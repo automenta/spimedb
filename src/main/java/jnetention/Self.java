@@ -5,12 +5,12 @@
  */
 package jnetention;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
-import jnetention.p2p.Listener;
-import jnetention.p2p.Network;
+import jnetention.p2p.Peer;
 import org.apache.commons.math3.stat.Frequency;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
@@ -23,6 +23,7 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Unifies DB & P2P features
@@ -30,7 +31,7 @@ import java.util.Map;
 public class Self extends EventEmitter {
     private final static String Session_MYSELF = "myself";
     private final BTreeMap<Object, Object> session;
-    public Network net;
+    public Peer net;
 
 
     public static class SaveEvent {
@@ -98,13 +99,15 @@ public class Self extends EventEmitter {
 
 
     public Self online(int listenPort) throws IOException, UnknownHostException, SocketException, InterruptedException {
-        net = new Network(listenPort);
-        net.listen("obj.", new Listener() {
-            @Override public void handleMessage(String topic, String message) {
-                System.err.println("recv: " + message);
-            }            
-        });
-        
+        net = new Peer(listenPort) {
+
+            @Override
+            public void onUpdate(UUID id, JsonNode j) {
+                super.onUpdate(id, j);
+                System.err.println(j);
+            }
+        };
+
         
         
         
@@ -128,6 +131,7 @@ public class Self extends EventEmitter {
     
     public void connect(String host, int port) throws UnknownHostException {
         net.connect(host, port);
+
     }
 
     
@@ -288,7 +292,7 @@ public class Self extends EventEmitter {
     public synchronized void broadcast(NObject x, boolean block) {
         if (net!=null) {
             System.err.println("broadcasting " + x);
-            net.send("obj0", x.toJSON());
+            net.put(x); //"obj0", x.toJSON());
 //            try {
 //                
 //                    

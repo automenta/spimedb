@@ -14,29 +14,18 @@
  */
 package com.hellblazer.gossip;
 
-import static com.hellblazer.gossip.GossipMessages.BYTE_SIZE;
-import static com.hellblazer.gossip.GossipMessages.DATA_POSITION;
-import static com.hellblazer.gossip.GossipMessages.DIGEST_BYTE_SIZE;
-import static com.hellblazer.gossip.GossipMessages.GOSSIP;
-import static com.hellblazer.gossip.GossipMessages.MAGIC;
-import static com.hellblazer.gossip.GossipMessages.MAGIC_BYTE_SIZE;
-import static com.hellblazer.gossip.GossipMessages.MAX_SEG_SIZE;
-import static com.hellblazer.gossip.GossipMessages.MESSAGE_HEADER_BYTE_SIZE;
-import static com.hellblazer.gossip.GossipMessages.REPLY;
-import static com.hellblazer.gossip.GossipMessages.RING;
-import static com.hellblazer.gossip.GossipMessages.UPDATE;
-import static com.hellblazer.gossip.GossipMessages.UPDATE_HEADER_BYTE_SIZE;
-import static java.lang.Math.min;
-import static java.lang.String.format;
+import com.hellblazer.utils.ByteBufferPool;
+import com.hellblazer.utils.HexDump;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.crypto.Mac;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
@@ -44,20 +33,15 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.crypto.Mac;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.hellblazer.utils.ByteBufferPool;
-import com.hellblazer.utils.HexDump;
+import static com.hellblazer.gossip.GossipMessages.*;
+import static java.lang.Math.min;
+import static java.lang.String.format;
 
 /**
  * A UDP message protocol implementation of the gossip communications
@@ -81,6 +65,10 @@ public class UdpCommunications implements GossipCommunications {
 
         @Override
         public void gossip(List<Digest> digests) {
+            sendDigests(digests, GOSSIP);
+        }
+        @Override
+        public void gossip(Iterator<Digest> digests) {
             sendDigests(digests, GOSSIP);
         }
 
@@ -109,18 +97,51 @@ public class UdpCommunications implements GossipCommunications {
             bufferPool.free(buffer);
         }
 
+
+
+
+        private void sendDigests(Iterator<Digest> digests, byte messageType) {
+            ByteBuffer buffer = bufferPool.allocate(MAX_SEG_SIZE);
+            buffer.order(ByteOrder.BIG_ENDIAN);
+
+            while (digests.hasNext()) {
+
+                //skip data position, we'll add that last after knowing the count
+                buffer.position(DATA_POSITION + 1);
+
+                int count;
+                for (count = 0; count < maxDigests && digests.hasNext(); count++) {
+                    Digest digest = digests.next();
+                    digest.writeTo(buffer);
+                }
+                int end = buffer.position();
+
+                buffer.position(DATA_POSITION);
+                buffer.put((byte)count);
+
+                buffer.position(end);
+
+                send(messageType, buffer, gossipper);
+                buffer.clear();
+            }
+
+            bufferPool.free(buffer);
+        }
+
         private void sendDigests(List<Digest> digests, byte messageType) {
             ByteBuffer buffer = bufferPool.allocate(MAX_SEG_SIZE);
             buffer.order(ByteOrder.BIG_ENDIAN);
+
             for (int i = 0; i < digests.size();) {
+
                 byte count = (byte) min(maxDigests, digests.size() - i);
                 buffer.position(DATA_POSITION);
                 buffer.put(count);
-                int position;
+                //int position;
                 for (Digest digest : digests.subList(i, i + count)) {
                     digest.writeTo(buffer);
-                    position = buffer.position();
-                    Integer.toString(position);
+                    //position = buffer.position();
+                    //Integer.toString(position);
                 }
                 send(messageType, buffer, gossipper);
                 i += count;

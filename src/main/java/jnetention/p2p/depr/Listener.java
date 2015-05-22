@@ -5,7 +5,7 @@
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
-package jnetention.p2p;
+package jnetention.p2p.depr;
 
 /**
  * Listen for messages

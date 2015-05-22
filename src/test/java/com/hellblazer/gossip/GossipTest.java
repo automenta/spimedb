@@ -65,18 +65,18 @@ public class GossipTest extends TestCase {
         Gossip gossip = new Gossip(communications, view, fdFactory, random, 4,
                                    TimeUnit.DAYS) {
             @Override
-            protected void notifyDeregister(ReplicatedState state) {
-                receiver.deregister(state.getId());
+            protected void notifyRemove(ReplicatedState state) {
+                receiver.onRemove(state.getId());
             }
 
             @Override
             protected void notifyRegister(ReplicatedState state) {
-                receiver.register(state.getId(), state.getState());
+                receiver.onPut(state.getId(), state.getState());
             }
 
             @Override
             protected void notifyUpdate(ReplicatedState state) {
-                receiver.update(state.getId(), state.getState());
+                receiver.onSet(state.getId(), state.getState());
             }
         };
         gossip.setListener(receiver);
@@ -116,15 +116,15 @@ public class GossipTest extends TestCase {
 
         verifyNoMoreInteractions(communications);
 
-        verify(receiver).register(eq(state1.state.getId()), isA(byte[].class));
-        verify(receiver).register(eq(state2.state.getId()), isA(byte[].class));
-        verify(receiver).register(eq(state3.state.getId()), isA(byte[].class));
-        verify(receiver).register(eq(state4.state.getId()), isA(byte[].class));
+        verify(receiver).onPut(eq(state1.state.getId()), isA(byte[].class));
+        verify(receiver).onPut(eq(state2.state.getId()), isA(byte[].class));
+        verify(receiver).onPut(eq(state3.state.getId()), isA(byte[].class));
+        verify(receiver).onPut(eq(state4.state.getId()), isA(byte[].class));
 
-        verify(receiver).deregister(eq(state1.state.getId()));
-        verify(receiver).deregister(eq(state2.state.getId()));
-        verify(receiver).deregister(eq(state3.state.getId()));
-        verify(receiver).deregister(eq(state4.state.getId()));
+        verify(receiver).onRemove(eq(state1.state.getId()));
+        verify(receiver).onRemove(eq(state2.state.getId()));
+        verify(receiver).onRemove(eq(state3.state.getId()));
+        verify(receiver).onRemove(eq(state4.state.getId()));
 
         verifyNoMoreInteractions(receiver);
     }
@@ -161,18 +161,18 @@ public class GossipTest extends TestCase {
         Gossip gossip = new Gossip(communications, view, fdFactory, random, 4,
                                    TimeUnit.DAYS) {
             @Override
-            protected void notifyDeregister(ReplicatedState state) {
-                receiver.deregister(state.getId());
+            protected void notifyRemove(ReplicatedState state) {
+                receiver.onRemove(state.getId());
             }
 
             @Override
             protected void notifyRegister(ReplicatedState state) {
-                receiver.register(state.getId(), state.getState());
+                receiver.onPut(state.getId(), state.getState());
             }
 
             @Override
             protected void notifyUpdate(ReplicatedState state) {
-                receiver.update(state.getId(), state.getState());
+                receiver.onSet(state.getId(), state.getState());
             }
         };
         gossip.setListener(receiver);
@@ -196,14 +196,14 @@ public class GossipTest extends TestCase {
 
         verifyNoMoreInteractions(communications);
 
-        verify(receiver).register(eq(state1.state.getId()),
-                                  eq(state1.state.getState()));
-        verify(receiver).register(eq(state2.state.getId()),
-                                  eq(state2.state.getState()));
-        verify(receiver).register(eq(state3.state.getId()),
-                                  eq(state3.state.getState()));
-        verify(receiver).register(eq(state4.state.getId()),
-                                  eq(state4.state.getState()));
+        verify(receiver).onPut(eq(state1.state.getId()),
+                eq(state1.state.getState()));
+        verify(receiver).onPut(eq(state2.state.getId()),
+                eq(state2.state.getState()));
+        verify(receiver).onPut(eq(state3.state.getId()),
+                eq(state3.state.getState()));
+        verify(receiver).onPut(eq(state4.state.getId()),
+                eq(state4.state.getState()));
 
         verifyNoMoreInteractions(receiver);
     }
@@ -244,18 +244,18 @@ public class GossipTest extends TestCase {
         Gossip gossip = new Gossip(communications, view, fdFactory, random, 4,
                                    TimeUnit.DAYS) {
             @Override
-            protected void notifyDeregister(ReplicatedState state) {
-                receiver.deregister(state.getId());
+            protected void notifyRemove(ReplicatedState state) {
+                receiver.onRemove(state.getId());
             }
 
             @Override
             protected void notifyRegister(ReplicatedState state) {
-                receiver.register(state.getId(), state.getState());
+                receiver.onPut(state.getId(), state.getState());
             }
 
             @Override
             protected void notifyUpdate(ReplicatedState state) {
-                receiver.update(state.getId(), state.getState());
+                receiver.onSet(state.getId(), state.getState());
             }
         };
         gossip.setListener(receiver);

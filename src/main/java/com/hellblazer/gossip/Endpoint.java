@@ -89,7 +89,7 @@ public class Endpoint implements Comparable<Endpoint> {
     private volatile GossipMessages          handler;
     private volatile State                   state     = State.CONNECTING;
     private final ReentrantLock              synch     = new ReentrantLock();
-    private final Map<UUID, ReplicatedState> states    = new HashMap<UUID, ReplicatedState>();
+    private final Map<UUID, ReplicatedState> states    = new HashMap<UUID, ReplicatedState>(1024);
     private final AtomicInteger              suspected = new AtomicInteger(0);
 
     public Endpoint(InetSocketAddress address) {
@@ -274,7 +274,7 @@ public class Endpoint implements Comparable<Endpoint> {
                     states.put(newState.getId(), newState);
                     if (state == State.ALIVE) {
                         if (newState.isDeleted()) {
-                            gossip.notifyDeregister(newState);
+                            gossip.notifyRemove(newState);
                         } else if (newState.isNotifiable()) {
                             gossip.notifyUpdate(newState);
                         }

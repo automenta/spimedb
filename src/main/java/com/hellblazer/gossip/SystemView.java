@@ -14,20 +14,14 @@
  */
 package com.hellblazer.gossip;
 
-import static java.lang.String.format;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static java.lang.String.format;
 
 /**
  * Provides a view on the known endpoint state for the system. The primary
@@ -52,7 +46,7 @@ public class SystemView {
     private final InetSocketAddress            localAddress;
     private final Map<InetSocketAddress, Long> quarantined = new HashMap<InetSocketAddress, Long>();
     private final long                         quarantineInterval;
-    private final List<InetSocketAddress>      seeds       = new ArrayList<InetSocketAddress>();
+    private final List<InetSocketAddress>      seeds       = new CopyOnWriteArrayList<InetSocketAddress>();
     private final Map<InetSocketAddress, Long> unreachable = new HashMap<InetSocketAddress, Long>();
     private final long                         unreachableInterval;
 
@@ -81,12 +75,16 @@ public class SystemView {
         quarantineInterval = quarantineDelay;
         unreachableInterval = unreachableDelay;
         for (InetSocketAddress seed : seedHosts) {
-            if (!seed.equals(localAddress)) {
-                seeds.add(seed);
-            }
+            connect(seed);
         }
         log.info(format("System view initialized for: %s, seeds: %s",
                         localAddress, seeds));
+    }
+
+    public void connect(InetSocketAddress seed) {
+        if (!seed.equals(localAddress)) {
+            seeds.add(seed);
+        }
     }
 
     /**

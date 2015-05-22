@@ -29,7 +29,7 @@ public interface GossipListener {
      * @param id
      *            - the id of the state that has been aba
      */
-    void deregister(UUID id);
+    void onRemove(UUID id);
 
     /**
      * The state is newly discovered
@@ -39,7 +39,7 @@ public interface GossipListener {
      * @param state
      *            - the content of the state
      */
-    void register(UUID id, byte[] state);
+    void onPut(UUID id, byte[] state);
 
     /**
      * Previously known state has been updated
@@ -49,5 +49,5 @@ public interface GossipListener {
      * @param state
      *            - the updated content of the state
      */
-    void update(UUID id, byte[] state);
+    void onSet(UUID id, byte[] state);
 }

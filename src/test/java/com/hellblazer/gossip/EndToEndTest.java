@@ -57,14 +57,14 @@ public class EndToEndTest extends TestCase {
         }
 
         @Override
-        public void deregister(UUID id) {
+        public void onRemove(UUID id) {
             System.err.println(String.format("Sould never have abandoned state %s",
                                              id));
             deregistered.set(true);
         }
 
         @Override
-        public void register(UUID id, byte[] state) {
+        public void onPut(UUID id, byte[] state) {
             int currentCount = count.incrementAndGet();
             if (currentCount % 10 == 0) {
                 System.out.print('.');
@@ -77,7 +77,7 @@ public class EndToEndTest extends TestCase {
         }
 
         @Override
-        public void update(UUID id, byte[] state) {
+        public void onSet(UUID id, byte[] state) {
             assert state != null;
             // System.out.println("Heartbeat received: " + hb);
             int currentCount = count.incrementAndGet();
@@ -122,11 +122,11 @@ public class EndToEndTest extends TestCase {
         for (int i = 0; i < membership; i++) {
             members.add(createDefaultCommunications(receivers[i], seedHosts, i));
             if (i == 0) { // always add first member
-                seedHosts.add(members.get(0).getLocalAddress());
+                seedHosts.add(members.get(0).me());
             } else if (seedHosts.size() < maxSeeds) {
                 // add the new member with probability of 25%
                 if (entropy.nextDouble() < 0.25D) {
-                    seedHosts.add(members.get(i).getLocalAddress());
+                    seedHosts.add(members.get(i).me());
                 }
             }
         }
@@ -138,7 +138,7 @@ public class EndToEndTest extends TestCase {
                 ByteBuffer buffer = ByteBuffer.wrap(state);
                 buffer.putInt(id);
                 member.start();
-                stateIds[id] = member.register(state);
+                stateIds[id] = member.put(state);
                 id++;
             }
             for (int i = 0; i < membership; i++) {
@@ -156,7 +156,7 @@ public class EndToEndTest extends TestCase {
         } finally {
             System.out.println();
             for (Gossip member : members) {
-                member.terminate();
+                member.stop();
             }
         }
         assertFalse("state was deregistered", deregistered.get());
@@ -184,7 +184,7 @@ public class EndToEndTest extends TestCase {
         for (Gossip member : members) {
             ByteBuffer state = ByteBuffer.wrap(new byte[4]);
             state.putInt(id);
-            member.update(stateIds[id], state.array());
+            member.put(stateIds[id], state.array());
             id++;
         }
         for (int i = 0; i < membership; i++) {

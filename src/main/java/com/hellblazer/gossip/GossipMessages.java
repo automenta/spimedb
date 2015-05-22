@@ -15,6 +15,7 @@
 package com.hellblazer.gossip;
 
 import java.net.InetSocketAddress;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -68,7 +69,8 @@ public interface GossipMessages {
      * @param digests
      *            - the list of heartbeat digests the receiver knows about
      */
-    void gossip(List<Digest> digests);
+    @Deprecated void gossip(List<Digest> digests);
+    void gossip(Iterator<Digest> digests);
 
     /**
      * The second message in the gossip protocol. Send a list of digests the
