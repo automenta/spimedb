@@ -1,16 +1,6 @@
 package jnetention.gui;
 
 import com.google.common.collect.HashMultiset;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,16 +14,28 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import jnetention.Self;
 import jnetention.NTag;
+import jnetention.Self;
 import jnetention.SpacePoint;
 import netscape.javascript.JSObject;
+import org.jewelsea.willow.util.ResourceUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.Event;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * TODO wikibrowser does not need to modify any DOM links because they will be intercepted.
@@ -97,7 +99,7 @@ abstract public class WikiBrowser extends BorderPane {
 
     static {
         try {
-            jquery = readFile(WikiBrowser.class.getResource("minified-custom.js").toURI(), Charset.defaultCharset());
+            jquery = readFile(ResourceUtil.get("js/minified-custom.js").toURI(), Charset.defaultCharset());
         } catch (Exception ex) {
             Logger.getLogger(WikiBrowser.class.getName()).log(Level.SEVERE, null, ex);
         }

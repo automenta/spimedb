@@ -8,6 +8,7 @@ package jnetention;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import jnetention.db.HG;
@@ -17,10 +18,7 @@ import org.apache.commons.math3.stat.Frequency;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Unifies DB & P2P features
@@ -165,26 +163,29 @@ public class Self extends EventEmitter {
 //        }), Predicates.notNull());        
     }
     
-    public Iterable<NObject> allValues() {
+    public Iterator<NObject> allValues() {
         /*if (net!=null) {
             return Iterables.concat(data.values(), netValues());
         }
         else {
             return data.values();
         }*/
-        return Collections.emptyList();
+        return db.allValues();
     }
     
-    public Iterable<NObject> tagged(final String tagID) {
-        return Iterables.filter(allValues(), new Predicate<NObject>(){
-            @Override public boolean apply(final NObject o) {
+    public Iterator<NObject> tagged(final String tagID) {
+        return Iterators.filter(allValues(), new Predicate<NObject>() {
+            @Override
+            public boolean apply(final NObject o) {
+                if (o == null) return false;
                 return o.hasTag(tagID);
-            }            
+            }
         });        
     }    
-    public Iterable<NObject> tagged(final String tagID, final String author) {
-        return Iterables.filter(allValues(), new Predicate<NObject>(){
+    public Iterator<NObject> tagged(final String tagID, final String author) {
+        return Iterators.filter(allValues(), new Predicate<NObject>(){
             @Override public boolean apply(final NObject o) {
+                if (o == null) return false;
                 if (author!=null)
                     if (!author.equals(o.author))
                         return false;
@@ -192,7 +193,7 @@ public class Self extends EventEmitter {
             }            
         });        
     }
-    public Iterable<NObject> tagged(final Tag t) {
+    public Iterator<NObject> tagged(final Tag t) {
         return tagged(t.name());
     }
     

@@ -2,8 +2,11 @@ package jnetention.db;
 
 import automenta.climatenet.Core;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import com.google.common.io.Files;
 import com.sleepycat.je.EnvironmentConfig;
+import jnetention.NObject;
 import mjson.Json;
 import mjson.hgdb.HyperNodeJson;
 import mjson.hgdb.JsonTypeSchema;
@@ -13,7 +16,9 @@ import org.hypergraphdb.storage.bje.BJEStorageImplementation;
 
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Hypergraph DB
@@ -68,11 +73,17 @@ public class HG {
     public void add(JsonNode j) {
 
 
+
         //TODO avoid string conversion
         Json json = Json.read(j.toString());
         jsonNode.add(json);
 
-        print(System.out);
+        HGHandle x = jsonNode.unique(json);
+        Object X = jsonNode.get(x);
+        System.out.println(graph.getType(x) + " " + X + " " + X.getClass());
+
+
+
     }
 
     public void print(PrintStream out) {
@@ -113,5 +124,27 @@ public class HG {
 
     public static void main(String[] args) {
         new HG();
+    }
+
+    public Iterator<NObject> allValues() {
+        //TODO see if there is a more specific query
+        HGSearchResult<HGHandle> r = jsonNode.find(HGQuery.hg.all());
+        //HGSearchResult<HGHandle> r = jsonNode.find(HGQuery.hg.all());
+
+        return Iterators.transform(r, new Function<HGHandle, NObject>() {
+            @Override
+            public NObject apply(HGHandle hgHandle) {
+                Object n = jsonNode.get(hgHandle);
+                if (n instanceof Json) {
+                    Json j = (Json) n;
+                    if (j.isObject()) {
+                        Map<String, Json> m = j.asJsonMap();
+                        String uuid = hgHandle.getPersistent().toString();
+                        return NObject.from(uuid, j.asJsonMap());
+                    }
+                }
+                return null;
+            }
+        });
     }
 }

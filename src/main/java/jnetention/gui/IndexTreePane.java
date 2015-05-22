@@ -7,30 +7,23 @@
 package jnetention.gui;
 
 import com.google.common.base.Function;
-import static com.google.common.collect.Iterables.addAll;
-import static com.google.common.collect.Iterables.transform;
+import com.google.common.collect.Iterators;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.util.Callback;
-import jnetention.Self;
-import jnetention.Self.NetworkUpdateEvent;
-import jnetention.Self.SaveEvent;
 import jnetention.EventEmitter.Observer;
 import jnetention.NObject;
 import jnetention.NTag;
+import jnetention.Self;
+import jnetention.Self.NetworkUpdateEvent;
+import jnetention.Self.SaveEvent;
 import jnetention.gui.TaggerPane.TagReceiver;
 
 
@@ -145,8 +138,9 @@ public class IndexTreePane extends BorderPane implements Observer {
         TreeItem<NObject> i = new TreeItem(t);
                               
         //add instances of the tag        
-        addAll(i.getChildren(), transform(core.tagged(t.id, subjectFilter!=null ? subjectFilter.author : null), new Function<NObject,TreeItem<NObject>>() {
-            @Override public TreeItem apply(final NObject f) {
+        Iterators.addAll(i.getChildren(), Iterators.transform(core.tagged(t.id, subjectFilter != null ? subjectFilter.author : null), new Function<NObject, TreeItem<NObject>>() {
+            @Override
+            public TreeItem apply(final NObject f) {
                 return newInstanceItem(f);
             }
         }));

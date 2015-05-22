@@ -28,10 +28,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -83,6 +80,11 @@ public class ResourceUtil {
         InputStream i = ResourceUtil.getResource("icon/" + imageFilename);
         return new Image(i);
     }
+    public static BufferedImage getImageAWT(String imageFilename) throws IOException {
+
+        InputStream i = ResourceUtil.getResource("icon/" + imageFilename);
+        return ImageIO.read(i);
+    }
 
     /**
      * Copies an ImageView to a new ImageView, so that we can render multiple copies of the templated
@@ -127,5 +129,9 @@ public class ResourceUtil {
         out.flush();
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         return new javafx.scene.image.Image(in, width, height, resize, smooth);
+    }
+
+    public static File get(String path) {
+        return new File( ClassLoader.getSystemResource("./" + path).getPath() );
     }
 }

@@ -14,6 +14,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
+import mjson.Json;
 
 import java.io.Serializable;
 import java.util.*;
@@ -61,8 +62,9 @@ public class NObject extends Value implements Serializable, Comparable {
         value.put(tag, strength);
     }
 
-    public void add(String tag, Object v) {
+    public NObject add(String tag, Object v) {
         value.put(tag, v);
+        return this;
     }
     
     @Override
@@ -182,5 +184,24 @@ public class NObject extends Value implements Serializable, Comparable {
     public void setSubject(String id) {
         subject = id;
     }
-    
+
+    public static String getOrDefault(Map<String, Json> m, String key, String defaultValue) {
+        Json x = m.get(key);
+        if (x!=null)
+            return x.toString();
+        return defaultValue;
+    }
+
+    public static NObject from(String uuid, Map<String, Json> m) {
+        String name = getOrDefault(m, "name", uuid);
+        NObject n = new NObject(uuid, name);
+        for (Map.Entry<String,Json> e : m.entrySet()) {
+            String k = e.getKey();
+            Json v = e.getValue();
+            if (k.equals("name")) continue;
+            n.add(k, v);
+        }
+        return n;
+    }
+
 }
