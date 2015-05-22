@@ -151,9 +151,9 @@ public class WebBrowser extends Application {
             }
         }
         NObject o = core.newObject("Web Browsing @ " + new Date().toString());
-        o.add("Web");
-        for (String u : urls) 
-            o.add(u);
+        o.put("Web", null);
+        for (String u : urls)
+            o.put(u, null);
         return o;        
     }
     

@@ -6,11 +6,12 @@
 
 package jnetention.gui;
 
-import java.util.Collection;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tooltip;
 import javafx.util.StringConverter;
 import jnetention.NObject;
+
+import java.util.Collection;
 
 /**
  * Combobox for selecting subjects (ex: users)
@@ -26,16 +27,16 @@ public class SubjectSelect extends ComboBox<NObject> {
             @Override public String toString(NObject object) {
                 if (object == null) return "?";
                 
-                if (object.name!=null)
-                    return object.name;
-                return object.id;
+                if (object.name()!=null)
+                    return object.name();
+                return object.id();
             }
 
             @Override public NObject fromString(String string) {
                 NObject first = null;
                 for (NObject n : subjects) {
                     if (first == null) first = n;
-                    if (n.name.equals(string))
+                    if (n.name().equals(string))
                         return n;
                 }
                 return first;

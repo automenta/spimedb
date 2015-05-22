@@ -6,10 +6,11 @@
 
 package jnetention.gui;
 
-import java.util.Collection;
 import javafx.application.Platform;
-import jnetention.Self;
 import jnetention.NObject;
+import jnetention.Self;
+
+import java.util.Collection;
 
 /**
  *
@@ -45,12 +46,12 @@ public class WikiTagger extends WikiBrowser {
                         @Override public void run() {
                             //TODO create Nobject
 
-                            NObject n = core.newObject(subject.name + ": " + id + "=" + tags);
+                            NObject n = core.newObject(subject.name() + ": " + id + "=" + tags);
 
-                            n.setSubject(subject.id);
+                            n.put("S",subject.id());
 
                             for (String t : tags) {
-                                n.add(t, id);
+                                n.put(t, id);
                             }
 
                             core.publish(n);

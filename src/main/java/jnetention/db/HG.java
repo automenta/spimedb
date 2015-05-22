@@ -13,9 +13,11 @@ import mjson.hgdb.JsonTypeSchema;
 import org.hypergraphdb.*;
 import org.hypergraphdb.query.AnyAtomCondition;
 import org.hypergraphdb.storage.bje.BJEStorageImplementation;
+import org.hypergraphdb.type.javaprimitive.ByteType;
 
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,12 +69,13 @@ public class HG {
 
 
     public void add(Serializable j) {
+
         add(Core.json.<JsonNode>valueToTree(j));
     }
 
     public void add(JsonNode j) {
 
-
+        System.out.println(j);
 
         //TODO avoid string conversion
         Json json = Json.read(j.toString());
@@ -119,32 +122,65 @@ public class HG {
 //        jsonNode.remove(jsonNode.exactly(
 //                object("name", "Pedro", "age", 28)));
 
+    public static class StringRef implements HGPersistentHandle {
 
+        public final String s;
+        private final byte[] bytes;
 
+        public StringRef(String s) {
+            this.s = s;
+            this.bytes = Charset.forName("UTF-8").encode(s).array();
+        }
 
-    public static void main(String[] args) {
-        new HG();
+        @Override
+        public byte[] toByteArray() {
+            return bytes;
+        }
+
+        @Override
+        public int compareTo(HGPersistentHandle o) {
+            if (o instanceof StringRef)
+                return new ByteType.ByteComparator().compare(bytes, ((StringRef)o).bytes);
+            return -1;
+        }
+
+        @Override
+        public HGPersistentHandle getPersistent() {
+            return this;
+        }
+    }
+
+    public Object get(String id) {
+        Object x = jsonNode.get(new StringRef(id));
+        if (x instanceof Json) {
+            Json j = (Json)x;
+            Map<String, Json> m = j.asJsonMap();
+            return NObject.from(id, j.asJsonMap());
+        }
+        return x;
     }
 
     public Iterator<NObject> allValues() {
-        //TODO see if there is a more specific query
-        HGSearchResult<HGHandle> r = jsonNode.find(HGQuery.hg.all());
-        //HGSearchResult<HGHandle> r = jsonNode.find(HGQuery.hg.all());
-
-        return Iterators.transform(r, new Function<HGHandle, NObject>() {
-            @Override
-            public NObject apply(HGHandle hgHandle) {
-                Object n = jsonNode.get(hgHandle);
-                if (n instanceof Json) {
-                    Json j = (Json) n;
-                    if (j.isObject()) {
-                        Map<String, Json> m = j.asJsonMap();
-                        String uuid = hgHandle.getPersistent().toString();
-                        return NObject.from(uuid, j.asJsonMap());
-                    }
-                }
-                return null;
-            }
-        });
+        return Iterators.transform(
+                //TODO see if there is a more specific query
+                jsonNode.find(HGQuery.hg.all()), hgNobject);
     }
+
+
+
+    class HGJsontoNObject implements Function<HGHandle, NObject> {
+        @Override
+        public NObject apply(HGHandle hgHandle) {
+            Object n = jsonNode.get(hgHandle);
+            if (n instanceof Json) {
+                Json j = (Json) n;
+                if (j.isObject()) {
+                    Map<String, Json> m = j.asJsonMap();
+                    return NObject.from(hgHandle, j.asJsonMap());
+                }
+            }
+            return null;
+        }
+    }
+    final HGJsontoNObject hgNobject = new HGJsontoNObject();
 }

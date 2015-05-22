@@ -178,7 +178,8 @@ public class Self extends EventEmitter {
             @Override
             public boolean apply(final NObject o) {
                 if (o == null) return false;
-                return o.hasTag(tagID);
+                //return Iterators.contains(iterateTags(true), t);
+                return o.containsKey(tagID);
             }
         });        
     }    
@@ -187,16 +188,14 @@ public class Self extends EventEmitter {
             @Override public boolean apply(final NObject o) {
                 if (o == null) return false;
                 if (author!=null)
-                    if (!author.equals(o.author))
+                    if (!author.equals(o.get("author")))
                         return false;
-                return o.hasTag(tagID);
-            }            
+                //return Iterators.contains(iterateTags(true), t);
+                return o.containsKey(tagID);
+            }
         });        
     }
-    public Iterator<NObject> tagged(final Tag t) {
-        return tagged(t.name());
-    }
-    
+
     public List<NObject> getUsers() {        
         return Lists.newArrayList(tagged(Tag.User));
     }
@@ -209,25 +208,26 @@ public class Self extends EventEmitter {
     public List<NObject> getTags() {         
         List<NObject> c = Lists.newArrayList(tagged(Tag.tag));
         
-        for (Tag sysTag : Tag.values())
-            c.add(NTag.asNObject(sysTag));
+        //for (Tag sysTag : Tag.values())
+          //  c.add(NTag.asNObject(sysTag));
         
         return c;
     }
     
     public NObject newUser(String name) {
-        NObject n = new NObject(name);
-        n.author = n.id;
-        n.add(Tag.User);
-        n.add(Tag.Human);
-        n.add("@", new SpacePoint(40, -80));
+        NObject n = new NObject.HashNObject.HashNObject(name);
+        n.put("author",  n.id());
+        n.put(Tag.User, null);
+        n.put(Tag.Human, null);
+        Object v = new SpacePoint(40, -80);
+        n.put("@", v);
         publish(n);
         return n;
     }
     
     /** creates a new anonymous object, but doesn't publish it yet */
     public NObject newAnonymousObject(String name) {
-        NObject n = new NObject(name);
+        NObject n = new NObject.HashNObject.HashNObject(name);
         return n;
     }
     
@@ -236,16 +236,17 @@ public class Self extends EventEmitter {
         if (myself==null)
             throw new RuntimeException("Unidentified; can not create new object");
         
-        NObject n = new NObject(name);                        
-        n.author = myself.id;                
+        NObject n = new NObject.HashNObject.HashNObject(name);
+        n.put("author", myself.id());
         return n;
     }
     
     public void become(NObject user) {
+        db.add(user);
+
         //System.out.println("Become: " + user);
         myself = user;
         //session.put(Session_MYSELF, user.id);
-        db.add(user);
     }
 
     
@@ -254,7 +255,7 @@ public class Self extends EventEmitter {
     }
     
     public void remove(NObject x) {
-        remove(x.id);        
+        remove(x.id());
     }
 
 
@@ -327,7 +328,7 @@ public class Self extends EventEmitter {
         return myself;
     }
 
-    protected void index(NObject previous, NObject o) {
+    protected <O> void index(NObject<O> previous, NObject<O> o) {
         if (previous!=null) {
             if (previous.isClass()) {
                 
@@ -337,17 +338,21 @@ public class Self extends EventEmitter {
         if (o!=null) {
             
             if ((o.isClass()) || (o.isProperty())) {
-                
-                for (Map.Entry<String, Object> e : o.value.entries()) {
+
+                //TODO index the 'inh'
+
+                /*
+                for (Map.Entry<String, O> e : o.entrySet()) {
                     String superclass = e.getKey();
                     if (superclass.equals("tag"))
                         continue;
                     
-                    if (getTag(superclass)==null) {
+                    if (get(superclass)==null) {
+                        System.out.println("saving superclass tag: " + superclass);
                         save(new NTag(superclass));
                     }
                     
-                }
+                }*/
                 
             }
             
@@ -380,22 +385,25 @@ public class Self extends EventEmitter {
         }    
     
 
-    public Object getTag(String tagID) {
+    public Object get(final String id) {
+        return db.get(id);
 //        NObject tag = data.get(tagID);
 //        if (tag!=null && tag.isClass())
 //            return tag;
-        return null;
     }
 
     public Iterable<NObject> getTagRoots() {
         return Iterables.filter(getTags(), new Predicate<NObject>() {
             @Override public boolean apply(NObject t) {
-                try {
-                    NTag tag = (NTag)t;
+                //try {
+                if (t instanceof NTag) {
+                    NTag tag = (NTag) t;
                     return tag.getSuperTags().isEmpty();
                 }
-                catch (Exception e) { }
                 return false;
+                /*}
+                catch (Exception e) { }
+                return false;*/
             }            
         });
     }

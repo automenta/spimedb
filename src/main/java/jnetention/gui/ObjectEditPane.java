@@ -79,7 +79,7 @@ public class ObjectEditPane extends BorderPane implements TagReceiver {
         
 
 
-        String name = n.name;
+        String name = n.name();
         if (name == null) name = "";
         
         
@@ -186,9 +186,9 @@ public class ObjectEditPane extends BorderPane implements TagReceiver {
     private static final Insets DefaultPadding = new Insets(4,4,4,4);
     
 
-    public static String toHTML(NObject n) {
+    public static <O> String toHTML(NObject<O> n) {
         StringBuilder sb = new StringBuilder();
-        for (final Map.Entry<String, Object> e : n.value.entries()) {
+        for (final Map.Entry<String, O> e : n.entrySet()) {
             sb.append(newTagHTML(e.getKey(), e.getValue()));
             
         }
@@ -202,7 +202,7 @@ public class ObjectEditPane extends BorderPane implements TagReceiver {
     }
     
     public static NObject fromHTML(String id, String name, String html) {        
-        NObject n = new NObject(name, id);
+        NObject n = new NObject.HashNObject(id, name);
         return n;
     }
 

@@ -21,8 +21,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import jnetention.Self;
 import jnetention.NObject;
+import jnetention.Self;
+import jnetention.gui.geo.WWMapPane;
 import jnetention.run.WebBrowser;
 
 /**
@@ -76,7 +77,7 @@ public class NodeControlPane extends BorderPane {
         Button b = new Button("+");
         b.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
-                popupObjectEdit(core, new NObject());
+                popupObjectEdit(core, new NObject.HashNObject(""));
             }
 
         });
@@ -133,6 +134,7 @@ public class NodeControlPane extends BorderPane {
     public Tab newSpacetimeTab() {
         Tab t = new Tab(/*"Spacetime"*/);
         GlyphsDude.setIcon(t, FontAwesomeIcon.CUBES);
+        t.setContent(new WWMapPane());
         return t;
     }    
     public Tab newOptionsTab() {
@@ -216,7 +218,7 @@ public class NodeControlPane extends BorderPane {
     public static void popupObjectEdit(Self core, NObject n) {
         Stage st = new Stage();
 
-        st.setTitle(n.id);
+        st.setTitle(n.id());
         st.setScene(new Scene(new ObjectEditPane(core, n), 600, 400));
         
         st.show();

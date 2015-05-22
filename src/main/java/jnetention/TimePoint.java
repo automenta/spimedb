@@ -15,7 +15,7 @@ public class TimePoint {
     }
 
     public static TimePoint get(NObject n) {   
-        return n.firstValue(TimePoint.class);
+        return (TimePoint) n.get("T");
     }
 
     public String toString() {

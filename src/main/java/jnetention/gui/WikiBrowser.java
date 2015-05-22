@@ -182,7 +182,7 @@ abstract public class WikiBrowser extends BorderPane {
                         if (wikipage.equals(currentTag))
                             continue;
                         
-                        if (core.getTag(wikipage)!=null)
+                        if (core.get(wikipage)!=null)
                             links.add(wikipage);
                     }
                 }

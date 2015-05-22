@@ -140,6 +140,35 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>gov.nasa</groupId>
+            <artifactId>worldwind</artifactId>
+            <version>2.0.0-986</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nasa</groupId>
+            <artifactId>worldwindx</artifactId>
+            <version>2.0.0-986</version>
+        </dependency>
+
+
+        <!-- 2.3.x incompatible with worldwind currently -->
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.sociaal</groupId>
+            <artifactId>vecmath</artifactId>
+            <version>3.0.0.20130526</version>
+        </dependency>
+
         <!--
         <dependency>
             <groupId>io.undertow</groupId>
@@ -275,6 +304,17 @@
 
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <!--<useIncrementalCompilation>false</useIncrementalCompilation>-->
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

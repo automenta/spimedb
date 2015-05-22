@@ -11,7 +11,6 @@ import com.google.common.collect.Iterators;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
@@ -26,6 +25,9 @@ import jnetention.Self.NetworkUpdateEvent;
 import jnetention.Self.SaveEvent;
 import jnetention.gui.TaggerPane.TagReceiver;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  *
@@ -34,7 +36,7 @@ import jnetention.gui.TaggerPane.TagReceiver;
 public class IndexTreePane extends BorderPane implements Observer {
     private final TreeView<NObject> tv;
     //http://docs.oracle.com/javafx/2/ui_controls/tree-view.htm
-    private final Self core;
+    private final Self self;
     private final TreeItem root;
     private final TagReceiver tagger;
     private final SubjectSelect subjectSelect;
@@ -42,7 +44,7 @@ public class IndexTreePane extends BorderPane implements Observer {
     public IndexTreePane(Self core, TagReceiver tagger) {
         super();
         
-        this.core = core;
+        this.self = core;
         this.tagger = tagger;
         
         root = new TreeItem();        
@@ -52,6 +54,7 @@ public class IndexTreePane extends BorderPane implements Observer {
         tv.setCellFactory(new Callback<TreeView<NObject>,TreeCell<NObject>>(){
             @Override
             public TreeCell<NObject> call(TreeView<NObject> p) {
+
                 return new TextFieldTreeCellImpl();
             }
         });
@@ -111,25 +114,23 @@ public class IndexTreePane extends BorderPane implements Observer {
     }
 
     protected void addHandlers() {
-        core.on(SaveEvent.class, IndexTreePane.this);
-        core.on(NetworkUpdateEvent.class, IndexTreePane.this);        
+        self.on(SaveEvent.class, IndexTreePane.this);
+        self.on(NetworkUpdateEvent.class, IndexTreePane.this);
     }
     
     @Override public void event(Object event) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                update();
-            }            
-        });
+        Platform.runLater(this::update);
     }             
     
     
     protected void update() {
                 
+        List<TreeItem> c = new ArrayList();
+        for (NObject t : self.getTagRoots()) {
+            c.add(newTagTree((NTag) t));
+        }
         root.getChildren().clear();
-        for (NObject t : core.getTagRoots()) {
-            root.getChildren().add(newTagTree((NTag)t));
-        }                
+        root.getChildren().addAll(c);
     }
     
     protected TreeItem newTagTree(final NTag t) {
@@ -138,7 +139,7 @@ public class IndexTreePane extends BorderPane implements Observer {
         TreeItem<NObject> i = new TreeItem(t);
                               
         //add instances of the tag        
-        Iterators.addAll(i.getChildren(), Iterators.transform(core.tagged(t.id, subjectFilter != null ? subjectFilter.author : null), new Function<NObject, TreeItem<NObject>>() {
+        Iterators.addAll(i.getChildren(), Iterators.transform(self.tagged(t.id, subjectFilter != null ? subjectFilter.get("A").toString() : null), new Function<NObject, TreeItem<NObject>>() {
             @Override
             public TreeItem apply(final NObject f) {
                 return newInstanceItem(f);
@@ -155,7 +156,7 @@ public class IndexTreePane extends BorderPane implements Observer {
     
     protected void onDoubleClick(NObject item) {
         if (tagger!=null) {
-            tagger.onTagSelected(item.id);
+            tagger.onTagSelected(item.id());
         }        
     }
     
@@ -180,11 +181,14 @@ public class IndexTreePane extends BorderPane implements Observer {
                 BorderPane g = new BorderPane();
                                 
                 Label tl = new Label(item.toString());
-                Hyperlink tb = new Hyperlink("[+]");                
+                Hyperlink tb = new Hyperlink("[+]");
+                tb.setOnMouseClicked(e -> {
+                    NodeControlPane.popupObjectEdit(self, item);
+                });
                 g.setTop(new FlowPane(tl, tb));
                 
                 BorderPane content = new BorderPane();
-                
+                /*
                 tb.setOnAction(new EventHandler<ActionEvent>() {
                     @Override public void handle(ActionEvent t) {                        
                         if (g.getBottom()==null) {
@@ -207,6 +211,7 @@ public class IndexTreePane extends BorderPane implements Observer {
                         }
                     }
                 });
+                */
                 
                 setGraphic(g);
             }

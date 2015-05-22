@@ -7,6 +7,7 @@
 package jnetention;
 
 import com.google.common.base.Predicate;
+
 import java.util.List;
 import java.util.Set;
 
@@ -14,14 +15,13 @@ import java.util.Set;
  * Tag = data class
  * @author me
  */
-public class NTag extends NObject {
+public class NTag extends NObject.HashNObject {
 
-    static NTag asNObject(final Tag sysTag) {
+    static NTag asNObject(final String sysTag) {
         //TODO cache
-        return new NTag(sysTag.name(), sysTag.name());
+        return new NTag(sysTag, sysTag);
     }
     
-    public String description;
 
     protected NTag(String id) {
         this(id, id);
@@ -32,26 +32,28 @@ public class NTag extends NObject {
     }
 
     public NTag(String id, String name, String extend) {
-        super(name, id);
+        super(id, name);
         
 
         addDefaultTags();
         if (extend!=null)
-            add(extend, 1.0);
+            put(extend, 1.0);
         
     }
     
     protected void addDefaultTags() {
-        add(Tag.tag.toString(), 1.0);        
+        put(Tag.tag.toString(), 1.0);
     }
-        
+
+
+
     public NTag(String id, String name, List<String> extend) {
         this(id, name, (String)null);
         
         for (String c : extend) {
             c = c.trim();
             if (c.length() == 0) continue;
-            add(c, 1.0);            
+            put(c, 1.0);
         }
     }
     

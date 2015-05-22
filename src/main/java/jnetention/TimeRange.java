@@ -23,7 +23,7 @@ public class TimeRange {
     }
     
     public static TimeRange get(NObject n) {
-        return n.firstValue(TimeRange.class);
+        return (TimeRange) n.get("T");
     }
 
     public long duration() { return to-from; }

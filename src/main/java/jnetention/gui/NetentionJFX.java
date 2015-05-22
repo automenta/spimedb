@@ -45,7 +45,7 @@ abstract public class NetentionJFX extends Application {
 
         Scene scene = new Scene(root, 350, 650);
 
-        primaryStage.setTitle(core.getMyself().id);
+        primaryStage.setTitle(core.getMyself().id());
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -132,7 +132,7 @@ abstract public class NetentionJFX extends Application {
         st.show();
     }
 
-    static void popupObjectView(Self core, NObject n) {
+    public static void popupObjectView(Self core, NObject n) {
         Stage st = new Stage();
 
         BorderPane root = new BorderPane();
@@ -157,7 +157,7 @@ abstract public class NetentionJFX extends Application {
 
             @Override
             public String getName() {
-                return n.name;
+                return n.name();
             }
 
             @Override
@@ -177,7 +177,7 @@ abstract public class NetentionJFX extends Application {
         });
         root.setTop(propertySheet);
 
-        st.setTitle(n.id);
+        st.setTitle(n.id());
         st.setScene(new Scene(root));
         st.show();
     }

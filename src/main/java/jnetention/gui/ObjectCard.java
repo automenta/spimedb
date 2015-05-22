@@ -20,10 +20,11 @@ public class ObjectCard extends VBox {
     public ObjectCard(NObject n) {
         super();
         
-        Label nameLabel = new Label(n.name);
+        Label nameLabel = new Label(n.name());
         nameLabel.setFont(Font.getDefault().font(24f));
         getChildren().add(nameLabel);
         
-        getChildren().add(new Label(n.getTags().toString()));
+        //getChildren().add(new Label(n.getTags().toString()));
+        getChildren().add(new Label(n.toString()));
     }
 }

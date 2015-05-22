@@ -13,7 +13,7 @@ import java.io.Serializable;
  *
  * @author me
  */
-public class Value implements Serializable {
+@Deprecated public class Value implements Serializable {
     
     public String id;
     public LinkedHashMultimap<String, Object> value;
@@ -24,6 +24,6 @@ public class Value implements Serializable {
     }
     
     public static Ref object(NObject n) {
-        return new Ref(n.id);
+        return new Ref(n.id());
     }
 }

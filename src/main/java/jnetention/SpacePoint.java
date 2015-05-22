@@ -19,7 +19,7 @@ public class SpacePoint implements Serializable {
     public double alt; //in meters
 
     public SpacePoint(double lat, double lon) {
-        this(lat, lon, Double.NaN);
+        this(lat, lon, 0 /*Double.NaN*/);
     }
 
     public SpacePoint(double lat, double lon, double alt) {        
@@ -38,7 +38,7 @@ public class SpacePoint implements Serializable {
 //    }
     
     public static SpacePoint get(NObject n) {
-        return n.firstValue(SpacePoint.class);
+        return (SpacePoint) n.get("G");
     }
     
     public String toString() {

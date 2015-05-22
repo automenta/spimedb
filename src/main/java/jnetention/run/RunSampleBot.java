@@ -27,7 +27,7 @@ public class RunSampleBot {
 
 
             for (int i = 0; i < 3; i++) {
-                b.publish(new NObject(Math.random() + "x"));
+                b.publish(new NObject.HashNObject(Math.random() + "x"));
                 Thread.sleep(1000);
             }
 
