@@ -1,17 +1,19 @@
 package jnetention.db;
 
+import automenta.climatenet.Core;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.io.Files;
 import com.sleepycat.je.EnvironmentConfig;
+import mjson.Json;
 import mjson.hgdb.HyperNodeJson;
 import mjson.hgdb.JsonTypeSchema;
-import org.hypergraphdb.HGConfiguration;
-import org.hypergraphdb.HGEnvironment;
-import org.hypergraphdb.HGHandle;
-import org.hypergraphdb.HyperGraph;
+import org.hypergraphdb.*;
+import org.hypergraphdb.query.AnyAtomCondition;
 import org.hypergraphdb.storage.bje.BJEStorageImplementation;
 
+import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.List;
-
-import static mjson.Json.object;
 
 /**
  * Hypergraph DB
@@ -19,42 +21,94 @@ import static mjson.Json.object;
  */
 public class HG {
 
+    public final HyperGraph graph;
+
+    final HGConfiguration config = new HGConfiguration();
+
+    private final HyperNodeJson jsonNode;
+
+    /** temporary */
     public HG() {
 
-
-        HGConfiguration config = new HGConfiguration();
         config.setTransactional(false);
         config.setSkipOpenedEvent(true);
         config.getTypeConfiguration().addSchema(new JsonTypeSchema());
+
 
         {
             BJEStorageImplementation bj = new BJEStorageImplementation();
             // sets the DB to work "In Memory"
             bj.getConfiguration().getEnvironmentConfig().setConfigParam(EnvironmentConfig.LOG_MEM_ONLY, "true");
-
+            bj.getConfiguration().getDatabaseConfig().setTemporary(true);
             config.setStoreImplementation(bj);
+
         }
 
-        HyperGraph graph = HGEnvironment.get("/tmp/x", config);
-
-
-
-        HyperNodeJson jsonNode =
-                new HyperNodeJson(graph);
-
-// Add a JSON object with two properties to the database
-        jsonNode.add(object("name", "Pedro", "age", 28));
-
-// ... later, do a lookup for all objects
-// with name="Pedro" the results are returned
-// as a Json array:
-        List<HGHandle> A = jsonNode.findAll(object("name", "Pedro"));
-        System.out.println(A);
-
-// delete the object with name="Pedro" and age=28:
-        jsonNode.remove(jsonNode.exactly(
-                object("name", "Pedro", "age", 28)));
+        this.graph = HGEnvironment.get(Files.createTempDir().getAbsolutePath(), config);
+        this.jsonNode = new HyperNodeJson(graph);
     }
+
+
+    /** persistent */
+    public HG(String path) {
+        config.setTransactional(false);
+        config.setSkipOpenedEvent(true);
+        config.getTypeConfiguration().addSchema(new JsonTypeSchema());
+
+        this.graph = HGEnvironment.get(path, config);
+        this.jsonNode = new HyperNodeJson(graph);
+    }
+
+
+
+    public void add(Serializable j) {
+        add(Core.json.<JsonNode>valueToTree(j));
+    }
+
+    public void add(JsonNode j) {
+
+
+        //TODO avoid string conversion
+        Json json = Json.read(j.toString());
+        jsonNode.add(json);
+
+        print(System.out);
+    }
+
+    public void print(PrintStream out) {
+        List<HGHandle> x = jsonNode.findAll(new AnyAtomCondition());
+        x.forEach(o -> out.println( graph.<Object>get(o) + "\t" +  jsonNode.getAll(HGQuery.hg.incident(o))));
+
+//        HGDepthFirstTraversal traversal =
+//                new HGDepthFirstTraversal(graph, new SimpleALGenerator(graph));
+//
+//        while (traversal.hasNext())
+//        {
+//            Pair<HGHandle, HGHandle> current = traversal.next();
+//            HGLink l = graph.get(current.getFirst());
+//            Object atom = graph.get(current.getSecond());
+//            out.println(l + " -> " + atom);
+//        }
+    }
+
+//
+//        HyperNodeJson jsonNode =
+//                new HyperNodeJson(graph);
+//
+//// Add a JSON object with two properties to the database
+//        jsonNode.add(object("name", "Pedro", "age", 28));
+//
+//// ... later, do a lookup for all objects
+//// with name="Pedro" the results are returned
+//// as a Json array:
+//        List<HGHandle> A = jsonNode.findAll(object("name", "Pedro"));
+//        System.out.println(A);
+//
+//// delete the object with name="Pedro" and age=28:
+//        jsonNode.remove(jsonNode.exactly(
+//                object("name", "Pedro", "age", 28)));
+
+
 
 
     public static void main(String[] args) {

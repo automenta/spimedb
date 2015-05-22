@@ -156,7 +156,7 @@ public class NodeControlPane extends BorderPane {
 
             @Override
             public void onTagSelected(String s) {
-                NetentionJFX.popupObjectView(core, core.data.get(s));
+                //NetentionJFX.popupObjectView(core, core.data.get(s));
             }
         }));
         return t;
@@ -205,7 +205,7 @@ public class NodeControlPane extends BorderPane {
         Pane p = new Pane();
         
         TextArea ta = new TextArea();
-        ta.setText(core.db.toString() + "\n" + core.db.getEngine().toString() );
+        ta.setText(core.db.toString() + "\n" + core.db.toString() );
         p.getChildren().add(ta);
         
         //core.data.sizeLong()

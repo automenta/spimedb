@@ -10,13 +10,10 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
+import jnetention.db.HG;
 import jnetention.p2p.Peer;
 import org.apache.commons.math3.stat.Frequency;
-import org.mapdb.BTreeMap;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -30,7 +27,7 @@ import java.util.UUID;
  */
 public class Self extends EventEmitter {
     private final static String Session_MYSELF = "myself";
-    private final BTreeMap<Object, Object> session;
+
     public Peer net;
 
 
@@ -43,41 +40,33 @@ public class Self extends EventEmitter {
     }
 
     
-    //DATABASE
-    public final BTreeMap<String, NObject> data;
-    public final DB db;
+    public final HG db;
     
     private NObject myself;
 
     /** in-memory Database */
     public Self() {
-        this(DBMaker.newMemoryDirectDB().make());        
+        this(new HG());
     }
     
     /** file Database */
     public Self(String filePath) {
-        this(DBMaker.newFileDB(new File(filePath))
-                .closeOnJvmShutdown()
-                .transactionDisable()
-                //.encryptionEnable("password")
-                .make());
+        this(new HG(filePath));
     }
     
-    public Self(DB db) {
+    public Self(HG db) {
         
         
         
         
         this.db = db;
-        // open existing an collection (or create new)
-        data = db.getTreeMap("objects");
-        session = db.getTreeMap("session");
 
-        if (session.get(Session_MYSELF)==null) {            
+        //if (session.get(Session_MYSELF)==null) {
+        {
             //first time user
             become(newAnonymousUser());
         }
-        
+
         
         //    map.put(1, "one");
         //    map.put(2, "two");
@@ -104,6 +93,8 @@ public class Self extends EventEmitter {
             @Override
             public void onUpdate(UUID id, JsonNode j) {
                 super.onUpdate(id, j);
+                db.add(j);
+                db.print(System.out);
                 System.err.println(j);
             }
         };
@@ -175,12 +166,13 @@ public class Self extends EventEmitter {
     }
     
     public Iterable<NObject> allValues() {
-        if (net!=null) {
+        /*if (net!=null) {
             return Iterables.concat(data.values(), netValues());
         }
         else {
             return data.values();
-        }
+        }*/
+        return Collections.emptyList();
     }
     
     public Iterable<NObject> tagged(final String tagID) {
@@ -251,12 +243,13 @@ public class Self extends EventEmitter {
     public void become(NObject user) {
         //System.out.println("Become: " + user);
         myself = user;
-        session.put(Session_MYSELF, user.id);
+        //session.put(Session_MYSELF, user.id);
+        db.add(user);
     }
 
     
     public void remove(String nobjectID) {
-        data.remove(nobjectID);
+        //data.remove(nobjectID);
     }
     
     public void remove(NObject x) {
@@ -270,8 +263,10 @@ public class Self extends EventEmitter {
     
     /** save nobject to database */
     public void save(NObject x) {
-        NObject removed = data.put(x.id, x);        
-        index(removed, x);
+        //NObject removed = data.put(x.id, x);
+        //index(removed, x);
+        db.add(x);
+        index(null, x);
         
         emit(SaveEvent.class, x);
     }
@@ -279,8 +274,11 @@ public class Self extends EventEmitter {
     /** batch save nobject to database */    
     public void save(Iterable<NObject> y) {
         for (NObject x : y) {
-            NObject removed = data.put(x.id, x);
-            index(removed, x);
+            //NObject removed = data.put(x.id, x);
+            //index(removed, x);
+
+            db.add(x);
+            index(null, x);
         }            
         emit(SaveEvent.class, null);
     }
@@ -382,9 +380,9 @@ public class Self extends EventEmitter {
     
 
     public Object getTag(String tagID) {
-        NObject tag = data.get(tagID);
-        if (tag!=null && tag.isClass())
-            return tag;
+//        NObject tag = data.get(tagID);
+//        if (tag!=null && tag.isClass())
+//            return tag;
         return null;
     }
 
