@@ -14,12 +14,12 @@
  */
 package com.hellblazer.gossip;
 
-import static com.hellblazer.gossip.Endpoint.readInetAddress;
-import static com.hellblazer.gossip.Endpoint.writeInetAddress;
-
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+
+import static com.hellblazer.gossip.Endpoint.readInetAddress;
+import static com.hellblazer.gossip.Endpoint.writeInetAddress;
 
 /**
  * @author hhildebrand
@@ -92,8 +92,7 @@ public class Update {
      */
     @Override
     public String toString() {
-        return "Update [" + node + ", " + state.getId() + ", "
-               + state.getTime() + "]";
+        return String.format("Update [%s,%s,%d]", node, state.getId(), state.getTime());
     }
 
     public void writeTo(ByteBuffer buffer) {

@@ -14,6 +14,9 @@
  */
 package com.hellblazer.gossip;
 
+import com.hellblazer.gossip.configuration.GossipConfiguration;
+import junit.framework.TestCase;
+
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
@@ -25,10 +28,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import junit.framework.TestCase;
-
-import com.hellblazer.gossip.configuration.GossipConfiguration;
 
 /**
  * Basic end to end testing
@@ -167,7 +166,8 @@ public class EndToEndTest extends TestCase {
                                                  int i) throws SocketException {
         GossipConfiguration config = new GossipConfiguration();
         config.seeds = seedHosts;
-        config.gossipInterval = 1;
+        config.gossipInterval = 100;
+        config.gossipUnit = TimeUnit.MILLISECONDS;
         Gossip gossip = config.construct();
         gossip.setListener(receiver);
         return gossip;

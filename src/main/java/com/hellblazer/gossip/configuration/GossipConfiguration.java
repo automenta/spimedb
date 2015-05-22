@@ -60,7 +60,7 @@ public class GossipConfiguration {
                                                                                    "localhost",
                                                                                    0);
     public FailureDetectorFactory  fdFactory;
-    public int                     gossipInterval          = 3;
+    public int                     gossipInterval          = 1;
     public TimeUnit                gossipUnit              = TimeUnit.SECONDS;
     public int                     heartbeatCycle          = DEFAULT_HEARTBEAT_CYCLE;
     public String                  hmac;
