@@ -1,0 +1,43 @@
+{        
+        "autoLoginDefaultProfile": true,
+		
+        "initialView": "wall",
+
+		"focusEditDisplayStartup": false,
+        "favicon": null,
+        "loginLogo": "/theme/login-logo.png",
+        "defaultAvatarIcon": "/theme/default-avatar.jpg",
+        "wikiStartPage": "Portal:Current_events",
+        "showPlanOnSelfPage": true,
+        "defaultTheme": "bootswatch.cerulean",
+        "maxStartupObjects": 8192,
+        "defaultMapMode2D": true,
+        "mapDefaultLocation": [40.44, -80.0],
+        "ontologySearchIntervalMS": 1500,
+        "viewlockDefault": false,
+        "viewUpdateTime": [
+            [150, 50, 250],
+            [0, 0, 100]
+        ],
+        "views": [
+            "us",
+            "map",
+            "browse",
+            "wiki",
+            "graph",
+            "share",
+            "_templates",
+            "forum",
+            "main",
+            "trends",
+            "time",
+            "notebook",
+            "wall",
+            "slides"
+        ],
+        "newUserProperties": [],
+        "shareTags": ["Offer", "Sell", "Lend", "Rent", "Swap", "GiveAway", "Need"],
+        "shareCategories": ["Food", "Service", "Volunteer", "Shelter", "Tools", "Health", "Transport", "Animal"],
+		"knowTags": ["Learn", "Teach", "Do"],
+        "defaultScope": 7
+}

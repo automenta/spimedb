@@ -1,0 +1,716 @@
+id,label,comment,domains,ranges
+openingHoursSpecification,Opening Hours Specification,The opening hours of a certain place.,Place,OpeningHoursSpecification
+code,Code,"A medical code for the entity, taken from a controlled vocabulary or ontology such as ICD-9, DiseasesDB, MeSH, SNOMED-CT, RxNorm, etc.",MedicalEntity,MedicalCode
+founder,Founder,A person who founded this organization.,Organization,Person
+reviewBody,Review Body,The actual body of the review,Review,Text
+toLocation,To Location,A sub property of location. The final location of the object or the agent after the action.,InsertAction TransferAction ExerciseAction MoveAction,Place Number
+deliveryLeadTime,Delivery Lead Time,The typical delay between the receipt of the order and the goods leaving the warehouse.,Offer Demand,QuantitativeValue
+datePublished,Date Published,Date of first broadcast/publication.,CreativeWork,Date
+processorRequirements,Processor Requirements,Processor architecture required to run the application (e.g. IA64).,SoftwareApplication,Text
+accountablePerson,Accountable Person,Specifies the Person that is legally accountable for the CreativeWork.,CreativeWork,Person
+itemShipped,Item Shipped,Item(s) being shipped.,ParcelDelivery,Product
+carrierRequirements,Carrier Requirements,Specifies specific carrier(s) requirements for the application (e.g. an application may only work on a specific carrier network).,MobileApplication,Text
+regionDrained,Region Drained,The anatomical or organ system drained by this vessel; generally refers to a specific part of an organ.,LymphaticVessel Vein,AnatomicalSystem AnatomicalStructure
+query,Query,A sub property of instrument. The query used on this action.,SearchAction,Class Text
+children,Children,A child of the person.,Person,Person
+interactingDrug,Interacting Drug,Another drug that is known to interact with this drug in a way that impacts the effect of this drug or causes a risk to the patient. Note: disease interactions are typically captured as contraindications.,Drug,Drug
+countriesNotSupported,Countries Not Supported,Countries for which the application is not supported. You can also provide the two-letter ISO 3166-1 alpha-2 country code.,SoftwareApplication,Text
+partOfEpisode,Part of Episode,The episode to which this clip belongs.,Clip,Episode
+representativeOfPage,Representative of Page,Indicates whether this image is representative of the content of the page.,ImageObject,Boolean
+proprietaryName,Proprietary Name,"Proprietary name given to the diet plan, typically by its originator or creator.",Diet,Text
+eligibleCustomerType,Eligible Customer Type,The type(s) of customers for which the given offer is valid.,Offer Demand,BusinessEntityType
+siblings,Siblings,"A sibling of the person (legacy spelling; see singular form, sibling).",Person,Person
+medicalSpecialty,Medical Specialty,A medical specialty of the provider.,Physician Hospital MedicalClinic,MedicalSpecialty
+merchant,Merchant,The party taking the order (e.g. Amazon.com is a merchant for many sellers).,Order,Organization Person
+availableAtOrFrom,Available At or From,The place(s) from which the offer can be obtained (e.g. store locations).,Offer Demand,Place
+mpn,Mpn,"The Manufacturer Part Number (MPN) of the product, or the product to which the offer refers.",Product Offer Demand,Text
+superEvent,Super Event,"An event that this event is a part of. For example, a collection of individual music performances might each have a music festival as their superEvent.",Event,Event
+evidenceOrigin,Evidence Origin,"Source of the data used to formulate the guidance, e.g. RCT, consensus opinion, etc.",MedicalGuideline,Text
+sportsActivityLocation,Sports Activity Location,A sub property of location. The sports activity location where this action occurred.,ExerciseAction,SportsActivityLocation
+eligibleQuantity,Eligible Quantity,The interval and unit of measurement of ordering quantities for which the offer or price specification is valid. This allows e.g. specifying that a certain freight charge is valid only for a certain quantity.,Demand PriceSpecification Offer,QuantitativeValue
+availableTest,Available Test,A diagnostic test or procedure offered by this lab.,DiagnosticLab,MedicalTest
+guidelineSubject,Guideline Subject,"The medical conditions, treatments, etc. that are the subject of the guideline.",MedicalGuideline,MedicalEntity
+reviewRating,Review Rating,"The rating given in this review. Note that reviews can themselves be rated. The <code>reviewRating</code> applies to rating given by the review. The <code>aggregateRating</code> property applies to the review itself, as a creative work.",Review,Rating
+normalRange,Normal Range,"Range of acceptable values for a typical patient, when applicable.",MedicalTest,Text
+priceCurrency,Price Currency,"The currency (in 3-letter ISO 4217 format) of the offer price or a price component, when attached to PriceSpecification and its subtypes.",PriceSpecification Offer,Text
+skills,Skills,Skills required to fulfill this role.,JobPosting,Text
+gender,Gender,Gender of the person.,Person,Text
+educationalFramework,Educational Framework,The framework to which the resource being described is aligned.,AlignmentObject,Text
+recipeYield,Recipe Yield,"The quantity produced by the recipe (for example, number of people served, number of servings, etc).",Recipe,Text
+maximumIntake,Maximum Intake,Recommended intake of this supplement for a given population as defined by a specific recommending authority.,DietarySupplement,MaximumDoseSchedule
+subEvents,Sub Events,"Events that are a part of this event. For example, a conference event includes many presentations, each are subEvents of the conference (legacy spelling; see singular form, subEvent).",Event,Event
+advanceBookingRequirement,Advance Booking Requirement,The amount of time that is required between accepting the offer and the actual usage of the resource or service.,Offer Demand,QuantitativeValue
+study,Study,A medical study or trial related to this entity.,MedicalEntity,MedicalStudy
+paymentAccepted,Payment Accepted,"Cash, credit card, etc.",LocalBusiness,Text
+givenName,Given Name,"Given name. In the U.S., the first name of a Person. This can be used along with familyName instead of the Name property.",Person,Text
+copyrightYear,Copyright Year,The year during which the claimed copyright for the CreativeWork was first asserted.,CreativeWork,Number
+installUrl,Install Url,"URL at which the app may be installed, if different from the URL of the item.",SoftwareApplication,URL
+availableThrough,Available Through,"After this date, the item will no longer be available for pickup.",DeliveryEvent,DateTime
+restPeriods,Rest Periods,How often one should break from the activity.,ExercisePlan,Text
+affiliation,Affiliation,"An organization that this person is affiliated with. For example, a school/university, a club, or a team.",Person,Organization
+availableIn,Available in,The location in which the strength is available.,DrugStrength,AdministrativeArea
+video,Video,An embedded video object.,CreativeWork,VideoObject
+value,Value,The value of the product characteristic.,QuantitativeValue,Number
+insertion,Insertion,"The place of attachment of a muscle, or what the muscle moves.",Muscle,AnatomicalStructure
+suggestedMaxAge,Suggested Max Age,Maximal age recommended for viewing content,PeopleAudience,Number
+legalStatus,Legal Status,"The drug or supplement's legal status, including any controlled substance schedules that apply.",DietarySupplement Drug,DrugLegalStatus
+issuedThrough,Issued Through,The service through with the permit was granted.,Permit,Service
+honorificSuffix,Honorific Suffix,An honorific suffix preceding a Person's name such as M.D. /PhD/MSCSW.,Person,Text
+applicationSuite,Application Suite,The name of the application suite to which the application belongs (e.g. Excel belongs to Office),SoftwareApplication,Text
+availableFrom,Available From,"When the item is available for pickup from the store, locker, etc.",DeliveryEvent,DateTime
+childMinAge,Child Min Age,Minimal age of the child,ParentAudience,Number
+productionCompany,Production Company,"The production company or studio that made the movie, tv/radio series, season, or episode, or media object.",Movie MediaObject Season Episode Series,Organization
+signOrSymptom,Sign or Symptom,A sign or symptom of this condition. Signs are objective or physically observable manifestations of the medical condition while symptoms are the subjective experienceof the medical condition.,MedicalCondition,MedicalSignOrSymptom
+circle,Circle,A circle is the circular region of a specified radius centered at a specified latitude and longitude. A circle is expressed as a pair followed by a radius in meters.,GeoShape,Text
+version,Version,The version of the CreativeWork embodied by a specified resource.,CreativeWork,Number
+relatedCondition,Related Condition,A medical condition associated with this anatomy.,SuperficialAnatomy AnatomicalSystem AnatomicalStructure,MedicalCondition
+eligibleDuration,Eligible Duration,The duration for which the given offer is valid.,Offer Demand,QuantitativeValue
+seeks,Seeks,A pointer to products or services sought by the organization or person (demand).,Person Organization,Demand
+addOn,Add On,An additional offer that can only be obtained in combination with the first base offer (e.g. supplements and extensions that are available for a surcharge).,Offer,Offer
+alcoholWarning,Alcohol Warning,"Any precaution, guidance, contraindication, etc. related to consumption of alcohol while taking this drug.",Drug,Text
+browserRequirements,Browser Requirements,"Specifies browser requirements in human-readable text. For example,""requires HTML5 support"".",WebApplication,Text
+hasDeliveryMethod,Has Delivery Method,Method used for delivery or shipping.,DeliveryEvent ParcelDelivery,DeliveryMethod
+owns,Owns,Products owned by the organization or person.,Person Organization,OwnershipInfo Product
+priceSpecification,Price Specification,"One or more detailed price specifications, indicating the unit price and delivery or payment charges.",Offer Demand,PriceSpecification
+eligibleTransactionVolume,Eligible Transaction Volume,"The transaction volume, in a monetary unit, for which the offer or price specification is valid, e.g. for indicating a minimal purchasing volume, to express free shipping above a certain order volume, or to limit the acceptance of credit cards to purchases to a certain minimal amount.",Demand PriceSpecification Offer,PriceSpecification
+tracks,Tracks,"A music recording (track)—usually a single song (legacy spelling; see singular form, track).",MusicPlaylist MusicGroup,MusicRecording
+address,Address,Physical address of the item.,Person Place Organization,PostalAddress
+usesDevice,Uses Device,Device used to perform the test.,MedicalTest,MedicalDevice
+confirmationNumber,Confirmation Number,A number that confirms the given order.,Order,Text
+bitrate,Bitrate,The bitrate of the media object.,MediaObject,Text
+foodEvent,Food Event,A sub property of location. The specific food event where the action occurred.,CookAction,FoodEvent
+guidelineDate,Guideline Date,Date on which this guideline's recommendation was made.,MedicalGuideline,Date
+box,Box,A polygon is the area enclosed by a point-to-point path for which the starting and ending points are the same. A polygon is expressed as a series of four or more spacedelimited points where the first and final points are identical.,GeoShape,Text
+commentText,Comment Text,The text of the UserComment.,UserComments,Text
+dosageForm,Dosage Form,"A dosage form in which this drug/supplement is available, e.g. 'tablet', 'suspension', 'injection'.",DietarySupplement Drug,Text
+sender,Sender,A sub property of participant. The participant who is at the sending end of the action.,ReceiveAction,Audience Organization Person
+preOp,Pre Op,"A description of the workup, testing, and other preparations required before implanting this device.",MedicalDevice,Text
+employees,Employees,"People working for this organization. (legacy spelling; see singular form, employee)",Organization,Person
+relatedAnatomy,Related Anatomy,Anatomical systems or structures that relate to the superficial anatomy.,SuperficialAnatomy,AnatomicalStructure AnatomicalSystem
+encodingFormat,Encoding Format,"mp3, mpeg4, etc.",MediaObject,Text
+availableDeliveryMethod,Available Delivery Method,The delivery method(s) available for this offer.,Offer Demand,DeliveryMethod
+recipeInstructions,Recipe Instructions,The steps to make the dish.,Recipe,Text
+medicineSystem,Medicine System,"The system of medicine that includes this MedicalEntity, for example 'evidence-based', 'homeopathic', 'chiropractic', etc.",MedicalEntity,MedicineSystem
+reviewedBy,Reviewed by,People or organizations that have reviewed the content on this web page for accuracy and/or completeness.,WebPage,Organization Person
+action,Action,The movement the muscle generates.,Muscle,Text
+mentions,Mentions,"Indicates that the CreativeWork contains a reference to, but is not necessarily about a concept.",CreativeWork,Thing
+printPage,Print Page,"If this NewsArticle appears in print, this field indicates the name of the page on which the article is found. Please note that this field is intended for the exact page name (e.g. A5, B18).",NewsArticle,Text
+costOrigin,Cost Origin,"Additional details to capture the origin of the cost data. For example, 'Medicare Part B'.",DrugCost,Text
+honorificPrefix,Honorific Prefix,An honorific prefix preceding a Person's name such as Dr/Mrs/Mr.,Person,Text
+followee,Followee,A sub property of object. The person or organization being followed.,FollowAction,Organization Person
+eligibleRegion,Eligible Region,"The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is valid.",DeliveryChargeSpecification Offer Demand,Text GeoShape
+appliesToDeliveryMethod,Applies to Delivery Method,The delivery method(s) to which the delivery charge or payment charge specification applies.,DeliveryChargeSpecification PaymentChargeSpecification,DeliveryMethod
+causeOf,Cause of,"The condition, complication, symptom, sign, etc. caused.",MedicalCause,MedicalEntity
+connectedTo,Connected to,Other anatomical structures to which this structure is connected.,AnatomicalStructure,AnatomicalStructure
+typeOfGood,Type of Good,The product that this structured value is referring to.,OwnershipInfo TypeAndQuantityNode,Product
+predecessorOf,Predecessor of,"A pointer from a previous, often discontinued variant of the product to its newer variant.",ProductModel,ProductModel
+usedToDiagnose,Used to Diagnose,A condition the test is used to diagnose.,MedicalTest,MedicalCondition
+baseSalary,Base Salary,The base salary of the job.,JobPosting,Number
+sodiumContent,Sodium Content,The number of milligrams of sodium.,NutritionInformation,Mass
+highPrice,High Price,The highest price of all offers available.,AggregateOffer,Number Text
+safetyConsideration,Safety Consideration,"Any potential safety concern associated with the supplement. May include interactions with other drugs and foods, pregnancy, breastfeeding, known adverse reactions, and documented efficacy of the supplement.",DietarySupplement,Text
+guideline,Guideline,A medical guideline related to this entity.,MedicalEntity,MedicalGuideline
+servicePostalAddress,Service Postal Address,The address for accessing the service by mail.,ServiceChannel,PostalAddress
+targetUrl,Target Url,The URL of a node in an established educational framework.,AlignmentObject,URL
+manufacturer,Manufacturer,The manufacturer of the product.,Product DietarySupplement Drug,Organization
+blogPosts,Blog Posts,"The postings that are part of this blog (legacy spelling; see singular form, blogPost).",Blog,BlogPosting
+issuedBy,Issued by,The organization issuing the permit.,Permit,Organization
+knows,Knows,The most generic bi-directional social/work relation.,Person,Person
+publicationType,Publication Type,"The type of the medical article, taken from the US NLM MeSH <a href=""http://www.nlm.nih.gov/mesh/pubtypes.html"">publication type catalog.</a>",MedicalScholarlyArticle,Text
+parentService,Parent Service,A broadcast service to which the broadcast service may belong to such as regional variations of a national channel.,BroadcastService,BroadcastService
+award,Award,An award won by this person or for this creative work.,Person CreativeWork,Text
+interactionCount,Interaction Count,"A count of a specific user interactions with this item—for example, <code>20 UserLikes</code>, <code>5 UserComments</code>, or <code>300 UserDownloads</code>. The user interaction type should be one of the sub types of <a href=""http://schema.org/UserInteraction"">UserInteraction</a>.",Person CreativeWork Place Organization,Text
+workHours,Work Hours,"The typical working hours for this job (e.g. 1st shift, night shift, 8am-5pm).",JobPosting,Text
+origin,Origin,The place or point where a muscle arises.,Muscle,AnatomicalStructure
+customer,Customer,Party placing the order.,Order,Organization Person
+serviceArea,Service Area,The geographic area where the service is provided.,Service,AdministrativeArea
+experienceRequirements,Experience Requirements,Description of skills and experience needed for the position.,JobPosting,Text
+language,Language,A sub property of instrument. The languaged used on this action.,WriteAction CommunicateAction,Language
+latitude,Latitude,The latitude of a location. For example <code>37.42242</code>.,GeoCoordinates,Number Text
+longitude,Longitude,The longitude of a location. For example <code>-122.08585</code>.,GeoCoordinates,Number Text
+reviews,Reviews,"Review of the item (legacy spelling; see singular form, review).",Organization Product CreativeWork Place Offer,Review
+ratingValue,Rating Value,The rating for the content.,Rating,Text
+significantLink,Significant Link,"One of the more significant URLs on the page. Typically, these are the non-navigation links that are clicked on the most.",WebPage,URL
+transmissionMethod,Transmission Method,"How the disease spreads, either as a route or vector, for example 'direct contact', 'Aedes aegypti', etc.",InfectiousDisease,Text
+inLanguage,In Language,"The language of the content. please use one of the language codes from the <a href=""http://tools.ietf.org/html/bcp47"">IETF BCP 47 standard.</a>",CreativeWork,Text
+performer,Performer,"A performer at the event—for example, a presenter, musician, musical group or actor.",Event,Organization Person
+isConsumableFor,Is Consumable for,A pointer to another product (or multiple products) for which this product is a consumable.,Product,Product
+gtin8,Gtin8,"The GTIN-8 code of the product, or the product to which the offer refers. This code is also known as EAN/UCC-8 or 8-digit EAN.",Product Offer Demand,Text
+agent,Agent,The direct performer or driver of the action (animate or inanimate). e.g. *John* wrote a book.,Action,Organization Person
+numTracks,Num Tracks,The number of tracks in this album or playlist.,MusicPlaylist,Integer
+isRelatedTo,Is Related to,"A pointer to another, somehow related product (or multiple products).",Product,Product
+costCategory,Cost Category,"The category of cost, such as wholesale, retail, reimbursement cap, etc.",DrugCost,DrugCostCategory
+partOfOrder,Part of Order,The overall order the items in this delivery were included in.,ParcelDelivery,Order
+appliesToPaymentMethod,Applies to Payment Method,The payment method(s) to which the payment charge specification applies.,PaymentChargeSpecification,PaymentMethod
+identifyingTest,Identifying Test,A diagnostic test that can identify this sign.,MedicalSign,MedicalTest
+signDetected,Sign Detected,A sign detected by the test.,MedicalTest,MedicalSign
+requirements,Requirements,"Component dependency requirements for application. This includes runtime environments and shared libraries that are not included in the application distribution package, but required to run the application (Examples: DirectX, Java or .NET runtime).",SoftwareApplication,Text URL
+produces,Produces,"The tangible thing generated by the service, e.g. a passport, permit, etc.",Service,Thing
+sourcedFrom,Sourced From,The neurological pathway that originates the neurons.,Nerve,BrainStructure
+maps,Maps,"A URL to a map of the place (legacy spelling; see singular form, map).",Place,URL
+streetAddress,Street Address,"The street address. For example, 1600 Amphitheatre Pkwy.",PostalAddress,Text
+yearsInOperation,Years in Operation,The age of the business.,BusinessAudience,QuantitativeValue
+significance,Significance,"The significance associated with the superficial anatomy; as an example, how characteristics of the superficial anatomy can suggest underlying medical conditions or courses of treatment.",SuperficialAnatomy,Text
+publishedOn,Published On,A broadcast service associated with the publication event,PublicationEvent,BroadcastService
+performerIn,Performer in,Event that this person is a performer or participant in.,Person,Event
+description,Description,A short description of the item.,Thing,Text
+unsaturatedFatContent,Unsaturated Fat Content,The number of grams of unsaturated fat.,NutritionInformation,Mass
+exifData,Exif Data,exif data for this object.,ImageObject,Text
+pregnancyCategory,Pregnancy Category,Pregnancy category of this drug.,Drug,DrugPregnancyCategory
+maxValue,Max Value,The upper of the product characteristic.,QuantitativeValue,Number
+collection,Collection,A sub property of object. The collection target of the action.,UpdateAction,Thing
+stageAsNumber,Stage As Number,"The stage represented as a number, e.g. 3.",MedicalConditionStage,Number
+expectedArrivalUntil,Expected Arrival Until,The latest date the package may arrive.,ParcelDelivery,DateTime
+catalog,Catalog,A data catalog which contains a dataset.,Dataset,DataCatalog
+startTime,Start Time,When the Action was performed: start time. This is for actions that span a period of time. e.g. John wrote a book from *January* to December.,Action,DateTime
+clincalPharmacology,Clincal Pharmacology,"Description of the absorption and elimination of drugs, including their concentration (pharmacokinetics, pK) and biological effects (pharmacodynamics, pD).",Drug,Text
+alternateName,Alternate Name,An alias for the item.,Thing,Text
+contentLocation,Content Location,The location of the content.,CreativeWork,Place
+makesOffer,Makes Offer,A pointer to products or services offered by the organization or person.,Person Organization,Offer
+hasPOS,Has POS,Points-of-Sales operated by the organization or person.,Person Organization,Place
+pathophysiology,Pathophysiology,"Changes in the normal mechanical, physical, and biochemical functions that are associated with this activity or condition.",MedicalCondition PhysicalActivity,Text
+discusses,Discusses,Specifies the CreativeWork associated with the UserComment.,UserComments,CreativeWork
+secondaryPrevention,Secondary Prevention,A preventative therapy used to prevent reoccurrence of the medical condition after an initial episode of the condition.,MedicalCondition,MedicalTherapy
+naturalProgression,Natural Progression,The expected progression of the condition if it is not treated and allowed to progress naturally.,MedicalCondition,Text
+serialNumber,Serial Number,"The serial number or any alphanumeric identifier of a particular product. When attached to an offer, it is a shortcut for the serial number of the product included in the offer.",Demand IndividualProduct Offer,Text
+codingSystem,Coding System,"The coding system, e.g. 'ICD-10'.",MedicalCode,Text
+affectedBy,Affected by,Drugs that affect the test's results.,MedicalTest,Drug
+producer,Producer,"The producer of the movie, tv/radio series, season, or episode, or video.",Movie Season Episode Series,Person
+isBasedOnUrl,Is Based On Url,"A resource that was used in the creation of this resource. This term can be repeated for multiple sources. For example, http://example.com/great-multiplication-intro.html",CreativeWork,URL
+inPlaylist,In Playlist,The playlist to which this recording belongs.,MusicRecording,MusicPlaylist
+memoryRequirements,Memory Requirements,Minimum memory requirements.,SoftwareApplication,Text URL
+releaseDate,Release Date,The release date of a product or product model. This can be used to distinguish the exact variant of a product.,Product,Date
+course,Course,A sub property of location. The course where this action was taken.,ExerciseAction,Place
+possibleTreatment,Possible Treatment,"A possible treatment to address this condition, sign or symptom.",MedicalCondition MedicalSignOrSymptom,MedicalTherapy
+isGift,Is Gift,Was the offer accepted as a gift for someone other than the buyer.,Order,Boolean
+subStageSuffix,Sub Stage Suffix,"The substage, e.g. 'a' for Stage IIIa.",MedicalConditionStage,Text
+relatedDrug,Related Drug,"Any other drug related to this one, for example commonly-prescribed alternatives.",Drug,Drug
+replyToUrl,Reply to Url,The URL at which a reply may be posted to the specified UserComment.,UserComments,URL
+temporal,Temporal,"The range of temporal applicability of a dataset, e.g. for a 2011 census dataset, the year 2011 (in ISO 8601 time interval format).",Dataset,DateTime
+clipNumber,Clip Number,Position of the clip within an ordered group of clips.,Clip,Integer
+responsibilities,Responsibilities,Responsibilities associated with this role.,JobPosting,Text
+bestRating,Best Rating,"The highest value allowed in this rating system. If bestRating is omitted, 5 is assumed.",Rating,Number Text
+offers,Offers,"An offer to transfer some rights to an item or to provide a service—for example, an offer to sell tickets to an event, to rent the DVD of a movie, to stream a TV show over the internet, to repair a motorcycle, or to loan a book.",Product CreativeWork Event,Offer
+ownedThrough,Owned Through,The date and time of giving up ownership on the product.,OwnershipInfo,DateTime
+publishingPrinciples,Publishing Principles,Link to page describing the editorial principles of the organization primarily responsible for the creation of the CreativeWork.,CreativeWork,URL
+byArtist,By Artist,The artist that performed this album or recording.,MusicAlbum MusicRecording,MusicGroup
+activeIngredient,Active Ingredient,"An active ingredient, typically chemical compounds and/or biologic substances.",DrugStrength DietarySupplement Drug,Text
+image,Image,URL of an image of the item.,Thing,URL
+breastfeedingWarning,Breastfeeding Warning,"Any precaution, guidance, contraindication, etc. related to this drug's use by breastfeeding mothers.",Drug,Text
+colleague,Colleague,A colleague of the person.,Person,Person
+mainContentOfPage,Main Content of Page,Indicates if this web page element is the main subject of the page.,WebPage,WebPageElement
+greater,Greater,This ordering relation for qualitative values indicates that the subject is greater than the object.,QualitativeValue,QualitativeValue
+releaseNotes,Release Notes,Description of what changed in this version.,SoftwareApplication,Text URL
+dateCreated,Date Created,The date on which the CreativeWork was created.,CreativeWork,Date
+postOp,Post Op,"A description of the postoperative procedures, care, and/or followups for this device.",MedicalDevice,Text
+dataset,Dataset,A dataset contained in a catalog.,DataCatalog,Dataset
+permissions,Permissions,"Permission(s) required to run the app (for example, a mobile app may require full internet access or may run only on wifi).",SoftwareApplication,Text
+workload,Workload,Quantitative measure of the physiologic output of the exercise; also referred to as energy expenditure.,ExercisePlan,Energy
+name,Name,The name of the item.,Thing,Text
+dateModified,Date Modified,The date on which the CreativeWork was most recently modified.,CreativeWork,Date
+addressRegion,Address Region,"The region. For example, CA.",PostalAddress,Text
+activityFrequency,Activity Frequency,How often one should engage in the activity.,ExercisePlan,Text
+validFor,Valid for,The time validity of the permit.,Permit,Duration
+areaServed,Area Served,"The location served by this contact point (e.g., a phone number intended for Europeans vs. North Americans or only within the United States.)",ContactPoint,AdministrativeArea
+requiredGender,Required Gender,Audiences defined by a person's gender.,PeopleAudience,Text
+trailer,Trailer,"The trailer of a movie or tv/radio series, season, or episode.",Movie Season Episode Series,VideoObject
+weight,Weight,The weight of the product.,Product,QuantitativeValue
+map,Map,A URL to a map of the place.,Place,URL
+musicBy,Music by,The composer of the movie or TV/radio soundtrack.,Series Episode Movie,Person MusicGroup
+tissueSample,Tissue Sample,The type of tissue sample required for the test.,PathologyTest,Text
+frequency,Frequency,"How often the dose is taken, e.g. 'daily'.",DoseSchedule,Text
+sponsor,Sponsor,Sponsor of the study.,MedicalStudy,Organization
+encodings,Encodings,"The media objects that encode this creative work (legacy spelling; see singular form, encoding).",CreativeWork,MediaObject
+logo,Logo,A logo associated with an organization.,Organization Brand Place Product,URL ImageObject
+event,Event,Upcoming or past event associated with this place or organization.,PlayAction Place JoinAction InviteAction Organization InformAction LeaveAction,Event
+album,Album,A music album.,MusicGroup,MusicAlbum
+availableChannel,Available Channel,"A means of accessing the service (e.g. a phone bank, a web site, a location, etc.)",Service,ServiceChannel
+jobLocation,Job Location,A (typically single) geographic location associated with the job position.,JobPosting,Place
+productSupported,Product Supported,"The product or service this support contact point is related to (such as product support for a particular product line). This can be a specific product or product line (e.g. ""iPhone"") or a general category of products or services (e.g. ""smartphones"").",ContactPoint,Product Text
+fatContent,Fat Content,The number of grams of fat.,NutritionInformation,Mass
+applicableLocation,Applicable Location,The location in which the status applies.,DrugLegalStatus DrugCost,AdministrativeArea
+foodWarning,Food Warning,"Any precaution, guidance, contraindication, etc. related to consumption of specific foods while taking this drug.",Drug,Text
+greaterOrEqual,Greater or Equal,This ordering relation for qualitative values indicates that the subject is greater than or equal to the object.,QualitativeValue,QualitativeValue
+strengthValue,Strength Value,"The value of an active ingredient's strength, e.g. 325.",DrugStrength,Number
+isPartOf,Is Part of,Indicates the collection or gallery to which the item belongs.,WebPage,CollectionPage
+cause,Cause,"An underlying cause. More specifically, one of the causative agent(s) that are most directly responsible for the pathophysiologic process that eventually results in the occurrence.",MedicalCondition MedicalSignOrSymptom,MedicalCause
+primaryImageOfPage,Primary Image of Page,Indicates the main image on the page,WebPage,ImageObject
+contentSize,Content Size,File size in (mega/kilo) bytes.,MediaObject,Text
+contentUrl,Content Url,"Actual bytes of the media object, for example the image file or video file. (previous spelling: contentURL)",MediaObject,URL
+attendee,Attendee,A person or organization attending the event.,Event,Organization Person
+activityDuration,Activity Duration,Length of time to engage in the activity.,ExercisePlan,Duration
+educationalAlignment,Educational Alignment,An alignment to an established educational framework.,CreativeWork,AlignmentObject
+scheduledTime,Scheduled Time,The time the object is scheduled to.,PlanAction,DateTime
+incentives,Incentives,Description of bonus and commission compensation aspects of the job.,JobPosting,Text
+free,Free,A flag to signal that the publication is accessible for free.,PublicationEvent,Boolean
+dependencies,Dependencies,Prerequisites needed to fulfill steps in article.,TechArticle,Text
+hoursAvailable,Hours Available,The hours during which this contact point is available.,ContactPoint,OpeningHoursSpecification
+members,Members,"A member of this organization (legacy spelling; see singular form, member).",Organization,Organization Person
+duns,Duns,The Dun & Bradstreet DUNS number for identifying an organization or business person.,Person Organization,Text
+prepTime,Prep Time,"The length of time it takes to prepare the recipe, in <a href=""http://en.wikipedia.org/wiki/ISO_8601"">ISO 8601 duration format</a>.",Recipe,Duration
+diagram,Diagram,An image containing a diagram that illustrates the structure and/or its component substructures and/or connections with other structures.,AnatomicalStructure,ImageObject
+availabilityEnds,Availability Ends,The end of the availability of the product or service included in the offer.,Offer Demand,DateTime
+benefits,Benefits,Description of benefits associated with the job.,JobPosting,Text
+numberofEmployees,Numberof Employees,The size of business by number of employees.,BusinessAudience,QuantitativeValue
+numberOfPages,Number of Pages,The number of pages in the book.,Book,Integer
+calories,Calories,The number of calories,NutritionInformation,Energy
+subEvent,Sub Event,"An Event that is part of this event. For example, a conference event includes many presentations, each are a subEvent of the conference.",Event,Event
+caption,Caption,The caption for this object.,VideoObject ImageObject,Text
+sugarContent,Sugar Content,The number of grams of sugar.,NutritionInformation,Mass
+studyDesign,Study Design,Specifics about the observational study design (enumerated).,MedicalObservationalStudy,MedicalObservationalStudyDesign
+storageRequirements,Storage Requirements,Storage requirements (free space required).,SoftwareApplication,Text URL
+nonEqual,Non Equal,This ordering relation for qualitative values indicates that the subject is not equal to the object.,QualitativeValue,QualitativeValue
+globalLocationNumber,Global Location Number,"The Global Location Number (GLN, sometimes also referred to as International Location Number or ILN) of the respective organization, person, or place. The GLN is a 13-digit number used to identify parties and physical locations.",Person Place Organization,Text
+educationalUse,Educational Use,"The purpose of a work in the context of education; for example, 'assignment', 'group work'.",CreativeWork,Text
+startDate,Start Date,"The start date and time of the event or item (in <a href=""http://en.wikipedia.org/wiki/ISO_8601"">ISO 8601 date format</a>).",Series Event Season,Date
+possibleComplication,Possible Complication,"A possible unexpected and unfavorable evolution of a medical condition. Complications may include worsening of the signs or symptoms of the disease, extension of the condition to other organ systems, etc.",MedicalCondition,Text
+isbn,ISBN,The ISBN of the book.,Book,Text
+arterialBranch,Arterial Branch,The branches that comprise the arterial structure.,Artery,AnatomicalStructure
+encoding,Encoding,A media object that encode this CreativeWork.,CreativeWork,MediaObject
+sameAs,Same As,"URL of a reference Web page that unambiguously indicates the item's identity. E.g. the URL of the item's Wikipedia page, Freebase page, or official website.",Thing,URL
+trialDesign,Trial Design,Specifics about the trial design (enumerated).,MedicalTrial,MedicalTrialDesign
+faxNumber,Fax Number,The fax number.,Person ContactPoint Place Organization,Text
+billingIncrement,Billing Increment,This property specifies the minimal quantity and rounding increment that will be the basis for the billing. The unit of measurement is specified by the unitCode property.,UnitPriceSpecification,Number
+videoQuality,Video Quality,The quality of the video.,VideoObject,Text
+bloodSupply,Blood Supply,The blood vessel that carries blood from the heart to the muscle.,Muscle,Vessel
+hiringOrganization,Hiring Organization,Organization offering the job position.,JobPosting,Organization
+accessibilityFeature,Accessibility Feature,"Content features of the resource, such as accessible media, alternatives and supported enhancements for accessibility (<a href=""http://www.w3.org/wiki/WebSchemas/Accessibility"">WebSchemas wiki lists possible values</a>).",CreativeWork,Text
+publication,Publication,"A publication event associated with the episode, clip or media object.",MediaObject Episode Clip,PublicationEvent
+relevantSpecialty,Relevant Specialty,"If applicable, a medical specialty in which this entity is relevant.",MedicalEntity,MedicalSpecialty
+codeRepository,Code Repository,"Link to the repository where the un-compiled, human readable code and related code is located (SVN, github, CodePlex)",Code,URL
+taxID,Tax ID,"The Tax / Fiscal ID of the organization or person, e.g. the TIN in the US or the CIF/NIF in Spain.",Person Organization,Text
+accessCode,Access Code,"Password, PIN, or access code needed for delivery (e.g. from a locker).",DeliveryEvent,Text
+requiresSubscription,Requires Subscription,"Indicates if use of the media require a subscription  (either paid or free). Allowed values are <code>true</code> or <code>false</code> (note that an earlier version had 'yes', 'no').",MediaObject,Boolean
+priceType,Price Type,"A short text or acronym indicating multiple price specifications for the same offer, e.g. SRP for the suggested retail price or INVOICE for the invoice price, mostly used in the car industry.",UnitPriceSpecification,Text
+numberOfEpisodes,Number of Episodes,The number of episodes in this season or series.,Series Season,Number
+nutrition,Nutrition,Nutrition information about the recipe.,Recipe,NutritionInformation
+option,Option,A sub property of object. The options subject to this action.,ChooseAction,Text Thing
+season,Season,A season in a tv/radio series.,Series,Season
+partOfTVSeries,Part of TV Series,The TV series to which this episode or season belongs. (legacy form; partOfSeries is preferred),TVEpisode TVSeason TVClip,TVSeries
+billingAddress,Billing Address,The billing address for the order.,Order,PostalAddress
+serviceUrl,Service Url,The website to access the service.,ServiceChannel,URL
+albums,Albums,"A collection of music albums (legacy spelling; see singular form, album).",MusicGroup,MusicAlbum
+printColumn,Print Column,The number of the column in which the NewsArticle appears in the print edition.,NewsArticle,Text
+population,Population,"Any characteristics of the population used in the study, e.g. 'males under 65'.",MedicalStudy,Text
+distance,Distance,A sub property of asset. The distance travelled.,TravelAction ExerciseAction,Distance
+colleagues,Colleagues,"A colleague of the person (legacy spelling; see singular form, colleague).",Person,Person
+estimatesRiskOf,Estimates Risk of,"The condition, complication, or symptom whose risk is being estimated.",MedicalRiskEstimator,MedicalEntity
+sensoryUnit,Sensory Unit,The neurological pathway extension that inputs and sends information to the brain or spinal cord.,Nerve,AnatomicalStructure SuperficialAnatomy
+performers,Performers,"The main performer or performers of the event—for example, a presenter, musician, or actor (legacy spelling; see singular form, performer).",Event,Organization Person
+preparation,Preparation,Typical preparation that a patient must undergo before having the procedure performed.,MedicalProcedure,Text
+targetPopulation,Target Population,"Characteristics of the population for which this is intended, or which typically uses it, e.g. 'adults'.",DietarySupplement DoseSchedule,Text
+cost,Cost,"Cost per unit of the drug, as reported by the source being tagged.",Drug,DrugCost
+risks,Risks,Specific physiologic risks associated to the plan.,Diet,Text
+openingHours,Opening Hours,"The opening hours for a business. Opening hours can be specified as a weekly time range, starting with days, then times per day. Multiple days can be listed with commas ',' separating each day. Day or time ranges are specified using a hyphen '-'.<br/>- Days are specified using the following two-letter combinations: <code>Mo</code>, <code>Tu</code>, <code>We</code>, <code>Th</code>, <code>Fr</code>, <code>Sa</code>, <code>Su</code>.<br/>- Times are specified using 24:00 time. For example, 3pm is specified as <code>15:00</code>. <br/>- Here is an example: <code>&lt;time itemprop=""openingHours"" datetime=""Tu,Th 16:00-20:00""&gt;Tuesdays and Thursdays 4-8pm&lt;/time&gt;</code>. <br/>- If a business is open 7 days a week, then it can be specified as <code>&lt;time itemprop=""openingHours"" datetime=""Mo-Su""&gt;Monday through Sunday, all day&lt;/time&gt;</code>.",LocalBusiness CivicStructure,Duration
+outcome,Outcome,Expected or actual outcomes of the study.,MedicalStudy,Text
+operatingSystem,Operating System,"Operating systems supported (Windows 7, OSX 10.6, Android 1.6).",SoftwareApplication,Text
+regionsAllowed,Regions Allowed,"The regions where the media is allowed. If not specified, then it's assumed to be allowed everywhere. Specify the countries in <a href=""http://en.wikipedia.org/wiki/ISO_3166"">ISO 3166 format</a>.",MediaObject,Place
+function,Function,Function of the anatomical structure.,AnatomicalStructure,Text
+recognizingAuthority,Recognizing Authority,"If applicable, the organization that officially recognizes this entity as part of its endorsed system of medicine.",MedicalEntity,Organization
+worstRating,Worst Rating,"The lowest value allowed in this rating system. If worstRating is omitted, 1 is assumed.",Rating,Number Text
+additionalType,Additional Type,"An additional type for the item, typically used for adding more specific types from external vocabularies in microdata syntax. This is a relationship between something and a class that the thing is in. In RDFa syntax, it is better to use the native RDFa syntax - the 'typeof' attribute - for multiple types. Schema.org tools may have only weaker understanding of extra types, in particular those defined externally.",Thing,URL
+educationalRole,Educational Role,An educationalRole of an EducationalAudience,EducationalAudience,Text
+recipeCategory,Recipe Category,"The category of the recipe—for example, appetizer, entree, etc.",Recipe,Text
+isicV4,Isic V4,"The International Standard of Industrial Classification of All Economic Activities (ISIC), Revision 4 code for a particular organization, business person, or place.",Person Place Organization,Text
+isSimilarTo,Is Similar to,"A pointer to another, functionally similar product (or multiple products).",Product,Product
+partOfSeason,Part of Season,The season to which this episode belongs.,Episode Clip,Season
+phase,Phase,The phase of the trial.,MedicalTrial,Text
+howPerformed,How Performed,How the procedure is performed.,MedicalProcedure,Text
+recommendedIntake,Recommended Intake,Recommended intake of this supplement for a given population as defined by a specific recommending authority.,DietarySupplement,RecommendedDoseSchedule
+transFatContent,Trans Fat Content,The number of grams of trans fat.,NutritionInformation,Mass
+totalTime,Total Time,"The total time it takes to prepare and cook the recipe, in <a href=""http://en.wikipedia.org/wiki/ISO_8601"">ISO 8601 duration format</a>.",Recipe,Duration
+suggestedMinAge,Suggested Min Age,Minimal age recommended for viewing content,PeopleAudience,Number
+seasonNumber,Season Number,Position of the season within an ordered group of seasons.,Season,Integer
+track,Track,A music recording (track)—usually a single song.,MusicPlaylist MusicGroup,MusicRecording
+warrantyScope,Warranty Scope,The scope of the warranty promise.,WarrantyPromise,WarrantyScope
+price,Price,"The offer price of a product, or of a price component when attached to PriceSpecification and its subtypes.",TradeAction PriceSpecification Offer,Text Number
+expires,Expires,Date the content expires and is no longer useful or available. Useful for videos.,MediaObject,Date
+additionalVariable,Additional Variable,"Any additional component of the exercise prescription that may need to be articulated to the patient. This may include the order of exercises, the number of repetitions of movement, quantitative distance, progressions over time, etc.",ExercisePlan,Text
+device,Device,Device required to run the application. Used in cases where a specific make/model is required to run the application.,SoftwareApplication,Text
+durationOfWarranty,Duration of Warranty,"The duration of the warranty promise. Common unitCode values are ANN for year, MON for months, or DAY for days.",WarrantyPromise,QuantitativeValue
+minPrice,Min Price,The lowest price if the price is a range.,PriceSpecification,Number
+transcript,Transcript,"If this MediaObject is an AudioObject or VideoObject, the transcript of that object.",AudioObject VideoObject,Text
+costCurrency,Cost Currency,"The currency (in 3-letter <a href=""http://en.wikipedia.org/wiki/ISO_4217"">ISO 4217 format</a>) of the drug cost.",DrugCost,Text
+paymentMethodId,Payment Method Id,An identifier for the method of payment used (e.g. the last 4 digits of the credit card).,Order,Text
+labelDetails,Label Details,Link to the drug's label details.,Drug,URL
+validFrom,Valid From,The date when the item becomes valid.,OpeningHoursSpecification Offer Demand PriceSpecification Permit,DateTime
+episode,Episode,An episode of a TV/radio series or season,Series Season,Episode
+subStructure,Sub Structure,Component (sub-)structure(s) that comprise this anatomical structure.,AnatomicalStructure,AnatomicalStructure
+url,URL,URL of the item.,Thing,URL
+alumni,Alumni,Alumni of educational organization.,EducationalOrganization,Person
+sportsEvent,Sports Event,A sub property of location. The sports event where this action occurred.,ExerciseAction,SportsEvent
+review,Review,A review of the item.,Organization Product CreativeWork Place Offer,Review
+text,Text,The textual content of this CreativeWork.,CreativeWork,Text
+businessFunction,Business Function,"The business function (e.g. sell, lease, repair, dispose) of the offer or component of a bundle (TypeAndQuantityNode). The default is http://purl.org/goodrelations/v1#Sell.",Offer TypeAndQuantityNode Demand,BusinessFunction
+relatedTo,Related to,The most generic familial relation.,Person,Person
+recipe,Recipe,A sub property of instrument. The recipe/instructions used to perform the action.,CookAction,Recipe
+addressLocality,Address Locality,"The locality. For example, Mountain View.",PostalAddress,Text
+alternativeHeadline,Alternative Headline,A secondary title of the CreativeWork.,CreativeWork,Text
+keywords,Keywords,The keywords/tags used to describe this content.,CreativeWork,Text
+associatedPathophysiology,Associated Pathophysiology,"If applicable, a description of the pathophysiology associated with the anatomical system, including potential abnormal changes in the mechanical, physical, and biochemical functions of the system.",SuperficialAnatomy AnatomicalSystem AnatomicalStructure,Text
+targetName,Target Name,The name of a node in an established educational framework.,AlignmentObject,Text
+availability,Availability,"The availability of this item—for example In stock, Out of stock, Pre-order, etc.",Offer Demand,ItemAvailability
+structuralClass,Structural Class,The name given to how bone physically connects to each other.,Joint,Text
+title,Title,The title of the job.,JobPosting,Text
+headline,Headline,Headline of the article,CreativeWork,Text
+menu,Menu,Either the actual menu or a URL of the menu.,FoodEstablishment,Text URL
+dateline,Dateline,The location where the NewsArticle was produced.,NewsArticle,Text
+winner,Winner,A sub property of participant. The winner of the action.,LoseAction,Person
+contentRating,Content Rating,"Official rating of a piece of content—for example,'MPAA PG-13'.",CreativeWork,Text
+paymentDue,Payment Due,The date that payment is due.,Order,DateTime
+applicationCategory,Application Category,"Type of software application, e.g. ""Game, Multimedia"".",SoftwareApplication,Text URL
+oponent,Oponent,A sub property of participant. The oponent on this action.,ExerciseAction,Person
+employee,Employee,Someone working for this organization.,Organization,Person
+priceRange,Price Range,"The price range of the business, for example <code>$$$</code>.",LocalBusiness,Text
+embedUrl,Embed Url,"A URL pointing to a player for a specific video. In general, this is the information in the <code>src</code> element of an <code>embed</code> tag and should not be the same as the content of the <code>loc</code> tag. (previous spelling: embedURL)",MediaObject,URL
+fiberContent,Fiber Content,The number of grams of fiber.,NutritionInformation,Mass
+printEdition,Print Edition,The edition of the print product in which the NewsArticle appears.,NewsArticle,Text
+reviewCount,Review Count,The count of total number of reviews.,AggregateRating,Number
+jobTitle,Job Title,"The job title of the person (for example, Financial Manager).",Person,Text
+blogPost,Blog Post,A posting that is part of this blog.,Blog,BlogPosting
+containedIn,Contained in,The basic containment relation between places.,Place,Place
+offerCount,Offer Count,The number of offers for the product.,AggregateOffer,Integer
+drugUnit,Drug Unit,"The unit in which the drug is measured, e.g. '5 mg tablet'.",DrugCost,Text
+recommendationStrength,Recommendation Strength,Strength of the guideline's recommendation (e.g. 'class I').,MedicalGuidelineRecommendation,Text
+itemCondition,Item Condition,"A predefined value from OfferItemCondition or a textual description of the condition of the product or service, or the products or services included in the offer.",Product Offer Demand,OfferItemCondition
+borrower,Borrower,A sub property of participant. The person that borrows the object being lent.,LendAction,Person
+assemblyVersion,Assembly Version,"Associated product/technology version. e.g., .NET Framework 4.5",APIReference,Text
+buyer,Buyer,A sub property of participant. The participant/person/organization that bought the object.,SellAction,Person
+partOfSystem,Part of System,The anatomical or organ system that this structure is part of.,AnatomicalStructure,AnatomicalSystem
+geo,Geo,The geo coordinates of the place.,Place,GeoCoordinates GeoShape
+antagonist,Antagonist,The muscle whose action counteracts the specified muscle.,Muscle,Muscle
+overdosage,Overdosage,"Any information related to overdose on a drug, including signs or symptoms, treatments, contact information for emergency response.",Drug,Text
+episodes,Episodes,"An episode of a TV/radio series or season (legacy spelling; see singular form, episode)",Series Season,Episode
+thumbnail,Thumbnail,Thumbnail image for an image or video.,VideoObject ImageObject,ImageObject
+subtype,Subtype,"A more specific type of the condition, where applicable, for example 'Type 1 Diabetes', 'Type 2 Diabetes', or 'Gestational Diabetes' for Diabetes.",MedicalCondition,Text
+requiredMaxAge,Required Max Age,Audiences defined by a person's maximum age.,PeopleAudience,Integer
+accessibilityControl,Accessibility Control,"Identifies input methods that are sufficient to fully control the described resource (<a href=""http://www.w3.org/wiki/WebSchemas/Accessibility"">WebSchemas wiki lists possible values</a>).",CreativeWork,Text
+source,Source,The anatomical or organ system that the artery originates from.,Artery,AnatomicalStructure
+landlord,Landlord,A sub property of participant. The owner of the real estate property. Sub property of destination or participant?,RentAction,Organization Person
+endTime,End Time,When the Action was performed: end time. This is for actions that span a period of time. e.g. John wrote a book from January to *December*.,Action,DateTime
+acceptsReservations,Accepts Reservations,"Either <code>Yes/No</code>, or a URL at which reservations can be made.",FoodEstablishment,Text URL
+articleBody,Article Body,The actual body of the article.,Article,Text
+valueReference,Value Reference,"A pointer to a secondary value that provides additional information on the original value, e.g. a reference temperature.",QualitativeValue QuantitativeValue,Enumeration StructuredValue
+aspect,Aspect,"An aspect of medical practice that is considered on the page, such as 'diagnosis', 'treatment', 'causes', 'prognosis', 'etiology', 'epidemiology', etc.",MedicalWebPage,Text
+creator,Creator,The creator/author of this CreativeWork or UserComments. This is the same as the Author property for CreativeWork.,UserComments CreativeWork,Organization Person
+lastReviewed,Last Reviewed,Date on which the content on this web page was last reviewed for accuracy and/or completeness.,WebPage,Date
+foundingDate,Founding Date,The date that this organization was founded.,Organization,Date
+intensity,Intensity,"Quantitative measure gauging the degree of force involved in the exercise, for example, heartbeats per minute. May include the velocity of the movement.",ExercisePlan,Text
+additionalName,Additional Name,"An additional name for a Person, can be used for a middle name.",Person,Text
+targetProduct,Target Product,"Target Operating System / Product to which the code applies.  If applies to several versions, just the product name can be used.",Code,SoftwareApplication
+doorTime,Door Time,The time admission will commence.,Event,DateTime
+fileFormat,File Format,MIME format of the binary (e.g. application/zip).,SoftwareApplication,Text
+closes,Closes,The closing hour of the place or service on the given day(s) of the week.,OpeningHoursSpecification,Time
+drainsTo,Drains to,The vasculature that the vein drains into.,Vein,Vessel
+codeValue,Code Value,The actual code.,MedicalCode,Text
+duplicateTherapy,Duplicate Therapy,A therapy that duplicates or overlaps this one.,MedicalTherapy,MedicalTherapy
+discussionUrl,Discussion Url,A link to the page containing the comments of the CreativeWork.,CreativeWork,URL
+runtime,Runtime,"Runtime platform or script interpreter dependencies (Example - Java v1, Python2.3, .Net Framework 3.0)",Code,Text
+functionalClass,Functional Class,The degree of mobility the joint allows.,Joint,Text
+isFamilyFriendly,Is Family Friendly,Indicates whether this content is family friendly.,CreativeWork,Boolean
+differentialDiagnosis,Differential Diagnosis,"One of a set of differential diagnoses for the condition. Specifically, a closely-related or competing diagnosis typically considered later in the cognitive process whereby this medical condition is distinguished from others most likely responsible for a similar collection of signs and symptoms to reach the most parsimonious diagnosis or diagnoses in a patient.",MedicalCondition,DDxElement
+deliveryStatus,Delivery Status,New entry added as the package passes through each leg of its journey (from shipment to final delivery).,ParcelDelivery,DeliveryEvent
+pregnancyWarning,Pregnancy Warning,"Any precaution, guidance, contraindication, etc. related to this drug's use during pregnancy.",Drug,Text
+audienceType,Audience Type,"The target group associated with a given audience (e.g. veterans, car owners, musicians, etc.)
+      domain: Audience
+      Range: Text
+    ",Audience,Text
+author,Author,The author of this content. Please note that author is special in that HTML 5 provides a special mechanism for indicating authorship via the rel tag. That is equivalent to this and may be used interchangeably.,CreativeWork,Organization Person
+accessibilityHazard,Accessibility Hazard,"A characteristic of the described resource that is physiologically dangerous to some users. Related to WCAG 2.0 guideline 2.3. (<a href=""http://www.w3.org/wiki/WebSchemas/Accessibility"">WebSchemas wiki lists possible values</a>)",CreativeWork,Text
+email,Email,Email address.,Person ContactPoint Organization,Text
+parent,Parent,A parent of this person.,Person,Person
+significantLinks,Significant Links,"The most significant URLs on the page. Typically, these are the non-navigation links that are clicked on the most (legacy spelling; see singular form, significantLink).",WebPage,URL
+relatedTherapy,Related Therapy,A medical therapy related to this anatomy.,SuperficialAnatomy AnatomicalSystem AnatomicalStructure,MedicalTherapy
+cookingMethod,Cooking Method,"The method of cooking, such as Frying, Steaming, ...",Recipe,Text
+awards,Awards,"Awards won by this person or for this creative work. (legacy spelling; see singular form, award)",Person CreativeWork,Text
+fileSize,File Size,"Size of the application / package (e.g. 18MB). In the absence of a unit (MB, KB etc.), KB will be assumed.",SoftwareApplication,Integer
+genre,Genre,Genre of the creative work,CreativeWork,Text
+nationality,Nationality,Nationality of the person.,Person,Country
+tickerSymbol,Ticker Symbol,"The exchange traded instrument associated with a Corporation object. The tickerSymbol is expressed as an exchange and an instrument name separated by a space character. For the exchange component of the tickerSymbol attribute, we reccommend using the controlled vocaulary of Market Identifier Codes (MIC) specified in ISO15022.",Corporation,Text
+serviceLocation,Service Location,"The location (e.g. civic structure, local business, etc.) where a person can go to access the service.",ServiceChannel,Place
+strengthUnit,Strength Unit,"The units of an active ingredient's strength, e.g. mg.",DrugStrength,Text
+itemListElement,Item List Element,A single list item.,ItemList,Text
+equal,Equal,This ordering relation for qualitative values indicates that the subject is equal to the object.,QualitativeValue,QualitativeValue
+drug,Drug,A drug in this drug class.,DrugClass,Drug
+cookTime,Cook Time,"The time it takes to actually cook the dish, in <a href=""http://en.wikipedia.org/wiki/ISO_8601"">ISO 8601 duration format</a>.",Recipe,Duration
+itemOffered,Item Offered,The item being offered.,Offer Demand,Product
+isProprietary,Is Proprietary,True if this item's name is a proprietary/brand name (vs. generic name).,DietarySupplement Drug,Boolean
+comment,Comment,"Comments, typically from users, on this CreativeWork.",CreativeWork,UserComments
+numberOfSeasons,Number of Seasons,The number of seasons in this series.,Series,Number
+color,Color,The color of the product.,Product,Text
+overview,Overview,"Descriptive information establishing the overarching theory/philosophy of the plan. May include the rationale for the name, the population where the plan first came to prominence, etc.",Diet,Text
+adverseOutcome,Adverse Outcome,"A possible complication and/or side effect of this therapy. If it is known that an adverse outcome is serious (resulting in death, disability, or permanent damage; requiring hospitalization; or is otherwise life-threatening or requires immediate medical attention), tag it as a seriouseAdverseOutcome instead.",MedicalDevice MedicalTherapy,MedicalEntity
+birthDate,Birth Date,Date of birth.,Person,Date
+height,Height,The height of the item.,MediaObject Product,Distance QuantitativeValue
+aggregateRating,Aggregate Rating,"The overall rating, based on a collection of reviews or ratings, of the item.",Organization Product CreativeWork Place Offer,AggregateRating
+geographicArea,Geographic Area,The geographic area associated with the audience.,Audience,AdministrativeArea
+contactType,Contact Type,"A person or organization can have different contact points, for different purposes. For example, a sales contact point, a PR contact point and so on. This property is used to specify the kind of contact point.",ContactPoint,Text
+associatedAnatomy,Associated Anatomy,The anatomy of the underlying organ system or structures associated with this entity.,MedicalCondition PhysicalActivity,AnatomicalSystem SuperficialAnatomy AnatomicalStructure
+articleSection,Article Section,"Articles may belong to one or more 'sections' in a magazine or newspaper, such as Sports, Lifestyle, etc.",Article,Text
+relatedLink,Related Link,"A link related to this web page, for example to other related web pages.",WebPage,URL
+includesObject,Includes Object,This links to a node or nodes indicating the exact quantity of the products included in the offer.,Offer Demand,TypeAndQuantityNode
+instrument,Instrument,The object that helped the agent perform the action. e.g. John wrote a book with *a pen*.,Action,Thing
+childMaxAge,Child Max Age,Maximal age of the child,ParentAudience,Number
+bookEdition,Book Edition,The edition of the book.,Book,Text
+targetDescription,Target Description,The description of a node in an established educational framework.,AlignmentObject,Text
+followup,Followup,Typical or recommended followup care after the procedure is performed.,MedicalProcedure,Text
+bodyLocation,Body Location,Location in the body of the anatomical structure.,AnatomicalStructure,Text
+publisher,Publisher,The publisher of the creative work.,CreativeWork,Organization
+physiologicalBenefits,Physiological Benefits,Specific physiologic benefits associated to the plan.,Diet,Text
+infectiousAgent,Infectious Agent,"The actual infectious agent, such as a specific bacterium.",InfectiousDisease,Text
+founders,Founders,"A person who founded this organization (legacy spelling; see singular form, founder).",Organization,Person
+copyrightHolder,Copyright Holder,The party holding the legal copyright to the CreativeWork.,CreativeWork,Organization Person
+prescribingInfo,Prescribing Info,Link to prescribing information for the drug.,Drug,URL
+inAlbum,In Album,The album to which this recording belongs.,MusicRecording,MusicAlbum
+availableStrength,Available Strength,An available dosage strength for the drug.,Drug,DrugStrength
+isVariantOf,Is Variant of,"A pointer to a base product from which this product is a variant. It is safe to infer that the variant inherits all product features from the base model, unless defined locally. This is not transitive.",ProductModel,ProductModel
+replacer,Replacer,A sub property of object. The object that replaces.,ReplaceAction,Thing
+orderDate,Order Date,Date order was placed.,Order,DateTime
+lowPrice,Low Price,The lowest price of all offers available.,AggregateOffer,Number Text
+bookFormat,Book Format,The format of the book.,Book,BookFormatType
+serviceOperator,Service Operator,"The operating organization, if different from the provider.  This enables the representation of services that are provided by an organization, but operated by another organization like a subcontractor.",GovernmentService,Organization
+lesser,Lesser,This ordering relation for qualitative values indicates that the subject is lesser than the object.,QualitativeValue,QualitativeValue
+learningResourceType,Learning Resource Type,"The predominant type or kind characterizing the learning resource. For example, 'presentation', 'handout'.",CreativeWork,Text
+replacee,Replacee,A sub property of object. The object that is being replaced.,ReplaceAction,Thing
+legalName,Legal Name,"The official name of the organization, e.g. the registered company name.",Organization,Text
+expectedPrognosis,Expected Prognosis,The likely outcome in either the short term or long term of the medical condition.,MedicalCondition,Text
+domainIncludes,Domain Includes,Relates a property to a class that is (one of) the type(s) the property is expected to be used on.,Property,Class
+procedure,Procedure,"A description of the procedure involved in setting up, using, and/or installing the device.",MedicalDevice,Text
+orderedItem,Ordered Item,The item ordered.,Order,Product
+isAccessoryOrSparePartFor,Is Accessory or Spare Part for,A pointer to another product (or multiple products) for which this product is an accessory or spare part.,Product,Product
+ownedFrom,Owned From,The date and time of obtaining the product.,OwnershipInfo,DateTime
+ratingCount,Rating Count,The count of total number of ratings.,AggregateRating,Number
+telephone,Telephone,The telephone number.,Person ContactPoint Place Organization,Text
+costPerUnit,Cost Per Unit,The cost per unit of the drug.,DrugCost,Number Text
+studyLocation,Study Location,The location in which the study is taking/took place.,MedicalStudy,AdministrativeArea
+carbohydrateContent,Carbohydrate Content,The number of grams of carbohydrates.,NutritionInformation,Mass
+vendor,Vendor,A sub property of participant. The seller.The participant/person/organization that sold the object.,BuyAction,Organization Person
+applicationSubCategory,Application Sub Category,"Subcategory of the application, e.g. ""Arcade Game"".",SoftwareApplication,Text URL
+dietFeatures,Diet Features,"Nutritional information specific to the dietary plan. May include dietary recommendations on what foods to avoid, what foods to consume, and specific alterations/deviations from the USDA or other regulatory body's approved dietary guidelines.",Diet,Text
+infectiousAgentClass,Infectious Agent Class,"The class of infectious agent (bacteria, prion, etc.) that causes the disease.",InfectiousDisease,InfectiousAgentClass
+inventoryLevel,Inventory Level,The current approximate inventory level for the item or items.,SomeProducts Offer Demand,QuantitativeValue
+participant,Participant,Other co-agents that participated in the action indirectly. e.g. John wrote a book with *Steve*.,Action,Organization Person
+servicePhone,Service Phone,The phone number to use to access the service.,ServiceChannel,ContactPoint
+employmentType,Employment Type,"Type of employment (e.g. full-time, part-time, contract, temporary, seasonal, internship).",JobPosting,Text
+doseSchedule,Dose Schedule,"A dosing schedule for the drug for a given population, either observed, recommended, or maximum dose based on the type used.",Drug,DoseSchedule
+contactOption,Contact Option,An option available on this contact point (e.g. a toll-free number or support for hearing-impaired callers.),ContactPoint,ContactPointOption
+valueAddedTaxIncluded,Value Added Tax Included,Specifies whether the applicable value-added tax (VAT) is included in the price specification or not.,PriceSpecification,Boolean
+member,Member,A member of this organization.,Organization,Organization Person
+amountOfThisGood,Amount of This Good,The quantity of the goods included in the offer.,TypeAndQuantityNode,Number
+postalCode,Postal Code,"The postal code. For example, 94043.",PostalAddress,Text
+comprisedOf,Comprised of,"The underlying anatomical structures, such as organs, that comprise the anatomical system.",AnatomicalSystem,AnatomicalStructure AnatomicalSystem
+productID,Product ID,"The product identifier, such as ISBN. For example: <code>&lt;meta itemprop='productID' content='isbn:123-456-789'/&gt;</code>.",Product,Text
+homeLocation,Home Location,A contact location for a person's residence.,Person,ContactPoint Place
+events,Events,"Upcoming or past events associated with this place or organization (legacy spelling; see singular form, event).",Organization Place,Event
+itemReviewed,Item Reviewed,The item that is being reviewed/rated.,AggregateRating Review,Thing
+status,Status,The status of the study (enumerated).,MedicalStudy,MedicalStudyStatus
+serviceType,Service Type,"The type of service being offered, e.g. veterans' benefits, emergency relief, etc.",Service,Text
+specialCommitments,Special Commitments,"Any special commitments associated with this job posting. Valid entries include VeteranCommit, MilitarySpouseCommit, etc.",JobPosting,Text
+screenshot,Screenshot,A link to a screenshot image of the app.,SoftwareApplication,ImageObject URL
+realEstateAgent,Real Estate Agent,A sub property of participant. The real estate agent involved in the action.,RentAction,RealEstateAgent
+familyName,Family Name,"Family name. In the U.S., the last name of an Person. This can be used along with givenName instead of the Name property.",Person,Text
+qualifications,Qualifications,Specific qualifications required for this role.,JobPosting,Text
+deliveryMethod,Delivery Method,A sub property of instrument. The method of delivery,ReceiveAction TrackAction SendAction,DeliveryMethod
+entertainmentBusiness,Entertainment Business,A sub property of location. The entertainment business where the action occurred.,PerformAction,EntertainmentBusiness
+paymentUrl,Payment Url,The URL for sending a payment.,Order,URL
+director,Director,"The director of the movie, tv/radio episode or series.",Series Episode Movie,Person
+evidenceLevel,Evidence Level,Strength of evidence of the data used to formulate the guideline (enumerated).,MedicalGuideline,MedicalEvidenceLevel
+servesCuisine,Serves Cuisine,The cuisine of the restaurant.,FoodEstablishment,Text
+providesService,Provides Service,The service provided by this channel.,ServiceChannel,Service
+purpose,Purpose,A goal towards an action is taken. Can be concrete or abstract.,AllocateAction MedicalDevice PayAction,Thing MedicalDevicePurpose
+deathDate,Death Date,Date of death.,Person,Date
+playerType,Player Type,"Player type required—for example, Flash or Silverlight.",MediaObject,Text
+permitAudience,Permit Audience,The target audience for this permit.,Permit,Audience
+rangeIncludes,Range Includes,Relates a property to a class that constitutes (one of) the expected type(s) for values of the property.,Property,Class
+discountCode,Discount Code,Code used to redeem a discount.,Order,Text
+mechanismOfAction,Mechanism of Action,The specific biochemical interaction through which this drug or supplement produces its pharmacological effect.,DietarySupplement Drug,Text
+eventStatus,Event Status,An eventStatus of an event represents its status; particularly useful when an event is cancelled or rescheduled.,Event,EventStatusType
+position,Position,Free text to define other than pure numerical ranking of an episode or a season in an ordered list of items (further formatting restrictions may apply within particular user groups).,Season Episode Clip,Text
+model,Model,The model of the product. Use with the URL of a ProductModel or a textual representation of the model identifier. The URL of the ProductModel can be from an external source. It is recommended to additionally provide strong product identifiers via the gtin8/gtin13/gtin14 and mpn properties.,Product,ProductModel Text
+audio,Audio,An embedded audio object.,CreativeWork,AudioObject
+alumniOf,Alumni of,An educational organizations that the person is an alumni of.,Person,EducationalOrganization
+procedureType,Procedure Type,"The type of procedure, for example Surgical, Noninvasive, or Percutaneous.",MedicalProcedure,MedicalProcedureType
+endDate,End Date,"The end date and time of the event or item (in <a href=""http://en.wikipedia.org/wiki/ISO_8601"">ISO 8601 date format</a>).",Series Event Season,Date
+photo,Photo,A photograph of this place.,Place,ImageObject Photograph
+recipeCuisine,Recipe Cuisine,"The cuisine of the recipe (for example, French or Ethopian).",Recipe,Text
+originatesFrom,Originates From,"The vasculature the lymphatic structure originates, or afferents, from.",LymphaticVessel,Vessel
+primaryPrevention,Primary Prevention,"A preventative therapy used to prevent an initial occurrence of the medical condition, such as vaccination.",MedicalCondition,MedicalTherapy
+warrantyPromise,Warranty Promise,The warranty promise(s) included in the offer.,SellAction BuyAction,WarrantyPromise
+itemListOrder,Item List Order,"Type of ordering (e.g. Ascending, Descending, Unordered).",ItemList,Text
+workLocation,Work Location,A contact location for a person's place of work.,Person,ContactPoint Place
+foodEstablishment,Food Establishment,A sub property of location. The specific food establishment where the action occurreed.,CookAction,FoodEstablishment Place
+sku,Sku,"The Stock Keeping Unit (SKU), i.e. a merchant-specific identifier for a product or service, or the product to which the offer refers.",Product Offer Demand,Text
+candidate,Candidate,A sub property of object. The candidate subject of this action.,VoteAction,Person
+acceptedOffer,Accepted Offer,"The offer(s) -- e.g., product, quantity and price combinations -- included in the order.",Order,Offer
+lender,Lender,A sub property of participant. The person that lends the object being borrowed.,BorrowAction,Person
+associatedArticle,Associated Article,A NewsArticle associated with the Media Object.,MediaObject,NewsArticle
+parents,Parents,"A parents of the person (legacy spelling; see singular form, parent).",Person,Person
+location,Location,"The location of the event, organization or action.",Action Organization Event,PostalAddress Place
+cholesterolContent,Cholesterol Content,The number of milligrams of cholesterol.,NutritionInformation,Mass
+studySubject,Study Subject,"A subject of the study, i.e. one of the medical conditions, therapies, devices, drugs, etc. investigated by the study.",MedicalStudy,MedicalEntity
+elevation,Elevation,The elevation of a location.,GeoShape GeoCoordinates,Text Number
+repetitions,Repetitions,Number of times one should repeat the activity.,ExercisePlan,Number
+originAddress,Origin Address,Shipper's address.,ParcelDelivery,PostalAddress
+validThrough,Valid Through,"The end of the validity of offer, price specification, or opening hours data.",OpeningHoursSpecification Demand PriceSpecification Offer,DateTime
+background,Background,"Descriptive information establishing a historical perspective on the supplement. May include the rationale for the name, the population where the supplement first came to prominence, etc.",DietarySupplement,Text
+subOrganization,Sub Organization,"A relationship between two organizations where the first includes the second, e.g., as a subsidiary. See also: the more specific 'department' property.",Organization,Organization
+runsTo,Runs to,"The vasculature the lymphatic structure runs, or efferents, to.",LymphaticVessel,Vessel
+recipient,Recipient,A sub property of participant. The participant who is at the receiving end of the action.,DonateAction ReturnAction GiveAction CommunicateAction PayAction SendAction TipAction AuthorizeAction,Organization Audience Person
+alignmentType,Alignment Type,"A category of alignment between the learning resource and the framework node. Recommended values include: 'assesses', 'teaches', 'requires', 'textComplexity', 'readingLevel', 'educationalSubject', and 'educationLevel'.",AlignmentObject,Text
+administrationRoute,Administration Route,"A route by which this drug may be administered, e.g. 'oral'.",Drug,Text
+subTest,Sub Test,A component test of the panel.,MedicalTestPanel,MedicalTest
+requiredMinAge,Required Min Age,Audiences defined by a person's minimum age.,PeopleAudience,Integer
+follows,Follows,The most generic uni-directional social relation.,Person,Person
+printSection,Print Section,"If this NewsArticle appears in print, this field indicates the print section in which the article appeared.",NewsArticle,Text
+maxPrice,Max Price,The highest price if the price is a range.,PriceSpecification,Number
+loser,Loser,A sub property of participant. The loser of the action.,WinAction,Person
+imagingTechnique,Imaging Technique,Imaging technique used.,ImagingTest,MedicalImagingTechnique
+audience,Audience,"The intended audience of the item, i.e. the group for whom the item was created.",PlayAction CreativeWork Product,Audience
+broadcaster,Broadcaster,The organization owning or operating the broadcast service.,BroadcastService,Organization
+indication,Indication,"A factor that indicates use of this therapy for treatment and/or prevention of a condition, symptom, etc. For therapies such as drugs, indications can include both officially-approved indications as well as off-label uses. These can be distinguished by using the ApprovedIndication subtype of MedicalIndication.",MedicalDevice MedicalTherapy,MedicalIndication
+memberOf,Member of,An organization to which the person belongs.,Person,Organization
+contactPoints,Contact Points,"A contact point for a person or organization (legacy spelling; see singular form, contactPoint).",Person Organization,ContactPoint
+endorsee,Endorsee,A sub property of participant. The person/organization being supported.,EndorseAction,Organization Person
+serviceSmsNumber,Service Sms Number,The number to access the service by text message.,ServiceChannel,ContactPoint
+hospitalAffiliation,Hospital Affiliation,A hospital with which the physician or office is affiliated.,Physician,Hospital
+distinguishingSign,Distinguishing Sign,One of a set of signs and symptoms that can be used to distinguish this diagnosis from others in the differential diagnosis.,DDxElement,MedicalSignOrSymptom
+encodesCreativeWork,Encodes Creative Work,The creative work encoded by this media object,MediaObject,CreativeWork
+isAvailableGenerically,Is Available Generically,True if the drug is available in a generic form (regardless of name).,Drug,Boolean
+datePosted,Date Posted,Publication date for the job posting.,JobPosting,Date
+discountCurrency,Discount Currency,The currency (in 3-letter ISO 4217 format) of the discount.,Order,Text
+typicalAgeRange,Typical Age Range,"The typical expected age range, e.g. '7-9', '11-'.",CreativeWork Event,Text
+duration,Duration,"The duration of the item (movie, audio recording, event, etc.) in <a href=""http://en.wikipedia.org/wiki/ISO_8601"">ISO 8601 date format</a>.",Movie MediaObject MusicRecording Event,Duration
+availableService,Available Service,A medical service available from this provider.,Physician Hospital MedicalClinic,MedicalTest MedicalProcedure MedicalTherapy
+episodeNumber,Episode Number,Position of the episode within an ordered group of episodes.,Episode,Integer
+paymentMethod,Payment Method,The name of the credit card or other method of payment for the order.,Order,PaymentMethod
+attendees,Attendees,"A person attending the event (legacy spelling; see singular form, attendee).",Event,Organization Person
+salaryCurrency,Salary Currency,"The currency (coded using ISO 4217, http://en.wikipedia.org/wiki/ISO_4217 used for the main salary information in this job posting.",JobPosting,Text
+worksFor,Works for,Organizations that the person works for.,Person,Organization
+seller,Seller,The organization or person making the offer.,Offer Demand,Organization Person
+programmingModel,Programming Model,Indicates whether API is managed or unmanaged.,APIReference,Text
+includedRiskFactor,Included Risk Factor,"A modifiable or non-modifiable risk factor included in the calculation, e.g. age, coexisting condition.",MedicalRiskEstimator,MedicalRiskFactor
+provider,Provider,The organization or agency that is providing the service.,CreativeWork Service,Organization Person
+prescriptionStatus,Prescription Status,Indicates whether this drug is available by prescription or over-the-counter.,Drug,DrugPrescriptionStatus
+occupationalCategory,Occupational Category,"Category or categories describing the job. Use BLS O*NET-SOC taxonomy: http://www.onetcenter.org/taxonomy.html. Ideally includes textual label and formal code, with the property repeated for each applicable value.",JobPosting,Text
+increasesRiskOf,Increases Risk of,"The condition, complication, etc. influenced by this factor.",MedicalRiskFactor,MedicalEntity
+object,Object,"The object upon the action is carried out, whose state is kept intact or changed. Also known as the semantic roles patient, affected or undergoer (which change their state) or theme (which doesn't). e.g. John read *a book*.",Action,Thing
+assembly,Assembly,"Library file name e.g., mscorlib.dll, system.web.dll",APIReference,Text
+contraindication,Contraindication,A contraindication for this therapy.,MedicalDevice MedicalTherapy,MedicalContraindication
+suggestedGender,Suggested Gender,The gender of the person or audience.,PeopleAudience,Text
+lesserOrEqual,Lesser or Equal,This ordering relation for qualitative values indicates that the subject is lesser than or equal to the object.,QualitativeValue,QualitativeValue
+trackingUrl,Tracking Url,Tracking url for the parcel delivery.,ParcelDelivery,URL
+acquiredFrom,Acquired From,The organization or person from which the product was acquired.,OwnershipInfo,Organization Person
+epidemiology,Epidemiology,"The characteristics of associated patients, such as age, gender, race etc.",MedicalCondition PhysicalActivity,Text
+contactPoint,Contact Point,A contact point for a person or organization.,Person Organization,ContactPoint
+expertConsiderations,Expert Considerations,Medical expert advice related to the plan.,Diet,Text
+servingSize,Serving Size,"The serving size, in terms of the number of volume or mass",NutritionInformation,Text
+stage,Stage,"The stage of the condition, if applicable.",MedicalCondition,MedicalConditionStage
+about,About,The subject matter of the content.,CommunicateAction CreativeWork,Thing
+naics,Naics,The North American Industry Classification System (NAICS) code for a particular organization or business person.,Person Organization,Text
+industry,Industry,The industry associated with the job position.,JobPosting,Text
+wordCount,Word Count,The number of words in the text of the Article.,Article,Integer
+gtin14,Gtin14,"The GTIN-14 code of the product, or the product to which the offer refers.",Product Offer Demand,Text
+carrier,Carrier,The party responsible for the parcel delivery.,ParcelDelivery,Organization
+gtin13,Gtin13,"The GTIN-13 code of the product, or the product to which the offer refers. This is equivalent to 13-digit ISBN codes and EAN UCC-13. Former 12-digit UPC codes can be converted into a GTIN-13 code by simply adding a preceeding zero.",Product Offer Demand,Text
+trackingNumber,Tracking Number,Shipper tracking number.,ParcelDelivery,Text
+tributary,Tributary,The anatomical or organ system that the vein flows into; a larger structure that the vein connects to.,Vein,AnatomicalStructure
+warranty,Warranty,The warranty promise(s) included in the offer.,Offer Demand,WarrantyPromise
+nerve,Nerve,The underlying innervation associated with the muscle.,Muscle,Nerve
+orderNumber,Order Number,The identifier of the transaction.,Order,Text
+exerciseType,Exercise Type,"Type(s) of exercise or activity, such as strength training, flexibility training, aerobics, cardiac rehabilitation, etc.",ExerciseAction ExercisePlan,Text
+resultReview,Result Review,A sub property of result. The review that resulted in the performing of the action.,ReviewAction,Review
+saturatedFatContent,Saturated Fat Content,The number of grams of saturated fat.,NutritionInformation,Mass
+educationRequirements,Education Requirements,Educational background needed for the position.,JobPosting,Text
+associatedMedia,Associated Media,The media objects that encode this creative work. This property is a synonym for encodings.,CreativeWork,MediaObject
+drugClass,Drug Class,"The class of drug this belongs to (e.g., statins).",Drug,DrugClass
+featureList,Feature List,Features or modules provided by this application (and possibly required by other applications).,SoftwareApplication,Text URL
+doseValue,Dose Value,"The value of the dose, e.g. 500.",DoseSchedule,Number
+seasons,Seasons,"A season in a tv/radio series. (legacy spelling; see singular form, season)",Series,Season
+contributor,Contributor,A secondary contributor to the CreativeWork.,CreativeWork,Organization Person
+thumbnailUrl,Thumbnail Url,A thumbnail image relevant to the Thing.,CreativeWork,URL
+musicGroupMember,Music Group Member,"A member of the music group—for example, John, Paul, George, or Ringo.",MusicGroup,Person
+availableLanguage,Available Language,A language someone may use with the item.,ServiceChannel ContactPoint,Language
+relatedStructure,Related Structure,"Related anatomical structure(s) that are not part of the system but relate or connect to it, such as vascular bundles associated with an organ system.",AnatomicalSystem,AnatomicalStructure
+interactivityType,Interactivity Type,"The predominant mode of learning supported by the learning resource. Acceptable values are 'active', 'expositive', or 'mixed'.",CreativeWork,Text
+area,Area,The area within which users can expect to reach the broadcast service.,BroadcastService,Place
+question,Question,A sub property of object. A question.,AskAction,Text
+seriousAdverseOutcome,Serious Adverse Outcome,"A possible serious complication and/or serious side effect of this therapy. Serious adverse outcomes include those that are life-threatening; result in death, disability, or permanent damage; require hospitalization or prolong existing hospitalization; cause congenital anomalies or birth defects; or jeopardize the patient and may require medical or surgical intervention to prevent one of the outcomes in this definition.",MedicalDevice MedicalTherapy,MedicalEntity
+healthCondition,Health Condition,Expectations for health conditions of target audience,PeopleAudience,MedicalCondition
+availabilityStarts,Availability Starts,The beginning of the availability of the product or service included in the offer.,Offer Demand,DateTime
+width,Width,The width of the item.,MediaObject Product,Distance QuantitativeValue
+proficiencyLevel,Proficiency Level,"Proficiency needed for this content; expected values: 'Beginner', 'Expert'.",TechArticle,Text
+editor,Editor,Specifies the Person who edited the CreativeWork.,CreativeWork,Person
+softwareVersion,Software Version,Version of the software instance.,SoftwareApplication,Text
+opens,Opens,The opening hour of the place or service on the given day(s) of the week.,OpeningHoursSpecification,Time
+dayOfWeek,Day of Week,The day of the week for which these opening hours are valid.,OpeningHoursSpecification,DayOfWeek
+serviceAudience,Service Audience,The audience eligible for this service.,Service,Audience
+brand,Brand,"The brand(s) associated with a product or service, or the brand(s) maintained by an organization or business person.",Person Product Organization,Organization Brand
+deliveryAddress,Delivery Address,Destination address.,ParcelDelivery,PostalAddress
+specialty,Specialty,One of the domain specialities to which this web page's content applies.,WebPage,Specialty
+identifyingExam,Identifying Exam,A physical examination that can identify this sign.,MedicalSign,PhysicalExam
+previousStartDate,Previous Start Date,"Used in conjunction with eventStatus for rescheduled or cancelled events. This property contains the previously scheduled start date. For rescheduled events, the startDate property should be used for the newly scheduled start date. In the (rare) case of an event that has been postponed and rescheduled multiple times, this field may be repeated.",Event,Date
+validUntil,Valid Until,The date when the item is no longer valid.,Permit,Date
+line,Line,A line is a point-to-point path consisting of two or more points. A line is expressed as a series of two or more point objects separated by space.,GeoShape,Text
+minValue,Min Value,The lower value of the product characteristic.,QuantitativeValue,Number
+proteinContent,Protein Content,The number of grams of protein.,NutritionInformation,Mass
+accessibilityAPI,Accessibility API,"Indicates that the resource is compatible with the referenced accessibility API (<a href=""http://www.w3.org/wiki/WebSchemas/Accessibility"">WebSchemas wiki lists possible values</a>).
+     ",CreativeWork,Text
+supplyTo,Supply to,The area to which the artery supplies blood to.,Artery,AnatomicalStructure
+illustrator,Illustrator,The illustrator of the book.,Book,Person
+nonProprietaryName,Non Proprietary Name,The generic name of this drug or supplement.,DietarySupplement Drug,Text
+downloadUrl,Download Url,"If the file can be downloaded, URL to download the binary.",SoftwareApplication,URL
+validIn,Valid in,The geographic area where the permit is valid.,Permit,AdministrativeArea
+sampleType,Sample Type,"Full (compile ready) solution, code snippet, inline code, scripts, template.",Code,Text
+distribution,Distribution,"A downloadable form of this dataset, at a specific location, in a specific format.",Dataset,DataDownload
+partOfSeries,Part of Series,The series to which this episode or season belongs.,Season Episode Clip,Series
+sourceOrganization,Source Organization,The Organization on whose behalf the creator was working.,CreativeWork,Organization
+videoFrameSize,Video Frame Size,The frame size of the video.,VideoObject,Text
+doseUnit,Dose Unit,"The unit of the dose, e.g. 'mg'.",DoseSchedule,Text
+result,Result,The result produced in the action. e.g. John wrote *a book*.,Action,Thing
+priceValidUntil,Price Valid Until,The date after which the price is no longer available.,Offer,Date
+programmingLanguage,Programming Language,The computer programming language.,Code,Thing
+citation,Citation,"A citation or reference to another creative work, such as another publication, web page, scholarly article, etc.",CreativeWork,CreativeWork Text
+processingTime,Processing Time,Estimated processing time for the service using this channel.,ServiceChannel,Duration
+sibling,Sibling,A sibling of the person.,Person,Person
+countriesSupported,Countries Supported,Countries for which the application is supported. You can also provide the two-letter ISO 3166-1 alpha-2 country code.,SoftwareApplication,Text
+warning,Warning,Any FDA or other warnings about the drug (text or URL).,Drug,Text URL
+orderStatus,Order Status,The current status of the order.,Order,OrderStatus
+commentTime,Comment Time,The time at which the UserComment was made.,UserComments,Date
+currenciesAccepted,Currencies Accepted,"The currency accepted (in <a href=""http://en.wikipedia.org/wiki/ISO_4217"">ISO 4217 currency format</a>).",LocalBusiness,Text
+unitCode,Unit Code,The unit of measurement given using the UN/CEFACT Common Code (3 characters).,TypeAndQuantityNode QuantitativeValue UnitPriceSpecification,Text
+biomechnicalClass,Biomechnical Class,The biomechanical properties of the bone.,Joint,Text
+postOfficeBoxNumber,Post Office Box Number,The post offce box number for PO box addresses.,PostalAddress,Text
+yearlyRevenue,Yearly Revenue,The size of the business in annual revenue.,BusinessAudience,QuantitativeValue
+polygon,Polygon,A polygon is the area enclosed by a point-to-point path for which the starting and ending points are the same. A polygon is expressed as a series of four or more spacedelimited points where the first and final points are identical.,GeoShape,Text
+ingredients,Ingredients,An ingredient used in the recipe.,Recipe,Text
+sportsTeam,Sports Team,A sub property of participant. The sports team that participated on this action.,ExerciseAction,SportsTeam
+depth,Depth,The depth of the product.,Product,Distance QuantitativeValue
+actor,Actor,"A cast member of the movie, tv/radio series, season, episode, or video.",Series Episode Movie,Person
+addressCountry,Address Country,"The country. For example, USA. You can also provide the two-letter <a href=""http://en.wikipedia.org/wiki/ISO_3166-1"">ISO 3166-1 alpha-2 country code</a>.",PostalAddress,Country
+branchOf,Branch of,"The larger organization that this local business is a branch of, if any.",LocalBusiness,Organization
+actors,Actors,"A cast member of the movie, tv/radio series, season, episode, or video. (legacy spelling; see singular form, actor)",Series Episode Movie,Person
+branch,Branch,The branches that delineate from the nerve bundle.,Nerve,AnatomicalStructure Nerve
+spatial,Spatial,"The range of spatial applicability of a dataset, e.g. for a dataset of New York weather, the state of New York.",Dataset,Place
+department,Department,"A relationship between an organization and a department of that organization, also described as an organization (allowing different urls, logos, opening hours). For example: a store with a pharmacy, or a bakery with a cafe.",Organization,Organization
+discount,Discount,Any discount applied (to an Order).,Order,Number Text
+riskFactor,Risk Factor,"A modifiable or non-modifiable factor that increases the risk of a patient contracting this condition, e.g. age,  coexisting condition.",MedicalCondition,MedicalRiskFactor
+typicalTest,Typical Test,A medical test typically performed given this condition.,MedicalCondition,MedicalTest
+category,Category,A category for the item. Greater signs or slashes can be used to informally indicate a category hierarchy.,PhysicalActivity Offer,Text PhysicalActivityCategory Thing
+nerveMotor,Nerve Motor,The neurological pathway extension that involves muscle control.,Nerve,Muscle
+successorOf,Successor of,"A pointer from a newer variant of a product  to its previous, often discontinued predecessor.",ProductModel,ProductModel
+acceptedPaymentMethod,Accepted Payment Method,The payment method(s) accepted by seller for this offer.,Offer Demand,PaymentMethod
+diet,Diet,A sub property of instrument. The died used in this action.,ExerciseAction,Diet
+exercisePlan,Exercise Plan,A sub property of instrument. The exercise plan used on this action.,ExerciseAction,ExercisePlan
+breadcrumb,Breadcrumb,A set of links that can help a user understand and navigate a website hierarchy.,WebPage,Text
+uploadDate,Upload Date,Date when this media object was uploaded to this site.,MediaObject,Date
+expectedArrivalFrom,Expected Arrival From,The earliest date the package may arrive.,ParcelDelivery,DateTime
+spouse,Spouse,The person's spouse.,Person,Person
+endorsers,Endorsers,People or organizations that endorse the plan.,Diet,Organization Person
+timeRequired,Time Required,"Approximate or typical time it takes to work with or through this learning resource for the typical intended target audience, e.g. 'P30M', 'P1H25M'.",CreativeWork,Duration
+targetPlatform,Target Platform,"Type of app development: phone, Metro style, desktop, XBox, etc.",APIReference,Text
+algorithm,Algorithm,The algorithm or rules to follow to compute the score.,MedicalRiskScore,Text
+photos,Photos,"Photographs of this place (legacy spelling; see singular form, photo).",Place,ImageObject Photograph
+fromLocation,From Location,A sub property of location. The original location of the object or the agent before the action.,TransferAction ExerciseAction MoveAction,Place Number
+directors,Directors,"The director of the movie, tv/radio episode or series. (legacy spelling; see singular form, director)",Series Episode Movie,Person
+diagnosis,Diagnosis,One or more alternative conditions considered in the differential diagnosis process.,DDxElement,MedicalCondition
+vatID,Vat ID,The Value-added Tax ID of the organisation or person.,Person Organization,Text

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>automenta</groupId>
+    <artifactId>climatenet</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <geotools.version>12.1</geotools.version>
+        <geotk.version>4.x-SNAPSHOT</geotk.version>
+        <junit.version>4.10</junit.version>
+        <!--<vaadin.version>7.5.0.alpha1</vaadin.version>-->
+    </properties>
+
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.sourceforge.argparse4j</groupId>
+            <artifactId>argparse4j</artifactId>
+            <version>0.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.tomp2p</groupId>
+            <artifactId>tomp2p-core</artifactId>
+            <version>5.0-Beta7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.tomp2p</groupId>
+            <artifactId>tomp2p-dht</artifactId>
+            <version>5.0-Beta7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.tomp2p</groupId>
+            <artifactId>tomp2p-storage</artifactId>
+            <version>5.0-Beta7</version>
+        </dependency>
+        <dependency>
+            <groupId>de.jensd</groupId>
+            <artifactId>fontawesomefx</artifactId>
+            <version>8.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jfxtras</groupId>
+            <artifactId>jfxtras-all</artifactId>
+            <version>8.0-r3</version>
+        </dependency>
+
+        <!--
+        <dependency>
+            <groupId>net.tomp2p</groupId>
+            <artifactId>tomp2p-all</artifactId>
+            <version>5.0-Beta7</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.8.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.pircbotx</groupId>
+            <artifactId>pircbotx</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.5</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>de.grundid.opendatalab</groupId>
+            <artifactId>geojson-jackson</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <!--
+        <dependency>
+            <groupId>org.mnode.ical4j</groupId>
+            <artifactId>ical4j</artifactId>
+            <version>2.0-alpha1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        -->
+
+
+        <dependency>
+            <groupId>com.rometools</groupId>
+            <artifactId>rome-modules</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
+
+        <!--
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-servlet</artifactId>
+            <version>1.2.0.CR1</version>
+        </dependency>
+           <dependency>-->
+        <!--<groupId>com.vaadin</groupId>-->
+        <!--<artifactId>vaadin-server</artifactId>-->
+        <!--<version>${vaadin.version}</version>-->
+        <!--<exclusions>-->
+        <!--<exclusion>-->
+        <!--<groupId>com.vaadin.external.flute</groupId>-->
+        <!--<artifactId>flute</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+        <!--<groupId>com.vaadin.external.google</groupId>-->
+        <!--<artifactId>guava</artifactId>-->
+        <!--</exclusion>-->
+        <!--</exclusions>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>com.vaadin</groupId>-->
+        <!--<artifactId>vaadin-client-compiled</artifactId>-->
+        <!--<version>${vaadin.version}</version>-->
+        <!--</dependency>-->
+        <!--&lt;!&ndash;<dependency>&ndash;&gt;-->
+        <!--&lt;!&ndash;<groupId>com.vaadin</groupId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifactId>vaadin-push</artifactId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<version>${vaadin.version}</version>&ndash;&gt;-->
+        <!--&lt;!&ndash;</dependency>&ndash;&gt;-->
+
+
+        <!--<dependency>-->
+        <!--<groupId>com.vaadin</groupId>-->
+        <!--<artifactId>vaadin-themes</artifactId>-->
+        <!--<version>${vaadin.version}</version>-->
+        <!--</dependency>-->
+
+
+    </dependencies>
+
+    <!-- ================================================================== -->
+    <!--     Repositories. This is where Maven looks for dependencies. The  -->
+    <!--     Maven repository is implicit and doesn't need to be specified. -->
+    <!-- ================================================================== -->
+    <repositories>
+        <!--
+        <repository>
+            <id>vaadin-addons</id>
+            <url>http://maven.vaadin.com/vaadin-addons</url>
+        </repository>
+        -->
+
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net repository</name>
+            <url>http://download.java.net/maven/2</url>
+        </repository>
+
+
+        <repository>
+            <id>tomp2p.net</id>
+            <url>http://tomp2p.net/dev/mvn/</url>
+        </repository>
+
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+
+
+                    <transformers>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>automenta.climatenet.run.Main</mainClass>
+                        </transformer>
+
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+
+                    </transformers>
+
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <generateUniqueDependencyReducedPom>false</generateUniqueDependencyReducedPom>
+                    <minimizeJar>true</minimizeJar>
+
+                    <filters>
+                        <filter>
+                            <artifact>org.jboss.xnio:*</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                        <filter>
+                            <artifact>org.jboss.logging:*</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                        <filter>
+                            <artifact>io.undertow:*</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                        <!--
+                        <filter>
+                          <artifact>org.apache.lucene:*</artifact>
+                          <includes><include>**</include></includes>
+                        </filter>
+                        <filter>
+                          <artifact>org.elasticsearch:*</artifact>
+                          <includes><include>**</include></includes>
+                        </filter>
+                        -->
+                    </filters>
+
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

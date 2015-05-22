@@ -1,0 +1,21 @@
+{
+    "bright":"Bright",
+    "dark":"Dark",
+
+    "matrix-green":"Matrix (green)",
+    "matrix-red":"Matrix (red)",
+    "matrix-blue":"Matrix (blue)",
+    "space": "Space",
+    "cybernetic": "Cybernetic",
+    "notebook": "Notebook",
+    "rainforest": "Rainforest",
+    "metamaps": "MetaMaps",
+    "scroogle": "Google",
+    "n$a": "N$A",
+
+    "bootswatch.cerulean": "Cerulean",
+    "bootswatch.readable": "Readable",
+    "bootswatch.simplex": "Simplex",
+    "bootswatch.spacelab": "SpaceLab",
+    "polymer.material": "Polymer"
+}

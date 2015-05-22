@@ -1,0 +1,33 @@
+alert,Represents any kind of significant notification.
+application,Represents any kind of software application.
+article,"Represents objects such as news articles, knowledge base entries, or other similar construct. Such objects generally consist of paragraphs of text, in some cases incorporating embedded media such as photos and inline hyperlinks to other resources."
+audio,Represents audio content of any kind. Objects of this type MAY contain an additional property as specified here.
+badge,Represents a badge or award granted to an object (typically a person object)
+binary,Objects of this type are used to carry arbirary Base64-encoded binary data within an Activity Stream object. It is primarily intended to attach binary data to other types of objects through the use of the attachments property. Objects of this type will contain the additional properties specified here.
+bookmark,"Represents a pointer to some URL -- typically a web page. In most cases, bookmarks are specific to a given user and contain metadata chosen by that user. Bookmark Objects are similar in principle to the concept of bookmarks or favorites in a web browser. A bookmark represents a pointer to the URL, not the URL or the associated resource itself. Objects of this type SHOULD contain an additional targetUrl property whose value is a String containing the IRI of the target of the bookmark."
+collection,"Represents a generic collection of objects of any type. This object type can be used, for instance, to represent a collection of files like a folder; a collection of photos like an album; and so forth. Objects of this type MAY contain an additional objectTypes property whose value is an Array of Strings specifying the expected objectType of objects contained within the collection."
+comment,Represents a textual response to another object. Objects of this type MAY contain an additionalinReplyTo property whose value is an Array of one or more other Activity Stream Objects for which the object is to be considered a response.
+device,Represents a device of any type.
+event,Represents an event that occurs at a certain location during a particular period of time. Objects of this type MAY contain the additional properties specified here.
+file,Represents any form of document or file. Objects of this type MAY contain an additional fileUrlproperty whose value a dereferenceable IRI that can be used to retrieve the file; and an additionalmimeType property whose value is the MIME type of the file described by the object.
+game,Represents a game or competition of any kind.
+group,Represents a grouping of objects in which member objects can join or leave. Objects of this type MAY contain the additional properties specified here.
+image,"Represents a graphical image. Objects of this type MAY contain an additional fullImageproperty whose value is an Activity Streams Media Link to a ""full-sized"" representation of the image."
+issue,"Represents a report about a problem or situation that needs to be resolved. For instance, theissue object can be used to represent reports detailing software defects, or reports of acceptable use violations, and so forth. Objects of this type MAY contain the additional properties specified here."
+job,Represents information about a job or a job posting.
+note,"Represents a short-form text message. This object is intended primarily for use in ""micro-blogging"" scenarios and in systems where users are invited to publish short, often plain-text messages whose useful lifespan is generally shorter than that of an article of weblog entry. A note is similar in structure to an article, but typically does not have a title or distinct paragraphs and tends to be much shorter in length."
+offer,Represents an offer of any kind.
+organization,Represents an organization of any kind.
+page,"Represents an area, typically a web page, that is representative of, and generally managed by a particular entity. Such areas are usually dedicated to displaying descriptive information about the entity and showcasing recent content such as articles, photographs and videos. Most social networking applications, for example, provide individual users with their own dedicated ""profile"" pages. Several allow similar types of pages to be created for commercial entities, organizations or events. While the specific details of how pages are implemented, their characteristics and use may vary, the one unifying property is that they are typically ""owned"" by a single entity that is represented by the content provided by the page itself."
+permission,"Represents a permission that can be granted to an individual. For instance, a person can be granted permission to modify a file. Objects of this type MAY contain the additional properties specified here."
+person,Represents an individual person.
+place,"Represents a physical location. Locations can be represented using geographic coordinates, a physical address, a free-form location name, or any combination of these. Objects of this type MAY contain the additional properties specified here."
+process,"Represents any form of process. For instance, a long-running task that is started and expected to continue operating for a period of time."
+product,Represents a commercial good or service. Objects of this type MAY contain an additionalfullImage property whose value is an Activity Streams Media Link to an image resource representative of the product.
+question,Represents a question or a poll. Objects of this type MAY contain an additional options property whose value is an Array of possible answers to the question in the form of Activity Stream objects of any type.
+review,Represents a primarily prose-based commentary on another object. Objects of this type MAY contain a rating property as specified here.
+role,"Represents a role assigned to some entity within a specific context. For instance, a person be assigned the ""admin"" role within a particular group. Objects of this type MAY contain the additional properties specified here."
+service,"Represents any form of hosted or consumable service that performs some kind of work or benefit for other entities. Examples of such objects include websites, businesses, etc."
+task,Represents an activity that has yet to be completed. Objects of this type can contain additional properties as specified here.
+team,Represents a team of any type.
+video,Represents video content of any kind. Objects of this type MAY contain additional properties as specified here.

@@ -1,0 +1,1530 @@
+{
+  "class": [
+    {
+      "id": "Thing",
+      "name": "Thing",
+      "description": "Something that may be used or applied",
+      "extend": null
+      
+    },
+    {
+      "id": "Concept",
+      "name": "Concept",
+      "description": "An abstract concept",
+      "extend": null
+      
+    },
+    {
+      "id": "Action",
+      "name": "Action",
+      "extend": null,
+      "description": "An action or event that may be accomplished or attended",
+      "value": [
+        "active",
+        "startsAt",
+        "stopsAt",
+        "maxAttendance"
+      ]
+      
+    },
+    {
+      "id": "Imaginary",
+      "name": "Imaginary",
+      "description": "Something imaginary, indefinite values",
+      "extend": [
+        "Concept"
+      ],
+      "value": [
+        "involvesUser"
+      ]
+      
+    },
+    {
+      "id": "Human",
+      "name": "Human",
+      "extend": [
+        "Thing"
+      ],
+      "value": [
+        "currentRole",
+        "biography",
+        "birthdate",
+        "male",
+        "female",
+        "email"
+      ]
+      
+    },
+    {
+      "id": "Similar",
+      "name": "Similar",
+      "extend": [
+        "Concept"
+      ],
+      "value": [
+        "similarTo"
+      ]
+      
+    },
+    {
+      "id": "Item",
+      "name": "Item",
+      "value": [
+        "purpose",
+        "quantity",
+        "individualWeight",
+        "color",
+        "itemCost",
+        "quantityUnit",
+        "quantityPerTime",
+        "quality",
+        "offerExpires",
+        "itemExpires",
+        "itemPaid",
+        "payWalletBTC",
+        "payWalletRipple",
+        "payWalletPayPal",
+        "payWalletRTN"
+      ],
+      "extend": [
+        "Thing"
+      ]
+      
+    },
+    {
+      "id": "Link",
+      "name": "Link",
+      "description": "A directed link, edge, or hyperedge in a graph or network",
+      "value": [
+        "next"
+      ],
+      "extend": [
+        "Concept"
+      ]
+      
+    },
+    {
+      "id": "Geometry",
+      "name": "Geometry",
+      "value": [
+        "gLength",
+        "gWidth",
+        "gHeight",
+        "mass"
+      ],
+      "extend": [
+        "Concept"
+      ]
+      
+    },
+    {
+      "id": "Physical",
+      "name": "Physical",
+      "value": [
+        "physicalIonizingRadiation",
+        "physicalTemperature",
+        "physicalLightLevel",
+        "physicalSoundLevel",
+        "physicalAtmosphericPressure",
+        "physicalOxygenConcentration",
+        "physicalCO2Concentration"
+      ],
+      "extend": [
+        "Concept"
+      ]
+      
+    },
+    {
+      "id": "Contract",
+      "name": "Contract",
+      "value": [
+        "transactionPaid",
+        "transactionDue",
+        "transactionGratis"
+      ],
+      "extend": [
+        "Concept"
+      ]
+      
+    },
+    {
+      "id": "Media",
+      "name": "Media",
+      "description": "A multimedia object",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Report",
+      "name": "Report",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "_Arrive",
+      "name": "Arrive",
+      "extend": [
+        "Action"
+      ],
+      "value": [
+        "arriveLocation"
+      ]    },
+    {
+      "id": "_Depart",
+      "name": "Depart",
+      "extend": [
+        "Action"
+      ],
+      "value": [
+        "departLocation"
+      ]    },
+    {
+      "id": "Problem",
+      "name": "Problem",
+      "extend": [
+        "Concept"
+      ],
+      "value": [
+        "problemBlame"
+      ]    },
+    {
+      "id": "Solution",
+      "name": "Solution",
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "Cause",
+      "name": "Cause",
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "Effect",
+      "name": "Effect",
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "Internet",
+      "name": "Internet",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Goal",
+      "name": "Goal",
+      "description": "A goal, dream, project, program, plan, opportunity, or deliverable",
+      "value": [
+        "goal",
+        "requiresAcknowledgement",
+        "lastAcknowledgement",
+        "goalEnabled",
+        "goalDependency",
+        "goalWorker",
+        "goalProgress",
+        "goalDeadline",
+        "goalCost",
+        "goalBudgeted",
+        "goalObjective"
+      ],
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "GoalCentroid",
+      "name": "Possible Goal",
+      "extend": [
+        "Goal",
+        "Imaginary"
+      ]    },
+    {
+      "id": "Favorite",
+      "name": "Favorite",
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "User",
+      "name": "User",
+      "extend": [
+        "Thing"
+      ],
+      "reserved": true
+      
+    },
+    {
+      "id": "Message",
+      "name": "Message",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Decision",
+      "name": "Decision",
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "Decision.Agree",
+      "name": "Agree",
+      "extend": [
+        "Decision"
+      ],
+      "description": "You are happy with the proposal."
+      
+    },
+    {
+      "id": "Decision.Abstain",
+      "name": "Abstain",
+      "extend": [
+        "Decision"
+      ],
+      "description": "You are unsure, or you\u2019re happy for the group to decide without you."
+      
+    },
+    {
+      "id": "Decision.Disagree",
+      "name": "Disagree",
+      "extend": [
+        "Decision"
+      ],
+      "description": "You think there might be a better alternative, but you\u2019re willing to go with the group."
+      
+    },
+    {
+      "id": "Decision.Block",
+      "name": "Block",
+      "extend": [
+        "Decision"
+      ],
+      "description": "You have serious objections and you\u2019ll be extremely unhappy if this proposal goes ahead."
+      
+    },
+    {
+      "id": "Know",
+      "name": "Know",
+      "extend": [
+        "Action"
+      ],
+      "value": [
+        "know"
+      ]    },
+    {
+      "id": "Trust",
+      "name": "Trust",
+      "extend": [
+        "Action"
+      ],
+      "icon": "\/icon\/trade.png",
+      "value": [
+        "trust"
+      ]    },
+    {
+      "id": "Distrust",
+      "name": "Distrust",
+      "extend": [
+        "Action"
+      ],
+      "value": [
+        "distrust"
+      ]    },
+    {
+      "id": "Value",
+      "name": "Like",
+      "description": "Represents like, valuing, preference, or having importance",
+      "extend": [
+        "Action"
+      ],
+      "value": [
+        "value"
+      ]    },
+    {
+      "id": "Not",
+      "name": "Not",
+      "extend": [
+        "Action"
+      ],
+      "icon": "\/icon\/not.png",
+      "value": [
+        "not"
+      ]    },
+    {
+      "id": "Access",
+      "name": "Access",
+      "extend": [
+        "Action"
+      ]    },
+    {
+      "id": "Can",
+      "name": "Can",
+      "extend": [
+        "Access"
+      ],
+      "icon": "\/icon\/can.png",
+      "description": "Something offer, offered, offering, share, shared, sharing, provide, providing, able",
+      "value": [
+        "can"
+      ]    },
+    {
+      "id": "Need",
+      "name": "Need",
+      "extend": [
+        "Access"
+      ],
+      "icon": "\/icon\/need.png",
+      "description": "Something want, wanted, wanting, need, needed, needing, seek, seeking, request, requested, requesting",
+      "value": [
+        "need"
+      ]    },
+    {
+      "id": "Offer",
+      "name": "Offer",
+      "extend": [
+        "Can"
+      ],
+      "icon": "\/icon\/can.png"
+      
+    },
+    {
+      "id": "Sell",
+      "name": "Sell",
+      "extend": [
+        "Can"
+      ],
+      "icon": "\/icon\/can.png"
+      
+    },
+    {
+      "id": "Lend",
+      "name": "Lend",
+      "extend": [
+        "Can"
+      ],
+      "icon": "\/icon\/can.png"
+      
+    },
+    {
+      "id": "Rent",
+      "name": "Rent",
+      "extend": [
+        "Can"
+      ],
+      "icon": "\/icon\/can.png"
+      
+    },
+    {
+      "id": "Swap",
+      "name": "Swap",
+      "extend": [
+        "Can"
+      ],
+      "icon": "\/icon\/can.png"
+      
+    },
+    {
+      "id": "GiveAway",
+      "name": "Share",
+      "extend": [
+        "Can"
+      ],
+      "icon": "\/icon\/can.png"
+      
+    },
+    {
+      "id": "Volunteer",
+      "name": "Volunteer",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Shelter",
+      "name": "Shelter",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Food",
+      "name": "Food",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Tools",
+      "name": "Tools",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Health",
+      "name": "Health",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Transport",
+      "name": "Transport",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Service",
+      "name": "Service",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Animal",
+      "name": "Animal",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Infrastructure",
+      "name": "Infrastructure",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Nature",
+      "name": "Nature",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Danger",
+      "name": "Danger",
+      "description": "Danger, emergency, or disaster situation \/ event",
+      "extend": [
+        "Thing"
+      ]    },
+    {
+      "id": "Plugin",
+      "name": "Plugin",
+      "extend": [
+        "Thing"
+      ],
+      "value": [
+        "Plugin.enable",
+        "Plugin.updateEvery"
+      ]    },
+    {
+      "id": "Medical_emergency",
+      "name": "Medical Emergency",
+      "description": "Medical problem, injury, or illness",
+      "extend": [
+        "Danger"
+      ],
+      "value": [
+        "medicalEmergencyBodyPart"
+      ]    },
+    {
+      "id": "Fire",
+      "name": "Fire",
+      "extend": [
+        "Danger"
+      ]    },
+    {
+      "id": "Theft",
+      "name": "Theft",
+      "description": "Theft or abduction",
+      "extend": [
+        "Danger"
+      ]    },
+    {
+      "id": "Physical_security",
+      "name": "Invasion",
+      "description": "Security intrusion",
+      "extend": [
+        "Danger"
+      ]    },
+    {
+      "id": "Promise",
+      "name": "Promise",
+      "description": "Promise or an Offer. 'I will do it, but only if you will help.'",
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "Tag",
+      "name": "Tag",
+      "description": "Indicates that an object defines a tag",
+      "value": [
+        "tagValueType"
+      ],
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "Template",
+      "name": "Template",
+      "description": "Template object that can create instances of it",
+      "value": [
+        
+      ],
+      "extend": [
+        "Concept"
+      ]    },
+    {
+      "id": "Earth",
+      "name": "Earth",
+      "description": "",
+      "icon": "icon\/earth.png"
+         },
+    {
+      "id": "Points of Interest",
+      "name": "Points of Interest",
+      "description": "DBPedia.org",
+      "dbpediaLayer": true,
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "United_States",
+      "name": "United States",
+      "description": "",
+      "icon": "icon\/earth.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "iem-us-nexrad",
+      "name": "United States NEXRAD Weather",
+      "description": "Weather data \u00a9 2012 IEM Nexrad",
+      "defaultStrength": 0.75,
+      "wmsLayer": {
+        "url": "http:\/\/mesonet.agron.iastate.edu\/cgi-bin\/wms\/nexrad\/n0r.cgi",
+        "layer": "nexrad-n0r-900913"
+      },
+      "extend": [
+        "United_States"
+      ]    },
+    {
+      "id": "conus_ir",
+      "name": "CONUS Infrared",
+      "description": "MesoNet - Iowa State",
+      "defaultStrength": 0.75,
+      "wmsLayer": {
+        "url": "http:\/\/mesonet.agron.iastate.edu\/cgi-bin\/wms\/goes\/conus_ir.cgi",
+        "layer": "ir_4km_900913"
+      },
+      "extend": [
+        "United_States"
+      ]    },
+    {
+      "id": "conus_vis",
+      "name": "CONUS VIS",
+      "description": "MesoNet - Iowa State",
+      "defaultStrength": 0.75,
+      "wmsLayer": {
+        "url": "http:\/\/mesonet.agron.iastate.edu\/cgi-bin\/wms\/goes\/conus_vis.cgi",
+        "layer": "vis_1km_900913"
+      },
+      "extend": [
+        "United_States"
+      ]    },
+    {
+      "id": "mrms_q3_24h_precipitation",
+      "name": "24h Precipitation",
+      "description": "MesoNet - Iowa State",
+      "defaultStrength": 0.75,
+      "wmsLayer": {
+        "url": "http:\/\/mesonet.agron.iastate.edu\/cgi-bin\/wms\/us\/mrms.cgi?",
+        "layer": "mrms_p24h"
+      },
+      "extend": [
+        "United_States"
+      ]    },
+    {
+      "id": "terrain-satellite",
+      "name": "Satellite",
+      "description": "Esri \/ DeLorme",
+      "defaultStrength": 0.75,
+      "tileLayer": "http:\/\/server.arcgisonline.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\/{z}\/{y}\/{x}",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "terrain-contour",
+      "name": "Contour",
+      "description": "Esri \/ DeLorme",
+      "defaultStrength": 0.75,
+      "tileLayer": "http:\/\/services.arcgisonline.com\/ArcGIS\/rest\/services\/World_Topo_Map\/MapServer\/tile\/{z}\/{y}\/{x}?blankTile=false",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "cycle-map",
+      "name": "Cycle Map",
+      "description": "OpenCycleMap.org",
+      "defaultStrength": 0.75,
+      "tileLayer": "http:\/\/{s}.tile.opencyclemap.org\/cycle\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "terrain-ocean",
+      "name": "Ocean Floor",
+      "description": "Esri \/ GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri",
+      "defaultStrength": 0.75,
+      "tileLayer": "http:\/\/services.arcgisonline.com\/ArcGIS\/rest\/services\/Ocean_Basemap\/MapServer\/tile\/{z}\/{y}\/{x}",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "owm-clouds",
+      "name": "Clouds",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/clouds\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "owm-precipitation",
+      "name": "Precipitation",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/precipitation\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "owm-rain",
+      "name": "Rain",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/rain\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "owm-pressure",
+      "name": "Pressure",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/pressure\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "owm-pressure_cntr",
+      "name": "Pressure Contour",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/pressure_cntr\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "owm-wind",
+      "name": "Wind",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/wind\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "owm-temp",
+      "name": "Temperature",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/temp\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]
+
+    },
+    {
+      "id": "owm-snow",
+      "name": "Snow",
+      "description": "OpenWeatherMap.org",
+      "defaultStrength": 0.5,
+      "tileLayer": "http:\/\/{s}.tile.openweathermap.org\/map\/snow\/{z}\/{x}\/{y}.png",
+      "extend": [
+        "Earth"
+      ]    },
+    {
+      "id": "Emotion",
+      "name": "Emotion",
+      "extend": [
+        "Concept"
+      ],
+      "description": "How something feels or seems",
+      "value": [
+        "emotionWhatDoing",
+        "emotionWhoWith",
+        "undulyExtremeMeaning",
+        "harshConclusions",
+        "drawingGlobalConclusions",
+        "decidingTotalDefinition",
+        "decidingAffectedFuture",
+        "feelBetterOrWorse",
+        "furtherGoalAction"
+      ]    },
+    {
+      "id": "Emotion.calm",
+      "name": "Calm",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.happy",
+      "name": "Happy",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.trusting",
+      "name": "Trusting",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.anticipating",
+      "name": "Anticipating",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.surprised",
+      "name": "Surprised",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.sad",
+      "name": "Sad",
+      "value": [
+        
+      ],
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.afraid",
+      "name": "Afraid",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.angry",
+      "name": "Angry",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.disgusted",
+      "name": "Disgusted",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.tired",
+      "name": "Tired",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Emotion.energized",
+      "name": "Energized",
+      "extend": [
+        "Emotion"
+      ]    },
+    {
+      "id": "Learn",
+      "name": "Learn",
+      "extend": [
+        "Know"
+      ],
+      "icon": "icon\/know\/k1.png"
+      
+    },
+    {
+      "id": "Do",
+      "name": "Do",
+      "extend": [
+        "Know"
+      ],
+      "icon": "icon\/know\/k4.png"
+      
+    },
+    {
+      "id": "Teach",
+      "name": "Teach",
+      "extend": [
+        "Know"
+      ],
+      "icon": "icon\/know\/k5.png"
+      
+    },
+    {
+      "id": "RSSFeed",
+      "name": "RSS Feed",
+      "extend": [
+        "Internet"
+      ],
+      "value": [
+        "urlAddress",
+        "urlFetchPeriod",
+        "addArticleTag",
+        "lastURLFetch"
+      ]    },
+    {
+      "id": "RSSItem",
+      "name": "RSS Item",
+      "extend": [
+        "Internet"
+      ],
+      "value": [
+        "rssItemURL"
+      ]    },
+    {
+      "id": "WebURL",
+      "name": "Web URL",
+      "extend": [
+        "Internet"
+      ],
+      "value": [
+        "urlAddress",
+        "urlFetchPeriod",
+        "lastURLFetch"
+      ]    },
+    {
+      "id": "ICalURL",
+      "name": "Calendar (iCal)",
+      "extend": [
+        "Internet"
+      ],
+      "value": [
+        "urlAddress",
+        "urlFetchPeriod",
+        "lastURLFetch"
+      ]    },
+    {
+      "id": "GPlusObject",
+      "name": "Google+ Object",
+      "extend": [
+        "Internet"
+      ],
+      "value": [
+        "gplusID",
+        "urlFetchPeriod",
+        "addArticleTag"
+      ]    },
+    {
+      "id": "Earthquake",
+      "name": "Earthquake",
+      "extend": [
+        "Nature",
+        "Danger"
+      ],
+      "value": [
+        "eqMagnitude",
+        "eqDepth"
+      ]    }
+  ],
+  "property": [
+    {
+      "name": "Active",
+      "extend": "boolean",
+      "id": "active"
+      
+    },
+    {
+      "name": "Starts At",
+      "extend": "text",
+      "id": "startsAt"
+      
+    },
+    {
+      "name": "Stops At",
+      "extend": "text",
+      "id": "stopsAt"
+      
+    },
+    {
+      "name": "Maximum Attendance",
+      "extend": "integer",
+      "id": "maxAttendance"
+      
+    },
+    {
+      "name": "Involves",
+      "extend": "object",
+      "id": "involvesUser"
+      
+    },
+    {
+      "name": "Current Role",
+      "extend": "text",
+      "id": "currentRole"
+      
+    },
+    {
+      "name": "Biography",
+      "extend": "html",
+      "id": "biography"
+      
+    },
+    {
+      "name": "Birthdate",
+      "extend": "timepoint",
+      "id": "birthdate"
+      
+    },
+    {
+      "name": "Male",
+      "extend": "boolean",
+      "id": "male"
+      
+    },
+    {
+      "name": "Female",
+      "extend": "boolean",
+      "id": "female"
+      
+    },
+    {
+      "name": "E-Mail",
+      "extend": "text",
+      "id": "email"
+      
+    },
+    {
+      "name": "to",
+      "extend": "object",
+      "id": "similarTo"
+      
+    },
+    {
+      "name": "Purpose",
+      "extend": "html",
+      "id": "purpose"
+      
+    },
+    {
+      "name": "Quantity",
+      "extend": "integer",
+      "id": "quantity"
+      
+    },
+    {
+      "name": "Weight (individual)",
+      "extend": "real",
+      "id": "individualWeight"
+      
+    },
+    {
+      "name": "Color",
+      "extend": "text",
+      "id": "color"
+      
+    },
+    {
+      "name": "Cost",
+      "extend": "real",
+      "default": 0,
+      "units": [
+        "Bitcoin",
+        "USDollar",
+        "Euro",
+        "Gold(g)",
+        "Silver(g)"
+      ],
+      "id": "itemCost"
+      
+    },
+    {
+      "name": "Quantity Unit",
+      "extend": "text",
+      "id": "quantityUnit"
+      
+    },
+    {
+      "name": "Quantity per Day",
+      "extend": "real",
+      "id": "quantityPerTime"
+      
+    },
+    {
+      "name": "Quality",
+      "extend": "text",
+      "id": "quality"
+      
+    },
+    {
+      "name": "Offer Expires",
+      "extend": "timepoint",
+      "id": "offerExpires"
+      
+    },
+    {
+      "name": "Expires",
+      "extend": "timepoint",
+      "id": "itemExpires"
+      
+    },
+    {
+      "name": "Paid",
+      "extend": "boolean",
+      "id": "itemPaid"
+      
+    },
+    {
+      "name": "Pay Bitcoin Wallet",
+      "extend": "text",
+      "id": "payWalletBTC"
+      
+    },
+    {
+      "name": "Pay Ripple Wallet",
+      "extend": "text",
+      "id": "payWalletRipple"
+      
+    },
+    {
+      "name": "Pay PayPal Address",
+      "extend": "text",
+      "id": "payWalletPayPal"
+      
+    },
+    {
+      "name": "Pay Bank Account (RTN)",
+      "extend": "text",
+      "id": "payWalletRTN"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "next"
+      
+    },
+    {
+      "name": "Length",
+      "extend": "real",
+      "units": [
+        "meter",
+        "foot",
+        "inch",
+        "mile"
+      ],
+      "id": "gLength"
+      
+    },
+    {
+      "name": "Width",
+      "extend": "real",
+      "units": [
+        "meter",
+        "foot",
+        "inch",
+        "mile"
+      ],
+      "id": "gWidth"
+      
+    },
+    {
+      "name": "Height",
+      "extend": "real",
+      "units": [
+        "meter",
+        "foot",
+        "inch",
+        "mile"
+      ],
+      "id": "gHeight"
+      
+    },
+    {
+      "name": "Mass",
+      "extend": "real",
+      "units": [
+        "kilogram",
+        "pound",
+        "ounce"
+      ],
+      "id": "mass"
+      
+    },
+    {
+      "name": "Ionizing Radiation",
+      "extend": "real",
+      "units": [
+        "rem",
+        "sieverts",
+        "rad",
+        "gray",
+        "roentgen",
+        "curie"
+      ],
+      "id": "physicalIonizingRadiation"
+      
+    },
+    {
+      "name": "Temperature",
+      "extend": "real",
+      "units": [
+        "fahrenheit",
+        "celsius",
+        "kelvin"
+      ],
+      "id": "physicalTemperature"
+      
+    },
+    {
+      "name": "Light Level",
+      "extend": "real",
+      "units": [
+        "candela "
+      ],
+      "id": "physicalLightLevel"
+      
+    },
+    {
+      "name": "Sound Level",
+      "extend": "real",
+      "units": [
+        "decibel "
+      ],
+      "id": "physicalSoundLevel"
+      
+    },
+    {
+      "name": "Atmospheric Pressure",
+      "extend": "real",
+      "units": [
+        "pascal",
+        "atmosphere",
+        "inches of Hg"
+      ],
+      "id": "physicalAtmosphericPressure"
+      
+    },
+    {
+      "name": "Oxygen Concentration",
+      "extend": "real",
+      "units": [
+        "O2 to N2 Ratio"
+      ],
+      "id": "physicalOxygenConcentration"
+      
+    },
+    {
+      "name": "CO2 Concentration",
+      "extend": "real",
+      "units": [
+        "ppm"
+      ],
+      "id": "physicalCO2Concentration"
+      
+    },
+    {
+      "name": "Paid",
+      "extend": "boolean",
+      "id": "transactionPaid"
+      
+    },
+    {
+      "name": "Due",
+      "extend": "boolean",
+      "id": "transactionDue"
+      
+    },
+    {
+      "name": "Gratis",
+      "extend": "boolean",
+      "id": "transactionGratis"
+      
+    },
+    {
+      "name": "Arrive location",
+      "extend": "spacepoint",
+      "id": "arriveLocation"
+      
+    },
+    {
+      "name": "Depart location",
+      "extend": "spacepoint",
+      "id": "departLocation"
+      
+    },
+    {
+      "name": "Blame",
+      "description": "Who or what is blamed",
+      "extend": "object",
+      "id": "problemBlame"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "goal"
+      
+    },
+    {
+      "name": "Require Acknowledgement",
+      "extend": "boolean",
+      "id": "requiresAcknowledgement"
+      
+    },
+    {
+      "name": "Repeat started",
+      "extend": "timepoint",
+      "readonly": true,
+      "id": "lastAcknowledgement"
+      
+    },
+    {
+      "name": "Enabled",
+      "extend": "boolean",
+      "default": true,
+      "id": "goalEnabled"
+      
+    },
+    {
+      "name": "Depends On",
+      "extend": "object",
+      "tag": "Goal",
+      "id": "goalDependency"
+      
+    },
+    {
+      "name": "Worker",
+      "extend": "object",
+      "tag": "Human",
+      "id": "goalWorker"
+      
+    },
+    {
+      "name": "Progress",
+      "extend": "real",
+      "min": 0,
+      "max": 1,
+      "mode": "slider",
+      "id": "goalProgress"
+      
+    },
+    {
+      "name": "Deadline",
+      "extend": "timepoint",
+      "max": 1,
+      "id": "goalDeadline"
+      
+    },
+    {
+      "name": "Cost",
+      "extend": "real",
+      "default": 0,
+      "units": [
+        "Bitcoin",
+        "USDollar",
+        "Euro",
+        "Gold(g)",
+        "Silver(g)"
+      ],
+      "id": "goalCost"
+      
+    },
+    {
+      "name": "Budgeted",
+      "description": "How much funding currently budgeted toward this",
+      "extend": "real",
+      "default": 0,
+      "units": [
+        "Bitcoin",
+        "USDollar",
+        "Euro",
+        "Gold(g)",
+        "Silver(g)"
+      ],
+      "id": "goalBudgeted"
+      
+    },
+    {
+      "name": "Objective",
+      "extend": "html",
+      "description": "What to accomplish and how to measure progress",
+      "id": "goalObjective"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "know"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "trust"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "distrust"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "value"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "not"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "can"
+      
+    },
+    {
+      "name": "",
+      "extend": "object",
+      "id": "need"
+      
+    },
+    {
+      "name": "Enable",
+      "extend": "boolean",
+      "max": 1,
+      "id": "Plugin.enable"
+      
+    },
+    {
+      "name": "Update Every (sec)",
+      "extend": "real",
+      "max": 1,
+      "id": "Plugin.updateEvery"
+      
+    },
+    {
+      "name": "Body Part",
+      "extend": "object",
+      "id": "medicalEmergencyBodyPart"
+      
+    },
+    {
+      "name": "Value Type",
+      "extend": "text",
+      "id": "tagValueType"
+      
+    },
+    {
+      "name": "What I am Doing",
+      "extend": "html",
+      "id": "emotionWhatDoing"
+      
+    },
+    {
+      "name": "Who I am With",
+      "extend": "object",
+      "tag": "Human",
+      "id": "emotionWhoWith"
+      
+    },
+    {
+      "name": "Is the meaning I\u2019m assigning to this event unduly extreme?",
+      "extend": "html",
+      "id": "undulyExtremeMeaning"
+      
+    },
+    {
+      "name": "Am I exaggerating a simple event to derive harsh conclusions from it?",
+      "extend": "html",
+      "id": "harshConclusions"
+      
+    },
+    {
+      "name": "Am I drawing global conclusions from this isolated event?",
+      "extend": "html",
+      "id": "drawingGlobalConclusions"
+      
+    },
+    {
+      "name": "Am I deciding that this specific event totally defines who it affects?",
+      "extend": "html",
+      "id": "decidingTotalDefinition"
+      
+    },
+    {
+      "name": "Am I deciding that this specific event affects the future of who it affects?",
+      "extend": "html",
+      "id": "decidingAffectedFuture"
+      
+    },
+    {
+      "name": "Does this meaning lead me to feel better or worse about myself?",
+      "extend": "html",
+      "id": "feelBetterOrWorse"
+      
+    },
+    {
+      "name": "Is it encouraging further goal-directed action or discouraging me to give up?",
+      "extend": "html",
+      "id": "furtherGoalAction"
+      
+    },
+    {
+      "name": "Address (URL)",
+      "extend": "url",
+      "min": 1,
+      "default": "http:\/\/",
+      "id": "urlAddress"
+      
+    },
+    {
+      "name": "Update Interval (minutes)",
+      "extend": "real",
+      "default": "10",
+      "max": 1,
+      "id": "urlFetchPeriod"
+      
+    },
+    {
+      "name": "Add Tag to Articles",
+      "extend": "text",
+      "id": "addArticleTag"
+      
+    },
+    {
+      "name": "Last Update",
+      "extend": "timepoint",
+      "readonly": true,
+      "id": "lastURLFetch"
+      
+    },
+    {
+      "name": "RSS Item URL",
+      "extend": "url",
+      "id": "rssItemURL"
+      
+    },
+    {
+      "name": "Google+ ID",
+      "extend": "text",
+      "id": "gplusID"
+      
+    },
+    {
+      "name": "Magnitude",
+      "extend": "real",
+      "id": "eqMagnitude"
+      
+    },
+    {
+      "name": "Depth (m)",
+      "extend": "real",
+      "id": "eqDepth"
+      
+    }
+  ]
+}

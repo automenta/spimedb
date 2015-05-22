@@ -1,0 +1,549 @@
+id,label,comment,ancestors,supertypes,subtypes,properties
+MedicalSignOrSymptom,Medical Sign or Symptom,,Thing MedicalEntity,MedicalEntity,MedicalSign MedicalSymptom,cause possibleTreatment
+ShoppingCenter,Shopping Center,,Thing Organization LocalBusiness,LocalBusiness,,
+LeaveAction,Leave Action,,Thing Action InteractAction,InteractAction,,event
+TieAction,Tie Action,,Thing Action AchieveAction,AchieveAction,,
+TakeAction,Take Action,,Thing Action TransferAction,TransferAction,,
+IceCreamShop,Ice Cream Shop,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+OfferItemCondition,Offer Item Condition,,Thing Intangible Enumeration,Enumeration,,
+BusinessFunction,Business Function,,Thing Intangible Enumeration,Enumeration,,
+ReserveAction,Reserve Action,,Thing Action OrganizeAction PlanAction,PlanAction,,
+PreventionIndication,Prevention Indication,,Thing MedicalEntity MedicalIndication,MedicalIndication,,
+AutomotiveBusiness,Automotive Business,,Thing Organization LocalBusiness,LocalBusiness,AutoBodyShop AutoDealer AutoPartsStore AutoRental AutoRepair AutoWash GasStation MotorcycleDealer MotorcycleRepair,
+Joint,Joint,,Thing MedicalEntity AnatomicalStructure,AnatomicalStructure,,biomechnicalClass functionalClass structuralClass
+APIReference,API Reference,,Thing CreativeWork Article TechArticle,TechArticle,,assembly assemblyVersion programmingModel targetPlatform
+MedicalStudy,Medical Study,,Thing MedicalEntity,MedicalEntity,MedicalObservationalStudy MedicalTrial,outcome population sponsor status studyLocation studySubject
+WantAction,Want Action,,Thing Action AssessAction ReactAction,ReactAction,,
+Physician,Physician,,Thing Organization LocalBusiness MedicalOrganization,MedicalOrganization,,availableService hospitalAffiliation medicalSpecialty
+HousePainter,House Painter,,Thing Organization LocalBusiness HomeAndConstructionBusiness,ProfessionalService HomeAndConstructionBusiness,,
+PalliativeProcedure,Palliative Procedure,,Thing MedicalEntity MedicalProcedure,MedicalProcedure MedicalTherapy,,
+BookmarkAction,Bookmark Action,,Thing Action OrganizeAction,OrganizeAction,,
+UnitPriceSpecification,Unit Price Specification,,Thing Intangible StructuredValue PriceSpecification,PriceSpecification,,billingIncrement priceType unitCode
+MarryAction,Marry Action,,Thing Action InteractAction,InteractAction,,
+MedicalIntangible,Medical Intangible,,Thing MedicalEntity,MedicalEntity,DDxElement DoseSchedule DrugCost DrugLegalStatus DrugStrength MedicalCode MedicalConditionStage MedicalEnumeration,
+SaleEvent,Sale Event,,Thing Event,Event,,
+CivicStructure,Civic Structure,,Thing Place,Place,Airport Aquarium Beach BusStation BusStop Campground Cemetery Crematorium EventVenue FireStation GovernmentBuilding Hospital MovieTheater Museum MusicVenue Park ParkingFacility PerformingArtsTheater PlaceOfWorship Playground PoliceStation RVPark StadiumOrArena SubwayStation TaxiStand TrainStation Zoo,openingHours
+HardwareStore,Hardware Store,,Thing Organization LocalBusiness Store,Store,,
+OpeningHoursSpecification,Opening Hours Specification,,Thing Intangible StructuredValue,StructuredValue,,closes dayOfWeek opens validFrom validThrough
+SportsClub,Sports Club,,Thing Organization LocalBusiness SportsActivityLocation,SportsActivityLocation,,
+MedicalProcedure,Medical Procedure,,Thing MedicalEntity,MedicalEntity,DiagnosticProcedure PalliativeProcedure TherapeuticProcedure,followup howPerformed preparation procedureType
+BlogPosting,Blog Posting,,Thing CreativeWork Article,Article,,
+SearchAction,Search Action,,Thing Action,Action,,query
+ComedyClub,Comedy Club,,Thing Organization LocalBusiness EntertainmentBusiness,EntertainmentBusiness,,
+EventVenue,Event Venue,,Thing Place CivicStructure,CivicStructure,,
+Recipe,Recipe,,Thing CreativeWork,CreativeWork,,cookingMethod cookTime ingredients nutrition prepTime recipeCategory recipeCuisine recipeInstructions recipeYield totalTime
+NightClub,Night Club,,Thing Organization LocalBusiness EntertainmentBusiness,EntertainmentBusiness,,
+Ligament,Ligament,,Thing MedicalEntity AnatomicalStructure,AnatomicalStructure,,
+ElementarySchool,Elementary School,,Thing Organization EducationalOrganization,EducationalOrganization,,
+Campground,Campground,,Thing Place CivicStructure,CivicStructure,,
+MovingCompany,Moving Company,,Thing Organization LocalBusiness HomeAndConstructionBusiness,HomeAndConstructionBusiness,,
+CommentAction,Comment Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,,
+BusinessEntityType,Business Entity Type,,Thing Intangible Enumeration,Enumeration,,
+MediaObject,Media Object,,Thing CreativeWork,CreativeWork,AudioObject DataDownload ImageObject MusicVideoObject VideoObject,associatedArticle bitrate contentSize contentUrl duration embedUrl encodesCreativeWork encodingFormat expires height playerType productionCompany publication regionsAllowed requiresSubscription uploadDate width
+Enumeration,Enumeration,,Thing Intangible,Intangible,BookFormatType BusinessEntityType BusinessFunction ContactPointOption DayOfWeek DeliveryMethod EventStatusType ItemAvailability OfferItemCondition OrderStatus PaymentMethod QualitativeValue Specialty WarrantyScope,
+Audience,Audience,,Thing Intangible,Intangible,BusinessAudience EducationalAudience MedicalAudience PeopleAudience,audienceType geographicArea
+State,State,,Thing Place AdministrativeArea,AdministrativeArea,,
+LendAction,Lend Action,,Thing Action TransferAction,TransferAction,,borrower
+TVEpisode,TV Episode,,Thing CreativeWork Episode,Episode,,partOfTVSeries
+DayOfWeek,Day of Week,,Thing Intangible Enumeration,Enumeration,,
+AggregateOffer,Aggregate Offer,,Thing Intangible Offer,Offer,,highPrice lowPrice offerCount
+MedicalCause,Medical Cause,,Thing MedicalEntity,MedicalEntity,,causeOf
+MedicalContraindication,Medical Contraindication,,Thing MedicalEntity,MedicalEntity,,
+SingleFamilyResidence,Single Family Residence,,Thing Place Residence,Residence,,
+StructuredValue,Structured Value,,Thing Intangible,Intangible,ContactPoint GeoCoordinates GeoShape NutritionInformation OpeningHoursSpecification OwnershipInfo PriceSpecification QuantitativeValue TypeAndQuantityNode WarrantyPromise,
+BusinessAudience,Business Audience,,Thing Intangible Audience,Audience,,numberofEmployees yearlyRevenue yearsInOperation
+Waterfall,Waterfall,,Thing Place Landform BodyOfWater,BodyOfWater,,
+RadioSeason,Radio Season,,Thing CreativeWork Season,Season,,
+WPSideBar,WP Side Bar,,Thing CreativeWork WebPageElement,WebPageElement,,
+EntertainmentBusiness,Entertainment Business,,Thing Organization LocalBusiness,LocalBusiness,AdultEntertainment AmusementPark ArtGallery Casino ComedyClub MovieTheater NightClub,
+UserComments,User Comments,,Thing Event UserInteraction,UserInteraction,,commentText commentTime creator discusses replyToUrl
+TrainStation,Train Station,,Thing Place CivicStructure,CivicStructure,,
+WPAdBlock,WP Ad Block,,Thing CreativeWork WebPageElement,WebPageElement,,
+BefriendAction,Befriend Action,,Thing Action InteractAction,InteractAction,,
+BarOrPub,Bar or Pub,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+DDxElement,D Dx Element,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,,diagnosis distinguishingSign
+Reservoir,Reservoir,,Thing Place Landform BodyOfWater,BodyOfWater,,
+RadioEpisode,Radio Episode,,Thing CreativeWork Episode,Episode,,
+ApartmentComplex,Apartment Complex,,Thing Place Residence,Residence,,
+FastFoodRestaurant,Fast Food Restaurant,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+CheckOutAction,Check Out Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,,
+AmusementPark,Amusement Park,,Thing Organization LocalBusiness EntertainmentBusiness,EntertainmentBusiness,,
+Continent,Continent,,Thing Place Landform,Landform,,
+Canal,Canal,,Thing Place Landform BodyOfWater,BodyOfWater,,
+Mountain,Mountain,,Thing Place Landform,Landform,,
+EndorseAction,Endorse Action,,Thing Action AssessAction ReactAction,ReactAction,,endorsee
+GovernmentPermit,Government Permit,,Thing Intangible Permit,Permit,,
+OnDemandEvent,On Demand Event,,Thing Event PublicationEvent,PublicationEvent,,
+Book,Book,,Thing CreativeWork,CreativeWork,,bookEdition bookFormat illustrator isbn numberOfPages
+MedicalOrganization,Medical Organization,,Thing Organization LocalBusiness,LocalBusiness,Dentist DiagnosticLab Hospital MedicalClinic Optician Pharmacy Physician VeterinaryCare,
+SellAction,Sell Action,,Thing Action TradeAction,TradeAction,,buyer warrantyPromise
+ReplaceAction,Replace Action,,Thing Action UpdateAction,UpdateAction,,replacee replacer
+DrawAction,Draw Action,,Thing Action CreateAction,CreateAction,,
+Diet,Diet,,Thing CreativeWork,CreativeWork LifestyleModification,,dietFeatures endorsers expertConsiderations overview physiologicalBenefits proprietaryName risks
+HobbyShop,Hobby Shop,,Thing Organization LocalBusiness Store,Store,,
+JobPosting,Job Posting,,Thing Intangible,Intangible,,baseSalary benefits datePosted educationRequirements employmentType experienceRequirements hiringOrganization incentives industry jobLocation occupationalCategory qualifications responsibilities salaryCurrency skills specialCommitments title workHours
+TradeAction,Trade Action,,Thing Action,Action,BuyAction DonateAction OrderAction PayAction QuoteAction RentAction SellAction TipAction,price
+WatchAction,Watch Action,,Thing Action ConsumeAction,ConsumeAction,,
+CreativeWork,Creative Work,,Thing,Thing,Article Blog Book Clip Code Comment DataCatalog Dataset Diet Episode ExercisePlan ItemList Map MediaObject Movie MusicPlaylist MusicRecording Painting Photograph Recipe Review Sculpture Season Series SoftwareApplication TVSeason TVSeries WebPage WebPageElement,about accessibilityAPI accessibilityControl accessibilityFeature accessibilityHazard accountablePerson aggregateRating alternativeHeadline associatedMedia audience audio author award awards citation comment contentLocation contentRating contributor copyrightHolder copyrightYear creator dateCreated dateModified datePublished discussionUrl editor educationalAlignment educationalUse encoding encodings genre headline inLanguage interactionCount interactivityType isBasedOnUrl isFamilyFriendly keywords learningResourceType mentions offers provider publisher publishingPrinciples review reviews sourceOrganization text thumbnailUrl timeRequired typicalAgeRange version video
+TheaterEvent,Theater Event,,Thing Event,Event,,
+ProfessionalService,Professional Service,,Thing Organization LocalBusiness,LocalBusiness,AccountingService Attorney Dentist Electrician GeneralContractor HousePainter Locksmith Notary Plumber RoofingContractor,
+MedicalRiskFactor,Medical Risk Factor,,Thing MedicalEntity,MedicalEntity,,increasesRiskOf
+ServiceChannel,Service Channel,,Thing Intangible,Intangible,,availableLanguage processingTime providesService serviceLocation servicePhone servicePostalAddress serviceSmsNumber serviceUrl
+Person,Person,,Thing,Thing,,additionalName address affiliation alumniOf award awards birthDate brand children colleague colleagues contactPoint contactPoints deathDate duns email familyName faxNumber follows gender givenName globalLocationNumber hasPOS homeLocation honorificPrefix honorificSuffix interactionCount isicV4 jobTitle knows makesOffer memberOf naics nationality owns parent parents performerIn relatedTo seeks sibling siblings spouse taxID telephone vatID workLocation worksFor
+Mass,Mass,,Thing Intangible Quantity,Quantity,,
+SportingGoodsStore,Sporting Goods Store,,Thing Organization LocalBusiness Store,Store,,
+MedicalStudyStatus,Medical Study Status,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+Painting,Painting,,Thing CreativeWork,CreativeWork,,
+Quantity,Quantity,,Thing Intangible,Intangible,Distance Duration Energy Mass,
+LymphaticVessel,Lymphatic Vessel,,Thing MedicalEntity AnatomicalStructure Vessel,Vessel,,originatesFrom regionDrained runsTo
+Library,Library,,Thing Organization LocalBusiness,LocalBusiness,,
+QualitativeValue,Qualitative Value,,Thing Intangible Enumeration,Enumeration,,equal greater greaterOrEqual lesser lesserOrEqual nonEqual valueReference
+ImagingTest,Imaging Test,,Thing MedicalEntity MedicalTest,MedicalTest,,imagingTechnique
+DepartmentStore,Department Store,,Thing Organization LocalBusiness Store,Store,,
+GeoCoordinates,Geo Coordinates,,Thing Intangible StructuredValue,StructuredValue,,elevation latitude longitude
+AutoDealer,Auto Dealer,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+BorrowAction,Borrow Action,,Thing Action TransferAction,TransferAction,,lender
+MedicalRiskScore,Medical Risk Score,,Thing MedicalEntity MedicalRiskEstimator,MedicalRiskEstimator,,algorithm
+Corporation,Corporation,,Thing Organization,Organization,,tickerSymbol
+Motel,Motel,,Thing Organization LocalBusiness LodgingBusiness,LodgingBusiness,,
+DeliveryChargeSpecification,Delivery Charge Specification,,Thing Intangible StructuredValue PriceSpecification,PriceSpecification,,appliesToDeliveryMethod eligibleRegion
+Brewery,Brewery,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+CollegeOrUniversity,College or University,,Thing Organization EducationalOrganization,EducationalOrganization,,
+ViewAction,View Action,,Thing Action ConsumeAction,ConsumeAction,,
+BedAndBreakfast,Bed And Breakfast,,Thing Organization LocalBusiness LodgingBusiness,LodgingBusiness,,
+AgreeAction,Agree Action,,Thing Action AssessAction ReactAction,ReactAction,,
+TransferAction,Transfer Action,,Thing Action,Action,BorrowAction DownloadAction GiveAction LendAction ReceiveAction ReturnAction SendAction TakeAction,fromLocation toLocation
+Demand,Demand,,Thing Intangible,Intangible,,acceptedPaymentMethod advanceBookingRequirement availability availabilityEnds availabilityStarts availableAtOrFrom availableDeliveryMethod businessFunction deliveryLeadTime eligibleCustomerType eligibleDuration eligibleQuantity eligibleRegion eligibleTransactionVolume gtin13 gtin14 gtin8 includesObject inventoryLevel itemCondition itemOffered mpn priceSpecification seller serialNumber sku validFrom validThrough warranty
+ChildrensEvent,Childrens Event,,Thing Event,Event,,
+WebPageElement,Web Page Element,,Thing CreativeWork,CreativeWork,SiteNavigationElement Table WPAdBlock WPFooter WPHeader WPSideBar,
+DoseSchedule,Dose Schedule,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,MaximumDoseSchedule RecommendedDoseSchedule ReportedDoseSchedule,doseUnit doseValue frequency targetPopulation
+MovieRentalStore,Movie Rental Store,,Thing Organization LocalBusiness Store,Store,,
+PhysicalTherapy,Physical Therapy,,Thing MedicalEntity MedicalTherapy,MedicalTherapy,,
+CafeOrCoffeeShop,Cafe or Coffee Shop,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+CookAction,Cook Action,,Thing Action CreateAction,CreateAction,,foodEstablishment foodEvent recipe
+InformAction,Inform Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,ConfirmAction RsvpAction,event
+PostalAddress,Postal Address,,Thing Intangible StructuredValue ContactPoint,ContactPoint,,addressCountry addressLocality addressRegion postalCode postOfficeBoxNumber streetAddress
+Crematorium,Crematorium,,Thing Place CivicStructure,CivicStructure,,
+PaymentMethod,Payment Method,,Thing Intangible Enumeration,Enumeration,CreditCard,
+ParkingFacility,Parking Facility,,Thing Place CivicStructure,CivicStructure,,
+TechArticle,Tech Article,,Thing CreativeWork Article,Article,APIReference,dependencies proficiencyLevel
+ProductModel,Product Model,,Thing Product,Product,,isVariantOf predecessorOf successorOf
+Series,Series,,Thing CreativeWork,CreativeWork,RadioSeries TVSeries,actor actors director directors endDate episode episodes musicBy numberOfEpisodes numberOfSeasons producer productionCompany season seasons startDate trailer
+Dataset,Dataset,,Thing CreativeWork,CreativeWork,,catalog distribution spatial temporal
+BankOrCreditUnion,Bank or Credit Union,,Thing Organization LocalBusiness FinancialService,FinancialService,,
+IgnoreAction,Ignore Action,,Thing Action AssessAction,AssessAction,,
+PlanAction,Plan Action,,Thing Action OrganizeAction,OrganizeAction,CancelAction ReserveAction ScheduleAction,scheduledTime
+VideoObject,Video Object,,Thing CreativeWork MediaObject,MediaObject,,caption thumbnail transcript videoFrameSize videoQuality
+MiddleSchool,Middle School,,Thing Organization EducationalOrganization,EducationalOrganization,,
+MusicEvent,Music Event,,Thing Event,Event,,
+InviteAction,Invite Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,,event
+Organization,Organization,,Thing,Thing,Corporation EducationalOrganization GovernmentOrganization LocalBusiness NGO PerformingGroup SportsTeam,address aggregateRating brand contactPoint contactPoints department duns email employee employees event events faxNumber founder founders foundingDate globalLocationNumber hasPOS interactionCount isicV4 legalName location logo makesOffer member members naics owns review reviews seeks subOrganization taxID telephone vatID
+AllocateAction,Allocate Action,,Thing Action OrganizeAction,OrganizeAction,AcceptAction AssignAction AuthorizeAction RejectAction,purpose
+DonateAction,Donate Action,,Thing Action TradeAction,TradeAction,,recipient
+TireShop,Tire Shop,,Thing Organization LocalBusiness Store,Store,,
+InsertAction,Insert Action,,Thing Action UpdateAction AddAction,AddAction,AppendAction PrependAction,toLocation
+OrderAction,Order Action,,Thing Action TradeAction,TradeAction,,
+DrugPrescriptionStatus,Drug Prescription Status,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+WarrantyPromise,Warranty Promise,,Thing Intangible StructuredValue,StructuredValue,,durationOfWarranty warrantyScope
+WinAction,Win Action,,Thing Action AchieveAction,AchieveAction,,loser
+FurnitureStore,Furniture Store,,Thing Organization LocalBusiness Store,Store,,
+PsychologicalTreatment,Psychological Treatment,,Thing MedicalEntity MedicalTherapy,MedicalTherapy,,
+Vein,Vein,,Thing MedicalEntity AnatomicalStructure Vessel,Vessel,,drainsTo regionDrained tributary
+MedicalAudience,Medical Audience,,Thing Intangible Audience,PeopleAudience Audience MedicalEnumeration,,
+WebPage,Web Page,,Thing CreativeWork,CreativeWork,AboutPage CheckoutPage CollectionPage ContactPage ItemPage MedicalWebPage ProfilePage SearchResultsPage,breadcrumb isPartOf lastReviewed mainContentOfPage primaryImageOfPage relatedLink reviewedBy significantLink significantLinks specialty
+MedicalIndication,Medical Indication,,Thing MedicalEntity,MedicalEntity,ApprovedIndication PreventionIndication TreatmentIndication,
+LodgingBusiness,Lodging Business,,Thing Organization LocalBusiness,LocalBusiness,BedAndBreakfast Hostel Hotel Motel,
+DrugLegalStatus,Drug Legal Status,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,,applicableLocation
+TelevisionStation,Television Station,,Thing Organization LocalBusiness,LocalBusiness,,
+Locksmith,Locksmith,,Thing Organization LocalBusiness HomeAndConstructionBusiness,ProfessionalService HomeAndConstructionBusiness,,
+BrainStructure,Brain Structure,,Thing MedicalEntity AnatomicalStructure,AnatomicalStructure,,
+DiagnosticLab,Diagnostic Lab,,Thing Organization LocalBusiness MedicalOrganization,MedicalOrganization,,availableTest
+Event,Event,,Thing,Thing,BusinessEvent ChildrensEvent ComedyEvent DanceEvent DeliveryEvent EducationEvent Festival FoodEvent LiteraryEvent MusicEvent PublicationEvent SaleEvent SocialEvent SportsEvent TheaterEvent UserInteraction VisualArtsEvent,attendee attendees doorTime duration endDate eventStatus location offers performer performers previousStartDate startDate subEvent subEvents superEvent typicalAgeRange
+MedicalTherapy,Medical Therapy,,Thing MedicalEntity,MedicalEntity,DietarySupplement Drug DrugClass LifestyleModification PalliativeProcedure PhysicalTherapy PsychologicalTreatment RadiationTherapy TherapeuticProcedure,adverseOutcome contraindication duplicateTherapy indication seriousAdverseOutcome
+GovernmentService,Government Service,,Thing Intangible Service,Service,,serviceOperator
+CancelAction,Cancel Action,,Thing Action OrganizeAction PlanAction,PlanAction,,
+Distance,Distance,,Thing Intangible Quantity,Quantity,,
+Museum,Museum,,Thing Place CivicStructure,CivicStructure,,
+NGO,NGO,,Thing Organization,Organization,,
+QuantitativeValue,Quantitative Value,,Thing Intangible StructuredValue,StructuredValue,,maxValue minValue unitCode value valueReference
+BroadcastEvent,Broadcast Event,,Thing Event PublicationEvent,PublicationEvent,,
+DrugCostCategory,Drug Cost Category,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+TipAction,Tip Action,,Thing Action TradeAction,TradeAction,,recipient
+VoteAction,Vote Action,,Thing Action AssessAction ChooseAction,ChooseAction,,candidate
+ExerciseGym,Exercise Gym,,Thing Organization LocalBusiness SportsActivityLocation,SportsActivityLocation,,
+MedicalRiskCalculator,Medical Risk Calculator,,Thing MedicalEntity MedicalRiskEstimator,MedicalRiskEstimator,,
+TVClip,TV Clip,,Thing CreativeWork Clip,Clip,,partOfTVSeries
+AutoWash,Auto Wash,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+PawnShop,Pawn Shop,,Thing Organization LocalBusiness Store,Store,,
+Season,Season,,Thing CreativeWork,CreativeWork,RadioSeason TVSeason,endDate episode episodes numberOfEpisodes partOfSeries position producer productionCompany seasonNumber startDate trailer
+OwnershipInfo,Ownership Info,,Thing Intangible StructuredValue,StructuredValue,,acquiredFrom ownedFrom ownedThrough typeOfGood
+AggregateRating,Aggregate Rating,,Thing Intangible Rating,Rating,,itemReviewed ratingCount reviewCount
+BookFormatType,Book Format Type,,Thing Intangible Enumeration,Enumeration,,
+Article,Article,,Thing CreativeWork,CreativeWork,BlogPosting NewsArticle ScholarlyArticle TechArticle,articleBody articleSection wordCount
+HomeAndConstructionBusiness,Home And Construction Business,,Thing Organization LocalBusiness,LocalBusiness,Electrician GeneralContractor HVACBusiness HousePainter Locksmith MovingCompany Plumber RoofingContractor,
+FoodEstablishment,Food Establishment,,Thing Organization LocalBusiness,LocalBusiness,Bakery BarOrPub Brewery CafeOrCoffeeShop FastFoodRestaurant IceCreamShop Restaurant Winery,acceptsReservations menu servesCuisine
+Class,Class,,Thing,Thing,,
+GovernmentOrganization,Government Organization,,Thing Organization,Organization,,
+DrugStrength,Drug Strength,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,,activeIngredient availableIn strengthUnit strengthValue
+GeneralContractor,General Contractor,,Thing Organization LocalBusiness HomeAndConstructionBusiness,ProfessionalService HomeAndConstructionBusiness,,
+MedicalSign,Medical Sign,,Thing MedicalEntity MedicalSignOrSymptom,MedicalSignOrSymptom,,identifyingExam identifyingTest
+CreateAction,Create Action,,Thing Action,Action,CookAction DrawAction FilmAction PaintAction PhotographAction WriteAction,
+ReceiveAction,Receive Action,,Thing Action TransferAction,TransferAction,,deliveryMethod sender
+ChildCare,Child Care,,Thing Organization LocalBusiness,LocalBusiness,,
+WebApplication,Web Application,,Thing CreativeWork SoftwareApplication,SoftwareApplication,,browserRequirements
+DeliveryEvent,Delivery Event,,Thing Event,Event,,accessCode availableFrom availableThrough hasDeliveryMethod
+HVACBusiness,HVAC Business,,Thing Organization LocalBusiness HomeAndConstructionBusiness,HomeAndConstructionBusiness,,
+Electrician,Electrician,,Thing Organization LocalBusiness HomeAndConstructionBusiness,ProfessionalService HomeAndConstructionBusiness,,
+DrugCost,Drug Cost,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,,applicableLocation costCategory costCurrency costOrigin costPerUnit drugUnit
+Embassy,Embassy,,Thing Place CivicStructure GovernmentBuilding,GovernmentBuilding,,
+HinduTemple,Hindu Temple,,Thing Place CivicStructure PlaceOfWorship,PlaceOfWorship,,
+ContactPage,Contact Page,,Thing CreativeWork WebPage,WebPage,,
+LiquorStore,Liquor Store,,Thing Organization LocalBusiness Store,Store,,
+MensClothingStore,Mens Clothing Store,,Thing Organization LocalBusiness Store,Store,,
+WearAction,Wear Action,,Thing Action ConsumeAction UseAction,UseAction,,
+Hotel,Hotel,,Thing Organization LocalBusiness LodgingBusiness,LodgingBusiness,,
+MedicalGuidelineRecommendation,Medical Guideline Recommendation,,Thing MedicalEntity MedicalGuideline,MedicalGuideline,,recommendationStrength
+Review,Review,,Thing CreativeWork,CreativeWork,,itemReviewed reviewBody reviewRating
+RadioClip,Radio Clip,,Thing CreativeWork Clip,Clip,,
+MedicalCondition,Medical Condition,,Thing MedicalEntity,MedicalEntity,InfectiousDisease,associatedAnatomy cause differentialDiagnosis epidemiology expectedPrognosis naturalProgression pathophysiology possibleComplication possibleTreatment primaryPrevention riskFactor secondaryPrevention signOrSymptom stage subtype typicalTest
+LocalBusiness,Local Business,,Thing Organization,Organization Place,AnimalShelter AutomotiveBusiness ChildCare DryCleaningOrLaundry EmergencyService EmploymentAgency EntertainmentBusiness FinancialService FoodEstablishment GovernmentOffice HealthAndBeautyBusiness HomeAndConstructionBusiness InternetCafe Library LodgingBusiness MedicalOrganization ProfessionalService RadioStation RealEstateAgent RecyclingCenter SelfStorage ShoppingCenter SportsActivityLocation Store TelevisionStation TouristInformationCenter TravelAgency,branchOf currenciesAccepted openingHours paymentAccepted priceRange
+VideoGallery,Video Gallery,,Thing CreativeWork WebPage CollectionPage,CollectionPage,,
+MedicalConditionStage,Medical Condition Stage,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,,stageAsNumber subStageSuffix
+PerformingGroup,Performing Group,,Thing Organization,Organization,DanceGroup MusicGroup TheaterGroup,
+UserCheckins,User Checkins,,Thing Event UserInteraction,UserInteraction,,
+MedicalTest,Medical Test,,Thing MedicalEntity,MedicalEntity,BloodTest DiagnosticProcedure ImagingTest MedicalTestPanel PathologyTest,affectedBy normalRange signDetected usedToDiagnose usesDevice
+HealthClub,Health Club,,Thing Organization LocalBusiness HealthAndBeautyBusiness,HealthAndBeautyBusiness SportsActivityLocation,,
+AssignAction,Assign Action,,Thing Action OrganizeAction AllocateAction,AllocateAction,,
+Festival,Festival,,Thing Event,Event,,
+GroceryStore,Grocery Store,,Thing Organization LocalBusiness Store,Store,,
+ApprovedIndication,Approved Indication,,Thing MedicalEntity MedicalIndication,MedicalIndication,,
+ExerciseAction,Exercise Action,,Thing Action PlayAction,PlayAction,,course diet distance exercisePlan exerciseType fromLocation oponent sportsActivityLocation sportsEvent sportsTeam toLocation
+Preschool,Preschool,,Thing Organization EducationalOrganization,EducationalOrganization,,
+Language,Language,,Thing Intangible,Intangible,,
+ConfirmAction,Confirm Action,,Thing Action InteractAction CommunicateAction InformAction,InformAction,,
+ConvenienceStore,Convenience Store,,Thing Organization LocalBusiness Store,Store,,
+GardenStore,Garden Store,,Thing Organization LocalBusiness Store,Store,,
+DiagnosticProcedure,Diagnostic Procedure,,Thing MedicalEntity MedicalProcedure,MedicalProcedure MedicalTest,,
+Code,Code,,Thing CreativeWork,CreativeWork,,codeRepository programmingLanguage runtime sampleType targetProduct
+HealthAndBeautyBusiness,Health And Beauty Business,,Thing Organization LocalBusiness,LocalBusiness,BeautySalon DaySpa HairSalon HealthClub NailSalon TattooParlor,
+CatholicChurch,Catholic Church,,Thing Place CivicStructure PlaceOfWorship,PlaceOfWorship,,
+BusStation,Bus Station,,Thing Place CivicStructure,CivicStructure,,
+TreatmentIndication,Treatment Indication,,Thing MedicalEntity MedicalIndication,MedicalIndication,,
+BikeStore,Bike Store,,Thing Organization LocalBusiness Store,Store,,
+PlaceOfWorship,Place of Worship,,Thing Place CivicStructure,CivicStructure,BuddhistTemple CatholicChurch Church HinduTemple Mosque Synagogue,
+WarrantyScope,Warranty Scope,,Thing Intangible Enumeration,Enumeration,,
+Vessel,Vessel,,Thing MedicalEntity AnatomicalStructure,AnatomicalStructure,Artery LymphaticVessel Vein,
+ReplyAction,Reply Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,,
+ContactPoint,Contact Point,,Thing Intangible StructuredValue,StructuredValue,PostalAddress,areaServed availableLanguage contactOption contactType email faxNumber hoursAvailable productSupported telephone
+DisagreeAction,Disagree Action,,Thing Action AssessAction ReactAction,ReactAction,,
+DaySpa,Day Spa,,Thing Organization LocalBusiness HealthAndBeautyBusiness,HealthAndBeautyBusiness,,
+Movie,Movie,,Thing CreativeWork,CreativeWork,,actor actors director directors duration musicBy producer productionCompany trailer
+TravelAgency,Travel Agency,,Thing Organization LocalBusiness,LocalBusiness,,
+MedicalDevice,Medical Device,,Thing MedicalEntity,MedicalEntity,,adverseOutcome contraindication indication postOp preOp procedure purpose seriousAdverseOutcome
+AdministrativeArea,Administrative Area,,Thing Place,Place,City Country State,
+JoinAction,Join Action,,Thing Action InteractAction,InteractAction,,event
+UpdateAction,Update Action,,Thing Action,Action,AddAction DeleteAction ReplaceAction,collection
+SubscribeAction,Subscribe Action,,Thing Action InteractAction,InteractAction,,
+JewelryStore,Jewelry Store,,Thing Organization LocalBusiness Store,Store,,
+LoseAction,Lose Action,,Thing Action AchieveAction,AchieveAction,,winner
+FilmAction,Film Action,,Thing Action CreateAction,CreateAction,,
+EventStatusType,Event Status Type,,Thing Intangible Enumeration,Enumeration,,
+StadiumOrArena,Stadium or Arena,,Thing Place CivicStructure,CivicStructure SportsActivityLocation,,
+CheckoutPage,Checkout Page,,Thing CreativeWork WebPage,WebPage,,
+DrugClass,Drug Class,,Thing MedicalEntity MedicalTherapy,MedicalTherapy,,drug
+IndividualProduct,Individual Product,,Thing Product,Product,,serialNumber
+LifestyleModification,Lifestyle Modification,,Thing MedicalEntity MedicalTherapy,MedicalTherapy,Diet PhysicalActivity,
+MedicalGuideline,Medical Guideline,,Thing MedicalEntity,MedicalEntity,MedicalGuidelineContraindication MedicalGuidelineRecommendation,evidenceLevel evidenceOrigin guidelineDate guidelineSubject
+ItemPage,Item Page,,Thing CreativeWork WebPage,WebPage,,
+Optician,Optician,,Thing Organization LocalBusiness MedicalOrganization,MedicalOrganization,,
+SportsTeam,Sports Team,,Thing Organization,Organization,,
+RoofingContractor,Roofing Contractor,,Thing Organization LocalBusiness HomeAndConstructionBusiness,ProfessionalService HomeAndConstructionBusiness,,
+Duration,Duration,,Thing Intangible Quantity,Quantity,,
+TypeAndQuantityNode,Type And Quantity Node,,Thing Intangible StructuredValue,StructuredValue,,amountOfThisGood businessFunction typeOfGood unitCode
+SomeProducts,Some Products,,Thing Product,Product,,inventoryLevel
+ReportedDoseSchedule,Reported Dose Schedule,,Thing MedicalEntity MedicalIntangible DoseSchedule,DoseSchedule,,
+Bone,Bone,,Thing MedicalEntity AnatomicalStructure,AnatomicalStructure,,
+OrganizeAction,Organize Action,,Thing Action,Action,AllocateAction ApplyAction BookmarkAction PlanAction,
+DanceGroup,Dance Group,,Thing Organization PerformingGroup,PerformingGroup,,
+Attorney,Attorney,,Thing Organization LocalBusiness ProfessionalService,ProfessionalService,,
+PublicSwimmingPool,Public Swimming Pool,,Thing Organization LocalBusiness SportsActivityLocation,SportsActivityLocation,,
+MedicalObservationalStudy,Medical Observational Study,,Thing MedicalEntity MedicalStudy,MedicalStudy,,studyDesign
+MedicalEntity,Medical Entity,,Thing,Thing,AnatomicalStructure AnatomicalSystem MedicalCause MedicalCondition MedicalContraindication MedicalDevice MedicalGuideline MedicalIndication MedicalIntangible MedicalProcedure MedicalRiskEstimator MedicalRiskFactor MedicalSignOrSymptom MedicalStudy MedicalTest MedicalTherapy SuperficialAnatomy,code guideline medicineSystem recognizingAuthority relevantSpecialty study
+TVSeason,TV Season,,Thing CreativeWork,CreativeWork Season,,partOfTVSeries
+GatedResidenceCommunity,Gated Residence Community,,Thing Place Residence,Residence,,
+MovieTheater,Movie Theater,,Thing Place CivicStructure,CivicStructure EntertainmentBusiness,,
+LiteraryEvent,Literary Event,,Thing Event,Event,,
+MusicVenue,Music Venue,,Thing Place CivicStructure,CivicStructure,,
+AlignmentObject,Alignment Object,,Thing Intangible,Intangible,,alignmentType educationalFramework targetDescription targetName targetUrl
+GeoShape,Geo Shape,,Thing Intangible StructuredValue,StructuredValue,,box circle elevation line polygon
+PeopleAudience,People Audience,,Thing Intangible Audience,Audience,MedicalAudience ParentAudience,healthCondition requiredGender requiredMaxAge requiredMinAge suggestedGender suggestedMaxAge suggestedMinAge
+InfectiousAgentClass,Infectious Agent Class,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+Permit,Permit,,Thing Intangible,Intangible,GovernmentPermit,issuedBy issuedThrough permitAudience validFor validFrom validIn validUntil
+CheckAction,Check Action,,Thing Action FindAction,FindAction,,
+RVPark,RV Park,,Thing Place CivicStructure,CivicStructure,,
+UnRegisterAction,Un Register Action,,Thing Action InteractAction,InteractAction,,
+SkiResort,Ski Resort,,Thing Organization LocalBusiness SportsActivityLocation,SportsActivityLocation,,
+OnSitePickup,On Site Pickup,,Thing Intangible Enumeration DeliveryMethod,DeliveryMethod,,
+ItemAvailability,Item Availability,,Thing Intangible Enumeration,Enumeration,,
+FireStation,Fire Station,,Thing Place CivicStructure,CivicStructure EmergencyService,,
+DryCleaningOrLaundry,Dry Cleaning or Laundry,,Thing Organization LocalBusiness,LocalBusiness,,
+Brand,Brand,,Thing Intangible,Intangible,,logo
+SoftwareApplication,Software Application,,Thing CreativeWork,CreativeWork,MobileApplication WebApplication,applicationCategory applicationSubCategory applicationSuite countriesNotSupported countriesSupported device downloadUrl featureList fileFormat fileSize installUrl memoryRequirements operatingSystem permissions processorRequirements releaseNotes requirements screenshot softwareVersion storageRequirements
+MaximumDoseSchedule,Maximum Dose Schedule,,Thing MedicalEntity MedicalIntangible DoseSchedule,DoseSchedule,,
+PrependAction,Prepend Action,,Thing Action UpdateAction AddAction InsertAction,InsertAction,,
+EatAction,Eat Action,,Thing Action ConsumeAction,ConsumeAction,,
+SearchResultsPage,Search Results Page,,Thing CreativeWork WebPage,WebPage,,
+ComputerStore,Computer Store,,Thing Organization LocalBusiness Store,Store,,
+MusicPlaylist,Music Playlist,,Thing CreativeWork,CreativeWork,MusicAlbum,numTracks track tracks
+SocialEvent,Social Event,,Thing Event,Event,,
+PaymentChargeSpecification,Payment Charge Specification,,Thing Intangible StructuredValue PriceSpecification,PriceSpecification,,appliesToDeliveryMethod appliesToPaymentMethod
+MedicalTestPanel,Medical Test Panel,,Thing MedicalEntity MedicalTest,MedicalTest,,subTest
+Muscle,Muscle,,Thing MedicalEntity AnatomicalStructure,AnatomicalStructure,,action antagonist bloodSupply insertion nerve origin
+ContactPointOption,Contact Point Option,,Thing Intangible Enumeration,Enumeration,,
+Rating,Rating,,Thing Intangible,Intangible,AggregateRating,bestRating ratingValue worstRating
+UserBlocks,User Blocks,,Thing Event UserInteraction,UserInteraction,,
+DeliveryMethod,Delivery Method,,Thing Intangible Enumeration,Enumeration,LockerDelivery OnSitePickup ParcelService,
+SuperficialAnatomy,Superficial Anatomy,,Thing MedicalEntity,MedicalEntity,,associatedPathophysiology relatedAnatomy relatedCondition relatedTherapy significance
+MusicGroup,Music Group,,Thing Organization PerformingGroup,PerformingGroup,,album albums musicGroupMember track tracks
+WPHeader,WP Header,,Thing CreativeWork WebPageElement,WebPageElement,,
+NailSalon,Nail Salon,,Thing Organization LocalBusiness HealthAndBeautyBusiness,HealthAndBeautyBusiness,,
+Synagogue,Synagogue,,Thing Place CivicStructure PlaceOfWorship,PlaceOfWorship,,
+Courthouse,Courthouse,,Thing Place CivicStructure GovernmentBuilding,GovernmentBuilding,,
+ConsumeAction,Consume Action,,Thing Action,Action,DrinkAction EatAction InstallAction ListenAction ReadAction UseAction ViewAction WatchAction,
+Hospital,Hospital,,Thing Place CivicStructure,CivicStructure MedicalOrganization EmergencyService,,availableService medicalSpecialty
+TattooParlor,Tattoo Parlor,,Thing Organization LocalBusiness HealthAndBeautyBusiness,HealthAndBeautyBusiness,,
+Photograph,Photograph,,Thing CreativeWork,CreativeWork,,
+Zoo,Zoo,,Thing Place CivicStructure,CivicStructure,,
+DataDownload,Data Download,,Thing CreativeWork MediaObject,MediaObject,,
+BloodTest,Blood Test,,Thing MedicalEntity MedicalTest,MedicalTest,,
+RecyclingCenter,Recycling Center,,Thing Organization LocalBusiness,LocalBusiness,,
+ReadAction,Read Action,,Thing Action ConsumeAction,ConsumeAction,,
+QuoteAction,Quote Action,,Thing Action TradeAction,TradeAction,,
+AnatomicalSystem,Anatomical System,,Thing MedicalEntity,MedicalEntity,,associatedPathophysiology comprisedOf relatedCondition relatedStructure relatedTherapy
+Park,Park,,Thing Place CivicStructure,CivicStructure,,
+AutoRental,Auto Rental,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+BodyOfWater,Body of Water,,Thing Place Landform,Landform,Canal LakeBodyOfWater OceanBodyOfWater Pond Reservoir RiverBodyOfWater SeaBodyOfWater Waterfall,
+MedicalEvidenceLevel,Medical Evidence Level,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+NewsArticle,News Article,,Thing CreativeWork Article,Article,,dateline printColumn printEdition printPage printSection
+ComedyEvent,Comedy Event,,Thing Event,Event,,
+MusicRecording,Music Recording,,Thing CreativeWork,CreativeWork,,byArtist duration inAlbum inPlaylist
+DataCatalog,Data Catalog,,Thing CreativeWork,CreativeWork,,dataset
+VisualArtsEvent,Visual Arts Event,,Thing Event,Event,,
+DeleteAction,Delete Action,,Thing Action UpdateAction,UpdateAction,,
+DefenceEstablishment,Defence Establishment,,Thing Place CivicStructure GovernmentBuilding,GovernmentBuilding,,
+EducationalOrganization,Educational Organization,,Thing Organization,Organization,CollegeOrUniversity ElementarySchool HighSchool MiddleSchool Preschool School,alumni
+WholesaleStore,Wholesale Store,,Thing Organization LocalBusiness Store,Store,,
+MedicalImagingTechnique,Medical Imaging Technique,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+MedicalSpecialty,Medical Specialty,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration Specialty,,
+CollectionPage,Collection Page,,Thing CreativeWork WebPage,WebPage,ImageGallery VideoGallery,
+TouristAttraction,Tourist Attraction,,Thing Place,Place,,
+InteractAction,Interact Action,,Thing Action,Action,BefriendAction CommunicateAction FollowAction JoinAction LeaveAction MarryAction RegisterAction SubscribeAction UnRegisterAction,
+DanceEvent,Dance Event,,Thing Event,Event,,
+CheckInAction,Check in Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,,
+PoliceStation,Police Station,,Thing Place CivicStructure,CivicStructure EmergencyService,,
+UserPlays,User Plays,,Thing Event UserInteraction,UserInteraction,,
+DepartAction,Depart Action,,Thing Action MoveAction,MoveAction,,
+ImageObject,Image Object,,Thing CreativeWork MediaObject,MediaObject,,caption exifData representativeOfPage thumbnail
+DrinkAction,Drink Action,,Thing Action ConsumeAction,ConsumeAction,,
+VeterinaryCare,Veterinary Care,,Thing Organization LocalBusiness MedicalOrganization,MedicalOrganization,,
+MedicalRiskEstimator,Medical Risk Estimator,,Thing MedicalEntity,MedicalEntity,MedicalRiskCalculator MedicalRiskScore,estimatesRiskOf includedRiskFactor
+RejectAction,Reject Action,,Thing Action OrganizeAction AllocateAction,AllocateAction,,
+PlayAction,Play Action,,Thing Action,Action,ExerciseAction PerformAction,audience event
+AutoBodyShop,Auto Body Shop,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+MedicalProcedureType,Medical Procedure Type,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+Dentist,Dentist,,Thing Organization LocalBusiness MedicalOrganization,MedicalOrganization ProfessionalService,,
+BuyAction,Buy Action,,Thing Action TradeAction,TradeAction,,vendor warrantyPromise
+PostOffice,Post Office,,Thing Organization LocalBusiness GovernmentOffice,GovernmentOffice,,
+ImageGallery,Image Gallery,,Thing CreativeWork WebPage CollectionPage,CollectionPage,,
+SiteNavigationElement,Site Navigation Element,,Thing CreativeWork WebPageElement,WebPageElement,,
+Casino,Casino,,Thing Organization LocalBusiness EntertainmentBusiness,EntertainmentBusiness,,
+ReviewAction,Review Action,,Thing Action AssessAction,AssessAction,,resultReview
+UserDownloads,User Downloads,,Thing Event UserInteraction,UserInteraction,,
+Action,Action,,Thing,Thing,AchieveAction AssessAction ConsumeAction CreateAction FindAction InteractAction MoveAction OrganizeAction PlayAction SearchAction TradeAction TransferAction UpdateAction,agent endTime instrument location object participant result startTime
+MobileApplication,Mobile Application,,Thing CreativeWork SoftwareApplication,SoftwareApplication,,carrierRequirements
+Sculpture,Sculpture,,Thing CreativeWork,CreativeWork,,
+Blog,Blog,,Thing CreativeWork,CreativeWork,,blogPost blogPosts
+ArtGallery,Art Gallery,,Thing Organization LocalBusiness EntertainmentBusiness,EntertainmentBusiness,,
+InsuranceAgency,Insurance Agency,,Thing Organization LocalBusiness FinancialService,FinancialService,,
+LakeBodyOfWater,Lake Body of Water,,Thing Place Landform BodyOfWater,BodyOfWater,,
+RecommendedDoseSchedule,Recommended Dose Schedule,,Thing MedicalEntity MedicalIntangible DoseSchedule,DoseSchedule,,
+HomeGoodsStore,Home Goods Store,,Thing Organization LocalBusiness Store,Store,,
+Church,Church,,Thing Place CivicStructure PlaceOfWorship,PlaceOfWorship,,
+ShareAction,Share Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,,
+EmergencyService,Emergency Service,,Thing Organization LocalBusiness,LocalBusiness,FireStation Hospital PoliceStation,
+Energy,Energy,,Thing Intangible Quantity,Quantity,,
+City,City,,Thing Place AdministrativeArea,AdministrativeArea,,
+GasStation,Gas Station,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+InfectiousDisease,Infectious Disease,,Thing MedicalEntity MedicalCondition,MedicalCondition,,infectiousAgent infectiousAgentClass transmissionMethod
+Plumber,Plumber,,Thing Organization LocalBusiness HomeAndConstructionBusiness,ProfessionalService HomeAndConstructionBusiness,,
+UserPageVisits,User Page Visits,,Thing Event UserInteraction,UserInteraction,,
+LegislativeBuilding,Legislative Building,,Thing Place CivicStructure GovernmentBuilding,GovernmentBuilding,,
+PaintAction,Paint Action,,Thing Action CreateAction,CreateAction,,
+ToyStore,Toy Store,,Thing Organization LocalBusiness Store,Store,,
+PhysicalActivity,Physical Activity,,Thing MedicalEntity MedicalTherapy LifestyleModification,LifestyleModification,ExercisePlan,associatedAnatomy category epidemiology pathophysiology
+HighSchool,High School,,Thing Organization EducationalOrganization,EducationalOrganization,,
+Beach,Beach,,Thing Place CivicStructure,CivicStructure,,
+Product,Product,,Thing,Thing,IndividualProduct ProductModel SomeProducts,aggregateRating audience brand color depth gtin13 gtin14 gtin8 height isAccessoryOrSparePartFor isConsumableFor isRelatedTo isSimilarTo itemCondition logo manufacturer model mpn offers productID releaseDate review reviews sku weight width
+BuddhistTemple,Buddhist Temple,,Thing Place CivicStructure PlaceOfWorship,PlaceOfWorship,,
+RealEstateAgent,Real Estate Agent,,Thing Organization LocalBusiness,LocalBusiness,,
+UserTweets,User Tweets,,Thing Event UserInteraction,UserInteraction,,
+RiverBodyOfWater,River Body of Water,,Thing Place Landform BodyOfWater,BodyOfWater,,
+TherapeuticProcedure,Therapeutic Procedure,,Thing MedicalEntity MedicalProcedure,MedicalProcedure MedicalTherapy,,
+ReturnAction,Return Action,,Thing Action TransferAction,TransferAction,,recipient
+PhysicalActivityCategory,Physical Activity Category,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+BowlingAlley,Bowling Alley,,Thing Organization LocalBusiness SportsActivityLocation,SportsActivityLocation,,
+TheaterGroup,Theater Group,,Thing Organization PerformingGroup,PerformingGroup,,
+RentAction,Rent Action,,Thing Action TradeAction,TradeAction,,landlord realEstateAgent
+Residence,Residence,,Thing Place,Place,ApartmentComplex GatedResidenceCommunity SingleFamilyResidence,
+MedicalObservationalStudyDesign,Medical Observational Study Design,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+PublicationEvent,Publication Event,,Thing Event,Event,BroadcastEvent OnDemandEvent,free publishedOn
+ElectronicsStore,Electronics Store,,Thing Organization LocalBusiness Store,Store,,
+Drug,Drug,,Thing MedicalEntity MedicalTherapy,MedicalTherapy,,activeIngredient administrationRoute alcoholWarning availableStrength breastfeedingWarning clincalPharmacology cost dosageForm doseSchedule drugClass foodWarning interactingDrug isAvailableGenerically isProprietary labelDetails legalStatus manufacturer mechanismOfAction nonProprietaryName overdosage pregnancyCategory pregnancyWarning prescribingInfo prescriptionStatus relatedDrug warning
+Winery,Winery,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+AssessAction,Assess Action,,Thing Action,Action,ChooseAction IgnoreAction ReactAction ReviewAction,
+Order,Order,,Thing Intangible,Intangible,,acceptedOffer billingAddress confirmationNumber customer discount discountCode discountCurrency isGift merchant orderDate orderedItem orderNumber orderStatus paymentDue paymentMethod paymentMethodId paymentUrl
+MotorcycleRepair,Motorcycle Repair,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+LandmarksOrHistoricalBuildings,Landmarks or Historical Buildings,,Thing Place,Place,,
+OutletStore,Outlet Store,,Thing Organization LocalBusiness Store,Store,,
+ExercisePlan,Exercise Plan,,Thing CreativeWork,CreativeWork PhysicalActivity,,activityDuration activityFrequency additionalVariable exerciseType intensity repetitions restPeriods workload
+LikeAction,Like Action,,Thing Action AssessAction ReactAction,ReactAction,,
+Florist,Florist,,Thing Organization LocalBusiness Store,Store,,
+Table,Table,,Thing CreativeWork WebPageElement,WebPageElement,,
+Service,Service,,Thing Intangible,Intangible,GovernmentService,availableChannel produces provider serviceArea serviceAudience serviceType
+AchieveAction,Achieve Action,,Thing Action,Action,LoseAction TieAction WinAction,
+MusicVideoObject,Music Video Object,,Thing CreativeWork MediaObject,MediaObject,,
+Playground,Playground,,Thing Place CivicStructure,CivicStructure,,
+OceanBodyOfWater,Ocean Body of Water,,Thing Place Landform BodyOfWater,BodyOfWater,,
+DownloadAction,Download Action,,Thing Action TransferAction,TransferAction,,
+FollowAction,Follow Action,,Thing Action InteractAction,InteractAction,,followee
+DislikeAction,Dislike Action,,Thing Action AssessAction ReactAction,ReactAction,,
+AutomatedTeller,Automated Teller,,Thing Organization LocalBusiness FinancialService,FinancialService,,
+Offer,Offer,,Thing Intangible,Intangible,AggregateOffer,acceptedPaymentMethod addOn advanceBookingRequirement aggregateRating availability availabilityEnds availabilityStarts availableAtOrFrom availableDeliveryMethod businessFunction category deliveryLeadTime eligibleCustomerType eligibleDuration eligibleQuantity eligibleRegion eligibleTransactionVolume gtin13 gtin14 gtin8 includesObject inventoryLevel itemCondition itemOffered mpn price priceCurrency priceSpecification priceValidUntil review reviews seller serialNumber sku validFrom validThrough warranty
+AboutPage,About Page,,Thing CreativeWork WebPage,WebPage,,
+WPFooter,WP Footer,,Thing CreativeWork WebPageElement,WebPageElement,,
+SportsActivityLocation,Sports Activity Location,,Thing Organization LocalBusiness,LocalBusiness,BowlingAlley ExerciseGym GolfCourse HealthClub PublicSwimmingPool SkiResort SportsClub StadiumOrArena TennisComplex,
+SelfStorage,Self Storage,,Thing Organization LocalBusiness,LocalBusiness,,
+TrackAction,Track Action,,Thing Action FindAction,FindAction,,deliveryMethod
+Aquarium,Aquarium,,Thing Place CivicStructure,CivicStructure,,
+Notary,Notary,,Thing Organization LocalBusiness ProfessionalService,ProfessionalService,,
+ReactAction,React Action,,Thing Action AssessAction,AssessAction,AgreeAction DisagreeAction DislikeAction EndorseAction LikeAction WantAction,
+FinancialService,Financial Service,,Thing Organization LocalBusiness,LocalBusiness,AccountingService AutomatedTeller BankOrCreditUnion InsuranceAgency,
+AudioObject,Audio Object,,Thing CreativeWork MediaObject,MediaObject,,transcript
+TouristInformationCenter,Tourist Information Center,,Thing Organization LocalBusiness,LocalBusiness,,
+Restaurant,Restaurant,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+RadiationTherapy,Radiation Therapy,,Thing MedicalEntity MedicalTherapy,MedicalTherapy,,
+ProfilePage,Profile Page,,Thing CreativeWork WebPage,WebPage,,
+BeautySalon,Beauty Salon,,Thing Organization LocalBusiness HealthAndBeautyBusiness,HealthAndBeautyBusiness,,
+MusicStore,Music Store,,Thing Organization LocalBusiness Store,Store,,
+Bakery,Bakery,,Thing Organization LocalBusiness FoodEstablishment,FoodEstablishment,,
+CommunicateAction,Communicate Action,,Thing Action InteractAction,InteractAction,AskAction CheckInAction CheckOutAction CommentAction InformAction InviteAction ReplyAction ShareAction,about language recipient
+Landform,Landform,,Thing Place,Place,BodyOfWater Continent Mountain Volcano,
+Volcano,Volcano,,Thing Place Landform,Landform,,
+WriteAction,Write Action,,Thing Action CreateAction,CreateAction,,language
+PhotographAction,Photograph Action,,Thing Action CreateAction,CreateAction,,
+RsvpAction,Rsvp Action,,Thing Action InteractAction CommunicateAction InformAction,InformAction,,
+MedicalClinic,Medical Clinic,,Thing Organization LocalBusiness MedicalOrganization,MedicalOrganization,,availableService medicalSpecialty
+CreditCard,Credit Card,,Thing Intangible Enumeration PaymentMethod,PaymentMethod,,
+MedicalGuidelineContraindication,Medical Guideline Contraindication,,Thing MedicalEntity MedicalGuideline,MedicalGuideline,,
+DrugPregnancyCategory,Drug Pregnancy Category,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+FoodEvent,Food Event,,Thing Event,Event,,
+HairSalon,Hair Salon,,Thing Organization LocalBusiness HealthAndBeautyBusiness,HealthAndBeautyBusiness,,
+PerformingArtsTheater,Performing Arts Theater,,Thing Place CivicStructure,CivicStructure,,
+DiscoverAction,Discover Action,,Thing Action FindAction,FindAction,,
+AppendAction,Append Action,,Thing Action UpdateAction AddAction InsertAction,InsertAction,,
+Mosque,Mosque,,Thing Place CivicStructure PlaceOfWorship,PlaceOfWorship,,
+Pharmacy,Pharmacy,,Thing Organization LocalBusiness MedicalOrganization,MedicalOrganization,,
+DietarySupplement,Dietary Supplement,,Thing MedicalEntity MedicalTherapy,MedicalTherapy,,activeIngredient background dosageForm isProprietary legalStatus manufacturer maximumIntake mechanismOfAction nonProprietaryName recommendedIntake safetyConsideration targetPopulation
+MedicineSystem,Medicine System,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+PetStore,Pet Store,,Thing Organization LocalBusiness Store,Store,,
+EmploymentAgency,Employment Agency,,Thing Organization LocalBusiness,LocalBusiness,,
+Episode,Episode,,Thing CreativeWork,CreativeWork,RadioEpisode TVEpisode,actor actors director directors episodeNumber musicBy partOfSeason partOfSeries position producer productionCompany publication trailer
+GolfCourse,Golf Course,,Thing Organization LocalBusiness SportsActivityLocation,SportsActivityLocation,,
+PathologyTest,Pathology Test,,Thing MedicalEntity MedicalTest,MedicalTest,,tissueSample
+MedicalTrial,Medical Trial,,Thing MedicalEntity MedicalStudy,MedicalStudy,,phase trialDesign
+ClothingStore,Clothing Store,,Thing Organization LocalBusiness Store,Store,,
+ParentAudience,Parent Audience,,Thing Intangible Audience PeopleAudience,PeopleAudience,,childMaxAge childMinAge
+AnatomicalStructure,Anatomical Structure,,Thing MedicalEntity,MedicalEntity,Bone BrainStructure Joint Ligament Muscle Nerve Vessel,associatedPathophysiology bodyLocation connectedTo diagram function partOfSystem relatedCondition relatedTherapy subStructure
+School,School,,Thing Organization EducationalOrganization,EducationalOrganization,,
+AskAction,Ask Action,,Thing Action InteractAction CommunicateAction,CommunicateAction,,question
+UserInteraction,User Interaction,,Thing Event,Event,UserBlocks UserCheckins UserComments UserDownloads UserLikes UserPageVisits UserPlays UserPlusOnes UserTweets,
+LockerDelivery,Locker Delivery,,Thing Intangible Enumeration DeliveryMethod,DeliveryMethod,,
+AutoRepair,Auto Repair,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+Thing,Thing,,,,Action BroadcastService Class CreativeWork Event Intangible MedicalEntity Organization Person Place Product Property,additionalType alternateName description image name sameAs url
+TennisComplex,Tennis Complex,,Thing Organization LocalBusiness SportsActivityLocation,SportsActivityLocation,,
+Place,Place,,Thing,Thing,AdministrativeArea CivicStructure Landform LandmarksOrHistoricalBuildings LocalBusiness Residence TouristAttraction,address aggregateRating containedIn event events faxNumber geo globalLocationNumber interactionCount isicV4 logo map maps openingHoursSpecification photo photos review reviews telephone
+Property,Property,,Thing,Thing,,domainIncludes rangeIncludes
+Comment,Comment,,Thing CreativeWork,CreativeWork,,
+Nerve,Nerve,,Thing MedicalEntity AnatomicalStructure,AnatomicalStructure,,branch nerveMotor sensoryUnit sourcedFrom
+AutoPartsStore,Auto Parts Store,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness Store,,
+MotorcycleDealer,Motorcycle Dealer,,Thing Organization LocalBusiness AutomotiveBusiness,AutomotiveBusiness,,
+Clip,Clip,,Thing CreativeWork,CreativeWork,RadioClip TVClip,clipNumber partOfEpisode partOfSeason partOfSeries position publication
+MedicalCode,Medical Code,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,,codeValue codingSystem
+ShoeStore,Shoe Store,,Thing Organization LocalBusiness Store,Store,,
+AnimalShelter,Animal Shelter,,Thing Organization LocalBusiness,LocalBusiness,,
+ScheduleAction,Schedule Action,,Thing Action OrganizeAction PlanAction,PlanAction,,
+TVSeries,TV Series,,Thing CreativeWork,CreativeWork Series,,
+Pond,Pond,,Thing Place Landform BodyOfWater,BodyOfWater,,
+Hostel,Hostel,,Thing Organization LocalBusiness LodgingBusiness,LodgingBusiness,,
+BookStore,Book Store,,Thing Organization LocalBusiness Store,Store,,
+EducationEvent,Education Event,,Thing Event,Event,,
+ApplyAction,Apply Action,,Thing Action OrganizeAction,OrganizeAction,,
+GovernmentOffice,Government Office,,Thing Organization LocalBusiness,LocalBusiness,PostOffice,
+Store,Store,,Thing Organization LocalBusiness,LocalBusiness,AutoPartsStore BikeStore BookStore ClothingStore ComputerStore ConvenienceStore DepartmentStore ElectronicsStore Florist FurnitureStore GardenStore GroceryStore HardwareStore HobbyShop HomeGoodsStore JewelryStore LiquorStore MensClothingStore MobilePhoneStore MovieRentalStore MusicStore OfficeEquipmentStore OutletStore PawnShop PetStore ShoeStore SportingGoodsStore TireShop ToyStore WholesaleStore,
+AddAction,Add Action,,Thing Action UpdateAction,UpdateAction,InsertAction,
+BroadcastService,Broadcast Service,,Thing,Thing,,area broadcaster parentService
+OfficeEquipmentStore,Office Equipment Store,,Thing Organization LocalBusiness Store,Store,,
+InternetCafe,Internet Cafe,,Thing Organization LocalBusiness,LocalBusiness,,
+BusinessEvent,Business Event,,Thing Event,Event,,
+UseAction,Use Action,,Thing Action ConsumeAction,ConsumeAction,WearAction,
+OrderStatus,Order Status,,Thing Intangible Enumeration,Enumeration,,
+Airport,Airport,,Thing Place CivicStructure,CivicStructure,,
+SeaBodyOfWater,Sea Body of Water,,Thing Place Landform BodyOfWater,BodyOfWater,,
+MoveAction,Move Action,,Thing Action,Action,ArriveAction DepartAction TravelAction,fromLocation toLocation
+TravelAction,Travel Action,,Thing Action MoveAction,MoveAction,,distance
+GiveAction,Give Action,,Thing Action TransferAction,TransferAction,,recipient
+MedicalDevicePurpose,Medical Device Purpose,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+UserPlusOnes,User Plus Ones,,Thing Event UserInteraction,UserInteraction,,
+EducationalAudience,Educational Audience,,Thing Intangible Audience,Audience,,educationalRole
+MedicalSymptom,Medical Symptom,,Thing MedicalEntity MedicalSignOrSymptom,MedicalSignOrSymptom,,
+ChooseAction,Choose Action,,Thing Action AssessAction,AssessAction,VoteAction,option
+InstallAction,Install Action,,Thing Action ConsumeAction,ConsumeAction,,
+RegisterAction,Register Action,,Thing Action InteractAction,InteractAction,,
+MobilePhoneStore,Mobile Phone Store,,Thing Organization LocalBusiness Store,Store,,
+MedicalWebPage,Medical Web Page,,Thing CreativeWork WebPage,WebPage,,aspect
+PayAction,Pay Action,,Thing Action TradeAction,TradeAction,,purpose recipient
+MedicalEnumeration,Medical Enumeration,,Thing MedicalEntity MedicalIntangible,MedicalIntangible,DrugCostCategory DrugPregnancyCategory DrugPrescriptionStatus InfectiousAgentClass MedicalAudience MedicalDevicePurpose MedicalEvidenceLevel MedicalImagingTechnique MedicalObservationalStudyDesign MedicalProcedureType MedicalSpecialty MedicalStudyStatus MedicalTrialDesign MedicineSystem PhysicalActivityCategory PhysicalExam,
+ParcelDelivery,Parcel Delivery,,Thing Intangible,Intangible,,carrier deliveryAddress deliveryStatus expectedArrivalFrom expectedArrivalUntil hasDeliveryMethod itemShipped originAddress partOfOrder trackingNumber trackingUrl
+AdultEntertainment,Adult Entertainment,,Thing Organization LocalBusiness EntertainmentBusiness,EntertainmentBusiness,,
+PriceSpecification,Price Specification,,Thing Intangible StructuredValue,StructuredValue,DeliveryChargeSpecification PaymentChargeSpecification UnitPriceSpecification,eligibleQuantity eligibleTransactionVolume maxPrice minPrice price priceCurrency validFrom validThrough valueAddedTaxIncluded
+Cemetery,Cemetery,,Thing Place CivicStructure,CivicStructure,,
+ListenAction,Listen Action,,Thing Action ConsumeAction,ConsumeAction,,
+PerformAction,Perform Action,,Thing Action PlayAction,PlayAction,,entertainmentBusiness
+GovernmentBuilding,Government Building,,Thing Place CivicStructure,CivicStructure,CityHall Courthouse DefenceEstablishment Embassy LegislativeBuilding,
+SendAction,Send Action,,Thing Action TransferAction,TransferAction,,deliveryMethod recipient
+SportsEvent,Sports Event,,Thing Event,Event,,
+PhysicalExam,Physical Exam,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+Map,Map,,Thing CreativeWork,CreativeWork,,
+RadioSeries,Radio Series,,Thing CreativeWork Series,Series,,
+AccountingService,Accounting Service,,Thing Organization LocalBusiness FinancialService,ProfessionalService FinancialService,,
+SubwayStation,Subway Station,,Thing Place CivicStructure,CivicStructure,,
+ScholarlyArticle,Scholarly Article,,Thing CreativeWork Article,Article,MedicalScholarlyArticle,
+CityHall,City Hall,,Thing Place CivicStructure GovernmentBuilding,GovernmentBuilding,,
+Artery,Artery,,Thing MedicalEntity AnatomicalStructure Vessel,Vessel,,arterialBranch source supplyTo
+NutritionInformation,Nutrition Information,,Thing Intangible StructuredValue,StructuredValue,,calories carbohydrateContent cholesterolContent fatContent fiberContent proteinContent saturatedFatContent servingSize sodiumContent sugarContent transFatContent unsaturatedFatContent
+MedicalTrialDesign,Medical Trial Design,,Thing MedicalEntity MedicalIntangible MedicalEnumeration,MedicalEnumeration,,
+Country,Country,,Thing Place AdministrativeArea,AdministrativeArea,,
+RadioStation,Radio Station,,Thing Organization LocalBusiness,LocalBusiness,,
+MusicAlbum,Music Album,,Thing CreativeWork MusicPlaylist,MusicPlaylist,,byArtist
+ItemList,Item List,,Thing CreativeWork,CreativeWork,,itemListElement itemListOrder
+AcceptAction,Accept Action,,Thing Action OrganizeAction AllocateAction,AllocateAction,,
+Specialty,Specialty,,Thing Intangible Enumeration,Enumeration,MedicalSpecialty,
+ArriveAction,Arrive Action,,Thing Action MoveAction,MoveAction,,
+ParcelService,Parcel Service,,Thing Intangible Enumeration DeliveryMethod,DeliveryMethod,,
+TaxiStand,Taxi Stand,,Thing Place CivicStructure,CivicStructure,,
+MedicalScholarlyArticle,Medical Scholarly Article,,Thing CreativeWork Article ScholarlyArticle,ScholarlyArticle,,publicationType
+Intangible,Intangible,,Thing,Thing,AlignmentObject Audience Brand Demand Enumeration JobPosting Language Offer Order ParcelDelivery Permit Quantity Rating Service ServiceChannel StructuredValue,
+FindAction,Find Action,,Thing Action,Action,CheckAction DiscoverAction TrackAction,
+UserLikes,User Likes,,Thing Event UserInteraction,UserInteraction,,
+AuthorizeAction,Authorize Action,,Thing Action OrganizeAction AllocateAction,AllocateAction,,recipient
+BusStop,Bus Stop,,Thing Place CivicStructure,CivicStructure,,
