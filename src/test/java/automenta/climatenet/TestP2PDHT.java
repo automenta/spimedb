@@ -6,13 +6,17 @@
 package automenta.climatenet;
 
 import automenta.climatenet.p2p.TomPeer;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.RTT;
+import net.tomp2p.storage.Data;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -60,7 +64,7 @@ public class TestP2PDHT {
         }
     }
 
-    public static void _main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         try {
             PeerDHT[] peers = createMasters(2, 4001);
 
@@ -78,25 +82,25 @@ public class TestP2PDHT {
 
             Thread.sleep(2000);
 
-//            myPeer1.put("This is my location key", "This is my domain", "This is my content key",
-//                    "And here comes the data").awaitUninterruptibly();
-//            
-//            System.out.println("1 put");
-//            
-//            FutureGet futureGet = myPeer2.get("This is my location key", "This is my domain", "This is my content key");
-//            
-//            futureGet.awaitUninterruptibly();
-//            
-//            System.out.println("2 get");
-//            
-//            if (futureGet.isSuccess()) {
-//                Map<Number640, Data> map = futureGet.dataMap();
-//                for (Data data : map.values()) {
-//                    MyData<String> myData = (MyData<String>) data.object();
-//                    System.out.println("key: " + myData.key() + ", domain: " + myData.domain() + ", content: "
-//                            + myData.content() + ", data: " + myData.data());
-//                }
-//            }
+            myPeer1.put("This is my location key", "This is my domain", "This is my content key",
+                    "And here comes the data").awaitUninterruptibly();
+
+            System.out.println("1 put");
+
+            FutureGet futureGet = myPeer2.get("This is my location key", "This is my domain", "This is my content key");
+
+            futureGet.awaitUninterruptibly();
+
+            System.out.println("2 get");
+
+            if (futureGet.isSuccess()) {
+                Map<Number640, Data> map = futureGet.dataMap();
+                for (Data data : map.values()) {
+                    TomPeer.MyData<String> myData = (TomPeer.MyData<String>) data.object();
+                    System.out.println("key: " + myData.key() + ", domain: " + myData.domain() + ", content: "
+                            + myData.content() + ", data: " + myData.data());
+                }
+            }
         } finally {
             if (master != null) {
                 master.shutdown();

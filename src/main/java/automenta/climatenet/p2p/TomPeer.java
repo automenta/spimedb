@@ -6,6 +6,8 @@
 package automenta.climatenet.p2p;
 
 import automenta.climatenet.Spacetime;
+import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureSend;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.BaseFutureListener;
@@ -13,7 +15,10 @@ import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
+import net.tomp2p.storage.Data;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -151,22 +156,22 @@ public class TomPeer {
         } catch (InterruptedException ex) {
             Logger.getLogger(TomPeer.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }    
-    /*
-    private FutureGet get(String key, String domain, String content) {
+    }
+
+    public FutureGet get(String key, String domain, String content) {
     Number160 locationKey = Number160.createHash(key);
     Number160 domainKey = Number160.createHash(domain);
     Number160 contentKey = Number160.createHash(content);
     return peer.get(locationKey).domainKey(domainKey).contentKey(contentKey).start();
     }
-    private FuturePut put(String key, String domain, String content, String data) throws IOException {
+    public FuturePut put(String key, String domain, String content, String data) throws IOException {
     Number160 locationKey = Number160.createHash(key);
     Number160 domainKey = Number160.createHash(domain);
     Number160 contentKey = Number160.createHash(content);
     MyData<String> myData = new MyData<String>().key(key).domain(domain).content(content).data(data);
     return peer.put(locationKey).domainKey(domainKey).data(contentKey, new Data(myData)).start();
     }
-    private static class MyData<K> implements Serializable {
+    public static class MyData<K> implements Serializable {
     private static final long serialVersionUID = 2098774660703812030L;
     private K key;
     private K domain;
@@ -201,7 +206,7 @@ public class TomPeer {
     return this;
     }
     }
-     */
+
 
   
     

@@ -8,13 +8,6 @@ package jnetention;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import java.io.File;
-import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import javafx.application.Platform;
 import jnetention.p2p.Listener;
 import jnetention.p2p.Network;
@@ -22,6 +15,14 @@ import org.apache.commons.math3.stat.Frequency;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Unifies DB & P2P features
@@ -73,7 +74,7 @@ public class Self extends EventEmitter {
 
         if (session.get(Session_MYSELF)==null) {            
             //first time user
-            become(newUser("Anonymous " + NObject.UUID().substring(0,4)));
+            become(newAnonymousUser());
         }
         
         
@@ -91,7 +92,11 @@ public class Self extends EventEmitter {
         //    db.close();
     }
 
-    
+    protected NObject newAnonymousUser() {
+        return newUser("Anonymous " + NObject.UUID().substring(0,4));
+    }
+
+
     public Self online(int listenPort) throws IOException, UnknownHostException, SocketException, InterruptedException {
         net = new Network(listenPort);
         net.listen("obj.", new Listener() {
@@ -106,7 +111,7 @@ public class Self extends EventEmitter {
         //net.getConfiguration().setBehindFirewall(true);                
         
         System.out.println("Server started listening to ");
-	System.out.println("Accessible to outside networks at ");
+	    System.out.println("Accessible to outside networks at ");
         
         
         return this;
@@ -283,7 +288,7 @@ public class Self extends EventEmitter {
     public synchronized void broadcast(NObject x, boolean block) {
         if (net!=null) {
             System.err.println("broadcasting " + x);
-            net.send("obj0", x.toStringDetailed());
+            net.send("obj0", x.toJSON());
 //            try {
 //                
 //                    

@@ -6,24 +6,19 @@
 
 package jnetention;
 
+import automenta.climatenet.Core;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
-import static com.google.common.collect.Iterators.*;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static com.google.common.collect.Iterators.*;
 
 /**
  *
@@ -35,6 +30,8 @@ public class NObject extends Value implements Serializable, Comparable {
     //public long modifiedAt;
     public String name;
     public String author;
+
+    /** subject as in 'subject/predicate', not email or document */
     private String subject;
     
     public NObject() {
@@ -130,6 +127,10 @@ public class NObject extends Value implements Serializable, Comparable {
     
     public String toStringDetailed() {
         return id + "," + name + "," + author + "," + subject + "," + new Date(createdAt).toString() + "=" + value;
+    }
+
+    public String toJSON() {
+        return Core.toJSON(this);
     }
 
     public <X> List<X> values(Class<X> c) {

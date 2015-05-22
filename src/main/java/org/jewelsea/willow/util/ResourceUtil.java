@@ -30,7 +30,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
@@ -47,7 +46,7 @@ public class ResourceUtil {
     static ResourceBundle resources;
     static {
         try {
-            resources = ResourceBundle.getBundle("resources/browser", Locale.getDefault());
+            resources = ResourceBundle.getBundle("browser", Locale.getDefault());
         } catch (RuntimeException ex) {
             Logger.getLogger(ResourceUtil.class.getName()).log(Level.SEVERE, null, ex);            
         }
@@ -68,10 +67,10 @@ public class ResourceUtil {
      * Get a resource relative to the application class.
      */
     static InputStream getResource(String path) {
-        
-            //System.out.println( ResourceUtil.class.getResource("../../../../../") );;
+
+        //System.out.println( ResourceUtil.class.getResource("../../../../../") );;
             //return ClassLoader.getSystemResource("../resources/org/jewelsea/willow/" + path).toExternalForm();
-            return ClassLoader.getSystemResourceAsStream("resources/" + path);
+            return ClassLoader.getSystemResourceAsStream("./" + path);
         //return new File("./src/resources/" + path);
         //return null;
     }
@@ -80,6 +79,7 @@ public class ResourceUtil {
      * Get a image resource in an images/ path relative to the application class.
      */
     public static Image getImage(String imageFilename) {
+
         InputStream i = ResourceUtil.getResource("icon/" + imageFilename);
         return new Image(i);
     }
