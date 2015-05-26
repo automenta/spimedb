@@ -32,12 +32,14 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>2.3</version>
         </dependency>
 
+        <!--
         <dependency>
             <groupId>net.tomp2p</groupId>
             <artifactId>tomp2p-core</artifactId>
@@ -55,6 +57,8 @@
             <artifactId>tomp2p-storage</artifactId>
             <version>5.0-Beta7</version>
         </dependency>
+        -->
+
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
@@ -106,6 +110,29 @@
             <version>3.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>1.0.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>opennars-logic</artifactId>
+            <groupId>opennars</groupId>
+            <version>1.7-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>opennars-gui</artifactId>
+            <groupId>opennars</groupId>
+            <version>1.7-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.jgrapht</groupId>
@@ -207,6 +234,9 @@
         <!--<artifactId>vaadin-themes</artifactId>-->
         <!--<version>${vaadin.version}</version>-->
         <!--</dependency>-->
+
+
+
         <dependency>
             <groupId>com.chiralbehaviors</groupId>
             <artifactId>failure-detectors</artifactId>

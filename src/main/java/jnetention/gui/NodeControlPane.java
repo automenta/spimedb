@@ -39,7 +39,8 @@ public class NodeControlPane extends BorderPane {
         this.core = core;
         
        
-        TabPane tab = new TabPane();      
+        TabPane tab = new TabPane();
+        tab.getTabs().add(newChatLogTab());
         tab.getTabs().add(newIndexTab());                
         tab.getTabs().add(newWikiTab());
         tab.getTabs().add(newSpacetimeTab());
@@ -162,7 +163,13 @@ public class NodeControlPane extends BorderPane {
             }
         }));
         return t;
-    }    
+    }
+    public Tab newChatLogTab() {
+        Tab t = new Tab();
+        GlyphsDude.setIcon(t, FontAwesomeIcon.EDIT);
+        t.setContent(new ChatLogPane(core));
+        return t;
+    }
 
     protected Node newNetworkPanel() {
         Pane p = new Pane();

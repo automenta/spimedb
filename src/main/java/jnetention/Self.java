@@ -13,21 +13,28 @@ import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import jnetention.db.HG;
 import jnetention.p2p.Peer;
+import nars.NAR;
+import nars.model.impl.Default;
+import nars.util.event.EventEmitter;
 import org.apache.commons.math3.stat.Frequency;
 
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Unifies DB & P2P features
  */
-public class Self extends EventEmitter {
-    private final static String Session_MYSELF = "myself";
+public class Self extends EventEmitter.DefaultEventEmitter {
+    //private final static String Session_MYSELF = "myself";
 
     public Peer net;
 
+    public final NAR nar = new NAR(new Default());
 
     public static class SaveEvent {
         public final NObject object;
@@ -289,6 +296,7 @@ public class Self extends EventEmitter {
     public void broadcast(NObject x) {
         broadcast(x, false);
     }
+
     public synchronized void broadcast(NObject x, boolean block) {
         if (net!=null) {
             System.err.println("broadcasting " + x);

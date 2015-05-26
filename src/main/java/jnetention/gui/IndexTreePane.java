@@ -17,13 +17,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.util.Callback;
-import jnetention.EventEmitter.Observer;
 import jnetention.NObject;
 import jnetention.NTag;
 import jnetention.Self;
 import jnetention.Self.NetworkUpdateEvent;
 import jnetention.Self.SaveEvent;
 import jnetention.gui.TaggerPane.TagReceiver;
+import nars.util.event.Reaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @author me
  */
-public class IndexTreePane extends BorderPane implements Observer {
+public class IndexTreePane extends BorderPane implements Reaction<Class>  {
     private final TreeView<NObject> tv;
     //http://docs.oracle.com/javafx/2/ui_controls/tree-view.htm
     private final Self self;
@@ -81,8 +81,8 @@ public class IndexTreePane extends BorderPane implements Observer {
                     update();
                 }
                 else {
-                    core.off(SaveEvent.class, IndexTreePane.this);
-                    core.off(NetworkUpdateEvent.class, IndexTreePane.this);
+                    //core.off(SaveEvent.class, IndexTreePane.this);
+                    //core.off(NetworkUpdateEvent.class, IndexTreePane.this);
                 }
             }
         });
@@ -117,12 +117,8 @@ public class IndexTreePane extends BorderPane implements Observer {
         self.on(SaveEvent.class, IndexTreePane.this);
         self.on(NetworkUpdateEvent.class, IndexTreePane.this);
     }
-    
-    @Override public void event(Object event) {
-        Platform.runLater(this::update);
-    }             
-    
-    
+
+
     protected void update() {
                 
         List<TreeItem> c = new ArrayList();
@@ -159,7 +155,12 @@ public class IndexTreePane extends BorderPane implements Observer {
             tagger.onTagSelected(item.id());
         }        
     }
-    
+
+    @Override
+    public void event(Class aClass, Object... objects) {
+        Platform.runLater(this::update);
+    }
+
 
     private final class TextFieldTreeCellImpl extends TreeCell<NObject> {
  
