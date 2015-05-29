@@ -25,29 +25,32 @@ import jnetention.NObject;
 import jnetention.Self;
 import jnetention.gui.geo.WWMapPane;
 import jnetention.run.WebBrowser;
+import nars.gui.NARControlPanel;
+import nars.gui.output.ConceptLogPanel;
 
 /**
  *
  * @author me
  */
 public class NodeControlPane extends BorderPane {
-    private final Self core;
+    private final Self self;
 
     public NodeControlPane(Self core) {
         super();
         
-        this.core = core;
+        this.self = core;
         
        
         TabPane tab = new TabPane();
         tab.getTabs().add(newChatLogTab());
-        tab.getTabs().add(newIndexTab());                
+        tab.getTabs().add(newIndexTab());
         tab.getTabs().add(newWikiTab());
         tab.getTabs().add(newSpacetimeTab());
         //tab.getTabs().add(newSpaceTab());
         tab.getTabs().add(newTimeTab());
         tab.getTabs().add(newOptionsTab());
-        
+        tab.getTabs().add(newReasonerTab());
+
         tab.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tab.autosize();
         
@@ -66,7 +69,7 @@ public class NodeControlPane extends BorderPane {
         GlyphsDude.setIcon(b, FontAwesomeIcon.LINK);
         b.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
-                NetentionJFX.popup(core, new WebBrowser(core));
+                NetentionJFX.popup(self, new WebBrowser(self));
             }
 
         });
@@ -78,7 +81,7 @@ public class NodeControlPane extends BorderPane {
         Button b = new Button("+");
         b.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
-                popupObjectEdit(core, new NObject.HashNObject(""));
+                popupObjectEdit(self, new NObject.HashNObject(""));
             }
 
         });
@@ -96,7 +99,7 @@ public class NodeControlPane extends BorderPane {
             @Override
             public void changed(ObservableValue<? extends Boolean> ov, Boolean b, Boolean t1) {
                 if (firstvisible) {                
-                    t.setContent(new WikiTagger(core, "Self"));
+                    t.setContent(new WikiTagger(self, "Self"));
                     firstvisible = false;
                 }
             }
@@ -155,7 +158,7 @@ public class NodeControlPane extends BorderPane {
     public Tab newIndexTab() {
         Tab t = new Tab(/*"Index"*/);
         GlyphsDude.setIcon(t, FontAwesomeIcon.LIST);
-        t.setContent(new IndexTreePane(core, new TaggerPane.TagReceiver() {
+        t.setContent(new IndexTreePane(self, new TaggerPane.TagReceiver() {
 
             @Override
             public void onTagSelected(String s) {
@@ -164,10 +167,21 @@ public class NodeControlPane extends BorderPane {
         }));
         return t;
     }
+    public Tab newReasonerTab() {
+        Tab t = new Tab();
+        GlyphsDude.setIcon(t, FontAwesomeIcon.EDIT);
+        t.setContent(new SwingPane(new NARControlPanel(self.nar)));
+        return t;
+    }
     public Tab newChatLogTab() {
         Tab t = new Tab();
         GlyphsDude.setIcon(t, FontAwesomeIcon.EDIT);
-        t.setContent(new ChatLogPane(core));
+
+        TextField iff = new TextField();
+
+        SplitPane sp = new SplitPane(new SwingPane(new ConceptLogPanel(self.nar)), iff);
+
+        t.setContent(sp);
         return t;
     }
 
@@ -205,8 +219,8 @@ public class NodeControlPane extends BorderPane {
     protected Node newIdentityPanel() {
         Pane p = new Pane();
         
-        if (core.getMyself()!=null)
-            p.getChildren().add(new ObjectCard(core.getMyself()));
+        if (self.getMyself()!=null)
+            p.getChildren().add(new ObjectCard(self.getMyself()));
                     
         return p;
     }
@@ -214,7 +228,7 @@ public class NodeControlPane extends BorderPane {
         Pane p = new Pane();
         
         TextArea ta = new TextArea();
-        ta.setText(core.db.toString() + "\n" + core.db.toString() );
+        ta.setText(self.db.toString() + "\n" + self.db.toString() );
         p.getChildren().add(ta);
         
         //core.data.sizeLong()
