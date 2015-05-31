@@ -2,6 +2,7 @@ target/
 cache/
 
 dependency-reduced-pom.xml
-climatenet.iml
+
 .idea/
 
+*.iml
