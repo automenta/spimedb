@@ -148,7 +148,8 @@ public class NodeControlPane extends BorderPane {
                     return (new WWMap());
                 }
                 catch (Throwable e) {
-                    return (new JLabel("Map unavailable: " + e.toString()));
+                    e.printStackTrace();
+                    return (new JLabel("Map error: " + e.toString()));
                 }
 
             }

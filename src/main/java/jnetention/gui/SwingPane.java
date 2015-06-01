@@ -11,8 +11,12 @@ import javax.swing.*;
 
 abstract public class SwingPane extends SwingNode {
 
-    static {
-        Video.themeInvert();
+    static private boolean themed = false;
+    static synchronized void ensureThemed() {
+        if (!themed) {
+            Video.themeInvert();
+            themed = true;
+        }
     }
 
     public SwingPane(Tab container) {
@@ -24,20 +28,36 @@ abstract public class SwingPane extends SwingNode {
             @Override
             public void changed(ObservableValue<? extends Boolean> o, Boolean a, Boolean b) {
                 if (isVisible() && firstvisible) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                                                   @Override
-                                                   public void run() {
-                                                       setContent(newComponent());
-                                                   }
-                                               }
-                    );
                     firstvisible = false;
+
+                    //construct the component in a new thread, then setContent in the swing thread
+                    new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            ensureThemed();
+
+
+                            SwingUtilities.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    JComponent c = newComponent();
+
+                                    setContent(c);
+                                }
+                            });
+                        }
+                    }).start();
+
                 }
             }
         });
 
 
     }
+
 
     abstract public JComponent newComponent();
 }

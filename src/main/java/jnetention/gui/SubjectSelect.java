@@ -19,6 +19,8 @@ import java.util.Collection;
  */
 public class SubjectSelect extends ComboBox<NObject> {
 
+    static final Tooltip whoTooltip = new Tooltip("Who?");
+
     public SubjectSelect(final Collection<NObject> subjects) {
         super();
         
@@ -45,7 +47,7 @@ public class SubjectSelect extends ComboBox<NObject> {
         
         getItems().addAll(subjects);        
         
-        setTooltip(new Tooltip("Who?"));        
+        setTooltip(whoTooltip);
         
         setEditable(true);
         

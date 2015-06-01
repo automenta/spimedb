@@ -23,6 +23,10 @@ import java.util.UUID;
  */
 public interface GossipListener {
 
+    default void onStart() { }
+
+    default void onStop() { }
+
     /**
      * Previously known state has been abandoned
      * 

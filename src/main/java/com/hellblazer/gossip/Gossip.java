@@ -324,6 +324,7 @@ public class Gossip {
             gossipTask = scheduler.scheduleWithFixedDelay(gossipTask(),
                                                           interval, interval,
                                                           intervalUnit);
+            listener.get().onStart();
         }
         return this;
     }
@@ -337,6 +338,7 @@ public class Gossip {
      */
     public Gossip stop() {
         if (running.compareAndSet(true, false)) {
+            listener.get().onStop();
             communications.terminate();
             scheduler.shutdownNow();
             gossipTask.cancel(true);

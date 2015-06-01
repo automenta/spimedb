@@ -92,6 +92,7 @@ public class Self extends EventEmitter.DefaultEventEmitter {
     }
 
 
+
     public Self online(int listenPort) throws IOException, UnknownHostException, SocketException, InterruptedException {
         net = new Peer(listenPort) {
 
@@ -102,16 +103,8 @@ public class Self extends EventEmitter.DefaultEventEmitter {
                 db.print(System.out);
                 System.err.println(j);
             }
-        };
 
-        
-        
-        
-        //net.getConfiguration().setBehindFirewall(true);                
-        
-        System.out.println("Server started listening to ");
-	    System.out.println("Accessible to outside networks at ");
-        
+        };
         
         return this;
     }
