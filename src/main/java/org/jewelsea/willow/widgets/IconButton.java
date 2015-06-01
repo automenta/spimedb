@@ -30,7 +30,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-import org.jewelsea.willow.util.ResourceUtil;
+import automenta.ResourceUtil;
 
 /** A button with an icon */
 public class IconButton extends Button {

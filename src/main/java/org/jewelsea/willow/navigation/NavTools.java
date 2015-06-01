@@ -34,9 +34,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import jnetention.run.WebBrowser;
-import org.jewelsea.willow.util.ResourceUtil;
+import automenta.ResourceUtil;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import static automenta.ResourceUtil.getString;
 
 public class NavTools {
     final static int buttonHeight = 20;

@@ -29,9 +29,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import jnetention.run.WebBrowser;
-import org.jewelsea.willow.util.ResourceUtil;
+import automenta.ResourceUtil;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import static automenta.ResourceUtil.getString;
 
 /**
  * Sidebar panel for showing Benchmark information

@@ -18,7 +18,7 @@ import jnetention.NTag;
 import jnetention.Self;
 import jnetention.SpacePoint;
 import netscape.javascript.JSObject;
-import org.jewelsea.willow.util.ResourceUtil;
+import automenta.ResourceUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

@@ -76,8 +76,8 @@ import org.jewelsea.willow.browser.TabManager;
 import org.jewelsea.willow.browser.UITab;
 import org.jewelsea.willow.navigation.NavTools;
 import org.jewelsea.willow.util.DebugUtil;
-import org.jewelsea.willow.util.ResourceUtil;
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import automenta.ResourceUtil;
+import static automenta.ResourceUtil.getString;
 
 public class WebBrowser extends Application {
     @Deprecated final public static long start = System.currentTimeMillis();

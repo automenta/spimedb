@@ -14,6 +14,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -23,10 +24,12 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import jnetention.NObject;
 import jnetention.Self;
-import jnetention.gui.geo.WWMapPane;
+import jnetention.gui.geo.WWMap;
 import jnetention.run.WebBrowser;
 import nars.gui.NARControlPanel;
 import nars.gui.output.ConceptLogPanel;
+
+import javax.swing.*;
 
 /**
  *
@@ -138,7 +141,18 @@ public class NodeControlPane extends BorderPane {
     public Tab newSpacetimeTab() {
         Tab t = new Tab(/*"Spacetime"*/);
         GlyphsDude.setIcon(t, FontAwesomeIcon.CUBES);
-        t.setContent(new WWMapPane());
+        t.setContent(new SwingPane(t) {
+            @Override
+            public JComponent newComponent() {
+                try {
+                    return (new WWMap());
+                }
+                catch (Throwable e) {
+                    return (new JLabel("Map unavailable: " + e.toString()));
+                }
+
+            }
+        });
         return t;
     }    
     public Tab newOptionsTab() {
@@ -170,7 +184,13 @@ public class NodeControlPane extends BorderPane {
     public Tab newReasonerTab() {
         Tab t = new Tab();
         GlyphsDude.setIcon(t, FontAwesomeIcon.EDIT);
-        t.setContent(new SwingPane(new NARControlPanel(self.nar)));
+        t.setContent(new SwingPane(t) {
+            @Override
+            public JComponent newComponent() {
+                return new NARControlPanel(self.nar);
+            }
+        });
+
         return t;
     }
     public Tab newChatLogTab() {
@@ -179,7 +199,16 @@ public class NodeControlPane extends BorderPane {
 
         TextField iff = new TextField();
 
-        SplitPane sp = new SplitPane(new SwingPane(new ConceptLogPanel(self.nar)), iff);
+        SplitPane sp = new SplitPane(
+                new SwingPane(t) {
+                    @Override
+                    public JComponent newComponent() {
+                        return new ConceptLogPanel(self.nar);
+                    }
+                }
+        );
+        sp.setDividerPositions(0.85f);
+        sp.setOrientation(Orientation.VERTICAL);
 
         t.setContent(sp);
         return t;

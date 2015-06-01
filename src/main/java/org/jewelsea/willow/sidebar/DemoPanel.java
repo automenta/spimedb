@@ -30,7 +30,7 @@ import jnetention.run.WebBrowser;
 import org.jewelsea.willow.navigation.BookmarkHandler;
 import org.jewelsea.willow.widgets.IconButton;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import static automenta.ResourceUtil.getString;
 
 /**
  * Sidebar panel for showing demos

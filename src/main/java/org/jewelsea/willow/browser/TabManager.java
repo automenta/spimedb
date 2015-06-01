@@ -33,8 +33,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
 import jnetention.Self;
-import org.jewelsea.willow.util.ResourceUtil;
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import automenta.ResourceUtil;
+import static automenta.ResourceUtil.getString;
 
 /**
  * Manages a set of active browser windows.

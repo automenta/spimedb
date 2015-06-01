@@ -12,7 +12,7 @@ import javafx.stage.WindowEvent;
 import jnetention.NObject;
 import jnetention.Self;
 import org.controlsfx.control.PropertySheet;
-import org.jewelsea.willow.util.ResourceUtil;
+import automenta.ResourceUtil;
 
 import java.awt.*;
 import java.awt.event.ActionListener;

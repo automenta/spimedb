@@ -19,7 +19,7 @@
  * Contact details: http://jewelsea.wordpress.com
  */
 
-package org.jewelsea.willow.util;
+package automenta;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -65,11 +65,21 @@ public class ResourceUtil {
      */
     static InputStream getResource(String path) {
 
+
         //System.out.println( ResourceUtil.class.getResource("../../../../../") );;
             //return ClassLoader.getSystemResource("../resources/org/jewelsea/willow/" + path).toExternalForm();
-            return ClassLoader.getSystemResourceAsStream("./" + path);
+
+        InputStream x = ClassLoader.getSystemResourceAsStream("./" + path);
+        if (x != null) return x;
+
+        try {
+            return new FileInputStream("./data/" + path);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         //return new File("./src/resources/" + path);
-        //return null;
+        return null;
     }
 
     /**
@@ -81,6 +91,7 @@ public class ResourceUtil {
         return new Image(i);
     }
     public static BufferedImage getImageAWT(String imageFilename) throws IOException {
+
 
         InputStream i = ResourceUtil.getResource("icon/" + imageFilename);
         return ImageIO.read(i);

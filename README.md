@@ -4,7 +4,7 @@ NETENTION
 TrayTention (Desktop SysTray & Mobile version :: Java 8+)
 ---------------------------------------------------------
 
-Real-time decentralized global propagation, notification, and analysis tools for AUTONOMY MAXIMIZATIION and AUTHORITY DISSOLUTION.
+Real-time decentralized global propagation, notification, and analysis tools for AUTONOMY MAXIMIZATION and AUTHORITY DISSOLUTION.
 
 Includes the most comprehensive, cross-domain, uncensored environmental dataset ever assembled: ClimateViewer (used in ClimateViewer 3D and ClimateViewer Mobile).
 

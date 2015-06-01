@@ -89,11 +89,11 @@ public class WWMap extends JPanel {
         this.initialize(true, true, false);
     }
 
-    public WWMap(Dimension size)
-    {
-        this.canvasSize = size;
-        this.initialize(true, true, false);
-    }
+//    public WWMap(Dimension size)
+//    {
+//        this.canvasSize = size;
+//        this.initialize(true, true, false);
+//    }
 
     public WWMap(boolean includeStatusBar, boolean includeLayerPanel, boolean includeStatsPanel)
     {
@@ -105,7 +105,10 @@ public class WWMap extends JPanel {
         setLayout(new BorderLayout());
 
         // Create the WorldWindow.
+
         this.wwjPanel = this.createAppPanel(this.canvasSize, includeStatusBar);
+
+
         this.wwjPanel.setPreferredSize(canvasSize);
 
         // Put the pieces together.
@@ -139,9 +142,7 @@ public class WWMap extends JPanel {
                     message += "Reason: " + t.getMessage() + "\n";
                     message += "This program will end when you press OK.";
 
-                    JOptionPane.showMessageDialog(null, message, "Unable to Start Program",
-                            JOptionPane.ERROR_MESSAGE);
-                    System.exit(-1);
+                    throw new RuntimeException(message);
                 }
             }
         });

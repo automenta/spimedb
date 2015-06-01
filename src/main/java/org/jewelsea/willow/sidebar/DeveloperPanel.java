@@ -27,7 +27,7 @@ import javafx.scene.layout.VBox;
 import org.jewelsea.willow.browser.BrowserTab;
 import org.jewelsea.willow.widgets.IconButton;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import static automenta.ResourceUtil.getString;
 
 /**
  * Sidebar panel for development tools

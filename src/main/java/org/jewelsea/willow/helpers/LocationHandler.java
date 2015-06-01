@@ -24,11 +24,10 @@ package org.jewelsea.willow.helpers;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.URL;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import static automenta.ResourceUtil.getString;
 
 public class LocationHandler {
     public static void handleLocation(WebView view, String location) {

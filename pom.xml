@@ -144,6 +144,7 @@
             <artifactId>geojson-jackson</artifactId>
             <version>1.4</version>
         </dependency>
+<!--
         <dependency>
             <groupId>edu.cmu.sphinx</groupId>
             <artifactId>sphinx4-core</artifactId>
@@ -154,6 +155,7 @@
             <artifactId>sphinx4-data</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        -->
         <!--
         <dependency>
             <groupId>org.mnode.ical4j</groupId>
@@ -245,7 +247,6 @@
         <!--</dependency>-->
 
 
-
         <dependency>
             <groupId>com.chiralbehaviors</groupId>
             <artifactId>failure-detectors</artifactId>
@@ -332,24 +333,37 @@
         <repository>
             <id>snapshots-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases><enabled>false</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
 
     </repositories>
 
     <build>
 
-
         <resources>
+
             <resource>
-                <!-- https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html -->
-                <directory>src/main/data</directory>
+                <directory>${basedir}/data</directory>
+                <includes>
+                    <include>*/**</include>
+                </includes>
+                <filtering>false</filtering>
             </resource>
+
+            <!--<resource>-->
+                <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->
+                <!--<directory>data</directory>-->
+            <!--</resource>-->
         </resources>
 
 
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -360,70 +374,103 @@
                     <!--<useIncrementalCompilation>false</useIncrementalCompilation>-->
                 </configuration>
             </plugin>
-
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.3</version>
+                <!-- https://github.com/chrischristo/capsule-maven-plugin -->
+                <groupId>com.github.chrischristo</groupId>
+                <artifactId>capsule-maven-plugin</artifactId>
+                <version>0.10.1</version>
                 <configuration>
+                    <appClass>jnetention.run.RunMemoryPeer</appClass>
+                    <manifest>
+                        <entry>
+                            <key>Min-Java-Version</key>
+                            <value>1.8.0</value>
+                        </entry>
+                    </manifest>
 
-
-                    <transformers>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>automenta.climatenet.run.Main</mainClass>
-                        </transformer>
-
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-
-                    </transformers>
-
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <generateUniqueDependencyReducedPom>false</generateUniqueDependencyReducedPom>
-                    <minimizeJar>true</minimizeJar>
-
-                    <filters>
-                        <filter>
-                            <artifact>org.jboss.xnio:*</artifact>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                        </filter>
-                        <filter>
-                            <artifact>org.jboss.logging:*</artifact>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                        </filter>
-                        <filter>
-                            <artifact>io.undertow:*</artifact>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                        </filter>
-                        <!--
-                        <filter>
-                          <artifact>org.apache.lucene:*</artifact>
-                          <includes><include>**</include></includes>
-                        </filter>
-                        <filter>
-                          <artifact>org.elasticsearch:*</artifact>
-                          <includes><include>**</include></includes>
-                        </filter>
-                        -->
-                    </filters>
-
+                    <!--<fileSets>-->
+                        <!--<fileSet>-->
+                            <!--<directory>${project.build.directory}/data</directory>-->
+                            <!--<outputDirectory>data</outputDirectory>-->
+                            <!--<includes>-->
+                                <!--<include>*</include>-->
+                            <!--</includes>-->
+                        <!--</fileSet>-->
+                    <!--</fileSets>-->
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>build</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+
+
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-shade-plugin</artifactId>-->
+            <!--<version>2.3</version>-->
+            <!--<configuration>-->
+
+
+            <!--<transformers>-->
+            <!--<transformer-->
+            <!--implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+            <!--<mainClass>automenta.climatenet.run.Main</mainClass>-->
+            <!--</transformer>-->
+
+            <!--<transformer-->
+            <!--implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>-->
+
+            <!--</transformers>-->
+
+            <!--<createDependencyReducedPom>false</createDependencyReducedPom>-->
+            <!--<generateUniqueDependencyReducedPom>false</generateUniqueDependencyReducedPom>-->
+            <!--<minimizeJar>true</minimizeJar>-->
+
+            <!--<filters>-->
+            <!--<filter>-->
+            <!--<artifact>org.jboss.xnio:*</artifact>-->
+            <!--<includes>-->
+            <!--<include>**</include>-->
+            <!--</includes>-->
+            <!--</filter>-->
+            <!--<filter>-->
+            <!--<artifact>org.jboss.logging:*</artifact>-->
+            <!--<includes>-->
+            <!--<include>**</include>-->
+            <!--</includes>-->
+            <!--</filter>-->
+            <!--<filter>-->
+            <!--<artifact>io.undertow:*</artifact>-->
+            <!--<includes>-->
+            <!--<include>**</include>-->
+            <!--</includes>-->
+            <!--</filter>-->
+            <!--&lt;!&ndash;-->
+            <!--<filter>-->
+            <!--<artifact>org.apache.lucene:*</artifact>-->
+            <!--<includes><include>**</include></includes>-->
+            <!--</filter>-->
+            <!--<filter>-->
+            <!--<artifact>org.elasticsearch:*</artifact>-->
+            <!--<includes><include>**</include></includes>-->
+            <!--</filter>-->
+            <!--&ndash;&gt;-->
+            <!--</filters>-->
+
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+            <!--<goal>shade</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

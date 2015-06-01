@@ -30,9 +30,9 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.jewelsea.willow.util.ResourceUtil;
+import automenta.ResourceUtil;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import static automenta.ResourceUtil.getString;
 
 public class ConfirmHandler extends VBox {
     public ConfirmHandler(String message, EventHandler<ActionEvent> confirmHandler, EventHandler<ActionEvent> denyHandler) {

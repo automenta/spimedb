@@ -32,10 +32,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import jnetention.run.WebBrowser;
 import org.jewelsea.willow.navigation.BookmarkHandler;
-import org.jewelsea.willow.util.ResourceUtil;
+import automenta.ResourceUtil;
 import org.jewelsea.willow.widgets.IconButton;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
+import static automenta.ResourceUtil.getString;
 
 /**
  * Sidebar panel for showing demos

@@ -42,8 +42,8 @@ import org.jewelsea.willow.helpers.FavIconHandler;
 import org.jewelsea.willow.helpers.LocationHandler;
 import org.jewelsea.willow.navigation.History;
 
-import static org.jewelsea.willow.util.ResourceUtil.getString;
-import static org.jewelsea.willow.util.ResourceUtil.copyImageView;
+import static automenta.ResourceUtil.getString;
+import static automenta.ResourceUtil.copyImageView;
 
 /**
  * A single web browser window to be displayed in a tab.
