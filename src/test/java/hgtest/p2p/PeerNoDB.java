@@ -1,13 +1,13 @@
 package hgtest.p2p;
 
 
-import java.util.concurrent.Future;
 import mjson.Json;
 import org.hypergraphdb.peer.HyperGraphPeer;
-import org.testng.annotations.Test;
-import hgtest.HGTestBase;
+import org.junit.Test;
 
-public class PeerNoDB extends HGTestBase
+import java.util.concurrent.Future;
+
+public class PeerNoDB
 {
 	@Test
 	public void testPeerWithoutLocalDB()
@@ -21,8 +21,8 @@ public class PeerNoDB extends HGTestBase
 		interfaceConfig.set("room", "play@conference.ols00068");
 		interfaceConfig.set("autoRegister", true);
 		config.set("interfaceConfig", interfaceConfig);
-		HyperGraphPeer peer = new HyperGraphPeer(config); 
-	    Future<Boolean> startupResult = peer.start();		
+		HyperGraphPeer peer = new HyperGraphPeer(config);
+	    Future<Boolean> startupResult = peer.start();
 	    try
 		{
 			if (startupResult.get())
@@ -34,10 +34,10 @@ public class PeerNoDB extends HGTestBase
 			    System.out.println("Peer failed to start.");
 			    peer.getStartupFailedException().printStackTrace(System.err);
 			}
-		} 
+		}
 	    catch (Exception e)
 		{
 			e.printStackTrace(System.err);
-		} 
+		}
 	}
 }

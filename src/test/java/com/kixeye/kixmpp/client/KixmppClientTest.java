@@ -21,42 +21,20 @@ package com.kixeye.kixmpp.client;
  */
 
 
+import com.kixeye.kixmpp.client.module.presence.Presence;
+import com.kixeye.kixmpp.client.module.presence.PresenceKixmppClientModule;
+import com.kixeye.kixmpp.server.KixmppServer;
 import io.netty.handler.ssl.SslContext;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.junit.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
-import org.apache.vysper.mina.TCPEndpoint;
-import org.apache.vysper.storage.StorageProviderRegistry;
-import org.apache.vysper.storage.inmemory.MemoryStorageProviderRegistry;
-import org.apache.vysper.xmpp.addressing.Entity;
-import org.apache.vysper.xmpp.addressing.EntityImpl;
-import org.apache.vysper.xmpp.authorization.AccountManagement;
-import org.apache.vysper.xmpp.modules.extension.xep0050_adhoc_commands.AdhocCommandsModule;
-import org.apache.vysper.xmpp.modules.extension.xep0077_inbandreg.InBandRegistrationModule;
-import org.apache.vysper.xmpp.modules.extension.xep0092_software_version.SoftwareVersionModule;
-import org.apache.vysper.xmpp.modules.extension.xep0119_xmppping.XmppPingModule;
-import org.apache.vysper.xmpp.modules.extension.xep0133_service_administration.ServiceAdministrationModule;
-import org.apache.vysper.xmpp.modules.extension.xep0202_entity_time.EntityTimeModule;
-import org.apache.vysper.xmpp.server.XMPPServer;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.kixeye.kixmpp.client.module.presence.Presence;
-import com.kixeye.kixmpp.client.module.presence.PresenceKixmppClientModule;
 
 /**
  * Tests the {@link KixmppClient}
@@ -69,11 +47,14 @@ public class KixmppClientTest {
 	private String password;
 	private String resource;
 	private int port;
-	
-	private XMPPServer server;
+
+	KixmppServer server;
+
 	
 	@Before
 	public void setUp() throws Exception {
+
+
 		domain = UUID.randomUUID().toString().replace("-", "");
 		username = UUID.randomUUID().toString().replace("-", "");
 		password = UUID.randomUUID().toString().replace("-", "");
@@ -84,37 +65,41 @@ public class KixmppClientTest {
         
         port = socketServer.getLocalPort();
         socketServer.close();
-        
-        StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
 
-        final Entity adminJID = EntityImpl.parseUnchecked(username + "@" + domain);
-        final AccountManagement accountManagement = (AccountManagement) providerRegistry .retrieve(AccountManagement.class);
-        
-        if (!accountManagement.verifyAccountExists(adminJID)) {
-            accountManagement.addUser(adminJID, password);
-        }
-        
-        TCPEndpoint tcpEndpoint = new TCPEndpoint();
-        tcpEndpoint.setPort(port);
+		server = new KixmppServer(port, domain);
+		server.start();
 
-        try (InputStream certStream = this.getClass().getResourceAsStream("/bogus_mina_tls.cert")) {
-			server = new XMPPServer(domain);
-	        server.addEndpoint(tcpEndpoint);
-	        server.setStorageProviderRegistry(providerRegistry);
-	        server.setTLSCertificateInfo(certStream, "boguspw");
-	
-	        server.start();
-	        
-	        server.addModule(new SoftwareVersionModule());
-	        server.addModule(new EntityTimeModule());
-	        server.addModule(new XmppPingModule());
-	        server.addModule(new InBandRegistrationModule());
-	        server.addModule(new AdhocCommandsModule());
-	        final ServiceAdministrationModule serviceAdministrationModule = new ServiceAdministrationModule();
-	        // unless admin user account with a secure password is added, this will be not become effective
-	        serviceAdministrationModule.setAddAdminJIDs(Arrays.asList(adminJID)); 
-	        server.addModule(serviceAdministrationModule);
-        }
+
+//        StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
+//
+//        final Entity adminJID = EntityImpl.parseUnchecked(username + "@" + domain);
+//        final AccountManagement accountManagement = (AccountManagement) providerRegistry .retrieve(AccountManagement.class);
+//
+//        if (!accountManagement.verifyAccountExists(adminJID)) {
+//            accountManagement.addUser(adminJID, password);
+//        }
+//
+//        TCPEndpoint tcpEndpoint = new TCPEndpoint();
+//        tcpEndpoint.setPort(port);
+//
+//        try (InputStream certStream = this.getClass().getResourceAsStream("/bogus_mina_tls.cert")) {
+//			server = new XMPPServer(domain);
+//	        server.addEndpoint(tcpEndpoint);
+//	        server.setStorageProviderRegistry(providerRegistry);
+//	        server.setTLSCertificateInfo(certStream, "boguspw");
+//
+//	        server.start();
+//
+//	        server.addModule(new SoftwareVersionModule());
+//	        server.addModule(new EntityTimeModule());
+//	        server.addModule(new XmppPingModule());
+//	        server.addModule(new InBandRegistrationModule());
+//	        server.addModule(new AdhocCommandsModule());
+//	        final ServiceAdministrationModule serviceAdministrationModule = new ServiceAdministrationModule();
+//	        // unless admin user account with a secure password is added, this will be not become effective
+//	        serviceAdministrationModule.setAddAdminJIDs(Arrays.asList(adminJID));
+//	        server.addModule(serviceAdministrationModule);
+//        }
 	}
 	
 	@After
@@ -122,8 +107,8 @@ public class KixmppClientTest {
         server.stop();
 	}
 	
-	@Test
-	public void testSimpleConnect() throws Exception {
+	@Test @Ignore
+	public void testSimpleSSLConnect() throws Exception {
 		try (KixmppClient client = new KixmppClient(createSslContext(), KixmppClient.Type.TCP)) {
 			Assert.assertNotNull(client.connect("localhost", port, domain).get(2, TimeUnit.SECONDS));
 			Assert.assertNotNull(client.login(username, password, resource).get(2, TimeUnit.SECONDS));
@@ -131,6 +116,16 @@ public class KixmppClientTest {
 		}
 	}
 
+	@Test
+	public void testSimpleConnect() throws Exception {
+		try (KixmppClient client = new KixmppClient()) {
+			Assert.assertNotNull(client.connect("localhost", port, domain).get(2, TimeUnit.SECONDS));
+			Assert.assertNotNull(client.login(username, password, resource).get(2, TimeUnit.SECONDS));
+			client.module(PresenceKixmppClientModule.class).updatePresence(new Presence());
+		}
+	}
+
+	@Ignore
 	private SslContext createSslContext() throws Exception {
 		Certificate cert;
 	    

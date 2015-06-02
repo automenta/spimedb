@@ -7,8 +7,10 @@
  */
 package org.hypergraphdb.peer;
 
-import java.util.concurrent.Future;
 import mjson.Json;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  *
@@ -27,7 +29,6 @@ public interface PeerInterface
      * There is only one <code>MessageHandler</code> for incoming message through
      * a given <code>PeerInterface</code> and this method sets it for this one.
      * </p>
-     * @param message
      */
     void setMessageHandler(MessageHandler messageHandler);
     
@@ -49,7 +50,7 @@ public interface PeerInterface
 	 * well as for all activities triggered by this <code>PeerInterface</code>.
 	 * </p>
 	 */
-	void start();
+	void start() throws ExecutionException, InterruptedException;
 
 	/**
 	 * <p>Return <code>true</code> if we are currently connected to the network
@@ -63,7 +64,7 @@ public interface PeerInterface
 	 * received or sent.
 	 * </p>
 	 */
-    void stop();
+    void close();
     
     /**
      * <p>

@@ -420,7 +420,7 @@ public class HyperGraphPeer
 		try 
 		{
 			if (peerInterface != null)
-				peerInterface.stop();
+				peerInterface.close();
 		}
 		catch (Throwable t) { }
 		//

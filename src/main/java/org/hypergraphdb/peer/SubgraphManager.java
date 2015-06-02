@@ -7,29 +7,9 @@
  */
 package org.hypergraphdb.peer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.Callable;
 import mjson.Json;
-import org.hypergraphdb.HGException;
-import org.hypergraphdb.HGHandle;
-import org.hypergraphdb.HGIndex;
-import org.hypergraphdb.HGLink;
-import org.hypergraphdb.HGPersistentHandle;
-import org.hypergraphdb.HGRandomAccessResult;
-import org.hypergraphdb.HGStore;
-import org.hypergraphdb.HyperGraph;
-import org.hypergraphdb.ReadyRef;
+import org.apache.commons.lang3.StringUtils;
+import org.hypergraphdb.*;
 import org.hypergraphdb.algorithms.CopyGraphTraversal;
 import org.hypergraphdb.algorithms.HGTraversal;
 import org.hypergraphdb.algorithms.HyperTraversal;
@@ -40,13 +20,12 @@ import org.hypergraphdb.storage.RAMStorageGraph;
 import org.hypergraphdb.storage.StorageGraph;
 import org.hypergraphdb.transaction.HGTransactionConfig;
 import org.hypergraphdb.type.HGAtomType;
-import org.hypergraphdb.util.FilterIterator;
-import org.hypergraphdb.util.HGAtomResolver;
-import org.hypergraphdb.util.HGUtils;
-import org.hypergraphdb.util.Mapping;
-import org.hypergraphdb.util.Pair;
-import org.hypergraphdb.util.RefResolver;
-import org.jivesoftware.smack.util.StringUtils;
+import org.hypergraphdb.util.*;
+
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * @author ciprian.costa
@@ -56,8 +35,11 @@ import org.jivesoftware.smack.util.StringUtils;
  */
 public class SubgraphManager
 {
-	
-	public static String encodeSubgraph(StorageGraph sgraph)
+
+    public static final Base64.Encoder ENCODER = Base64.getEncoder();
+    public static final Base64.Decoder DECODER = Base64.getDecoder();
+
+    public static String encodeSubgraph(StorageGraph sgraph)
 	{
 		SubgraphSerializer ser = new SubgraphSerializer();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -69,14 +51,14 @@ public class SubgraphManager
 		{
 			throw new RuntimeException(e);
 		}
-		return StringUtils.encodeBase64(out.toByteArray());
+		return ENCODER.encodeToString(out.toByteArray());
 	}
 	
 	public static RAMStorageGraph decodeSubgraph(String sgraphString)
 	{
 		try
 		{
-			ByteArrayInputStream in = new ByteArrayInputStream(StringUtils.decodeBase64(sgraphString));
+			ByteArrayInputStream in = new ByteArrayInputStream(DECODER.decode(sgraphString));
 			return (RAMStorageGraph)new SubgraphSerializer().readData(in);
 		}
 		catch (IOException e)

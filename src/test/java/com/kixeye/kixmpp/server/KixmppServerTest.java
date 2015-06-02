@@ -20,27 +20,6 @@ package com.kixeye.kixmpp.server;
  * #L%
  */
 
-import io.netty.handler.ssl.SslContext;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
-import io.netty.util.concurrent.Promise;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.SmackException.NotConnectedException;
-import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.tcp.XMPPTCPConnection;
-import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.kixeye.kixmpp.KixmppJid;
 import com.kixeye.kixmpp.client.KixmppClient;
 import com.kixeye.kixmpp.client.module.chat.MessageKixmppClientModule;
@@ -59,6 +38,17 @@ import com.kixeye.kixmpp.server.module.muc.MucHistory;
 import com.kixeye.kixmpp.server.module.muc.MucHistoryProvider;
 import com.kixeye.kixmpp.server.module.muc.MucKixmppServerModule;
 import com.kixeye.kixmpp.server.utils.SocketUtils;
+import io.netty.handler.ssl.SslContext;
+import io.netty.util.concurrent.Promise;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests the {@link KixmppServer}
@@ -396,58 +386,58 @@ public class KixmppServerTest {
 		}
 	}
 
-	@Test
-	public void testSimpleUsingSmack() throws Exception {
-		try (KixmppServer server = new KixmppServer(new InetSocketAddress(SocketUtils.findAvailableTcpPort()), "testChat",
-				new InetSocketAddress(SocketUtils.findAvailableTcpPort()), new ConstNodeDiscovery())) {
-			Assert.assertNotNull(server.start().get(2, TimeUnit.SECONDS));
-
-			((InMemoryAuthenticationService) server.module(
-					SaslKixmppServerModule.class).getAuthenticationService())
-					.addUser("testUser", "testPassword");
-			server.module(MucKixmppServerModule.class).addService("conference")
-					.addRoom("someRoom");
-
-			XMPPConnection connection = new XMPPTCPConnection(
-					new ConnectionConfiguration("localhost", server
-							.getBindAddress().getPort(), server.getDomain()));
-
-			try {
-				connection.connect();
-
-				connection.login("testUser", "testPassword");
-
-				final LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
-
-				PacketListener messageListener = new PacketListener() {
-					public void processPacket(Packet packet)
-							throws NotConnectedException {
-						messages.offer((Message) packet);
-					}
-				};
-
-				MultiUserChat chat = new MultiUserChat(connection,
-						"someRoom@conference.testChat");
-				chat.addMessageListener(messageListener);
-				chat.join("testNick");
-
-				chat.sendMessage("hello!");
-
-				Message message = messages.poll(2, TimeUnit.SECONDS);
-
-				Assert.assertNotNull(message);
-
-				if (null == message.getBody()
-						|| "".equals(message.getBody().trim())) {
-					message = messages.poll(2, TimeUnit.SECONDS);
-
-					Assert.assertNotNull(message);
-
-					Assert.assertEquals("hello!", message.getBody());
-				}
-			} finally {
-				connection.disconnect();
-			}
-		}
-	}
+//	@Test
+//	public void testSimpleUsingSmack() throws Exception {
+//		try (KixmppServer server = new KixmppServer(new InetSocketAddress(SocketUtils.findAvailableTcpPort()), "testChat",
+//				new InetSocketAddress(SocketUtils.findAvailableTcpPort()), new ConstNodeDiscovery())) {
+//			Assert.assertNotNull(server.start().get(2, TimeUnit.SECONDS));
+//
+//			((InMemoryAuthenticationService) server.module(
+//					SaslKixmppServerModule.class).getAuthenticationService())
+//					.addUser("testUser", "testPassword");
+//			server.module(MucKixmppServerModule.class).addService("conference")
+//					.addRoom("someRoom");
+//
+//			XMPPConnection connection = new XMPPTCPConnection(
+//					new ConnectionConfiguration("localhost", server
+//							.getBindAddress().getPort(), server.getDomain()));
+//
+//			try {
+//				connection.connect();
+//
+//				connection.login("testUser", "testPassword");
+//
+//				final LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
+//
+//				PacketListener messageListener = new PacketListener() {
+//					public void processPacket(Packet packet)
+//							throws NotConnectedException {
+//						messages.offer((Message) packet);
+//					}
+//				};
+//
+//				MultiUserChat chat = new MultiUserChat(connection,
+//						"someRoom@conference.testChat");
+//				chat.addMessageListener(messageListener);
+//				chat.join("testNick");
+//
+//				chat.sendMessage("hello!");
+//
+//				Message message = messages.poll(2, TimeUnit.SECONDS);
+//
+//				Assert.assertNotNull(message);
+//
+//				if (null == message.getBody()
+//						|| "".equals(message.getBody().trim())) {
+//					message = messages.poll(2, TimeUnit.SECONDS);
+//
+//					Assert.assertNotNull(message);
+//
+//					Assert.assertEquals("hello!", message.getBody());
+//				}
+//			} finally {
+//				connection.disconnect();
+//			}
+//		}
+//	}
 }

@@ -155,13 +155,17 @@ public class KixmppServer implements AutoCloseable, ClusterListener {
 	public KixmppServer(InetSocketAddress bindAddress, String domain) {
 		this(bindAddress, domain, DEFAULT_CLUSTER_ADDRESS, new ConstNodeDiscovery());
 	}
-	
-	/**
-	 * Creates a new {@link KixmppServer} with the given ssl engine.
-	 * 
-	 * @param bindAddress
-	 * @param domain
-	 */
+
+	public KixmppServer(int port, String domain) {
+		this(new InetSocketAddress(port), domain);
+	}
+
+		/**
+         * Creates a new {@link KixmppServer} with the given ssl engine.
+         *
+         * @param bindAddress
+         * @param domain
+         */
 	public KixmppServer(InetSocketAddress bindAddress, String domain, InetSocketAddress clusterAddress, NodeDiscovery clusterDiscovery) {
 		this(bindAddress, domain, clusterAddress, clusterDiscovery, true);
 	}
