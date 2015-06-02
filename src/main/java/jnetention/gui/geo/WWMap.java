@@ -100,7 +100,7 @@ public class WWMap extends JPanel {
         this.initialize(includeStatusBar, includeLayerPanel, includeStatsPanel);
     }
 
-    protected void initialize(boolean includeStatusBar, boolean includeLayerPanel, boolean includeStatsPanel)
+    protected void initialize(boolean includeStatusBar  , boolean includeLayerPanel, boolean includeStatsPanel)
     {
         setLayout(new BorderLayout());
 

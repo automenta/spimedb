@@ -1,0 +1,48 @@
+package com.kixeye.kixmpp.p2p.message;
+
+/*
+ * #%L
+ * Zaqar
+ * %%
+ * Copyright (C) 2014 Charles Barry
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
+public class PingResponse {
+    private long createTimeInMilliseconds;
+    private long responseTimeInMilliseconds;
+
+    public PingResponse() {
+    }
+
+    public PingResponse(long createTimeInMilliseconds, long responseTimeInMilliseconds) {
+        this.createTimeInMilliseconds = createTimeInMilliseconds;
+        this.responseTimeInMilliseconds = responseTimeInMilliseconds;
+    }
+
+    public PingResponse(PingRequest request) {
+        this.createTimeInMilliseconds = request.getCreateTimeInMilliseconds();
+        this.responseTimeInMilliseconds = System.currentTimeMillis();
+    }
+
+    public long getCreateTimeInMilliseconds() {
+        return createTimeInMilliseconds;
+    }
+
+    public long getResponseTimeInMilliseconds() {
+        return responseTimeInMilliseconds;
+    }
+}
