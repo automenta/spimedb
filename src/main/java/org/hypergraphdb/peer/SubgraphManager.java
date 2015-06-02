@@ -81,10 +81,10 @@ public class SubgraphManager
             TreeMap<HGPersistentHandle, Object> sorted = new TreeMap<HGPersistentHandle, Object>();
             for (Pair<HGPersistentHandle, Object> p : graph)
                 sorted.put(p.getFirst(), p.getSecond());
-            for (HGPersistentHandle h : sorted.keySet())
+            for (Map.Entry<HGPersistentHandle, Object> hgPersistentHandleObjectEntry : sorted.entrySet())
             {
-                out.write(h.toString() + "=[");
-                Object x = sorted.get(h);
+                out.write(hgPersistentHandleObjectEntry.getKey().toString() + "=[");
+                Object x = hgPersistentHandleObjectEntry.getValue();
                 if (x instanceof HGPersistentHandle [])
                 {
                     HGPersistentHandle [] link = (HGPersistentHandle[])x;
@@ -313,7 +313,7 @@ public class SubgraphManager
                                                         HGTraversal traversal)
     {
         Set<HGHandle> roots = new HashSet<HGHandle>();
-        CopyGraphTraversal copyTraversal = null;
+        CopyGraphTraversal copyTraversal;
         if (traversal instanceof CopyGraphTraversal)
             copyTraversal = (CopyGraphTraversal)traversal;
         else if (traversal instanceof HyperTraversal)
@@ -531,7 +531,7 @@ public class SubgraphManager
                 substituteTypes.put(typeHandle, typeHandle);
             else if (graph.get(typeHandle) == null) // do we have the atom type locally?
             {
-                    Class<?> clazz = null;
+                    Class<?> clazz;
                     try
                     {
                         if(classname.startsWith("[L"))
@@ -543,7 +543,7 @@ public class SubgraphManager
                            clazz = HGUtils.loadClass(graph, classname);
                         HGHandle localType = graph.getTypeSystem().getTypeHandle(clazz);
                         if (localType == null)
-                            throw new HGException("Unable to create local type for Java class '" + classname + "'");
+                            throw new HGException("Unable to create local type for Java class '" + classname + '\'');
                         substituteTypes.put(typeHandle, graph.getPersistentHandle(localType));                        
                     }
                     catch (ClassNotFoundException ex)

@@ -282,7 +282,7 @@ public class Self extends EventEmitter.DefaultEventEmitter {
             db.add(x);
             index(null, x);
         }            
-        emit(SaveEvent.class, null);
+        emit(SaveEvent.class);
     }
 
     

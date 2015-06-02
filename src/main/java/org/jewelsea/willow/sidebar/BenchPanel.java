@@ -63,7 +63,7 @@ public class BenchPanel extends TitledPane {
         ToggleGroup benchToggleGroup = new ToggleGroup();
         boolean firstCategory = true;
         for (final String[] link : benchmarkLinks) {
-            if ("".equals(link[1])) {
+            if (link[1] != null && link[1].isEmpty()) {
                 // a category of benchmarks.
                 final Label categoryLabel = new Label(link[0]);
                 categoryLabel.setStyle("-fx-text-fill: midnightblue; -fx-font-size: 16px;");

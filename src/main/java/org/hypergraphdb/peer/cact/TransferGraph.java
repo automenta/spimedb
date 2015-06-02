@@ -8,30 +8,20 @@
 package org.hypergraphdb.peer.cact;
 
 
-import static org.hypergraphdb.peer.Messages.CONTENT;
-
-import static org.hypergraphdb.peer.Messages.getReply;
-import static org.hypergraphdb.peer.Messages.getSender;
-import java.util.UUID;
 import mjson.Json;
 import org.hypergraphdb.HGHandle;
 import org.hypergraphdb.algorithms.CopyGraphTraversal;
 import org.hypergraphdb.algorithms.DefaultALGenerator;
 import org.hypergraphdb.algorithms.HGTraversal;
 import org.hypergraphdb.algorithms.HyperTraversal;
-import org.hypergraphdb.peer.HGPeerIdentity;
-import org.hypergraphdb.peer.HyperGraphPeer;
-import org.hypergraphdb.peer.Messages;
-import org.hypergraphdb.peer.Performative;
-import org.hypergraphdb.peer.SubgraphManager;
-import org.hypergraphdb.peer.workflow.FSMActivity;
-import org.hypergraphdb.peer.workflow.FromState;
-import org.hypergraphdb.peer.workflow.OnMessage;
-import org.hypergraphdb.peer.workflow.PossibleOutcome;
-import org.hypergraphdb.peer.workflow.WorkflowState;
-import org.hypergraphdb.peer.workflow.WorkflowStateConstant;
+import org.hypergraphdb.peer.*;
+import org.hypergraphdb.peer.workflow.*;
 import org.hypergraphdb.util.Mapping;
 import org.hypergraphdb.util.Pair;
+
+import java.util.UUID;
+
+import static org.hypergraphdb.peer.Messages.*;
 
 public class TransferGraph extends FSMActivity
 {
@@ -81,7 +71,7 @@ public class TransferGraph extends FSMActivity
     public WorkflowStateConstant onQueryRef(Json msg) throws Throwable
     {
         traversal = Messages.content(msg); 
-        CopyGraphTraversal copyTraversal = null;
+        CopyGraphTraversal copyTraversal;
         if (traversal instanceof CopyGraphTraversal)
             copyTraversal = (CopyGraphTraversal)traversal;
         else if (traversal instanceof HyperTraversal)

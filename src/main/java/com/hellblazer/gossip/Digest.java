@@ -14,13 +14,13 @@
  */
 package com.hellblazer.gossip;
 
-import static com.hellblazer.gossip.Endpoint.readInetAddress;
-import static com.hellblazer.gossip.Endpoint.writeInetAddress;
-
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.UUID;
+
+import static com.hellblazer.gossip.Endpoint.readInetAddress;
+import static com.hellblazer.gossip.Endpoint.writeInetAddress;
 
 /**
  * Contains information about a specified list of Endpoints and the largest
@@ -127,9 +127,9 @@ public class Digest implements Comparable<Digest> {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(address);
-        sb.append(":");
+        sb.append(':');
         sb.append(id);
-        sb.append(":");
+        sb.append(':');
         sb.append(time);
         return sb.toString();
     }

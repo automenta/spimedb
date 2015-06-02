@@ -69,7 +69,6 @@ public interface GossipMessages {
      * @param digests
      *            - the list of heartbeat digests the receiver knows about
      */
-    @Deprecated void gossip(List<Digest> digests);
     void gossip(Iterator<Digest> digests);
 
     /**

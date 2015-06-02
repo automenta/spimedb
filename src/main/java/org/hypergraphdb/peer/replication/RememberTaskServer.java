@@ -9,27 +9,24 @@ package org.hypergraphdb.peer.replication;
 
 
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import mjson.Json;
-
 import org.hypergraphdb.HGHandle;
 import org.hypergraphdb.peer.HGPeerIdentity;
 import org.hypergraphdb.peer.HyperGraphPeer;
 import org.hypergraphdb.peer.Messages;
 import org.hypergraphdb.peer.StorageService;
 import org.hypergraphdb.peer.log.Timestamp;
-import org.hypergraphdb.peer.workflow.AbstractActivity;
-import org.hypergraphdb.peer.workflow.Conversation;
-import org.hypergraphdb.peer.workflow.ProposalConversation;
-import org.hypergraphdb.peer.workflow.TaskActivity;
-import org.hypergraphdb.peer.workflow.TaskFactory;
+import org.hypergraphdb.peer.workflow.*;
 import org.hypergraphdb.storage.StorageGraph;
 
-import static org.hypergraphdb.peer.HGDBOntology.*;
-import static org.hypergraphdb.peer.Messages.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.hypergraphdb.peer.HGDBOntology.SLOT_CURRENT_VERSION;
+import static org.hypergraphdb.peer.HGDBOntology.SLOT_LAST_VERSION;
+import static org.hypergraphdb.peer.Messages.getReply;
+import static org.hypergraphdb.peer.Messages.getSender;
 
 /**
  * 
@@ -42,7 +39,7 @@ import static org.hypergraphdb.peer.Messages.*;
  */
 public class RememberTaskServer extends TaskActivity<RememberTaskServer.State>
 {
-	protected enum State
+	public static enum State
 	{
 		BeforeStart, Started, HandleAccepted, HandleRejected, Done
 	};

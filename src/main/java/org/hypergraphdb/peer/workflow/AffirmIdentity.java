@@ -8,17 +8,17 @@
 package org.hypergraphdb.peer.workflow;
 
 
-import static org.hypergraphdb.peer.Messages.*;
-import static org.hypergraphdb.peer.Performative.*;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import mjson.Json;
-
-import org.hypergraphdb.HGPersistentHandle;
 import org.hypergraphdb.peer.HGPeerIdentity;
 import org.hypergraphdb.peer.HyperGraphPeer;
 import org.hypergraphdb.peer.Messages;
+
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.hypergraphdb.peer.Messages.getReply;
+import static org.hypergraphdb.peer.Messages.getSender;
+import static org.hypergraphdb.peer.Performative.*;
 
 public class AffirmIdentity extends FSMActivity
 {
@@ -39,7 +39,7 @@ public class AffirmIdentity extends FSMActivity
     HGPeerIdentity parseIdentity(Json j)
     {
         HGPeerIdentity I = new HGPeerIdentity();
-        I.setId((HGPersistentHandle)Messages.fromJson(j.at("uuid")));
+        I.setId(Messages.fromJson(j.at("uuid")));
         I.setHostname(j.at("hostname").asString());
         I.setIpAddress(j.at("ipaddress").asString());
         I.setGraphLocation(j.at("graph-location").asString());

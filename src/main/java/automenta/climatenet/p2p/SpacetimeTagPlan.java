@@ -68,7 +68,7 @@ public class SpacetimeTagPlan {
 
             SpacePoint sp = null;
 
-            List<Long> times = times = new ArrayList(1);
+            List<Long> times = new ArrayList(1);
 
             if (get(0).equals("time")) {
                 //convert time ranges to a set of time points

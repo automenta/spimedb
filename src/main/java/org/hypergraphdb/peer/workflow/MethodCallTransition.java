@@ -7,12 +7,13 @@
  */
 package org.hypergraphdb.peer.workflow;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
-
 import org.hypergraphdb.annotation.HGTransact;
 import org.hypergraphdb.transaction.HGTransactionConfig;
 import org.hypergraphdb.util.HGUtils;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 /**
  * <p>
@@ -55,7 +56,7 @@ public class MethodCallTransition implements Transition
         }
         catch (Exception e)
         {
-        	System.err.println("Action on transition in activity " + activity + " args:" + args);
+        	System.err.println("Action on transition in activity " + activity + " args:" + Arrays.toString(args));
         	for (Object x : args) System.err.println(x);
         	e.printStackTrace(System.err);
         	HGUtils.throwRuntimeException(e);

@@ -206,7 +206,8 @@ public class NodeControlPane extends BorderPane {
                     public JComponent newComponent() {
                         return new ConceptLogPanel(self.nar);
                     }
-                }
+                },
+                iff
         );
         sp.setDividerPositions(0.85f);
         sp.setOrientation(Orientation.VERTICAL);
@@ -258,7 +259,7 @@ public class NodeControlPane extends BorderPane {
         Pane p = new Pane();
         
         TextArea ta = new TextArea();
-        ta.setText(self.db.toString() + "\n" + self.db.toString() );
+        ta.setText(self.db.toString() + '\n' + self.db.toString() );
         p.getChildren().add(ta);
         
         //core.data.sizeLong()

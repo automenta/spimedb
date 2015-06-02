@@ -7,13 +7,14 @@
  */
 package org.hypergraphdb.peer.serializer;
 
+import org.hypergraphdb.HGHandleFactory;
+import org.hypergraphdb.HGPersistentHandle;
+import org.hypergraphdb.handle.UUIDHandleFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
-import org.hypergraphdb.HGHandleFactory;
-import org.hypergraphdb.HGPersistentHandle;
-import org.hypergraphdb.handle.UUIDHandleFactory;
 
 public class SerializationUtils
 {
@@ -42,7 +43,7 @@ public class SerializationUtils
 		// assume not null
 		try
 		{
-			int v = ((Integer) data).intValue();
+			int v = data.intValue();
 			out.write((byte) ((v >>> 24) & 0xFF));
 			out.write((byte) ((v >>> 16) & 0xFF));
 			out.write((byte) ((v >>> 8) & 0xFF));

@@ -294,7 +294,7 @@ public class XMPPPeerInterface implements PeerInterface {
     final static public int DEFAULT_PORT = 10001;
 
     public void start() throws ExecutionException, InterruptedException {
-        assert messageHandler != null : new NullPointerException("MessageHandler not specified.");
+        //assert messageHandler != null : new NullPointerException("MessageHandler not specified.");
 
         client = new KixmppClient();
 

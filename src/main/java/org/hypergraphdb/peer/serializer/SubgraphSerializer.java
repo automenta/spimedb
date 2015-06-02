@@ -7,18 +7,17 @@
  */
 package org.hypergraphdb.peer.serializer;
 
-import java.io.IOException;
+import org.hypergraphdb.HGPersistentHandle;
+import org.hypergraphdb.storage.RAMStorageGraph;
+import org.hypergraphdb.storage.StorageGraph;
+import org.hypergraphdb.util.Pair;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import org.hypergraphdb.HGPersistentHandle;
-import org.hypergraphdb.storage.RAMStorageGraph;
-import org.hypergraphdb.storage.StorageGraph;
-import org.hypergraphdb.util.Pair;
 
 public class SubgraphSerializer
 {
@@ -28,9 +27,9 @@ public class SubgraphSerializer
 
     public Object readData(InputStream in) throws IOException
     {
-        RAMStorageGraph result = null;
+        RAMStorageGraph result;
 
-        byte type = 0;
+        byte type;
         
         int rootCount = SerializationUtils.deserializeInt(in);
         

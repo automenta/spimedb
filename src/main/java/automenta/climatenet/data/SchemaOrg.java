@@ -121,7 +121,6 @@ abstract public class SchemaOrg {
         reader.close();
 
         reader = new CSVReader(new FileReader("data/activitystreams/verbs.csv"), ',', '\"');
-        c = 0;
         while ((line = reader.readNext()) != null) {
             //System.out.println("  " + Arrays.asList(line));
             //[id, label, comment, domains, ranges]

@@ -22,7 +22,7 @@ public class NProperty extends NTag {
     }
 
     protected void addDefaultTags() {
-        put(Tag.property.toString(), 1.0);
+        put(Tag.property, 1.0);
     }
     
     

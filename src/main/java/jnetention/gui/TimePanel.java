@@ -88,9 +88,9 @@ public class TimePanel extends BorderPane {
         lAppointmentGroupMap.put("group21", new Agenda.AppointmentGroupImpl().withStyleClass("group21"));
         lAppointmentGroupMap.put("group22", new Agenda.AppointmentGroupImpl().withStyleClass("group22"));
         lAppointmentGroupMap.put("group23", new Agenda.AppointmentGroupImpl().withStyleClass("group23"));
-        for (String lId : lAppointmentGroupMap.keySet()) {
-            AppointmentGroup lAppointmentGroup = lAppointmentGroupMap.get(lId);
-            lAppointmentGroup.setDescription(lId);
+        for (Map.Entry<String, AppointmentGroup> stringAppointmentGroupEntry : lAppointmentGroupMap.entrySet()) {
+            AppointmentGroup lAppointmentGroup = stringAppointmentGroupEntry.getValue();
+            lAppointmentGroup.setDescription(stringAppointmentGroupEntry.getKey());
             agenda.appointmentGroups().add(lAppointmentGroup);
         }
 

@@ -72,7 +72,7 @@ public class StorageService
 		
 		
 		ownAddedHandles.add(handle);	
-		graph.define((HGPersistentHandle)handle, value);
+		graph.define(handle, value);
 		
 		return handle;
 		
@@ -86,7 +86,7 @@ public class StorageService
 		logGraph.remove(handle, false);
 
 		ownUpdatedHandles.add(handle);	
-		graph.replace((HGPersistentHandle)handle, value);
+		graph.replace(handle, value);
 		
 		return handle;
 	}
@@ -94,7 +94,7 @@ public class StorageService
 
 	public HGHandle addOrReplaceSubgraph(StorageGraph subgraph)
 	{
-		HGPersistentHandle handle = (HGPersistentHandle)subgraph.getRoots().iterator().next();
+		HGPersistentHandle handle = subgraph.getRoots().iterator().next();
 		
 		if (graph.getStore().containsLink(handle))
 		{

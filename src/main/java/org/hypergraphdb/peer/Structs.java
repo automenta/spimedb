@@ -12,14 +12,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 //import java.net.URI;
 //import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.Map.Entry;
 
 //import net.jxta.document.AdvertisementFactory;
@@ -544,8 +537,7 @@ public class Structs
         else
         {
             List<Object> l = new ArrayList<Object>();
-            for (Object x : args)
-                l.add(x);
+            Collections.addAll(l, args);
 
             return (T) getStructPart(source, l, 0);
         }
@@ -568,8 +560,7 @@ public class Structs
         else
         {
             List<Object> l = new ArrayList<Object>();
-            for (Object x : args)
-                l.add(x);
+            Collections.addAll(l, args);
 
             return hasStructPart(source, l, 0);
         }
@@ -581,56 +572,51 @@ public class Structs
         if (source == null)
             return defaultValue;
         if (hasPart(source, args))
-            defaultValue = (T) getPart(source, args);
+            defaultValue = getPart(source, args);
         return defaultValue;
     }
 
-    private static boolean hasStructPart(Object source, Object path, int pos)
-    {
-        if (!(path instanceof List))
-        {
-            return hasStructPart(source, path);
-        }
-        else
-        {
-            List<Object> list = (List<Object>) path;
-            if ((list.size() < pos) || (pos < 0))
-                return false;
+    private static boolean hasStructPart(Object source, Object path, int pos) {
+        while (true) {
+            if (!(path instanceof List)) {
+                return hasStructPart(source, path);
+            } else {
+                List<Object> list = (List<Object>) path;
+                if ((list.size() < pos) || (pos < 0))
+                    return false;
 
-            boolean hasPart = hasStructPart(source, list.get(pos));
-            if (hasPart)
-            {
-                if (pos == list.size())
-                    return true;
-                else
-                    return hasStructPart(getStructPart(source, list.get(pos)),
-                                         path,
-                                         pos + 1);
+                boolean hasPart = hasStructPart(source, list.get(pos));
+                if (hasPart) {
+                    if (pos == list.size())
+                        return true;
+                    else {
+                        source = getStructPart(source, list.get(pos));
+                        pos = pos + 1;
+                    }
+                } else
+                    return false;
             }
-            else
-                return false;
         }
     }
 
-    private static Object getStructPart(Object source, Object path, int pos)
-    {
-        if (!(path instanceof List))
-        {
-            return getStructPart(source, path);
-        }
-        else
-        {
-            List<Object> list = (List<Object>) path;
-            if ((list.size() < pos) || (pos < 0))
-                return null;
+    private static Object getStructPart(Object source, Object path, int pos) {
+        while (true) {
+            if (!(path instanceof List)) {
+                return getStructPart(source, path);
+            } else {
+                List<Object> list = (List<Object>) path;
+                if ((list.size() < pos) || (pos < 0))
+                    return null;
 
-            Object part = getStructPart(source, list.get(pos));
-            pos++;
+                Object part = getStructPart(source, list.get(pos));
+                pos++;
 
-            if (pos == list.size())
-                return createObject(part);
-            else
-                return getStructPart(part, path, pos);
+                if (pos == list.size())
+                    return createObject(part);
+                else {
+                    source = part;
+                }
+            }
         }
     }
 
@@ -734,7 +720,7 @@ public class Structs
     private static Class<?> getBeanClass(String className)
     {
         // must be a list of two elements, the first being the class name
-        Class<?> result = null;
+        Class<?> result;
 
         result = hgInvertedClassNames.get(className);
         if (result == null)
@@ -912,7 +898,7 @@ public class Structs
         if (name == null)
             throw new IllegalArgumentException(
                     "Unknown HyperGraph query condition or atom predicate type '"
-                            + x.getClass().getName() + "'");
+                            + x.getClass().getName() + '\'');
 
         // return list(name, svalue(x, true, true));
         return (List<Object>) svalue(x, true, true, null);

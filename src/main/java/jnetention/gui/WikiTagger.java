@@ -46,7 +46,7 @@ public class WikiTagger extends WikiBrowser {
                         @Override public void run() {
                             //TODO create Nobject
 
-                            NObject n = core.newObject(subject.name() + ": " + id + "=" + tags);
+                            NObject n = core.newObject(subject.name() + ": " + id + '=' + tags);
 
                             n.put("S",subject.id());
 

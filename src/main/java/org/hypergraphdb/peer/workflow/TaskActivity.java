@@ -8,20 +8,18 @@
 package org.hypergraphdb.peer.workflow;
 
 
-import java.lang.reflect.InvocationTargetException;
+import mjson.Json;
+import org.hypergraphdb.peer.HyperGraphPeer;
+import org.hypergraphdb.peer.Messages;
+import org.hypergraphdb.peer.PeerInterface;
+import org.hypergraphdb.util.Pair;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import mjson.Json;
-
-import org.hypergraphdb.peer.HyperGraphPeer;
-import org.hypergraphdb.peer.Messages;
-import org.hypergraphdb.peer.PeerInterface;
-import org.hypergraphdb.util.Pair;
 
 /**
  * Base class for tasks. A task is an <code>AbstractActivity</code> that
@@ -41,8 +39,7 @@ import org.hypergraphdb.util.Pair;
  * @author Cipri Costa
  * 
  */
-public abstract class TaskActivity<StateType> 
-	extends AbstractActivity<StateType> implements ActivityStateListener
+public abstract class TaskActivity<StateType>	extends AbstractActivity<StateType> implements ActivityStateListener
 {
     private UUID taskId;
     private HyperGraphPeer thisPeer;
@@ -73,7 +70,7 @@ public abstract class TaskActivity<StateType>
     /**
      * Conversation states we are interested in
      */
-    private HashSet<Object> conversationStates = new HashSet<Object>();
+    private HashSet<Object> conversationStates = new HashSet();
 
     public TaskActivity(HyperGraphPeer thisPeer, StateType start,
                         StateType end)
@@ -292,7 +289,7 @@ public abstract class TaskActivity<StateType>
 //        thisPeer.getPeerInterface().unregisterTask(getTaskId());
     }
 
-    protected void registerConversation(Conversation<?> conversation,
+    protected void registerConversation(Conversation conversation,
                                         UUID conversationId)
     {
 

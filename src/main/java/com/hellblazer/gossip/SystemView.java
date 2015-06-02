@@ -194,7 +194,7 @@ public class SystemView {
             return null;
         }
 
-        InetSocketAddress seed = null;
+        InetSocketAddress seed;
         int attempts = 0;
         do {
             if (attempts++ > seeds.size()) {

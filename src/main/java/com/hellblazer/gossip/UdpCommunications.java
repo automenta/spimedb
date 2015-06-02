@@ -50,6 +50,7 @@ import static java.lang.String.format;
  * 
  */
 public class UdpCommunications implements GossipCommunications {
+
     private class GossipHandler implements GossipMessages {
         private final InetSocketAddress gossipper;
 
@@ -63,10 +64,6 @@ public class UdpCommunications implements GossipCommunications {
             return gossipper;
         }
 
-        @Override
-        public void gossip(List<Digest> digests) {
-            sendDigests(digests, GOSSIP);
-        }
         @Override
         public void gossip(Iterator<Digest> digests) {
             sendDigests(digests, GOSSIP);
@@ -82,11 +79,12 @@ public class UdpCommunications implements GossipCommunications {
         public void update(List<Update> deltaState) {
             ByteBuffer buffer = bufferPool.allocate(MAX_SEG_SIZE);
             buffer.order(ByteOrder.BIG_ENDIAN);
-            for (Update state : deltaState) {
+            int n = deltaState.size();
+            for (int i = 0; i < n; i++) {
+                Update state = deltaState.get(i);
                 if (state.node.equals(gossipper)) {
                     if (log.isTraceEnabled()) {
-                        log.trace(String.format("Not sending % to the node that owns it",
-                                                state));
+                        log.trace("Not sending % to the node that owns it " + state);
                     }
                 } else {
                     UdpCommunications.this.update(UPDATE, state, gossipper,
@@ -491,7 +489,7 @@ public class UdpCommunications implements GossipCommunications {
      */
     private void send(byte msgType, ByteBuffer buffer, SocketAddress target) {
         if (socket.isClosed()) {
-            log.trace(String.format("Sending on a closed socket"));
+            log.trace("Sending on a closed socket");
             return;
         }
         int msgLength = buffer.position();
@@ -537,7 +535,7 @@ public class UdpCommunications implements GossipCommunications {
     /**
      * Service the next inbound datagram
      * 
-     * @param buffer
+     * @param
      *            - the buffer to use to receive the datagram
      * @throws IOException
      */

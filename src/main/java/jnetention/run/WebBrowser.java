@@ -105,9 +105,9 @@ public class WebBrowser extends Application {
         }
 
         public Route get(String url) {
-            for (String s : routes.keySet()) {
-                if (s.equals(url))
-                    return routes.get(s);
+            for (Map.Entry<String, Route> stringRouteEntry : routes.entrySet()) {
+                if (stringRouteEntry.getKey().equals(url))
+                    return stringRouteEntry.getValue();
             }
             return null;
         }
@@ -421,7 +421,7 @@ public class WebBrowser extends Application {
             // update the stage title to monitor the page displayed in the selected browser.
             // todo hmm I wonder how the listeners ever get removed...
             newBrowser.getView().getEngine().titleProperty().addListener((observableValue, oldTitle, newTitle) -> {
-                if (newTitle != null && !"".equals(newTitle)) {
+                if (newTitle != null && !newTitle.isEmpty()) {
                     stage.setTitle(getString("browser.name") + " - " + newTitle);
                 } else {
                     // necessary because when the browser is in the process of loading a new page, the title will be empty.  todo I wonder if the title would be reset correctly if the page has no title.

@@ -38,15 +38,16 @@ public class NodeId implements Comparable<NodeId> {
 
     static {
         // Hash network interfaces in an attempt to create a "mostly unique" id for this computer.
-        int machineHash;
+        int machineHash = 1;
         try {
-            StringBuilder sb = new StringBuilder();
+            //StringBuilder sb = new StringBuilder();
+
             Enumeration<NetworkInterface> iter = NetworkInterface.getNetworkInterfaces();
             while ( iter.hasMoreElements() ){
                 NetworkInterface ni = iter.nextElement();
-                sb.append( ni.toString() );
+                machineHash += 31 * machineHash + ni.getName().hashCode();
+                //sb.append( ni.toString() );
             }
-            machineHash = sb.toString().hashCode();
         } catch (Exception e) {
             logger.error("Unexpected exception during NodeId static initialization", e);
             machineHash = ThreadLocalRandom.current().nextInt();

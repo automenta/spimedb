@@ -140,14 +140,13 @@ public abstract class AbstractActivity<StateType> implements Runnable
         afterStateChanged(newValue);
     }
 
-    @SuppressWarnings("unchecked")
-    public void setStateListener(Object state, ActivityStateListener listener)
+    public <S extends StateType> void setStateListener(S state, ActivityStateListener listener)
     {
         ArrayList<ActivityStateListener> list = stateListeners.get(state);
         if (list == null)
         {
             list = new ArrayList<ActivityStateListener>();
-            stateListeners.put((StateType) state, list);
+            stateListeners.put(state, list);
         }
 
         list.add(listener);

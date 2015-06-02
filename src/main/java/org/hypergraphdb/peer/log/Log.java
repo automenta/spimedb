@@ -41,7 +41,7 @@ public class Log
 	private HashMap<Object, HGHandle> peerHandles = new HashMap<Object, HGHandle>();
 	private PeerInterface peerInterface;
 	private HashMap<Object, HashMap<Timestamp, Timestamp>> peerQueues = new HashMap<Object, HashMap<Timestamp,Timestamp>>();
-	private Timestamp timestamp;
+	final private Timestamp timestamp;
 	
 	public Log(HyperGraph logDb, PeerInterface peerInterface)
 	{
@@ -123,7 +123,7 @@ public class Log
 		
 	}
 	
-	public void confirmFromPeer(HGPeerIdentity targetId, Timestamp timestamp)
+	public void confirmFromPeer(HGPeerIdentity targetId, final Timestamp timestamp)
 	{
 		// record the peer received the message - this will be used for purging
 		Peer peer = getPeer(targetId);
@@ -173,7 +173,7 @@ public class Log
 	 * @param current_version 
 	 * @param last_version 
 	 */
-	public boolean registerRequest(HGPeerIdentity peerId, Timestamp last_version, Timestamp current_version)
+	public boolean registerRequest(HGPeerIdentity peerId, Timestamp last_version, final Timestamp current_version)
 	{
 		//TODO - add a timeout and return false;
 		
@@ -259,7 +259,7 @@ public class Log
 					{
 						Timestamp ts = logDb.get(handle);
 						LogEntry entry = new LogEntry(link.getTargetAt(1), logDb, ts);
-						entry.setOperation((StorageService.Operation)logDb.get(link.getTargetAt(2)));
+						entry.setOperation(logDb.get(link.getTargetAt(2)));
 						
 						result.add(entry);
 					}

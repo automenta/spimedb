@@ -46,11 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
@@ -158,6 +155,9 @@ public class KixmppServer implements AutoCloseable, ClusterListener {
 
 	public KixmppServer(int port, String domain) {
 		this(new InetSocketAddress(port), domain);
+	}
+	public KixmppServer(String host, int port, String domain) {
+		this(new InetSocketAddress(host, port), domain);
 	}
 
 		/**
@@ -632,7 +632,7 @@ public class KixmppServer implements AutoCloseable, ClusterListener {
     		}
     		
     		if (!wasSet) {
-    			throw new IllegalStateException(String.format("The current state is [%s] but must be [%s]", state.get(), expectedStates));
+    			throw new IllegalStateException(String.format("The current state is [%s] but must be [%s]", state.get(), Arrays.toString(expectedStates)));
     		}
     	} else {
     		if (!state.compareAndSet(null, update)) {

@@ -8,6 +8,7 @@
 package org.hypergraphdb.peer;
 
 
+import com.google.common.io.Files;
 import mjson.Json;
 import org.hypergraphdb.HGEnvironment;
 import org.hypergraphdb.HGHandle;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -69,8 +71,8 @@ public class HyperGraphPeer {
     /**
      * A map of arbitrary objects shared between activities.
      */
-    private Map<String, Object> context =
-            Collections.synchronizedMap(new HashMap<String, Object>());
+    final private Map<String, Object> context =
+            Collections.synchronizedMap(new HashMap());
 
     /**
      * The local database of the peer. The peer will be listening on any changes to the local database and replciate them accordingly.
@@ -82,10 +84,10 @@ public class HyperGraphPeer {
      */
     private HGPeerIdentity identity = null;
 
-    private TwoWayMap<Object, HGPeerIdentity> peerIdentities =
+    final private TwoWayMap<Object, HGPeerIdentity> peerIdentities =
             new TwoWayMap<Object, HGPeerIdentity>();
 
-    private List<PeerPresenceListener> peerListeners =
+    final private List<PeerPresenceListener> peerListeners =
             Collections.synchronizedList(new ArrayList<PeerPresenceListener>());
 
     /**
@@ -155,7 +157,7 @@ public class HyperGraphPeer {
     public static HGPeerIdentity getIdentity(final HyperGraph graph, final String peerName) {
         return graph.getTransactionManager().ensureTransaction(new Callable<HGPeerIdentity>() {
             public HGPeerIdentity call() {
-                HGPeerIdentity identity = null;
+                HGPeerIdentity identity;
                 java.net.InetAddress localMachine = null;
                 try {
                     localMachine = java.net.InetAddress.getLocalHost();
@@ -243,21 +245,23 @@ public class HyperGraphPeer {
         configuration = loadConfiguration(configFile);
     }
 
+    final static String lsep = System.getProperty("line.separator");
+
     private static String getContents(File file) throws IOException {
-        StringBuilder contents = new StringBuilder();
-
-        BufferedReader input = new BufferedReader(new FileReader(file));
-        try {
-            String line = null;
-            while ((line = input.readLine()) != null) {
-                contents.append(line);
-                contents.append(System.getProperty("line.separator"));
-            }
-        } finally {
-            input.close();
-        }
-
-        return contents.toString();
+        return Files.toString(file, Charset.defaultCharset());
+//        StringBuilder contents = new StringBuilder();
+//
+//        BufferedReader input = new BufferedReader(new FileReader(file));
+//        try {
+//            String line = null;
+//            while ((line = input.readLine()) != null) {
+//                contents.append(line).append(lsep);
+//            }
+//        } finally {
+//            input.close();
+//        }
+//
+//        return contents.toString();
     }
 
     public static Json loadConfiguration(File configFile) {
@@ -438,7 +442,7 @@ public class HyperGraphPeer {
      */
     public void updateNetworkProperties() {
         GetInterestsTask task = new GetInterestsTask(this);
-        ActivityResult result = null;
+        ActivityResult result;
         try {
             result = activityManager.initiateActivity(task).get();
         } catch (Exception ex) {

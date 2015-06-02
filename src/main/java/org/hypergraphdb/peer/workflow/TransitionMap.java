@@ -7,13 +7,9 @@
  */
 package org.hypergraphdb.peer.workflow;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import mjson.Json;
+
+import java.util.*;
 
 /**
  * <p>
@@ -37,13 +33,14 @@ import mjson.Json;
  */
 public class TransitionMap
 {
-    private Map<String, Set<Transition>> map =  
-        Collections.synchronizedMap(new HashMap<String, Set<Transition>>()); 
-    private Map<Transition, Set<String>> inverseMap =
-        Collections.synchronizedMap(new HashMap<Transition, Set<String>>());
+    final private Map<String, Set<Transition>> map =
+        Collections.synchronizedMap(new HashMap());
+
+    final private Map<Transition, Set<String>> inverseMap =
+        Collections.synchronizedMap(new HashMap());
     
-    private Map<String, Transition> activityMap = 
-        Collections.synchronizedMap(new HashMap<String, Transition>());
+    final private Map<String, Transition> activityMap =
+        Collections.synchronizedMap(new HashMap());
     
     /**
      * <p>
@@ -87,7 +84,7 @@ public class TransitionMap
         {
         	if (e.getValue().isNull())
         		continue;
-            String key = fromState.toString() + "&" + e.getKey() + "=" + e.getValue().getValue();
+            String key = fromState.toString() + '&' + e.getKey() + '=' + e.getValue().getValue();
             Set<Transition> S = map.get(key);
             if (S == null)
                 continue;
@@ -141,7 +138,7 @@ public class TransitionMap
         Set<String> inverseSet = new HashSet<String>();
         for (Map.Entry<String, String> e : messageAttributes.entrySet())
         {
-            String key = fromState.toString() + "&" + e.getKey() + "=" + e.getValue();
+            String key = fromState.toString() + '&' + e.getKey() + '=' + e.getValue();
             Set<Transition> S = map.get(key);
             if (S == null)
             {
@@ -158,7 +155,7 @@ public class TransitionMap
                                     Activity fromActivity,
                                     WorkflowStateConstant atActivityState)
     {
-        String key = fromState.toString() + "&" + fromActivity.getType() + "&" +
+        String key = fromState.toString() + '&' + fromActivity.getType() + '&' +
                      atActivityState.toString();
         return activityMap.get(key);
     }
@@ -170,7 +167,7 @@ public class TransitionMap
     {
         synchronized (activityMap)
         {
-            String key = fromState.toString() + "&" + subActivityType + "&" +
+            String key = fromState.toString() + '&' + subActivityType + '&' +
                          atSubActivityState.toString();
             Transition existing = activityMap.get(key);
             if (existing != null)

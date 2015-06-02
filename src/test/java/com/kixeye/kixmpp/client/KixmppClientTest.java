@@ -21,6 +21,7 @@ package com.kixeye.kixmpp.client;
  */
 
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.kixeye.kixmpp.client.module.presence.Presence;
 import com.kixeye.kixmpp.client.module.presence.PresenceKixmppClientModule;
 import com.kixeye.kixmpp.server.KixmppServer;
@@ -42,32 +43,40 @@ import java.util.concurrent.TimeUnit;
  * @author ebahtijaragic
  */
 public class KixmppClientTest {
-	private String domain;
-	private String username;
-	private String password;
-	private String resource;
-	private int port;
+	static private String domain;
+	static private String username;
+	static private String password;
+	static private String resource;
+	static private int port;
 
-	KixmppServer server;
+	static KixmppServer server;
 
 	
-	@Before
-	public void setUp() throws Exception {
-
+	static {
 
 		domain = UUID.randomUUID().toString().replace("-", "");
 		username = UUID.randomUUID().toString().replace("-", "");
 		password = UUID.randomUUID().toString().replace("-", "");
 		resource = UUID.randomUUID().toString().replace("-", "");
-		
-        ServerSocket socketServer = new ServerSocket();
-        socketServer.bind(null);
-        
-        port = socketServer.getLocalPort();
-        socketServer.close();
 
-		server = new KixmppServer(port, domain);
-		server.start();
+		//new Thread( () ->
+		{
+			try {
+				ServerSocket socketServer = new ServerSocket();
+				socketServer.bind(null);
+
+				port = socketServer.getLocalPort();
+				socketServer.close();
+
+				server = new KixmppServer("localhost", port, domain);
+
+				ListenableFuture<KixmppServer> x = server.start();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		// ).start();
 
 
 //        StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
@@ -102,10 +111,10 @@ public class KixmppClientTest {
 //        }
 	}
 	
-	@After
-	public void tearDown() { 
-        server.stop();
-	}
+//	@After
+//	public void tearDown() {
+//        server.stop();
+//	}
 	
 	@Test @Ignore
 	public void testSimpleSSLConnect() throws Exception {
@@ -119,8 +128,8 @@ public class KixmppClientTest {
 	@Test
 	public void testSimpleConnect() throws Exception {
 		try (KixmppClient client = new KixmppClient()) {
-			Assert.assertNotNull(client.connect("localhost", port, domain).get(2, TimeUnit.SECONDS));
-			Assert.assertNotNull(client.login(username, password, resource).get(2, TimeUnit.SECONDS));
+			Assert.assertNotNull(client.connect("localhost", port, domain).get(6, TimeUnit.SECONDS));
+			Assert.assertNotNull(client.login(username, password, resource).get(6, TimeUnit.SECONDS));
 			client.module(PresenceKixmppClientModule.class).updatePresence(new Presence());
 		}
 	}

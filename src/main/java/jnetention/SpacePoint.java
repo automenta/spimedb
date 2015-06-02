@@ -42,7 +42,7 @@ public class SpacePoint implements Serializable {
     }
     
     public String toString() {
-        String s = String.format("%.2f", lat) + "," + String.format("%.2f", lon);
+        String s = String.format("%.2f", lat) + ',' + String.format("%.2f", lon);
         
         if (!Double.isNaN(alt)) {
             s += "," + alt;            

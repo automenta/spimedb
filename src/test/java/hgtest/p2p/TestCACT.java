@@ -190,7 +190,7 @@ public class TestCACT
 		try
 		{
 			while (peer2.getConnectedPeers().isEmpty())
-				Thread.sleep(500);
+				Thread.sleep(1);
 			GetAtom activity = new GetAtom(peer2, graph1.getPersistentHandle(fromPeer1), peer1.getIdentity());
 			peer2.getActivityManager().initiateActivity(activity);
 			activity.getFuture().get();

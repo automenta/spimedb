@@ -55,7 +55,7 @@ public class Wikipedia  {
     public String filterPage(Document doc) {
         String location = doc.location();
         if (location.contains("/"))
-            location = location.substring(location.lastIndexOf("/") + 1, location.length());
+            location = location.substring(location.lastIndexOf('/') + 1, location.length());
 
         //String uri = "http://dbpedia.org/resource/" + location;
 

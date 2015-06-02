@@ -263,7 +263,7 @@ abstract public class WikiBrowser extends BorderPane {
 
     public void loadWikiPage(String urlOrTag) {
         webview.setVisible(false);
-        if (urlOrTag.indexOf("/")==-1)
+        if (urlOrTag.indexOf('/')==-1)
             urlOrTag = "http://en.m.wikipedia.org/wiki/" + urlOrTag;
         webEngine.load(urlOrTag);
     }

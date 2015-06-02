@@ -218,7 +218,7 @@ public abstract class RemotePeer
 
     public String toString()
     {
-        String result = "RemotePeer(name=" + getName() + ")";
+        String result = "RemotePeer(name=" + getName() + ')';
         return result;
     }
 }

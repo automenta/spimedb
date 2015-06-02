@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -209,9 +210,10 @@ public class Gossip {
         this.heartbeatCycle = heartbeatCycle;
         this.redundancy = redundancy;
         scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+            int count = 0;
+
             @Override
             public Thread newThread(Runnable r) {
-                int count = 0;
                 Thread daemon = new Thread(r, "Gossip servicing thread "
                                               + count++);
                 daemon.setDaemon(true);
@@ -419,20 +421,6 @@ public class Gossip {
     }
 
     /**
-     * Add the updates for all the local state for this node to the
-     * deltaStateList.
-     * 
-     * @param deltaState
-     */
-    private void updateAllLocalState(List<Update> deltaState) {
-        synchronized (localState) {
-            for (ReplicatedState state : localState.values()) {
-                deltaState.add(new Update(me(), state));
-            }
-        }
-    }
-
-    /**
      * Update the heartbeat state for this node, sending it across the ring
      */
     private void updateHeartbeat() {
@@ -494,7 +482,6 @@ public class Gossip {
 
     /**
      * @param gossiper
-     * @param gossipingEndpoint
      */
     protected void checkConnectionStatus(final InetSocketAddress gossiper) {
         final Endpoint gossipingEndpoint = endpoints.get(gossiper);
@@ -516,10 +503,10 @@ public class Gossip {
                         }
                     }
                     // We want it all, baby
-                    gossipingEndpoint.getHandler().gossip(Arrays.asList(new Digest(
-                                                                                   gossiper,
-                                                                                   ALL_STATES,
-                                                                                   -1)));
+                    gossipingEndpoint.getHandler().gossip(Iterators.singletonIterator(new Digest(
+                            gossiper,
+                            ALL_STATES,
+                            -1)));
                 }
             }, fdFactory);
         }
@@ -569,39 +556,37 @@ public class Gossip {
         ring.update(endpoints.values());
     }
 
-    /**
-     * Connect and gossip with a member that isn't currently connected. As we
-     * have no idea what state this member is in, we need to add a digest to the
-     * list that is manifestly out of date so that the member, if it responds,
-     * will update us with its state.
-     * 
-     * @param address
-     *            - the address to connect to
-     * @param digests
-     *            - the digests in question
-     */
-    @Deprecated protected void connectAndGossipWith(final InetSocketAddress address,
-                                        final List<Digest> digests) {
-        final Endpoint newEndpoint = new Endpoint(
-                                                  address,
-                                                  communications.handlerFor(address));
-        Endpoint previous = endpoints.putIfAbsent(address, newEndpoint);
-        if (previous == null) {
-            if (log.isDebugEnabled()) {
-                log.debug(format("%s connecting and gossiping with %s",
-                                 me(), address));
-            }
-            List<Digest> filtered = new ArrayList<Digest>(digests.size());
-            for (Digest digest : digests) {
-                if (!digest.getAddress().equals(address)) {
-                    filtered.add(digest);
-                }
-            }
-            filtered.add(new Digest(address, ALL_STATES, -1)); // We want it
-                                                               // all, baby
-            newEndpoint.getHandler().gossip(filtered);
-        }
-    }
+//    /**
+//     * Connect and gossip with a member that isn't currently connected. As we
+//     * have no idea what state this member is in, we need to add a digest to the
+//     * list that is manifestly out of date so that the member, if it responds,
+//     * will update us with its state.
+//     *
+//     * @param address
+//     *            - the address to connect to
+//     * @param digests
+//     *            - the digests in question
+//     */
+//    protected void connectAndGossipWith(final InetSocketAddress address,
+//                                        final Iterator<Digest> digests) {
+//        final Endpoint newEndpoint = new Endpoint(
+//                                                  address,
+//                                                  communications.handlerFor(address));
+//        Endpoint previous = endpoints.putIfAbsent(address, newEndpoint);
+//        if (previous == null) {
+//            if (log.isDebugEnabled()) {
+//                log.debug(format("%s connecting and gossiping with %s",
+//                                 me(), address));
+//            }
+//
+//            Iterator<Digest> id =
+//                    Iterators.concat(
+//                            Iterators.filter(digests, digest -> !digest.getAddress().equals(address),
+//                                    Iterators.singletonIterator(new Digest(address, ALL_STATES, -1))));
+//
+//                    newEndpoint.getHandler().gossip(id);
+//        }
+//    }
 
     protected void connectAndGossipWith(final InetSocketAddress address,
                                                     final Iterator<Digest> digests) {
@@ -659,10 +644,10 @@ public class Gossip {
                         }
                     }
                     // We want it all, baby
-                    endpoint.getHandler().gossip(Arrays.asList(new Digest(
-                                                                          address,
-                                                                          ALL_STATES,
-                                                                          -1)));
+                    endpoint.getHandler().gossip(Iterators.singletonIterator(new Digest(
+                            address,
+                            ALL_STATES,
+                            -1)));
                 }
             }, fdFactory);
         }
@@ -694,9 +679,9 @@ public class Gossip {
                                         me(), address));
             }
             // We want it all, baby
-            endpoint.getHandler().gossip(Arrays.asList(new Digest(address,
-                                                                  ALL_STATES,
-                                                                  -1)));
+            endpoint.getHandler().gossip(Iterators.singletonIterator(new Digest(address,
+                    ALL_STATES,
+                    -1)));
         }
     }
 
@@ -713,12 +698,15 @@ public class Gossip {
             log.trace(String.format("Member: %s receiving gossip digests: %s",
                                     me(), Arrays.toString(digests)));
         }
-        List<Digest> deltaDigests = new ArrayList<Digest>();
-        List<Update> deltaState = new ArrayList<Update>();
+        List<Digest> deltaDigests = new ArrayList<Digest>(digests.length);
+        List<Update> deltaState = new ArrayList<Update>(localState.size());
         for (Digest digest : digests) {
             if (ALL_STATES.equals(digest.getId())) {
+
                 // They want it all, baby
-                updateAllLocalState(deltaState);
+                synchronized (localState) {
+                    deltaState.addAll(localState.values().stream().map(state -> new Update(me(), state)).collect(Collectors.toList()));
+                }
             } else {
                 long remoteTime = digest.getTime();
                 Endpoint endpoint = endpoints.get(digest.getAddress());
@@ -767,17 +755,18 @@ public class Gossip {
     /**
      * Perform the periodic gossip.
      * 
-     * @param communications
+     * @param
      *            - the mechanism to send the gossip message to a peer
      */
     protected void gossip() {
         updateHeartbeat();
+
         List<Digest> digests = randomDigests();
         List<InetSocketAddress> members = new ArrayList<>();
         for (int i = 0; i < redundancy; i++) {
             members.add(gossipWithTheLiving(digests));
         }
-        gossipWithTheDead(digests);
+        gossipWithTheDead(digests.iterator());
         gossipWithSeeds(digests.iterator(), members);
         checkStatus();
     }
@@ -814,37 +803,38 @@ public class Gossip {
         };
     }
 
-    /**
-     * Gossip with one of the kernel members of the system view with some
-     * probability. If the live member that we gossiped with is a seed member,
-     * then don't worry about it.
-     * 
-     * @param digests
-     *            - the digests to gossip.
-     * @param members
-     *            - the live member we've gossiped with.
-     */
-    protected void gossipWithSeedsOLD(final List<Digest> digests,
-                                   List<InetSocketAddress> members) {
-        InetSocketAddress address = view.getRandomSeedMember(members);
-        if (address == null) {
-            return;
-        }
-        Endpoint endpoint = endpoints.get(address);
-        if (endpoint != null) {
-            List<Digest> filtered = new ArrayList<Digest>(digests.size());
-            for (Digest digest : digests) {
-                if (!digest.getAddress().equals(address)) {
-                    filtered.add(digest);
-                }
-            }
-            filtered.add(new Digest(address, ALL_STATES, -1)); // We want it
-                                                               // all, baby
-            endpoint.getHandler().gossip(filtered);
-        } else {
-            connectAndGossipWith(address, digests);
-        }
-    }
+//    /**
+//     * Gossip with one of the kernel members of the system view with some
+//     * probability. If the live member that we gossiped with is a seed member,
+//     * then don't worry about it.
+//     *
+//     * @param digests
+//     *            - the digests to gossip.
+//     * @param members
+//     *            - the live member we've gossiped with.
+//     */
+//    protected void gossipWithSeedsOLD(final List<Digest> digests,
+//                                   List<InetSocketAddress> members) {
+//        InetSocketAddress address = view.getRandomSeedMember(members);
+//        if (address == null) {
+//            return;
+//        }
+//        Endpoint endpoint = endpoints.get(address);
+//        if (endpoint != null) {
+//            List<Digest> filtered = new ArrayList<Digest>(digests.size());
+//            for (Digest digest : digests) {
+//                if (!digest.getAddress().equals(address)) {
+//                    filtered.add(digest);
+//                }
+//            }
+//            filtered.add(new Digest(address, ALL_STATES, -1)); // We want it
+//                                                               // all, baby
+//            endpoint.getHandler().gossip(filtered);
+//        } else {
+//            connectAndGossipWith(address, digests);
+//        }
+//    }
+//
     protected void gossipWithSeeds(final Iterator<Digest> digests,
                                    List<InetSocketAddress> members) {
         InetSocketAddress address = view.getRandomSeedMember(members);
@@ -885,7 +875,7 @@ public class Gossip {
      * @param digests
      *            - the digests of interest
      */
-    protected void gossipWithTheDead(List<Digest> digests) {
+    protected void gossipWithTheDead(Iterator<Digest> digests) {
         InetSocketAddress address = view.getRandomUnreachableMember(endpoints.size());
         if (address == null) {
             return;
@@ -912,13 +902,15 @@ public class Gossip {
                                  me(), endpoint.getAddress(),
                                  digests.size()));
             }
-            List<Digest> filtered = new ArrayList<Digest>(digests.size());
+
+            @Deprecated List<Digest> filtered = new ArrayList<Digest>(digests.size());
             for (Digest digest : digests) {
                 if (!digest.getAddress().equals(address)) {
                     filtered.add(digest);
                 }
             }
-            endpoint.getHandler().gossip(filtered);
+
+            endpoint.getHandler().gossip(filtered.iterator());
             return address;
         }
         if (log.isWarnEnabled()) {
@@ -1112,8 +1104,8 @@ public class Gossip {
             log.trace(String.format("Member: %s receiving update state: %s",
                                     me(), update));
         }
-        assert update.node != null : String.format("endpoint address is null: "
-                                                   + update);
+        assert update.node != null : "endpoint address is null: "
+                                                   + update;
         assert !update.node.equals(me()) : "Should not have received a state update we own";
         if (view.isQuarantined(update.node)) {
             if (log.isDebugEnabled()) {
@@ -1132,8 +1124,6 @@ public class Gossip {
     }
 
     public void connectAndGossipWith(InetSocketAddress seed) {
-
-
-        connectAndGossipWith(seed, randomDigests());
+        connectAndGossipWith(seed, randomDigests().iterator());
     }
 }

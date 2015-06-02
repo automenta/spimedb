@@ -52,7 +52,7 @@ public class Ring {
             }
         } else {
             if (log.isTraceEnabled()) {
-                log.trace(String.format("Ring has not been formed, not forwarding state"));
+                log.trace("Ring has not been formed, not forwarding state");
             }
         }
     }
@@ -70,7 +70,7 @@ public class Ring {
         members.remove(endpoint);
         if (members.size() < 3) {
             if (log.isTraceEnabled()) {
-                log.trace(String.format("Ring has not been formed"));
+                log.trace("Ring has not been formed");
             }
             return;
         }

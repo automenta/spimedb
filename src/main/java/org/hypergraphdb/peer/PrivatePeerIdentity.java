@@ -111,7 +111,7 @@ public class PrivatePeerIdentity
     
     public String toString()
     {
-        return "HGPeerIdentity[" + id + "," + hostname + "," + 
-            ipAddress + "," + graphLocation + /*"," + name + */ "]"; 
+        return "HGPeerIdentity[" + id + ',' + hostname + ',' +
+            ipAddress + ',' + graphLocation + /*"," + name + */ ']';
     }
 }

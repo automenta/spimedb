@@ -1,5 +1,15 @@
 package org.hypergraphdb.peer.serializer;
 
+import mjson.Json;
+import org.hypergraphdb.*;
+import org.hypergraphdb.handle.*;
+import org.hypergraphdb.peer.Performative;
+import org.hypergraphdb.query.*;
+import org.hypergraphdb.type.BonesOfBeans;
+import org.hypergraphdb.util.Constant;
+import org.hypergraphdb.util.HGUtils;
+import org.hypergraphdb.util.TwoWayMap;
+
 import java.beans.IndexedPropertyDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
@@ -13,29 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
-
-import mjson.Json;
-
-import org.hypergraphdb.HGException;
-import org.hypergraphdb.HGHandle;
-import org.hypergraphdb.HGIndex;
-import org.hypergraphdb.HGLink;
-import org.hypergraphdb.HyperGraph;
-import org.hypergraphdb.handle.PhantomHandle;
-import org.hypergraphdb.handle.PhantomManagedHandle;
-import org.hypergraphdb.handle.UUIDPersistentHandle;
-import org.hypergraphdb.handle.WeakHandle;
-import org.hypergraphdb.handle.WeakManagedHandle;
-import org.hypergraphdb.peer.Performative;
-import org.hypergraphdb.query.And;
-import org.hypergraphdb.query.AtomTypeCondition;
-import org.hypergraphdb.query.AtomValueCondition;
-import org.hypergraphdb.query.Or;
-import org.hypergraphdb.query.TypedValueCondition;
-import org.hypergraphdb.type.BonesOfBeans;
-import org.hypergraphdb.util.Constant;
-import org.hypergraphdb.util.HGUtils;
-import org.hypergraphdb.util.TwoWayMap;
 
 public class HGPeerJsonFactory implements Json.Factory
 {
@@ -143,13 +130,13 @@ public class HGPeerJsonFactory implements Json.Factory
 
 	public final JsonConverter uuidConverter = new JsonConverter()
 	{
-		public Json to(Object x) { return Json.make(((UUID)x).toString()); }
+		public Json to(Object x) { return Json.make(x.toString()); }
 		public Object from(Json x) { return UUID.fromString(x.asString()); }		
 	};
 
 	public final JsonConverter regexConverter = new JsonConverter()
 	{
-		public Json to(Object x) { return Json.make(((Pattern)x).toString()); }
+		public Json to(Object x) { return Json.make(x.toString()); }
 		public Object from(Json x) { return Pattern.compile(x.asString()); }		
 	};
 
@@ -322,7 +309,7 @@ public class HGPeerJsonFactory implements Json.Factory
 					//return beanClass.getConstructor(new Class[]{String.class}).newInstance(x.at("value").getValue().toString());
 				else if (Boolean.class.isAssignableFrom(beanClass))
 					return x.at("value").asBoolean();
-				Object bean = null;
+				Object bean;
 				x = x.at("value");
 				if (HGLink.class.isAssignableFrom(beanClass) && x.has("_link"))
 				{
@@ -435,10 +422,10 @@ public class HGPeerJsonFactory implements Json.Factory
 		else if (type.isEnum())
 			return Json.object().set("java.lang.Enum", type.getName()).set("value", anything.toString());
 		
-		for (Class<?> abstractConv : converterFromAbstractMap.keySet())
-			if (abstractConv.isAssignableFrom(type))
-				return converterFromAbstractMap.get(abstractConv).to(anything);
-		Json value = null;
+		for (Map.Entry<Class, JsonConverter> classJsonConverterEntry : converterFromAbstractMap.entrySet())
+			if (classJsonConverterEntry.getKey().isAssignableFrom(type))
+				return classJsonConverterEntry.getValue().to(anything);
+		Json value;
 		if (converter != null)
 			value = converter.to(anything); 
 		else if (Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type))

@@ -1,7 +1,5 @@
 package jnetention.gui;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
@@ -14,6 +12,9 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
  
 public class HTMLBrowser extends Application {
@@ -83,7 +84,7 @@ public class HTMLBrowser extends Application {
                                 if (text.length() < minTextLength)
                                     continue;
                                 
-                                System.out.println(text + " " + width +  "x" + height + "=" + (width*height) + " @ " + ((width*height)/text.length()) + "/c"  );
+                                System.out.println(text + ' ' + width + 'x' + height + '=' + (width*height) + " @ " + ((width*height)/text.length()) + "/c"  );
                                 
                             }
                                     

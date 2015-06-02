@@ -98,7 +98,7 @@ public class BrowserTab extends UITab<WebView> {
         engine.titleProperty().addListener((observableValue, oldValue, newTitle) -> {
             // todo we already have a listener for the title, might want to repurpose it...
             // todo I wonder if the title would be reset correctly if the page has no title.
-            if (newTitle != null && !"".equals(newTitle)) {
+            if (newTitle != null && !newTitle.isEmpty()) {
                 setText(newTitle);
             }
         });

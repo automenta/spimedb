@@ -139,7 +139,7 @@ public class WWMap extends JPanel {
                 {
                     String message = "Computer does not meet minimum graphics requirements.\n";
                     message += "Please install up-to-date graphics driver and try again.\n";
-                    message += "Reason: " + t.getMessage() + "\n";
+                    message += "Reason: " + t.getMessage() + '\n';
                     message += "This program will end when you press OK.";
 
                     throw new RuntimeException(message);

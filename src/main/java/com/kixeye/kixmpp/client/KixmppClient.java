@@ -21,17 +21,20 @@ package com.kixeye.kixmpp.client;
  */
 
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import com.kixeye.kixmpp.*;
+import com.kixeye.kixmpp.client.module.KixmppClientModule;
+import com.kixeye.kixmpp.client.module.chat.MessageKixmppClientModule;
+import com.kixeye.kixmpp.client.module.error.ErrorKixmppClientModule;
+import com.kixeye.kixmpp.client.module.muc.MucKixmppClientModule;
+import com.kixeye.kixmpp.client.module.presence.PresenceKixmppClientModule;
+import com.kixeye.kixmpp.handler.KixmppEventEngine;
+import com.kixeye.kixmpp.handler.KixmppStanzaHandler;
+import com.kixeye.kixmpp.interceptor.KixmppStanzaInterceptor;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -50,6 +53,12 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.output.XMLOutputter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -60,32 +69,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.jdom2.Attribute;
-import org.jdom2.Element;
-import org.jdom2.Namespace;
-import org.jdom2.output.XMLOutputter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import com.kixeye.kixmpp.KixmppAuthException;
-import com.kixeye.kixmpp.KixmppCodec;
-import com.kixeye.kixmpp.KixmppException;
-import com.kixeye.kixmpp.KixmppJid;
-import com.kixeye.kixmpp.KixmppStanzaRejectedException;
-import com.kixeye.kixmpp.KixmppStreamEnd;
-import com.kixeye.kixmpp.KixmppStreamStart;
-import com.kixeye.kixmpp.KixmppWebSocketCodec;
-import com.kixeye.kixmpp.client.module.KixmppClientModule;
-import com.kixeye.kixmpp.client.module.chat.MessageKixmppClientModule;
-import com.kixeye.kixmpp.client.module.error.ErrorKixmppClientModule;
-import com.kixeye.kixmpp.client.module.muc.MucKixmppClientModule;
-import com.kixeye.kixmpp.client.module.presence.PresenceKixmppClientModule;
-import com.kixeye.kixmpp.handler.KixmppEventEngine;
-import com.kixeye.kixmpp.handler.KixmppStanzaHandler;
-import com.kixeye.kixmpp.interceptor.KixmppStanzaInterceptor;
 
 /**
  * A XMPP client.
@@ -128,7 +111,7 @@ public class KixmppClient implements AutoCloseable {
 	private AtomicReference<GenericFutureListener<Future<? super Void>>> connectListener = new AtomicReference<>();
 	
 	private AtomicReference<State> state = new AtomicReference<>(State.DISCONNECTED);
-	private static enum State {
+	private enum State {
 		CONNECTING,
 		CONNECTED,
 		
@@ -309,7 +292,7 @@ public class KixmppClient implements AutoCloseable {
 		this.jid = this.jid.withNode(username).withResource(resource);
 		this.password = password;
 		
-		channel.get().writeAndFlush(new KixmppStreamStart(null, new KixmppJid(jid.getDomain()), true));
+		channel.get().writeAndFlush(new KixmppStreamStart(null, new KixmppJid(username, jid.getDomain(), resource), true));
 		
 		return deferredLogin;
 	}

@@ -257,7 +257,7 @@ public class PeerHyperNode implements HyperNode
         ArrayList<T> L = new ArrayList<T>();
         for (Pair<HGHandle, T> p : (List<Pair<HGHandle, T>>)(List)A.getResult())
         {
-            L.add((T)p.getSecond());
+            L.add(p.getSecond());
         }            
         return L;        
     }

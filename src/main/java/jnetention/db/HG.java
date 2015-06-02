@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Hypergraph DB
@@ -70,7 +69,7 @@ public class HG {
 
     public void add(Serializable j) {
 
-        add(Core.json.<JsonNode>valueToTree(j));
+        add((JsonNode)Core.json.valueToTree(j));
     }
 
     public void add(JsonNode j) {
@@ -83,7 +82,7 @@ public class HG {
 
         HGHandle x = jsonNode.unique(json);
         Object X = jsonNode.get(x);
-        System.out.println(graph.getType(x) + " " + X + " " + X.getClass());
+        System.out.println(graph.getType(x) + " " + X + ' ' + X.getClass());
 
 
 
@@ -91,7 +90,7 @@ public class HG {
 
     public void print(PrintStream out) {
         List<HGHandle> x = jsonNode.findAll(new AnyAtomCondition());
-        x.forEach(o -> out.println( graph.<Object>get(o) + "\t" +  jsonNode.getAll(HGQuery.hg.incident(o))));
+        x.forEach(o -> out.println( graph.get(o) + "\t" +  jsonNode.getAll(HGQuery.hg.incident(o))));
 
 //        HGDepthFirstTraversal traversal =
 //                new HGDepthFirstTraversal(graph, new SimpleALGenerator(graph));
@@ -154,7 +153,6 @@ public class HG {
         Object x = jsonNode.get(new StringRef(id));
         if (x instanceof Json) {
             Json j = (Json)x;
-            Map<String, Json> m = j.asJsonMap();
             return NObject.from(id, j.asJsonMap());
         }
         return x;
@@ -175,7 +173,6 @@ public class HG {
             if (n instanceof Json) {
                 Json j = (Json) n;
                 if (j.isObject()) {
-                    Map<String, Json> m = j.asJsonMap();
                     return NObject.from(hgHandle, j.asJsonMap());
                 }
             }

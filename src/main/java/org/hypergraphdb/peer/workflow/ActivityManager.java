@@ -9,32 +9,22 @@ package org.hypergraphdb.peer.workflow;
 
 
 
-import static org.hypergraphdb.peer.workflow.WorkflowState.*;
-import static org.hypergraphdb.peer.Messages.*;
-
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import mjson.Json;
-
 import org.hypergraphdb.peer.HyperGraphPeer;
 import org.hypergraphdb.peer.MessageHandler;
 import org.hypergraphdb.peer.Messages;
 import org.hypergraphdb.peer.Performative;
 import org.hypergraphdb.peer.serializer.HGPeerJsonFactory;
 import org.hypergraphdb.util.HGUtils;
+
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.hypergraphdb.peer.Messages.*;
+import static org.hypergraphdb.peer.workflow.WorkflowState.Limbo;
+import static org.hypergraphdb.peer.workflow.WorkflowState.Started;
 
 
 /**
@@ -48,16 +38,16 @@ import org.hypergraphdb.util.HGUtils;
  */
 public class ActivityManager implements MessageHandler
 {
-    private HyperGraphPeer thisPeer;
+    final private HyperGraphPeer thisPeer;
     
-    private Map<String, ActivityType> activityTypes = 
-        Collections.synchronizedMap(new HashMap<String, ActivityType>());
+    final private Map<String, ActivityType> activityTypes =
+        Collections.synchronizedMap(new HashMap());
     
-    private Map<UUID, Activity> activities = 
-        Collections.synchronizedMap(new HashMap<UUID, Activity>());
-    
-    private Map<Activity, Activity> parents = 
-        Collections.synchronizedMap(new HashMap<Activity, Activity>());
+    final private Map<UUID, Activity> activities =
+        Collections.synchronizedMap(new HashMap());
+
+    final private Map<Activity, Activity> parents =
+        Collections.synchronizedMap(new HashMap());
  
     //
     // Scheduling and action queues. Each activity has an associated queue of actions
@@ -662,7 +652,7 @@ public class ActivityManager implements MessageHandler
             type = activityTypes.get(msg.at(Messages.ACTIVITY_TYPE).asString());
             if (type == null)
             {
-                notUnderstood(msg, " unkown activity type '" + type + "'");
+                notUnderstood(msg, " unkown activity type '" + type + '\'');
                 return;                
             } 
             activity = type.getFactory().make(thisPeer, activityId, msg);

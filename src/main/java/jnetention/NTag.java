@@ -42,7 +42,7 @@ public class NTag extends NObject.HashNObject {
     }
     
     protected void addDefaultTags() {
-        put(Tag.tag.toString(), 1.0);
+        put(Tag.tag, 1.0);
     }
 
 
@@ -64,7 +64,7 @@ public class NTag extends NObject.HashNObject {
     public Set<String> getSuperTags() {
         return getTags(new Predicate<String>() {
             @Override public boolean apply(String t) {
-                return (!t.equals(Tag.tag.toString()));
+                return (!t.equals(Tag.tag));
             }
         });
     }

@@ -144,7 +144,7 @@ public class KixmppJid {
 		if (node == null) {
 			return domain;
 		} else {
-			return node + "@" + domain;
+			return node + '@' + domain;
 		}
 	}
 	
@@ -157,7 +157,7 @@ public class KixmppJid {
 		if (resource == null) {
 			return getBaseJid();
 		} else {
-			return node + "@" + domain + "/" + resource;
+			return node + '@' + domain + '/' + resource;
 		}
 	}
 	

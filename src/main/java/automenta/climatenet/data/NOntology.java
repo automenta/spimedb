@@ -100,7 +100,7 @@ abstract public class NOntology {
                 if (o.containsKey("wmsLayer")) {
 
                 }
-                System.out.println(id + " " + name + " " + extend);
+                System.out.println(id + ' ' + name + ' ' + extend);
             }
 
         };

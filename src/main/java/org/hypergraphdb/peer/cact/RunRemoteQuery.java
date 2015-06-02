@@ -1,24 +1,11 @@
 package org.hypergraphdb.peer.cact;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import static org.hypergraphdb.peer.Messages.*;
 import mjson.Json;
 import org.hypergraphdb.HGHandle;
 import org.hypergraphdb.HGQuery.hg;
 import org.hypergraphdb.HyperGraph;
-import org.hypergraphdb.peer.HGPeerIdentity;
-import org.hypergraphdb.peer.HyperGraphPeer;
-import org.hypergraphdb.peer.Messages;
-import org.hypergraphdb.peer.Performative;
-import org.hypergraphdb.peer.SubgraphManager;
-import org.hypergraphdb.peer.workflow.FSMActivity;
-import org.hypergraphdb.peer.workflow.FromState;
-import org.hypergraphdb.peer.workflow.OnMessage;
-import org.hypergraphdb.peer.workflow.WorkflowState;
-import org.hypergraphdb.peer.workflow.WorkflowStateConstant;
+import org.hypergraphdb.peer.*;
+import org.hypergraphdb.peer.workflow.*;
 import org.hypergraphdb.query.HGQueryCondition;
 import org.hypergraphdb.storage.StorageGraph;
 import org.hypergraphdb.type.HGAtomType;
@@ -26,6 +13,13 @@ import org.hypergraphdb.util.HGAtomResolver;
 import org.hypergraphdb.util.KeyMapResolver;
 import org.hypergraphdb.util.MapResolver;
 import org.hypergraphdb.util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.hypergraphdb.peer.Messages.CONTENT;
 
 public class RunRemoteQuery extends FSMActivity
 {
@@ -72,7 +66,7 @@ public class RunRemoteQuery extends FSMActivity
         HyperGraph graph = getThisPeer().getGraph();
         expression = Messages.fromJson(msg.at(CONTENT).at("condition"));
         deref = msg.at(CONTENT).at("deref").asBoolean();
-        List<Object> L = null;
+        List<Object> L;
         switch (limit)
         {
             case 1:

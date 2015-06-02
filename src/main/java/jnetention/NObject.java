@@ -183,7 +183,7 @@ public interface NObject<O> extends Serializable, Map<String, O> {
     }
 
     public static NObject from(String uuid, Map<String, Json> m) {
-        String name = getOrDefault(m, "name", uuid);
+        //String name = getOrDefault(m, "name", uuid);
         NObject n = new MapNObject(uuid, m);
 //        for (Map.Entry<String,Json> e : m.entrySet()) {
 //            String k = e.getKey();

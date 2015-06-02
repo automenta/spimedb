@@ -191,7 +191,7 @@ class ShellExec {
                 String line;
                 while ( (line = br.readLine()) != null) {
                     if (output != null)
-                        output.append(line + NL); 
+                        output.append(line).append(NL);
                 }
             } catch (IOException ex) {
                 // ex.printStackTrace();
