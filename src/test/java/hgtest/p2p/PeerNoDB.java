@@ -1,17 +1,23 @@
 package hgtest.p2p;
 
 
+import com.kixeye.kixmpp.server.KixmppServer;
 import mjson.Json;
 import org.hypergraphdb.peer.HyperGraphPeer;
+import org.hypergraphdb.peer.xmpp.XMPPPeerInterface;
 import org.junit.Test;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.Future;
 
 public class PeerNoDB
 {
 	@Test
-	public void testPeerWithoutLocalDB()
-	{
+	public void testPeerWithoutLocalDB() throws Exception {
+
+        KixmppServer server = new KixmppServer(new InetSocketAddress(XMPPPeerInterface.DEFAULT_PORT), XMPPPeerInterface.DEFAULT_DOMAIN);
+        server.start();
+
 		Json config = Json.object();
 		config.set("interfaceType", "org.hypergraphdb.peer.xmpp.XMPPPeerInterface");
 		Json interfaceConfig = Json.object();

@@ -70,7 +70,7 @@ public class XMPPPeerInterface implements PeerInterface {
 
     public void configure(Json configuration) {
         serverName = configuration.at("serverUrl").asString();
-        port = configuration.at("port", 5222).asInteger();
+        port = configuration.at("port", DEFAULT_PORT).asInteger();
         user = configuration.at("user").asString();
         password = configuration.at("password").asString();
         roomId = configuration.has("room") ? configuration.at("room").asString() : null;

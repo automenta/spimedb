@@ -1,6 +1,6 @@
 {
 "hasLocalStorage"	: false,
-"localDB": "c:/temp/hgdbpeertest",
+"localDB": "/tmp/hgdbpeertest",
 "bootstrap" : [ {"class" : "org.hypergraphdb.peer.bootstrap.AffirmIdentityBootstrap", "config" : {}},
                 {"class" : "org.hypergraphdb.peer.bootstrap.CACTBootstrap", "config" : {}},
               ],
@@ -11,6 +11,6 @@
     "user" : "test1",
     "password" : "password",
 	"serverUrl"	: "localhost",
-	"port"	: 5222
+	"port"	: 10001
 }
 }

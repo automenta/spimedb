@@ -47,7 +47,7 @@ public class TestCACT
 
 	private HyperGraphPeer startPeer(String dblocation, String username, String hostname)
 	{
-		hostname = "evalhalla.com";
+
 		Json config = Json.object();
 		config.set(PeerConfig.INTERFACE_TYPE, "org.hypergraphdb.peer.xmpp.XMPPPeerInterface");
 		config.set(PeerConfig.LOCAL_DB, dblocation);
