@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<!-- 
+http://metawidget.sourceforge.net/doc/reference/en/html/ch01s02.html
+http://metawidget.sourceforge.net/doc/reference/en/html/ch03s02.html#section-metawidgets-web-javascript 
+http://metawidget.sourceforge.net/doc/reference/en/html/ch06s02.html#section-widgetbuilders-javascript
+http://metawidget.sourceforge.net/doc/reference/en/html/ch08s02.html#section-layouts-web-javascript
+-->
+<html>
+	<head>
+            <script src="../lib/metawidgets/metawidget-core.min.js"></script>
+		<style>
+			#metawidget {
+				border: 1px solid #cccccc;
+				width: 250px;
+				border-radius: 10px;
+				padding: 10px;
+				margin: 50px auto;
+				display: block;
+			}
+		</style>
+		<script>
+			var person = {
+				firstname: 'Homer',
+				surname: 'Simpson',
+				age: 36,
+				save: function() {
+					document.getElementById( 'metawidget' ).save();
+					console.log( person );
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<x-metawidget id="metawidget" path="person"></x-metawidget>
+                
+                <!-- Equivalent to:
+                    <div id="metawidget"></div>
+                    <script type="text/javascript">
+			var mw = new metawidget.Metawidget( document.getElementById( 'metawidget' ));
+			mw.toInspect = person;
+			mw.buildWidgets();
+                    </script>
+                -->
+	</body>
+</html>

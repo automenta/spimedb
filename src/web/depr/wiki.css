@@ -1,0 +1,116 @@
+.WikiBrowser {
+	clear: both;
+	padding: 1em;
+}
+.WikiBrowser h1 {
+	margin-top: 0;
+}
+
+.WikiBrowser .hlist li {
+	display: inline;
+	white-space: nowrap;
+}
+.WikiBrowser .hlist {
+	margin-bottom: 2em !important;
+}
+
+.WikiTagSave {
+	margin-top: 5px;
+	font-size: 150%;
+}
+.WikiBrowserHeader {
+	float: center;
+	text-align: center;
+	padding-top: 5px;
+	font-size: 125%;
+	
+}
+
+
+/*
+
+@import url("netention.css");
+@import url("lib/bootstrap/bootstrap.min.css");
+@import url("theme/bootswatch.cerulean.css");
+
+@import url("lib/fontawesome/css/font-awesome.min.css");
+    @import url("lib/leaflet/leaflet.css");
+    @import url("lib/leaflet/Control.OSMGeocoder.css");
+    @import url("lib/leaflet/leaflet.draw.css");
+
+body {
+    overflow: auto;
+    margin: 0;            
+}
+#content {
+    margin: 1em;
+    margin-top:2.8em;    
+}
+#wiki {
+    width: 70%;
+}
+#sidebar {
+    position: fixed;
+    right: 10px;
+    top: 0;
+    width: 30%;
+    padding-top: 2em;
+    overflow: auto;
+    height: 100%;    
+}
+.WikiBrowser {
+    overflow: visible;
+}
+
+#tagbar {            
+    padding: 0.25em;
+    width: 100%;           
+}
+#mainmenu button, #mainmenu input {
+    font-size: 130%;
+}
+#tagbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
+#mainmenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0.25em;
+    z-index: 100;
+}
+#mainmenuicons {
+    float: left;
+}
+#viewmenu {
+    float: left;
+    margin-left: 2em;
+}
+
+#tagbar .label {
+    float: left;
+}
+#tagbar .quicktag {
+    padding-left: 1em;
+    padding-right: 1em;
+    float: left;
+}
+#tagbar .save {
+    float: left;
+    font-size: 150%;
+}
+#tagbar .save .cancelButton {
+    float: right;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: 0;
+}
+.item {
+    clear: both;
+}
+*/

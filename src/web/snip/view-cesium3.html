@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>?</title>
+    <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="../lib/cesium/Widgets/widgets.css"/>
+    <style type="text/css">
+        #cesiumContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #baseLayerPickerContainer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        .cesium-baseLayerPicker-dropDown-visible {
+            transform: none;
+            position: absolute;
+            left: 0;
+            bottom: 40px;
+        }
+        .cesium-viewer-toolbar {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #toolbar {
+            margin: 5px;
+            padding: 2px 5px;
+            /*position: absolute;
+            top:20px;
+            left:20px;
+            border-radius: 4px;
+
+            background: rgba(42, 42, 42, 0.8);
+
+            color:#FFF;
+            */
+        }
+
+        #toolbar input {
+            vertical-align: middle;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+        /*
+        #toolbar table tr {
+            transform: translateY(0);
+            transition: transform 0.4s ease-out;
+        }
+        #toolbar table tr.up {
+            transform: translateY(33px);
+            transition: none;
+        }
+        #toolbar table tr.down {
+            transform: translateY(-33px);
+            transition: none;
+        }
+        */
+        /*.cesium-credit-image img {
+            width:118px; height:26px;
+        }*/
+        .cesium-credit-image, .cesium-widget-credits { display: none !important; }
+
+    </style>
+
+</head>
+<body>
+
+<div class="ui bottom attached pushable">
+
+    <div class="ui left inverted labeled icon sidebar menu visible">
+
+        <div class="ui horizontal left inverted icon menu">
+
+            <a class="red item">
+                <i class="mail icon"></i>
+            </a>
+            <a class="teal item">
+                <i class="lab icon"></i>
+            </a>
+            <a class="green item">
+                <i class="star icon"></i>
+            </a>
+
+        </div>
+
+        <a class="ui item">
+            <div class="inverted ui transparent mini input">
+                <input type="text" placeholder="..">
+                <i class="search icon"></i>
+            </div>
+        </a>
+
+        <div class="ui grid">
+            <a class="item">
+                <i class="home icon"></i>
+                Home
+            </a>
+            <a class="item">
+                <i class="block layout icon"></i>
+                Topics
+            </a>
+            <a class="item">
+                <i class="smile icon"></i>
+                Friends
+            </a>
+            <a class="item">
+                <i class="calendar icon"></i>
+                History
+            </a>
+            <a class="item">
+                <i class="mail icon"></i>
+                Messages
+            </a>
+            <a class="item">
+                <i class="chat icon"></i>
+                Discussions
+            </a>
+            <a class="item">
+                <i class="trophy icon"></i>
+                Achievements
+            </a>
+            <a class="item">
+                <i class="shop icon"></i>
+                Store
+            </a>
+        </div>
+        <!--<a class="ui item">-->
+        <div class="ui item inverted vertical accordion">
+            <div class="active title">
+                <i class="dropdown icon"></i>
+                title
+            </div>
+            <div class="active content">
+                content
+            </div>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                title
+            </div>
+            <div class="content">
+                content
+            </div>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                title
+            </div>
+            <div class="content">
+                content
+            </div>
+        </div>
+
+        <!--</a>-->
+        <div id="toolbar" class="ui item">
+            <table><tbody data-bind="foreach: layers">
+            <tr data-bind="css: { up: $parent.upLayer === $data, down: $parent.downLayer === $data }">
+                <td><input type="checkbox" data-bind="checked: show"></td>
+                <td>
+                    <span data-bind="text: name, visible: !$parent.isSelectableLayer($data)"></span>
+                    <select data-bind="visible: $parent.isSelectableLayer($data), options: $parent.baseLayers, optionsText: 'name', value: $parent.selectedLayer"></select>
+                </td>
+                <td>
+                    <input type="range" min="0" max="1" step="0.01" data-bind="value: alpha, valueUpdate: 'input'">
+                </td>
+                <td><button type="button" class="cesium-button" data-bind="click: function() { $parent.raise($data, $index()); }, visible: $parent.canRaise($index())">▲</button></td>
+                <td><button type="button" class="cesium-button" data-bind="click: function() { $parent.lower($data, $index()); }, visible: $parent.canLower($index())">▼</button></td>
+            </tr>
+            </tbody></table>
+        </div>
+
+
+    </div>
+    <div class="pusher">
+        <!--<div class="ui basic segment">-->
+
+
+            <div id="cesiumContainer" ></div>
+            <!--<div id="loadingIndicator" class="loadingIndicator"></div>-->
+            <div id="baseLayerPickerContainer"></div>
+
+        <!--</div>-->
+    </div>
+
+</div>
+
+
+
+
+<script>
+    function ready() {
+        //$('.left.demo.sidebar').sidebar('toggle');
+        //$('.left.demo.sidebar').sidebar('toggle');
+        $('.ui.accordion').accordion();
+        //$('.tabular.menu .item').tab();
+    }
+</script>
+</body>
+
+<link rel="import" onload="ready()" href="../head.html">
+<script type="text/javascript" src="../lib/cesium/Cesium.js"></script>
+<script type="text/javascript" src="../lib/cesium-viewer.js"></script>
+
+
+</html>
+
+
+

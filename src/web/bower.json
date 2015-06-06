@@ -1,0 +1,27 @@
+{
+    "name":  "netention",
+    "version": "1.0.0",
+    "dependencies": {
+        "jquery": "latest",
+        "jquery-ui": "latest",
+        "cytoscape": "latest",
+        "cytoscape-edgehandles": "latest",
+        "cesiumjs": "latest",
+        "leaflet": "latest",
+        "leaflet-providers": "latest",
+        "d3": "latest",
+        "graphlib": "latest",
+        "bootstrap": "latest",
+        "bootstro": "latest",
+        "bootstrap-theme-cyborg": "latest",
+        "fontawesome": "latest",
+        "metawidget": "latest",
+        "pnotify": "latest",
+        "lodash": "latest",
+        "semantic": "latest",
+        "backbone": "latest",
+        "es6-shim": "latest",
+        "jquery.atwho": "ichord/At.js",
+        "fullcalendar": "latest"
+    }
+}

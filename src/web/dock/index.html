@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="UTF-8"> 
+        <link rel="stylesheet" href="css/font-awesome.min.css">
+        <link rel="stylesheet" href="/lib/dockspawn/css/dock-manager.css">
+        <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/lib/bootstrap-slider/bootstrap-slider.css">
+        <link rel="stylesheet" href="index.css">
+
+        <script src="/lib/jquery.min.js"></script>
+
+        <script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="/lib/bootstrap-slider/bootstrap-slider.js"></script>
+
+        <script src="/lib/dockspawn/dockspawn.js" type="text/javascript"></script>
+
+        <script src="index.js"></script>
+    </head>
+    <body>
+        <div class="demo-header" id="header" style="width:100%">
+            <div class="demo-header-title"><i class="fa fa-camera-retro"></i>OpenNARS</div>
+            <!-- <div class="demo-header-description">Pull a panel out from it's title bar and dock it elsewhere</div> -->
+        </div>
+        <div id="dock" class="dock"></div>
+
+        <div id="tag_window" caption="Tags" icon="fa fa-tag" class="solution-window">
+            <ul>
+                <li id="tag_window_1">
+                    <a href="#">Test Project</a>
+                    <ul>
+                        <li id="phtml_2"><a href="#">Source File 1</a></li>
+                        <li id="phtml_3"><a href="#">Header File 1</a></li>
+                    </ul>
+                </li>
+                <li id="tag_window_2">
+                    <a href="#">My Project 2</a>
+                </li>
+            </ul>
+        </div>
+        <div id="properties_window" caption="Status" class="properties-window"></div>
+        <div id="input_window" caption="Input" class="input-window">
+                <input type="text" name="message" placeholder="Input" value=""/><input type="button" value="Send Web Socket Data"
+                                                                                onclick="send(this.form.message.value)" />
+        </div>
+        <div id="output_window" caption="Output" class="output-window">
+                <div id="responseText" style="width: 100%; height: 100%; overflow: auto"></div>
+            
+        </div>
+        <div id="outline_window" caption="Outline" class="outline-window">
+        </div>
+        <script>
+            $(document).ready(function() {
+
+                // Convert a div to the dock manager.  Panels can then be docked on to it
+                var dockDiv = document.getElementById("dock");
+                var dock = new dockspawn.DockManager(dockDiv);
+
+                dock.resizable();
+
+                // Convert existing elements on the page into "Panels".
+                // They can then be docked on to the dock manager
+                // Panels get a titlebar and a close button, and can also be
+                // converted to a floating dialog box which can be dragged / resized
+                var solution = dock.contain("tag_window");
+                var properties = dock.contain("properties_window");
+                var outline = dock.contain("outline_window");
+                var input = dock.contain("input_window");
+                var output = dock.contain("output_window");                
+ 
+                // Dock the panels on the dock manager
+                //var content = dock.content;
+                var outputNode = output.dockFill();
+                
+                var outlineNode = outline.dockLeft(0.15);
+                var solutionNode = solution.dockFill(outlineNode);
+                var propertiesNode = properties.dockDown(0.6, outlineNode);                
+
+                
+                var inputNode = input.dockDown(0.15);
+                
+            });
+
+            $(document).ready(function() {
+                var socket = websocket({
+                    onMessage: function(event) {
+                        var line = $("<pre></pre>");
+                        line.text((event.data).trim());
+                        $('#responseText').append(line);
+                    },
+                    onConnect: function(event) {
+                        socket.send([ 'sub', 'a' ]);
+
+                        var ta = document.getElementById('responseText');
+                        if (!ta)
+                            return;
+
+                        ta.value = "Web Socket opened!";
+
+                        socket.send([1, 2, 3]);
+                        socket.send(["b"]);
+                        socket.send({});
+                    },
+                    onDisconnect: function(event) {
+                        $('#responseText').append("Web Socket Closed");
+                    }
+                });
+
+            });
+
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "netention",
+  "version": "1.0.0",
+  "description": "netention",  
+  "author": "",
+  "license": "GPL",
+  "dependencies": {
+    "bower": "latest"
+  }
+}

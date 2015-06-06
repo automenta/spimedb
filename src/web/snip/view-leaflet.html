@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>ClimateNet</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- <script src="lib/es6-shim.min.js"></script> -->
+
+
+        <script src="lib/jquery-2.1.1.min.js"></script>
+        <script src="lib/lodash.min.js"></script>
+        <!-- <script src="lib/observe-shim.js"></script> NOT NECESSARY IF USING WEBCOMPONENTS POLYFILL -->
+
+        <script src="know/lib/jquery-ui.min.js"></script>
+
+        <script src="know/lib/cytoscape.js"></script>
+        <script src="know/lib/cytoscape-edgehandles.js"></script>
+
+
+        <script src="lib/json-patch-duplex.min.js"></script>
+        <!--<script src="lib/jiff.js"></script>
+        <script src="lib/jsonsynch.min.js"></script>-->
+
+        <script src="lib/web_socket.js"></script>
+
+        <script src="know/lib/html2json/html2json.js"></script>
+        <script src="know/lib/html2json/htmlparser.js"></script>
+        <!--<script src="lib/jquery.pep.js"></script>-->
+
+
+        <script src="lib/graphlib.min.js"></script>
+
+        <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="lib/bootswatch/bootstrap.cyborg.min.css">
+
+        <link rel="stylesheet" href="lib/fontawesome/css/font-awesome.min.css">
+
+
+        <!--
+        <link type="text/css" rel="stylesheet" href="know/lib/foundation/foundation.min.css"  media="screen,projection"/>
+        <script type="text/javascript" src="know/lib/foundation/foundation.min.js"></script>
+-->
+
+        <script src="lib/pnotify/pnotify.custom.min.js"></script>
+        <link type="text/css" rel="stylesheet" href="lib/pnotify/pnotify.custom.min.css"/>
+
+        <script src="know/lib/metawidgets/metawidget-core.min.js"></script>
+
+        <script src="know/lib/modernizr.js"></script>
+        <!-- <script src="lib/fastclick.js"></script> -->
+
+        <script src="util.js"></script>
+        <script src="know/ui.js"></script>
+        <script src="know/spacegraph.js"></script>
+        <script src="know/frame.js"></script>
+        <script src="know/node.js"></script>
+
+        <script src="know/example_channels.js"></script>
+
+        <link type="text/css" rel="stylesheet" href="know/spacegraph.css"/>
+        
+        <!-- http://leafletjs.com/examples/quick-start.html -->
+        <script src="lib/leaflet/leaflet.js"></script>        
+        <script src="lib/leaflet/leaflet.osmgeocoder.js"></script>   
+        <script src="lib/leaflet/leaflet.markercluster.js"></script>
+        <script src="lib/leaflet/leaflet-providers.js"></script>
+        <script src="lib/leaflet/leaflet.geojsoncss.min.js"></script>
+        <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+        <link rel="stylesheet" href="lib/leaflet/leaflet.osmgeocoder.css">
+        <link rel="stylesheet" href="lib/leaflet/MarkerCluster.css">
+        <link rel="stylesheet" href="lib/leaflet/MarkerCluster.Default.css">
+        
+        
+
+        <!--
+        <script src="lib/d3/d3.min.js"></script>    
+        <script src="lib/zoomtree.js"></script>        
+        <link rel="stylesheet" href="lib/zoomtree.css">
+        -->
+        
+        
+        <link rel="stylesheet" href="map2d.css">
+        
+        <script src="util.js"></script>
+
+    </head>
+    <body>
+
+        <div id="map"></div>
+
+
+        <div id="wrapper" class="active">
+
+            <!-- Sidebar -->
+            <div id="sidebar-wrapper">
+                <ul id="sidebar_menu" class="sidebar-nav">
+                    <li class="sidebar-brand">
+                        <div style="float: left">
+                            <input placeholder="Find.." class="sidebar_search" type="text"></input>
+                        </div>
+                        <div style="right:0; position:absolute"><a id="menu-toggle" href="#"><i class="main_icon fa fa-bomb fa-2x"></i></a></div>
+                    </li>
+                </ul>
+                <ul class="sidebar-nav" id="visibleLayers">     
+                    <!--<li><a>Link1<i class="sub_icon fa fa-bolt fa-2x"></i></a></li>
+                    <li><a>link2<i class="sub_icon fa fa-cloud fa-2x"></i></a></li>-->
+                </ul>
+
+            </div>
+
+            <!-- Page content -->
+            <div id="page-content-wrapper">
+            </div>
+
+        </div>
+
+
+        <!--
+
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">             
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                        <li><a href="#">Link</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">One more separated link</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                    </form>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#">Link</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        -->
+
+
+        <!--<div id="layermenu" class="panel panel-default"></div>-->
+
+        <script>
+            
+
+            var updatePeriodMS = 500;
+            var renderPeriodMS = 150;
+
+            var styles = { };
+            var features = {};
+            var tag = new graphlib.Graph({multigraph: true}); //https://github.com/cpettitt/graphlib/wiki
+
+
+            function addTileLayer(lid, name, parent) {
+                var id = lid.replace(/\./g,'_');
+                var t = newTag(id);
+                t.name = name;
+                t.inh[parent] = 1.0;
+                
+                features[id] = t.features[id] = ( L.tileLayer.provider(lid) );
+                               
+                t.update();
+                
+                tag.setNode(id, t);
+            }
+            
+            function newTileLayer(template) {
+                //var template = T.tileLayer;
+                var options = {
+                    attribution: ''
+                };
+                if (typeof template !== 'string') {
+                    options = template;
+                    template = options.template;
+
+                    var d = new Date(Date.now() - 24 * 60 * 60 * 1000  /* 24hrs ago */);
+                    var m = d.getMonth() + 1;
+                    var r = d.getDate() + 1;
+                    if (m <= 9)
+                        m = '0' + m;
+                    if (r <= 9)
+                        r = '0' + r;
+                    options.time = d.getFullYear() + '-' + m + '-' + r;
+                }
+                if (options.reprojected) {
+                    if (options.format.indexOf('png') != -1) {
+                        //put PNG layers above, since they usually contain transparent image that could see through to a solid JPG layer beneath
+                        options.zIndex = 101;
+                    }
+                    else
+                        options.zIndex = 100;
+                }
+
+
+                var tl = L.tileLayer(template, options);
+
+                if (options.reprojected) {
+                    notify({title: 'Map Re-projected', text: "The '" + T.name + "' layer uses an alternate map projection.  It may not appear aligned with other layers."});
+                    tl.reprojects = true;
+                }
+
+                //tl.setOpacity(strength);
+
+                /*tl.addTo(map);
+                onAdded(tl);*/
+        
+                features[template] = tl;
+                return tl;
+
+            }
+            
+            function newWMSLayer(opt) {
+                //var l = T.wmsLayer;
+
+                var o = {
+                    //layers: l.layer,
+                    format: 'image/png',
+                    transparent: true,
+                    attribution: ''
+                };
+                /*if (l.crs) {
+                 if (l.crs == 'EPSG4326')
+                 o.crs = L.CRS.EPSG4326;
+                 }*/
+                var w = L.tileLayer.wms(opt, o);
+                /*w.setOpacity(strength);
+                w.addTo(map);*/
+        
+                features[opt.url] = w;
+                
+                return w;
+            }
+            
+            function addTileLayers() {
+                var w = newTag('Weather');
+                w.name = 'Weather';
+                
+                //https://github.com/leaflet-extras/leaflet-providers/blob/master/leaflet-providers.js
+                addTileLayer('OpenStreetMap.Mapnik', 'OpenStreetMap', 'Earth');        
+                /*
+                addTileLayer('OpenWeatherMap.Temperature', 'Temperature (OWM)', 'Weather');
+                addTileLayer('OpenWeatherMap.Clouds', 'Clouds (OWM)', 'Weather');
+                                
+                
+                addTileLayer('OpenStreetMap.BlackAndWhite', 'OpenStreetMap (Gray)', 'Earth');
+                
+                addTileLayer('Thunderforest.Landscape', 'Landscape (Thunderforest)', 'Earth');
+                */
+            }
+            
+            
+            var geojsonMarkerOptions = {
+                radius: 8,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            };
+
+
+            var map = L.map('map');
+                    
+            map.setView([51.505, -0.09], 13);
+            
+            var osmGeocoder = new L.Control.OSMGeocoder();
+            map.addControl(osmGeocoder);
+                
+
+
+            var ltree;
+            function init() {
+                
+                $("#menu-toggle").click(function(e) {
+                        e.preventDefault();
+                        $("#wrapper").toggleClass("active");
+                });
+
+
+                function nextUpdateBounds() {
+                    setTimeout(updateBounds, 0);
+                }
+
+                map.on('viewreset', nextUpdateBounds);
+                map.on('moveend', nextUpdateBounds);
+                map.on('resize', nextUpdateBounds);
+
+                addTileLayers();
+                
+                //Default: OSM layer
+                tag.node('OpenStreetMap_Mapnik').setOpacity(1.0);
+                
+
+                updateBounds();                
+                
+                updateTagIndex(renderLayerViews);
+
+            }
+
+            var loadTags = _.throttle(function() {
+                
+                /*map.eachLayer(function (layer) {
+                   layer.remove(); 
+                });*/
+                
+            }, renderPeriodMS);
+
+            /*
+             //not used yet:
+             var geojsonoption = {
+             onEachFeature: function onEachFeature(feature, layer) {
+             // does this feature have a property named popupContent?
+             if (feature.properties && feature.properties.popupContent) {
+             layer.bindPopup(feature.properties.popupContent);
+             }
+             },
+             pointToLayer: function (feature, latlng) {
+             return L.circleMarker(latlng, geojsonMarkerOptions);
+             }
+             };
+             */
+
+            function addFeature(id, f) {
+                if (!f.geom)
+                    return;
+                if (features[id])
+                    return;
+
+                f.type = "Feature";
+                f.geometry = f.geom;
+                
+                /*
+                if (f.styleUrl) {
+                    if (!styles[f.styleUrl]) {
+                        console.log(f.id + ' missing style: ' + f.styleUrl);
+                        
+                        //TODO batch these
+                        //loadStyles([f.styleUrl]);
+                    }
+                }
+                */
+
+
+                if (f.geom.type === "point")
+                    f.geometry.type = "Point";
+                if (f.geom.type === "linestring")
+                    f.geometry.type = "LineString";
+                if (f.geom.type === "polygon")
+                    f.geometry.type = "Polygon";
+                
+                
+                if (!f.style)
+                    f.style = { };
+                
+                if (!f.properties) {
+                    f.properties = { };
+
+                    if (f.name) {
+                        f.properties.name = f.name;
+                    }
+                    if (f.description) {
+                        f.properties.description = f.description;
+                    }
+                }
+                
+                if (f.name && f.description)
+                    f.popupTemplate = "<strong>{name}</strong><br/>{description}";
+                else if (f.name)
+                    f.popupTemplate = "<strong>{name}</strong>";
+                else if (f.description)
+                    f.popupTemplate = "{description}";
+
+                //https://github.com/albburtsev/Leaflet.geojsonCSS
+                //L.geoJson.css(json).addTo(map);
+
+                var layer = L.geoJson.css(f);
+                layer.setOpacity = function(o) {
+                    for (var l in this._layers) {
+                        var ll = this._layers[l];
+                        if (ll.setOpacity)
+                            ll.setOpacity(o);
+                    }
+                };
+                
+                layer.data = f;
+                features[id] = layer;
+                
+                layer.addTo(map);
+            }
+
+            function removeFeature(i) {
+                
+                //features[i].removeFrom(map);                
+            }
+            
+            function newTag(layerID) {
+                var t = {
+                    id: layerID, 
+                    name: undefined,
+                    features: { },
+                    inh: { },
+                    opacity: 0
+                };
+
+                tag.setNode(layerID, t);
+                                
+                t.setOpacity = function(o) {
+                    
+                    var prevOpacity = t.opacity || 0;
+                    
+                    this.opacity = o;
+                    
+                    var add=false, remove=false;
+                    
+                    if /*((prevOpacity === 0) && */(this.opacity > 0.01) {
+                        //add to map
+                        add = true;
+                    }
+                    if /*((prevOpacity > 0) && */(this.opacity < 0.01) {
+                        //remove from map
+                        remove = true;
+                    }                    
+                    
+                    for (var f in this.features) {
+                        var x = features[f];
+                        if (!x) {
+                            console.error('missing feature: ', f);
+                            continue;
+                        }
+                        
+                        if (x.setOpacity) {
+                            x.setOpacity(o);
+                        }
+                                                
+                        if (add) {                                                       
+                            if (x.addTo)
+                                x.addTo(map);
+                        }
+                        else if (remove) {
+                            if (x.remove)
+                                x.remove();
+                        }
+                        
+                    }
+
+                };
+                
+                t.update = function() {
+                    if (this.inh) {
+                        //TODO remove existing edges
+                        
+                        _.each(this.inh, function(strength, superTag) {                            
+                            var n = tag.node(superTag);
+                            if (!n) {
+                                newTag(superTag);                                
+                            }
+                                
+                            tag.setEdge(superTag, layerID);
+                        });
+                    }
+                };
+                
+                
+                return t;
+            }
+
+            function updateGeoJSONFeatures(r) {
+
+                /*
+                for (var i in features) {
+                    if (!r[i]) {
+                        removeFeature(i);
+                    }
+                }*/
+
+                var unknownLayers = {};
+                var updatedLayers =  { };
+                
+                for (var id in r) {
+                    var f = r[id];
+                    
+                    addFeature(id, f);
+                    
+                    var p = f.path || [];
+
+                    //TODO cache known paths
+                    
+                    var parent = null;
+                    var layerNode = null;
+                    
+                    var maxOpacity = 0.0;
+                    
+                    for (var i = 0; i < p.length; i++) {
+                        var layerID = p[i];
+                        layerNode = tag.node(layerID);
+                        
+                        
+                        if (layerNode) {
+                        }
+                        else {
+                            layerNode = newTag(layerID);                            
+                            layerNode.inh[parent] = 1.0;
+                            layerNode.update();
+                            
+                            unknownLayers[layerID] = true;
+                            
+                        }
+                        updatedLayers[layerID] = true;
+                              
+                        if (layerNode.opacity > maxOpacity)
+                            maxOpacity = layerNode.opacity;
+                        
+                        
+                        parent = layerID;
+                                                
+                        layerNode.features[id] = f;
+                    }
+                    
+                    features[id].setOpacity(maxOpacity);
+
+                }
+
+                                
+                function updateChangedLayers() {
+                    renderLayerView(_.keys(updatedLayers), false);
+                }
+                
+                if (unknownLayers.length > 0)
+                    loadTags(unknownLayers, updateChangedLayers);
+                else
+                    updateChangedLayers();
+            }
+            
+            function renderLayerViews() {
+                renderLayerView(tag.sources(), true);
+            }
+            
+            var updateOpacity = _.throttle(function(t, opacity) {
+                t.setOpacity(opacity);
+                setTimeout(loadTags, 0);                
+            }, renderPeriodMS);
+            
+            var opacityChange = function() {
+                var d = $(this).data('tag');
+                var opacity = $(this).val();
+                
+                var t = tag.node(d);
+                updateOpacity(t, opacity);                
+            };
+            
+            function jq( myid ) {
+                return myid.replace( /(:|\.|\[|\]|\=)/g, "\\$1" ); 
+            }
+            function layerControlID(vid) { return 't_' + jq(vid); }
+            function layerControl(vid) { return $('#' + layerControlID(vid)); }
+            
+            function updateTagButton(x) {                
+                var d = $(this).data('tag');
+                window.open("watch.html?url=tag&operation=update&channels=" + d, "_blank", "toolbar=yes, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+            }
+
+            function renderLayerView(s, recurse) {
+                
+                             
+                if (s && s.length)
+                    _.each(s, function (n) {
+                        if (!n) return;
+
+                        v = tag.node(n);
+
+                        if (!v) {
+                            console.error('missing tag: ' + n);
+                            return;
+                        }
+
+                        var name = v.name || v.id;
+                        var count = _.size(v.features);
+                        //nu.append('<li>' + name + ' ' + count + '</li>');
+
+                        
+                        var d = layerControl(v.id);
+                        if (d.length === 0) {
+                            d = newEle('li').attr('id', layerControlID(v.id));
+                            $('#visibleLayers').append(d);                        
+                        }
+                        
+                        d.html('');
+                        
+                        
+                        
+                        var a = $('<a><h6>' + name + ' (' + count + ')</h6></a>').appendTo(d);                        
+                                                
+                        /*if (count > 0)*/ {
+
+                            var opacity = $('<input class="opacitySlider" type="range" min="0" step="0.01" max="1.0"/>').appendTo(a);
+                            opacity.val(v.opacity || 0);
+                            opacity.data('tag', n);
+
+                            opacity.change(opacityChange);
+                        }
+                        
+                        if (v.meta) {
+                            if (v.meta.kmlLayer) {
+                                var updateButton = $('<button><i class="fa fa-refresh"></i></button>').appendTo(a);
+                                updateButton.data('tag', n);
+                                updateButton.click(updateTagButton);
+                            }
+                            
+                        }
+                        
+                                              
+                        if(count) {
+                            d.addClass('enabled');
+                        }
+
+                        if (recurse)
+                            renderLayerView(tag.successors( v.id ));
+
+                        
+                        var parent = tag.predecessors( v.id );
+                        if (parent) {
+                            parent = parent[0];
+                            console.log(v.id + ' to ' + parent);
+                            //d.appendTo(layerControl(parent).find('ul'));
+                        }
+                        else {
+                            //root
+                            console.log(v.id + ' to root');
+                            //$('#visibleLayers').append(d);
+                        }
+                        
+                        
+                        
+                    });
+
+            }
+            
+            var ajaxFail = function (v, m) {  
+                console.error('AJAJ Err:', v, m);  
+                
+            };
+            
+            function updateStyles(r) {
+                for (var i in r) {
+                    styles[i] = r[i];
+                }
+            }
+
+            function updateTags(r) {
+                for (var i in r) {
+                    
+                    var l = r[i];
+                    
+                    var n = tag.node(i);
+                    if (!n) {
+                        n = newTag(i);
+                    }
+                    
+                    //TODO copy other metadata, use _.extend
+                    n.name = l.name || i;    
+                    
+                    if (l.style) {
+                        n.style = l.style;
+                    }
+                    if (l.styleUrl) {
+                        n.styleUrl = l.styleUrl;
+                    }
+                    
+                    n.meta = l.meta || { };
+                    
+                    if (n.meta.wmsLayer) {                        
+                        n.features[n.meta.wmsLayer] = newWMSLayer(n.meta.wmsLayer);
+                    }
+                    if (n.meta.tileLayer) {
+                        n.features[n.meta.tileLayer] = newTileLayer(n.meta.tileLayer);
+                    }
+                    
+                        
+                    if (l.inh) {
+                        n.inh = l.inh;
+                    }
+                    
+                    n.update();
+                    
+                }
+            }
+
+            function updateTagIndex(callback) {
+                $.getJSON('/tag/index')
+                    .done(function (r) {
+                        updateTags(r);
+                        if (callback)  callback();
+                    })
+                    .fail(ajaxFail);
+            }
+
+            function loadTags(layerIDs, callback) {
+                //layerIDs = _.map(layerIDs, encodeURIComponent);
+                        
+                $.getJSON('/tag/meta', {id: JSON.stringify(layerIDs)})
+                    .done(function (r) {
+                        updateTags(r);
+                        if (callback)  callback();
+                    })
+                    .fail(ajaxFail);
+            }
+            /*
+            function loadStyles(styleIDs, callback) {
+                //layerIDs = _.map(styleIDs, encodeURIComponent);
+                
+                $.getJSON('/style/meta', {id: JSON.stringify(styleIDs)})
+                    .done(function (r) {
+                        updateStyles(r);
+                        if (callback)  callback();
+                    })
+                    .fail(ajaxFail);
+            } */           
+
+            var updateBounds = _.throttle(function (e) {
+                var b = map.getBounds();
+
+                var radiusMeters = b.getSouthEast().distanceTo(b.getNorthWest()) / 2.0;
+                var lon = b.getCenter().lng;
+                var lat = b.getCenter().lat;
+
+
+                $.getJSON('/geoCircle', {lat: lat, lon: lon, radiusM: radiusMeters})
+
+                        .done(function (r) {
+                            //console.log(r);
+
+                            updateGeoJSONFeatures(r);
+                        })
+                        .fail(function (v, m) {
+                            console.log('err', v, m);
+                        });
+            }, updatePeriodMS);
+
+            $(document).ready(init);
+
+        </script>
+
+    </body>
+</html>

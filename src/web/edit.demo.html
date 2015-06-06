@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+</head>
+<body>
+
+<div id="ne2" class="nobjedit" contenteditable="true">
+
+    Here is an inline <span class="inlinemenu"></span> menu.
+
+    I'm describing something <span contenteditable="false">inline widget</span>
+    and somethign else
+    <span contenteditable="false"><button>click</button></span> now what
+    and then <span contenteditable="false"><input type="text" placeholder="type it"/></span>
+
+    <span contenteditable="false"><button>click</button></span> now what
+    and then <span contenteditable="false">Distance (km): <input type="text" placeholder="type it"/></span>
+</div>
+
+
+<br/> <br/>
+
+<div class="nobjedit">
+    <div class="nobjedit header" contenteditable="true">
+        <b>nobject title</b>
+    </div>
+    <div id="ne1" class="nobjedit" contenteditable="true">
+
+        Type or click the @ symbol to show the circle popup stuff.
+
+        What if I could <span contenteditable="false"><select>
+        <option>Explode</option>
+        <option>Implode</option>
+        <option>Melt</option>
+        <option>Disintegrate</option>
+        <option>Detonate</option>
+    </select></span>
+        with <span contenteditable="false">speed <input type="range"/></span>
+        <select>
+            <option>or</option>
+            <option>and</option>
+        </select> maybe only <span contenteditable="false">after <input type="date"/></span>
+
+    </div>
+</div>
+
+
+
+
+
+</body>
+
+<link rel="import" href="head.html">
+
+<link href="lib/atwho/css/jquery.atwho.css" rel="stylesheet">
+
+<script src="lib/caret/jquery.caret.js"></script>
+<script src="lib/atwho/js/jquery.atwho.js"></script>
+
+<script>
+
+    function updateInlineMenu() {
+        $('.inlinemenu').each(function() {
+            var m = $(this);
+
+            m.html('');
+            m.attr('contenteditable', 'false');
+
+            var n = newEle('span').appendTo(m);
+            n.append($('<div class="compact ui button">a</a>'));
+            n.append($('<div class="compact ui button">b</a>'));
+
+            /*
+            var closeButton = $('<div class="compact ui button">x</a>').hide()
+            closeButton.css({
+                position: 'relative'
+            });
+            n.append(closeButton);
+            n.hover(function() {
+                closeButton.show();
+            }, function() {
+                closeButton.hide();
+            });
+            */
+
+            n.append('<div class="ui simple dropdown item"><i class="dropdown icon"></i><div class="menu"><div class="item">Choice 1</div><div class="item">Choice 2</div><div class="item">Choice 3</div></div></div>');
+
+
+
+        });
+    }
+
+    $(document).ready(function () {
+        updateInlineMenu();
+    });
+
+</script>
+<script>
+    //cirular popup demo code:
+    $(document).ready(function () {
+
+        var pm = new PopupMenu("editpopup");
+        pm.radius = 140; //pixels
+        pm.onHidden = function () {
+        };
+
+        //$('.nobjedit').atwho({
+        $('#ne1').atwho({
+            at: "@",
+            data: ["one", "two", "three", "four"]
+//                }).on("matched.atwho", function(event, flag, query) {
+//                    //console.log(event, "matched " + flag + " and the result is " + query);
+        }).on("shown.atwho", function (event) {
+
+
+            var textarea = $(event.target);
+
+            //console.log(event, "show");
+
+
+            var m = $('<div class="circlePopup"></div>').append(
+                    '<a class="closebutton ui button" href="#">X</a>',
+                    list = $('<ul></ul>').append(
+                            '<li><a href="#" action="addText">T</a></li>',
+                            '<li><a href="#" action="addURL">U</a></li>',
+                            '<li><a href="#">Dr</a></li>',
+                            '<li><a href="#">S</a></li>',
+                            '<li><a href="#">E</a></li>'
+                    )
+            );
+
+            //var list = $(".atwho-view-ul").clone(true,true).appendTo(m);
+
+            list.children().each(function () {
+                $(this).find('a').addClass('ui button');
+            })
+
+            $(".atwho-view-ul").find('li').each(function () {
+                $(this).detach().appendTo(list);
+            });
+
+            var pp = textarea.caret('offset');
+            pp.top += pp.height; //center on line height
+            //var offset = textarea.offset();
+            //pp.top += offset.top;
+            //pp.left += offset.left;
+
+            var modal = newDiv().modal({
+                duration: 50,
+                onVisible: function() {
+                    pm.show(m, pp, modal);
+                },
+                onHidden: function() {
+                    modal.remove();
+                }
+            }).modal('show');
+
+
+
+//                    var at = $('.atwho-view');
+//
+//                    if (at.find('.atwho-overlay').length == 0)  {
+//
+//                        //add when first created
+//                        //var atb = newDivClassed('atwho-overlay').appendTo(at);
+//
+//                        $('<button class="atwho-overlay">x</button>').appendTo(at).css({
+//                            left: "0",
+//                            width: "1em",
+//                            top: "50%"
+//                        });
+//                        $('<button class="atwho-overlay">y</button>').appendTo(at).css({
+//                            right: "0",
+//                            width: "1em",
+//                            top:"50%"
+//                        });
+//                        /*
+//                        $('<button>w</button>').appendTo(atb).css({
+//                            top: "-1em"
+//                        });
+//                        $('<button>z</button>').appendTo(atb).css({
+//                            bottom: "1em"
+//                        });*/
+//                    }
+
+            //at.fadeIn();
+
+        }).on("hidden.atwho", function (event) {
+            console.log(event, "hide");
+            var at = $('.atwho-view');
+            //at.fadeOut();
+
+            pm.hide();
+        });
+
+//                }).on("reposition.atwho", function(event,pos) {
+//                    console.log(event, "reposition");
+//
+//
+//
+//
+////                    //center on caret
+////                    var at = $('.atwho-view');
+////
+////                    //pos.left -= at.width()/2;
+////                    pos.top -= at.height()/2;
+////
+////                    at.offset(pos);
+//                });
+    });
+</script>
+<style>
+    body {
+        background-color: black;
+        color: orange;
+        font-family: arial;
+        font-size: 210%;
+        margin: 1em;
+    }
+
+    .header {
+        font-size: 150%;
+    }
+
+    .nobjedit {
+        border: 1px solid gray;
+        padding: 0.5em;
+        transition: outline-color 0.75s ease;
+        outline: 3px dashed green;
+    }
+
+    .nobjedit:hover {
+        outline-color: #0090D2;
+    }
+
+    /*
+    [contenteditable="true"] {
+        transition: outline-color 0.75s ease;
+        outline: 3px dashed green;
+    }
+    [contenteditable="true"]:hover {
+        outline-color: #0090D2;
+    }
+    */
+
+    [contenteditable="true"] [contenteditable="false"] {
+        border: 1px solid #e38585;
+        padding: 0.25em;
+        margin: 0.1em;
+    }
+
+    button, input, select {
+        color: black !important;
+    }
+
+    .atwho-view {
+        font-size: 50%;
+        opacity: 0.85;
+
+        ___transform: scale(1.0); /* 1/10 of the original size */
+        ___transition: transform 0.25s ease-in-out;
+
+        background-color: black;
+        color: yellow;
+    }
+
+
+    .atwho-view:hover {
+        _transform: scale(1.25);
+        opacity: 0.95;
+    }
+
+    .atwho-overlay {
+        position: absolute;
+    }
+
+    .atwho-container {
+        display: none !important;
+    }
+
+    .ui.dimmer {
+        background: rgba(0,0,0,.5) !important;
+    }
+
+</style>
+
+<style>
+    .circlePopup {
+        z-index: 5000;
+        position: absolute;
+        opacity: 0.9;
+        overflow: visible !important;
+    }
+
+    .circlePopup ul {
+        list-style: none;
+    }
+
+    .circlePopup li, .circlePopup a {
+        position: absolute;
+    }
+
+    .liCircle {
+        color: white;
+        width: 50px;
+        height: 50px;
+        margin-left: 0;
+        background-color: #00f;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 30px;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: none;
+        text-decoration: none;
+        opacity: 0.9;
+    }
+
+    .liCircle:hover {
+        color: white;
+        background-color: #090;
+        text-decoration: none;
+        opacity: 0.95;
+    }
+
+    .closebutton {
+        opacity: 0.7;
+        background-color: #aaa;
+    }
+
+    .closebutton:hover {
+        opacity: 0.9;
+        background-color: #999;
+    }
+
+</style>
+
+
+</html>

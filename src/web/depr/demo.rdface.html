@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Test RDFaCE with TinyMCE 4+</title>
+
+        <script src="lib/jquery/jquery.min.js" type="text/javascript"></script>
+
+        <script type="text/javascript" src="lib/tinymce/tinymce.min.js"></script>
+        <script type="text/javascript" src="lib/tinymce/plugins/rdface/libs/jstree/_lib/jquery.cookie.js"></script>
+
+        <style type="text/css">
+            @import url("lib/bootstrap/bootstrap.min.css");
+            @import url("lib/fontawesome/css/font-awesome.min.css");
+        </style>
+        <script type="text/javascript">
+            
+            tinymce.init({
+                selector: "div.editable0",
+                schema: "html5",
+                //inline: true,
+                menubar: false,
+                statusbar: false,
+                resize: "both",
+                valid_elements: "+*[*]",
+                content_css: "lib/tinymce/plugins/rdface/css/rdface.css, lib/tinymce/plugins/rdface/schema_creator/schema_colors.css",
+                plugins: [
+                    "advlist autolink lists link image charmap print preview anchor",
+                    "searchreplace visualblocks code fullscreen",
+                    "insertdatetime media table contextmenu paste rdface emoticons textcolor"
+                ],
+                toolbar: "rdfaceMain rdfaceRun link emoticons | styleselect forecolor bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent table image"
+            });
+
+
+            tinymce.init({
+                selector: "div.editable1",
+                schema: "html5",
+                //inline: true,
+                valid_elements: "+*[*]",
+                content_css: "lib/tinymce/plugins/rdface/css/rdface.css,lib/tinymce/plugins/rdface/schema_creator/schema_colors.css",
+                plugins: [
+                    "advlist autolink lists link image charmap print preview anchor",
+                    "searchreplace visualblocks code fullscreen",
+                    "insertdatetime media table contextmenu paste rdface"
+                ],
+                toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | rdfaceMain rdfaceRun"
+            });
+            tinymce.init({
+                selector: "div.editable2",
+                schema: "html5",
+                inline: true,
+                valid_elements: "+*[*]",
+                content_css: "lib/tinymce/plugins/rdface/css/rdface.css,lib/tinymce/plugins/rdface/schema_creator/schema_colors.css",
+                plugins: [
+                    "advlist autolink lists link image charmap print preview anchor",
+                    "searchreplace visualblocks code fullscreen",
+                    "insertdatetime media table contextmenu paste rdface"
+                ],
+                toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | rdfaceMain rdfaceRun"
+            });
+        </script>
+    </head>
+
+    <body>
+        <h2>Minimal Mode</h2>
+        <div class="editable0" style="width:100%; height:300px">
+            <p><strong>Johann Wolfgang von Goethe</strong> was a German writer, pictorial artist, biologist, theoretical physicist, and polymath. He is considered the supreme genius of modern German literature. His works span the fields of poetry, drama, prose, philosophy, and science.<p>Goethe studied law in <span style="color: #993300;">University of Leipzig</span> from 1765 to 1768. He detested learning age-old judicial rules by heart, preferring instead to attend the poetry lessons of Christian Fürchtegott Gellert. In Leipzig, Goethe fell in love with Käthchen Schönkopf and wrote cheerful verses about her in the Rococo genre.</p><p>The restaurant Auerbachs Keller and its legend of Faust's 1525 barrel ride impressed him so much that Auerbachs Keller became the only real place in his closet drama Faust Part One. Because his studies did not progress, Goethe was forced to return to Frankfurt at the close of August 1768. Goethe had a great effect on the nineteenth century.</p><p>The Goethe Institute is a non-profit German cultural association operational worldwide, promoting the study of the German language abroad and encouraging international cultural exchange and relations. The Goethe-Institut fosters knowledge about Germany by providing information on German culture, society and politics.</p></p>
+        </div><hr/>
+
+
+        <h2>Normal Mode</h2>
+        <div class="editable1" style="width:100%; height:300px">
+            <p><strong>Johann Wolfgang von Goethe</strong> was a German writer, pictorial artist, biologist, theoretical physicist, and polymath. He is considered the supreme genius of modern German literature. His works span the fields of poetry, drama, prose, philosophy, and science.<p>Goethe studied law in <span style="color: #993300;">University of Leipzig</span> from 1765 to 1768. He detested learning age-old judicial rules by heart, preferring instead to attend the poetry lessons of Christian Fürchtegott Gellert. In Leipzig, Goethe fell in love with Käthchen Schönkopf and wrote cheerful verses about her in the Rococo genre.</p><p>The restaurant Auerbachs Keller and its legend of Faust's 1525 barrel ride impressed him so much that Auerbachs Keller became the only real place in his closet drama Faust Part One. Because his studies did not progress, Goethe was forced to return to Frankfurt at the close of August 1768. Goethe had a great effect on the nineteenth century.</p><p>The Goethe Institute is a non-profit German cultural association operational worldwide, promoting the study of the German language abroad and encouraging international cultural exchange and relations. The Goethe-Institut fosters knowledge about Germany by providing information on German culture, society and politics.</p></p>
+        </div><hr/>
+        <h2>Inline Edit Mode</h2>
+        <div class="editable2" style="width:100%; height:300px">
+            <p><strong>Johann Wolfgang von Goethe</strong> was a German writer, pictorial artist, biologist, theoretical physicist, and polymath. He is considered the supreme genius of modern German literature. His works span the fields of poetry, drama, prose, philosophy, and science.<p>Goethe studied law in <span style="color: #993300;">University of Leipzig</span> from 1765 to 1768. He detested learning age-old judicial rules by heart, preferring instead to attend the poetry lessons of Christian Fürchtegott Gellert. In Leipzig, Goethe fell in love with Käthchen Schönkopf and wrote cheerful verses about her in the Rococo genre.</p><p>The restaurant Auerbachs Keller and its legend of Faust's 1525 barrel ride impressed him so much that Auerbachs Keller became the only real place in his closet drama Faust Part One. Because his studies did not progress, Goethe was forced to return to Frankfurt at the close of August 1768. Goethe had a great effect on the nineteenth century.</p><p>The Goethe Institute is a non-profit German cultural association operational worldwide, promoting the study of the German language abroad and encouraging international cultural exchange and relations. The Goethe-Institut fosters knowledge about Germany by providing information on German culture, society and politics.</p></p>
+        </div>
+    </body>
+</html>

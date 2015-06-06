@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+        <meta charset="utf-8">
+        <title>{{title}}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="application-name" content="Netention"/>
+        <meta name="description" content="<%= description %>">		
+        {{#allowSearchEngineIndexing}}
+        <meta name="robots" content="noindex, nofollow, noarchive">
+        {{/allowSearchEngineIndexing}}
+
+        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+           <script src="assets/js/html5shiv.js"></script>
+        <![endif]-->
+
+        <!-- Fav and touch icons -->
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="icon/apple-touch-icon-144-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="icon/apple-touch-icon-114-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="icon/apple-touch-icon-72-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" href="icon/apple-touch-icon-57-precomposed.png">
+        <link id="favicon" rel="shortcut icon" href="icon/favicon.png">
+        <style> #NotificationArea { font-family: Arial, sans; z-index: 5000;  position: fixed; font-size: 200%;  text-align:center; top: 25%; width: 100%; } </style>
+        <style type="text/css">
+            @import url("lib/bootstrap/bootstrap.min.css");
+            @import url("lib/fontawesome/css/font-awesome.min.css");
+
+            /*@import url('lib/jquery-ui/1.11.1/jquery-ui.css');*/
+            @import url('lib/jquery-ui/1.11.1/bootstrap/jquery-ui-1.10.3.theme.css');
+            @import url('lib/jquery-ui/1.11.1/bootstrap/jquery-ui-1.10.3.custom.css');
+
+        </style>
+        
+    </head>
+
+    <body>
+
+        <!-- LOGIN SCREEN -->
+        <div id="LoadingSplash" style="display: none">        
+            <div id="login-prompt" class="logon overthrow">
+                <div>
+                    <img alt="Welcome" id="loginLogo"/>
+                    <h3 id="LoadingSplashTitle" style="text-align:center;">Login</h3>
+                    <div id="login" style="display:none">
+                    </div>
+                    <div id="ProfileSelect">
+                    </div>
+                    <!--<div id="about-netention" style="display:none">
+                        <p>Contribute to the <a href="http://netention.org/" target="_blank">&ldquo;<em>Netention</em>&rdquo;</a> open-source project on <a href="https://github.com/automenta/netentionjs2" target="_blank">Github</a> and read about the upcoming <a href="http://climateviewer.com/" target="_blank">Global Survival System</a>. Contact Jim Lee on <a href="http://twitter.com/rezn8d" target="_blank">Twitter</a>, <a href="http://www.facebook.com/rezn8d" target="_blank">Facebook</a>, or Skype user &ldquo;rezn8d&rdquo; if you are interested in helping.  Works best on <a href="http://chrome.google.com/" target="_blank">Chrome</a> or <a href="http://www.firefox.com/" target="_blank">Firefox</a>.</p>
+                    </div>-->
+                </div>    
+            </div>           
+        </div> 
+        <!-- HIDDEN UNTIL LOADED -->
+
+
+        <!-- UI LAYERS -->
+        <div id="NotificationArea">Loading...</div>
+
+        <div id="FocusEditWrap"  style="display:none"  class="panel panel-default MenuPopout ui-mainmenu">
+            <div class="panel-body">
+
+                <div>
+                    <ul class="nav">
+                        <li><button id="FocusWhatButton" class="btn btn-default btn-sm ViewControl" title="What"><img src="icon/find.svg"></button></li>
+                        <li><button id="FocusWhereButton" class="btn btn-default btn-sm ViewControl" title="Where"><img src="icon/view.map.svg"></button></li>
+                        <li><button id="FocusWhenButton" class="btn btn-default btn-sm ViewControl" title="When"><img src="icon/view.time.svg"></button></li>
+                        <li><button id="FocusWhoButton" class="btn btn-default btn-sm ViewControl" title="Source"><img src="icon/view.us.svg"></button></li>
+                        <li><button id="FocusHowButton" class="btn btn-default btn-sm ViewControl" title="How"><img src="icon/view.graph.svg"></button></li>
+                    </ul>
+                </div>
+                <br/>
+                <div><span id="FocusStatus"></span></div>
+                <br/>
+                <div id="FocusTaggerPanel" style="display: none" class='panel panel-default'>
+                    <div class="panel-heading">						
+                        <div id="FocusTaggerMenu"></div>
+                    </div>
+                    <div id="FocusTagger" class="panel-body">
+                    </div>
+                </div>
+
+                <div id="FocusEdit"></div>
+            </div>
+        </div>
+
+        <div id="View" style="display:none"></div>
+
+        <div id="AlertConsole"></div>
+        
+        <!--<a id="AvatarButtonMini" style="display:none;"><img id="toggle-img" title="Click here to expand the control panel"  alt="toggle menu button" src="icon/netention-button.png" /></a>-->
+
+        <div id="ActionMenuWrapper"></div>
+        
+
+        <nav id="MainMenu" style="display:none; width: 100%" class="container-fluid navbar-default" role="navigation">
+            <!-- <li class="viz"><a class="ui-button" id="time" title="Timeline" href="#"><b class="icon-time"></b><span class="display-menu-collapse">Timeline</span></a></li> -->
+            <!-- <li><button id="FocusToggleButton" title="Toggle Fullsize" ><i class="icon-resize-full"></i></button></li> -->
+            <!-- <li><button id='slides'  title="Slides"><i class="icon-play"></i></button></li> -->
+
+			<button type="button" class="ViewControl btn btn-default dropdown-toggle" data-toggle="dropdown">
+				<img alt="brand" id="avatar-img" class="ui-corner-br" alt="avatar image" src="icon/load.gif" />
+			</button>
+			<ul id="AvatarDropdown" class="dropdown-menu" role="menu">
+            
+				<div id="OptionsMenu" class="btn-group">
+                	<div id="NotificationList" style="float: left" class="ViewControl"></div>
+            	</div>
+				
+				<li id="ConnectionList" class="divider"></li>
+				<li class="divider"></li>
+				<li><a href="#">Reconnect</a></li>
+				<li><a href="#">Disconnect All</a></li>
+				<li class="divider"></li>
+				<li><a id="ToggleChatButton" class="ViewControl"><img src="icon/view.chat.svg">Chat</a></li>
+				<li><a id="EditProfileButton" class="ViewControl"><img src="icon/view.browse.svg">Edit My Profile</a></li>
+				<li><a id="SelectProfileButton" class="ViewControl"><img src="icon/view.share.svg">Change Identity...</a></li>
+				<li><a href="/login" class="websocket ViewControl"><i class="fa fa-sign-in fa-3x"></i> Login</a></li>
+				<li><a href="/logout" class="websocket ViewControl"><i class="fa fa-sign-in fa-3x"></i> Logout</a></li>
+			</ul>
+
+            <div class="btn-group" style="float:left">
+                <button id="AddContentButton" title="New..." type="button" class="ViewControl btn btn-default"><img src="icon/plus.transparent.svg"/></button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="padding-left: 5px; padding-right: 5px;">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#"><i class="fa fa-comment-o"></i> Status Update</a></li>
+                    <li><a href="#"><i class="fa fa-edit"></i> Note</a></li>
+                    <li><a href="#"><i class="fa fa-map-marker"></i> Mapped Location</a></li>
+                    <li><a href="#"><i class="fa fa-clock-o"></i> Event</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#"><i class="fa fa-file-image-o"></i> Upload Image</a></li>
+                    <li><a href="#"><i class="fa fa-camera"></i> Record Webcam</a></li>
+                    <li><a href="#"><i class="fa fa-microphone"></i> Record Audio</a></li>
+                </ul>
+            </div>			
+
+
+            <button id="FocusClearButton" style="display:none" title="Clear Focus" type="button" class="ViewControl btn btn-default"><i class="fa fa-times-circle-o fa-2x"></i></button>
+            <button id="FocusEditToggleButton" title="Focus" type="button" class="ViewControl btn btn-default" data-toggle="button"><i class="fa fa-search fa-2x"></i></button>
+
+            <button id="viewplay" class="ViewControl btn btn-default" title="Live Mode"><i class="fa fa-play fa-2x"></i></button>
+            <button id="viewpause" class="ViewControl btn btn-default" title="Pause"><i class="fa fa-pause fa-2x"></i></button>
+
+
+            <div id="ViewSelect" class="section">
+            </div>
+
+
+            <div id="ViewUpdates" style="display:none" class="section">
+            </div>
+
+            <div id="ViewMenu" class="section"></div>
+
+        </nav>
+
+
+        <!-- END HIDDEN UNTIL LOADED -->
+
+        <script src="lib/LAB.min.js" type="text/javascript"></script>
+
+        <!-- <script src="lib/weakmap.min.js"></script> -->
+
+        <script src="lib/jquery/jquery.min.js" type="text/javascript"></script>
+        <script src="lib/lodash/lodash.min.js" type="text/javascript"></script> 
+        <script src="lib/underscore.string/2.3.3/underscore.string.min.js" type="text/javascript"></script> 
+        <script src="lib/backbone.js/backbone-min.js" type="text/javascript"></script> 
+        <script src="lib/bootstrap/bootstrap.min.js"></script>
+
+        <!--<script src="lib/react/react-0.10.0.min.js"></script>-->        
+        <!--<script src="lib/react/JSXTransformer-0.10.0.js"></script>-->
+
+        <!--<script src="lib/react/react-bootstrap.min.js"></script>-->
+
+        <script src="lib/datatables/jquery.dataTables.min.js" type="text/javascript"></script>
+        <!-- <script src="lib/datatables/Scroller/js/dataTables.scroller.js"></script> -->
+
+        <script src="lib/d3/d3.v3.min.js"></script>
+
+        <script src="lib/sketchpad/raphael-min.js"></script>
+
+        <!-- <script src="lib/lazyload.js" type="text/javascript"></script>  -->
+        <script src="lib/setImmediate.js" type="text/javascript"></script> 
+        <script src="lib/lunr/lunr.min.js"></script>
+
+        <script src="lib/sockjs/sockjs-0.3.4.min.js"></script>
+        <script src='lib/sockjs/vertxbus.min.js'></script>    
+        <script src='connect.websocket.js'></script>    
+    
+        <script src="lib/graphlib.min.js" type="text/javascript"></script> 
+
+        <script src="lib/pouchdb/pouchdb-3.0.5.min.js"></script>
+        <!--<script src="/lib/pouchdb/pouchdb.memory.js"></script>-->
+        <!--<script src="/lib/leveljs/level.js"></script>-->
+
+        <script src="util/db.pouch.js" type="text/javascript"></script>
+        <script src="util/util.js" type="text/javascript"></script>
+
+        <script src="connect.http.js" type="text/javascript"></script>
+
+        <script src="client_configuration.js" type="text/javascript"></script> 
+        
+        <script src="netention.js" type="text/javascript"></script> 
+
+        <script src="lib/jquery-ui/1.11.1/jquery-ui.min.js" type="text/javascript"></script>
+        <script src="lib/jquery-ui/jquery.ui.touch-punch.min.js" type="text/javascript"></script>
+
+        <script src="lib/overthrow/overthrow.js" type="text/javascript"></script>
+
+
+        <script src="lib/leaflet/leaflet.js"></script>
+        <script src="lib/leaflet/leaflet.draw.js"></script>
+        <script src="lib/leaflet/leaflet.dbpedialayer.js"></script>
+        <script src="lib/leaflet/Control.OSMGeocoder.js"></script>
+
+        <script src="lib/jQuery-URL-Parser/purl.js" type="text/javascript"></script> 
+        <script src="lib/pnotify/pnotify.custom.min.js" type="text/javascript"></script>
+
+        <script src="lib/jquery-svg/jquery.svg.min.js" type="text/javascript"></script>
+
+        <script src="lib/timeago/jquery.timeago.js" type="text/javascript"></script> 
+        <script src="lib/jquery-form/jquery.form.js" type="text/javascript"></script> 
+
+        <script src="lib/jqtree/tree.jquery.min.js"></script>
+
+        <!--
+        <script src="lib/jquery-tagsinput/jquery.tagsinput.js"></script> 
+        -->
+
+        <script src="lib/popline/jquery.popline.js"></script> 
+        <script src="lib/popline/plugins/jquery.popline.link.js"></script> 
+        <script src="lib/popline/plugins/jquery.popline.blockquote.js"></script> 
+        <script src="lib/popline/plugins/jquery.popline.decoration.js"></script> 
+        <script src="lib/popline/plugins/jquery.popline.list.js"></script> 
+        <script src="lib/popline/plugins/jquery.popline.justify.js"></script>
+        <script src="lib/popline/plugins/jquery.popline.blockformat.js"></script> 
+        <script src="lib/popline/plugins/jquery.popline.social.js"></script> 
+        <script src="lib/popline/plugins/jquery.popline.backcolor.js"></script> 
+        
+        <!--<script src="lib/jwerty/jwerty.js"></script>-->
+
+
+
+        <!-- PDF.js -->
+        <!-- <script src="lib/pdf.js/build/pdf.js"></script> -->
+
+
+        <!--<script src="lib/freetile/jquery.freetile.min.js" type="text/javascript"></script>-->
+
+        <!--<script src="lib/fractaldom/fractaldom.js"></script>-->
+
+        <script src="lib/jmousewheel/jMouseWheel-1.0.min.js"></script>
+
+        <script src="lib/markdown/markdown.min.js"></script>
+
+        <script src="lib/sketchpad/raphael.sketchpad.js"></script>
+
+        <!-- <script src="lib/qrcode/qrcode.min.js"></script> -->
+        <!--<script src="lib/jsonh/jsonh.js"></script>-->
+
+        <script src="ui.js" type="text/javascript"></script>
+
+        <script src="widget.object.js" type="text/javascript"></script> 
+        <script src="widget.value.js" type="text/javascript"></script> 
+        <script src="widget.object.view.js" type="text/javascript"></script>         
+        <script src="widget.object.edit.js" type="text/javascript"></script>         
+        <script src="widget.map.js" type="text/javascript"></script> 
+        <script src="widget.tag.js" type="text/javascript"></script> 
+        <script src="widget.focus.js" type="text/javascript"></script> 
+        <script src="widget.profile.js" type="text/javascript"></script> 
+        <script src="widget.wiki.js" type="text/javascript"></script> 
+        <script src="widget.channel.js" type="text/javascript"></script> 
+
+        <script src="view.main.js" type="text/javascript"></script> 
+        <script src="view.map.js" type="text/javascript"></script> 
+        <script src="view.map.cesium.js" type="text/javascript"></script> 
+        <script src="view.browse.js" type="text/javascript"></script> 
+        <!--<script src="view.trends.js" type="text/javascript"></script> -->
+        <script src="view.slides.js" type="text/javascript"></script> 
+        <script src="view.graph.js" type="text/javascript"></script> 
+        <script src="view.self.js" type="text/javascript"></script> 
+        <script src="view.forum.js" type="text/javascript"></script> 
+        <script src="view.time.js" type="text/javascript"></script> 
+        <script src="view.share.js" type="text/javascript"></script> 
+        <!--<script src="view.options.js" type="text/javascript"></script> -->
+        <!--<script src="view.templates.js" type="text/javascript"></script> -->
+        <!-- <script src="view.notebook.js" type="text/javascript"></script>  -->
+        <script src="view.wall.js" type="text/javascript"></script> 
+        <script src="view.wiki.js" type="text/javascript"></script> 
+
+        <script src="webcam.js"></script>
+        <script src="search.js" type="text/javascript"></script> 
+        <script src="action.js" type="text/javascript"></script> 
+
+
+        <!-- templates -------->
+        <!--
+        <script type="text/jsx" src="object.jsx"></script>
+        <script type="text/jsx" src="category_previews.jsx"></script>
+        <script type="text/jsx" src="notifications.jsx"></script>
+        -->
+
+
+        <script>
+            $LAB.setGlobalDefaults({AllowDuplicates: false});
+        </script>
+        <style>
+            /*@import url("lib/fractaldom/fractaldom.css");*/
+
+            @import url("lib/leaflet/leaflet.css");
+            @import url("lib/leaflet/Control.OSMGeocoder.css");
+            @import url("lib/leaflet/leaflet.draw.css");
+
+            @import url("lib/pnotify/pnotify.custom.min.css");
+
+            /*@import url("lib/gridster/jquery.gridster.min.css");*/
+            @import url("lib/jquery-tagsinput/jquery.tagsinput.css");
+
+            @import url("netention.css");
+            @import url("wiki.css");
+            @import url("netention.anim.css");
+
+            @import url("lib/datatables/css/jquery.dataTables.min.css");
+            /*@import url("lib/datatables/Scroller/css/dataTables.scroller.min.css");*/
+
+
+            @import url("lib/popline/themes/popclip.css")
+
+        </style>
+        
+        <div id="theme"></div>
+        
+        <style id="customcss"></style>
+
+    </body>
+<script>
+    var auth = '{{auth}}';
+    var selves = {{&selves}};    
+    var self = null;
+    
+    $(document).ready(function() {		
+		
+        //debugLog();
+ 
+        netention({
+            routes: {
+                'new': 'new',
+                'me': 'me', // #help
+                'help': 'help', // #help
+                'query/:query': 'query', // #search/kiwis
+                'object/:id': 'showObject',
+                'object/:id/focus': 'focus',
+                'tag/:tag': 'tag',
+                'tag/:tag/new': 'tagNew',
+                //"new/with/tags/:t":     "newWithTags",
+                'example': 'completeExample',
+                'user/:userid': 'user',
+                'read/*url': 'read',
+                
+                'wiki/:page': 'wiki',
+                'wiki/search/:query': 'wikisearch',
+
+				':view': 'view',
+                ':view/tag/:tag': 'viewTag'
+                        //"search/:query/:page":  "query"   // #search/kiwis/p7
+            },
+            me: function() {
+                commitFocus($N.myself());
+            },
+            completeExample: function() {
+                commitFocus(exampleObject);
+            },
+            showObject: function(id) {
+                var x = $N.object[id];
+                if (x) {
+                    newPopupObjectView(x);
+                }
+                else {
+                    notify({
+                        title: 'Unknown object',
+                        text: id
+                    });
+                }
+            },
+            wiki: function (page) {
+                setView('wiki', { target: page, search: false} );                
+            },
+            wikisearch: function (query) {
+                setView('wiki', { target: query, search: false} );
+            },            
+            view: function(view) {
+                $N.set('currentView', view);                
+            },
+            viewTag: function(view, tag) {
+                $N.set('currentView', view);
+
+                var tf = new $N.nobject();
+                tf.addTag(tag);
+                $N.setFocus(tf);
+
+                //show sidebar
+                if (!$('#FocusEditWrap').is(':visible'))
+                    $('#FocusEditToggleButton').click();
+            },
+            user: function(userid) {
+                $N.set('currentView', {view: 'user', userid: userid});
+            },
+            tagNew: function(tag) {
+                var n = new $N.nobject();
+                n.addTag(tag);
+                newPopupObjectEdit(n);
+            },
+            read: function(url) {
+                later(function() {
+                    viewRead(url);
+                });
+            }
+        });
+                
+        
+        $N.once('ui.start', function (){        
+
+            console.log('initUI()');
+
+            var ii = identity();
+
+            if (ii === ID_AUTHENTICATED) {
+                $('#NotificationArea').html('Authorized.');
+            }
+            else if (ii === ID_ANONYMOUS) {
+                $('#NotificationArea').html('Anonymous.');
+            }
+            else {
+                $('#NotificationArea').html('Read-only public access.');
+                /*$('.loginlink').click(function() {
+                 $('#LoadingSplash').show();
+                 nn.hide();
+                 });*/
+            }
+            
+            $('#LoadingSplash2').hide();
+
+            /*
+             if (($N.myself()===undefined) && (identity()!=ID_UNKNOWN)) {
+             openSelectProfileModal("Start a New Profile");
+             }*/
+
+            updateViewControls();
+
+            $('body.timeago').timeago();
+
+            var viewUpdateMS = configuration.viewUpdateTime[configuration.device][0];
+            var viewDebounceMS = configuration.viewUpdateTime[configuration.device][1];
+            var firstViewDebounceMS = configuration.viewUpdateTime[configuration.device][2];
+            var firstView = true;
+
+            var throttledUpdateView = _.throttle(function() {
+                                    
+                    $('#AvatarButton').addClass('ViewBusy');
+                    later(function() {
+                            _updateView();
+                            if (firstView) {
+                                    updateView = _.debounce(throttledUpdateView, viewDebounceMS);
+                                    firstView = false;
+                            }
+                            $('#AvatarButton').removeClass('ViewBusy');
+                    });
+            }, viewUpdateMS);
+
+            updateView = _.debounce(throttledUpdateView, firstViewDebounceMS);
+
+
+            /*var msgs = ['I think', 'I feel', 'I wonder', 'I know', 'I want'];
+            //var msgs = ['Revolutionary', 'Extraordinary', 'Bodacious', 'Scrumptious', 'Delicious'];
+            function updatePrompt() {
+                    var l = msgs[parseInt(Math.random() * msgs.length)];
+                    $('.nameInput').attr('placeholder', l + '...');
+            }
+            setInterval(updatePrompt, 7000);
+            updatePrompt();
+            */
+
+            later(function() {
+                setTheme($N.get('theme'));        
+            });
+
+
+
+            $('#AddContentButton').click(function() {
+                var o = objNew();
+                /*var focus = $N.focus();
+                if (focus)
+                    if (focus.value)
+                        o.value = focus.value;*/
+               
+                newPopupObjectEdit(o, {width: '50%'});
+            });
+            $('#SelectProfileButton').click(function() {
+                    openSelectProfileModal();
+                    return false;
+            });
+            $('#EditProfileButton').click(function() {
+                    newPopup("Profile", true, true).append(newObjectEdit($N.myself(), true));    
+                    return false;
+            });
+
+            
+            $('#ToggleChatButton').click(function() {
+                newPopupObjectView('User');
+                return false;
+            })
+
+            initFocusButtons();
+
+            setViewLock(configuration.viewlockDefault);
+
+            //$('#Roster').append(newRosterWidget());
+
+/*
+            later(function() {
+                    //Setup Notification Menu
+                    (function () {
+                            React.renderComponent(
+                                    NotificationMenu(),
+                                    $('#NotificationList')[0]
+                            );
+                    })();
+            });
+            $('#NotificationList').click(function() {
+                    $('#NotificationList i').removeClass('blink');
+            });
+
+*/
+
+        });
+
+
+        $N.once('session.start', function() { 
+            
+            console.log('Session start for: ', $N.id());
+            var currentSelf = $N.myself();
+			
+            //init main menu
+            $('#MainMenu').show();
+            $('#View').show();
+			
+            updateIndent(true);			
+            updateBrand(); //TODO use backbone Model instead of global function
+            updateViewLock(0);
+            if (configuration.device == configuration.DESKTOP)
+                $('.ViewControl').addClass('pulse');
+			
+			
+            $N.saveAll();
+
+
+
+            $N.on('change:attention', updateView);
+            $N.on('change:currentView', updateView);
+            $N.on('change:tags', updateView);
+            $N.on('change:focus', updateView);
+                
+			
+			//setup default view if none already created by router
+            if ($('#View').children().length === 0)
+            	updateView();
+
+            $('#NotificationArea').remove();
+
+            
+        	
+        	
+			
+
+            later(function() {
+                    notify({
+                            title: 'Connected.',
+                            type: 'success',
+                            delay: 2000
+                    });                        
+            });
+
+            $N.updateRoster();
+
+
+            //WebRTC
+            if (configuration.webrtc) {
+                $LAB
+                        .script("/lib/peerjs/peer.min.js")
+                        .script("/webrtc.js")
+                        .wait(function() {
+                                initWebRTC(configuration.webrtc); 
+                        });
+            }
+            
+    
+            //WebSockets Event Bus
+            if (bus) {
+                $N.on('pub', function(x) {
+                    bus.publish('publish', objCompact(x));
+                });
+                
+                
+                bus.registerHandler('say', publicHandler = function (message) {
+                    
+                    try {
+                        //notify(JSON.parse(message));
+                        notify(message);                        
+                    }
+                    catch (e) {
+                        console.log(e + ': ' + message);
+                    }
+                });  
+                bus.registerHandler('publish', function(message) {
+                    var now = Date.now();
+                    var created = message.m || message.c;
+                    var latency = now - created;
+                    
+                    //TODO different message according to scope
+                    //TODO limit title length
+
+                    if (message.a) {
+
+                        if (message.a == $N.id()) {
+                            notify({title: message.n, text: 'Shared: ' + message.i + ' (' + latency + 'ms)'});
+                        }
+                        else {
+                            notify(
+                               {title: message.n, 
+                                text: 'New: ' + message.i + ' by ' + $N.label(message.a) + ' (' + latency + 'ms)'
+                            } );
+                        }
+                    }
+                    else {
+                        notify( JSON.stringify(message) );
+                    }
+                    
+                });
+            }
+
+
+            if (!$N.myself())
+                openSelectProfileModal('Start a New Profile');
+
+        
+            newChannelPopup('main');
+        });
+
+    });
+
+</script>
+        
+</html>

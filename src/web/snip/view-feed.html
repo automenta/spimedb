@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+<head>
+    <title>HyperGraph&trade; | Your Interwebz on Steroids</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="title" content="HyperGraph&trade;">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/lib/fontawesome/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="/css/hypergraph.css" />
+
+    <script type="text/javascript" src="/lib/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="/lib/masonry.pkgd.min.js"></script>
+    <script type="text/javascript" src="/lib/imagesloaded.pkgd.min.js"></script>
+    <script type="text/javascript" src="/lib/bootstrap/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div id="feed">
+
+                <div class="item">
+                    <img src="img/cesium.jpg" alt="">
+                    <h4><a href="#">Title 1</a></h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                        irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    <div class="social">
+                        <div class="btn social-like social-bt" title="Like"><i class="fa fa-thumbs-o-up"></i></div>
+                        <div class="btn social-dislike social-bt" title="Dislike"><i class="fa fa-thumbs-o-down"></i></div>
+                        <div class="btn social-pin social-bt" title="Share"><i class="fa fa-retweet"></i></div>
+                        <div class="btn social-favorite social-bt" title="Favorite"><i class="fa fa-heart-o"></i></div>
+                        <div class="btn social-totals social-bt"></div>
+                    </div>
+                </div>
+                <div class="item">
+                    <img src="img/leaflet.jpg" alt="">
+                    <h4><a href="#">Title 2</a></h4>
+                    <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+                <div class="item">
+                    <img src="http://i.imgur.com/xOIMvAe.jpg" alt="">
+                    <h4><a href="#">Title 3</a></h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                        irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                </div>
+                <div class="item">
+                    <img src="http://i.imgur.com/3gXW3L3.jpg" alt="">
+                    <h4><a href="#">Title 4</a></h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                        irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+                <div class="item">
+                    <img src="http://i.imgur.com/o2RVMqm.jpg" alt="">
+                    <h4><a href="#">Title 5</a></h4>
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+                <div class="item">
+                    <img src="img/graph.jpg" alt="">
+                    <h4><a href="#">Title 2</a></h4>
+                    <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+                <div class="item">
+                    <img src="http://i.imgur.com/o2RVMqm.jpg" alt="">
+                    <h4><a href="#">Title 5</a></h4>
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+            </div> <!-- feed -->
+        </div> <!-- row -->
+    </div> <!-- container-fluid -->
+
+
+<script type="text/javascript">
+    $('#feed').imagesLoaded( function(){
+      $('#feed').masonry({
+       itemSelector: '.item',
+       isAnimated: true,
+       "columnWidth": 300
+      });
+    });
+</script>
+</body>
+</html>

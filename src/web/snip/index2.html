@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>?</title>
+
+</head>
+<body>
+
+
+<div class="ui left inverted labeled icon wide sidebar menu visible">
+
+    <div class="ui horizontal left inverted icon menu">
+
+        <a class="red item">
+            <i class="mail icon"></i>
+        </a>
+        <a class="teal item">
+            <i class="lab icon"></i>
+        </a>
+        <a class="green item">
+            <i class="star icon"></i>
+        </a>
+
+    </div>
+
+    <a class="ui item">
+        <div class="inverted ui transparent mini icon input">
+            <input type="text" placeholder="..">
+            <i class="search icon"></i>
+        </div>
+    </a>
+
+    <div class="ui grid">
+        <a class="item">
+            <i class="home icon"></i>
+            Home
+        </a>
+        <a class="item">
+            <i class="block layout icon"></i>
+            Topics
+        </a>
+        <a class="item">
+            <i class="smile icon"></i>
+            Friends
+        </a>
+        <a class="item">
+            <i class="calendar icon"></i>
+            History
+        </a>
+        <a class="item">
+            <i class="mail icon"></i>
+            Messages
+        </a>
+        <a class="item">
+            <i class="chat icon"></i>
+            Discussions
+        </a>
+        <a class="item">
+            <i class="trophy icon"></i>
+            Achievements
+        </a>
+        <a class="item">
+            <i class="shop icon"></i>
+            Store
+        </a>
+    </div>
+    <!--<a class="ui item">-->
+        <div class="ui item inverted vertical accordion">
+            <div class="active title">
+                <i class="dropdown icon"></i>
+                title
+            </div>
+            <div class="active content">
+                content
+            </div>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                title
+            </div>
+            <div class="content">
+                content
+            </div>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                title
+            </div>
+            <div class="content">
+                content
+            </div>
+        </div>
+
+    <!--</a>-->
+
+</div>
+
+
+<div class="ui top attached tabular menu">
+    <a class="active item" data-tab="first">First</a>
+    <a class="item" data-tab="second">Second</a>
+    <a class="item" data-tab="third">Third</a>
+</div>
+<div class="ui bottom attached active tab segment" data-tab="first">
+    First
+</div>
+<div class="ui bottom attached tab segment" data-tab="second">
+    Second
+</div>
+<div class="ui bottom attached tab segment" data-tab="third">
+    Third
+</div>
+
+
+<script>
+    function ready() {
+        //$('.left.demo.sidebar').sidebar('toggle');
+        //$('.left.demo.sidebar').sidebar('toggle');
+        $('.ui.accordion').accordion();
+        $('.tabular.menu .item').tab();
+    }
+</script>
+</body>
+
+<link rel="import" onload="ready()" href="../head.html">
+
+
+</html>

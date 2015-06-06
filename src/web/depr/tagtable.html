@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2014 me
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+    <head>
+        <title>Tag Table</title>
+        <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <script src="lib/jquery/jquery.min.js" type="text/javascript"></script>
+        <script src="lib/lodash/lodash.min.js" type="text/javascript"></script> 
+        <script src="lib/underscore.string/2.3.3/underscore.string.min.js" type="text/javascript"></script> 
+        
+        <script src="lib/datatables/jquery.dataTables.min.js" type="text/javascript"></script>
+        <style type="text/css">
+
+            @import url("lib/datatables/css/jquery.dataTables.min.css");
+            /*@import url("lib/datatables/Scroller/css/dataTables.scroller.min.css");*/
+            @import url("lib/fontawesome/css/font-awesome.min.css");
+
+            table.dataTable tbody tr, table.dataTable.display tbody tr.odd, 
+            table.dataTable.display tbody tr.even>.sorting_1, table.dataTable.display tbody tr.odd>.sorting_1  {
+                background-color: transparent;
+                
+            }
+            .dataTables_info, .dataTables_length, .dataTables_filter {
+                opacity: 0.85;
+            }
+            .dataTables_paginate, .dataTables_paginate > *, .paging_simple_numbers, .paginate_button, .paginate_button a > *, 
+            .dataTables_wrapper .dataTables_paginate .paginate_button.current{
+                background: none !important;
+                border: 0px;
+            }
+            .dataTables_paginate a {
+                border: 0px;
+                background: none;
+            }
+            
+            
+            body {
+                background-color: black;
+                color: #aaa;
+                font-family: monospace;
+                font-size: 130%;
+                margin: 1em;
+            }
+            a { color: white; }
+            pre, h3 {
+                margin-top: 0.5em;
+                margin-bottom: 0.5em;
+            }
+            pre {
+                color: white;
+                font-size: 80%;
+            }
+            h3 {
+                color: white;
+            }
+            time {
+                font-size: 80%;
+            }
+
+            .item {
+                margin-bottom: 2em;
+            }
+            .section {
+                margin-left: 4em;
+            }
+            #menu {
+                position: fixed;
+                right: 0;
+                top: 0;
+                z-index: 10;                
+            }
+            #menu a {
+                font-size: 80px;
+                opacity: 0.85;
+                padding: 12px;
+            }
+            #menu a:hover {
+                opacity: 0.9;
+            }
+
+        </style>
+        
+    </head>
+    
+    <body>
+        <div id="table">
+        </div>
+    </body>
+    
+    <script>
+        $(document).ready(function() {
+            var basetag = 'User';
+           
+            function update() {
+
+                $.getJSON('object/tag/' + basetag + '/json', function(d) {
+                    //$('body').append(JSON.stringify(j));
+                    
+                        $('#table').empty();
+                        
+                        var t = $('<table cellpadding="0" cellspacing="0" border="0" class="display" style="width:100%"></table>');
+			t.appendTo('#table');
+
+			
+
+                        var data = [];
+                        _.each(d, function(subject) {
+                            var name = subject.name;
+                            if (subject.out) {
+                                for (var pred in subject.out) {
+                                    var objList = subject.out[pred];
+                                    for (var i = 0; i < objList.length; i++) {
+                                        var obj = objList[i];
+                                        data.push([name, pred, obj]);
+                                    }
+                                }
+                            }
+                            
+                        });
+
+			var table = t.dataTable({
+				'data': data,
+				'columns': [
+					{ 'title': '<i class="fa fa-cubes"></i>'/*, class: ''*/ },
+					{ 'title': '<i class="fa fa-arrows-h"></i>' },
+					{ 'title': '<i class="fa fa-cubes"></i>' }
+					//{ 'title': 'Author' }
+				],
+				'deferRender': true,
+
+				//http://www.datatables.net/extensions/scroller/examples
+				/*
+				"scrollY": "200px",
+				"dom": "frtiS",
+				'scrollCollapse': true,
+				*/
+				'searching': true,
+				'lengthChange': true,
+				'paging': true,
+				'ordering': true,
+				//'order': [2, 'desc'],
+				'columnDefs': [
+				   {
+						'targets': [0],
+						'visible': true,
+						'searchable': true
+					}
+					/*{
+						// The `data` parameter refers to the data for the cell (defined by the
+						// `data` option, which defaults to the column being worked with, in
+						// this case `data: 0`.
+						"render": function (data, type, row) {
+							return '';
+						},
+						"targets": 1
+					},*/
+
+
+				],
+                                
+                                /*
+				'createdRow': function(row, data, index ) {
+					$('td', row).eq(0).html(
+						newObjectView(data[0], {
+							scale: 0.5,
+							depthRemaining: 0,
+							startMinimized: false,
+							showAuthorName: false,
+							transparent: true
+						})
+					);
+					$('td', row).eq(1).html($.timeago(new Date(data[2])));
+				}
+                                */
+			});                    
+                });
+            }
+        
+            update();
+           
+        });
+    </script>
+    
+</html>
