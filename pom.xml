@@ -228,6 +228,11 @@
             <artifactId>undertow-core</artifactId>
             <version>1.2.7.Final</version>
         </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-websockets-jsr</artifactId>
+            <version>1.2.7.Final</version>
+        </dependency>
 
 
         <!--
