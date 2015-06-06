@@ -1,0 +1,94 @@
+<html>
+<head>
+	<title>FractalDOM</title>
+    <script src="../lib/jquery.min.js" type="text/javascript"></script>
+    <script src="../lib/jqueryui/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="../lib/lodash.min.js" type="text/javascript"></script>
+    <script src="lib/jmousewheel/jMouseWheel-1.0.min.js" type="text/javascript"></script>
+    <script src="lib/jquery-svg/jquery.svg.min.js" type="text/javascript"></script>
+
+	<!-- JQuery-UI theme -->
+	<link rel="stylesheet" type="text/css" href="../lib/jqueryui/themes/ui-lightness/jquery-ui.min.css">
+
+	<script src="nslider.js" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="nslider.css">
+
+	<script src="fractaldom.js" type="text/javascript"></script>
+
+	<link rel="stylesheet" type="text/css" href="fractaldom.css">
+
+	<style>
+		.ui-dialog { opacity: 0.9; }
+		body {
+			background-image: url(grid.png);
+			background-size: stretch;
+			overflow: hidden;
+		}
+	</style>
+</head>
+
+<body>
+	
+</body>
+
+<script>
+
+
+
+	var d = fractaldom();
+	d.appendTo($('body'));
+	d.init();
+
+	var w1 = d.newNode("a", {title:'Hi', position: [100,100]} );
+	w1.setSize(250,400);
+	w1.append('Fractals are everywhere<br/><img src="fractal.gif"/>');
+	w1.append('Fractal patterns have been modeled extensively, albeit within a range of scales rather than infinitely, owing to the practical limits of physical time and space. Models may simulate theoretical fractals or natural phenomena with fractal features. The outputs of the modelling process may be highly artistic renderings, outputs for investigation, or benchmarks for fractal analysis. Some specific applications of fractals to technology are listed elsewhere. Images and other outputs of modelling are normally referred to as being "fractals" even if they do not have strictly fractal characteristics, such as when it is possible to zoom into a region of the fractal image that does not exhibit any fractal properties. Also, these may include calculation or display artifacts which are not characteristics of true fractals.')
+
+	var w2 = d.newNode('b', { title: 'Instructions', position: [800,300] } );
+	w2.setSize(300,200);
+	w2.append('<b>Drag on the left-side box in the title bar to adjust zoom.</b><br/><br/>');
+	w2.append('<b>Drag on the background to move the canvas.</b><br/><br/>');
+	w2.append('<b>Resize a window to a small square to activate its icon mode.</b><br/><br/>');
+
+	d.newEdge('a', 'b', { });
+
+	var w3 = d.newNode('c', { position: [700,700] });
+	w3.setSize(250,250);
+	var iframeButton = $('<button>Add IFRAME</button>');	
+	w3.append(iframeButton);
+
+
+
+	w3.append(bigSlider);
+
+
+	w3.append('<br/>Warning: IFrame support not entirely bug-free.  It reloads unnecessarily when it its jquery dialog loses focus.  This is because jquery-ui moves the DOM elements when dialog focus changes.  Needs a fix');
+	var w4 = null;
+	iframeButton.click(function() {
+		if (!w4) {
+			w4 = d.newNode('d',{ 
+				element: $('<iframe src="http://en.wikipedia.org"></iframe>')
+			});
+			d.newEdge('c', 'd', { });
+		}
+	});
+
+	d.newEdge('a', 'c', { });
+
+
+
+	//NSLider
+	var bigSlider = NSlider({
+
+	}).css({
+		width: '300px',
+		height: '2em',
+		position: 'fixed',
+		right: '1em',
+		top: '1em'
+	}).appendTo( $('body') );
+
+
+</script>
+
+</html>

@@ -1,0 +1,505 @@
+<html>
+<head>
+	<title>ValNet Example 1</title>
+    <script src="lib/jquery/jquery.min.js" type="text/javascript"></script>
+    <script src="lib/jquery-ui/1.10.4/ui/minified/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="lib/underscore.js/1.5.2/underscore-min.js" type="text/javascript"></script> 
+    <script src="lib/jmousewheel/jMouseWheel-1.0.min.js" type="text/javascript"></script>
+    <script src="lib/jquery-svg/jquery.svg.min.js" type="text/javascript"></script>
+
+
+	<!-- JQuery-UI theme -->
+	<link rel="stylesheet" type="text/css" href="lib/jquery-ui/1.10.4/themes/ui-lightness/jquery-ui.min.css">
+
+    <script src="fractaldom.js" type="text/javascript"></script>
+    <script src="project_processes_agents_resourcetypes.js" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="fractaldom.css">
+
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+
+	<style>
+		body {
+			font-size: 100%;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			font-family: Arial, sans;			
+		}
+		#menu {
+			height: 3em;
+			width: 100%;			
+			background-color: gray;
+			position: fixed;
+		}
+		#content {
+			padding-top: 3.5em;
+		}
+		.link {
+			pointer-events: none;
+		}
+		.link {
+		  stroke: #000;
+		}
+
+		.node text {
+		  pointer-events: none;
+		  font: 10px sans-serif;
+		}
+		svg {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		#projectFilter {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			height: 16em;
+			overflow: scroll;
+			
+		}
+	</style>
+</head>
+
+<body>
+	<div id="menu">
+		<button id="ViewProjects">Projects</button>
+		<button id="ViewAgents">Agents</button>
+		<button id="ViewResources">Resources</button>
+		<button id="ViewOrders">Orders</button>
+		<button id="ViewProcesses">Processes</button>
+		<button id="ViewStatistics">Statistics</button>
+	</div>
+	<div id="content"></div>
+</body>
+
+<script>
+
+
+function ValnetModel(v) {
+	var m = {
+		projects: function() { 	return v.projects;		},
+		agents: function() { 	return v.agents;		},
+		processes: function() { 	return v.processes;		},
+		resourceTypes: function() { 	return v.resource_types;		},
+		processesInProject : function(pid) {
+			return _.filter(v.processes, function(proc) {
+				return proc['project-id'] == pid;
+			});
+		}
+	};
+	return m;
+}
+
+var valnet;
+function load(f) {
+	$.getJSON('project_processes_agents_resourcetypes_orders2.json', function(valnetState) {
+		valnet = ValnetModel(valnetState);
+		f();
+	});
+}
+
+function viewStatistics() {
+	var c = $('<div/>');
+	c.append('<b>Projects:</b> ' + _.map( valnet.projects(), function(v) { return v.name; } ).join(',') + '<br/>');
+	c.append('<b>Agents:</b> ' + _.map( valnet.agents(), function(v) { return v.name; } ).join(',') + '<br/>');
+	c.append('<b>Processes:</b> ' + _.map( valnet.processes(), function(v) { return v.name; } ).join(',') + '<br/>');
+	c.append('<b>Resource Types:</b> ' + _.map( valnet.resourceTypes(), function(v) { return v.name; } ).join(',') + '<br/>');
+	$('#content').html(c);
+}
+
+function viewProjects() {
+	var c = $('<div/>');
+
+	function newProjectSummary(pid, p) {
+		var s = $('<div/>');
+		s.append('<h2>' + p.name + '</h2>');
+		s.append('Processes:<br/>');
+		var proclist = $('<ul/>');
+		var procs = valnet.processesInProject(pid);
+		_.each(procs, function(pr) {
+			proclist.append('<li>' + pr.name + '</li>');
+		});
+		s.append(proclist);
+		return s;
+	}
+
+	_.each( valnet.projects(), function(p, pid) {
+		c.append(newProjectSummary(pid, p));
+	});
+
+	$('#content').html(c);
+}
+
+function viewAgents() {
+	var c = $('<div/>');
+
+	function newAgentSummary(aid, a) {
+		var s = $('<div/>');
+		s.append('<h2>' + a.name + '</h2>');
+		s.append('Processes:<br/>');
+		var proclist = $('<ul/>');
+		var procs = a.processes;
+		_.each(procs, function(pr) {
+			var P = valnet.processes()[pr];
+			proclist.append('<li>' + P.name + '</li>');
+		});
+		s.append(proclist);
+		return s;
+	}
+
+	_.each( valnet.agents(), function(a, aid) {
+		c.append(newAgentSummary(aid, a));
+	});
+
+	$('#content').html(c);
+}
+
+function viewResources() {
+	var c = $('<div/>');
+
+	function newResourceSummary(aid, a) {
+		var s = $('<div/>');
+		s.append('<h2><a href="' + a.url + '">' + a.name + '</a></h2>');
+		//s.append(JSON.stringify(a));
+		if (a['photo-url']) {
+			s.append('<img src="' + a['photo-url'] + '"/>')
+		}
+		s.append('<br/>');
+		/*s.append('Processes:<br/>');
+		var proclist = $('<ul/>');
+		var procs = a.processes;
+		_.each(procs, function(pr) {
+			var P = valnet.processes()[pr];
+			proclist.append('<li>' + P.name + '</li>');
+		});
+		s.append(proclist);*/
+		return s;
+	}
+
+	_.each( valnet.resourceTypes(), function(a, aid) {
+		c.append(newResourceSummary(aid, a));
+	});
+
+	$('#content').html(c);
+}
+
+function viewOrders() {
+    /*"Order-104": {
+      "url": "\/accounting\/order-schedule\/104\/",
+      "next": [
+        
+      ],
+      "name": "",
+      "for": "",
+      "due": "2013-10-10"
+    },*/
+}
+
+$(document).ready(function() {
+	load(function() {
+
+		$("#ViewProjects").click(viewProjects);
+		$("#ViewStatistics").click(viewStatistics);
+		$("#ViewAgents").click(viewAgents);
+		$("#ViewResources").click(viewResources);
+		$("#ViewProcesses").click(viewProcessGraph);
+
+		viewProcessGraph();
+
+	});
+});
+
+function viewProcessGraph() {
+		$('#content').html('');
+
+		//add Project filter
+		var projectFilter = $('<div/>');
+		projectFilter.append('<b>Projects:</b><br/>');
+		projectFilter.attr('id', 'projectFilter');
+		for (var i in valnet.projects()) {
+			var P = valnet.projects()[i];
+			var cb = $('<input type="checkbox"/>');
+			cb.click(function() {
+				alert('TODO: redraw graph');
+			});
+			projectFilter.append(cb);
+			projectFilter.append(P.name);
+			projectFilter.append('<br/>');
+		}
+		$('#content').append(projectFilter);
+
+		var maxWidth = 6000, maxHeight = 4000;
+
+		var svgCanvas = d3.select("#content").append("svg")
+			.attr("width", "100%")
+			.attr("height", "100%");
+
+		svg = d3.select("#content svg").append('g');
+
+		var force = d3.layout.force()
+			.gravity(.02)
+			.linkDistance(150)
+			.linkStrength(0.1) //necessary to be < 1.0 to make sure charge (repulsion) is stronger
+			.charge(-500)
+			.size([maxWidth, maxHeight]);
+
+
+		var nodes = [];
+		var nodeIndex = {};
+		var edges = [];
+
+
+
+		var minDate=-1, maxDate;
+
+		for (var i in valnet.processes()) {
+			var N = valnet.processes()[i];
+			var start = Date.parse(N.start);
+			var end = Date.parse(N.end);
+			var mid = (start + end)/2.0;
+			N.mid = mid;	
+			if (minDate == -1)
+				minDate = maxDate = mid;
+			else {
+				if (mid < minDate) minDate = mid;
+				if (mid > maxDate) maxDate = mid;
+			}				
+		}
+
+		var xScale = 4500;
+		function getX(date) {
+			var x = (maxDate!=minDate) ? xScale * (date - minDate) / (maxDate - minDate) : 0;
+			return x;
+		}
+
+		//add resource type nodes
+		for (var i in valnet.resourceTypes()) {
+			var N = valnet.resourceTypes()[i];
+			var rx = xScale * Math.random();
+			var ry = 500 * Math.random();
+
+			var width = 150;
+			var height = 100;
+			/*var rb = new joint.shapes.basic.Rect({
+				position: { x: rx, y: ry },
+				size: { width: width, height: height },
+				attrs: { 
+					text: { text: N.name },
+				    rect: { fill: '#bbf' },
+				}
+			});
+			graph.addCell(rb);		
+			N.cell = rb;
+			N.view = paper.findViewByModel(N.cell);
+			nodes[i] = N;*/
+
+			nodes.push( { name: N.name, color: "#bbf", width: width, height: 25 } );
+			nodeIndex[i] = nodes.length-1;
+		}
+
+		//add process nodes
+		for (var i in valnet.processes()) {
+			var N = valnet.processes()[i];
+
+			var rx = getX(N.mid);
+
+			var ry = 500 * Math.random();
+
+			var width = Math.max(150, getX(Date.parse(N.end)) - getX(Date.parse(N.start)));
+			var height = 50;
+			/*var rb = new joint.shapes.basic.Rect({
+				position: { x: rx, y: ry },
+				size: { width: width, height: height },
+				attrs: { 
+					text: { text: N.name },
+				    rect: { fill: '#bfb' },
+				}			});
+			graph.addCell(rb);		
+			N.cell = rb;
+			N.view = paper.findViewByModel(N.cell);
+			nodes[i] = N;*/
+
+			nodes.push( { name: N.name, color: "#bfb", width: width, height: 25, fixedX: rx } );
+			nodeIndex[i] = nodes.length-1;
+
+			for (var j = 0; j < N.next.length; j++) {
+				edges.push( { source: nodeIndex[i], target: nodeIndex[N.next[j]] } );
+			}
+		}
+
+		//add outgoing edges from resource types
+		for (var i in valnet.resourceTypes()) {
+			var N = valnet.resourceTypes()[i];				
+			for (var k = 0; k < N.next.length; k++) {
+				var nextProcess = N.next[k];
+				edges.push( { source: nodeIndex[i], target: nodeIndex[nextProcess] } );
+			}
+		}
+
+		for (var i = 0; i < edges.length; i++) {
+			var E = edges[i];
+
+			//var from = nodes[E[0]].cell;
+			//var to = nodes[E[1]].cell;
+
+			/*
+			var link1 = new joint.dia.Link({
+				source: { id: from.id },
+				target: { id: to.id },
+			});
+			var label = E[2];
+			if ((label) && (label.length > 0)) {
+				link1.label(0, {
+					position: .5,
+					attrs: {
+						rect: { fill: 'black' },
+						text: { fill: 'white', text: E[2] }
+					}
+				});
+			}
+			*/
+			//graph.addCell(link1);
+		}
+
+		 force
+			  .nodes(nodes)
+			  .links(edges)
+			  .start();
+
+	      var drag = force.drag()
+    		.on("dragstart", function() {
+				oncell = true;
+			}).on("dragend", function() {
+				oncell = false;
+			});
+
+		  var link = svg.selectAll(".link")
+			  .data(edges)
+			  .enter().append("line")
+			  .attr("class", "link");
+
+		  var node = svg.selectAll(".node")
+			  .data(nodes)
+			  .enter().append("g")
+			  .attr("class", "node")
+			  .call(force.drag);
+
+  		  node.append("rect")
+             .attr("x", function(d) { return -d.width/2; })
+             .attr("y", function(d) { return -d.height/2; })
+             .attr("width", function(d) { return d.width; } )
+             .attr("height", function(d) { return d.height; } )
+			 .style("fill", function(d) { return d.color; });
+
+		  node.append("image")
+			  .attr("xlink:href", "https://github.com/favicon.ico")
+			  .attr("x", -8)
+			  .attr("y", -8)
+			  .attr("width", 16)
+			  .attr("height", 16);
+
+		  node.append("text")
+			  .attr("dx", function(d) { return -d.width/2; })
+			  .attr("dy", "1em")
+			  .text(function(d) { return d.name });
+
+		  force.on("tick", function() {
+			node.attr("transform", function(d) { 
+				if (d.fixedX!=undefined) d.x = d.fixedX;
+				return "translate(" + d.x + "," + d.y + ")"; 
+			});
+
+			link.attr("x1", function(d) { return d.source.x + d.source.width/2; })
+				.attr("y1", function(d) { return d.source.y; })
+				.attr("x2", function(d) { return d.target.x - d.target.width/2; })
+				.attr("y2", function(d) { return d.target.y; });
+
+		  });
+
+
+
+		var scale = 1.0;
+		var dragging = false;
+		var lastPoint = null;
+		var startDragPoint = null;
+		var tx = 0, ty = 0;
+		var oncell = false;
+
+		var cc = $("#content");
+		var ss = $("#content svg");
+		var ssg = $("#content svg g");
+
+		var ended = false;
+	    force.on("end", function() {
+			ended = true;
+		});
+
+
+		function updateSVGTransform() {
+			ssg.attr('transform', 'translate(' + tx + ',' + ty +') scale('+scale+','+scale+')');
+			if (ended) {
+				force.start();
+				force.tick();
+				force.stop();
+			}
+		}
+
+		ss.mousewheel(function(evt){
+			var direction = evt.deltaY;
+
+			if (direction > 0) {
+				scale *= 0.9;
+			}
+			else {
+				scale /= 0.9;
+			}
+
+			updateSVGTransform();
+		});
+
+
+		cc.mousedown(function(m) {
+			if ((m.which==1) && (!oncell)) { 
+				dragging = true;
+				startDragPoint = [m.clientX, m.clientY];
+			}		
+		});
+		cc.mouseup(function(m) {
+			dragging = false;
+			lastPoint = null;
+		});
+		cc.mousemove(function(m) {
+			if (m.which!=1) {
+				dragging = false;
+				lastPoint = null;
+				return;
+			}
+
+			if (dragging) {
+				if (lastPoint) {
+					var dx = m.clientX - lastPoint[0];
+					var dy = m.clientY - lastPoint[1];
+					tx += dx;
+					ty += dy;
+					updateSVGTransform();
+				}
+
+				lastPoint = [m.clientX, m.clientY];		
+
+			}
+		});
+
+
+
+
+}
+
+
+</script>
+
+</html>

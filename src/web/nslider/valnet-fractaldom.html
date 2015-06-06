@@ -1,0 +1,113 @@
+<html>
+<head>
+	<title>ValNet Example 1</title>
+    <script src="lib/jquery/jquery.min.js" type="text/javascript"></script>
+    <script src="lib/jquery-ui/1.10.4/ui/minified/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="lib/underscore.js/1.5.2/underscore-min.js" type="text/javascript"></script> 
+    <script src="lib/jmousewheel/jMouseWheel-1.0.min.js" type="text/javascript"></script>
+    <script src="lib/jquery-svg/jquery.svg.min.js" type="text/javascript"></script>
+
+	<!-- JQuery-UI theme -->
+	<link rel="stylesheet" type="text/css" href="lib/jquery-ui/1.10.4/themes/ui-lightness/jquery-ui.min.css">
+
+    <script src="fractaldom.js" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="fractaldom.css">
+
+	<style>
+		body {
+			background-color: gray;
+			font-size: 70%;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+	</style>
+</head>
+
+<body>
+</body>
+
+<script>
+
+	//var data = {"nodes": [{"start": "2013-09-19", "end": "2013-11-01", "id": "Process-400", "name": "Make User Guide"}, {"start": "2014-04-25", "end": "2014-04-28", "id": "Process-386", "name": "Make piezo micromanipulator products for first offering"}, {"start": "2013-09-20", "end": "2013-09-25", "id": "Process-383", "name": "Make Two- and Three-channel Piezo Electronics"}, {"start": "2013-11-01", "end": "2013-11-02", "id": "Process-416", "name": "Make LabView program for 1 axis piezo"}, {"start": "2013-11-12", "end": "2014-01-04", "id": "Process-395", "name": "Make Piezo one/two/three-channel electronics"}, {"start": "2013-11-08", "end": "2013-11-30", "id": "Process-415", "name": "Make Computer program prototype"}, {"start": "2013-11-12", "end": "2013-11-16", "id": "Process-384", "name": "Make Piezo User Guide in English"}, {"start": "2013-11-12", "end": "2013-11-21", "id": "Process-385", "name": "Make Piezo User Guide in French"}, {"start": "2013-11-12", "end": "2013-12-27", "id": "Process-393", "name": "Make Piezo micromanipulator mechanical design"}, {"start": "2013-11-14", "end": "2013-12-03", "id": "Process-394", "name": "Make or order piezo robot fingers"}, {"start": "2013-12-21", "end": "2013-12-21", "id": "Process-406", "name": "make piezo mechanics layer"}, {"start": "2013-11-14", "end": "2014-01-05", "id": "Process-388", "name": "Make market study - pricing"}, {"start": "2013-09-10", "end": "2013-11-01", "id": "Process-387", "name": "Make Brochure"}, {"start": "2014-02-17", "end": "2014-02-24", "id": "Process-396", "name": "Make Piezo micromanipulator mechanics"}], "edges": [{"width": 1, "to_node": "Process-386", "from_node": "Process-400", "label": "User Guide"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-383", "label": "Piezo micromanipulator two-channel electronics, Piezo micromanipulator three-channel electronics"}, {"width": 1, "to_node": "Process-395", "from_node": "Process-416", "label": ""}, {"width": 1, "to_node": "Process-415", "from_node": "Process-416", "label": ""}, {"width": 1, "to_node": "Process-386", "from_node": "Process-384", "label": "User Guide"}, {"width": 1, "to_node": "Process-384", "from_node": "Process-395", "label": ""}, {"width": 1, "to_node": "Process-386", "from_node": "Process-385", "label": "User Guide"}, {"width": 1, "to_node": "Process-394", "from_node": "Process-393", "label": "Piezo micromanipulator mechanical design"}, {"width": 1, "to_node": "Process-406", "from_node": "Process-393", "label": "Piezo micromanipulator mechanical design"}, {"width": 1, "to_node": "Process-388", "from_node": "Process-395", "label": "Piezo micromanipulator one-channel electronics"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-395", "label": "Piezo micromanipulator one-channel electronics"}, {"width": 1, "to_node": "Process-387", "from_node": "Process-395", "label": ""}, {"width": 1, "to_node": "Process-396", "from_node": "Process-394", "label": "Piezo micromanipulator three-channel finger, Piezo micromanipulator one-channel finger, Piezo micromanipulator two-channel finger"}, {"width": 1, "to_node": "Process-396", "from_node": "Process-406", "label": "Untested piezo mechanics layer"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-396", "label": "Piezo micromanipulator one-channel mechanics, Piezo micromanipulator two-channel mechanics, Piezo micromanipulator three-channel mechanics"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-415", "label": ""}]};
+	var data = {"nodes": [{"start": "2013-02-01", "end": "2013-02-09", "id": "Process-62", "name": "Make Mechanical - Physiological bath"}, {"start": "2013-02-20", "end": "2013-03-07", "id": "Process-44", "name": "writing paper for scientific peer-reviewed journal and a proposal for CSA "}, {"start": "2013-03-11", "end": "2013-03-11", "id": "Process-53", "name": "Make Mosquito joint"}, {"start": "2013-03-11", "end": "2013-03-11", "id": "Process-54", "name": "Make Optical - Robot finger"}, {"start": "2013-03-11", "end": "2013-03-11", "id": "Process-52", "name": "Make something"}, {"start": "2013-03-15", "end": "2013-03-15", "id": "Process-58", "name": "Make constriction transducer"}, {"start": "2013-03-18", "end": "2013-03-18", "id": "Process-59", "name": "Make something"}, {"start": "2013-03-18", "end": "2013-03-18", "id": "Process-60", "name": "Make something"}, {"start": "2013-03-19", "end": "2013-03-19", "id": "Process-61", "name": "Make Mechanical - Physiological bath"}, {"start": "2013-03-28", "end": "2013-03-28", "id": "Process-67", "name": "Make Laser Driver (German one chip solution)"}, {"start": "2013-04-05", "end": "2013-04-05", "id": "Process-75", "name": "Soldering German laser driver"}, {"start": "2014-01-06", "end": "2014-04-15", "id": "Process-435", "name": " Prototype opto-mechanical low cost tape sensor 3D printed Matheus"}, {"start": "2014-01-08", "end": "2014-01-09", "id": "Process-428", "name": "Make LED Mosquito in visible"}, {"start": "2014-02-19", "end": "2014-03-31", "id": "Process-429", "name": "Make PMMA 3D printed transducer"}, {"start": "2013-03-29", "end": "2013-03-29", "id": "Process-70", "name": "Make something"}, {"start": "2013-03-29", "end": "2013-03-29", "id": "Process-69", "name": "Make something"}, {"start": "2013-04-01", "end": "2013-04-01", "id": "Process-71", "name": "Make Mechanical - xyz piezo micromanipulator"}, {"start": "2013-04-08", "end": "2013-04-08", "id": "Process-79", "name": "Make something"}, {"start": "2013-04-08", "end": "2013-04-08", "id": "Process-76", "name": "Make something"}, {"start": "2013-04-08", "end": "2013-04-08", "id": "Process-82", "name": "Make something"}, {"start": "2013-04-08", "end": "2013-04-08", "id": "Process-80", "name": "Make something"}, {"start": "2013-04-08", "end": "2013-04-08", "id": "Process-81", "name": "Make something"}, {"start": "2013-04-08", "end": "2013-04-08", "id": "Process-78", "name": "Make something"}, {"start": "2013-04-08", "end": "2013-04-08", "id": "Process-77", "name": "Make something"}, {"start": "2013-04-09", "end": "2013-04-09", "id": "Process-83", "name": "Make something"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-106", "name": "Make Bath electrical stimulation bath"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-102", "name": "Assemble Mosquito"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-103", "name": "Assemble Mosquito electronics layer"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-104", "name": "Assemble Mosquito photonics layer"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-105", "name": "Assemble bath"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-109", "name": "Assemble joint-type transducer"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-107", "name": "Assemble the xyz piezo micromanipulator"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-112", "name": "make joint"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-110", "name": "make levers"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-111", "name": "make mirror"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-122", "name": "make levers"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-114", "name": "Assemble Mosquito"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-115", "name": "Assemble Mosquito electronics layer"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-116", "name": "Assemble Mosquito photonics layer"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-117", "name": "Assemble bath"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-121", "name": "Assemble joint-type transducer"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-119", "name": "Assemble the xyz piezo micromanipulator"}, {"start": "2013-12-04", "end": "2013-12-31", "id": "Process-419", "name": "Make SPI DAC module for Piezo - design and SPI DAC module for Piezo - prototype"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-118", "name": "Make Bath electrical stimulation bath"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-101", "name": "Make Mosquito scientific instrument system"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-113", "name": "Make Mosquito scientific instrument system"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-124", "name": "make joint"}, {"start": "2013-04-16", "end": "2013-04-16", "id": "Process-123", "name": "make mirror"}, {"start": "2013-04-18", "end": "2013-04-18", "id": "Process-281", "name": "LabView programming and Computer program prototype"}, {"start": "2013-05-06", "end": "2013-05-06", "id": "Process-297", "name": "Make something"}, {"start": "2013-05-10", "end": "2013-05-10", "id": "Process-299", "name": "Make Photonics - Constriction Transducer"}, {"start": "2013-05-10", "end": "2013-05-10", "id": "Process-298", "name": "1 axis piezo driver"}, {"start": "2013-05-21", "end": "2013-05-21", "id": "Process-309", "name": "make mirror"}, {"start": "2013-05-21", "end": "2013-05-21", "id": "Process-308", "name": "Make Photonics - Joint-type transducer"}, {"start": "2013-05-22", "end": "2013-05-22", "id": "Process-310", "name": "Make something"}, {"start": "2013-06-02", "end": "2013-06-02", "id": "Process-311", "name": "Microfilament transducer"}, {"start": "2013-06-04", "end": "2013-06-04", "id": "Process-314", "name": "Assemble Mosquito electronics layer"}, {"start": "2013-06-04", "end": "2013-06-04", "id": "Process-313", "name": "Assemble Mosquito"}, {"start": "2013-06-04", "end": "2013-06-04", "id": "Process-315", "name": "Assemble Mosquito photonics layer"}, {"start": "2013-06-05", "end": "2013-06-05", "id": "Process-316", "name": "Make something"}, {"start": "2013-06-05", "end": "2013-06-05", "id": "Process-317", "name": "Make Aluminum etching"}, {"start": "2013-06-17", "end": "2013-06-17", "id": "Process-322", "name": "Make XYZ piezo positioner"}, {"start": "2013-06-17", "end": "2013-06-17", "id": "Process-321", "name": "Make Photonics - Constriction Transducer"}, {"start": "2013-06-17", "end": "2013-06-17", "id": "Process-319", "name": "Make Optical - Tape sensor"}, {"start": "2013-01-01", "end": "2013-06-30", "id": "Process-337", "name": "Make DAQ Electronic Design"}, {"start": "2013-07-02", "end": "2013-07-02", "id": "Process-323", "name": "Make Prototype - Mosquito 850nm"}, {"start": "2013-07-03", "end": "2013-07-03", "id": "Process-329", "name": "Assemble Mosquito electronics layer"}, {"start": "2013-07-03", "end": "2013-07-03", "id": "Process-324", "name": "Build testing setup and create test report for the Piezo micromanipulator"}, {"start": "2013-08-26", "end": "2013-08-26", "id": "Process-365", "name": "Make something"}, {"start": "2013-08-26", "end": "2013-08-26", "id": "Process-357", "name": "Make something"}, {"start": "2013-08-26", "end": "2013-08-26", "id": "Process-358", "name": "Make something"}, {"start": "2013-08-26", "end": "2013-08-26", "id": "Process-359", "name": "Make something"}, {"start": "2013-08-26", "end": "2013-08-26", "id": "Process-360", "name": "Make Mosquito electronic filter"}, {"start": "2013-09-19", "end": "2013-09-19", "id": "Process-399", "name": "Make Optical connector for transducer"}, {"start": "2013-09-10", "end": "2013-09-20", "id": "Process-390", "name": "Make sales plan"}, {"start": "2013-09-10", "end": "2013-09-20", "id": "Process-389", "name": "Make sales contract"}, {"start": "2013-10-04", "end": "2013-10-04", "id": "Process-402", "name": "Make something"}, {"start": "2013-09-17", "end": "2013-10-10", "id": "Process-398", "name": "Make answer to RFP (request for proposal)"}, {"start": "2013-10-01", "end": "2013-10-31", "id": "Process-364", "name": "Tape sensor - manufacturing"}, {"start": "2013-10-01", "end": "2013-10-31", "id": "Process-363", "name": "Tape sensor - 3D printing"}, {"start": "2013-10-01", "end": "2013-10-31", "id": "Process-295", "name": "Low-Cost Tape Sensor Project"}, {"start": "2013-04-28", "end": "2013-04-28", "id": "Process-294", "name": "Make Tape transducer"}, {"start": "2013-10-01", "end": "2013-10-31", "id": "Process-361", "name": "Tape sensor - introduction"}, {"start": "2013-10-01", "end": "2013-10-31", "id": "Process-366", "name": "Tape sensor - gap gearing "}, {"start": "2013-10-01", "end": "2013-10-31", "id": "Process-362", "name": "Tape sensor - gap optimization "}, {"start": "2013-10-21", "end": "2013-10-31", "id": "Process-403", "name": "Make Microfluidic chip fabrication - 3D printing"}, {"start": "2013-10-25", "end": "2013-11-01", "id": "Process-407", "name": "Make something"}, {"start": "2013-09-10", "end": "2013-11-01", "id": "Process-387", "name": "Make Brochure"}, {"start": "2013-11-12", "end": "2014-01-04", "id": "Process-395", "name": "Make Piezo one/two/three-channel electronics"}, {"start": "2013-11-01", "end": "2013-11-02", "id": "Process-416", "name": "Make LabView program for 1 axis piezo"}, {"start": "2013-11-08", "end": "2013-11-30", "id": "Process-415", "name": "Make Computer program prototype"}, {"start": "2013-10-21", "end": "2013-11-13", "id": "Process-414", "name": "Make grant application and business plan"}, {"start": "2013-11-12", "end": "2013-11-16", "id": "Process-384", "name": "Make Piezo User Guide in English"}, {"start": "2014-04-25", "end": "2014-04-28", "id": "Process-386", "name": "Make piezo micromanipulator products for first offering"}, {"start": "2013-11-12", "end": "2013-11-21", "id": "Process-385", "name": "Make Piezo User Guide in French"}, {"start": "2013-11-14", "end": "2013-12-03", "id": "Process-394", "name": "Make or order piezo robot fingers"}, {"start": "2014-02-17", "end": "2014-02-24", "id": "Process-396", "name": "Make Piezo micromanipulator mechanics"}, {"start": "2013-11-12", "end": "2013-12-27", "id": "Process-393", "name": "Make Piezo micromanipulator mechanical design"}, {"start": "2013-12-21", "end": "2013-12-21", "id": "Process-406", "name": "make piezo mechanics layer"}, {"start": "2013-12-09", "end": "2013-12-31", "id": "Process-420", "name": "Design a low cost long range piezo stack"}, {"start": "2013-12-09", "end": "2013-12-31", "id": "Process-421", "name": "Prototype Low cost, long range piezo stack"}, {"start": "2013-11-14", "end": "2014-01-05", "id": "Process-388", "name": "Make market study - pricing"}, {"start": "2014-01-20", "end": "2014-01-20", "id": "Process-424", "name": "Piezo Stack Z-Axis test"}, {"start": "2014-01-21", "end": "2014-01-21", "id": "Process-425", "name": "Make Mosquito SS4 prototype"}, {"start": "2014-02-12", "end": "2014-02-12", "id": "Process-426", "name": "Make Joint-type transducer prototype"}, {"start": "2014-02-15", "end": "2014-02-17", "id": "Process-427", "name": "Design new mosquito transducer"}, {"start": "2014-02-19", "end": "2014-02-28", "id": "Process-430", "name": "Design PMMA fiber joint-type transducer "}, {"start": "2014-02-19", "end": "2014-02-28", "id": "Process-431", "name": "Make Prototype PMMA fiber joint-type transducer"}, {"start": "2014-01-06", "end": "2014-04-15", "id": "Process-434", "name": "Design Low cost tape sensor 3D printed Matheus"}, {"start": "2013-09-20", "end": "2013-09-25", "id": "Process-383", "name": "Make Two- and Three-channel Piezo Electronics"}, {"start": "2013-09-19", "end": "2013-11-01", "id": "Process-400", "name": "Make User Guide"}], "edges": [{"width": 1, "to_node": "Process-75", "from_node": "Process-67", "label": "Laser driver"}, {"width": 1, "to_node": "Process-435", "from_node": "Process-67", "label": "Laser driver"}, {"width": 1, "to_node": "Process-428", "from_node": "Process-67", "label": "Laser driver"}, {"width": 1, "to_node": "Process-429", "from_node": "Process-67", "label": "Laser driver"}, {"width": 1, "to_node": "Process-419", "from_node": "Process-119", "label": "Piezo micromanipulator three-channel electronics"}, {"width": 1, "to_node": "Process-308", "from_node": "Process-309", "label": "Mirror on fiber"}, {"width": 1, "to_node": "Process-311", "from_node": "Process-67", "label": "Laser driver"}, {"width": 1, "to_node": "Process-313", "from_node": "Process-314", "label": "Mosquito electronics layer"}, {"width": 1, "to_node": "Process-313", "from_node": "Process-315", "label": "Mosquito optical layer"}, {"width": 1, "to_node": "Process-324", "from_node": "Process-329", "label": "Mosquito electronics layer"}, {"width": 1, "to_node": "Process-428", "from_node": "Process-329", "label": "Mosquito electronics layer"}, {"width": 1, "to_node": "Process-428", "from_node": "Process-360", "label": "Mosquito electronic filter"}, {"width": 1, "to_node": "Process-294", "from_node": "Process-295", "label": ""}, {"width": 1, "to_node": "Process-366", "from_node": "Process-362", "label": "Low cost tape sensor Study"}, {"width": 1, "to_node": "Process-387", "from_node": "Process-395", "label": ""}, {"width": 1, "to_node": "Process-395", "from_node": "Process-416", "label": ""}, {"width": 1, "to_node": "Process-415", "from_node": "Process-416", "label": ""}, {"width": 1, "to_node": "Process-386", "from_node": "Process-384", "label": "User Guide"}, {"width": 1, "to_node": "Process-384", "from_node": "Process-395", "label": ""}, {"width": 1, "to_node": "Process-386", "from_node": "Process-385", "label": "User Guide"}, {"width": 1, "to_node": "Process-396", "from_node": "Process-394", "label": "Piezo micromanipulator three-channel finger, Piezo micromanipulator one-channel finger, Piezo micromanipulator two-channel finger"}, {"width": 1, "to_node": "Process-394", "from_node": "Process-393", "label": "Piezo micromanipulator mechanical design"}, {"width": 1, "to_node": "Process-396", "from_node": "Process-406", "label": "Untested piezo mechanics layer"}, {"width": 1, "to_node": "Process-406", "from_node": "Process-393", "label": "Piezo micromanipulator mechanical design"}, {"width": 1, "to_node": "Process-421", "from_node": "Process-420", "label": ""}, {"width": 1, "to_node": "Process-388", "from_node": "Process-395", "label": "Piezo micromanipulator one-channel electronics"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-395", "label": "Piezo micromanipulator one-channel electronics"}, {"width": 1, "to_node": "Process-430", "from_node": "Process-427", "label": ""}, {"width": 1, "to_node": "Process-386", "from_node": "Process-396", "label": "Piezo micromanipulator one-channel mechanics, Piezo micromanipulator two-channel mechanics, Piezo micromanipulator three-channel mechanics"}, {"width": 1, "to_node": "Process-431", "from_node": "Process-430", "label": "Joint-type transducer design"}, {"width": 1, "to_node": "Process-435", "from_node": "Process-434", "label": "Low cost Tape sensor Design"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-383", "label": "Piezo micromanipulator two-channel electronics, Piezo micromanipulator three-channel electronics"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-400", "label": "User Guide"}, {"width": 1, "to_node": "Process-386", "from_node": "Process-415", "label": ""}]};
+
+	var d = fractaldom({
+		iconSize: true
+	});
+	d.appendTo($('body'));
+	d.init();
+
+	var minDate, maxDate;
+	for (var i = 0; i < data.nodes.length; i++) {
+		var N = data.nodes[i];
+		var start = Date.parse(N.start);
+		var end = Date.parse(N.end);
+		var mid = (start + end)/2.0;
+		N.mid = mid;	
+		if (i == 0)
+			minDate = maxDate = mid;
+		else {
+			if (mid < minDate) minDate = mid;
+			if (mid > maxDate) maxDate = mid;
+		}				
+	}
+
+	function getX(date) {
+		return (maxDate!=minDate) ? 2500 * (date - minDate) / (maxDate - minDate) : 0;
+	}
+
+	var splitStartEnd = false;
+
+	if (!splitStartEnd) {
+		for (var i = 0; i < data.nodes.length; i++) {
+			var N = data.nodes[i];
+
+			var rx = getX(N.mid);
+
+			var ry = 500 * Math.random();
+			var x = d.newNode(N.id, { title: N.name });
+			//x.append('Process:<br/><b>' + N.name + '</b><br/>' + N.start + '..' + N.end);
+			x.position( rx,ry );
+			x.setWidth( Math.max(150, getX(Date.parse(N.end)) - getX(Date.parse(N.start))) );
+			x.setHeight( 50 );
+			x.setCloseable(false);
+		}
+		for (var i = 0; i < data.edges.length; i++) {
+			var E = data.edges[i];
+			d.newEdge(E.from_node, E.to_node, { label: E.label, lineWidth: E.width*3 });
+		}
+	}
+	else {
+		for (var i = 0; i < data.nodes.length; i++) {
+			var N = data.nodes[i];
+
+			var ry = 500 * Math.random();
+
+			var xs = d.newNode(N.id+'s', { title: (N.name + '<br/>' + N.start) });
+			//xs.append('Process:<br/><b>' + N.name + '</b><br/>' + N.start);
+			xs.position( getX(Date.parse(N.start)),ry );
+			xs.setWidth( 150 );
+			xs.setHeight( 150 );
+
+			var xe = d.newNode(N.id+'e', { title: N.name });
+			xe.append(N.end);
+			xe.position( getX(Date.parse(N.end)), ry );
+			xe.setWidth( 150 );
+			xe.setHeight( 70 );
+
+			d.newEdge(N.id + 's', N.id + 'e', { lineWidth: 15 })
+
+		}
+		for (var i = 0; i < data.edges.length; i++) {
+			var E = data.edges[i];
+			d.newEdge(E.from_node + 'e', E.to_node + 's', { label: E.label, lineWidth: E.width });
+		}
+	}
+
+	d.layoutFD(0.25, 0.5, true, false, 150, 3200);
+
+</script>
+
+</html>

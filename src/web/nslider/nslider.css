@@ -1,0 +1,13 @@
+div.zoomSlider {
+    width: 50px;
+    height: 25px;
+    border: 3px solid black;
+    float: left;
+    cursor: crosshair;
+    background-color: gray;
+}
+
+.zoomSlider .bar {
+    display: table-cell;
+    opacity: 0.9;
+}
