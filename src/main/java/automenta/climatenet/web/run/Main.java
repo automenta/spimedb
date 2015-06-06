@@ -64,7 +64,7 @@ public class Main {
             
             SpacetimeWebServer w = null;
 
-            InfiniPeer peer = InfiniPeer.start("anon_" + Core.uuid());
+            InfiniPeer peer = InfiniPeer.local("anon_" + Core.uuid());
 
             if (webPort!=null) {
                 w = new SpacetimeWebServer( peer, localhost, webPort);
