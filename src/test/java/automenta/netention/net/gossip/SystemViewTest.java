@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
-package com.hellblazer.gossip;
+package automenta.netention.net.gossip;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import junit.framework.TestCase;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -23,7 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Basic testing of the system view

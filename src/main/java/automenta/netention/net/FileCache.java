@@ -1,40 +1,42 @@
 package automenta.netention.net;
 
 
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.HTreeMap;
-
-import java.io.File;
-import java.util.concurrent.TimeUnit;
+import nars.util.db.InfiniPeer;
+import org.infinispan.Cache;
 
 /**
  * Created by me on 4/23/15.
  */
 public class FileCache {
 
-    private final DB db;
-    private final HTreeMap<String, byte[]> cache;
 
-    public FileCache(String path, int timeUnits, TimeUnit unit) {
+    private final InfiniPeer peer;
+    private final String channel;
+    private final Cache<String, byte[]> cache;
 
-        //init off-heap store with 2GB size limit
-        db = DBMaker
-                .newFileDB(new File(path))    //use off-heap memory, on-heap is `.memoryDB()`
-                .cacheDisable()
-                .compressionEnable()
-                        .closeOnJvmShutdown()
-                                //.mmapFileEnableIfSupported()
-                //.transactionDisable()   //better performance
-                .make();
+    public FileCache(String id, InfiniPeer peer) {
+        this.peer = peer;
+        this.channel = id;
 
-        //There is also maximal size limit to prevent OutOfMemoryException
-        cache = db
-                .createHashMap("cache")
-                .expireMaxSize(8129 * 1024)
-                .expireAfterWrite(timeUnits, unit)
-                .expireAfterAccess(timeUnits, unit)
-                .makeOrGet();
+        this.cache = peer.the(channel, true);
+
+//        //init off-heap store with 2GB size limit
+//        db = DBMaker
+//                .newFileDB(new File(path))    //use off-heap memory, on-heap is `.memoryDB()`
+//                .cacheDisable()
+//                .compressionEnable()
+//                        .closeOnJvmShutdown()
+//                                //.mmapFileEnableIfSupported()
+//                //.transactionDisable()   //better performance
+//                .make();
+//
+//        //There is also maximal size limit to prevent OutOfMemoryException
+//        cache = db
+//                .createHashMap("cache")
+//                .expireMaxSize(8129 * 1024)
+//                .expireAfterWrite(timeUnits, unit)
+//                .expireAfterAccess(timeUnits, unit)
+//                .makeOrGet();
 
 //        //load stuff
 //        for(int i = 0;i<100000;i++){
@@ -50,7 +52,7 @@ public class FileCache {
 //        //current size of store (how much memory it has allocated
 //        long currentSize = Store.forDB(db).getCurrSize();
 
-        System.out.println("FileCache: " + this);
+
     }
 
 
@@ -60,8 +62,6 @@ public class FileCache {
 
     public void put(String uri, byte[] b) {
         cache.put(uri, b);
-
-        db.commit();
     }
 
     @Override

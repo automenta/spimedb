@@ -35,8 +35,11 @@ import java.util.Map;
  */
 public class Wikipedia  {
 
-    public Wikipedia() {
+    private final HttpCache http;
 
+    public Wikipedia(HttpCache http) {
+
+        this.http = http;
         //r.get("/wikipedia/:id/html", new WikiPage(e));
         //r.get("/wikipedia/search/:query", new WikiSearch(e));
 
@@ -168,7 +171,7 @@ public class Wikipedia  {
 
 
 
-            byte[] response = HttpCache.the.get(u);
+            byte[] response = http.get(u);
 
             Document doc = Jsoup.parse(new java.io.ByteArrayInputStream(response), Charset.defaultCharset().name(), u);
 

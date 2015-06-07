@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
-package com.hellblazer.gossip;
+package automenta.netention.net.gossip;
+
+import junit.framework.TestCase;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.UUID;
-
-import junit.framework.TestCase;
 
 /**
  * Basic testing of the digest state

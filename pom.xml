@@ -54,25 +54,7 @@
             <version>2.3</version>
         </dependency>
 
-        <!--
-        <dependency>
-            <groupId>net.tomp2p</groupId>
-            <artifactId>tomp2p-core</artifactId>
-            <version>5.0-Beta7</version>
-        </dependency>
 
-        <dependency>
-            <groupId>net.tomp2p</groupId>
-            <artifactId>tomp2p-dht</artifactId>
-            <version>5.0-Beta7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.tomp2p</groupId>
-            <artifactId>tomp2p-storage</artifactId>
-            <version>5.0-Beta7</version>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>de.jensd</groupId>
@@ -93,13 +75,6 @@
         </dependency>
 
 
-        <!--
-        <dependency>
-            <groupId>net.tomp2p</groupId>
-            <artifactId>tomp2p-all</artifactId>
-            <version>5.0-Beta7</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
@@ -125,11 +100,6 @@
             <version>3.5</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.mapdb</groupId>
-            <artifactId>mapdb</artifactId>
-            <version>1.0.7</version>
-        </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -141,6 +111,13 @@
             <artifactId>opennars-logic</artifactId>
             <groupId>opennars</groupId>
             <version>1.7-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.0.8-beta</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -222,6 +199,12 @@
             <version>3.0.0.20130526</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.opensextant</groupId>
+            <artifactId>giscore</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+
 
         <dependency>
             <groupId>io.undertow</groupId>
@@ -232,6 +215,11 @@
             <groupId>io.undertow</groupId>
             <artifactId>undertow-websockets-jsr</artifactId>
             <version>1.2.7.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>de.undercouch</groupId>
+            <artifactId>bson4jackson</artifactId>
+            <version>2.5.0</version>
         </dependency>
 
 
@@ -291,138 +279,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.0</version>
-            <scope>test</scope>
-        </dependency>
 
-        <dependency>
-            <groupId>de.undercouch</groupId>
-            <artifactId>bson4jackson</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hypergraphdb</groupId>
-            <artifactId>hgdb</artifactId>
-            <version>1.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hypergraphdb</groupId>
-            <artifactId>hgbdbje</artifactId>
-            <version>1.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hypergraphdb</groupId>
-            <artifactId>hgdbmjson</artifactId>
-            <version>1.3-SNAPSHOT</version>
-        </dependency>
-
-
-
-        <!-- KIXEYE -->
-        <!-- HawtDispatch -->
-        <dependency>
-            <groupId>org.fusesource.hawtdispatch</groupId>
-            <artifactId>hawtdispatch</artifactId>
-            <version>${hawtdispatch.version}</version>
-        </dependency>
-
-        <!-- Netty -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-buffer</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-common</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-http</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-handler</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport-native-epoll</artifactId>
-            <version>${netty.version}</version>
-            <classifier>linux-x86_64</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.18.2-GA</version>
-        </dependency>
-
-
-        <!-- JodaTime -->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.4</version>
-        </dependency>
-
-        <!-- XML Parsing -->
-        <dependency>
-            <groupId>com.fasterxml</groupId>
-            <artifactId>aalto-xml</artifactId>
-            <version>${aalto.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>stax2-api</artifactId>
-            <version>${stax2-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom2</artifactId>
-            <version>${jdom.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dyuproject.protostuff</groupId>
-            <artifactId>protostuff-core</artifactId>
-            <version>${protostuff.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dyuproject.protostuff</groupId>
-            <artifactId>protostuff-runtime</artifactId>
-            <version>${protostuff.version}</version>
-        </dependency>
-        <!-- Logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <!-- Testing -->
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 
@@ -462,6 +319,8 @@
             <id>ChiralBehaviors-release</id>
             <url>http://repository-chiralbehaviors.forge.cloudbees.com/release/</url>
         </repository>
+
+
 
         <repository>
             <id>snapshots-repo</id>

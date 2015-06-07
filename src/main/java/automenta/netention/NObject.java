@@ -8,8 +8,6 @@ package automenta.netention;
 
 import com.google.common.base.Predicate;
 import com.google.common.primitives.Longs;
-import mjson.Json;
-import org.hypergraphdb.HGHandle;
 
 import java.io.Serializable;
 import java.util.*;
@@ -168,30 +166,30 @@ public interface NObject<O> extends Serializable, Map<String, O> {
         subject = id;
     }*/
 
-    public static String getOrDefault(Map<String, Json> m, String key, String defaultValue) {
-        Json x = m.get(key);
-        if (x!=null)
-            return x.toString();
-        return defaultValue;
-    }
+//    public static String getOrDefault(Map<String, Json> m, String key, String defaultValue) {
+//        Json x = m.get(key);
+//        if (x!=null)
+//            return x.toString();
+//        return defaultValue;
+//    }
 
 
-    public static NObject from(HGHandle hgHandle, Map<String, Json> m) {
-        String uuid = hgHandle.getPersistent().toString();
-        return from(uuid, m);
-    }
+//    public static NObject from(HGHandle hgHandle, Map<String, Json> m) {
+//        String uuid = hgHandle.getPersistent().toString();
+//        return from(uuid, m);
+//    }
 
-    public static NObject from(String uuid, Map<String, Json> m) {
-        //String name = getOrDefault(m, "name", uuid);
-        NObject n = new MapNObject(uuid, m);
-//        for (Map.Entry<String,Json> e : m.entrySet()) {
-//            String k = e.getKey();
-//            Json v = e.getValue();
-//            if (k.equals("name")) continue;
-//            n.add(k, v);
-//        }
-        return n;
-    }
+//    public static NObject from(String uuid, Map<String, Json> m) {
+//        //String name = getOrDefault(m, "name", uuid);
+//        NObject n = new MapNObject(uuid, m);
+////        for (Map.Entry<String,Json> e : m.entrySet()) {
+////            String k = e.getKey();
+////            Json v = e.getValue();
+////            if (k.equals("name")) continue;
+////            n.add(k, v);
+////        }
+//        return n;
+//    }
 
     String id();
 

@@ -5,23 +5,28 @@
  */
 package automenta.netention;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.tinkerpop.blueprints.Edge;
+import nars.util.db.MapGraph;
+import nars.util.db.SpanGraph;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Generalization of a URL/URI, label, semantic predicate, type / class, or any kind of literalizable concept.
  */
 public class Tag {
-    Logger logger = LoggerFactory.getLogger(Tag.class);
+
     
     public final String id;
-    public Map<String,Double> inh;   /** intensional inheritance */
+    public final MapGraph.MVertex vertex;
+
     public String name;
     public String description;
+
     public Map<String,Object> meta = new HashMap();
+    public Map<String,Double> inh;   /** intensional inheritance */
+
     private String icon;
 
     //TEMPORARY
@@ -41,11 +46,17 @@ public class Tag {
     public final static String property = "property";
 
 
-    public Tag(String id, String name) {
+    public static Tag the(SpanGraph g, String id) {
+        Tag t = new Tag(g, id);
+        if (t.vertex == null) return null;
+        return t;
+    }
+
+    protected Tag(SpanGraph g, String id) {
+
         this.id = id;
-        this.name = name;
-        this.description = null;
-        this.inh = new HashMap();
+        this.vertex = g.getVertex(id);
+
     }
     
     public Tag meta(String key, Object value) {
@@ -61,6 +72,21 @@ public class Tag {
     public void icon(String icon) {
         this.icon = icon;
     }
-    
-    
+
+
+    public void name(String name) {
+        this.name = name;
+    }
+
+    public Edge inheritance(String object, double v) {
+        if (v > 0) {
+            Edge e = vertex.addEdge("inh", vertex.graph().getVertex(object));
+            e.setProperty("%", v);
+            return e;
+        }
+        else {
+            //TODO
+        }
+        return null;
+    }
 }

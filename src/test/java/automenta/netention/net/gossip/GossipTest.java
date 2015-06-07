@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
-package com.hellblazer.gossip;
+package automenta.netention.net.gossip;
 
 import com.hellblazer.utils.fd.FailureDetectorFactory;
 import junit.framework.TestCase;

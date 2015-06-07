@@ -1,21 +1,21 @@
 package automenta.netention.net;
 
 
+import nars.util.db.InfiniPeer;
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 public class HttpCache {
 
 
-    FileCache fileCache;
-    public static final HttpCache the = new HttpCache("cache/file");
 
 
-    public HttpCache(String path)  {
-        fileCache = new FileCache(path, 7, TimeUnit.DAYS);
+    final FileCache fileCache;
+
+    public HttpCache(String path, InfiniPeer peer)  {
+        fileCache = new FileCache(path, peer);
     }
 
 

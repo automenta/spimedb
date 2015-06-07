@@ -12,9 +12,6 @@ import de.undercouch.bson4jackson.BsonFactory;
 import java.io.IOException;
 import java.util.Base64;
 
-/**
- * Created by me on 5/21/15.
- */
 public class Core {
 
     final public static ObjectMapper json = new ObjectMapper()

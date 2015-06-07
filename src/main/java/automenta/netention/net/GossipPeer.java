@@ -57,6 +57,7 @@ public class GossipPeer implements GossipListener {
     }
 
     public UUID put(UUID u, Serializable j) {
+
         //serialize data
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
