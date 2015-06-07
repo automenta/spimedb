@@ -1,81 +1,37 @@
 package automenta.climatenet.web.shell;
 
+import automenta.climatenet.Core;
 import automenta.climatenet.web.SpacetimeWebServer;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.AbstractReceiveListener;
 import io.undertow.websockets.core.BufferedTextMessage;
+import io.undertow.websockets.core.StreamSourceFrameChannel;
 import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
+import nars.NAR;
+import nars.io.out.Output;
+import nars.io.out.TextOutput;
+import nars.model.impl.Default;
+import nars.nal.nal8.operator.TermFunction;
+import nars.nal.term.Term;
 import nars.util.db.InfiniPeer;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Logger;
+
 import static io.undertow.Handlers.websocket;
+import static io.undertow.websockets.core.WebSockets.sendText;
 
 
 public class NARServer extends SpacetimeWebServer {
 
+    final public static Logger broadcast = Logger.getLogger(NARServer.class + ".broadcast");
+
     private static final int DEFAULT_WEBSOCKET_PORT = 10000;
     static final boolean WEBSOCKET_DEBUG = false;
     
-    private static int cycleIntervalMS = 50;
 
-    
-//    class NARSWebSocketServer extends WebSocketServer  {
-//
-//        public NARSWebSocketServer(InetSocketAddress addr) throws UnknownHostException {
-//            super(addr);
-//        }
-//
-//        @Override
-//        public void onOpen(final WebSocket conn, ClientHandshake handshake) {
-//            //this.sendToAll("new connection: " + handshake.getResourceDescriptor());
-//
-//            WebSocketImpl.DEBUG = WebSocket.DEBUG = WEBSOCKET_DEBUG;
-//
-//            if (WEBSOCKET_DEBUG) System.out.println("Connect: " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
-//
-//            final NARConnection n = new NARConnection(new Default().build(), cycleIntervalMS) {
-//                @Override public void println(String output) {
-//                    conn.send(output);
-//                }
-//            };
-//            socketSession.put(conn, n);
-//
-//        }
-//
-//        @Override
-//        public void onClose(WebSocket conn, int code, String rule, boolean remote) {
-//            if (WEBSOCKET_DEBUG) System.out.println(conn + " disconnected");
-//
-//            NARConnection n = socketSession.get(conn);
-//            if (n!=null) {
-//                n.stop();
-//                socketSession.remove(conn);
-//            }
-//        }
-//
-//        @Override
-//        public void onMessage(WebSocket conn, String message) {
-//
-//            NARConnection n = socketSession.get(conn);
-//            if (n!=null) {
-//                n.read(message);
-//            }
-//        }
-//
-//
-//        @Override
-//        public void onError(WebSocket conn, Exception ex) {
-//            ex.printStackTrace();
-//            if (conn != null) {
-//                // some errors like port binding failed may not be assignable to a specific websocket
-//            }
-//        }
-//
-//    }
-    
-    //final NARSWebSocketServer websockets;
-    //private final Map<WebSocket, NARConnection> socketSession = new HashMap();
 
     public NARServer(InfiniPeer p, int httpPort) throws Exception {
         super(p, httpPort);
@@ -83,19 +39,129 @@ public class NARServer extends SpacetimeWebServer {
 
         addPrefixPath("/nars.io", websocket(new WebSocketConnectionCallback() {
 
+            protected void broadcast(String msg, WebSocketChannel channel) {
+                broadcast.info(msg);
+                for (WebSocketChannel session : channel.getPeerConnections()) {
+                    sendText(msg, session, null);
+                }
+            }
+
+
+            NAR nar;
+            Thread runner;
+
+            String uid = Core.uuid();
+
             @Override
             public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
-                channel.getReceiveSetter().set(new AbstractReceiveListener() {
 
-                    @Override protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
-                        final String messageData = message.getData();
-                        for (WebSocketChannel session : channel.getPeerConnections()) {
-                            WebSockets.sendText(messageData, session, null);
+                broadcast("online(" + uid + "). :|:", channel);
+
+                nar = new NAR(new Default());
+
+                nar.input("schizo(" + uid  + ")!");
+
+                new Output(nar) {
+
+                    @Override
+                    public void event(Class aClass, Object... objects) {
+
+                        try {
+
+                            String t = TextOutput.getOutputString(aClass, objects, false, nar, new StringBuilder()).toString();
+                            //String t = JSON.stringFrom(objects);
+
+                            //String t = Json.array().add(aClass.getSimpleName()).add(objects).toString();
+                            sendText(t, channel, null);
+
+                        }
+                        catch (Exception e) {
+                            sendText(e.toString(), channel, null);
                         }
                     }
+                };
+
+                //http://jmvidal.cse.sc.edu/talks/agentcommunication/performatives.html
+                nar.on(new TermFunction("propagate") {
+
+                    @Override
+                    public Object function(Term... terms) {
+                        broadcast(Arrays.toString(terms), channel);
+                        return null;
+                    }
                 });
+                nar.on(new TermFunction("propagate") {
+
+                    @Override
+                    public Object function(Term... terms) {
+                        broadcast(Arrays.toString(terms), channel);
+                        return null;
+                    }
+                });
+                nar.on(new TermFunction("stop") {
+                    @Override public Object function(Term... terms) {
+                        nar.param.conceptActivationFactor.set(0.15f);
+                        return null;
+                    }
+                });
+                nar.on(new TermFunction("go") {
+                    @Override public Object function(Term... terms) {
+                        nar.param.conceptActivationFactor.set(1f);
+                        return null;
+                    }
+                });
+
+                runner = new Thread(new Runnable() {
+
+                    public long delayMS = 750;
+
+                    @Override public void run() {
+
+                        while (true) {
+                            nar.frame(1);
+
+                            try {
+                                Thread.sleep(delayMS);
+                            } catch (InterruptedException e) {
+                                break;
+                            }
+                        }
+
+                    }
+                });
+
+                runner.start();
+
+                channel.getReceiveSetter().set(new AbstractReceiveListener() {
+
+
+                    @Override
+                    protected void onClose(WebSocketChannel webSocketChannel, StreamSourceFrameChannel channel) throws IOException {
+                        broadcast("(--,online(" + uid + ")). :|:", webSocketChannel);
+
+                        if (runner!=null)  {
+                            runner.interrupt();
+                            runner = null;
+                        }
+                        nar.delete();
+                        nar = null;
+
+                        super.onClose(webSocketChannel, channel);
+                    }
+
+                    @Override
+                    protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
+                        final String messageData = message.getData();
+
+                        nar.input(messageData);
+                        //nar.run(1);
+                    }
+
+                });
+
                 channel.resumeReceives();
             }
+
 
         }));
 
@@ -128,15 +194,15 @@ public class NARServer extends SpacetimeWebServer {
                     //nlp = new NLPInputParser(nlpHost, nlpPort);
                 }
             }
-            if (args.length >= 4) {
-                cycleIntervalMS = Integer.parseInt(args[3]);
-            }
+//            if (args.length >= 4) {
+//                cycleIntervalMS = Integer.parseInt(args[3]);
+//            }
         }
                 
         NARServer s = new NARServer(InfiniPeer.local("nars"), httpPort);
         
         System.out.println("NARS Web Server ready. port: " + httpPort);
-        System.out.println("  Cycle interval (ms): " + cycleIntervalMS);
+        //System.out.println("  Cycle interval (ms): " + cycleIntervalMS);
         /*if (nlp!=null) {
             System.out.println("  NLP enabled, using: " + nlpHost + ":" + nlpPort);            
         }*/
