@@ -8,13 +8,13 @@ package automenta.netention.web;
 import automenta.netention.Core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.syncleus.spangraph.InfiniPeer;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.Headers;
-import nars.util.db.InfiniPeer;
 
 import java.io.File;
 import java.io.IOException;

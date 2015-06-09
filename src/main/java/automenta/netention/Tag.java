@@ -5,12 +5,11 @@
  */
 package automenta.netention;
 
+import com.syncleus.spangraph.MapGraph;
+import com.syncleus.spangraph.SpanGraph;
 import com.tinkerpop.blueprints.Edge;
-import nars.util.db.MapGraph;
-import nars.util.db.SpanGraph;
+import com.tinkerpop.blueprints.Vertex;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Generalization of a URL/URI, label, semantic predicate, type / class, or any kind of literalizable concept.
@@ -24,8 +23,8 @@ public class Tag {
     public String name;
     public String description;
 
-    public Map<String,Object> meta = new HashMap();
-    public Map<String,Double> inh;   /** intensional inheritance */
+    //public Map<String,Object> meta = new HashMap();
+
 
     private String icon;
 
@@ -48,19 +47,28 @@ public class Tag {
 
     public static Tag the(SpanGraph g, String id) {
         Tag t = new Tag(g, id);
-        if (t.vertex == null) return null;
+        if (t.vertex == null) {
+            System.err.println(id + " vertex missing");
+            return null;
+        }
         return t;
     }
 
     protected Tag(SpanGraph g, String id) {
 
         this.id = id;
-        this.vertex = g.getVertex(id);
+
+        //TODO replace with getOrAdd method
+        Vertex vertex = g.getVertex(id);
+        if (vertex == null)
+            this.vertex = g.addVertex(id);
+        else
+            this.vertex = (MapGraph.MVertex) vertex;
 
     }
     
     public Tag meta(String key, Object value) {
-        meta.put(key, value);
+        vertex.setProperty(key, value);
         return this;
     }
 
@@ -80,7 +88,11 @@ public class Tag {
 
     public Edge inheritance(String object, double v) {
         if (v > 0) {
-            Edge e = vertex.addEdge("inh", vertex.graph().getVertex(object));
+            MapGraph.MVertex vv = vertex.graph().getVertex(object);
+            if (vv == null) {
+                vv = vertex.graph().addVertex(object);
+            }
+            Edge e = vertex.addEdge("inh", vv);
             e.setProperty("%", v);
             return e;
         }

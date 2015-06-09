@@ -1,7 +1,7 @@
 package automenta.netention.net;
 
 
-import nars.util.db.InfiniPeer;
+import com.syncleus.spangraph.InfiniPeer;
 import org.infinispan.Cache;
 
 /**

@@ -2,6 +2,7 @@ package automenta.netention.web.shell;
 
 import automenta.netention.Core;
 import automenta.netention.web.SpacetimeWebServer;
+import com.syncleus.spangraph.InfiniPeer;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.AbstractReceiveListener;
 import io.undertow.websockets.core.BufferedTextMessage;
@@ -14,7 +15,6 @@ import nars.io.out.TextOutput;
 import nars.model.impl.Default;
 import nars.nal.nal8.operator.TermFunction;
 import nars.nal.term.Term;
-import nars.util.db.InfiniPeer;
 
 import java.io.IOException;
 import java.util.Arrays;

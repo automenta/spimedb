@@ -5,12 +5,11 @@
  */
 package automenta.netention.data;
 
+import automenta.netention.Core;
 import automenta.netention.Tag;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import nars.util.db.InfiniPeer;
-import nars.util.db.SpanGraph;
-import nars.util.language.JSON;
+import com.syncleus.spangraph.InfiniPeer;
+import com.syncleus.spangraph.SpanGraph;
 
 import java.io.File;
 import java.net.URI;
@@ -18,17 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- *
  * @author me
  */
-public class ClimateViewer {
+public class ClimateViewerSources {
 
     final String channel = "spacetime";
     static final String basePath = "cache";
     static final String layersFile = "data/climateviewer.json";
     private final SpanGraph st;
 
-    public ClimateViewer(final InfiniPeer peer) throws Exception {
+    String currentSection = "Unknown";
+
+    public ClimateViewerSources(final InfiniPeer peer) throws Exception {
 
         this.st = new SpanGraph(channel, peer);
 
@@ -47,15 +47,18 @@ public class ClimateViewer {
 
         String layers = new String(encoded, "UTF8");
 
-        //ObjectNode j = fromJSON(layers);
-        final ArrayNode n = (ArrayNode) JSON.mapFrom(layers).get("cv");
+        JsonNode lll = Core.fromJSON(layers).get("cv");
 
-        //BulkRequestBuilder bulk = st.newBulk();
+        JsonNode n = lll;
 
-        String currentSection = "Unknown";
 
-        for (JsonNode x : n) {
-            if (x.isObject() && x.has("section")) {
+
+
+
+        n.forEach(x -> {
+
+            //x.isObject() &&
+            if (x.has("section")) {
 
                 String name = x.get("section").textValue();
                 String id = getSectionID(x);
@@ -66,53 +69,57 @@ public class ClimateViewer {
                 }
 
                 Tag t = Tag.the(st, id);
-                if (t!=null)
+                if (t != null)
                     t.name(name);
 
             }
-        }
-        String icon = null;
+            else  {
+                String icon = null;
 
-        for (JsonNode x : n) {
-            if (x.has("icon"))
-                icon = x.get("icon").textValue();
+                if (x.has("icon"))
+                    icon = x.get("icon").textValue();
 
-            if (x.isTextual()) {
-                currentSection = x.textValue();
-            } else if (x.isObject() && x.has("section")) {
-                currentSection = getSectionID(x);
-            } else if (!x.isObject() && !x.has("layer")) {
-                System.err.println("Unrecognized item: " + x);
-            } else {
-                final String id = x.get("layer").textValue();
-                final String kml = x.has("kml") ? x.get("kml").textValue() : null;
-                final String name = x.get("name").textValue();
+                if (x.isTextual()) {
+                    currentSection = x.textValue();
+                } else if (x.isObject() && x.has("section")) {
+                    currentSection = getSectionID(x);
+                } else if (!x.isObject() && !x.has("layer")) {
+                    System.err.println("Unrecognized item: " + x);
+                } else {
+                    final String id = x.get("layer").textValue();
+                    final String kml = x.has("kml") ? x.get("kml").textValue() : null;
+                    final String name = x.get("name").textValue();
 
 
-                Tag t = Tag.the(st, id);
+                    Tag t = Tag.the(st, id);
+                    t.name(name);
 
-                t.name(name);
+                    if (kml != null)
+                        t.meta("kmlLayer", kml);
 
-                if (kml!=null)
-                    t.meta("kmlLayer", kml);
+                    if (icon != null)
+                        t.icon(icon);
 
-                if (icon!=null)
-                    t.icon(icon);
+                    if (currentSection != null) {
+                        t.inheritance(currentSection, 1.0);
+                    }
 
-                if (currentSection != null) {
-                    t.inheritance(currentSection, 1.0);
+
+                    //System.out.println(currentSection + " " + name + " " + x);
+                    //executor.submit(new ImportKML(st, proxy, id, name, url));
                 }
 
 
-
-
-                        //System.out.println(currentSection + " " + name + " " + x);
-                //executor.submit(new ImportKML(st, proxy, id, name, url));
             }
-        }
+        });
 
+        System.out.println(st.vertexSet());
+        System.out.println(st.edgeSet());
 
     }
+
+
+
 //
 //    public static void _main(String[] args) throws Exception {
 //

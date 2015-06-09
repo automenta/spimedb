@@ -7,7 +7,7 @@ package automenta.netention.run;
 
 import automenta.netention.Core;
 import automenta.netention.web.SpacetimeWebServer;
-import nars.util.db.InfiniPeer;
+import com.syncleus.spangraph.InfiniPeer;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.*;
 
@@ -39,12 +39,12 @@ public class Main {
         netGroup.addArgument("-localhost").type(String.class).required(false).setDefault("localhost").help("Host to bind servers, if different from localhost");
 
         MutuallyExclusiveGroup dbGroup = parser.addMutuallyExclusiveGroup("Database");
-        dbGroup.addArgument("-esserver").type(String.class).help("ElasticSearch server host:port");
+        //dbGroup.addArgument("-esserver").type(String.class).help("ElasticSearch server host:port");
         
-        dbGroup.addArgument("-espath").type(String.class).help("Elasticsearch embedded DB path");
+        //dbGroup.addArgument("-espath").type(String.class).help("Elasticsearch embedded DB path");
 
         MutuallyExclusiveGroup dbOptGroup = parser.addMutuallyExclusiveGroup("Database Options");
-        dbOptGroup.addArgument("-esindex").type(String.class).help("ElasticSearch index name").required(false).setDefault("spacetime");
+        //dbOptGroup.addArgument("-esindex").type(String.class).help("ElasticSearch index name").required(false).setDefault("spacetime");
         
 
         try {

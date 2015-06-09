@@ -1,11 +1,12 @@
 package automenta.netention.net;
 
 
-import nars.util.db.InfiniPeer;
+import com.syncleus.spangraph.InfiniPeer;
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStreamReader;
 import java.net.URL;
+
 
 public class HttpCache {
 

@@ -62,7 +62,7 @@
     "Weather",
     { id: "Weather", section: "Weather", icon: "fa fa-exclamation-triangle fa-fw"},
     { only3d: true, layer: "hirad", kml: "http://mw1.google.com/mw-weather/current-points/twc/root.kmz", source: "Weather.com HiRAD forecast", sourceURL: "http://www.weather.com/", name: "Weather Forecast"},
-    { layer: 'kml-nwswarn', kml: 'http://wdssii.nssl.noaa.gov/realtime/nws_warnings.kmz', source: "NOAA National Severe Storms Laboratory, Warning Decision Support System - Integrated Information (WDSS-II)", sourceURL: 'http://wdssii.nssl.noaa.gov/', name: "Current Warnings"},
+    { layer: "kml-nwswarn", kml: "http://wdssii.nssl.noaa.gov/realtime/nws_warnings.kmz", source: "NOAA National Severe Storms Laboratory, Warning Decision Support System - Integrated Information (WDSS-II)", sourceURL: "http://wdssii.nssl.noaa.gov/", name: "Current Warnings"},
     { only3d: true, layer: "kml-nwshlog", kml: "http://wdssii.nssl.noaa.gov/geotiff/kml/NwsHourlyStormLogs.kml", source: "NOAA National Severe Storms Laboratory, Warning Decision Support System - Integrated Information (WDSS-II)", sourceURL: "http://wdssii.nssl.noaa.gov/", name: "Hourly Storm Log"},
     { only3d: true, layer: "kml-nwsdlog", kml: "http://wdssii.nssl.noaa.gov/geotiff/kml/NwsDailyStormLogs.kml", source: "NOAA National Severe Storms Laboratory, Warning Decision Support System - Integrated Information (WDSS-II)", sourceURL: "http://wdssii.nssl.noaa.gov/", name: "Daily Storm Log"},
     { layer: "kml-iswecso", kml: "http://www.atmos.uiuc.edu/iswecs/Google.Earth/Convective/SPC/Day1_Outlook.kml", source: "University of Illinois, Intersection of Severe Weather, Climate and Society (ISWECS)", sourceURL: "http://www.atmos.illinois.edu/iswecs/latest.html", name: "Convective Forecast (Day 1)"},

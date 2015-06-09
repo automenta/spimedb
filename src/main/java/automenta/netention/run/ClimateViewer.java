@@ -1,25 +1,33 @@
-//package automenta.climatenet.web.run.run;
-//
-//import automenta.climatenet.data.elastic.ElasticSpacetime;
-//import automenta.climatenet.data.geo.USGSEarthquakes;
-//
-//
-//public class ClimateViewer {
-//
-//
-//
-//    public static void main(String[] args) throws Exception {
+package automenta.netention.run;
+
+
+import automenta.netention.data.ClimateViewerSources;
+import automenta.netention.web.shell.NARServer;
+import com.syncleus.spangraph.InfiniPeer;
+
+
+public class ClimateViewer {
+
+
+
+    public static void main(String[] args) throws Exception {
+        InfiniPeer peer = InfiniPeer.local("nars");
+        NARServer s = new NARServer(peer, 8080);
+
+
 //        int webPort = 9090;
 //
-//        NetentionServer s = new NetentionServer(
+//        SpacetimeWebServer s = SpacetimeWebServer(
 //                //ElasticSpacetime.temporary("cv", -1),
 //                ElasticSpacetime.local("cv", "cache", true),
 //                "localhost",
 //                webPort);
-//
-//        new automenta.climatenet.data.ClimateViewer(s.db);
-//
-//
+
+        new ClimateViewerSources(peer);
+
+        s.start();
+
+//        /*
 //        //EXAMPLES
 //        {
 ////            s.add("irc",
@@ -38,10 +46,8 @@
 //                    new SimpleSimulation("x")
 //            ).handler());*/
 //        }
-//
-//
-//        s.start();
-//    }
-//
-//
-//}
+//        */
+    }
+
+
+}

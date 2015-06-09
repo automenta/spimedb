@@ -1,7 +1,7 @@
 package automenta.netention.run;
 
 import automenta.netention.web.shell.NARServer;
-import nars.util.db.InfiniPeer;
+import com.syncleus.spangraph.InfiniPeer;
 
 /**
  * Created by me on 6/6/15.
