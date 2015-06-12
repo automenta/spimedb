@@ -7,14 +7,14 @@ import org.infinispan.Cache;
 /**
  * Created by me on 4/23/15.
  */
-public class FileCache {
+public class SpanCache {
 
 
     private final InfiniPeer peer;
     private final String channel;
     private final Cache<String, byte[]> cache;
 
-    public FileCache(String id, InfiniPeer peer) {
+    public SpanCache(String id, InfiniPeer peer) {
         this.peer = peer;
         this.channel = id;
 

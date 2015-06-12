@@ -13,10 +13,10 @@ public class HttpCache {
 
 
 
-    final FileCache fileCache;
+    final SpanCache fileCache;
 
     public HttpCache(String path, InfiniPeer peer)  {
-        fileCache = new FileCache(path, peer);
+        fileCache = new SpanCache(path, peer);
     }
 
 

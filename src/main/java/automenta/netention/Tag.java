@@ -9,6 +9,7 @@ import com.syncleus.spangraph.MapGraph;
 import com.syncleus.spangraph.SpanGraph;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
+import nars.nal.NALOperator;
 
 
 /**
@@ -92,7 +93,7 @@ public class Tag {
             if (vv == null) {
                 vv = vertex.graph().addVertex(object);
             }
-            Edge e = vertex.addEdge("inh", vv);
+            Edge e = vertex.addEdge(NALOperator.INHERITANCE.str, vv);
             e.setProperty("%", v);
             return e;
         }

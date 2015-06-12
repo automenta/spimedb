@@ -15,10 +15,10 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.Headers;
+import nars.util.utf8.Utf8;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
@@ -237,6 +237,7 @@ public class SpacetimeWebServer extends PathHandler {
 
     }
 
+
     @Override
     public synchronized PathHandler addPrefixPath(String path, HttpHandler handler) {
         paths.add(path);
@@ -250,7 +251,7 @@ public class SpacetimeWebServer extends PathHandler {
         ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 
         try {
-            ex.getOutputStream().write(Charset.forName("UTF-8").encode(s).array());
+            ex.getOutputStream().write(Utf8.toUtf8(s));
         } catch (IOException e) {
             logger.severe(e.toString());
         }

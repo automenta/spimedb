@@ -37,6 +37,7 @@ public class NARServer extends SpacetimeWebServer {
         super(p, httpPort);
 
 
+
         addPrefixPath("/nars.io", websocket(new WebSocketConnectionCallback() {
 
             protected void broadcast(String msg, WebSocketChannel channel) {
@@ -59,8 +60,14 @@ public class NARServer extends SpacetimeWebServer {
 
                 broadcast("online(" + uid + "). :|:", channel);
 
-                NAR nar = new NAR(new Default());
+
+                NAR nar = new NAR(new Default() {
+
+                });
                 nar.input("schizo(" + uid  + ")!");
+
+
+
 
                 new Output(nar) {
 
@@ -111,6 +118,8 @@ public class NARServer extends SpacetimeWebServer {
                         return null;
                     }
                 });
+
+
 
                 final Thread runner = new Thread(new Runnable() {
 

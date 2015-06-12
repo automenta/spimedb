@@ -12,6 +12,9 @@ public class ClimateViewer {
 
     public static void main(String[] args) throws Exception {
         InfiniPeer peer = InfiniPeer.local("nars");
+
+        new ClimateViewerSources(peer);
+
         NARServer s = new NARServer(peer, 8080);
 
 
@@ -23,7 +26,6 @@ public class ClimateViewer {
 //                "localhost",
 //                webPort);
 
-        new ClimateViewerSources(peer);
 
         s.start();
 
