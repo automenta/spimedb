@@ -164,7 +164,7 @@ public class CachingProxyServer implements HttpHandler {
                 exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
             }
             exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
-            logger.info("sending client cached " + response.content + " bytes");
+            logger.info("sending client cached " + response.content.length + " bytes");
         }
 
     }
