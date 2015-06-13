@@ -13,20 +13,15 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.Headers;
 import nars.util.utf8.Utf8;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static io.undertow.Handlers.header;
-import static io.undertow.Handlers.resource;
 
 /**
  *
@@ -37,7 +32,6 @@ public class SpacetimeWebServer extends PathHandler {
     public static final Logger logger = Logger.getLogger(SpacetimeWebServer.class.toString());
 
 
-    final String clientPath = "./src/web";
     private final InfiniPeer db;
 
 
@@ -71,15 +65,11 @@ public class SpacetimeWebServer extends PathHandler {
         //CORS fucking sucks
         /*  .header("Access-Control-Allow-Origin", "*")
             .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-            .header("Access-Control-Allow-Credentials", "true")
-            .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
-            .header("Access-Control-Max-Age", "1209600")
+            .header("Access-Control-Allow-CredentialMax-Age", "1209600")
          */
 
         //https://github.com/undertow-io/undertow/blob/master/examples/src/main/java/io/undertow/examples/sessionhandling/SessionServer.java
-        addPrefixPath("/", header(resource(
-                new FileResourceManager(new File(clientPath), 100, true, "/")).
-                setDirectoryListingEnabled(false), "Access-Control-Allow-Origin", "*"));
+        addPrefixPath("/", ClientResources.handleClientResources());
 
 //        addPrefixPath("/socket", new WebSocketCore(
 //                index
@@ -222,11 +212,10 @@ public class SpacetimeWebServer extends PathHandler {
 //
 //        });
 //
-//        addPrefixPath("/wikipedia", new Wikipedia());
+//         addPrefixPath("/wikipedia", new Wikipedia());
 
 
     }
-
 
 
     public void start() {

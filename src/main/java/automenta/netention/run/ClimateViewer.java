@@ -2,7 +2,9 @@ package automenta.netention.run;
 
 
 import automenta.netention.data.ClimateViewerSources;
-import automenta.netention.web.shell.NARServer;
+import automenta.netention.net.proxy.InfiniProxy;
+import automenta.netention.net.proxy.URLSensor;
+import automenta.netention.web.ClientResources;
 import com.syncleus.spangraph.InfiniPeer;
 
 
@@ -11,11 +13,34 @@ public class ClimateViewer {
 
 
     public static void main(String[] args) throws Exception {
-        InfiniPeer peer = InfiniPeer.local("nars");
+        InfiniProxy p = new InfiniProxy("CVgeo", InfiniPeer.local(), 8080, "cache");
 
-        new ClimateViewerSources(peer);
+        p.addPrefixPath("/", ClientResources.handleClientResources());
 
-        NARServer s = new NARServer(peer, 8080);
+
+        /*final static String eq4_5week = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.atom";
+
+        public USGSEarthquakes() {
+            super("USGSEarthquakes", eq4_5week, 128);*/
+
+
+        //new IRCBot(s.db, "RAWinput", "irc.freenode.net", "#netention");
+
+        new ClimateViewerSources() {
+
+            @Override
+            public void onLayer(String id, String name, String kml, String icon, String currentSection) {
+                URLSensor r = new URLSensor(currentSection + "/" + id, name, kml, icon);
+                p.add(r);
+            }
+
+            @Override
+            public void onSection(String name, String id, String icon) {
+
+            }
+        };
+
+        p.run();
 
 
 //        int webPort = 9090;
@@ -25,9 +50,6 @@ public class ClimateViewer {
 //                ElasticSpacetime.local("cv", "cache", true),
 //                "localhost",
 //                webPort);
-
-
-        s.start();
 
 //        /*
 //        //EXAMPLES

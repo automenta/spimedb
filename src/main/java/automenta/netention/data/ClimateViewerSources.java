@@ -6,10 +6,7 @@
 package automenta.netention.data;
 
 import automenta.netention.Core;
-import automenta.netention.Tag;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.syncleus.spangraph.InfiniPeer;
-import com.syncleus.spangraph.SpanGraph;
 
 import java.io.File;
 import java.net.URI;
@@ -19,18 +16,15 @@ import java.nio.file.Paths;
 /**
  * @author me
  */
-public class ClimateViewerSources {
+public abstract class ClimateViewerSources {
 
-    final String channel = "spacetime";
     static final String basePath = "cache";
     static final String layersFile = "data/climateviewer.json";
-    private final SpanGraph st;
 
     String currentSection = "Unknown";
 
-    public ClimateViewerSources(final InfiniPeer peer) throws Exception {
+    public ClimateViewerSources() throws Exception {
 
-        this.st = new SpanGraph(channel, peer);
 
         /*ExecutorService executor =
 
@@ -68,9 +62,10 @@ public class ClimateViewerSources {
                     throw new RuntimeException("Section " + x + " missing ID");
                 }
 
-                Tag t = Tag.the(st, id);
-                if (t != null)
-                    t.name(name);
+                onSection(name, id, icon);
+                //Tag t = Tag.the(st, id);
+                //if (t != null)
+                  //  t.name(name);
 
             }
             else  {
@@ -91,19 +86,8 @@ public class ClimateViewerSources {
                     final String name = x.get("name").textValue();
 
 
-                    Tag t = Tag.the(st, id);
-                    t.name(name);
 
-                    if (kml != null)
-                        t.meta("kmlLayer", kml);
-
-                    if (icon != null)
-                        t.icon(icon);
-
-                    if (currentSection != null) {
-                        t.inheritance(currentSection, 1.0);
-                    }
-
+                    onLayer(id, name, kml, icon, currentSection);
 
                     //System.out.println(currentSection + " " + name + " " + x);
                     //executor.submit(new ImportKML(st, proxy, id, name, url));
@@ -113,11 +97,12 @@ public class ClimateViewerSources {
             }
         });
 
-        System.out.println(st.vertexSet());
-        System.out.println(st.edgeSet());
 
     }
 
+    abstract public void onLayer(String id, String name, String kml, String icon, String currentSection);
+
+    abstract public void onSection(String name, String id, String icon);
 
 
 //

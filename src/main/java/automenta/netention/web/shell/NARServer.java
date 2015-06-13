@@ -54,11 +54,11 @@ public class NARServer extends SpacetimeWebServer {
 
 
             @Override
-            public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
+            public void onConnect(WebSocketHttpExchange exchange, final WebSocketChannel ws) {
 
                 String uid = Core.uuid();
 
-                broadcast("online(" + uid + "). :|:", channel);
+                broadcast("online(" + uid + "). :|:", ws);
 
 
                 NAR nar = new NAR(new Default() {
@@ -72,20 +72,20 @@ public class NARServer extends SpacetimeWebServer {
                 new Output(nar) {
 
                     @Override
-                    public void event(Class aClass, Object... objects) {
-
+                    protected void output(Channel ch, Class aClass, Object... objects) {
                         try {
 
                             String t = TextOutput.getOutputString(aClass, objects, false, nar, new StringBuilder()).toString();
                             //String t = JSON.stringFrom(objects);
 
                             //String t = Json.array().add(aClass.getSimpleName()).add(objects).toString();
-                            sendText(t, channel, null);
+                            sendText(t, ws, null);
 
                         }
                         catch (Exception e) {
-                            sendText(e.toString(), channel, null);
+                            sendText(e.toString(), ws, null);
                         }
+
                     }
                 };
 
@@ -94,7 +94,7 @@ public class NARServer extends SpacetimeWebServer {
 
                     @Override
                     public Object function(Term... terms) {
-                        broadcast(Arrays.toString(terms), channel);
+                        broadcast(Arrays.toString(terms), ws);
                         return null;
                     }
                 });
@@ -102,7 +102,7 @@ public class NARServer extends SpacetimeWebServer {
 
                     @Override
                     public Object function(Term... terms) {
-                        broadcast(Arrays.toString(terms), channel);
+                        broadcast(Arrays.toString(terms), ws);
                         return null;
                     }
                 });
@@ -142,7 +142,7 @@ public class NARServer extends SpacetimeWebServer {
 
                 runner.start();
 
-                channel.getReceiveSetter().set(new AbstractReceiveListener() {
+                ws.getReceiveSetter().set(new AbstractReceiveListener() {
 
 
                     @Override
@@ -169,7 +169,7 @@ public class NARServer extends SpacetimeWebServer {
 
                 });
 
-                channel.resumeReceives();
+                ws.resumeReceives();
             }
 
 
