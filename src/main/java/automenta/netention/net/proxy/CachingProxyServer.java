@@ -99,10 +99,13 @@ public class CachingProxyServer extends PathHandler {
 
                 CachedURL response = null;
 
+                //attempt to read, or if expired, just get the newest
                 try {
                     response = get(url);
                 } catch (Exception e) {
                 }
+
+                boolean write = true;
 
                 if (response == null) {
 
@@ -115,6 +118,8 @@ public class CachingProxyServer extends PathHandler {
                     ).get();
 
                     logger.info("cache set: " + response.content.length + " bytes");
+
+                    write = true;
 
                 } else {
                     logger.info("cache hit: " + url);
@@ -135,6 +140,14 @@ public class CachingProxyServer extends PathHandler {
                         logger.debug("sending client cached " + response.content.length + " bytes");
                 }
 
+                if (write && response!=null) {
+                    try {
+                        put(decodeURIComponent(url.toString()), response);
+                    }
+                    catch (Exception e) {
+                        logger.error(e.toString());
+                    }
+                }
             }
 
         });
@@ -167,20 +180,41 @@ public class CachingProxyServer extends PathHandler {
 
     }
 
-    public File getCacheFile(String uri, boolean header) throws UnsupportedEncodingException {
-        String filename = URLEncoder.encode(uri, "UTF-8");
-        return new File(cachePath + filename + (header ? ".h" : ""));
+    public File getCacheFile(String filename, boolean header) throws UnsupportedEncodingException {
+        if (filename.startsWith("https://")) filename = filename.substring(8);
+        if (filename.startsWith("http://")) filename = filename.substring(7);
+        if (filename.startsWith("http:/")) filename = filename.substring(6);
+
+        filename = URLEncoder.encode(filename, "UTF-8");
+
+        filename = filename.replace("%2F", "/"); //restore '/' for directory seprataion.
+        filename = filename.replace("%26", "/&"); //separate at '&' also
+        filename = filename.replace("%3F", "/?"); //separate at '&' also
+        filename = filename.replace("%3D", "="); //restore '=' this is valid in unix filename
+        filename = filename.replace("%2C", ","); //restore ',' this is valid in unix filename
+        filename = filename.replace("%3A", ":"); //restore ',' this is valid in unix filename
+
+
+        String target = cachePath + filename + (header ? ".h" : "");
+
+        File f = new File(target);
+
+        File parent = f.getParentFile();
+        parent.mkdirs();
+
+        return f;
     }
 
-    public synchronized CachedURL get(String uripedido) throws Exception {
+    public synchronized CachedURL get(String u) throws Exception {
 
-        File header = getCacheFile(uripedido, true);
+
+        File header = getCacheFile(u, true);
         ObjectInputStream deficheiro = new ObjectInputStream(new FileInputStream(header));
 
         CachedURL x = (CachedURL) deficheiro.readObject();
         x.content = new byte[x.size];
 
-        File content = getCacheFile(uripedido, false);
+        File content = getCacheFile(u, false);
         final FileInputStream cc = new FileInputStream(content);
         IOUtils.readFully(cc, x.content);
         cc.close();
@@ -268,8 +302,9 @@ public class CachingProxyServer extends PathHandler {
                 httpclient.close();
             }
 
+
             if (data != null) {
-                put(url.toString(), this.curl = new CachedURL(response.getAllHeaders(), responseCode, data));
+                this.curl = new CachedURL(response.getAllHeaders(), responseCode, data);
             }
 
             return curl;
