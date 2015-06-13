@@ -9,18 +9,22 @@ package automenta.netention.net.proxy;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.util.HeaderMap;
-import io.undertow.util.HeaderValues;
 import io.undertow.util.HttpString;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +63,7 @@ public class CachingProxyServer extends PathHandler {
                 .setHandler(this);
 
 
-        addPath("/proxy", new PathHandler() {
+        addPrefixPath("/proxy", new PathHandler() {
             @Override
             public void handleRequest(final HttpServerExchange exchange) throws Exception {
                 if (exchange.isInIoThread()) {
@@ -75,8 +79,8 @@ public class CachingProxyServer extends PathHandler {
 
                 try {
                     response = get(url);
+                } catch (Exception e) {
                 }
-                catch (Exception e) { }
 
                 if (response == null) {
 
@@ -84,31 +88,29 @@ public class CachingProxyServer extends PathHandler {
 
                     response = executor.submit(
                             new Request(
-                                    new URL(url),
-                                    exchange.getRequestHeaders(),
-                                    exchange.getResponseCode()
+                                    new URL(url)
                             )
                     ).get();
 
                     logger.info("cache set: " + response.content.length + " bytes");
 
-                }
-                else {
+                } else {
                     logger.info("cache hit: " + url);
                 }
 
                 if (response == null) {
                     logger.error("undownloaded: " + url);
                     exchange.setResponseCode(404);
-                }
-                else {
+                } else {
 
                     exchange.setResponseCode(response.responseCode);
                     for (String[] x : response.responseHeader) {
                         exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
                     }
                     exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
-                    logger.debug("sending client cached " + response.content.length + " bytes");
+
+                    if (logger.isDebugEnabled())
+                        logger.debug("sending client cached " + response.content.length + " bytes");
                 }
 
             }
@@ -169,18 +171,19 @@ public class CachingProxyServer extends PathHandler {
         transient public byte[] content; //stored separately
 
         public int responseCode;
-        public List<String[]> responseHeader; //TODO UTF8
+        //public List<String[]> requestHeader;
+        public List<String[]> responseHeader;
         public int size;
 
         public CachedURL() {
+
         }
 
-        public CachedURL(HeaderMap requestHeaders, int responseCode, byte[] content) {
-            responseHeader = new ArrayList();
-            for (HeaderValues x : requestHeaders) {
-                for (String y : x) {
-                    responseHeader.add(new String[]{x.toString(), y});
-                }
+        public CachedURL(Header[] responseHeaders, int responseCode, byte[] content) {
+            responseHeader = new ArrayList(responseHeaders.length);
+
+            for (Header h : responseHeaders) {
+                responseHeader.add(new String[] { h.getName(), h.getValue() }  );
             }
             this.responseCode = responseCode;
             this.content = content;
@@ -199,31 +202,52 @@ public class CachingProxyServer extends PathHandler {
 //    }
 
     public class Request implements Callable<CachedURL> {
-        private final HeaderMap request;
-        int response;
+        int responseCode;
         private URL url;
         private CachedURL curl;
+        public HttpResponse response;
 
-
-        public Request(URL url, HeaderMap request, int responseCode) {
+        public Request(URL url) throws URISyntaxException {
             this.url = url;
-            this.response = responseCode;
-            this.request = request;
         }
 
         @Override
         public CachedURL call() throws Exception {
 
+            //
+
+            CloseableHttpClient httpclient = HttpClients.createDefault();
+            byte[] data;
             try {
-                byte[] data = IOUtils.toByteArray(url);
+                HttpGet httpget = new HttpGet(url.toURI());
 
+                logger.info("HTTP GET " + httpget.getRequestLine());
 
-                put(url.toString(), this.curl =
-                        new CachedURL(request, response, data));
+                // Create a custom response handler
+                ResponseHandler<byte[]> responseHandler = new ResponseHandler<byte[]>() {
+;
+
+                    @Override
+                    public byte[] handleResponse(final HttpResponse hresponse) throws ClientProtocolException, IOException {
+                        response = hresponse;
+                        responseCode = hresponse.getStatusLine().getStatusCode();
+                        if (responseCode >= 200 && responseCode < 300) {
+                            HttpEntity entity = hresponse.getEntity();
+                            return entity != null ? EntityUtils.toByteArray(entity) : null;
+                        } else {
+                            return null;
+                        }
+                    }
+
+                };
+                data = httpclient.execute(httpget, responseHandler);
+
+            } finally {
+                httpclient.close();
             }
-            catch (Exception e) {
-                logger.error(e.toString());
-                return null;
+
+            if (data!=null) {
+                put(url.toString(), this.curl = new CachedURL(response.getAllHeaders(), responseCode, data));
             }
 
             return curl;

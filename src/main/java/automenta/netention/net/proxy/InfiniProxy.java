@@ -43,7 +43,7 @@ public class InfiniProxy extends CachingProxyServer {
         });
         addPrefixPath("/cache", resource(
                 new FileResourceManager(new File(cachePath), 100))
-                .setDirectoryListingEnabled(true).setWelcomeFiles("README").setMimeMappings(MimeMappings.DEFAULT));
+                .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT));
 
         /*
         addPrefixPath("/cache", new HttpHandler() {
