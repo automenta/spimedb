@@ -52,6 +52,24 @@ public class CachingProxyServer extends PathHandler {
     final ExecutorService executor = Executors.newFixedThreadPool(threads);
     public final Undertow.Builder web;
 
+    public static String decodeURIComponent(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        String result = null;
+
+        try {
+            result = URLDecoder.decode(s, "UTF-8");
+        }
+
+        // This exception should never occur.
+        catch (UnsupportedEncodingException e) {
+            result = s;
+        }
+
+        return result;
+    }
 
     public CachingProxyServer(int port, String cachePath) {
 
@@ -71,7 +89,11 @@ public class CachingProxyServer extends PathHandler {
                     return;
                 }
 
-                final String url = exchange.getQueryString();
+                String url = exchange.getQueryString();
+
+                if (url == null) return;
+
+                url = decodeURIComponent(url);
 
                 logger.info("request: " + url);
 
@@ -147,7 +169,7 @@ public class CachingProxyServer extends PathHandler {
 
     public File getCacheFile(String uri, boolean header) throws UnsupportedEncodingException {
         String filename = URLEncoder.encode(uri, "UTF-8");
-        return new File(cachePath + filename +  (header ? ".h" : ""));
+        return new File(cachePath + filename + (header ? ".h" : ""));
     }
 
     public synchronized CachedURL get(String uripedido) throws Exception {
@@ -183,7 +205,7 @@ public class CachingProxyServer extends PathHandler {
             responseHeader = new ArrayList(responseHeaders.length);
 
             for (Header h : responseHeaders) {
-                responseHeader.add(new String[] { h.getName(), h.getValue() }  );
+                responseHeader.add(new String[]{h.getName(), h.getValue()});
             }
             this.responseCode = responseCode;
             this.content = content;
@@ -225,7 +247,7 @@ public class CachingProxyServer extends PathHandler {
 
                 // Create a custom response handler
                 ResponseHandler<byte[]> responseHandler = new ResponseHandler<byte[]>() {
-;
+                    ;
 
                     @Override
                     public byte[] handleResponse(final HttpResponse hresponse) throws ClientProtocolException, IOException {
@@ -246,7 +268,7 @@ public class CachingProxyServer extends PathHandler {
                 httpclient.close();
             }
 
-            if (data!=null) {
+            if (data != null) {
                 put(url.toString(), this.curl = new CachedURL(response.getAllHeaders(), responseCode, data));
             }
 
