@@ -53,7 +53,7 @@ public class RobotSimulant extends NObject {
     }
     public RobotSimulant knowHere(NObject... n) {
         for (NObject x : n)
-            x.where(getWhere());
+            x.where(getSpace());
         Collections.addAll(memory, n);
         return this;
     }
@@ -65,7 +65,7 @@ public class RobotSimulant extends NObject {
 
         @Override
         public void update(RobotSimulant r, double dt) {
-            r.where(0, lonPerSecond * dt + r.getWhere().getLongitude());
+            r.where(0, lonPerSecond * dt + r.getSpace().getLongitude());
         }
     }
 
@@ -114,8 +114,8 @@ public class RobotSimulant extends NObject {
         for (int i = 0; i < npoints; i++) {
             LngLatAlt w = shadowWorld.getCoordinates().get(0).get(i);
             LngLatAlt l = shadowLocal.getCoordinates().get(0).get(i);
-            w.setLongitude(getWhere().getLongitude() + l.getLongitude());
-            w.setLatitude(getWhere().getLatitude() + l.getLatitude());
+            w.setLongitude(getSpace().getLongitude() + l.getLongitude());
+            w.setLatitude(getSpace().getLatitude() + l.getLatitude());
         }
 
         return shadowWorld;

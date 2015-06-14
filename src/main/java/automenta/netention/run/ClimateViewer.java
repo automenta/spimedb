@@ -11,9 +11,13 @@ import com.syncleus.spangraph.InfiniPeer;
 public class ClimateViewer {
 
 
+    final static String cachePath = "cache";
 
     public static void main(String[] args) throws Exception {
-        InfiniProxy p = new InfiniProxy("CVgeo", InfiniPeer.local(), 8080, "cache");
+        InfiniProxy p = new InfiniProxy("CVgeo",
+                InfiniPeer.local("i", cachePath, 32000),
+                //InfiniPeer.local(),
+                8080, cachePath);
 
         p.addPrefixPath("/", ClientResources.handleClientResources());
 

@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import nars.NAR;
 import nars.model.impl.Default;
-import nars.util.event.EventEmitter;
 import org.apache.commons.math3.stat.Frequency;
 
 import java.io.IOException;
@@ -25,10 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+
 /**
  * Unifies DB & P2P features
  */
-public class Self extends EventEmitter.DefaultEventEmitter {
+public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
     //private final static String Session_MYSELF = "myself";
 
     public GossipPeer net;
@@ -114,9 +114,10 @@ public class Self extends EventEmitter.DefaultEventEmitter {
     protected void broadcastSelf() {
         if (myself!=null)
             Platform.runLater(new Runnable() {
-                @Override public void run() {
-                        broadcast(myself);
-                }                    
+                @Override
+                public void run() {
+                    broadcast(myself);
+                }
             });        
     }
     

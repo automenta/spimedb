@@ -72,7 +72,7 @@ public class SpacetimeTagPlan {
 
             if (get(0).equals("time")) {
                 //convert time ranges to a set of time points
-                TimePoint tr = o.getWhen();
+                TimePoint tr = o.getTime();
                 if (tr != null) {
                     if (tr instanceof TimeRange)
                         times.addAll( ((TimeRange)tr).discretize(timePeriod) );
@@ -104,7 +104,7 @@ public class SpacetimeTagPlan {
 
                 for (String s : this) {
                     if (s.equals("lat")) {
-                        sp = o.getWhere();
+                        sp = o.getSpace();
                         if (sp==null) {
                             //this nobject is invalid, return; goals will be empty
                             return goals;

@@ -1,6 +1,7 @@
 package automenta.netention.net;
 
 import automenta.netention.Core;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -8,13 +9,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by me on 4/22/15.
+ *
+ * https://github.com/FasterXML/jackson-annotations/
+ *
+ * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/test/Person.java
+ * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/queries/spatial/QuerySpatialTest.java#L78
+ *
  */
 public class NObject implements Serializable {
 
-    String id, name;
-    TimePoint when = null;
-    SpacePoint where = null;
+    @JsonProperty("I") String id;
+
+    @JsonProperty("N") String name;
+
+    @JsonProperty("T") TimePoint time = null;
+
+    @JsonProperty("S") SpacePoint space = null;
+
     Map<String, Double> tags = new HashMap(); //TODO use a ObjectDouble primitive map structure
 
     public NObject() {
@@ -46,12 +57,12 @@ public class NObject implements Serializable {
     /**
      * timepoint, or -1 if none
      */
-    public TimePoint getWhen() {
-        return when;
+    public TimePoint getTime() {
+        return time;
     }
 
-    public SpacePoint getWhere() {
-        return where;
+    public SpacePoint getSpace() {
+        return space;
     }
 
     public Collection<String> tagSet() {
@@ -59,7 +70,7 @@ public class NObject implements Serializable {
     }
 
     public NObject when(long when) {
-        this.when = new TimePoint(when);
+        this.time = new TimePoint(when);
         return this;
     }
 
@@ -68,7 +79,7 @@ public class NObject implements Serializable {
     }
 
     public NObject where(SpacePoint s) {
-        this.where = s;
+        this.space = s;
         return this;
     }
 

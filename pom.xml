@@ -118,6 +118,11 @@
             <groupId>opennars</groupId>
             <version>1.7-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <artifactId>opennars-gui</artifactId>
+            <groupId>opennars</groupId>
+            <version>1.7-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
@@ -126,11 +131,11 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <artifactId>opennars-gui</artifactId>
-            <groupId>opennars</groupId>
-            <version>1.7-SNAPSHOT</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<artifactId>opennars</artifactId>-->
+            <!--<groupId>opennars-gui</groupId>-->
+            <!--<version>1.7-SNAPSHOT</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.jgrapht</groupId>
@@ -142,18 +147,35 @@
             <artifactId>geojson-jackson</artifactId>
             <version>1.5</version>
         </dependency>
-<!--
+
         <dependency>
-            <groupId>edu.cmu.sphinx</groupId>
-            <artifactId>sphinx4-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jersey2-jaxrs</artifactId>
+            <version>1.5.0</version>
         </dependency>
         <dependency>
-            <groupId>edu.cmu.sphinx</groupId>
-            <artifactId>sphinx4-data</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <version>3.0.11.Final</version>
         </dependency>
-        -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-undertow</artifactId>
+            <version>3.0.11.Final</version>
+        </dependency>
+
+        <!--
+                <dependency>
+                    <groupId>edu.cmu.sphinx</groupId>
+                    <artifactId>sphinx4-core</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>
+                <dependency>
+                    <groupId>edu.cmu.sphinx</groupId>
+                    <artifactId>sphinx4-data</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>
+                -->
         <!--
         <dependency>
             <groupId>org.mnode.ical4j</groupId>
@@ -315,13 +337,13 @@
         </repository>
 
         <!--<repository>-->
-            <!--<id>hypergraphdb</id>-->
-            <!--<url>http://hypergraphdb.org/maven</url>-->
+        <!--<id>hypergraphdb</id>-->
+        <!--<url>http://hypergraphdb.org/maven</url>-->
         <!--</repository>-->
 
         <!--<repository>-->
-            <!--<id>tomp2p.net</id>-->
-            <!--<url>http://tomp2p.net/dev/mvn/</url>-->
+        <!--<id>tomp2p.net</id>-->
+        <!--<url>http://tomp2p.net/dev/mvn/</url>-->
         <!--</repository>-->
 
         <repository>
@@ -336,14 +358,14 @@
 
 
         <!--<repository>-->
-            <!--<id>snapshots-repo</id>-->
-            <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-            <!--<releases>-->
-                <!--<enabled>false</enabled>-->
-            <!--</releases>-->
-            <!--<snapshots>-->
-                <!--<enabled>true</enabled>-->
-            <!--</snapshots>-->
+        <!--<id>snapshots-repo</id>-->
+        <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+        <!--<releases>-->
+        <!--<enabled>false</enabled>-->
+        <!--</releases>-->
+        <!--<snapshots>-->
+        <!--<enabled>true</enabled>-->
+        <!--</snapshots>-->
         <!--</repository>-->
 
     </repositories>
@@ -361,8 +383,8 @@
             </resource>
 
             <!--<resource>-->
-                <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->
-                <!--<directory>data</directory>-->
+            <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->
+            <!--<directory>data</directory>-->
             <!--</resource>-->
         </resources>
 
@@ -428,36 +450,36 @@
 
 
             <!--<plugin>-->
-                <!--&lt;!&ndash; https://github.com/chrischristo/capsule-maven-plugin &ndash;&gt;-->
-                <!--<groupId>com.github.chrischristo</groupId>-->
-                <!--<artifactId>capsule-maven-plugin</artifactId>-->
-                <!--<version>0.10.1</version>-->
-                <!--<configuration>-->
-                    <!--<appClass>jnetention.run.RunMemoryPeer</appClass>-->
-                    <!--<manifest>-->
-                        <!--<entry>-->
-                            <!--<key>Min-Java-Version</key>-->
-                            <!--<value>1.8.0</value>-->
-                        <!--</entry>-->
-                    <!--</manifest>-->
+            <!--&lt;!&ndash; https://github.com/chrischristo/capsule-maven-plugin &ndash;&gt;-->
+            <!--<groupId>com.github.chrischristo</groupId>-->
+            <!--<artifactId>capsule-maven-plugin</artifactId>-->
+            <!--<version>0.10.1</version>-->
+            <!--<configuration>-->
+            <!--<appClass>jnetention.run.RunMemoryPeer</appClass>-->
+            <!--<manifest>-->
+            <!--<entry>-->
+            <!--<key>Min-Java-Version</key>-->
+            <!--<value>1.8.0</value>-->
+            <!--</entry>-->
+            <!--</manifest>-->
 
-                    <!--&lt;!&ndash;<fileSets>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<fileSet>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<directory>${project.build.directory}/data</directory>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<outputDirectory>data</outputDirectory>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<includes>&ndash;&gt;-->
-                                <!--&lt;!&ndash;<include>*</include>&ndash;&gt;-->
-                            <!--&lt;!&ndash;</includes>&ndash;&gt;-->
-                        <!--&lt;!&ndash;</fileSet>&ndash;&gt;-->
-                    <!--&lt;!&ndash;</fileSets>&ndash;&gt;-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<goals>-->
-                            <!--<goal>build</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
+            <!--&lt;!&ndash;<fileSets>&ndash;&gt;-->
+            <!--&lt;!&ndash;<fileSet>&ndash;&gt;-->
+            <!--&lt;!&ndash;<directory>${project.build.directory}/data</directory>&ndash;&gt;-->
+            <!--&lt;!&ndash;<outputDirectory>data</outputDirectory>&ndash;&gt;-->
+            <!--&lt;!&ndash;<includes>&ndash;&gt;-->
+            <!--&lt;!&ndash;<include>*</include>&ndash;&gt;-->
+            <!--&lt;!&ndash;</includes>&ndash;&gt;-->
+            <!--&lt;!&ndash;</fileSet>&ndash;&gt;-->
+            <!--&lt;!&ndash;</fileSets>&ndash;&gt;-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<goals>-->
+            <!--<goal>build</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
             <!--</plugin>-->
 
 
