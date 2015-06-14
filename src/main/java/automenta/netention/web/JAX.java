@@ -192,5 +192,13 @@ public class JAX extends PathHandler {
     {
         this.server.stop();
     }
+
+    public JAX start(String host, int port) {
+
+            return start( Undertow.builder()
+                    .addHttpListener(8080, "localhost")
+                    .setIoThreads(4) );
+
+    }
 }
 

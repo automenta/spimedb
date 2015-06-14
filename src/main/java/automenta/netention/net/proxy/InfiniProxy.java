@@ -10,7 +10,7 @@ import org.infinispan.Cache;
 
 import java.io.File;
 
-import static automenta.netention.web.SpacetimeWebServer.send;
+import static automenta.netention.web.Web.send;
 import static io.undertow.Handlers.resource;
 
 public class InfiniProxy extends CachingProxyServer {

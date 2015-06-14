@@ -5,9 +5,7 @@ import automenta.netention.data.ClimateViewerSources;
 import automenta.netention.net.NObject;
 import automenta.netention.net.proxy.CachingProxyServer;
 import automenta.netention.net.proxy.URLSensor;
-import automenta.netention.web.ClientResources;
 import automenta.netention.web.JAX;
-import io.undertow.Undertow;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.MimeMappings;
 
@@ -20,7 +18,7 @@ import java.util.List;
 import static io.undertow.Handlers.resource;
 
 
-public class ClimateViewer {
+public class ClimateViewerProxy {
 
 
     final static String cachePath = "cache";
@@ -39,16 +37,13 @@ public class ClimateViewer {
         JAX j = new JAX()
             .add(API.class)
             .add(Index.class)
-            .add("/", ClientResources.handleClientResources())
+            //.add("/", ClientResources.handleClientResources())
             .add("/proxy", new CachingProxyServer(cachePath))
             .add("/cache", resource(
-                    new FileResourceManager(new File(cachePath), 100))
-                    .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT));
+                    new FileResourceManager(new File(cachePath), 64))
+                    .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT))
+            .start("localhost", 8080);
 
-
-        j.start(Undertow.builder()
-                .addHttpListener(8080, "localhost")
-                .setIoThreads(4));
 
         //InfiniPeer.local("i", cachePath, 32000);
         new ClimateViewerSources() {
@@ -97,12 +92,13 @@ public class ClimateViewer {
     }
 
 
+
     @Path("/api")
     public static class API {
         @GET @Produces("text/json")
         public Object get() {
             try {
-                List<RESTEndpoints.Endpoint> x = RESTEndpoints.restEndpoints(ClimateViewer.class);
+                List<RESTEndpoints.Endpoint> x = RESTEndpoints.restEndpoints(ClimateViewerProxy.class);
                 return x;
             } catch (Exception e) {
                 return e.toString();

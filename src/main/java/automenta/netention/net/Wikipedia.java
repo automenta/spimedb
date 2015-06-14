@@ -18,22 +18,29 @@ package automenta.netention.net;
 
 
 import automenta.netention.Core;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.PathHandler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static automenta.netention.web.Web.send;
+
+
 /**
- * @author me
+ * Wikipedia proxy and filter
  */
-public class Wikipedia  {
+public class Wikipedia extends PathHandler {
+
 
     private final HttpCache http;
 
@@ -150,36 +157,52 @@ public class Wikipedia  {
     }
 
 
-    public String handleRequest(String mode, String query) throws Exception {
+    @Override
+    public void handleRequest(HttpServerExchange ex) throws Exception {
+        String[] sections = ex.getRequestPath().split("/");
+        String mode = sections[0];
+        String query = sections[1];
+        handleRequest(mode, query, ex);
+    }
+
+    public void handleRequest(String mode, String query, HttpServerExchange ex) throws Exception {
 
         //System.out.println("wikipedia handle request: " + ex + ex.getQueryString() + " " + ex.getRequestPath());
 
-        //String[] sections = ex.getRequestPath().split("/");
-            String u = null;
-            switch (mode) {
-                case "page":
-                    //"/wikipedia/page/:pageID/html"
-                    String wikipage = query;
-                    u = "http://en.wikipedia.org/wiki/" + wikipage;
-                    break;
-                case "search":
-                    //"/wikipedia/search/:query/html"
-                    String q = query;
-                    u = "http://en.wikipedia.org/w/index.php?search=" + q;
-                    break;
+        String u = null;
+        switch (mode) {
+            case "page":
+                //"/wikipedia/page/:pageID/html"
+                String wikipage = query;
+                u = "http://en.wikipedia.org/wiki/" + wikipage;
+                break;
+            case "search":
+                //"/wikipedia/search/:query/html"
+                String q = query;
+                u = "http://en.wikipedia.org/w/index.php?search=" + q;
+                break;
+        }
+
+
+        final String finalU = u;
+        http.get(u, r -> {
+
+            byte[] response = r.bytes();
+
+            //TODO do this filtering in a filter step before saving the cached file so it doesn't need repeated
+            Document doc = null;
+            try {
+
+                doc = Jsoup.parse(new java.io.ByteArrayInputStream(response), Charset.defaultCharset().name(), finalU);
+                String result = filterPage(doc);
+                send(result, ex);
+
+            } catch (IOException e) {
+                send(e.toString(), ex );
             }
 
 
-
-            byte[] response = http.get(u);
-
-            Document doc = Jsoup.parse(new java.io.ByteArrayInputStream(response), Charset.defaultCharset().name(), u);
-
-            String result = filterPage(doc);
-
-            //SpacetimeWebServer.send(result, ex);
-            return result;
-
+        });
 
     }
 
