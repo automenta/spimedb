@@ -148,11 +148,7 @@
             <version>1.5</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-jersey2-jaxrs</artifactId>
-            <version>1.5.0</version>
-        </dependency>
+
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jaxrs</artifactId>
@@ -163,6 +159,13 @@
             <artifactId>resteasy-undertow</artifactId>
             <version>3.0.11.Final</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson-provider</artifactId>
+            <version>3.0.11.Final</version>
+        </dependency>
+
 
         <!--
                 <dependency>

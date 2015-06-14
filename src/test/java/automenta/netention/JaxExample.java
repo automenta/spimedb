@@ -1,6 +1,5 @@
 package automenta.netention;
 
-import io.swagger.jaxrs.config.BeanConfig;
 import io.undertow.servlet.api.DeploymentInfo;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.test.TestPortProvider;
@@ -48,15 +47,7 @@ public class JaxExample {
         public MyApp() {
             super();
 
-            BeanConfig beanConfig = new BeanConfig();
-            beanConfig.setVersion("1.0.2");
-            beanConfig.setSchemes(new String[]{"http"});
-            beanConfig.setHost("localhost:8081");
-            beanConfig.setBasePath("/base");
-            beanConfig.setResourcePackage("io.swagger.resources");
 
-
-            beanConfig.setScan(true);
 
         }
 
@@ -67,8 +58,6 @@ public class JaxExample {
 
             classes.add(Resource.class);
 
-            classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-            classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 
             return classes;
         }
@@ -80,6 +69,18 @@ public class JaxExample {
     public static void init() throws Exception
     {
         server = new UndertowJaxrsServer().start();
+
+
+
+//        server.deploy(deployment()
+//                .setClassLoader(JSAPIServlet.class.getClassLoader())
+//                .setContextPath("/base")
+//
+//                        .setDeploymentName("js")
+//                .addServlets(
+//                        servlet("js", JSAPIServlet.class)
+//                                .addInitParam("message", "Hello World")
+//                                .addMapping("/js")));
     }
 
     @AfterClass

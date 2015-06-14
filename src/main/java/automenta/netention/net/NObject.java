@@ -38,6 +38,8 @@ public class NObject implements Serializable {
     }
 
     public NObject(String id, String name) {
+        if (id == null)
+            id = Core.uuid();
         this.id = id;
         this.name = name;
     }
