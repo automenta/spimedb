@@ -6,7 +6,6 @@
 package automenta.netention.net.proxy;
 
 
-import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.util.HttpString;
@@ -24,7 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,7 @@ public class CachingProxyServer extends PathHandler {
     public static final Logger logger = LoggerFactory.getLogger(CachingProxyServer.class);
 
 
-    public final Proxy proxy;
+    //public final Proxy proxy;
     final String cachePath;
 
 //    public static void main(String[] args) throws Exception {
@@ -50,7 +52,7 @@ public class CachingProxyServer extends PathHandler {
 
     final static int threads = 8;
     final ExecutorService executor = Executors.newFixedThreadPool(threads);
-    public final Undertow.Builder web;
+    //public final Undertow.Builder web;
 
     public static String decodeURIComponent(String s) {
         if (s == null) {
@@ -71,95 +73,82 @@ public class CachingProxyServer extends PathHandler {
         return result;
     }
 
-    public CachingProxyServer(int port, String cachePath) {
-
-
+    public CachingProxyServer(String cachePath) {
         this.cachePath = cachePath + "/";
-        web = Undertow.builder()
-                .addHttpListener(port, "localhost")
-                .setIoThreads(4)
-                .setHandler(this);
+    }
 
+    @Override
+    public void handleRequest(final HttpServerExchange exchange) throws Exception {
+        if (exchange.isInIoThread()) {
+            exchange.dispatch(this);
+            return;
+        }
 
-        addPrefixPath("/proxy", new PathHandler() {
-            @Override
-            public void handleRequest(final HttpServerExchange exchange) throws Exception {
-                if (exchange.isInIoThread()) {
-                    exchange.dispatch(this);
-                    return;
-                }
+        String url = exchange.getQueryString();
 
-                String url = exchange.getQueryString();
+        if (url == null) return;
 
-                if (url == null) return;
+        url = decodeURIComponent(url);
 
-                url = decodeURIComponent(url);
+        logger.info("request: " + url);
 
-                logger.info("request: " + url);
+        CachedURL response = null;
 
-                CachedURL response = null;
+        //attempt to read, or if expired, just get the newest
+        try {
+            response = get(url);
+        } catch (Exception e) {
+        }
 
-                //attempt to read, or if expired, just get the newest
-                try {
-                    response = get(url);
-                } catch (Exception e) {
-                }
+        boolean write = true;
 
-                boolean write = true;
+        if (response == null) {
 
-                if (response == null) {
+            logger.debug("cache miss: " + url);
 
-                    logger.debug("cache miss: " + url);
+            response = executor.submit(
+                    new Request(
+                            new URL(url)
+                    )
+            ).get();
 
-                    response = executor.submit(
-                            new Request(
-                                    new URL(url)
-                            )
-                    ).get();
+            logger.info("cache set: " + response.content.length + " bytes");
 
-                    logger.info("cache set: " + response.content.length + " bytes");
+            write = true;
 
-                    write = true;
+        } else {
+            logger.info("cache hit: " + url);
+        }
 
-                } else {
-                    logger.info("cache hit: " + url);
-                }
+        if (response == null) {
+            logger.error("undownloaded: " + url);
+            exchange.setResponseCode(404);
+        } else {
 
-                if (response == null) {
-                    logger.error("undownloaded: " + url);
-                    exchange.setResponseCode(404);
-                } else {
-
-                    exchange.setResponseCode(response.responseCode);
-                    for (String[] x : response.responseHeader) {
-                        exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
-                    }
-                    exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
-
-                    if (logger.isDebugEnabled())
-                        logger.debug("sending client cached " + response.content.length + " bytes");
-                }
-
-                if (write && response!=null) {
-                    try {
-                        put(decodeURIComponent(url.toString()), response);
-                    }
-                    catch (Exception e) {
-                        logger.error(e.toString());
-                    }
-                }
+            exchange.setResponseCode(response.responseCode);
+            for (String[] x : response.responseHeader) {
+                exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
             }
+            exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
 
-        });
+            if (logger.isDebugEnabled())
+                logger.debug("sending client cached " + response.content.length + " bytes");
+        }
 
-        proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(port));
-
+        if (write && response!=null) {
+            try {
+                put(decodeURIComponent(url.toString()), response);
+            }
+            catch (Exception e) {
+                logger.error(e.toString());
+            }
+        }
     }
 
-    public void run() {
-        logger.info("Web server start: " + proxy + ", saving to: " + cachePath);
-        web.build().start();
-    }
+//    public void run() {
+//        logger.info("Web server start:, saving to: " + cachePath);
+//        web.build().start();
+//    }
 
     public synchronized void put(String uri, CachedURL c) throws IOException {
 

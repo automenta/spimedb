@@ -2,10 +2,22 @@ package automenta.netention.run;
 
 
 import automenta.netention.data.ClimateViewerSources;
-import automenta.netention.net.proxy.InfiniProxy;
+import automenta.netention.net.NObject;
+import automenta.netention.net.proxy.CachingProxyServer;
 import automenta.netention.net.proxy.URLSensor;
 import automenta.netention.web.ClientResources;
-import com.syncleus.spangraph.InfiniPeer;
+import automenta.netention.web.JAX;
+import io.undertow.Undertow;
+import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.util.MimeMappings;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import java.io.File;
+import java.util.List;
+
+import static io.undertow.Handlers.resource;
 
 
 public class ClimateViewer {
@@ -14,13 +26,6 @@ public class ClimateViewer {
     final static String cachePath = "cache";
 
     public static void main(String[] args) throws Exception {
-        InfiniProxy p = new InfiniProxy("CVgeo",
-                InfiniPeer.local("i", cachePath, 32000),
-                //InfiniPeer.local(),
-                8080, cachePath);
-
-        p.addPrefixPath("/", ClientResources.handleClientResources());
-
 
         /*final static String eq4_5week = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.atom";
 
@@ -30,12 +35,28 @@ public class ClimateViewer {
 
         //new IRCBot(s.db, "RAWinput", "irc.freenode.net", "#netention");
 
+
+        JAX j = new JAX()
+            .add(API.class)
+            .add(Index.class)
+            .add("/", ClientResources.handleClientResources())
+            .add("/proxy", new CachingProxyServer(cachePath))
+            .add("/cache", resource(
+                    new FileResourceManager(new File(cachePath), 100))
+                    .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT));
+
+
+        j.start(Undertow.builder()
+                .addHttpListener(8080, "localhost")
+                .setIoThreads(4));
+
+        //InfiniPeer.local("i", cachePath, 32000);
         new ClimateViewerSources() {
 
             @Override
             public void onLayer(String id, String name, String kml, String icon, String currentSection) {
                 URLSensor r = new URLSensor(currentSection + "/" + id, name, kml, icon);
-                p.add(r);
+                //p.add(r);
             }
 
             @Override
@@ -43,8 +64,6 @@ public class ClimateViewer {
 
             }
         };
-
-        p.run();
 
 
 //        int webPort = 9090;
@@ -76,6 +95,41 @@ public class ClimateViewer {
 //        }
 //        */
     }
+
+
+    @Path("/api")
+    public static class API {
+        @GET @Produces("text/json")
+        public Object get() {
+            try {
+                List<RESTEndpoints.Endpoint> x = RESTEndpoints.restEndpoints(ClimateViewer.class);
+                return x;
+            } catch (Exception e) {
+                return e.toString();
+            }
+
+        }
+    }
+
+    @Path("/version")
+    public static class Version {
+        @GET
+        @Produces("text/plain")
+        public String get() {
+            return "1.0";
+        }
+    }
+
+    @Path("/index")
+    public static class Index {
+        @GET @Produces("text/json")
+        public NObject[] get() {
+            return new NObject[] {
+                    new NObject(null, "abc"), new NObject(null, "def")
+            };
+        }
+    }
+
 
 
 }

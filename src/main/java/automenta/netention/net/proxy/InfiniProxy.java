@@ -22,8 +22,8 @@ public class InfiniProxy extends CachingProxyServer {
         index.put(r.id, r);
     }
 
-    public InfiniProxy(String proxyIndex, InfiniPeer peer, int port, String cachePath) {
-        super(port, cachePath);
+    public InfiniProxy(String proxyIndex, InfiniPeer peer, String cachePath) {
+        super(cachePath);
 
         this.index = peer.the(proxyIndex);
 
