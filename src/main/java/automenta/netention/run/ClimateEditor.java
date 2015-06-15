@@ -1,11 +1,20 @@
 package automenta.netention.run;
 
+import automenta.netention.Core;
+import automenta.netention.Self;
 import automenta.netention.data.ClimateViewerSources;
+import automenta.netention.data.SchemaOrg;
 import automenta.netention.net.HttpCache;
 import automenta.netention.net.Wikipedia;
 import automenta.netention.net.proxy.URLSensor;
 import automenta.netention.web.ClientResources;
 import automenta.netention.web.JAX;
+import automenta.netention.web.Web;
+import com.google.common.collect.Lists;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.PathHandler;
+
+import java.util.ArrayList;
 
 /**
  * Created by me on 6/14/15.
@@ -27,12 +36,32 @@ public class ClimateEditor {
 
         HttpCache httpCache = new HttpCache(cachePath);
 
+
+
+        Self s = new Self();
+
         JAX j = new JAX()
                 .add("/wikipedia", new Wikipedia(httpCache))
-                //.add(Index.class)
+                .add("/api/tag", new PathHandler() {
+
+                    @Override
+                    public void handleRequest(HttpServerExchange exchange) throws Exception {
+
+                        ArrayList<Object> av = Lists.newArrayList(s.allValues());
+                        byte[] b = Core.jsonAnnotated.writeValueAsBytes(av);
+                        Web.send(b, exchange, "application/json" );
+                    }
+                })
                 .add("/", ClientResources.handleClientResources())
                 .start("localhost", 8080);
 
+
+
+        SchemaOrg.load(s);
+//        logger.info("Loading ClimateViewer (ontology)");
+//        new ClimateViewer(s.db);
+//        logger.info("Loading Netention (ontology)");
+//        NOntology.load(s.db);
 
         //InfiniPeer.local("i", cachePath, 32000);
         new ClimateViewerSources() {

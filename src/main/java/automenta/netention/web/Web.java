@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
-import nars.util.utf8.Utf8;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Deque;
 import java.util.Map;
 
@@ -15,18 +15,36 @@ import java.util.Map;
  * Utility functions for web server processes
  */
 public interface Web {
+
+//    static void send(String s, HttpServerExchange ex) {
+//        ex.startBlocking();
+//
+//        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+//
+//        try {
+//            ex.getOutputStream().write(Utf8.toUtf8(s));
+//        } catch (IOException e) {
+//            SpacetimeWebServer.logger.severe(e.toString());
+//        }
+//
+//        ex.getResponseSender().close();
+//    }
+
     static void send(String s, HttpServerExchange ex) {
-        ex.startBlocking();
-
         ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+        ex.getResponseSender().send(s);
+        ex.endExchange();
+    }
 
-        try {
-            ex.getOutputStream().write(Utf8.toUtf8(s));
-        } catch (IOException e) {
-            SpacetimeWebServer.logger.severe(e.toString());
-        }
 
-        ex.getResponseSender().close();
+    static void send(byte[] s, HttpServerExchange ex, String type) {
+
+        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, type);
+
+        ex.getResponseSender().send(ByteBuffer.wrap(s));
+
+        //ex.getResponseSender().close();
+        ex.endExchange();
     }
 
     static void send(JsonNode d, HttpServerExchange ex) {

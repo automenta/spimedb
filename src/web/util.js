@@ -131,11 +131,13 @@ class TagIndex {
 
 
         var that = this;
-        $.getJSON('/tag/index')
+        $.getJSON('/api/tag')
             .done(function(tagMap) {
 
-                for (var i in tagMap)
-                    that.updateTag(i, tagMap[i]);
+
+                _.each(tagMap, function(i) {
+                    that.updateTag(i.id, i);
+                });
 
                 //add edges
                 var nn = that.tag.nodes();

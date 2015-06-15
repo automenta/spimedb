@@ -1,6 +1,8 @@
 package automenta.netention.data;
 
 import au.com.bytecode.opencsv.CSVReader;
+import automenta.netention.Self;
+import automenta.netention.net.NObject;
 import com.google.common.collect.Lists;
 
 import java.io.FileReader;
@@ -16,35 +18,40 @@ import java.util.List;
  */
 abstract public class SchemaOrg {
 
-//    public static void load(final ElasticSpacetime db) throws IOException {
-//        final BulkRequestBuilder bulk = db.newBulk();
-//        try {
-//            new SchemaOrg() {
-//
-//                @Override
-//                public void onClass(String id, String label, List<String> supertypes, String comment) {
-//
-//                    Tag t = new Tag(id, label);
-//                    t.setDescription(comment);
-//                    for (String s : supertypes) {
-//                        t.inh.put(s, 1.0);
-//                    }
-//
-//                    db.addTag(bulk, t);
-//                }
-//
-//                @Override
-//                public void onProperty(String id, String label, List<String> domains, List<String> ranges, String comment) {
-//                }
-//
-//            };
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        db.commit(bulk);
-//
-//    }
+    public static void load(final Self self) throws IOException {
+        try {
+            new SchemaOrg() {
+
+                @Override
+                public void onClass(String id, String label, List<String> supertypes, String comment) {
+
+
+                    NObject t = new NObject(id, label);
+
+
+                    t.description(comment);
+
+                    for (String s : supertypes) {
+                        t.tag(s);
+                        //t.inh.put(s, 1.0);
+                    }
+
+                    self.add(t);
+
+
+                }
+
+                @Override
+                public void onProperty(String id, String label, List<String> domains, List<String> ranges, String comment) {
+                }
+
+            };
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
 
 

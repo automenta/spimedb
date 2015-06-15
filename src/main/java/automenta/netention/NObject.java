@@ -11,13 +11,12 @@ import com.google.common.primitives.Longs;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 /**
  *
  * @author me
  */
-public interface NObject<O> extends Serializable, Map<String, O> {
+interface XNObject<O> extends Serializable, Map<String, O> {
         
 //    public long createdAt;
 //    //public long modifiedAt;
@@ -191,139 +190,139 @@ public interface NObject<O> extends Serializable, Map<String, O> {
 //        return n;
 //    }
 
-    String id();
-
-    default public String name() {
-        Object n = get("name");
-        if (n!=null) return n.toString();
-        return id();
-    }
-
-    public static class HashNObject extends HashMap<String,Object> implements NObject<Object> {
-
-        public final String id;
-
-        public HashNObject(String id, String name) {
-            this.id = id;
-            put("name", name);
-
-        }
-
-        public HashNObject(String name) {
-            this(Core.uuid(), name);
-        }
-
-        @Override
-        public String id() {
-            return id;
-        }
-    }
-
-    public static class MapNObject<O> implements NObject<O>, Cloneable, Serializable {
-
-        private final Map<String, O> map;
-        private final String id;
-
-        public MapNObject(String id, Map<String, O> adapted) {
-            this.id = id;
-            this.map = adapted;
-        }
-
-        @Override
-        public String id() {
-            return id;
-        }
-
-        public int size() {
-            return map.size();
-        }
-
-        public boolean isEmpty() {
-            return map.isEmpty();
-        }
-
-        public boolean containsValue(Object value) {
-            return map.containsValue(value);
-        }
-
-        public boolean containsKey(Object key) {
-            return map.containsKey(key);
-        }
-
-        public O get(Object key) {
-            return map.get(key);
-        }
-
-        public O put(String key, O value) {
-            return map.put(key, value);
-        }
-
-        public O remove(Object key) {
-            return map.remove(key);
-        }
-
-        @Override
-        public void putAll(Map<? extends String, ? extends O> m) {
-            map.putAll(m);
-        }
-
-
-        public void clear() {
-            map.clear();
-        }
-
-        public Set<String> keySet() {
-            return map.keySet();
-        }
-
-        public Collection<O> values() {
-            return map.values();
-        }
-
-        public Set<Entry<String, O>> entrySet() {
-            return map.entrySet();
-        }
-
-        public boolean equals(Object o) {
-            return map.equals(o);
-        }
-
-        public int hashCode() {
-            return map.hashCode();
-        }
-
-        public String toString() {
-            return map.toString();
-        }
-
-
-
-        public O getOrDefault(Object key, O defaultValue) {
-            return map.getOrDefault(key, defaultValue);
-        }
-
-        public O putIfAbsent(String key, O value) {
-            return map.putIfAbsent(key, value);
-        }
-
-        public boolean remove(Object key, Object value) {
-            return map.remove(key, value);
-        }
-
-        public boolean replace(String key, O oldValue, O newValue) {
-            return map.replace(key, oldValue, newValue);
-        }
-
-        public O replace(String key, O value) {
-            return map.replace(key, value);
-        }
-
-
-
-        public void forEach(BiConsumer<? super String, ? super O> action) {
-            map.forEach(action);
-        }
-
-
-    }
+//    String id();
+//
+//    default public String name() {
+//        Object n = get("name");
+//        if (n!=null) return n.toString();
+//        return id();
+//    }
+//
+//    public static class HashNObject extends HashMap<String,Object> implements NObject<Object> {
+//
+//        public final String id;
+//
+//        public HashNObject(String id, String name) {
+//            this.id = id;
+//            put("name", name);
+//
+//        }
+//
+//        public HashNObject(String name) {
+//            this(Core.uuid(), name);
+//        }
+//
+//        @Override
+//        public String id() {
+//            return id;
+//        }
+//    }
+//
+//    public static class MapNObject<O> implements NObject<O>, Cloneable, Serializable {
+//
+//        private final Map<String, O> map;
+//        private final String id;
+//
+//        public MapNObject(String id, Map<String, O> adapted) {
+//            this.id = id;
+//            this.map = adapted;
+//        }
+//
+//        @Override
+//        public String id() {
+//            return id;
+//        }
+//
+//        public int size() {
+//            return map.size();
+//        }
+//
+//        public boolean isEmpty() {
+//            return map.isEmpty();
+//        }
+//
+//        public boolean containsValue(Object value) {
+//            return map.containsValue(value);
+//        }
+//
+//        public boolean containsKey(Object key) {
+//            return map.containsKey(key);
+//        }
+//
+//        public O get(Object key) {
+//            return map.get(key);
+//        }
+//
+//        public O put(String key, O value) {
+//            return map.put(key, value);
+//        }
+//
+//        public O remove(Object key) {
+//            return map.remove(key);
+//        }
+//
+//        @Override
+//        public void putAll(Map<? extends String, ? extends O> m) {
+//            map.putAll(m);
+//        }
+//
+//
+//        public void clear() {
+//            map.clear();
+//        }
+//
+//        public Set<String> keySet() {
+//            return map.keySet();
+//        }
+//
+//        public Collection<O> values() {
+//            return map.values();
+//        }
+//
+//        public Set<Entry<String, O>> entrySet() {
+//            return map.entrySet();
+//        }
+//
+//        public boolean equals(Object o) {
+//            return map.equals(o);
+//        }
+//
+//        public int hashCode() {
+//            return map.hashCode();
+//        }
+//
+//        public String toString() {
+//            return map.toString();
+//        }
+//
+//
+//
+//        public O getOrDefault(Object key, O defaultValue) {
+//            return map.getOrDefault(key, defaultValue);
+//        }
+//
+//        public O putIfAbsent(String key, O value) {
+//            return map.putIfAbsent(key, value);
+//        }
+//
+//        public boolean remove(Object key, Object value) {
+//            return map.remove(key, value);
+//        }
+//
+//        public boolean replace(String key, O oldValue, O newValue) {
+//            return map.replace(key, oldValue, newValue);
+//        }
+//
+//        public O replace(String key, O value) {
+//            return map.replace(key, value);
+//        }
+//
+//
+//
+//        public void forEach(BiConsumer<? super String, ? super O> action) {
+//            map.forEach(action);
+//        }
+//
+//
+//    }
 }

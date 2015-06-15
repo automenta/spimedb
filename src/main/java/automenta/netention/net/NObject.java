@@ -1,6 +1,9 @@
 package automenta.netention.net;
 
 import automenta.netention.Core;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import infinispan.org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
@@ -16,17 +19,24 @@ import java.util.Map;
  * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/queries/spatial/QuerySpatialTest.java#L78
  *
  */
+@JsonSerialize
+@JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
+@JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
 public class NObject implements Serializable {
 
     @JsonProperty("I") String id;
 
     @JsonProperty("N") String name;
 
-    @JsonProperty("T") TimePoint time = null;
+    @JsonProperty("T")
+    TimePoint time = null;
 
     @JsonProperty("S") SpacePoint space = null;
 
-    Map<String, Double> tags = new HashMap(); //TODO use a ObjectDouble primitive map structure
+    //TODO use a ObjectDouble primitive map structure
+    @JsonProperty("^") Map<String, Double> inh = null;
+
+    @JsonProperty("_") String description = null;
 
     public NObject() {
         this(Core.uuid());
@@ -52,8 +62,8 @@ public class NObject implements Serializable {
         return name;
     }
 
-    public Map<String, Double> getTags() {
-        return tags;
+    public Map<String, Double> getInh() {
+        return inh;
     }
 
     /**
@@ -68,7 +78,7 @@ public class NObject implements Serializable {
     }
 
     public Collection<String> tagSet() {
-        return tags.keySet();
+        return inh.keySet();
     }
 
     public NObject when(long when) {
@@ -90,8 +100,13 @@ public class NObject implements Serializable {
     }
 
     public NObject tag(String tag, double strength) {
-        tags.put(tag, strength);
+        if (inh == null) inh = new HashMap();
+        inh.put(tag, strength);
         return this;
     }
 
+
+    public void description(String d) {
+        this.description = d;
+    }
 }

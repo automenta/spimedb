@@ -6,22 +6,23 @@
 package automenta.netention;
 
 import automenta.netention.net.GossipPeer;
+import automenta.netention.net.NObject;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import nars.NAR;
 import nars.model.impl.Default;
 import org.apache.commons.math3.stat.Frequency;
+import spangraph.InfiniPeer;
+import spangraph.MapGraph;
+import spangraph.SpanGraph;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -29,11 +30,13 @@ import java.util.UUID;
  * Unifies DB & P2P features
  */
 public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
+
     //private final static String Session_MYSELF = "myself";
 
     public GossipPeer net;
 
     public final NAR nar = new NAR(new Default());
+
 
     public static class SaveEvent {
         public final NObject object;
@@ -43,36 +46,22 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
         
     }
 
-    public static class HG {
-        //dummy class
-    }
-    
-    public final HG db;
-    
+
+
+    public final SpanGraph<?> db;
     private NObject myself;
 
     /** in-memory Database */
     public Self() {
-        this(new HG());
-    }
-    
-    /** file Database */
-    public Self(String filePath) {
-        this(/*new HG(filePath)*/);
-    }
-    
-    public Self(HG db) {
-        
-        
-        
-        
-        this.db = db;
 
-        //if (session.get(Session_MYSELF)==null) {
-        {
-            //first time user
-            become(newAnonymousUser());
-        }
+        InfiniPeer p = InfiniPeer.local("anony");
+        this.db = new SpanGraph("self", p);
+
+//        //if (session.get(Session_MYSELF)==null) {
+//        {
+//            //first time user
+//            become(newAnonymousUser());
+//        }
 
         
         //    map.put(1, "one");
@@ -89,10 +78,10 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
         //    db.close();
     }
 
-    protected NObject newAnonymousUser() {
-        return newUser("Anonymous " + NObject.UUID().substring(0,4));
-    }
-
+//    protected NObject newAnonymousUser() {
+//        return newUser("Anonymous " + NObject.UUID().substring(0,4));
+//    }
+//
 
 
     public Self online(int listenPort) throws IOException, UnknownHostException, SocketException, InterruptedException {
@@ -126,7 +115,11 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
 
     }
 
-    
+    public MapGraph.MVertex add(NObject t) {
+        return db.addVertex(t);
+    }
+
+
     /*public Core offline() {
         
         return this;
@@ -166,27 +159,31 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
 //        }), Predicates.notNull());        
     }
     
-    public Iterator<NObject> allValues() {
+    public Iterator<Serializable> allValues() {
+        return Iterators.transform(db.vertexSet().iterator(), v ->
+                        v.getId()
+        );
         /*if (net!=null) {
             return Iterables.concat(data.values(), netValues());
         }
         else {
             return data.values();
         }*/
-        //return db.allValues();
-        return Iterators.emptyIterator();
+                //return db.allValues();
+                //return Iterators.emptyIterator();
     }
     
-    public Iterator<NObject> tagged(final String tagID) {
-        return Iterators.filter(allValues(), new Predicate<NObject>() {
-            @Override
-            public boolean apply(final NObject o) {
-                if (o == null) return false;
-                //return Iterators.contains(iterateTags(true), t);
-                return o.containsKey(tagID);
-            }
-        });        
-    }    
+//    public Iterator<NObject> tagged(final String tagID) {
+//        return Iterators.filter(allValues(), new Predicate<NObject>() {
+//            @Override
+//            public boolean apply(final NObject o) {
+//                if (o == null) return false;
+//                //return Iterators.contains(iterateTags(true), t);
+//                return o.containsKey(tagID);
+//            }
+//        });
+//    }
+    /*
     public Iterator<NObject> tagged(final String tagID, final String author) {
         return Iterators.filter(allValues(), new Predicate<NObject>(){
             @Override public boolean apply(final NObject o) {
@@ -199,25 +196,27 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
             }
         });        
     }
+    */
 
-    public List<NObject> getUsers() {        
-        return Lists.newArrayList(tagged(Tag.User));
-    }
-    
-    public List<NObject> getSubjects() {        
-        //TODO list all possible subjects, not just users
-        return getUsers();
-    }
-    
-    public List<NObject> getTags() {         
-        List<NObject> c = Lists.newArrayList(tagged(Tag.tag));
-        
-        //for (Tag sysTag : Tag.values())
-          //  c.add(NTag.asNObject(sysTag));
-        
-        return c;
-    }
-    
+//    public List<NObject> getUsers() {
+//        return Lists.newArrayList(tagged(Tag.User));
+//    }
+//
+//    public List<NObject> getSubjects() {
+//        //TODO list all possible subjects, not just users
+//        return getUsers();
+//    }
+//
+//    public List<NObject> getTags() {
+//        List<NObject> c = Lists.newArrayList(tagged(Tag.tag));
+//
+//        //for (Tag sysTag : Tag.values())
+//          //  c.add(NTag.asNObject(sysTag));
+//
+//        return c;
+//    }
+
+    /*
     public NObject newUser(String name) {
         NObject n = new NObject.HashNObject.HashNObject(name);
         n.put("author",  n.id());
@@ -228,22 +227,24 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
         publish(n);
         return n;
     }
-    
-    /** creates a new anonymous object, but doesn't publish it yet */
-    public NObject newAnonymousObject(String name) {
-        NObject n = new NObject.HashNObject.HashNObject(name);
-        return n;
-    }
-    
-    /** creates a new object (with author = myself), but doesn't publish it yet */
-    public NObject newObject(String name) {
-        if (myself==null)
-            throw new RuntimeException("Unidentified; can not create new object");
-        
-        NObject n = new NObject.HashNObject.HashNObject(name);
-        n.put("author", myself.id());
-        return n;
-    }
+    *?
+
+
+//    /** creates a new anonymous object, but doesn't publish it yet */
+//    public NObject newAnonymousObject(String name) {
+//        NObject n = new NObject.HashNObject.HashNObject(name);
+//        return n;
+//    }
+//
+//    /** creates a new object (with author = myself), but doesn't publish it yet */
+//    public NObject newObject(String name) {
+//        if (myself==null)
+//            throw new RuntimeException("Unidentified; can not create new object");
+//
+//        NObject n = new NObject.HashNObject.HashNObject(name);
+//        n.put("author", myself.id());
+//        return n;
+//    }
     
     public void become(NObject user) {
         //db.add(user);
@@ -257,39 +258,39 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
     public void remove(String nobjectID) {
         //data.remove(nobjectID);
     }
-    
-    public void remove(NObject x) {
-        remove(x.id());
-    }
+//
+//    public void remove(NObject x) {
+//        remove(x.id());
+//    }
 
 
     
-   
-
-    
-    /** save nobject to database */
-    public void save(NObject x) {
-        //NObject removed = data.put(x.id, x);
-        //index(removed, x);
-        //db.add(x);
-        index(null, x);
-        
-        emit(SaveEvent.class, x);
-    }
-    
-    /** batch save nobject to database */    
-    public void save(Iterable<NObject> y) {
-        for (NObject x : y) {
-            //NObject removed = data.put(x.id, x);
-            //index(removed, x);
-
-            //db.add(x);
-            index(null, x);
-        }            
-        emit(SaveEvent.class);
-    }
-
-    
+//
+//
+//
+//    /** save nobject to database */
+//    public void save(NObject x) {
+//        //NObject removed = data.put(x.id, x);
+//        //index(removed, x);
+//        //db.add(x);
+//        index(null, x);
+//
+//        emit(SaveEvent.class, x);
+//    }
+//
+//    /** batch save nobject to database */
+//    public void save(Iterable<NObject> y) {
+//        for (NObject x : y) {
+//            //NObject removed = data.put(x.id, x);
+//            //index(removed, x);
+//
+//            //db.add(x);
+//            index(null, x);
+//        }
+//        emit(SaveEvent.class);
+//    }
+//
+//
     public void broadcast(NObject x) {
         broadcast(x, false);
     }
@@ -308,18 +309,19 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
         }        
     }
     
-    /** save to database and publish in DHT */
-    public void publish(NObject x, boolean block) {
-        save(x);
-    
-        broadcast(x, block);
-        
-        
-        //TODO save to geo-index
-    }
-    public void publish(NObject x) {
-        publish(x, false);        
-    }
+//    /** save to database and publish in DHT */
+//    public void publish(NObject x, boolean block) {
+//        save(x);
+//
+//        broadcast(x, block);
+//
+//
+//        //TODO save to geo-index
+//    }
+
+//    public void publish(NObject x) {
+//        publish(x, false);
+//    }
     
     /*
     public int getNetID() {
@@ -333,37 +335,37 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
         return myself;
     }
 
-    protected <O> void index(NObject<O> previous, NObject<O> o) {
-        if (previous!=null) {
-            if (previous.isClass()) {
-                
-            }
-        }
-        
-        if (o!=null) {
-            
-            if ((o.isClass()) || (o.isProperty())) {
-
-                //TODO index the 'inh'
-
-                /*
-                for (Map.Entry<String, O> e : o.entrySet()) {
-                    String superclass = e.getKey();
-                    if (superclass.equals("tag"))
-                        continue;
-                    
-                    if (get(superclass)==null) {
-                        System.out.println("saving superclass tag: " + superclass);
-                        save(new NTag(superclass));
-                    }
-                    
-                }*/
-                
-            }
-            
-        }
-        
-    }
+//    protected <O> void index(NObject<O> previous, NObject<O> o) {
+//        if (previous!=null) {
+//            if (previous.isClass()) {
+//
+//            }
+//        }
+//
+//        if (o!=null) {
+//
+//            if ((o.isClass()) || (o.isProperty())) {
+//
+//                //TODO index the 'inh'
+//
+//                /*
+//                for (Map.Entry<String, O> e : o.entrySet()) {
+//                    String superclass = e.getKey();
+//                    if (superclass.equals("tag"))
+//                        continue;
+//
+//                    if (get(superclass)==null) {
+//                        System.out.println("saving superclass tag: " + superclass);
+//                        save(new NTag(superclass));
+//                    }
+//
+//                }*/
+//
+//            }
+//
+//        }
+//
+//    }
 
     
 
@@ -397,21 +399,21 @@ public class Self extends nars.util.event.EventEmitter.DefaultEventEmitter {
 //        if (tag!=null && tag.isClass())
 //            return tag;
     }
-
-    public Iterable<NObject> getTagRoots() {
-        return Iterables.filter(getTags(), new Predicate<NObject>() {
-            @Override public boolean apply(NObject t) {
-                //try {
-                if (t instanceof NTag) {
-                    NTag tag = (NTag) t;
-                    return tag.getSuperTags().isEmpty();
-                }
-                return false;
-                /*}
-                catch (Exception e) { }
-                return false;*/
-            }            
-        });
-    }
+//
+//    public Iterable<NObject> getTagRoots() {
+//        return Iterables.filter(getTags(), new Predicate<NObject>() {
+//            @Override public boolean apply(NObject t) {
+//                //try {
+//                if (t instanceof NTag) {
+//                    NTag tag = (NTag) t;
+//                    return tag.getSuperTags().isEmpty();
+//                }
+//                return false;
+//                /*}
+//                catch (Exception e) { }
+//                return false;*/
+//            }
+//        });
+//    }
     
 }

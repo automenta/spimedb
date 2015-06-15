@@ -5,13 +5,6 @@
  */
 package automenta.netention;
 
-import com.syncleus.spangraph.MapGraph;
-import com.syncleus.spangraph.SpanGraph;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
-import nars.nal.NALOperator;
-
-
 /**
  * Generalization of a URL/URI, label, semantic predicate, type / class, or any kind of literalizable concept.
  */
@@ -19,7 +12,6 @@ public class Tag {
 
     
     public final String id;
-    public final MapGraph.MVertex vertex;
 
     public String name;
     public String description;
@@ -46,32 +38,20 @@ public class Tag {
     public final static String property = "property";
 
 
-    public static Tag the(SpanGraph g, String id) {
-        Tag t = new Tag(g, id);
-        if (t.vertex == null) {
-            System.err.println(id + " vertex missing");
-            return null;
-        }
-        return t;
-    }
 
-    protected Tag(SpanGraph g, String id) {
+    protected Tag(String id) {
 
         this.id = id;
 
         //TODO replace with getOrAdd method
-        Vertex vertex = g.getVertex(id);
-        if (vertex == null)
-            this.vertex = g.addVertex(id);
-        else
-            this.vertex = (MapGraph.MVertex) vertex;
+
 
     }
     
-    public Tag meta(String key, Object value) {
-        vertex.setProperty(key, value);
-        return this;
-    }
+//    public Tag meta(String key, Object value) {
+//        vertex.setProperty(key, value);
+//        return this;
+//    }
 
 
     public void setDescription(String d) {
@@ -87,19 +67,23 @@ public class Tag {
         this.name = name;
     }
 
-    public Edge inheritance(String object, double v) {
-        if (v > 0) {
-            MapGraph.MVertex vv = vertex.graph().getVertex(object);
-            if (vv == null) {
-                vv = vertex.graph().addVertex(object);
-            }
-            Edge e = vertex.addEdge(NALOperator.INHERITANCE.str, vv);
-            e.setProperty("%", v);
-            return e;
-        }
-        else {
-            //TODO
-        }
-        return null;
-    }
+//    public void addEdge(String label, String target) {
+//        edges.put(label)
+//    }
+
+//    public Edge inheritance(String object, double v) {
+//        if (v > 0) {
+//            MapGraph.MVertex vv = vertex.graph().getVertex(object);
+//            if (vv == null) {
+//                vv = vertex.graph().addVertex(object);
+//            }
+//            Edge e = vertex.addEdge(NALOperator.INHERITANCE.str, vv);
+//            e.setProperty("%", v);
+//            return e;
+//        }
+//        else {
+//            //TODO
+//        }
+//        return null;
+//    }
 }

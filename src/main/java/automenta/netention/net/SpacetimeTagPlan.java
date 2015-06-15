@@ -63,7 +63,7 @@ public class SpacetimeTagPlan {
             }
 
             List<Goal> goals = new LinkedList();
-            Map<String,Double> ts = o.getTags();
+            Map<String,Double> ts = o.getInh();
 
 
             SpacePoint sp = null;
