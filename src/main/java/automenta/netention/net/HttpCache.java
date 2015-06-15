@@ -1,6 +1,9 @@
 package automenta.netention.net;
 
 
+import automenta.netention.web.Web;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -19,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -26,9 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/** TODO provide a Cached response result as a File stream
- * rather than loading it into memory and returning the byte[]
- */
+/** TODO avoid byte[] buffering data before writing to disk  */
 public class HttpCache {
 
     public static final Logger logger = LoggerFactory.getLogger(HttpCache.class);
@@ -42,8 +44,11 @@ public class HttpCache {
         this.cachePath = cachePath + "/";
     }
 
+    public void get(String url, Consumer<CachedURL> target) {
+        get(url, null, target);
+    }
 
-    public void get(String url, Consumer<CachedURL> consumer) {
+    public void get(String url, Consumer<CachedURL> filter, Consumer<CachedURL> target) {
         logger.info("http request: " + url);
 
         CachedURL response = null;
@@ -67,8 +72,11 @@ public class HttpCache {
                         )
                 ).get();
             } catch (Exception e) {
-                consumer.accept(null);
+                target.accept(null);
             }
+
+            if (filter!=null && response!=null)
+                filter.accept(response);
 
             logger.info("cache set: " + response.size + " bytes");
 
@@ -76,14 +84,14 @@ public class HttpCache {
 
         } else {
             logger.info("cache hit: " + url);
-            consumer.accept(response);
+            target.accept(response);
         }
 
         if (response == null) {
             logger.error("undownloaded: " + url);
-            consumer.accept(null);
+            target.accept(null);
         } else {
-            consumer.accept(response);
+            target.accept(response);
         }
 
         if (write && response!=null) {
@@ -227,6 +235,41 @@ public class HttpCache {
                 } catch (IOException e) {
                     return null;
                 }
+        }
+
+        public void setContent(byte[] bytes) {
+            this.content = bytes;
+            this.size = bytes.length;
+            this.contentStream = null;
+        }
+
+        public void send(HttpServerExchange exchange) {
+            final CachedURL response = this;
+
+            if (response == null) {
+                exchange.setResponseCode(404);
+                exchange.getResponseSender().send("?");
+            } else {
+                exchange.setResponseCode(response.responseCode);
+                for (String[] x : response.responseHeader) {
+                    exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
+                }
+                if (response.content != null) {
+                    exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
+                } else {
+                    try {
+                        exchange.startBlocking();
+                        IOUtils.copyLarge(response.contentStream, exchange.getOutputStream());
+                        exchange.endExchange();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Web.send(e.toString(), exchange);
+                    }
+                }
+
+
+            }
         }
     }
 

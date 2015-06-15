@@ -1,5 +1,81 @@
 "use strict";
 
+
+
+function ready() {
+
+    var VIEW_STARTUP = 'feed';
+
+    var app = new NClient();
+
+    window.app = app; //for console access
+
+    Backbone.Router.extend({
+
+        routes: {
+//                "help":                 "help",    // #help
+//                "search/:query":        "search",  // #search/kiwis
+//                "search/:query/p:page": "search"   // #search/kiwis/p7
+        }
+
+
+//            help: function() {
+//
+//            },
+//
+//            search: function(query, page) {
+//
+//            }
+
+    });
+    Backbone.history.start({pushState: true});
+
+
+
+
+    $('#sidebar').append(app.newViewControl());
+
+    app.index = new TagIndex(function (i) {
+
+        //called after index has been loaded, but this won't be necessary when events are used
+
+        function newIndex() {
+            var t = new TagIndexAccordion(app.index);
+
+            t.newElementHeader = function(tag) {
+
+                //http://codepen.io/thehonestape/pen/yjlGi
+                //http://thecodeplayer.com/walkthrough/spicing-up-the-html5-range-slider-input
+
+                var d = newDiv();
+                var ii = $('<input class="tagSlider" type = "range" value="0" min="0" max="100" _onchange="rangevalue.value=value"/>');
+                ii.change(function(c) {
+                    app.setFocus(tag, parseInt(ii.val()) * 0.01);
+                });
+                d.html(ii);
+                return d;
+            };
+
+            t.addClass('tagIndexAccordion');
+            $('#sidebar').append(t);
+
+        }
+
+        newIndex();
+
+        //TODO make this part of TagIndexAccordion when it is refactored as a class
+        app.on('index.change', function() {
+            $('.' + 'tagIndexAccordion').remove();
+            newIndex();
+        });
+
+    });
+
+    app.setView(VIEW_STARTUP);
+
+}
+
+
 class NClient extends EventEmitter {
 
     constructor() {
@@ -147,77 +223,3 @@ class NClient extends EventEmitter {
     }
 
 }
-
-function ready() {
-
-
-    var app = new NClient();
-
-    window.app = app; //for console access
-
-    Backbone.Router.extend({
-
-        routes: {
-//                "help":                 "help",    // #help
-//                "search/:query":        "search",  // #search/kiwis
-//                "search/:query/p:page": "search"   // #search/kiwis/p7
-        }
-
-
-//            help: function() {
-//
-//            },
-//
-//            search: function(query, page) {
-//
-//            }
-
-    });
-    Backbone.history.start({pushState: true});
-
-
-
-
-    $('#sidebar').append(app.newViewControl());
-
-    app.index = new TagIndex(function (i) {
-
-        //called after index has been loaded, but this won't be necessary when events are used
-
-        function newIndex() {
-            var t = new TagIndexAccordion(app.index);
-
-            t.newElementHeader = function(tag) {
-
-                //http://codepen.io/thehonestape/pen/yjlGi
-                //http://thecodeplayer.com/walkthrough/spicing-up-the-html5-range-slider-input
-
-                var d = newDiv();
-                var ii = $('<input class="tagSlider" type = "range" value="0" min="0" max="100" _onchange="rangevalue.value=value"/>');
-                ii.change(function(c) {
-                    app.setFocus(tag, parseInt(ii.val()) * 0.01);
-                });
-                d.html(ii);
-                return d;
-            };
-
-            t.addClass('tagIndexAccordion');
-            $('#sidebar').append(t);
-
-        }
-
-        newIndex();
-
-        //TODO make this part of TagIndexAccordion when it is refactored as a class
-        app.on('index.change', function() {
-            $('.' + 'tagIndexAccordion').remove();
-            newIndex();
-        });
-
-    });
-
-    app.setView('map3d');
-
-}
-
-

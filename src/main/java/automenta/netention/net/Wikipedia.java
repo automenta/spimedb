@@ -18,22 +18,20 @@ package automenta.netention.net;
 
 
 import automenta.netention.Core;
+import com.google.common.collect.Sets;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.select.Collector;
 import org.jsoup.select.Elements;
+import org.jsoup.select.Evaluator;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static automenta.netention.web.Web.send;
+import java.util.*;
 
 
 /**
@@ -62,7 +60,28 @@ public class Wikipedia extends PathHandler {
             "mw-indicators", "plainlinks"
     };
 
-    public String filterPage(Document doc) {
+    public static class ElementSetEvaluator extends Evaluator     {
+        private final HashSet<String> ele;
+
+        public ElementSetEvaluator(String... id)
+        {
+            this.ele = Sets.newHashSet(id);
+        }
+
+        public boolean matches(Element root, Element element)         {
+            return ele.contains(element.id());
+        }
+
+        public String toString()
+        {
+            return ele.toString();
+        }
+    }
+
+    public static final ElementSetEvaluator filteredElements = new ElementSetEvaluator
+            ("top", "siteSub", "contentSub", "jump-to-nav");
+
+    public byte[] filterPage(Document doc) {
         String location = doc.location();
         if (location.contains("/"))
             location = location.substring(location.lastIndexOf('/') + 1, location.length());
@@ -89,10 +108,8 @@ public class Wikipedia extends PathHandler {
             doc.getElementsByTag("head").remove();
             doc.getElementsByTag("script").remove();
             doc.getElementsByTag("link").remove();
-            doc.getElementById("top").remove();
-            doc.getElementById("siteSub").remove();
-            doc.getElementById("contentSub").remove();
-            doc.getElementById("jump-to-nav").remove();
+
+            Collector.collect(filteredElements, doc).remove();
 
 
             for (String r : removedClasses) {
@@ -119,7 +136,7 @@ public class Wikipedia extends PathHandler {
         String metadata = Core.toJSON(m);
         doc.getElementById("content").prepend("<div id='_meta'>" + metadata + "</div>");
 
-        String content = doc.getElementById("content").toString();
+
 
         Elements catlinks = doc.select(".mw-normal-catlinks li a");
         List<String> categories = new ArrayList();
@@ -152,16 +169,15 @@ public class Wikipedia extends PathHandler {
 //                req.response().end("Cache fail: " + uri);
 //            }
 
-
-        return content;
+        return doc.getElementById("content").outerHtml().getBytes();
     }
 
 
     @Override
     public void handleRequest(HttpServerExchange ex) throws Exception {
-        String[] sections = ex.getRequestPath().split("/");
-        String mode = sections[0];
-        String query = sections[1];
+        String[] sections = ex.getRelativePath().split("/");
+        String mode = sections[1];
+        String query = sections[2];
         handleRequest(mode, query, ex);
     }
 
@@ -185,23 +201,25 @@ public class Wikipedia extends PathHandler {
 
 
         final String finalU = u;
-        http.get(u, r -> {
-
-            byte[] response = r.bytes();
+        http.get(u, f -> {
+            byte[] response = f.bytes();
 
             //TODO do this filtering in a filter step before saving the cached file so it doesn't need repeated
             Document doc = null;
             try {
 
                 doc = Jsoup.parse(new java.io.ByteArrayInputStream(response), Charset.defaultCharset().name(), finalU);
-                String result = filterPage(doc);
-                send(result, ex);
+                f.setContent( filterPage(doc) );
 
-            } catch (IOException e) {
-                send(e.toString(), ex );
+            }
+            catch (IOException e) {
+                e.printStackTrace();
             }
 
+        },
 
+        r -> {
+            r.send(ex);
         });
 
     }

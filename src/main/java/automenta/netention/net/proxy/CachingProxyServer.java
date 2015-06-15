@@ -22,7 +22,6 @@ import static automenta.netention.web.Web.send;
 
 /**
  * Proxy server which caches requests and their data to files on disk
- * TODO broken since removing async-http-client which depended on netty 3 (we are using netty4 in other dependencies)
  */
 public class CachingProxyServer extends PathHandler {
 
@@ -62,32 +61,11 @@ public class CachingProxyServer extends PathHandler {
 
             @Override
             public void accept(HttpCache.CachedURL response) {
-                if (response == null) {
-                    exchange.setResponseCode(404);
-                    exchange.getResponseSender().send("?");
-                }
-                else {
-                    exchange.setResponseCode(response.responseCode);
-                    for (String[] x : response.responseHeader) {
-                        exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
-                    }
-                    if (response.content!=null) {
-                        exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
-                    }
-                    else {
-                        try {
-                            exchange.startBlocking();
-                            IOUtils.copyLarge(response.contentStream, exchange.getOutputStream());
-                            exchange.endExchange();
 
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            send(e.toString(), exchange);
-                        }
-                    }
+                response.send(exchange);
 
 
-                }
+
             }
         });
 
