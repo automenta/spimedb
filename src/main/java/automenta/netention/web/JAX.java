@@ -1,6 +1,7 @@
 package automenta.netention.web;
 
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.servlet.Servlets;
@@ -195,7 +196,11 @@ public class JAX extends PathHandler {
 
     public JAX start(String host, int port) {
 
-            return start( Undertow.builder()
+            return start(Undertow.builder()
+                    .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
+                    .setServerOption(UndertowOptions.ENABLE_SPDY, true)
+                    //.addHttpsListener(8443, bindAddress, sslContext)
+
                     .addHttpListener(8080, "localhost")
                     .setIoThreads(4) );
 

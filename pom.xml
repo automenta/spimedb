@@ -35,6 +35,9 @@
 
     <dependencies>
 
+
+
+
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
             <artifactId>argparse4j</artifactId>
@@ -52,26 +55,6 @@
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>2.3</version>
-        </dependency>
-
-
-
-        <dependency>
-            <groupId>de.jensd</groupId>
-            <artifactId>fontawesomefx</artifactId>
-            <version>8.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jfxtras</groupId>
-            <artifactId>jfxtras-all</artifactId>
-            <version>8.0-r3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <version>8.20.8</version>
         </dependency>
 
 
@@ -118,11 +101,6 @@
             <groupId>opennars</groupId>
             <version>1.7-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <artifactId>opennars-gui</artifactId>
-            <groupId>opennars</groupId>
-            <version>1.7-SNAPSHOT</version>
-        </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
@@ -148,6 +126,26 @@
             <version>1.5</version>
         </dependency>
 
+        <!--<dependency>-->
+            <!--<groupId>org.infinispan</groupId>-->
+            <!--<artifactId>infinispan-server-core</artifactId>-->
+            <!--<version>8.0.0.Alpha1</version>-->
+        <!--</dependency>-->
+
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>4.0.25.Final</version>
+
+
+            </dependency>
+
+
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
 
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
@@ -201,34 +199,6 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>gov.nasa</groupId>
-            <artifactId>worldwind</artifactId>
-            <version>2.0.0-986</version>
-        </dependency>
-        <dependency>
-            <groupId>gov.nasa</groupId>
-            <artifactId>worldwindx</artifactId>
-            <version>2.0.0-986</version>
-        </dependency>
-
-
-        <!-- 2.3.x incompatible with worldwind currently -->
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.sociaal</groupId>
-            <artifactId>vecmath</artifactId>
-            <version>3.0.0.20130526</version>
-        </dependency>
 
         <dependency>
             <groupId>org.opensextant</groupId>
