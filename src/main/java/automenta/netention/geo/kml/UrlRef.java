@@ -75,31 +75,17 @@
  on the JDOM Project, please see <http://www.jdom.org/>.
 
  */
-package automenta.netention.data.geo;
+package automenta.netention.geo.kml;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.Proxy;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
+import javax.net.ssl.*;
+import java.io.*;
+import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -107,10 +93,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <code>UrlRef</code> manages the encoding/decoding of internally created
@@ -343,25 +325,25 @@ public final class UrlRef implements java.io.Serializable {
     public static String escapeUri(String href) {
         /*
         URI-reference = [ absoluteURI | relativeURI ] [ "#" fragment
-        
+
         excluded characters from URI syntax:
-        
+
         control     = <US-ASCII coded characters 00-1F and 7F hexadecimal>
         space       = <US-ASCII coded character 20 hexadecimal>
         delims      = "<" | ">" | "#" | "%" | <">
-        
+
         Other characters are excluded because gateways and other transport
         agents are known to sometimes modify such characters, or they are
         used as delimiters.
-        
+
         unwise      = "{" | "}" | "|" | "\" | "^" | "[" | "]" | "`"
-        
+
         Data corresponding to excluded characters must be escaped in order to
         be properly represented within a URI.
-        
+
         Note within a query component, these characters are reserved:
         ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+" | "," | "$"
-        
+
         http://www.ietf.org/rfc/rfc2396.txt
         */
         StringBuilder buf = new StringBuilder(href.length());

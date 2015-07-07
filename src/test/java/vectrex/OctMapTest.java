@@ -1,7 +1,7 @@
 package vectrex;
 
-import com.syncleus.spangraph.InfiniPeer;
 import org.junit.Test;
+import spangraph.InfiniPeer;
 import toxi.geom.Vec3D;
 import toxi.geom.XYZ;
 

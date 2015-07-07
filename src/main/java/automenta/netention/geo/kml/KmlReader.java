@@ -14,7 +14,7 @@
  *  their occurrence.
  *
  */
-package automenta.netention.data.geo;
+package automenta.netention.geo.kml;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -22,7 +22,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.opensextant.giscore.events.*;
 import org.opensextant.giscore.input.IGISInputStream;
-import org.opensextant.giscore.input.kml.KmlInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -590,7 +589,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                         IGISObject gisObj;
                         while ((gisObj = read(kis, ref, networkLinks)) != null) {
                             if (handler != null) {
-                                if (!handler.handleEvent(ref, gisObj)) {
+                                if (!handler.kmlEvent(ref, gisObj)) {
                                     // clear out temp list of links to abort following networkLinks
                                     log.info("Abort following networkLinks");
                                     networkLinks.clear();
@@ -614,17 +613,17 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                 } catch (java.net.ConnectException e) {
                     log.error("Failed to import from network link: " + uri + "\n" + e);
                     if (handler != null) {
-                        handler.handleError(uri, e);
+                        handler.kmlError(uri, e);
                     }
                 } catch (FileNotFoundException e) {
                     log.error("Failed to import from network link: " + uri + "\n" + e);
                     if (handler != null) {
-                        handler.handleError(uri, e);
+                        handler.kmlError(uri, e);
                     }
                 } catch (Exception e) {
                     log.error("Failed to import from network link: " + uri, e);
                     if (handler != null) {
-                        handler.handleError(uri, e);
+                        handler.kmlError(uri, e);
                     }
                 } finally {
                     IOUtils.closeQuietly(is);
@@ -776,7 +775,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
          * @return Return true to continue parsing and recursively follow
          * NetworkLinks, false stops following NetworkLinks.
          */
-        boolean handleEvent(UrlRef ref, IGISObject gisObj);
+        boolean kmlEvent(UrlRef ref, IGISObject gisObj);
 
         /**
          * Error handler
@@ -784,6 +783,6 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
          * @param uri URI for NetworkLink resource
          * @param e Exception thrown
          */
-        void handleError(URI uri, Exception e);
+        void kmlError(URI uri, Exception e);
     }
 }

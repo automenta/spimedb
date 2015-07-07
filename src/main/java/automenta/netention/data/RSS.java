@@ -1,7 +1,8 @@
-//package automenta.climatenet.data;
+//package automenta.netention.data;
 //
-//import automenta.climatenet.p2p.HttpCache;
-//import automenta.climatenet.p2p.NObject;
+//
+//import automenta.netention.net.HttpCache;
+//import automenta.netention.net.NObject;
 //import com.rometools.modules.georss.GeoRSSModule;
 //import com.rometools.modules.georss.GeoRSSUtils;
 //import com.rometools.rome.feed.synd.SyndEntry;
@@ -14,7 +15,7 @@
 //import java.util.List;
 //
 //
-//public class RSS extends Channel.FeedChannel<RSS.RSSItem> {
+//public class RSS  {
 //
 //    private final String url;
 //
@@ -36,9 +37,12 @@
 //        }
 //    }
 //
+//
+//
 //    public void update() throws Exception {
 //
 //        byte[] response = HttpCache.the.get(url);
+//
 //        SyndFeedInput input = new SyndFeedInput();
 //        SyndFeed feed = null;
 //        try {

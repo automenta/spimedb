@@ -1,8 +1,8 @@
 package java.com.syncleus.spangraph;
 
-import com.syncleus.spangraph.InfiniPeer;
 import org.infinispan.Cache;
 import org.junit.Test;
+import spangraph.InfiniPeer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

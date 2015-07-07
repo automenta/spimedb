@@ -18,7 +18,7 @@
  *
  **************************************************************************************
  */
-package automenta.netention.data.geo;
+package automenta.netention.geo.kml;
 
 /**
  * Container for element and attribute names used in KML

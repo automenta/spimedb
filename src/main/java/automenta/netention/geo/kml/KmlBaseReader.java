@@ -12,10 +12,16 @@
  *  their occurrence.
  *
  */
-package automenta.netention.data.geo;
+package automenta.netention.geo.kml;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.apache.commons.lang.StringUtils;
+import org.opensextant.geodesy.*;
+import org.opensextant.giscore.events.NetworkLink;
+import org.opensextant.giscore.events.TaggedMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -23,17 +29,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
-import org.opensextant.giscore.events.NetworkLink;
-import org.opensextant.giscore.events.TaggedMap;
-import org.opensextant.geodesy.Angle;
-import org.opensextant.geodesy.Geodetic2DBounds;
-import org.opensextant.geodesy.Geodetic2DPoint;
-import org.opensextant.geodesy.Latitude;
-import org.opensextant.geodesy.Longitude;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * URL rewriting logic extracted from KmlReader handles low-level rewriting URL
