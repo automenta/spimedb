@@ -2,7 +2,7 @@ package automenta.netention.net;
 
 import automenta.netention.Core;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import infinispan.org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonProperty;
 

@@ -1,12 +1,12 @@
 package automenta.netention.net.proxy;
 
 import automenta.netention.Core;
-import com.syncleus.spangraph.InfiniPeer;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.MimeMappings;
 import org.infinispan.Cache;
+import spangraph.InfiniPeer;
 
 import java.io.File;
 

@@ -1,8 +1,8 @@
 package automenta.netention.net;
 
 
-import com.syncleus.spangraph.InfiniPeer;
 import org.infinispan.Cache;
+import spangraph.InfiniPeer;
 
 /**
  * Created by me on 4/23/15.

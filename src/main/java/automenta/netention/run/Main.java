@@ -7,9 +7,9 @@ package automenta.netention.run;
 
 import automenta.netention.Core;
 import automenta.netention.web.SpacetimeWebServer;
-import com.syncleus.spangraph.InfiniPeer;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.*;
+import spangraph.InfiniPeer;
 
 
 /**

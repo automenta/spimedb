@@ -2,18 +2,13 @@ package automenta.netention.run;
 
 
 import automenta.netention.data.ClimateViewerSources;
-import automenta.netention.net.NObject;
 import automenta.netention.net.proxy.CachingProxyServer;
 import automenta.netention.net.proxy.URLSensor;
-import automenta.netention.web.JAX;
+import automenta.netention.web.Web;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.MimeMappings;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import java.io.File;
-import java.util.List;
 
 import static io.undertow.Handlers.resource;
 
@@ -34,9 +29,7 @@ public class ClimateViewerProxy {
         //new IRCBot(s.db, "RAWinput", "irc.freenode.net", "#netention");
 
 
-        JAX j = new JAX()
-            .add(API.class)
-            .add(Index.class)
+        Web j = new Web()
             //.add("/", ClientResources.handleClientResources())
             .add("/proxy", new CachingProxyServer(cachePath))
             .add("/cache", resource(
@@ -92,39 +85,39 @@ public class ClimateViewerProxy {
     }
 
 
-
-    @Path("/api")
-    public static class API {
-        @GET @Produces("text/json")
-        public Object get() {
-            try {
-                List<RESTEndpoints.Endpoint> x = RESTEndpoints.restEndpoints(ClimateViewerProxy.class);
-                return x;
-            } catch (Exception e) {
-                return e.toString();
-            }
-
-        }
-    }
-
-    @Path("/version")
-    public static class Version {
-        @GET
-        @Produces("text/plain")
-        public String get() {
-            return "1.0";
-        }
-    }
-
-    @Path("/index")
-    public static class Index {
-        @GET @Produces("text/json")
-        public NObject[] get() {
-            return new NObject[] {
-                    new NObject(null, "abc"), new NObject(null, "def")
-            };
-        }
-    }
+//
+//    @Path("/api")
+//    public static class API {
+//        @GET @Produces("text/json")
+//        public Object get() {
+//            try {
+//                List<RESTEndpoints.Endpoint> x = RESTEndpoints.restEndpoints(ClimateViewerProxy.class);
+//                return x;
+//            } catch (Exception e) {
+//                return e.toString();
+//            }
+//
+//        }
+//    }
+//
+//    @Path("/version")
+//    public static class Version {
+//        @GET
+//        @Produces("text/plain")
+//        public String get() {
+//            return "1.0";
+//        }
+//    }
+//
+//    @Path("/index")
+//    public static class Index {
+//        @GET @Produces("text/json")
+//        public NObject[] get() {
+//            return new NObject[] {
+//                    new NObject(null, "abc"), new NObject(null, "def")
+//            };
+//        }
+//    }
 
 
 

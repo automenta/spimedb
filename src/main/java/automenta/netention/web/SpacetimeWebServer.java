@@ -5,10 +5,10 @@
  */
 package automenta.netention.web;
 
-import com.syncleus.spangraph.InfiniPeer;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
+import spangraph.InfiniPeer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author me
  */
-public class SpacetimeWebServer extends PathHandler implements Web {
+public class SpacetimeWebServer extends Web {
 
     public static final Logger logger = Logger.getLogger(SpacetimeWebServer.class.toString());
 

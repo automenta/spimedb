@@ -1,7 +1,6 @@
 package automenta.netention.data;
 
 import au.com.bytecode.opencsv.CSVReader;
-import automenta.netention.Self;
 import automenta.netention.net.NObject;
 import com.google.common.collect.Lists;
 
@@ -18,7 +17,7 @@ import java.util.List;
  */
 abstract public class SchemaOrg {
 
-    public static void load(final Self self) throws IOException {
+    public static void load(final Object self) throws IOException {
         try {
             new SchemaOrg() {
 
@@ -36,7 +35,7 @@ abstract public class SchemaOrg {
                         //t.inh.put(s, 1.0);
                     }
 
-                    self.add(t);
+                    //self.add(t);
 
 
                 }

@@ -1,15 +1,6 @@
 package org.infinispan.server.websocket;
 
 import automenta.netention.web.ClientResources;
-import com.syncleus.spangraph.InfiniPeer;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
-import io.netty.util.CharsetUtil;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
@@ -28,6 +19,7 @@ import org.infinispan.server.websocket.handlers.PutHandler;
 import org.infinispan.server.websocket.handlers.RemoveHandler;
 import org.infinispan.server.websocket.json.JsonConversionException;
 import org.infinispan.server.websocket.json.JsonObject;
+import spangraph.InfiniPeer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -92,9 +84,6 @@ public class InfiniSocket implements WebSocketConnectionCallback {
         private static final String INFINISPAN_WS_JS_FILENAME = "infinispan-ws.js";
 
 
-        private boolean connectionUpgraded;
-        //private final Map<String, Cache<Object, Object>> startedCaches;
-        private WebSocketServerHandshaker handshaker;
 
         public WebSocketConnection(WebSocketChannel socket) {
             this.socket = socket;
@@ -144,29 +133,29 @@ public class InfiniSocket implements WebSocketConnectionCallback {
 
         }
     }
-
-    private void loadScriptToResponse(FullHttpRequest req, DefaultFullHttpResponse res) {
-        String wsAddress = getWebSocketLocation(req);
-
-        StringWriter writer = new StringWriter();
-        writer.write("var defaultWSAddress = '" + wsAddress + "';");
-        writer.write(InfiniSocket.getJavascript());
-
-        ByteBuf content = res.content().writeBytes(writer.toString().getBytes(CharsetUtil.UTF_8));
-
-        res.headers().set("Content-type", "text/javascript; charset=UTF-8");
-
-    }
-
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        //log.debugf(cause, "Error processing request on channel %s" , ctx.name());
-        cause.printStackTrace();
-        ctx.close();
-    }
-
-    private String getWebSocketLocation(HttpRequest req) {
-        return "ws://" + req.headers().get(HttpHeaders.Names.HOST) + "/";
-    }
+//
+//    private void loadScriptToResponse(FullHttpRequest req, DefaultFullHttpResponse res) {
+//        String wsAddress = getWebSocketLocation(req);
+//
+//        StringWriter writer = new StringWriter();
+//        writer.write("var defaultWSAddress = '" + wsAddress + "';");
+//        writer.write(InfiniSocket.getJavascript());
+//
+//        ByteBuf content = res.content().writeBytes(writer.toString().getBytes(CharsetUtil.UTF_8));
+//
+//        res.headers().set("Content-type", "text/javascript; charset=UTF-8");
+//
+//    }
+//
+//    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+//        //log.debugf(cause, "Error processing request on channel %s" , ctx.name());
+//        cause.printStackTrace();
+//        ctx.close();
+//    }
+//
+//    private String getWebSocketLocation(HttpRequest req) {
+//        return "ws://" + req.headers().get(HttpHeaders.Names.HOST) + "/";
+//    }
 
     @Override
     public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel socket) {
