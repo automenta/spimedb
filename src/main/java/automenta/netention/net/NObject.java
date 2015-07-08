@@ -8,11 +8,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.spatial.Coordinates;
+import org.opensextant.geodesy.Geodetic2DPoint;
+import org.opensextant.geodesy.Geodetic3DPoint;
+import org.opensextant.giscore.geometry.Line;
+import org.opensextant.giscore.geometry.Point;
+import org.opensextant.giscore.geometry.Polygon;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static automenta.netention.geo.ImportKML.toArray;
 
 /**
  *
@@ -44,7 +52,6 @@ public class NObject implements Serializable, Coordinates {
     //TODO use a ObjectDouble primitive map structure
     @JsonProperty("^") Map<String, Object> fields = null;
 
-    @JsonProperty("_") String description = null;
 
 
     public NObject() {
@@ -87,9 +94,14 @@ public class NObject implements Serializable, Coordinates {
         return fields.keySet();
     }
 
-    public NObject when(final long when) {
+    public NObject when(final long at) {
+        return when(at,at);
+    }
+
+    public NObject when(final long start, final long end) {
         if (this.time == null) this.time = new long[2];
-        this.time[0] = this.time[1] = when;
+        this.time[0] = start;
+        this.time[1] = end;
         return this;
     }
 
@@ -97,11 +109,17 @@ public class NObject implements Serializable, Coordinates {
         return where(coord[0], coord[1], coord[2]);
     }
 
-    public NObject where(float lat, float lng, float alt) {
+    public NObject where(float lat, float lng, float alt, Object... shaped) {
 
         if (space == null) space = new float[3];
         space[0] = lat;
         space[1] = lng;
+        space[2] = alt;
+
+        if (shaped.length > 0) {
+            put("s", shaped);
+        }
+
 
         return this;
     }
@@ -112,6 +130,9 @@ public class NObject implements Serializable, Coordinates {
 
     public NObject where(double lat, double lon) {
         return where((float)lat, (float)lon, Float.NaN);
+    }
+    public NObject where(double lat, double lon, double alt, Object... shape) {
+        return where((float)lat, (float)lon, (float)alt, shape);
     }
 
     public NObject where(float lat, float lng) {
@@ -140,6 +161,10 @@ public class NObject implements Serializable, Coordinates {
         return Float.NaN;
     }
 
+    public <X> X get(String tag) {
+        return (X) fields.get(tag);
+    }
+
     public NObject put(String tag) {
         return put(tag, 1.0f);
     }
@@ -154,7 +179,11 @@ public class NObject implements Serializable, Coordinates {
 
 
     public void description(String d) {
-        this.description = d;
+        put("_", d);
+    }
+
+    public String description() {
+        return get("_").toString();
     }
 
     @JsonIgnore
@@ -183,5 +212,39 @@ public class NObject implements Serializable, Coordinates {
     public NObject now() {
         when( System.currentTimeMillis() );
         return this;
+    }
+
+    public NObject name(String name) {
+        return put("N", name);
+    }
+
+    public NObject where(Geodetic2DPoint c, Object... shape) {
+
+        double lat = c.getLatitudeAsDegrees();
+        double lon = c.getLongitudeAsDegrees();
+        double ele = Double.NaN;
+        if (c instanceof Geodetic3DPoint) {
+            ele = ((Geodetic3DPoint)c).getElevation();
+        }
+
+        //http://geojson.org/
+        return where(lon, lat, ele, shape);
+    }
+
+    public NObject where(Line l) {
+
+        List<Point> lp = l.getPoints();
+        double[][] points = toArray(lp);
+
+        return where(l.getCenter(), "linestring", points);
+
+    }
+
+    public NObject where(Polygon p) {
+        double[][] outerRing = toArray(p.getOuterRing().getPoints());
+
+        //TODO handle inner rings
+
+        return where(p.getCenter(), "polygon", new double[][][]{outerRing /* inner rings */});
     }
 }

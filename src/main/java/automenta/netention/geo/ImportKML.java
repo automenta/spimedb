@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static automenta.netention.geo.ElasticSpacetime.jsonBuilder;
+import static automenta.netention.geo.SpimeBase.newNObject;
 
 /**
  *
@@ -45,25 +45,25 @@ public class ImportKML {
 
     static final HtmlCompressor compressor = new HtmlCompressor();
     private final Proxy proxy;
+    private final SpimeBase geo;
+    private final String id;
+    int serial;
+    int numFeatures = 0;
+    private String layer;
+    final Deque<String> path = new ArrayDeque();
+
+    boolean enableDescriptions = false;
 
 
     public static String getSerial(String layer, int serial) {
         return (Base64.getEncoder().encodeToString(BigInteger.valueOf(serial).add(BigInteger.valueOf(layer.hashCode()).shiftRight(32)).toByteArray()));
     }
-    private final ElasticSpacetime geo;
-    private final String id;
-
-    int serial;
-
-    int numFeatures = 0;
-    private String layer;
-    private int BULK_SIZE = 1000;
 
     public String[] getPath(Deque<String> p) {
         return p.toArray(new String[p.size()]);
     }
 
-    public static interface GISVisitor {
+    public interface GISVisitor {
 
         public boolean on(IGISObject go, String[] path) throws IOException;
 
@@ -72,9 +72,8 @@ public class ImportKML {
         public void end();
     }
 
-    final Deque<String> path = new ArrayDeque();
 
-    public void transformKML(Supplier<KmlReader> source, String layer, ElasticSpacetime st, final GISVisitor visitor) throws Exception {
+    public void transformKML(Supplier<KmlReader> source, String layer, SpimeBase st, final GISVisitor visitor) throws Exception {
 
         this.layer = layer;
 
@@ -239,11 +238,11 @@ public class ImportKML {
         }
     }
 
-    public ImportKML(ElasticSpacetime geo, String id) {
+    public ImportKML(SpimeBase geo, String id) {
         this(geo, null, id);
     }
 
-    public ImportKML(ElasticSpacetime geo, Proxy proxy, String id) {
+    public ImportKML(SpimeBase geo, Proxy proxy, String id) {
         this.geo = geo;
         this.proxy = proxy;
         this.id = id;
@@ -251,11 +250,15 @@ public class ImportKML {
 
 
 
-    public Runnable task(String url) throws IOException {
-        return task(url, null);
+    public Runnable url(String url) throws IOException {
+        return url(url, null);
     }
 
-    public Runnable task(String url, Proxy proxy) throws IOException {
+    public Runnable file(String path) throws IOException {
+        return url("file:///" + path, null);
+    }
+
+    public Runnable url(String url, Proxy proxy) throws IOException {
         return task(() -> {
             try {
                 return new KmlReader(new URL(url), proxy);
@@ -344,13 +347,11 @@ public class ImportKML {
 
                 });
 
-                System.out.println(layer + " STYLES:  \n" + styles.keySet());
+                //System.out.println(layer + " STYLES:  \n" + styles.keySet());
 
 
                 //2. process features
                 transformKML(reader, id, geo, new GISVisitor() {
-
-
 
                     @Override
                     public void start(String layer) {
@@ -369,7 +370,7 @@ public class ImportKML {
                             //System.out.println(cs + " " + cs.getId());
 
 
-                            NObject d = jsonBuilder().put("name", cs.getName());
+                            NObject d = newNObject().name(cs.getName());
 
                             /*String styleUrl = cs.getStyleUrl();
                              if (styleUrl != null) {
@@ -381,18 +382,20 @@ public class ImportKML {
                              d.put("styleUrl", styleUrl);
                              }
                              */
-                            String desc = cs.getDescription();
-                            if ((desc != null) && (desc.length() > 0)) {
-                                //filter
-                                desc = filterHTML(desc);
-                                if (desc.length() > 0) {
-                                    d.put("description", desc);
+                            if (enableDescriptions) {
+                                String desc = cs.getDescription();
+                                if ((desc != null) && (desc.length() > 0)) {
+                                    //filter
+                                    desc = filterHTML(desc);
+                                    if (desc.length() > 0) {
+                                        d.description(desc);
+                                    }
                                 }
                             }
 
                             d.put("path", path);
 
-                            String i = getSerial(layer, serial);
+                            //String i = getSerial(layer, serial);
 
                             geo.put(d);
 
@@ -402,15 +405,16 @@ public class ImportKML {
                         if (go instanceof Feature) {
                             Feature f = (Feature) go;
 
-                            NObject fb = jsonBuilder();
-                            fb.put("name", f.getName());
+                            NObject fb = newNObject().name(f.getName());
 
-                            String desc = f.getDescription();
-                            if ((desc != null) && (desc.length() > 0)) {
-                                //filter
-                                desc = filterHTML(desc);
-                                if (desc.length() > 0) {
-                                    fb.put("description", desc);
+                            if (enableDescriptions) {
+                                String desc = f.getDescription();
+                                if ((desc != null) && (desc.length() > 0)) {
+                                    //filter
+                                    desc = filterHTML(desc);
+                                    if (desc.length() > 0) {
+                                        fb.put("description", desc);
+                                    }
                                 }
                             }
 
@@ -419,39 +423,32 @@ public class ImportKML {
                                     fb.put("snippet", f.getSnippet());
                                 }
                             }
-                            if (f.getStartTime() != null) {
-                                fb.put("startTime", f.getStartTime().getTime());
+
+                            if (f.getStartTime()!=null) {
+                                if (f.getEndTime() != null) {
+                                    fb.when(f.getStartTime().getTime(), f.getEndTime().getTime());
+                                }
+                                else {
+                                    fb.when(f.getStartTime().getTime());
+                                }
                             }
-                            if (f.getEndTime() != null) {
-                                fb.put("endTime", f.getEndTime().getTime());
-                            }
 
-                            Geometry geo = f.getGeometry();
-                            if (geo != null) {
-                                if (geo instanceof Point) {
-                                    Point pp = (Point) geo;
-                                    Geodetic2DPoint c = pp.getCenter();
-                                    double lat = c.getLatitudeAsDegrees();
-                                    double lon = c.getLongitudeAsDegrees();
+                            Geometry g = f.getGeometry();
 
-                                    //http://geojson.org/
-                                    jsonBuilder("geom").put("type", "point").put("coordinates", new double[]{lon, lat});
 
-                                } else if (geo instanceof org.opensextant.giscore.geometry.Line) {
-                                    org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) geo;
+                            if (g != null) {
+                                if (g instanceof Point) {
+                                    Point pp = (Point) g;
+                                    fb.where(pp.getCenter(), "point");
 
-                                    List<Point> lp = l.getPoints();
-                                    double[][] points = toArray(lp);
+                                } else if (g instanceof org.opensextant.giscore.geometry.Line) {
+                                    org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;
 
-                                    jsonBuilder("geom").put("type", "linestring").put("coordinates", points);
+                                    fb.where( l );
+                                } else if (g instanceof org.opensextant.giscore.geometry.Polygon) {
+                                    org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) g;
 
-                                } else if (geo instanceof org.opensextant.giscore.geometry.Polygon) {
-                                    org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) geo;
-
-                                    double[][] outerRing = toArray(p.getOuterRing().getPoints());
-                                    //TODO handle inner rings
-
-                                    jsonBuilder("geom").put("type", "polygon").put("coordinates", new double[][][]{outerRing /* inner rings */});
+                                    fb.where(p);
                                 }
 
                                 //TODO other types
@@ -477,11 +474,11 @@ public class ImportKML {
 
                             if ((f.getStyleUrl() != null) || (styleInline != null)) {
 
-                                fb = jsonBuilder("style");
+                                //fb = jsonBuilder("style");
 
                                 if (f.getStyleUrl() != null) {
                                     String su = f.getStyleUrl();
-                                    if (su.startsWith("#")) {
+                                    if (anchorHash(su)) {
                                         su = su.substring(1);
                                     }
 
@@ -503,8 +500,8 @@ public class ImportKML {
 
                             fb.put("path", path);
 
-                            String fid = getSerial(layer, serial);
-                            //geo.add(bulk, "feature", fid, fb);
+                            //String fid = getSerial(layer, serial);
+                            geo.put(fb);
                             numFeatures++;
 
                             //bulk = commit();
@@ -529,6 +526,10 @@ public class ImportKML {
                 System.err.println(e);
             }
         };
+    }
+
+    public static boolean anchorHash(String su) {
+        return su.charAt(0) == '#';
     }
 
     static {

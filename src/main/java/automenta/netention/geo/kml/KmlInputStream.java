@@ -46,6 +46,8 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static automenta.netention.geo.ImportKML.anchorHash;
+
 /**
  * Read a Google Earth Keyhole Markup Language (KML) file in as an input stream
  * one event at a time.
@@ -349,7 +351,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
      */
     @NonNull
     public static List<Point> parseCoord(String coord) {
-        List<Point> list = new ArrayList<Point>();
+        List<Point> list = new ArrayList(2);
         NumberStreamTokenizer st = new NumberStreamTokenizer(coord);
         st.ordinaryChar(',');
         boolean seenComma = false;
@@ -370,7 +372,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 switch (st.ttype) {
                     case NumberStreamTokenizer.TT_WORD:
                         //s = "STRING:" + st.sval; // Already a String
-                        log.warn("ignore invalid string in coordinate: \"" + st.sval + "\"");
+                        log.warn("ignore invalid string in coordinate: \"",st.sval,"\"");
                         //if (seenComma) System.out.println("\tXXX: WORD: seenComma");
                         //if (numparts != 0) System.out.println("\tXXX: WORD: numparts=" + numparts);
                         break;
@@ -379,7 +381,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         try {
                             if (numparts == 3) {
                                 if (seenComma) {
-                                    log.warn("comma found instead of whitespace between tuples before " + st.nval);
+                                    log.warn("comma found instead of whitespace between tuples before ", st.nval);
                                     // handle commas appearing between tuples
                                     // Google Earth interprets input with: "1,2,3,4,5,6" as two tuples: {1,2,3}  {4,5,6}.
                                     seenComma = false;
@@ -413,14 +415,13 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                         lat = new Latitude(st.nval, Angle.DEGREES);
                                     } else {
                                         if (lon != COORD_ERROR) {
-                                            list.add(new Point(new Geodetic2DPoint(
-                                                    lon, new Latitude())));
+                                            list.add(new Point(new Geodetic2DPoint(lon, new Latitude())));
                                         }
                                         //else System.out.println("\tERROR: drop bad coord");
                                         // start new tuple
                                         lon = new Longitude(st.nval, Angle.DEGREES);
                                         if (log.isDebugEnabled() && Math.abs(st.nval) > 180) {
-                                            log.debug("longitude out of range: " + st.nval);
+                                            log.debug("longitude out of range: ", st.nval);
                                         }
                                         numparts = 1;
                                     }
@@ -437,7 +438,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                         // start new tuple
                                         lon = new Longitude(st.nval, Angle.DEGREES);
                                         if (log.isDebugEnabled() && Math.abs(st.nval) > 180) {
-                                            log.debug("longitude out of range: " + st.nval);
+                                            log.debug("longitude out of range: ", st.nval);
                                         }
                                         numparts = 1;
                                     }
@@ -456,7 +457,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             */
                         } catch (IllegalArgumentException e) {
                             // bad lat/longitude; e.g. out of valid range
-                            System.err.println("Invalid coordinate: " + st.nval + " " + e);
+                            log.error("Invalid coordinate: ", st.nval, " ", e);
                             if (numparts != 0) {
                                 lon = COORD_ERROR;
                             }
@@ -487,7 +488,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 }
                             //else System.out.println("\tXXX: ** ERROR: COMMA3: seenComma w/numparts=" + numparts);
                         } else {
-                            log.warn("ignore invalid character in coordinate string: (" + (char) st.ttype + ")");
+                            log.warn("ignore invalid character in coordinate string: (", (char) st.ttype, ")");
                         }
                     //s = "CHAR:" + String.valueOf((char) st.ttype);
                 }
@@ -495,8 +496,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             } // while
         } catch (IOException e) {
             // we're using StringReader. this should never happen
-            log.error("Failed to parse coord string: " + coord == null || coord.length() <= 20
-                    ? coord : coord.substring(0, 20) + "...", e);
+            log.error("Failed to parse coord string: ", (coord == null || coord.length() <= 20
+                    ? coord : coord.substring(0, 20) + "..."), e);
         }
         
         // add last coord if valid
@@ -545,7 +546,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 try {
                     ev = stream.nextEvent(); // Actually advance
                 } catch (Exception nev) {
-                    System.err.println("nextEvent: " + nev);
+                    nev.printStackTrace();
                     break;
                 }
                 if (ev != null) {
@@ -559,7 +560,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     try {
                         ev = stream.peek();
                     } catch (Exception x) {
-                        System.err.println("  " + x);
+                        x.printStackTrace();
+                        //System.err.println("  " + x);
                     }
                 }
             }
@@ -657,18 +659,28 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                      return comment;
                      */
                 }
-            } catch (ArrayIndexOutOfBoundsException e) {
-                // if have wrong encoding can end up here
-                //log.warn("Unexpected parse error", e);
-                throw new IOException(e);
-            } catch (NoSuchElementException e) {
-                return null;
-            } catch (NullPointerException e) {
-                throw new IOException(e);
-            } catch (XMLStreamException e) {
-                throw new IOException(e);
             }
+            catch (NoSuchElementException e) {
+                return null;
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+
+//            } catch (ArrayIndexOutOfBoundsException e) {
+//                // if have wrong encoding can end up here
+//                //log.warn("Unexpected parse error", e);
+//                throw new IOException(e);
+//            } catch (NoSuchElementException e) {
+//                return null;
+//            } catch (NullPointerException e) {
+//                throw new IOException(e);
+//            } catch (XMLStreamException e) {
+//                throw new IOException(e);
+//            }
         }
+
     }
 
     /*
@@ -952,7 +964,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
     private void handleSchemaData(String uri, Common cs, QName qname)
             throws XMLStreamException {
         XMLEvent next;
-        if (uri.startsWith("#")) {
+        if (anchorHash(uri)) {
             uri = uri.substring(1);
         }
         Schema schema = schemata.get(uri);
@@ -1137,14 +1149,14 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     } else if (key.equalsIgnoreCase(StyleMap.HIGHLIGHT)) {
                         key = StyleMap.HIGHLIGHT;
                     } else {
-                        log.warn("Unknown StyleMap key: " + key);
+                        log.warn("Unknown StyleMap key: ", key);
                     }
 
                     if (sm.containsKey(key)) {
                         if (value != null) {
-                            log.warn("StyleMap already has " + key + " definition. Ignore styleUrl=" + value);
+                            log.warn("StyleMap already has ", key, " definition. Ignore styleUrl=", value);
                         } else {
-                            log.warn("StyleMap already has " + key + " definition. Ignore inline Style");
+                            log.warn("StyleMap already has ", key, " definition. Ignore inline Style");
                         }
                         // Google Earth keeps the first pair for a given key
                     } else {
@@ -1198,7 +1210,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         }
                     }
                 } catch (IllegalArgumentException e) {
-                    log.warn("Ignoring bad time: " + time + ": " + e);
+                    log.warn("Ignoring bad time: ", time, ": ", e);
                 }/* catch (ParseException e) {
                  log.warn("Ignoring bad time: " + time + ": " + e);
                  }*/
@@ -1500,7 +1512,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             return null;
         }
         cstr = cstr.trim();
-        if (cstr.startsWith("#")) {
+        if (anchorHash("#")) {
             // skip over '#' prefix used for HTML color codes allowed by Google Earth
             // but invalid wrt KML XML Schema.
             log.debug("Skip '#' in color code: {}", cstr);
@@ -2020,13 +2032,13 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             try {
                                 geo = handleGeometry(sl);
                             } catch (IllegalArgumentException iae) {
-                                System.err.println("handleGeometry: " + iae);
+                                log.error("handleGeometry", iae);
                             }
                             if (geo != null) {
                                 fs.setGeometry(geo);
                             }
                         } catch (XMLStreamException xe) {
-                            log.warn("Failed XML parsing: skip geometry " + localname);
+                            log.warn("Failed XML parsing: skip geometry ", localname);
                             log.debug("", xe);
                             skipNextElement(stream, qName);
                         } catch (RuntimeException rte) {
@@ -2212,6 +2224,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     try {
                         value = getNonEmptyElementText();
                     } catch (Exception exx) {
+                        exx.printStackTrace();
                         //javax.xml.stream.XMLStreamException: ParseError at [row,col]:[18,12]
                         //Message: elementGetText() function expects text only elment but START_ELEMENT was encountered.
                     }
@@ -2805,8 +2818,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             String elementText = stream.getElementText();
             return elementText == null || elementText.isEmpty() ? elementText : elementText.trim();
         } catch (XMLStreamException e) {
-            log.warn("Unable to parse " + name.getLocalPart()
-                    + " as text element: " + e);
+            log.warn("Unable to parse ", name.getLocalPart(), " as text element: ", e);
             skipNextElement(stream, name);
             return null;
         }

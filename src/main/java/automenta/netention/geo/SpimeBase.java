@@ -19,14 +19,14 @@ import java.util.Iterator;
  * http://infinispan.org/docs/8.0.x/user_guide/user_guide.html#_the_infinispan_query_module
  * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/queries/spatial/QuerySpatialTest.java
  */
-public class ElasticSpacetime implements Iterable<NObject> {
+public class SpimeBase implements Iterable<NObject> {
 
 
     private final Cache<String, NObject> cache;
     private final SearchManager search;
     private final EntityContext nobjContext;
 
-    public ElasticSpacetime(Cache<String, NObject> cache) {
+    public SpimeBase(Cache<String, NObject> cache) {
 
         this.cache = cache;
         this.search = Search.getSearchManager(cache);
@@ -34,15 +34,15 @@ public class ElasticSpacetime implements Iterable<NObject> {
 
     }
 
-    public static NObject jsonBuilder() {
+    public static NObject newNObject() {
         return new NObject();
     }
-    public static NObject jsonBuilder(String id) {
+    public static NObject newNObject(String id) {
         return new NObject(id);
     }
 
-    public static void main(String[] args) {
-
+    /** in-RAM index */
+    public static SpimeBase memory() {
         Configuration infinispanConfiguration = new ConfigurationBuilder()
                 .indexing()
                 .index(Index.ALL)
@@ -52,11 +52,14 @@ public class ElasticSpacetime implements Iterable<NObject> {
 
         DefaultCacheManager cacheManager = new DefaultCacheManager(infinispanConfiguration);
 
+        SpimeBase db = new SpimeBase(cacheManager.getCache());
+        return db;
+    }
 
-        ElasticSpacetime db = new ElasticSpacetime(cacheManager.getCache());
+    public static void main(String[] args) {
 
 
-
+        SpimeBase db = SpimeBase.memory();
 
         //sm.getMassIndexer().start();
 
