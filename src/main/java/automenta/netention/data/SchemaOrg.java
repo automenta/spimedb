@@ -31,7 +31,7 @@ abstract public class SchemaOrg {
                     t.description(comment);
 
                     for (String s : supertypes) {
-                        t.tag(s);
+                        t.put(s);
                         //t.inh.put(s, 1.0);
                     }
 

@@ -8,6 +8,7 @@ package automenta.netention.geo;
 
 import automenta.netention.geo.kml.KmlReader;
 import automenta.netention.geo.kml.UrlRef;
+import automenta.netention.net.NObject;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+
+import static automenta.netention.geo.ElasticSpacetime.jsonBuilder;
 
 /**
  *
@@ -347,11 +350,11 @@ public class ImportKML {
                 //2. process features
                 transformKML(reader, id, geo, new GISVisitor() {
 
-                    private BulkRequestBuilder bulk = null;
+
 
                     @Override
                     public void start(String layer) {
-                        bulk = geo.newBulk();
+
                     }
 
                     @Override
@@ -365,8 +368,8 @@ public class ImportKML {
                             //TODO startTime?
                             //System.out.println(cs + " " + cs.getId());
 
-                            XContentBuilder d;
-                            d = jsonBuilder().startObject().field("name", cs.getName());
+
+                            NObject d = jsonBuilder().put("name", cs.getName());
 
                             /*String styleUrl = cs.getStyleUrl();
                              if (styleUrl != null) {
@@ -375,7 +378,7 @@ public class ImportKML {
                              }
                              styleUrl = layer + "_" + styleUrl;
                              System.err.println("Container styleUrl: " + styleUrl);
-                             d.field("styleUrl", styleUrl);
+                             d.put("styleUrl", styleUrl);
                              }
                              */
                             String desc = cs.getDescription();
@@ -383,43 +386,44 @@ public class ImportKML {
                                 //filter
                                 desc = filterHTML(desc);
                                 if (desc.length() > 0) {
-                                    d.field("description", desc);
+                                    d.put("description", desc);
                                 }
                             }
 
-                            d.field("path", path).endObject();
+                            d.put("path", path);
 
                             String i = getSerial(layer, serial);
-                            bulk = geo.add(bulk, "tag", i, d);
 
-                            bulk = commit();
+                            geo.put(d);
+
+
                         }
 
                         if (go instanceof Feature) {
                             Feature f = (Feature) go;
 
-                            XContentBuilder fb = jsonBuilder().startObject();
-                            fb.field("name", f.getName());
+                            NObject fb = jsonBuilder();
+                            fb.put("name", f.getName());
 
                             String desc = f.getDescription();
                             if ((desc != null) && (desc.length() > 0)) {
                                 //filter
                                 desc = filterHTML(desc);
                                 if (desc.length() > 0) {
-                                    fb.field("description", desc);
+                                    fb.put("description", desc);
                                 }
                             }
 
                             if (f.getSnippet() != null) {
                                 if (f.getSnippet().length() > 0) {
-                                    fb.field("snippet", f.getSnippet());
+                                    fb.put("snippet", f.getSnippet());
                                 }
                             }
                             if (f.getStartTime() != null) {
-                                fb.field("startTime", f.getStartTime().getTime());
+                                fb.put("startTime", f.getStartTime().getTime());
                             }
                             if (f.getEndTime() != null) {
-                                fb.field("endTime", f.getEndTime().getTime());
+                                fb.put("endTime", f.getEndTime().getTime());
                             }
 
                             Geometry geo = f.getGeometry();
@@ -431,7 +435,7 @@ public class ImportKML {
                                     double lon = c.getLongitudeAsDegrees();
 
                                     //http://geojson.org/
-                                    fb.startObject("geom").field("type", "point").field("coordinates", new double[]{lon, lat}).endObject();
+                                    jsonBuilder("geom").put("type", "point").put("coordinates", new double[]{lon, lat});
 
                                 } else if (geo instanceof org.opensextant.giscore.geometry.Line) {
                                     org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) geo;
@@ -439,7 +443,7 @@ public class ImportKML {
                                     List<Point> lp = l.getPoints();
                                     double[][] points = toArray(lp);
 
-                                    fb.startObject("geom").field("type", "linestring").field("coordinates", points).endObject();
+                                    jsonBuilder("geom").put("type", "linestring").put("coordinates", points);
 
                                 } else if (geo instanceof org.opensextant.giscore.geometry.Polygon) {
                                     org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) geo;
@@ -447,7 +451,7 @@ public class ImportKML {
                                     double[][] outerRing = toArray(p.getOuterRing().getPoints());
                                     //TODO handle inner rings
 
-                                    fb.startObject("geom").field("type", "polygon").field("coordinates", new double[][][]{outerRing /* inner rings */}).endObject();
+                                    jsonBuilder("geom").put("type", "polygon").put("coordinates", new double[][][]{outerRing /* inner rings */});
                                 }
 
                                 //TODO other types
@@ -473,7 +477,7 @@ public class ImportKML {
 
                             if ((f.getStyleUrl() != null) || (styleInline != null)) {
 
-                                fb.startObject("style");
+                                fb = jsonBuilder("style");
 
                                 if (f.getStyleUrl() != null) {
                                     String su = f.getStyleUrl();
@@ -493,17 +497,17 @@ public class ImportKML {
                                     styleJson(fb, styleInline);
                                 }
 
-                                fb.endObject();
+
 
                             }
 
-                            fb.field("path", path);
+                            fb.put("path", path);
 
                             String fid = getSerial(layer, serial);
-                            bulk = ImportKML.this.geo.add(bulk, "feature", fid, fb.endObject());
+                            //geo.add(bulk, "feature", fid, fb);
                             numFeatures++;
 
-                            bulk = commit();
+                            //bulk = commit();
                         }
 
                         if (go instanceof Schema) {
@@ -515,21 +519,8 @@ public class ImportKML {
 
                     @Override
                     public void end() {
-                        geo.commit(bulk);
-                        bulk = null;
                     }
 
-                    private BulkRequestBuilder commit() {
-                        System.out.println("commit: " + bulk.numberOfActions());
-
-                        if (bulk.numberOfActions() < BULK_SIZE) {
-                            return bulk;
-                        } else {
-                            geo.commit(bulk);
-                            bulk = null;
-                            return null;
-                        }
-                    }
 
                 });
 
@@ -571,46 +562,47 @@ public class ImportKML {
 
     }
 
-    XContentBuilder stylemapJson(XContentBuilder fb, StyleMap s) throws IOException {
-        Pair normal = s.getPair(StyleMap.NORMAL);
-        //System.out.println(normal.getStyleUrl() + " " + normal.getStyleSelector());
-        return fb;
-    }
+//    NObject stylemapJson(NObject fb, StyleMap s) throws IOException {
+//        Pair normal = s.getPair(StyleMap.NORMAL);
+//        //System.out.println(normal.getStyleUrl() + " " + normal.getStyleSelector());
+//        return fb;
+//    }
 
-    XContentBuilder styleJson(XContentBuilder fb, Style s) throws IOException {
+
+    NObject styleJson(NObject fb, Style s) throws IOException {
 
         //System.out.println("Applying style: " + s);
         String iconUrl = s.getIconUrl();
         if (iconUrl != null) {
-            fb.field("iconUrl", iconUrl);
+            fb.put("iconUrl", iconUrl);
         }
 
         String baloonText = s.getBalloonText();
         if (baloonText != null) {
-            fb.field("baloonText", baloonText);
+            fb.put("baloonText", baloonText);
         }
 
         /*Color iconColor = s.getIconColor();
          if (iconColor!=null)
-         fb.field("iconColor", iconColor.getRed(), iconColor.getGreen(), iconColor.getBlue(), iconColor.getAlpha() );
+         fb.put("iconColor", iconColor.getRed(), iconColor.getGreen(), iconColor.getBlue(), iconColor.getAlpha() );
         
         
          Color lineColor = s.getLineColor();
          if (lineColor!=null)
-         fb.field("lineColor", new Integer[] { lineColor.getRed(), lineColor.getGreen(), lineColor.getBlue(), lineColor.getAlpha() } );
+         fb.put("lineColor", new Integer[] { lineColor.getRed(), lineColor.getGreen(), lineColor.getBlue(), lineColor.getAlpha() } );
         
          Color polyColor = s.getPolyColor();
          if (polyColor!=null)
-         fb.field("polyColor", "rgba(" + polyColor.getRed() + "," + polyColor.getGreen()+ "," + polyColor.getBlue()+ "," + polyColor.getAlpha() + ")"  );
+         fb.put("polyColor", "rgba(" + polyColor.getRed() + "," + polyColor.getGreen()+ "," + polyColor.getBlue()+ "," + polyColor.getAlpha() + ")"  );
          */
         Color polyColor = s.getPolyColor();
         if (polyColor != null) {
-            fb.field("polyColor", polyColor.toString().substring("org.opensextant.giscore.utils.".length()));
+            fb.put("polyColor", polyColor.toString().substring("org.opensextant.giscore.utils.".length()));
         }
 
         Double lineWidth = s.getLineWidth();
         if (lineWidth != null) {
-            fb.field("lineWidth", lineWidth);
+            fb.put("lineWidth", lineWidth);
         }
 
         return fb;
@@ -625,9 +617,9 @@ public class ImportKML {
 //
 //        System.err.println("processStyle: " + s.getId() + " -> " + fullStyleId);
 //
-//        XContentBuilder fb = jsonBuilder().startObject();
+//        NObject fb = jsonBuilder();
 //        styleJson(fb, s);
-//        fb.endObject();
+//        fb;
 //
 //        //use '_' instead of '#' which is reserved for URL encoding
 //        bulk = st.add(bulk, "style", fullStyleId, fb);

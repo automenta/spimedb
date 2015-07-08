@@ -21,6 +21,7 @@ public class Core {
             .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true)
             .configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true)
             .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, true)
+            .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false)
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
     final public static ObjectMapper jsonAnnotated = new ObjectMapper()
