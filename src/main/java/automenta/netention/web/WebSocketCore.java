@@ -49,6 +49,7 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
 
         socket.getReceiveSetter().set(this);
         socket.resumeReceives();
+
     }
 
     @Override
@@ -126,9 +127,14 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
 
     public void send(WebSocketChannel socket, Object object) {
         try {
+
+            System.out.println("Sending: " + object);
+
             ByteBuffer data = ByteBuffer.wrap(Core.json.writeValueAsBytes(object));
-            //System.out.println("Sending: " + data);
+
             WebSockets.sendText(data, socket, this);
+
+
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();
         }
@@ -147,6 +153,6 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
 
     @Override
     public void complete(WebSocketChannel channel, Void context) {
-        log.info("Complete: " + channel);
+        //log.info("Complete: " + channel);
     }
 }

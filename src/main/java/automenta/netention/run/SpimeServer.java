@@ -8,6 +8,10 @@ import automenta.netention.web.Web;
 import automenta.netention.web.WebSocketCore;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.spi.WebSocketHttpExchange;
+import org.apache.lucene.search.Query;
+import org.hibernate.search.query.dsl.Unit;
+import org.infinispan.query.CacheQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +23,27 @@ public class SpimeServer extends Web {
 
         public SpimeSocket() {
             super(true);
+        }
+
+        @Override
+        public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel socket) {
+            super.onConnect(exchange, socket);
+
+
+            base.forEach( x -> send(socket, x) );
+
+
+            Query c = base.find().spatial().onField("where").
+                    within(500, Unit.KM).ofLatitude(40).andLongitude(-80).createQuery();
+
+
+            CacheQuery cq = base.find(c);
+
+            System.out.println(cq.list());
+            System.out.println(cq.getResultSize());
+
+
+
         }
 
         @Override
