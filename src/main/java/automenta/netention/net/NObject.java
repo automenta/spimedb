@@ -41,7 +41,7 @@ public class NObject implements Serializable, Coordinates {
 
     @Field(store = Store.YES) @JsonProperty("I") final String id;
 
-    @Field(store = Store.YES) @JsonProperty("N") final String name;
+    @Field(store = Store.YES) @JsonProperty("N") String name;
 
     @JsonProperty("T") long[] time = null;
 
@@ -215,8 +215,14 @@ public class NObject implements Serializable, Coordinates {
     }
 
     public NObject name(String name) {
-        return put("N", name);
+        this.name = name;
+        return this;
     }
+
+    public final static String POINT = ".";
+    public final static String LINESTRING = "-";
+    public final static String POLYGON = "*";
+
 
     public NObject where(Geodetic2DPoint c, Object... shape) {
 
@@ -236,7 +242,7 @@ public class NObject implements Serializable, Coordinates {
         List<Point> lp = l.getPoints();
         double[][] points = toArray(lp);
 
-        return where(l.getCenter(), "linestring", points);
+        return where(l.getCenter(), NObject.LINESTRING, points);
 
     }
 
@@ -245,6 +251,11 @@ public class NObject implements Serializable, Coordinates {
 
         //TODO handle inner rings
 
-        return where(p.getCenter(), "polygon", new double[][][]{outerRing /* inner rings */});
+        return where(p.getCenter(), NObject.POLYGON, new double[][][]{outerRing /* inner rings */});
+    }
+
+    /** extensionally inside of a folder structure specified by path (topmost first) */
+    public NObject inside(String... path) {
+        return put(">", path);
     }
 }

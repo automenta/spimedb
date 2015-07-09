@@ -23,7 +23,6 @@ import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.utils.Color;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
@@ -46,17 +45,22 @@ public class ImportKML {
     static final HtmlCompressor compressor = new HtmlCompressor();
     private final Proxy proxy;
     private final SpimeBase geo;
-    private final String id;
-    int serial;
-    int numFeatures = 0;
+    long serial;
+
     private String layer;
     final Deque<String> path = new ArrayDeque();
 
-    boolean enableDescriptions = false;
+    boolean enableDescriptions = true;
 
 
-    public static String getSerial(String layer, int serial) {
-        return (Base64.getEncoder().encodeToString(BigInteger.valueOf(serial).add(BigInteger.valueOf(layer.hashCode()).shiftRight(32)).toByteArray()));
+    public static String getSerial(long serial) {
+
+        return Long.toString(serial, Character.MAX_RADIX);
+        //return Base64.getEncoder().withoutPadding().encodeToString(Longs.toByteArray(serial));
+        //return Base64.getEncoder().withoutPadding().encodeToString(Longs.toByteArray(serial));
+        //return Base64.getEncoder().withoutPadding().encodeToString(BigInteger.valueOf(serial).toByteArray());
+                //.add(BigInteger.valueOf(layer.hashCode()).shiftRight(32)
+                //.toByteArray();
     }
 
     public String[] getPath(Deque<String> p) {
@@ -103,32 +107,43 @@ public class ImportKML {
                 }
 
                 if (go instanceof DocumentStart) {
-                    DocumentStart ds = (DocumentStart) go;
+                    //DocumentStart ds = (DocumentStart) go;
 
-                    path.add(layer);
+                    continue;
 
                 }
 
                 if (go instanceof ContainerEnd) {
                     path.removeLast();
+                    continue;
                 }
 
-                if ((go instanceof ContainerStart) || (go instanceof Feature)) {
-                    serial++;
+                //if ((go instanceof ContainerStart) || (go instanceof Feature)) {
+                //if (go instanceof ContainerStart) {
+                //}
+
+                //add to the path after container start is processed
+                if (go instanceof ContainerStart) {
+                    ContainerStart cs = (ContainerStart) go;
+                    //TODO startTime?
+
+                    String i;
+                    if (path.isEmpty())
+                        i = layer;
+                    else {
+                        i = getSerial(serial++);
+                    }
+
+                    //System.out.println(cs + " " + cs.getId());
+                    path.add(i);
+
                 }
 
                 if (!visitor.on(go, getPath(path))) {
                     break;
                 }
 
-                //add to the path after container start is processed
-                if (go instanceof ContainerStart) {
-                    ContainerStart cs = (ContainerStart) go;
-                    //TODO startTime?
-                    //System.out.println(cs + " " + cs.getId());
-                    String i = getSerial(layer, serial);
-                    path.add(i);
-                }
+
 
             } catch (Throwable t) {
                 System.err.println(t);
@@ -238,28 +253,27 @@ public class ImportKML {
         }
     }
 
-    public ImportKML(SpimeBase geo, String id) {
-        this(geo, null, id);
+    public ImportKML(SpimeBase geo) {
+        this(geo, null);
     }
 
-    public ImportKML(SpimeBase geo, Proxy proxy, String id) {
+    public ImportKML(SpimeBase geo, Proxy proxy) {
         this.geo = geo;
         this.proxy = proxy;
-        this.id = id;
     }
 
 
 
-    public Runnable url(String url) throws IOException {
-        return url(url, null);
+    public Runnable url(String id, String url) throws IOException {
+        return url(id, url, null);
     }
 
-    public Runnable file(String path) throws IOException {
-        return url("file:///" + path, null);
+    public Runnable file(String id, String path) throws IOException {
+        return url(id, "file:///" + path, null);
     }
 
-    public Runnable url(String url, Proxy proxy) throws IOException {
-        return task(() -> {
+    public Runnable url(String id, String url, Proxy proxy) throws IOException {
+        return task(id, () -> {
             try {
                 return new KmlReader(new URL(url), proxy);
             } catch (IOException e) {
@@ -270,7 +284,7 @@ public class ImportKML {
     }
 
 
-    public Runnable task(Supplier<KmlReader> reader) {
+    public Runnable task(String id, Supplier<KmlReader> reader) {
         return () -> {
             try {
                 final Map<String, Style> styles = new LinkedHashMap();
@@ -353,6 +367,8 @@ public class ImportKML {
                 //2. process features
                 transformKML(reader, id, geo, new GISVisitor() {
 
+                    public boolean rootFound;
+
                     @Override
                     public void start(String layer) {
 
@@ -364,13 +380,30 @@ public class ImportKML {
                             throw new RuntimeException("null GISObject: " + path);
                         }
 
+                        NObject d;
+
                         if (go instanceof ContainerStart) {
                             ContainerStart cs = (ContainerStart) go;
                             //TODO startTime?
                             //System.out.println(cs + " " + cs.getId());
 
 
-                            NObject d = newNObject().name(cs.getName());
+
+
+                            if (path.length == 1) {
+                                if (rootFound) {
+                                    throw new RuntimeException("Multiple roots");
+                                }
+                                rootFound = true;
+                                //name the top level folder
+                                d = newNObject(id);
+                            }
+                            else {
+                                String m = String.join(" ", path);
+                                d = newNObject(m);
+                            }
+
+                            d.name(cs.getName());
 
                             /*String styleUrl = cs.getStyleUrl();
                              if (styleUrl != null) {
@@ -393,19 +426,29 @@ public class ImportKML {
                                 }
                             }
 
-                            d.put("path", path);
+                        }
+                        else {
+                            d = newNObject();
+                            d.inside(path);
+                        }
 
-                            //String i = getSerial(layer, serial);
-
-                            geo.put(d);
-
+                        if (go instanceof Common) {
+                            Common cm = (Common)go;
+                            if (cm.getStartTime()!=null) {
+                                if (cm.getEndTime() != null) {
+                                    d.when(cm.getStartTime().getTime(), cm.getEndTime().getTime());
+                                }
+                                else {
+                                    d.when(cm.getStartTime().getTime());
+                                }
+                            }
 
                         }
 
                         if (go instanceof Feature) {
                             Feature f = (Feature) go;
 
-                            NObject fb = newNObject().name(f.getName());
+                            d.name(f.getName());
 
                             if (enableDescriptions) {
                                 String desc = f.getDescription();
@@ -413,25 +456,17 @@ public class ImportKML {
                                     //filter
                                     desc = filterHTML(desc);
                                     if (desc.length() > 0) {
-                                        fb.put("description", desc);
+                                        d.description(desc);
                                     }
                                 }
                             }
 
                             if (f.getSnippet() != null) {
                                 if (f.getSnippet().length() > 0) {
-                                    fb.put("snippet", f.getSnippet());
+                                    d.put("snippet", f.getSnippet());
                                 }
                             }
 
-                            if (f.getStartTime()!=null) {
-                                if (f.getEndTime() != null) {
-                                    fb.when(f.getStartTime().getTime(), f.getEndTime().getTime());
-                                }
-                                else {
-                                    fb.when(f.getStartTime().getTime());
-                                }
-                            }
 
                             Geometry g = f.getGeometry();
 
@@ -439,16 +474,16 @@ public class ImportKML {
                             if (g != null) {
                                 if (g instanceof Point) {
                                     Point pp = (Point) g;
-                                    fb.where(pp.getCenter(), "point");
+                                    d.where(pp.getCenter(), NObject.POINT);
 
                                 } else if (g instanceof org.opensextant.giscore.geometry.Line) {
                                     org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;
 
-                                    fb.where( l );
+                                    d.where( l );
                                 } else if (g instanceof org.opensextant.giscore.geometry.Polygon) {
                                     org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) g;
 
-                                    fb.where(p);
+                                    d.where(p);
                                 }
 
                                 //TODO other types
@@ -486,29 +521,31 @@ public class ImportKML {
                                     if (s == null) {
                                         //System.err.println("Missing: " + f.getStyleUrl());
                                     } else {
-                                        styleJson(fb, s);
+                                        styleJson(d, s);
                                     }
                                 }
 
                                 if (styleInline != null) {
-                                    styleJson(fb, styleInline);
+                                    styleJson(d, styleInline);
                                 }
 
 
 
                             }
 
-                            fb.put("path", path);
-
-                            //String fid = getSerial(layer, serial);
-                            geo.put(fb);
-                            numFeatures++;
-
-                            //bulk = commit();
                         }
 
                         if (go instanceof Schema) {
                             //..
+                        }
+
+                        if (d!=null) {
+
+                            if (d.getName() == null)  {
+                                System.err.println("Un-NObjectized: " + go);
+                                return false;
+                            }
+                            geo.put(d);
                         }
 
                         return true;

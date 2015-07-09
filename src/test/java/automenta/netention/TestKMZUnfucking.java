@@ -11,12 +11,9 @@ public class TestKMZUnfucking {
 
         SpimeBase es = SpimeBase.memory();
 
-        ImportKML kml = new ImportKML(es,
-                TestKMZUnfucking.class.getSimpleName().toString());
-
-        kml.url(
-                //"file:///tmp/kml/EOL-Field-Projects-CV3D.kmz"
-                "file:///tmp/kml/GVPWorldVolcanoes-List.kmz"
+        new ImportKML(es).url("main",
+                "file:///tmp/kml/EOL-Field-Projects-CV3D.kmz"
+                //"file:///tmp/kml/GVPWorldVolcanoes-List.kmz"
         ).run();
 
 
