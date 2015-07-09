@@ -1,0 +1,67 @@
+<html>
+<head>
+    <style>
+        body {
+            background-color: black;
+            color: gray;
+            font-family: monospace;
+            margin: 1em;
+            font=size: 150%;
+        }
+    </style>
+</head>
+
+<body>
+
+</body>
+
+<script src="../lib/web_socket.js"></script>
+<script>
+
+    var conn = { };
+    var path = "ws";
+
+    if (!conn.url)
+        conn.url = 'ws://' + window.location.hostname + ':' + window.location.port + '/' + path;
+
+    //subscriptions: channel id -> channel
+    conn.subs = { };
+
+
+    var ws = conn.socket = new WebSocket(conn.url);
+
+    ws.onopen = function () {
+
+        conn.opened = true;
+
+        console.log('websocket connected');
+
+        if (conn.onOpen)
+            conn.onOpen(this);
+
+
+    };
+
+    ws.onclose = function () {
+        //already disconnected?
+        if (!this.opt)
+            return;
+
+        conn.opened = false;
+
+        //console.log("Websocket disconnected");
+
+        if (conn.onClose)
+            conn.onClose();
+
+        //attempt reconnect?
+    };
+    ws.onerror = function (e) {
+        console.log("Websocket error", e);
+        if (conn.onError)
+            conn.onError(e);
+    };
+
+</script>
+
+</html>
