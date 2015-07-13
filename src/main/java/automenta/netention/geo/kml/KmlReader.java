@@ -52,7 +52,7 @@ import java.util.zip.ZipInputStream;
  */
 public class KmlReader extends KmlBaseReader implements IGISInputStream {
 
-    private static final Logger log = LoggerFactory.getLogger(KmlReader.class);
+    public static final Logger log = LoggerFactory.getLogger(KmlReader.class);
 
     private InputStream iStream;
 

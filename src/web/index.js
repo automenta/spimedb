@@ -225,9 +225,18 @@ class NClient extends EventEmitter {
 
     spaceOn(bounds, onFocus, onError) {
         //adds a spatial boundary region to the focus
-        console.log('spaceOn', bounds);
+        //console.log('spaceOn', bounds);
 
-        $.getJSON(bounds.toURL())
-            .done(onFocus).error(onError);
+        $.get(bounds.toURL())
+            .done(function(s) {
+                if (s.length == 0) return;
+                try {
+                    var p = JSON.parse(s);
+                    onFocus(p);
+                }
+                catch (e) {
+                    onError(e);
+                }
+            }).error(onError);
     }
 }

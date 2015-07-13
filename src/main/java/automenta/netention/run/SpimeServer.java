@@ -1,6 +1,7 @@
 package automenta.netention.run;
 
 
+import automenta.netention.Core;
 import automenta.netention.geo.ImportKML;
 import automenta.netention.geo.SpimeBase;
 import automenta.netention.net.NObject;
@@ -13,15 +14,18 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
 import org.hibernate.search.query.dsl.SpatialContext;
 import org.hibernate.search.query.dsl.SpatialTermination;
 import org.hibernate.search.query.dsl.Unit;
 import org.infinispan.query.CacheQuery;
+import org.infinispan.query.FetchOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.Map;
 
 public class SpimeServer extends Web {
@@ -124,15 +128,33 @@ public class SpimeServer extends Web {
                     if (qb != null) {
                         Query c = qb.createQuery();
 
+                        final int MAX_QUERY_RESULTS = 128;
+
                         CacheQuery cq = base.find(c);
+                        cq.maxResults(MAX_QUERY_RESULTS).sort(Sort.RELEVANCE);
+
 
                         if (cq.getResultSize() > 0) {
-                            StringBuilder sb = new StringBuilder();
-                            cq.forEach(r -> {
-                                sb.append(r.toString());
-                            });
+                            //StringBuilder sb = new StringBuilder();
 
-                            send(sb.toString(), ex);
+                            Iterator i = cq.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.LAZY).fetchSize(MAX_QUERY_RESULTS));
+
+                            send(o -> {
+                                try {
+                                    Core.json.writeArrayValues(o, i, ',');
+                                    o.flush();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+//                                while (i.hasNext()) {
+//                                    NObject r = (NObject)i.next();
+//                                    o.write(r.toBytes(true));
+//                                    //sb.append(r.toString());
+//                                }
+
+                            }, ex);
+
+                            //send(sb.toString(), ex);
                         }
                         else {
                             //no results
@@ -170,11 +192,14 @@ public class SpimeServer extends Web {
 
             String[] urls = new String[] {
                 "file:///tmp/kml/EOL-Field-Projects-CV3D.kmz",
-                "file:///tmp/kml/GVPWorldVolcanoes-List.kmz"
+                "file:///tmp/kml/GVPWorldVolcanoes-List.kmz",
+                "file:///tmp/kml/submarine-cables-CV3D.kmz",
+                "file:///tmp/kml/fusion-landing-points-CV3D.kmz",
+                "file:///tmp/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
             };
 
             for (String u : urls) {
-                new ImportKML(es).url("main", u).run();
+                new ImportKML(es).url(u).run();
             }
 
         }

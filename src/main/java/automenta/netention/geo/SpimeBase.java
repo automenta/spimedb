@@ -8,6 +8,7 @@ import org.hibernate.search.stat.Statistics;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.Index;
+import org.infinispan.context.Flag;
 import org.infinispan.manager.CacheContainer;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.query.CacheQuery;
@@ -91,11 +92,14 @@ public class SpimeBase implements Iterable<NObject> {
                 .fetchPersistentState(true)
                 .ignoreModifications(false)
                 .preload(true)
-                .async().enable()
 
-                        //.purgeOnStartup(true)
+                .async().enable()
+                .versioning().disable()
+
 
                 .unsafe();
+
+                //.purgeOnStartup(true)
                 /*.clustering()
                         //.cacheMode(CacheMode.DIST_SYNC)
                 .cacheMode(CacheMode.DIST_SYNC)
@@ -172,6 +176,11 @@ public class SpimeBase implements Iterable<NObject> {
 
     public NObject put(final NObject d) {
         return cache.put(d.getId(), d);
+    }
+    public void putFast(final NObject d) {
+        cache.getAdvancedCache()
+                .withFlags(Flag.SKIP_REMOTE_LOOKUP, Flag.SKIP_CACHE_LOAD)
+                .putAsync(d.getId(), d);
     }
 
     @Override

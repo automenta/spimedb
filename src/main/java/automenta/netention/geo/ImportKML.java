@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static automenta.netention.geo.SpimeBase.newNObject;
+import static automenta.netention.geo.kml.KmlReader.log;
 
 /**
  *
@@ -124,7 +125,7 @@ public class ImportKML {
 
                 //add to the path after container start is processed
                 if (go instanceof ContainerStart) {
-                    ContainerStart cs = (ContainerStart) go;
+                    //ContainerStart cs = (ContainerStart) go;
                     //TODO startTime?
 
                     String i;
@@ -263,6 +264,9 @@ public class ImportKML {
     }
 
 
+    public Runnable url(String url) throws IOException {
+        return url(new URL(url).getFile(), url);
+    }
 
     public Runnable url(String id, String url) throws IOException {
         return url(id, url, null);
@@ -286,7 +290,11 @@ public class ImportKML {
 
     public Runnable task(String id, Supplier<KmlReader> reader) {
         return () -> {
+
             try {
+
+                long start = System.currentTimeMillis();
+
                 final Map<String, Style> styles = new LinkedHashMap();
 
 
@@ -545,7 +553,7 @@ public class ImportKML {
                                 System.err.println("Un-NObjectized: " + go);
                                 return false;
                             }
-                            geo.put(d);
+                            geo.putFast(d);
                         }
 
                         return true;
@@ -558,10 +566,14 @@ public class ImportKML {
 
                 });
 
+                long end = System.currentTimeMillis();
+                log.warn(id+ " loaded: " + (end-start) + "(ms)");
+
             } catch (Throwable e) {
                 //e.printStackTrace();;
                 System.err.println(e);
             }
+
         };
     }
 

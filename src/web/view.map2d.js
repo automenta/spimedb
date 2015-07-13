@@ -39,7 +39,7 @@ class Map2DView extends NView {
 
     start(v, app, cb) {
 
-        var uiBoundsReactionPeriodMS = 10;
+        var uiBoundsReactionPeriodMS = 100;
 
         var testIcon = L.icon({
             iconUrl: 'icon/unknown.png',

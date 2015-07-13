@@ -1,7 +1,10 @@
 package automenta.netention.net;
 
 import automenta.netention.Core;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.spatial.Coordinates;
@@ -203,6 +206,7 @@ public class NObject implements Serializable, Coordinates {
         return Core.toJSON(this);
     }
 
+
     @JsonIgnore
     public boolean isSpatial() {
         return space!=null;
@@ -258,4 +262,6 @@ public class NObject implements Serializable, Coordinates {
     public NObject inside(String... path) {
         return put(">", path);
     }
+
+
 }

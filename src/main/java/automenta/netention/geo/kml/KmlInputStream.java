@@ -202,9 +202,13 @@ public class KmlInputStream extends XmlInputStream implements IKml {
 
     private static final Pattern WHITESPACE_PAT = Pattern.compile(",\\s+\\.?\\d");
 
+    boolean warnInvalidColorValues = false;
+
+    private Map<String, String> schemaAliases;
+    private final Map<String, Schema> schemata = new HashMap<String, Schema>();
+    private boolean dupAltitudeModeWarn;
+
     private static final Set<String> ms_kml_ns = new HashSet<String>(8);
-
-
     private static final Set<String> ms_features = new HashSet<String>(5);   // Placement, etc.
     private static final Set<String> ms_containers = new HashSet<String>(2); // Document, Folder
     private static final Set<String> ms_attributes = new HashSet<String>(2); // open, metadata
@@ -517,9 +521,6 @@ public class KmlInputStream extends XmlInputStream implements IKml {
         return list;
     }
 
-    private Map<String, String> schemaAliases;
-    private final Map<String, Schema> schemata = new HashMap<String, Schema>();
-    private boolean dupAltitudeModeWarn;
 
 
     public KmlInputStream(InputStream input) throws IOException {
@@ -1515,7 +1516,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
         if (anchorHash("#")) {
             // skip over '#' prefix used for HTML color codes allowed by Google Earth
             // but invalid wrt KML XML Schema.
-            log.debug("Skip '#' in color code: {}", cstr);
+            //log.debug("Skip '#' in color code: {}", cstr);
             cstr = cstr.substring(1);
         }
         if (cstr.length() == 8) {
@@ -1530,7 +1531,10 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             }
         }
 
-        log.warn("Invalid color value: " + cstr);
+
+
+        if (warnInvalidColorValues)
+            log.warn("Invalid color value: " + cstr);
         return null;
     }
 

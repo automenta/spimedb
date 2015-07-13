@@ -15,11 +15,13 @@ import io.undertow.util.Headers;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Utility functions for web server processes
@@ -49,6 +51,23 @@ public class Web extends PathHandler  {
         ex.endExchange();
     }
 
+    public static void send(Consumer<OutputStream> s, HttpServerExchange ex) {
+
+        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+
+        ex.startBlocking();
+
+        try {
+            OutputStream os = ex.getOutputStream();
+            s.accept(os);
+            os.flush();
+        } catch (Exception ex1) {
+            SpacetimeWebServer.logger.severe(ex1.toString());
+        }
+
+        ex.getResponseSender().close();
+    }
+
 
     static void send(byte[] s, HttpServerExchange ex, String type) {
 
@@ -61,9 +80,9 @@ public class Web extends PathHandler  {
     }
 
     static void send(JsonNode d, HttpServerExchange ex) {
-        ex.startBlocking();
-
         ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+
+        ex.startBlocking();
 
         try {
             Core.json.writeValue(ex.getOutputStream(), d);
