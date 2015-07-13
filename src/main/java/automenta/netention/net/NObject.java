@@ -1,10 +1,7 @@
 package automenta.netention.net;
 
 import automenta.netention.Core;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.spatial.Coordinates;
@@ -30,11 +27,12 @@ import static automenta.netention.geo.ImportKML.toArray;
  * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/queries/spatial/QuerySpatialTest.java#L78
  *
  */
+
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
 @JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
 @Indexed
-@Spatial(spatialMode = SpatialMode.RANGE /*, store=Store.COMPRESS*/ ) //http://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/
+@Spatial(spatialMode = SpatialMode.RANGE, store=Store.YES ) //http://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/
 public class NObject implements Serializable, Coordinates {
 
     final static long ETERNAL = Long.MIN_VALUE;
@@ -141,7 +139,7 @@ public class NObject implements Serializable, Coordinates {
 
     //TODO provide non-boxed versoins of these
     @JsonIgnore
-    @Latitude
+    //@Latitude
     public Double getLatitude() {
         if (space!=null)
             return Double.valueOf(space[0]);
@@ -149,7 +147,7 @@ public class NObject implements Serializable, Coordinates {
     }
 
     @JsonIgnore
-    @Longitude
+    //@Longitude
     public Double getLongitude() {
         if (space!=null)
             return Double.valueOf(space[1]);

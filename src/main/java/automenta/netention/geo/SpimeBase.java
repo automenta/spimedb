@@ -4,6 +4,7 @@ import automenta.netention.net.NObject;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.query.dsl.EntityContext;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.stat.Statistics;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.Index;
@@ -52,15 +53,32 @@ public class SpimeBase implements Iterable<NObject> {
         return new NObject(id);
     }
 
-    public static ConfigurationBuilder withIndexing(ConfigurationBuilder cb) {
+    /*public static ConfigurationBuilder withIndexing(ConfigurationBuilder cb) {
         return withIndexing(cb, "ram");
+    }*/
+    public static ConfigurationBuilder withIndexing(ConfigurationBuilder cb) {
+//        Cache cache = cb.
+//Directory indexDir = DirectoryBuilder.newDirectoryInstance(cache, cache, cache, indexName)
+//                                     .create();
+        return withIndexing(cb, "infinispan");
     }
+
+
 
     public static ConfigurationBuilder withIndexing(ConfigurationBuilder cb, String directoryProvider) {
         cb.indexing()
                 .index(Index.ALL)
                 .addProperty("default.directory_provider", directoryProvider)
                 .addProperty("lucene_version", "LUCENE_CURRENT");
+
+
+        /*
+        hibernate.search.Animals.2.indexwriter.max_merge_docs = 10
+        hibernate.search.Animals.2.indexwriter.merge_factor = 20
+        hibernate.search.Animals.2.indexwriter.term_index_interval = default
+        hibernate.search.default.indexwriter.max_merge_docs = 100
+        hibernate.search.default.indexwriter.ram_buffer_size = 64
+         */
         return cb;
     }
 
@@ -72,6 +90,8 @@ public class SpimeBase implements Iterable<NObject> {
                 .maxEntries(maxEntries)
                 .fetchPersistentState(true)
                 .ignoreModifications(false)
+                .preload(true)
+                .async().enable()
 
                         //.purgeOnStartup(true)
 
@@ -94,7 +114,6 @@ public class SpimeBase implements Iterable<NObject> {
         ConfigurationBuilder c = new ConfigurationBuilder();
         withIndexing(c);
 
-
         return newSpimeBase(c);
     }
 
@@ -116,28 +135,28 @@ public class SpimeBase implements Iterable<NObject> {
     }
 
 
-    public static void main(String[] args) {
-
-
-        SpimeBase db = SpimeBase.memory();
-
-        //sm.getMassIndexer().start();
-
-        db.put(new NObject(null, "Spatial NObject").where(0.75f, 0.66f));
-        db.put(new NObject(null, "Temporal NObject").now());
-
-
-        db.forEach( x -> System.out.println(x) );
-
-
-        Query c = db.find().keyword().onField("name").matching("Spatial NObject").createQuery();
-        CacheQuery cq = db.find(c);
-
-        System.out.println(cq.list());
-        System.out.println(cq.getResultSize());
-
-
-    }
+//    public static void main(String[] args) {
+//
+//
+//        SpimeBase db = SpimeBase.memory();
+//
+//        //sm.getMassIndexer().start();
+//
+//        db.put(new NObject(null, "Spatial NObject").where(0.75f, 0.66f));
+//        db.put(new NObject(null, "Temporal NObject").now());
+//
+//
+//        db.forEach( x -> System.out.println(x) );
+//
+//
+//        Query c = db.find().keyword().onField("name").matching("Spatial NObject").createQuery();
+//        CacheQuery cq = db.find(c);
+//
+//        System.out.println(cq.list());
+//        System.out.println(cq.getResultSize());
+//
+//
+//    }
 
     public QueryBuilder find() {
         return nobjContext.get();
@@ -145,6 +164,10 @@ public class SpimeBase implements Iterable<NObject> {
 
     public CacheQuery find(Query q) {
         return search.getQuery(q, NObject.class);
+    }
+
+    public Statistics getStatistics() {
+        return search.getStatistics();
     }
 
     public NObject put(final NObject d) {

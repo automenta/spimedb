@@ -117,22 +117,18 @@ public class SpimeServer extends Web {
 
                         }
 
-
                     }
+
 
 
                     if (qb != null) {
                         Query c = qb.createQuery();
-
-                        //System.out.println(c);
 
                         CacheQuery cq = base.find(c);
 
                         if (cq.getResultSize() > 0) {
                             StringBuilder sb = new StringBuilder();
                             cq.forEach(r -> {
-                                System.out.println(r);
-                                System.out.println(r.getClass());
                                 sb.append(r.toString());
                             });
 
@@ -166,18 +162,25 @@ public class SpimeServer extends Web {
 
 
     public static void main(String[] args) throws IOException {
-        SpimeBase es = SpimeBase.disk("/tmp/se", 128*1024);
+        SpimeBase es = SpimeBase.disk("/tmp/sf", 128*1024);
 
 
         if (es.isEmpty()) {
             System.out.println("Initializing database...");
 
-            new ImportKML(es).url("main",
-                    "file:///tmp/kml/EOL-Field-Projects-CV3D.kmz"
-                    //"file:///tmp/kml/GVPWorldVolcanoes-List.kmz"
-            ).run();
+            String[] urls = new String[] {
+                "file:///tmp/kml/EOL-Field-Projects-CV3D.kmz",
+                "file:///tmp/kml/GVPWorldVolcanoes-List.kmz"
+            };
+
+            for (String u : urls) {
+                new ImportKML(es).url("main", u).run();
+            }
 
         }
+
+        System.out.println(es.getStatistics().getIndexedClassNames());
+        System.out.println(es.getStatistics().indexedEntitiesCount());
 
         System.out.println(es.size() + " objects loaded");
 
