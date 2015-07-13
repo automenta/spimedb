@@ -34,7 +34,7 @@ import static automenta.netention.geo.ImportKML.toArray;
 @JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
 @JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
 @Indexed
-@Spatial(name = "nobject", spatialMode = SpatialMode.RANGE)
+@Spatial(spatialMode = SpatialMode.RANGE /*, store=Store.COMPRESS*/ ) //http://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/
 public class NObject implements Serializable, Coordinates {
 
     final static long ETERNAL = Long.MIN_VALUE;
@@ -141,6 +141,7 @@ public class NObject implements Serializable, Coordinates {
 
     //TODO provide non-boxed versoins of these
     @JsonIgnore
+    @Latitude
     public Double getLatitude() {
         if (space!=null)
             return Double.valueOf(space[0]);
@@ -148,6 +149,7 @@ public class NObject implements Serializable, Coordinates {
     }
 
     @JsonIgnore
+    @Longitude
     public Double getLongitude() {
         if (space!=null)
             return Double.valueOf(space[1]);

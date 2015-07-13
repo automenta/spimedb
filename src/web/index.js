@@ -84,9 +84,10 @@ class NClient extends EventEmitter {
         this.focus = { };
         this.index = { };
         this.views = {
+
+        'map2d': new Map2DView(),
         'feed': new FeedView(),
         'graph': new GraphView(),
-        'map2d': new Map2DView(),
         'map3d': new Map3DView(),
         'wikipedia': new WikipediaView('Happiness'),
         'time': new TimeView()
@@ -222,4 +223,11 @@ class NClient extends EventEmitter {
         this.emit('index.change', [tags /* additions */, null /* removals */]);
     }
 
+    spaceOn(bounds, onFocus, onError) {
+        //adds a spatial boundary region to the focus
+        console.log('spaceOn', bounds);
+
+        $.getJSON(bounds.toURL())
+            .done(onFocus).error(onError);
+    }
 }

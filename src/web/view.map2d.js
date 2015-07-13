@@ -1,5 +1,36 @@
 "use strict";
 
+/** fixed point conversion of a floating point number, encoded in base64 */
+function b36float(x, decimals) {
+    //(parseInt(x.toPrecision(decimals)) * (Math.pow(10,decimals))).toString(36)
+    parseInt( (x*Math.pow(10,decimals)).toFixed(decimals) ).toString(36)
+}
+function circleBoundsCompact(lat, lon, radMeters, decimals) {
+
+    return {
+        "y":  b36float(lat,decimals),
+        "x":  b36float(lon,decimals),
+        "r":  b36float(radMeters,decimals),
+        "p": "e" //earth
+    }
+}
+function circleBounds(lat, lon, radMeters, decimals) {
+
+    return {
+        "y":  lat.toFixed(decimals),
+        "x":  lon.toFixed(decimals),
+        "r":  radMeters.toFixed(decimals),
+        "p": "e", //earth
+        toURL: function() {
+            return "/space?R=c&x=" + // "Region" = "circular"
+                this.x + "&y=" + this.y +
+                "&r=" + this.r; //"radius"
+        }
+    }
+}
+
+
+
 class Map2DView extends NView {
 
     constructor() {
@@ -7,6 +38,9 @@ class Map2DView extends NView {
     }
 
     start(v, app, cb) {
+
+        var uiBoundsReactionPeriodMS = 10;
+
         var testIcon = L.icon({
             iconUrl: 'icon/unknown.png',
             iconSize: [32, 32],
@@ -24,9 +58,58 @@ class Map2DView extends NView {
 
         L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        if (cb) cb();
+
+
+        /** focus callback, used whenever an object that may be displayed is received asynchronously */
+        var focus = function(x) {
+            console.log('TODO display', x);
+        };
 
         var agentIcons = { };
+
+
+
+        var updateBounds = _.throttle(function (e) {
+            var b = map.getBounds();
+
+            var radiusMeters = b.getSouthEast().distanceTo(b.getNorthWest()) / 2.0;
+            var lon = b.getCenter().lng;
+            var lat = b.getCenter().lat;
+
+
+
+            app.spaceOn(circleBounds/*Compact*/(lat, lon, radiusMeters, 4),
+
+                focus, function(errV, errM) {
+                    console.error('err', errV, errM);
+                }
+
+            );
+
+                /*.done(focus) //function (r) {
+                    //console.log(r);
+
+                    //updateGeoJSONFeatures(r);
+                //})
+                .fail(function (v, m) {
+                    console.log('err', v, m);
+                });*/
+
+        }, uiBoundsReactionPeriodMS );
+
+
+
+        map.on('viewreset', nextUpdateBounds);
+        map.on('moveend', nextUpdateBounds);
+        map.on('resize', nextUpdateBounds);
+
+        function nextUpdateBounds() {
+            setTimeout(updateBounds, 0);
+        }
+
+        updateBounds();
+
+        if (cb) cb();
 
         app.on(['focus','change'], this.listener = function(c) {
 

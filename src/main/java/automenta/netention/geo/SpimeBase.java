@@ -26,7 +26,7 @@ public class SpimeBase implements Iterable<NObject> {
     public static final Logger log = LoggerFactory.getLogger(SpimeBase.class);
 
     private final Cache<String, NObject> cache;
-    private final SearchManager search;
+    public final SearchManager search;
     private final EntityContext nobjContext;
 
     public SpimeBase(CacheContainer cm, String id) {
