@@ -70,6 +70,8 @@ public class SpimeServer extends Web {
     public SpimeServer(SpimeBase s)  {
         super();
 
+
+
         //static content
         add("/", ClientResources.handleClientResources());
 
@@ -131,35 +133,10 @@ public class SpimeServer extends Web {
                         final int MAX_QUERY_RESULTS = 128;
 
                         CacheQuery cq = base.find(c);
-                        cq.maxResults(MAX_QUERY_RESULTS).sort(Sort.RELEVANCE);
 
+                        final int maxResults = MAX_QUERY_RESULTS;
 
-                        if (cq.getResultSize() > 0) {
-                            //StringBuilder sb = new StringBuilder();
-
-                            Iterator i = cq.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.LAZY).fetchSize(MAX_QUERY_RESULTS));
-
-                            send(o -> {
-                                try {
-                                    Core.json.writeArrayValues(o, i, ',');
-                                    o.flush();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-//                                while (i.hasNext()) {
-//                                    NObject r = (NObject)i.next();
-//                                    o.write(r.toBytes(true));
-//                                    //sb.append(r.toString());
-//                                }
-
-                            }, ex);
-
-                            //send(sb.toString(), ex);
-                        }
-                        else {
-                            //no results
-                            ex.endExchange();
-                        }
+                        sendQueryResult(cq, maxResults, ex);
 
                     } else {
                         //invalid query or other server error
@@ -182,6 +159,38 @@ public class SpimeServer extends Web {
 
     }
 
+    public void sendQueryResult(CacheQuery cq, int maxResults, HttpServerExchange ex) {
+        cq.maxResults(maxResults).sort(Sort.RELEVANCE);
+
+
+        if (cq.getResultSize() > 0) {
+            //StringBuilder sb = new StringBuilder();
+
+            Iterator i = cq.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.LAZY).fetchSize(maxResults));
+
+            send(o -> {
+                try {
+                    Core.json.writeArrayValues(o, i, ',');
+                    o.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                                while (i.hasNext()) {
+//                                    NObject r = (NObject)i.next();
+//                                    o.write(r.toBytes(true));
+//                                    //sb.append(r.toString());
+//                                }
+
+            }, ex);
+
+            //send(sb.toString(), ex);
+        }
+        else {
+            //no results
+            ex.endExchange();
+        }
+    }
+
 
     public static void main(String[] args) throws IOException {
         SpimeBase es = SpimeBase.disk("/tmp/sf", 128*1024);
@@ -191,11 +200,11 @@ public class SpimeServer extends Web {
             System.out.println("Initializing database...");
 
             String[] urls = new String[] {
-                "file:///tmp/kml/EOL-Field-Projects-CV3D.kmz",
-                "file:///tmp/kml/GVPWorldVolcanoes-List.kmz",
-                "file:///tmp/kml/submarine-cables-CV3D.kmz",
-                "file:///tmp/kml/fusion-landing-points-CV3D.kmz",
-                "file:///tmp/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
+                "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
+                "file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
+                "file:///home/me/kml/submarine-cables-CV3D.kmz",
+                "file:///home/me/kml/fusion-landing-points-CV3D.kmz",
+                "file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
             };
 
             for (String u : urls) {

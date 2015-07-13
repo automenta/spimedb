@@ -103,6 +103,8 @@ public class Core {
             .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true)
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
+
+
     final public static ObjectMapper jsonAnnotated = new ObjectMapper()
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
             .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)

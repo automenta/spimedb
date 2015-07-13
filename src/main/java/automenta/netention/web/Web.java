@@ -155,10 +155,13 @@ public class Web extends PathHandler  {
             return start(Undertow.builder()
                     .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
                     .setServerOption(UndertowOptions.ENABLE_SPDY, true)
-                    //.addHttpsListener(8443, bindAddress, sslContext)
+                    .setWorkerThreads(4)
 
-                    .addHttpListener(8080, "localhost")
-                    .setIoThreads(4) );
+
+                            //.addHttpsListener(8443, bindAddress, sslContext)
+
+                            .addHttpListener(8080, "localhost")
+                            .setIoThreads(4));
 
     }
 }

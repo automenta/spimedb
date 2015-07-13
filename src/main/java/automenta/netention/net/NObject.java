@@ -238,7 +238,7 @@ public class NObject implements Serializable, Coordinates {
         }
 
         //http://geojson.org/
-        return where(lon, lat, ele, shape);
+        return where(lat, lon, ele, shape);
     }
 
     public NObject where(Line l) {
