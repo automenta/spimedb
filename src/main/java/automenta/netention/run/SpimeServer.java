@@ -17,6 +17,7 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.query.dsl.SpatialContext;
 import org.hibernate.search.query.dsl.SpatialTermination;
+import org.hibernate.search.query.dsl.TermContext;
 import org.hibernate.search.query.dsl.Unit;
 import org.infinispan.query.CacheQuery;
 import org.infinispan.query.FetchOptions;
@@ -102,6 +103,27 @@ public class SpimeServer extends Web {
 
         //websocket
         add("/ws", new SpimeSocket().get());
+
+        add("/tag/", new HttpHandler() {
+
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws Exception {
+                //TODO use NObject subclass for tags (categories)
+                System.out.println("INDEX");
+
+                TermContext whatQuery = base.search.buildQueryBuilderForClass(NObject.class).get().keyword();
+                Query c = whatQuery.wildcard().onField("outside").matching("*").createQuery();
+
+                CacheQuery x = base.find(c);
+
+                System.out.println(whatQuery);
+                System.out.println(c);
+                System.out.println(x);
+
+                x.iterator().forEachRemaining(y -> System.out.println(y) );
+
+            }
+        });
 
         add("/obj/", new HttpHandler() {
 
@@ -189,9 +211,10 @@ public class SpimeServer extends Web {
 
             String ss = n.summary(sb);
 
-            for (String p : n.inside()) {
+            /*for (String p : n.inside()) {
                 m.put(p, ss);
-            }
+            }*/
+            m.put(n.inside(), ss);
         }
 
 

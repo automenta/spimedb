@@ -52,10 +52,10 @@ public class NObject implements Serializable, Coordinates {
 
 
     /** extensional inheritance: what this nobject is "inside" of (its container) */
-    @JsonProperty(">") private String[] inside = null;
+    @Field(name = "inside") @JsonProperty(">") private String inside = null;
 
     /** extensional inheritance: what this nobject is "outside" of (its contents) */
-    @JsonProperty("<") private String[] outside = null;
+    @Field(name = "outside") @JsonProperty("<") private String outside = null;
 
     public NObject() {
         this(Core.uuid());
@@ -265,18 +265,18 @@ public class NObject implements Serializable, Coordinates {
     }
 
     /** sets the inside property */
-    public NObject setInside(String... parents) {
+    public NObject setInside(String parents) {
         this.inside = parents;
         return this;
     }
     /** sets the children property */
-    public NObject setOutside(String... children) {
+    public NObject setOutside(String children) {
         this.outside = children;
         return this;
     }
 
-    public String[] inside() { return inside; }
-    public String[] outside() { return outside; }
+    public String inside() { return inside; }
+    public String outside() { return outside; }
 
 
     /** produces a "1-line" summar JSON object as a string */

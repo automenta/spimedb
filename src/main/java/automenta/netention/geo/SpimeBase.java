@@ -184,13 +184,34 @@ public class SpimeBase implements Iterable<NObject> {
     }
 
     public NObject put(final NObject d) {
-        return cache.put(d.getId(), d);
+        NObject removed = cache.put(d.getId(), d);
+
+        //if (removed == null || !removed.inside().equals(d.inside())) extensionality(d);
+
+        //TODO remove extensionality of what is removed if different
+
+        return removed;
     }
 
     public void putFast(final NObject d) {
         cache.getAdvancedCache()
                 .withFlags(Flag.SKIP_REMOTE_LOOKUP, Flag.SKIP_CACHE_LOAD)
                 .putAsync(d.getId(), d);
+
+        extensionality(d);
+    }
+
+    private void extensionality(NObject d) {
+        String p = d.inside();
+        if (p==null) return;
+
+        NObject n = get(p);
+        if (n == null)
+            return; //err
+
+        n.setOutside("TRUE");
+        cache.replaceAsync(p, n);
+
     }
 
 
