@@ -40,7 +40,7 @@ public class Web extends PathHandler {
             DeploymentManager manager = this.container.addDeployment(builder);
             manager.deploy();
             try {
-                addPath(builder.getContextPath(), manager.start());
+                add(builder.getContextPath(), manager.start());
             } catch (ServletException e) {
                 throw new RuntimeException(e);
             }
@@ -138,9 +138,8 @@ public class Web extends PathHandler {
         return ids;
     }
 
-
     public Web add(String path, HttpHandler ph) {
-        addPrefixPath(path, ph);
+        super.addPrefixPath(path, ph);
         return this;
     }
 

@@ -28,6 +28,7 @@ public class SpimeBase implements Iterable<NObject> {
     public static final Logger log = LoggerFactory.getLogger(SpimeBase.class);
 
     private final Cache<String, NObject> cache;
+
     public final SearchManager search;
     private final EntityContext nobjContext;
 
@@ -42,6 +43,9 @@ public class SpimeBase implements Iterable<NObject> {
     public SpimeBase(Cache<String, NObject> cache) {
 
         this.cache = cache;
+
+
+
         this.search = Search.getSearchManager(cache);
         this.nobjContext = search.buildQueryBuilderForClass(NObject.class);
 
@@ -85,6 +89,9 @@ public class SpimeBase implements Iterable<NObject> {
 
     public static SpimeBase disk(String diskPath, int maxEntries) {
         ConfigurationBuilder c = new ConfigurationBuilder();
+
+        c.invocationBatching().enable();
+
         c.persistence()
                 .addSingleFileStore()
                 .location(diskPath)
@@ -107,7 +114,6 @@ public class SpimeBase implements Iterable<NObject> {
                 .l1().lifespan(25000L)
                 .hash().numOwners(3);*/
 
-        withIndexing(c);
 
         return newSpimeBase(c);
     }
@@ -116,14 +122,17 @@ public class SpimeBase implements Iterable<NObject> {
     public static SpimeBase memory() {
 
         ConfigurationBuilder c = new ConfigurationBuilder();
-        withIndexing(c);
+
 
         return newSpimeBase(c);
     }
 
     public static SpimeBase newSpimeBase(ConfigurationBuilder c) {
 
+        withIndexing(c);
+
         final DefaultCacheManager cacheManager = new DefaultCacheManager(c.build());
+
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Shutting down...");
@@ -177,11 +186,13 @@ public class SpimeBase implements Iterable<NObject> {
     public NObject put(final NObject d) {
         return cache.put(d.getId(), d);
     }
+
     public void putFast(final NObject d) {
         cache.getAdvancedCache()
                 .withFlags(Flag.SKIP_REMOTE_LOOKUP, Flag.SKIP_CACHE_LOAD)
                 .putAsync(d.getId(), d);
     }
+
 
     @Override
     public Iterator<NObject> iterator() {
@@ -197,4 +208,7 @@ public class SpimeBase implements Iterable<NObject> {
     }
 
 
+    public NObject get(String nobjectID) {
+        return cache.get(nobjectID);
+    }
 }

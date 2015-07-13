@@ -46,6 +46,7 @@ class Map2DView extends NView {
             iconAnchor: [16, 16]
         });
 
+
         var map = this.map = L.map(v[0], {
             // This map option disables world wrapping. by default, it is false.
             continuousWorld: true,
@@ -54,6 +55,10 @@ class Map2DView extends NView {
         //map.setView([51.505, -0.09], 13);
         map.setView([-35.98909,-54.2566178],9);
         //map.setView([0,0], 7);
+
+
+
+
 
         L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -66,6 +71,7 @@ class Map2DView extends NView {
             opacity: 1,
             fillOpacity: 0.8
         };
+
 
 
         /*
@@ -89,6 +95,46 @@ class Map2DView extends NView {
 
         var features = new Map();
 
+        function clickHandler(e) {
+            alert('popup');
+        }
+
+        function overHandler(e) {
+            var o = e.target.options;
+
+            if (o.ttRemove) {
+                clearTimeout(o.ttRemove);
+                o.tt.fadeIn();
+            }
+            else {
+                if (o.tt) return; //already shown
+
+                //setTimeout(function () {
+                    var tt = o.tt = $('<div>').addClass('map2d_status');
+
+                    tt.html($('<a>').text(o.title).click(function () {
+                    }));
+
+                    tt.css('left', e.containerPoint.x);
+                    tt.css('top', e.containerPoint.y);
+
+                    tt.appendTo(v);
+                //}, 0);
+            }
+        }
+        function outHandler(e) {
+            var delay = 1500; //ms
+            var fadeTime = 500; //ms
+
+            var o = e.target.options;
+            if (o.tt) {
+                o.ttRemove = setTimeout(function() {
+                    o.tt.fadeOut(fadeTime);
+                    o.tt = o.ttRemove = undefined;
+                }, delay);
+            }
+        }
+
         function addFeatures(ff) {
             var i;
             for (i = 0; i < ff.length; i++) {
@@ -102,10 +148,19 @@ class Map2DView extends NView {
                 if (features.get(id))
                     return;
 
-                //console.log('showing: ' , f.N, f.I, f.S);
 
-                var m = L.circleMarker( [ f.S[0], f.S[1] ],
-                    geojsonMarkerOptions);
+                var m = L.circleMarker( [ f.S[0], f.S[1] ], {
+                        data: f,
+                        title: f.N || f.I,
+                        zIndexOffset: 100
+                });
+                m.on('click', clickHandler);
+                m.on('mouseover', overHandler);
+                m.on('mouseout', outHandler);
+
+
+
+
                 m.addTo(clustering);
 
                 features.set(id, m);

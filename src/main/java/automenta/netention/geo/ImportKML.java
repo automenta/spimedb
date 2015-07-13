@@ -52,6 +52,7 @@ public class ImportKML {
     final Deque<String> path = new ArrayDeque();
 
     boolean enableDescriptions = true;
+    private String pathString;
 
 
     public static String getSerial(long serial) {
@@ -116,6 +117,7 @@ public class ImportKML {
 
                 if (go instanceof ContainerEnd) {
                     path.removeLast();
+                    updatePath();
                     continue;
                 }
 
@@ -137,6 +139,7 @@ public class ImportKML {
 
                     //System.out.println(cs + " " + cs.getId());
                     path.add(i);
+                    updatePath();
 
                 }
 
@@ -213,6 +216,10 @@ public class ImportKML {
 
         visitor.end();
 
+    }
+
+    void updatePath() {
+        pathString = String.join("/", path);
     }
 
 //    public static void exec(String cmd) {
@@ -407,8 +414,7 @@ public class ImportKML {
                                 d = newNObject(id);
                             }
                             else {
-                                String m = String.join(" ", path);
-                                d = newNObject(m);
+                                d = newNObject(pathString);
                             }
 
                             d.name(cs.getName());
@@ -433,11 +439,10 @@ public class ImportKML {
                                     }
                                 }
                             }
-
                         }
                         else {
                             d = newNObject();
-                            d.inside(path);
+                            d.setInside(pathString);
                         }
 
                         if (go instanceof Common) {

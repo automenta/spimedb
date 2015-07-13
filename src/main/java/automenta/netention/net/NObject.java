@@ -51,6 +51,11 @@ public class NObject implements Serializable, Coordinates {
     @JsonProperty("^") Map<String, Object> fields = null;
 
 
+    /** extensional inheritance: what this nobject is "inside" of (its container) */
+    @JsonProperty(">") private String[] inside = null;
+
+    /** extensional inheritance: what this nobject is "outside" of (its contents) */
+    @JsonProperty("<") private String[] outside = null;
 
     public NObject() {
         this(Core.uuid());
@@ -259,16 +264,19 @@ public class NObject implements Serializable, Coordinates {
         return where(p.getCenter(), NObject.POLYGON, new double[][][]{outerRing /* inner rings */});
     }
 
-    /** extensionally inside of a folder structure specified by path (topmost first) */
-    public NObject inside(String... path) {
-        return put(">", path);
+    /** sets the inside property */
+    public NObject setInside(String... parents) {
+        this.inside = parents;
+        return this;
     }
-    public String inside() {
-        String[] paths = get(">");
-        if ((paths == null) || (paths.length == 0))
-            return "uncategorized";
-        return String.join("/", paths);
+    /** sets the children property */
+    public NObject setOutside(String... children) {
+        this.outside = children;
+        return this;
     }
+
+    public String[] inside() { return inside; }
+    public String[] outside() { return outside; }
 
 
     /** produces a "1-line" summar JSON object as a string */

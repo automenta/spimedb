@@ -6,8 +6,6 @@
 package automenta.netention.web;
 
 import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.PathHandler;
 import spangraph.InfiniPeer;
 
 import java.util.ArrayList;
@@ -60,7 +58,7 @@ public class SpacetimeWebServer extends Web {
          */
 
         //https://github.com/undertow-io/undertow/blob/master/examples/src/main/java/io/undertow/examples/sessionhandling/SessionServer.java
-        addPrefixPath("/", ClientResources.handleClientResources());
+        add("/", ClientResources.handleClientResources());
 
 //        addPrefixPath("/socket", new WebSocketCore(
 //                index
@@ -218,11 +216,6 @@ public class SpacetimeWebServer extends Web {
     }
 
 
-    @Override
-    public synchronized PathHandler addPrefixPath(String path, HttpHandler handler) {
-        paths.add(path);
-        return super.addPrefixPath(path, handler);
-    }
 
 
 }

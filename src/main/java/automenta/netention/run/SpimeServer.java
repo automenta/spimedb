@@ -103,6 +103,21 @@ public class SpimeServer extends Web {
         //websocket
         add("/ws", new SpimeSocket().get());
 
+        add("/obj/", new HttpHandler() {
+
+            @Override
+            public void handleRequest(HttpServerExchange ex) throws Exception {
+
+                String nobjectID = ex.getRelativePath().substring(1); //removes leading '/'
+                NObject n = base.get(nobjectID);
+                if (n == null)
+                    ex.setResponseCode(404);
+                else {
+                    send(n.toString(), ex);
+                }
+            }
+        });
+
         add("/planet/earth/region2d/circle/summary", new HttpHandler() {
             @Override
             public void handleRequest(HttpServerExchange ex) throws Exception {
@@ -171,8 +186,12 @@ public class SpimeServer extends Web {
         StringBuilder sb = new StringBuilder(128);
         while (i.hasNext()) {
             NObject n = (NObject)i.next();
-            String path = n.inside();
-            m.put(path, n.summary(sb));
+
+            String ss = n.summary(sb);
+
+            for (String p : n.inside()) {
+                m.put(p, ss);
+            }
         }
 
 
@@ -262,6 +281,7 @@ public class SpimeServer extends Web {
         }
 
         System.out.println("Indices: " + es.getStatistics().indexedEntitiesCount());
+
 
         //System.out.println(es.size() + " objects loaded");
 
