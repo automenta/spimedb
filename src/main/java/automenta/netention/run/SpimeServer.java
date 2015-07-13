@@ -9,12 +9,12 @@ import automenta.netention.web.ClientResources;
 import automenta.netention.web.Web;
 import automenta.netention.web.WebSocketCore;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.HashMultimap;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
 import org.hibernate.search.query.dsl.SpatialContext;
 import org.hibernate.search.query.dsl.SpatialTermination;
 import org.hibernate.search.query.dsl.Unit;
@@ -24,11 +24,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class SpimeServer extends Web {
+
+    final int MAX_QUERY_RESULTS = 256;
 
     public class SpimeSocket extends WebSocketCore {
 
@@ -54,7 +58,6 @@ public class SpimeServer extends Web {
 //            System.out.println(cq.getResultSize());
 
 
-
         }
 
         @Override
@@ -63,13 +66,35 @@ public class SpimeServer extends Web {
         }
     }
 
+    public CacheQuery queryCircle(double lat, double lon, double radMeters, int maxResults) {
+
+        //Bounds
+        //SpatialMatchingContext whereQuery = base.find().spatial().onField("nobject");
+        SpatialContext whereQuery = base.search.buildQueryBuilderForClass(NObject.class).get().spatial();
+
+
+        SpatialTermination qb = whereQuery.
+                within(radMeters / 1000.0, Unit.KM)
+                .ofLatitude(lat)
+                .andLongitude(lon);
+
+
+        if (qb != null) {
+            Query c = qb.createQuery();
+
+            CacheQuery cq = base.find(c).maxResults(maxResults);
+            return cq;
+        }
+        return null;
+
+    }
+
     public static final Logger log = LoggerFactory.getLogger(SpimeServer.class);
 
     private final SpimeBase base;
 
-    public SpimeServer(SpimeBase s)  {
+    public SpimeServer(SpimeBase s) {
         super();
-
 
 
         //static content
@@ -78,79 +103,44 @@ public class SpimeServer extends Web {
         //websocket
         add("/ws", new SpimeSocket().get());
 
-        add("/space", new HttpHandler() {
+        add("/planet/earth/region2d/circle/summary", new HttpHandler() {
+            @Override
+            public void handleRequest(HttpServerExchange ex) throws Exception {
+                try {
+                    CacheQuery cq = queryCircle(ex.getQueryParameters());
+                    if (cq != null) {
+                        sendSummaryResults(cq, ex, MAX_QUERY_RESULTS);
+                    } else {
+                        //invalid query or other server error
+                        ex.setResponseCode(500);
+                        ex.endExchange();
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        add("/planet/earth/region2d/circle/detail", new HttpHandler() {
             @Override
             public void handleRequest(HttpServerExchange ex) throws Exception {
 
                 try {
-
-                    Map<String, Deque<String>> q = ex.getQueryParameters();
-
-                    //TODO handle planet ("p")
-
-
-
-                    SpatialTermination qb = null;
-
-                    String regionShape = q.get("R").getFirst().toString();
-
-
-
-                    if (regionShape != null) {
-
-                        //Bounds
-                        //SpatialMatchingContext whereQuery = base.find().spatial().onField("nobject");
-                        SpatialContext whereQuery = base.search.buildQueryBuilderForClass(NObject.class).get().spatial();
-
-
-
-                        switch (regionShape) {
-                            case "c":
-                                /* Circle("x", "y", "m")
-                                        x = lon
-                                        y = lat
-                                        m = radius (meters)
-                                */
-                                double lon = Double.valueOf(q.get("x").getFirst().toString());
-                                double lat = Double.valueOf(q.get("y").getFirst().toString());
-                                double radMeters = Double.valueOf(q.get("r").getFirst().toString());
-
-                                qb = whereQuery.
-                                        within(radMeters / 1000.0, Unit.KM)
-                                        .ofLatitude(lat)
-                                        .andLongitude(lon);
-                                break;
-
-                        }
-
-                    }
-
-
-
-                    if (qb != null) {
-                        Query c = qb.createQuery();
-
-                        final int MAX_QUERY_RESULTS = 128;
-
-                        CacheQuery cq = base.find(c);
-
-                        final int maxResults = MAX_QUERY_RESULTS;
-
-                        sendQueryResult(cq, maxResults, ex);
-
+                    CacheQuery cq = queryCircle(ex.getQueryParameters());
+                    if (cq != null) {
+                        sendFullResults(cq, ex, MAX_QUERY_RESULTS);
                     } else {
                         //invalid query or other server error
                         ex.setResponseCode(500);
                         ex.endExchange();
                     }
 
-
                     //                String[] sections = ex.getRelativePath().split("/");
                     //                String mode = sections[1];
                     //                String query = sections[2];
                     //                handleRequest(mode, query, ex);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -159,13 +149,80 @@ public class SpimeServer extends Web {
 
     }
 
-    public void sendQueryResult(CacheQuery cq, int maxResults, HttpServerExchange ex) {
-        cq.maxResults(maxResults).sort(Sort.RELEVANCE);
+    private CacheQuery queryCircle(Map<String, Deque<String>> q) {
+        /* Circle("x", "y", "m")
+                            x = lon
+                            y = lat
+                            m = radius (meters)
+                    */
+        double lon = Double.valueOf(q.get("x").getFirst().toString());
+        double lat = Double.valueOf(q.get("y").getFirst().toString());
+        double radMeters = Double.valueOf(q.get("r").getFirst().toString());
 
+        final int maxResults = MAX_QUERY_RESULTS;
+
+        return queryCircle(lat, lon, radMeters, maxResults);
+    }
+
+    public void sendSummaryResults(CacheQuery cq, HttpServerExchange ex, int maxResults) {
+        HashMultimap<String,String> m = HashMultimap.create();
+
+        Iterator i = cq.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.LAZY).fetchSize(maxResults));
+        StringBuilder sb = new StringBuilder(128);
+        while (i.hasNext()) {
+            NObject n = (NObject)i.next();
+            String path = n.inside();
+            m.put(path, n.summary(sb));
+        }
+
+
+
+        send(o -> {
+
+            PrintStream p = new PrintStream(o);
+
+            try {
+                p.print('{');
+
+                boolean first = true;
+                for (String path : m.keys()) {
+                    Set<String> s = m.get(path);
+                    String items = String.join(",", s); //TODO output directly
+
+                    if (!first) {
+                        p.append(',');
+                    }
+                    else
+                        first = false;
+
+                    p.append('\"').append(path).append("\":[");
+
+                    p.append(items).append("]");
+
+                }
+
+                p.print('}');
+                p.flush();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+//            try {
+//
+//                Core.json.writeValue(o, m);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+        }, ex);
+
+    }
+
+    public void sendFullResults(CacheQuery cq, HttpServerExchange ex, int maxResults) {
+        //cq.maxResults(maxResults).sort(Sort.RELEVANCE);
 
         if (cq.getResultSize() > 0) {
-            //StringBuilder sb = new StringBuilder();
-
             Iterator i = cq.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.LAZY).fetchSize(maxResults));
 
             send(o -> {
@@ -175,17 +232,8 @@ public class SpimeServer extends Web {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-//                                while (i.hasNext()) {
-//                                    NObject r = (NObject)i.next();
-//                                    o.write(r.toBytes(true));
-//                                    //sb.append(r.toString());
-//                                }
-
             }, ex);
-
-            //send(sb.toString(), ex);
-        }
-        else {
+        } else {
             //no results
             ex.endExchange();
         }
@@ -193,18 +241,18 @@ public class SpimeServer extends Web {
 
 
     public static void main(String[] args) throws IOException {
-        SpimeBase es = SpimeBase.disk("/tmp/sf", 128*1024);
+        SpimeBase es = SpimeBase.disk("/tmp/sf", 128 * 1024);
 
 
         if (es.isEmpty()) {
             System.out.println("Initializing database...");
 
-            String[] urls = new String[] {
-                "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
-                "file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-                "file:///home/me/kml/submarine-cables-CV3D.kmz",
-                "file:///home/me/kml/fusion-landing-points-CV3D.kmz",
-                "file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
+            String[] urls = new String[]{
+                    "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
+                    "file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
+                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
+                    "file:///home/me/kml/fusion-landing-points-CV3D.kmz",
+                    "file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
             };
 
             for (String u : urls) {
@@ -213,10 +261,9 @@ public class SpimeServer extends Web {
 
         }
 
-        System.out.println(es.getStatistics().getIndexedClassNames());
-        System.out.println(es.getStatistics().indexedEntitiesCount());
+        System.out.println("Indices: " + es.getStatistics().indexedEntitiesCount());
 
-        System.out.println(es.size() + " objects loaded");
+        //System.out.println(es.size() + " objects loaded");
 
 
         new SpimeServer(es).start("localhost", 8080);

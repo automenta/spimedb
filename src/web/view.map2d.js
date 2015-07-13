@@ -20,9 +20,8 @@ function circleBounds(lat, lon, radMeters, decimals) {
         "y":  lat.toFixed(decimals),
         "x":  lon.toFixed(decimals),
         "r":  radMeters.toFixed(decimals),
-        "p": "e", //earth
         toURL: function() {
-            return "/space?R=c&x=" + // "Region" = "circular"
+            return "/planet/earth/region2d/circle/summary?x=" + // "Region" = "circular"
                 this.x + "&y=" + this.y +
                 "&r=" + this.r; //"radius"
         }
@@ -84,6 +83,10 @@ class Map2DView extends NView {
          };
          */
 
+        var clustering = new L.MarkerClusterGroup();
+        clustering.addTo(map);
+;
+
         var features = new Map();
 
         function addFeatures(ff) {
@@ -103,13 +106,11 @@ class Map2DView extends NView {
 
                 var m = L.circleMarker( [ f.S[0], f.S[1] ],
                     geojsonMarkerOptions);
-                m.addTo(map);
+                m.addTo(clustering);
 
                 features.set(id, m);
 
             }
-
-            console.log(features.keys(), " features displayed");
 
             //f.type = "Feature";
             //f.geometry = f.geom;
@@ -321,9 +322,21 @@ class Map2DView extends NView {
         /** focus callback, used whenever an object that may be displayed is received asynchronously */
         var focus = function(x) {
             if (x) {
-                setTimeout(function () {
-                    addFeatures(x)
-                }, 0);
+
+                if (!Array.isArray(x)) {
+                    //decode categories
+                    setTimeout(function () {
+                        for (var k in x) {
+                            var e = x[k];
+                            addFeatures(e);
+                        }
+                    }, 0);
+                }
+                else {
+                    setTimeout(function () {
+                        addFeatures(x)
+                    }, 0);
+                }
             }
         };
 

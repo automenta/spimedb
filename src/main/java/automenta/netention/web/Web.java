@@ -5,9 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
+import io.undertow.predicate.Predicates;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.encoding.ContentEncodingRepository;
+import io.undertow.server.handlers.encoding.EncodingHandler;
+import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletContainer;
@@ -26,9 +30,34 @@ import java.util.function.Consumer;
 /**
  * Utility functions for web server processes
  */
-public class Web extends PathHandler  {
-    public final ServletContainer container = ServletContainer.Factory.newInstance();
-    private final Set<Class<?>> services = new HashSet();
+public class Web extends PathHandler {
+
+    public static class ServletWeb extends Web {
+        public final ServletContainer container = ServletContainer.Factory.newInstance();
+        private final Set<Class<?>> services = new HashSet();
+
+        public Web deploy(DeploymentInfo builder) {
+            DeploymentManager manager = this.container.addDeployment(builder);
+            manager.deploy();
+            try {
+                addPath(builder.getContextPath(), manager.start());
+            } catch (ServletException e) {
+                throw new RuntimeException(e);
+            }
+            return this;
+        }
+
+        public Web add(Class<?> service) {
+            services.add(service);
+            return this;
+        }
+
+
+    }
+
+
+    boolean compress = true;
+
     public Undertow server;
 
 //    static void send(String s, HttpServerExchange ex) {
@@ -109,59 +138,58 @@ public class Web extends PathHandler  {
         return ids;
     }
 
-    public Web deploy(DeploymentInfo builder)
-    {
-        DeploymentManager manager = this.container.addDeployment(builder);
-        manager.deploy();
-        try
-        {
-            addPath(builder.getContextPath(), manager.start());
-        }
-        catch (ServletException e)
-        {
-            throw new RuntimeException(e);
-        }
-        return this;
-    }
 
     public Web add(String path, HttpHandler ph) {
         addPrefixPath(path, ph);
         return this;
     }
 
-    public Web add(Class<?> service) {
-        services.add(service);
-        return this;
-    }
-
-    public Web start(Undertow.Builder builder)     {
+    public Web start(Undertow.Builder builder) {
 //        deploy(new Application() {
 //            @Override public Set<Class<?>> getClasses() {
 //                return services;
 //            }
 //        }, "/api");
-        this.server = builder.setHandler(this).build();
+
+
+        Undertow.Builder s;
+        if (compress) {
+
+            final EncodingHandler handler =
+                    new EncodingHandler(new ContentEncodingRepository()
+                            .addEncodingHandler("gzip",
+                                    new GzipEncodingProvider(), 5,
+                                    Predicates.parse("max-content-size[50000]")))
+                            .setNext(this);
+
+// ...
+            s = builder.setHandler(handler);
+        } else {
+            s = builder.setHandler(this);
+        }
+        this.server = s.build();
         this.server.start();
         return this;
     }
 
-    public void stop()
-    {
+    public void stop() {
         this.server.stop();
     }
 
     public Web start(String host, int port) {
 
-            return start(Undertow.builder()
-                    .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
-                    .setServerOption(UndertowOptions.ENABLE_SPDY, true)
-                    .setWorkerThreads(4)
+        return start(Undertow.builder()
+                .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
+                .setServerOption(UndertowOptions.ENABLE_SPDY, true)
+                .setWorkerThreads(2)
 
 
-                            //.addHttpsListener(8443, bindAddress, sslContext)
+                        //.addHttpsListener(8443, bindAddress, sslContext)
 
-                            .addHttpListener(8080, "localhost")
-                            .setIoThreads(4));
+                .addHttpListener(port, host)
+                .setIoThreads(4));
 
     }
+
+
 }

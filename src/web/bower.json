@@ -9,6 +9,7 @@
         "cesiumjs": "latest",
         "leaflet": "latest",
         "leaflet-providers": "latest",
+        "leaflet.markercluster": "latest",
         "d3": "latest",
         "graphlib": "latest",
         "bootstrap": "latest",

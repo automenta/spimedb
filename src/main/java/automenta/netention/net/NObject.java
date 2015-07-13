@@ -15,10 +15,7 @@ import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static automenta.netention.geo.ImportKML.toArray;
 
@@ -211,6 +208,10 @@ public class NObject implements Serializable, Coordinates {
     public boolean isSpatial() {
         return space!=null;
     }
+    @JsonIgnore
+    public boolean isTemporal() {
+        return time!=null;
+    }
 
 
     public NObject now() {
@@ -262,6 +263,30 @@ public class NObject implements Serializable, Coordinates {
     public NObject inside(String... path) {
         return put(">", path);
     }
+    public String inside() {
+        String[] paths = get(">");
+        if ((paths == null) || (paths.length == 0))
+            return "uncategorized";
+        return String.join("/", paths);
+    }
 
 
+    /** produces a "1-line" summar JSON object as a string */
+    @JsonIgnore public String summary(StringBuilder sb) {
+        sb.setLength(0);
+
+        sb.append("{\"I\":\"").append(getId()).append("\"");
+
+        String name = getName();
+        if (name!=null)
+            sb.append(",\"N\":\"").append(name).append("\"");
+        if (isSpatial())
+            sb.append(",\"S\":").append(Arrays.toString(space)); //TODO append
+        if (isTemporal())
+            sb.append(",\"T\":").append(Arrays.toString(time)); //TODO append
+
+        sb.append('}');
+
+        return sb.toString();
+    }
 }

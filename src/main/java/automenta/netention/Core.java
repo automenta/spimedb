@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import de.undercouch.bson4jackson.BsonFactory;
@@ -124,7 +123,7 @@ public class Core {
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
 
-    final public static JsonNodeFactory newJson = new JsonNodeFactory(false);
+    //final public static JsonNodeFactory newJson = new JsonNodeFactory(false);
 
     public final static ObjectMapper bson = new ObjectMapper(new BsonFactory());
 
@@ -156,10 +155,10 @@ public class Core {
 
 
     public static String uuid() {
-        int bits = 8 * 16;
-        byte[] bytes = new byte[bits/8];
+
+        byte[] bytes = new byte[12];
         for (int i = 0; i < bytes.length; i++)
-            bytes[i] = (byte)(Math.random() * 256); //TODO use xorshfitrandom
+            bytes[i] = (byte)(Math.random() * 256); //TODO use better RNG
 
         return Base64.getEncoder().encodeToString(bytes);
     }
