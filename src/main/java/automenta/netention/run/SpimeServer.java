@@ -17,7 +17,6 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.query.dsl.SpatialContext;
 import org.hibernate.search.query.dsl.SpatialTermination;
-import org.hibernate.search.query.dsl.TermContext;
 import org.hibernate.search.query.dsl.Unit;
 import org.infinispan.query.CacheQuery;
 import org.infinispan.query.FetchOptions;
@@ -26,10 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SpimeServer extends Web {
 
@@ -71,7 +67,7 @@ public class SpimeServer extends Web {
 
         //Bounds
         //SpatialMatchingContext whereQuery = base.find().spatial().onField("nobject");
-        SpatialContext whereQuery = base.search.buildQueryBuilderForClass(NObject.class).get().spatial();
+        SpatialContext whereQuery = base.objSearch.buildQueryBuilderForClass(NObject.class).get().spatial();
 
 
         SpatialTermination qb = whereQuery.
@@ -104,24 +100,36 @@ public class SpimeServer extends Web {
         //websocket
         add("/ws", new SpimeSocket().get());
 
-        add("/tag/", new HttpHandler() {
 
+        add("/index", new HttpHandler() {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws Exception {
-                //TODO use NObject subclass for tags (categories)
-                System.out.println("INDEX");
 
-                TermContext whatQuery = base.search.buildQueryBuilderForClass(NObject.class).get().keyword();
-                Query c = whatQuery.wildcard().onField("outside").matching("*").createQuery();
+                send(Core.json.writeValueAsString(base.ext.keySet()), exchange);
+            }
+        });
 
-                CacheQuery x = base.find(c);
+        //TODO add parametres for root & how many levels
+        add("/obj/inside/", new HttpHandler() {
 
-                System.out.println(whatQuery);
-                System.out.println(c);
-                System.out.println(x);
+            @Override
+            public void handleRequest(HttpServerExchange ex) throws Exception {
 
-                x.iterator().forEachRemaining(y -> System.out.println(y) );
+                String rp = ex.getRelativePath();
+                if (rp.length() > 0) {
+                    String nobjectID = rp.substring(1); //removes leading '/'
 
+                    send(Core.json.writeValueAsString(base.ext.get(nobjectID)), ex);
+                }
+                /*send(o -> {
+                    PrintStream p = new PrintStream(o);
+                    Iterator<Map.Entry<String, Collection<String>>> ie = base.ext.entrySet().iterator();
+                    while (ie.hasNext()) {
+                        Map.Entry<String, Collection<String>> e = ie.next();
+                        p.print(e.getKey() + ": " + e.getValue() + "\n");
+                    }
+                    p.flush();
+                }, exchange);*/
             }
         });
 

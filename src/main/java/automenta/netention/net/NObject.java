@@ -267,6 +267,8 @@ public class NObject implements Serializable, Coordinates {
     /** sets the inside property */
     public NObject setInside(String parents) {
         this.inside = parents;
+        if (this.inside.equals(getId()))
+            throw new RuntimeException("object can not be inside itself");
         return this;
     }
     /** sets the children property */

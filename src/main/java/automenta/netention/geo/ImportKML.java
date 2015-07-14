@@ -53,6 +53,7 @@ public class ImportKML {
 
     boolean enableDescriptions = true;
     private String pathString;
+    private String parentPathString;
 
 
     public static String getSerial(long serial) {
@@ -219,6 +220,13 @@ public class ImportKML {
     }
 
     void updatePath() {
+        if (path.size() > 0) {
+            parentPathString = String.join("/",  new ArrayList(path).subList(0, path.size()-1));
+        }
+        else {
+            parentPathString = null;
+        }
+
         pathString = String.join("/", path);
     }
 
@@ -415,6 +423,7 @@ public class ImportKML {
                             }
                             else {
                                 d = newNObject(pathString);
+                                d.setInside(parentPathString);
                             }
 
                             d.name(cs.getName());
@@ -558,7 +567,7 @@ public class ImportKML {
                                 System.err.println("Un-NObjectized: " + go);
                                 return false;
                             }
-                            geo.putFast(d);
+                            geo.put(d);
                         }
 
                         return true;

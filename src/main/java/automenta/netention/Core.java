@@ -156,7 +156,7 @@ public class Core {
 
     public static String uuid() {
 
-        byte[] bytes = new byte[12];
+        byte[] bytes = new byte[16]; /** 16*8 = 128 bits = UUID */
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = (byte)(Math.random() * 256); //TODO use better RNG
 

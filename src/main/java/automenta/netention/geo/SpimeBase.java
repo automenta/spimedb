@@ -8,7 +8,6 @@ import org.hibernate.search.stat.Statistics;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.Index;
-import org.infinispan.context.Flag;
 import org.infinispan.manager.CacheContainer;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.query.CacheQuery;
@@ -17,7 +16,7 @@ import org.infinispan.query.SearchManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * http://infinispan.org/docs/8.0.x/user_guide/user_guide.html#_the_infinispan_query_module
@@ -27,33 +26,33 @@ public class SpimeBase implements Iterable<NObject> {
 
     public static final Logger log = LoggerFactory.getLogger(SpimeBase.class);
 
-    private final Cache<String, NObject> cache;
 
-    public final SearchManager search;
+    private final Cache<String, NObject> obj;
+
+    /**
+     * extensional inheritance -- parent/child containment relationships
+     */
+    public final Cache<String /* parent */, Collection<String> /* children */> ext;
+
+    public final SearchManager objSearch;
     private final EntityContext nobjContext;
 
     public SpimeBase(CacheContainer cm, String id) {
-        this(cm.getCache(id));
-    }
-
-    public SpimeBase(CacheContainer cm) {
-        this(cm.getCache());
-    }
-
-    public SpimeBase(Cache<String, NObject> cache) {
-
-        this.cache = cache;
 
 
+        this.obj = cm.getCache(id + "_obj");
+        this.objSearch = Search.getSearchManager(obj);
 
-        this.search = Search.getSearchManager(cache);
-        this.nobjContext = search.buildQueryBuilderForClass(NObject.class);
+        this.ext = cm.getCache(id + "_ext");
+
+        this.nobjContext = objSearch.buildQueryBuilderForClass(NObject.class);
 
     }
 
     public static NObject newNObject() {
         return new NObject();
     }
+
     public static NObject newNObject(String id) {
         return new NObject(id);
     }
@@ -69,12 +68,35 @@ public class SpimeBase implements Iterable<NObject> {
     }
 
 
-
     public static ConfigurationBuilder withIndexing(ConfigurationBuilder cb, String directoryProvider) {
+        //https://github.com/tsykora/infinispan-odata-server/blob/master/src/main/resources/indexing-perf.xml#L82
         cb.indexing()
                 .index(Index.ALL)
                 .addProperty("default.directory_provider", directoryProvider)
-                .addProperty("lucene_version", "LUCENE_CURRENT");
+                .addProperty("lucene_version", "LUCENE_CURRENT")
+                .addProperty("lucene_version", "LUCENE_CURRENT")
+                //<!-- Supporting exclusive index usage will require lock cleanup on crashed nodes to be implemented -->
+                .addProperty("hibernate.search.default.exclusive_index_use", "false")
+                .addProperty("default.chunk_size", "128000")
+                .addProperty("default.indexwriter.merge_factor", "30")
+                .addProperty("default.indexwriter.merge_max_size", "1024")
+                .addProperty("default.indexwriter.ram_buffer_size", "256");
+                //        <!-- Write indexes in Infinispan -->
+                //        <property name="default.chunk_size" value="128000" />
+                //
+                //        <!-- The default is 10, but we don't want to waste many cycles in merging
+                //        (tune for writes at cost of reader fragmentation) -->
+                //        <property name="default.indexwriter.merge_factor" value="30" />
+                //
+                //        <!-- Never create segments larger than 1GB -->
+                //        <property name="default.indexwriter.merge_max_size" value="1024" />
+                //
+                //        <!-- IndexWriter flush buffer size in MB -->
+                //        <property name="default.indexwriter.ram_buffer_size" value="256" />
+                //
+                //        <!-- Enable sharding on writers
+                //                <property name="default.sharding_strategy.nbr_of_shards" value="6" /> -->
+                //        ;
 
 
         /*
@@ -106,7 +128,7 @@ public class SpimeBase implements Iterable<NObject> {
 
                 .unsafe();
 
-                //.purgeOnStartup(true)
+        //.purgeOnStartup(true)
                 /*.clustering()
                         //.cacheMode(CacheMode.DIST_SYNC)
                 .cacheMode(CacheMode.DIST_SYNC)
@@ -118,7 +140,9 @@ public class SpimeBase implements Iterable<NObject> {
         return newSpimeBase(c);
     }
 
-    /** in-RAM index */
+    /**
+     * in-RAM index
+     */
     public static SpimeBase memory() {
 
         ConfigurationBuilder c = new ConfigurationBuilder();
@@ -139,7 +163,7 @@ public class SpimeBase implements Iterable<NObject> {
             cacheManager.stop();
         }));
 
-        SpimeBase db = new SpimeBase(cacheManager.getCache());
+        SpimeBase db = new SpimeBase(cacheManager, "");
 
         log.info("Created: " + db + " with " + c);
 
@@ -148,88 +172,114 @@ public class SpimeBase implements Iterable<NObject> {
     }
 
 
-//    public static void main(String[] args) {
-//
-//
-//        SpimeBase db = SpimeBase.memory();
-//
-//        //sm.getMassIndexer().start();
-//
-//        db.put(new NObject(null, "Spatial NObject").where(0.75f, 0.66f));
-//        db.put(new NObject(null, "Temporal NObject").now());
-//
-//
-//        db.forEach( x -> System.out.println(x) );
-//
-//
-//        Query c = db.find().keyword().onField("name").matching("Spatial NObject").createQuery();
-//        CacheQuery cq = db.find(c);
-//
-//        System.out.println(cq.list());
-//        System.out.println(cq.getResultSize());
-//
-//
-//    }
-
     public QueryBuilder find() {
         return nobjContext.get();
     }
 
     public CacheQuery find(Query q) {
-        return search.getQuery(q, NObject.class);
+        return objSearch.getQuery(q, NObject.class);
     }
 
     public Statistics getStatistics() {
-        return search.getStatistics();
+        return objSearch.getStatistics();
     }
 
     public NObject put(final NObject d) {
-        NObject removed = cache.put(d.getId(), d);
+        NObject removed = obj.put(d.getId(), d);
 
         //if (removed == null || !removed.inside().equals(d.inside())) extensionality(d);
 
         //TODO remove extensionality of what is removed if different
 
+        String currInside = d.inside();
+        String prevInside;
+        if (removed != null) {
+            prevInside = removed.inside();
+        } else {
+            prevInside = null;
+        }
+
+        if (currInside != null) {
+            if (currInside.equals(prevInside)) {
+                //extensionality unchanged
+            } else {
+                if (prevInside != null)
+                    unchild(d.getId(), prevInside);
+                child(d.getId(), currInside);
+            }
+        } else {
+            if (prevInside != null) {
+                unchild(d.getId(), prevInside);
+            } else {
+                //still no parent
+            }
+            root(d.getId());
+        }
+
+
         return removed;
     }
 
+    protected void root(String rootID) {
+        ext.put(rootID, new ArrayList(0));
+    }
+
+    protected boolean child(String childID, String parentID) {
+        Collection<String> e = ext.get(parentID);
+        if (e == null) {
+            e = new HashSet();
+        }
+        else if (e.size() > 0 && (!(e instanceof Set))) {
+            //allow list if e.size() == 1, but if grows > 1, convert to set
+            e = new HashSet(e);
+        }
+        if (e.add(childID)) {
+            ext.put(parentID, e);
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean unchild(String childID, String parentID) {
+        Collection<String> e = ext.get(parentID);
+        if (e != null) {
+            if (e.remove(childID)) {
+                ext.put(parentID, e);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
     public void putFast(final NObject d) {
+
         cache.getAdvancedCache()
                 .withFlags(Flag.SKIP_REMOTE_LOOKUP, Flag.SKIP_CACHE_LOAD)
                 .putAsync(d.getId(), d);
 
         extensionality(d);
-    }
+    }*/
 
-    private void extensionality(NObject d) {
-        String p = d.inside();
-        if (p==null) return;
-
-        NObject n = get(p);
-        if (n == null)
-            return; //err
-
-        n.setOutside("TRUE");
-        cache.replaceAsync(p, n);
-
-    }
 
 
     @Override
     public Iterator<NObject> iterator() {
-        return cache.values().iterator();
+        return obj.values().iterator();
     }
 
     public boolean isEmpty() {
-        return cache.isEmpty();
+        return obj.isEmpty();
     }
 
     public int size() {
-        return cache.size();
+        return obj.size();
     }
 
 
     public NObject get(String nobjectID) {
-        return cache.get(nobjectID);
+        return obj.get(nobjectID);
     }
 }
+
+
