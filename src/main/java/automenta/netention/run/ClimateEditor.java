@@ -1,7 +1,7 @@
 package automenta.netention.run;
 
 import automenta.netention.data.SpimeScript;
-import automenta.netention.db.BPSpimeBase;
+import automenta.netention.db.SpimeGraph;
 import automenta.netention.geo.ImportKML;
 
 import javax.script.ScriptException;
@@ -16,7 +16,7 @@ public class ClimateEditor {
 
     public static void main(String[] args) throws IOException, ScriptException {
         //InfinispanSpimeBase es = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
-        BPSpimeBase es = new BPSpimeBase();
+        SpimeGraph es = new SpimeGraph();
 
 
 
