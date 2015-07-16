@@ -399,7 +399,7 @@ class Map2DView extends NView {
 
 
 
-        var updateBounds = _.throttle(function (e) {
+        var updateBounds = _.debounce(function (e) {
             var b = map.getBounds();
 
             var radiusMeters = b.getSouthEast().distanceTo(b.getNorthWest()) / 2.0;

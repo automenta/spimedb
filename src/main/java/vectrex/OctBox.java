@@ -1,5 +1,6 @@
 package vectrex;
 
+import com.gs.collections.impl.list.mutable.FastList;
 import toxi.geom.*;
 
 import java.util.ArrayList;
@@ -96,6 +97,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
     public OctBox<V> ADD(final V p) {
 
 
+
         // check if point is inside cube
         if (containsPoint(p)) {
             // only add points to leaves for now
@@ -125,7 +127,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
     }
 
     protected Collection<V> newPointsCollection() {
-        return new ArrayList();
+        return new FastList();
     }
 
 
@@ -175,9 +177,10 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      *
      * @return leaf node or null if point is outside the tree dimensions
      */
-    public OctBox getLeafForPoint(XYZ p) {
+    public OctBox getLeafForPoint(final XYZ p) {
         // if not a leaf node...
         if (p.isInAABB(this)) {
+            final OctBox[] children = this.children;
             if (children!=null) {
                 int octant = getOctantID(p);
                 if (children[octant] != null) {
@@ -204,19 +207,19 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
     }
 
 
-    /**
-     * Computes the local child octant/cube index for the given point
-     *
-     * @param plocal
-     *            point in the node-local coordinate system
-     * @return octant index
-     */
-    protected final int getOctantID(final Vec3D plocal) {
-        final XYZ h = this.extent;
-
-        return (plocal.x >= h.x() ? 1 : 0) + (plocal.y >= h.y() ? 2 : 0)
-                + (plocal.z >= h.z() ? 4 : 0);
-    }
+//    /**
+//     * Computes the local child octant/cube index for the given point
+//     *
+//     * @param plocal
+//     *            point in the node-local coordinate system
+//     * @return octant index
+//     */
+//    protected final int getOctantID(final Vec3D plocal) {
+//        final XYZ h = this.extent;
+//
+//        return (plocal.x >= h.x() ? 1 : 0) + (plocal.y >= h.y() ? 2 : 0)
+//                + (plocal.z >= h.z() ? 4 : 0);
+//    }
 
     /** computes getOctantID for the point subtracted by another point,
      *  without needing to allocate a temporary object
@@ -280,14 +283,14 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      *            AABB
      * @return all points with the box volume
      */
-    @Deprecated public List<XYZ> getPointsWithinBox(BB b) {
-        ArrayList<XYZ> results = null;
+    @Deprecated public List<V> getPointsWithinBox(BB b) {
+        ArrayList<V> results = null;
         if (this.intersectsBox(b)) {
             if (points != null) {
-                for (XYZ q : points) {
+                for (V q : points) {
                     if (q.isInAABB(b)) {
                         if (results == null) {
-                            results = new ArrayList<XYZ>();
+                            results = new ArrayList();
                         }
                         results.add(q);
                     }
@@ -295,7 +298,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
             } else if (children!=null) {
                 for (int i = 0; i < 8; i++) {
                     if (children[i] != null) {
-                        List<XYZ> points = children[i].getPointsWithinBox(b);
+                        List<V> points = children[i].getPointsWithinBox(b);
                         if (points != null) {
                             if (results == null) {
                                 results = new ArrayList();
@@ -309,10 +312,10 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
         return results;
     }
 
-    public void forEachInBox(BB b, Consumer<XYZ> c) {
+    public void forEachInBox(BB b, Consumer<V> c) {
         if (this.intersectsBox(b)) {
             if (points != null) {
-                for (XYZ q : points) {
+                for (V q : points) {
                     if (q.isInAABB(b)) {
                         c.accept(q);
                     }
@@ -332,11 +335,11 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
         throw new UnsupportedOperationException();
     }
 
-    public void forEachInSphere(Sphere s, Consumer<XYZ> c) {
+    public void forEachInSphere(Sphere s, Consumer<V> c) {
 
         if (this.intersectsSphere(s)) {
             if (points != null) {
-                for (XYZ q : points) {
+                for (V q : points) {
                     if (s.containsPoint(q)) {
                         c.accept(q);
                     }
@@ -398,7 +401,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      * @param clipRadius
      * @return selected points
      */
-    public void forEachInSphere(Vec3D sphereOrigin, float clipRadius, Consumer<XYZ> c) {
+    public void forEachInSphere(Vec3D sphereOrigin, float clipRadius, Consumer<V> c) {
         forEachInSphere(new Sphere(sphereOrigin, clipRadius), c);
     }
 

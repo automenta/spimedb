@@ -5,9 +5,12 @@ import automenta.netention.geo.SpimeBase;
 import com.google.common.collect.Iterators;
 import com.gs.collections.api.tuple.Pair;
 import com.gs.collections.api.tuple.Twin;
+import com.gs.collections.impl.list.mutable.FastList;
 import com.gs.collections.impl.map.mutable.ConcurrentHashMap;
 import com.gs.collections.impl.set.mutable.UnifiedSet;
 import com.gs.collections.impl.tuple.Tuples;
+import toxi.geom.Vec3D;
+import vectrex.OctBox;
 
 import java.util.*;
 
@@ -43,6 +46,11 @@ public class SpimeGraph implements SpimeBase {
 
 
     final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph = new SpimeMapGraph();
+    public final OctBox<NObject> spacetime = new OctBox(
+            new Vec3D(-180f, -90f, 0),
+            new Vec3D(360f, 180f, 0),
+            new Vec3D(0.05f, 0.05f, 0f)
+    );
 
     public SpimeGraph() {
 
@@ -52,6 +60,10 @@ public class SpimeGraph implements SpimeBase {
     @Override
     public NObject put(NObject d) {
         final String id = d.getId();
+
+        if (d.isSpatial()) {
+            spacetime.ADD(d);
+        }
 
         graph.addVertex(id, d);
 
@@ -113,7 +125,36 @@ public class SpimeGraph implements SpimeBase {
 
     @Override
     public Iterator<NObject> get(double lat, double lon, double radMeters, int maxResults) {
-        return null;
+        float radDegrees = metersToDegrees((float)radMeters);
+
+        List<NObject> l = new FastList() {
+
+            int count = 0;
+
+            @Override
+            public boolean add(Object newItem) {
+                if (count == maxResults) return false;
+
+                if (super.add(newItem)) {
+                    count++;
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        spacetime.forEachInSphere(new Vec3D((float)lat, (float)lon, 0), radDegrees, n -> {
+            l.add(n);
+            //TODO exit from this loop early if capacity reached
+        });
+
+        //System.out.println(lat + " " + lon + " " + radDegrees + " -> " + l);
+
+        return l.iterator();
+    }
+
+    private float metersToDegrees(float radMeters) {
+        return radMeters / 110648f;
     }
 
     private static class SpimeMapGraph extends MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> {

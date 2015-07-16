@@ -12,6 +12,7 @@ import org.opensextant.geodesy.Geodetic3DPoint;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
+import toxi.geom.XYZ;
 
 import java.io.Serializable;
 import java.util.*;
@@ -32,7 +33,7 @@ import static automenta.netention.geo.ImportKML.toArray;
 @JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
 @Indexed
 @Spatial(spatialMode = SpatialMode.RANGE, store=Store.YES ) //http://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/
-public class NObject implements Serializable, Coordinates {
+public class NObject implements Serializable, Coordinates, XYZ {
 
     final static long ETERNAL = Long.MIN_VALUE;
 
@@ -313,5 +314,24 @@ public class NObject implements Serializable, Coordinates {
         sb.append('}');
 
         return sb.toString();
+    }
+
+    @JsonIgnore @Override
+    public float x() {
+        if (space == null) return Float.NaN;
+        return space[0];
+    }
+
+    @JsonIgnore @Override
+    public float y() {
+        if (space == null) return Float.NaN;
+        return space[1];
+    }
+
+    @JsonIgnore @Override
+    public float z() {
+        if (time == null)
+            return 0;
+        return time[0];
     }
 }

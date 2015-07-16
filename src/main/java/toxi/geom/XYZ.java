@@ -1,5 +1,6 @@
 package toxi.geom;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import toxi.math.InterpolateStrategy;
 
 import java.io.Serializable;
@@ -7,6 +8,7 @@ import java.io.Serializable;
 /**
  * Created by me on 6/13/15.
  */
+@JsonIgnoreType
 public interface XYZ extends Serializable {
 
     public float x();
