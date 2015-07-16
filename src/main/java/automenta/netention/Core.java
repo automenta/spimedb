@@ -84,7 +84,7 @@ public class Core {
         }
 
 
-        public void writeArrayValues(OutputStream out, Iterator<Object> objs, char separator) throws IOException {
+        public void writeArrayValues(OutputStream out, Iterator objs, char separator) throws IOException {
             out.write('[');
             writeValues(out, objs, separator);
             out.write(']');

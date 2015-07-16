@@ -2,8 +2,8 @@ package automenta.netention.run;
 
 
 import automenta.netention.Core;
-import automenta.netention.geo.SpimeBase;
 import automenta.netention.NObject;
+import automenta.netention.geo.SpimeBase;
 import automenta.netention.web.ClientResources;
 import automenta.netention.web.Web;
 import automenta.netention.web.WebSocketCore;
@@ -13,18 +13,15 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
-import org.apache.lucene.search.Query;
-import org.hibernate.search.query.dsl.SpatialContext;
-import org.hibernate.search.query.dsl.SpatialTermination;
-import org.hibernate.search.query.dsl.Unit;
-import org.infinispan.query.CacheQuery;
-import org.infinispan.query.FetchOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public class SpimeServer extends Web {
 
@@ -62,28 +59,6 @@ public class SpimeServer extends Web {
         }
     }
 
-    public CacheQuery queryCircle(double lat, double lon, double radMeters, int maxResults) {
-
-        //Bounds
-        //SpatialMatchingContext whereQuery = base.find().spatial().onField("nobject");
-        SpatialContext whereQuery = base.objSearch.buildQueryBuilderForClass(NObject.class).get().spatial();
-
-
-        SpatialTermination qb = whereQuery.
-                within(radMeters / 1000.0, Unit.KM)
-                .ofLatitude(lat)
-                .andLongitude(lon);
-
-
-        if (qb != null) {
-            Query c = qb.createQuery();
-
-            CacheQuery cq = base.find(c).maxResults(maxResults);
-            return cq;
-        }
-        return null;
-
-    }
 
     public static final Logger log = LoggerFactory.getLogger(SpimeServer.class);
 
@@ -104,7 +79,7 @@ public class SpimeServer extends Web {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws Exception {
 
-                send(Core.json.writeValueAsString(base.ext.keySet()), exchange);
+                send(Core.json.writeValueAsString(base.getInsides(null)), exchange);
             }
         });
 
@@ -118,7 +93,7 @@ public class SpimeServer extends Web {
                 if (rp.length() > 0) {
                     String nobjectID = rp.substring(1); //removes leading '/'
 
-                    send(Core.json.writeValueAsString(base.ext.get(nobjectID)), ex);
+                    send(Core.json.writeValueAsString(base.getInsides(nobjectID)), ex);
                 }
                 /*send(o -> {
                     PrintStream p = new PrintStream(o);
@@ -151,7 +126,7 @@ public class SpimeServer extends Web {
             @Override
             public void handleRequest(HttpServerExchange ex) throws Exception {
                 try {
-                    CacheQuery cq = queryCircle(ex.getQueryParameters());
+                    Iterator cq = queryCircle(ex.getQueryParameters());
                     if (cq != null) {
                         sendSummaryResults(cq, ex, MAX_QUERY_RESULTS);
                     } else {
@@ -171,7 +146,7 @@ public class SpimeServer extends Web {
             public void handleRequest(HttpServerExchange ex) throws Exception {
 
                 try {
-                    CacheQuery cq = queryCircle(ex.getQueryParameters());
+                    Iterator cq = queryCircle(ex.getQueryParameters());
                     if (cq != null) {
                         sendFullResults(cq, ex, MAX_QUERY_RESULTS);
                     } else {
@@ -193,7 +168,7 @@ public class SpimeServer extends Web {
 
     }
 
-    private CacheQuery queryCircle(Map<String, Deque<String>> q) {
+    private Iterator<NObject> queryCircle(Map<String, Deque<String>> q) {
         /* Circle("x", "y", "m")
                             x = lon
                             y = lat
@@ -204,14 +179,13 @@ public class SpimeServer extends Web {
         double radMeters = Double.valueOf(q.get("r").getFirst().toString());
 
         final int maxResults = MAX_QUERY_RESULTS;
-
-        return queryCircle(lat, lon, radMeters, maxResults);
+        Iterator<NObject> cq = base.get( lat, lon, radMeters, maxResults );
+        return cq;
     }
 
-    public void sendSummaryResults(CacheQuery cq, HttpServerExchange ex, int maxResults) {
+    public void sendSummaryResults(Iterator i, HttpServerExchange ex, int maxResults) {
         HashMultimap<String,String> m = HashMultimap.create();
 
-        Iterator i = cq.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.LAZY).fetchSize(maxResults));
         StringBuilder sb = new StringBuilder(128);
         while (i.hasNext()) {
             NObject n = (NObject)i.next();
@@ -268,11 +242,9 @@ public class SpimeServer extends Web {
 
     }
 
-    public void sendFullResults(CacheQuery cq, HttpServerExchange ex, int maxResults) {
+    public void sendFullResults(Iterator<NObject> i, HttpServerExchange ex, int maxResults) {
         //cq.maxResults(maxResults).sort(Sort.RELEVANCE);
 
-        if (cq.getResultSize() > 0) {
-            Iterator i = cq.iterator(new FetchOptions().fetchMode(FetchOptions.FetchMode.LAZY).fetchSize(maxResults));
 
             send(o -> {
                 try {
@@ -282,10 +254,11 @@ public class SpimeServer extends Web {
                     e.printStackTrace();
                 }
             }, ex);
-        } else {
+
+        /*} else {
             //no results
             ex.endExchange();
-        }
+        }*/
     }
 
 }

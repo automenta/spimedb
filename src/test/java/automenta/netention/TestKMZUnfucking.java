@@ -1,6 +1,7 @@
 package automenta.netention;
 
 
+import automenta.netention.db.InfinispanSpimeBase;
 import automenta.netention.geo.SpimeBase;
 import automenta.netention.geo.ImportKML;
 
@@ -9,7 +10,7 @@ public class TestKMZUnfucking {
 
     public static void main(String[] args) throws Exception {
 
-        SpimeBase es = SpimeBase.memory();
+        SpimeBase es = InfinispanSpimeBase.memory();
 
         new ImportKML(es).url("main",
                 "file:///tmp/kml/EOL-Field-Projects-CV3D.kmz"

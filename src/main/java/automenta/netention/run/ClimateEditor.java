@@ -1,8 +1,8 @@
 package automenta.netention.run;
 
 import automenta.netention.data.SpimeScript;
+import automenta.netention.db.BPSpimeBase;
 import automenta.netention.geo.ImportKML;
-import automenta.netention.geo.SpimeBase;
 
 import javax.script.ScriptException;
 import java.io.File;
@@ -15,14 +15,16 @@ public class ClimateEditor {
 
 
     public static void main(String[] args) throws IOException, ScriptException {
-        SpimeBase es = SpimeBase.disk("/tmp/sf", 128 * 1024);
+        //InfinispanSpimeBase es = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
+        BPSpimeBase es = new BPSpimeBase();
 
 
 
-        new SpimeScript(es).run(new File("data/climateviewer.js"));
 
         if (es.isEmpty()) {
             System.out.println("Initializing database...");
+
+            new SpimeScript(es).run(new File("data/climateviewer.js"));
 
             String[] urls = new String[]{
                     "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
@@ -38,7 +40,7 @@ public class ClimateEditor {
 
         }
 
-        System.out.println("Indices: " + es.getStatistics().indexedEntitiesCount());
+        System.out.println(es + " objects=" + es.size());
 
 
         //System.out.println(es.size() + " objects loaded");
