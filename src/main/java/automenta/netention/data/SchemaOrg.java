@@ -1,7 +1,7 @@
 package automenta.netention.data;
 
 import au.com.bytecode.opencsv.CSVReader;
-import automenta.netention.net.NObject;
+import automenta.netention.NObject;
 import com.google.common.collect.Lists;
 
 import java.io.FileReader;

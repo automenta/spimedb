@@ -1,6 +1,5 @@
-package automenta.netention.net;
+package automenta.netention;
 
-import automenta.netention.Core;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -54,8 +53,8 @@ public class NObject implements Serializable, Coordinates {
     /** extensional inheritance: what this nobject is "inside" of (its container) */
     @Field(name = "inside") @JsonProperty(">") private String inside = null;
 
-    /** extensional inheritance: what this nobject is "outside" of (its contents) */
-    @Field(name = "outside") @JsonProperty("<") private String outside = null;
+//    /** extensional inheritance: what this nobject is "outside" of (its contents) */
+//    @Field(name = "outside") @JsonProperty("<") private Set<String> outside = new HashSet();
 
     public NObject() {
         this(Core.uuid());
@@ -175,6 +174,21 @@ public class NObject implements Serializable, Coordinates {
     }
 
     public NObject put(String tag, Object value) {
+        switch (tag) {
+            case ">": setInside((String)value); return this;
+//            case "<":
+//                //HACK
+//                setOutside(Sets.newHashSet((String[])value));
+//                return this;
+            case "I":
+                if ((value instanceof String) && (value.equals(id))) {
+                    //already being set to same ID
+                    return this;
+                }
+                throw new RuntimeException(this + " can not change ID");
+            case "N": name(value.toString()); return this;
+        }
+
         if (fields == null) fields = new HashMap();
         fields.put(tag, value);
         return this;
@@ -271,14 +285,15 @@ public class NObject implements Serializable, Coordinates {
             throw new RuntimeException("object can not be inside itself");
         return this;
     }
-    /** sets the children property */
-    public NObject setOutside(String children) {
-        this.outside = children;
-        return this;
-    }
+
+//    /** sets the children property */
+//    public NObject setOutside(Set<String> content) {
+//        this.outside = content;
+//        return this;
+//    }
 
     public String inside() { return inside; }
-    public String outside() { return outside; }
+    //public Set<String> outside() { return outside; }
 
 
     /** produces a "1-line" summar JSON object as a string */

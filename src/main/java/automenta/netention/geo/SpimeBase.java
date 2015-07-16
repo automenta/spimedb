@@ -1,6 +1,6 @@
 package automenta.netention.geo;
 
-import automenta.netention.net.NObject;
+import automenta.netention.NObject;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.query.dsl.EntityContext;
 import org.hibernate.search.query.dsl.QueryBuilder;

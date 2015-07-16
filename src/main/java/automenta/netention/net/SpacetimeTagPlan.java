@@ -1,5 +1,6 @@
 package automenta.netention.net;
 
+import automenta.netention.NObject;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.ml.clustering.*;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;

@@ -2,9 +2,8 @@ package automenta.netention.run;
 
 
 import automenta.netention.Core;
-import automenta.netention.geo.ImportKML;
 import automenta.netention.geo.SpimeBase;
-import automenta.netention.net.NObject;
+import automenta.netention.NObject;
 import automenta.netention.web.ClientResources;
 import automenta.netention.web.Web;
 import automenta.netention.web.WebSocketCore;
@@ -289,34 +288,4 @@ public class SpimeServer extends Web {
         }
     }
 
-
-    public static void main(String[] args) throws IOException {
-        SpimeBase es = SpimeBase.disk("/tmp/sf", 128 * 1024);
-
-
-        if (es.isEmpty()) {
-            System.out.println("Initializing database...");
-
-            String[] urls = new String[]{
-                    "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
-                    "file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
-                    "file:///home/me/kml/fusion-landing-points-CV3D.kmz",
-                    "file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
-            };
-
-            for (String u : urls) {
-                new ImportKML(es).url(u).run();
-            }
-
-        }
-
-        System.out.println("Indices: " + es.getStatistics().indexedEntitiesCount());
-
-
-        //System.out.println(es.size() + " objects loaded");
-
-
-        new SpimeServer(es).start("localhost", 8080);
-    }
 }

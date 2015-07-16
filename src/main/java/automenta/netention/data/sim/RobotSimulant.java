@@ -1,6 +1,6 @@
 package automenta.netention.data.sim;
 
-import automenta.netention.net.NObject;
+import automenta.netention.NObject;
 import com.google.common.collect.Lists;
 import org.geojson.LngLatAlt;
 import org.geojson.Polygon;

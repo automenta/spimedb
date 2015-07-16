@@ -8,7 +8,7 @@ package automenta.netention.geo;
 
 import automenta.netention.geo.kml.KmlReader;
 import automenta.netention.geo.kml.UrlRef;
-import automenta.netention.net.NObject;
+import automenta.netention.NObject;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
