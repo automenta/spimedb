@@ -23,6 +23,7 @@
         "backbone": "latest",
         "es6-shim": "latest",
         "jquery.atwho": "ichord/At.js",
-        "fullcalendar": "latest"
+        "fullcalendar": "latest",
+        "interact": "latest"
     }
 }

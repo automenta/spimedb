@@ -96,7 +96,17 @@ class Map2DView extends NView {
         var features = new Map();
 
         function clickHandler(e) {
-            alert('popup');
+            var obj = e.target.options.data;
+            var x = JSON.stringify(obj, null, 4);
+
+            var w = newWindow().append(x);
+            $.getJSON('/obj/' + obj.I, function(c) {
+                 var desc = c['^']['_'];
+                 if (desc)
+                    w.html(desc);
+                 else
+                    w.html(JSON.stringify(c, null, 4));
+            } );
         }
 
         function overHandler(e) {

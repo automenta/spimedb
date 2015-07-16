@@ -8,6 +8,12 @@ body {
     color: gray!important;
     line-height:1.1!important;
     font-family:Arial,Helvetica,sans-serif !important;
+
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -o-user-select: none;
+        user-select: none;
 }
 
 #view {
@@ -21,7 +27,7 @@ body {
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 100;
+    z-index: 6000;
     font-size: 100%;
     /*background-color: black;*/
     margin: 0 !important;
@@ -140,3 +146,34 @@ input[type=range].tagSlider:focus::-ms-fill-upper {
 
     #baseLayerPickerContainer { position:absolute; top:5px; right:5px; width:38px; height:38px; border:0; }
     .cesium-viewer-toolbar { display: block !important; position: absolute !important; top: 5px !important; right: 42px !important; }
+
+
+    .windget {
+      background-color: #29e;
+      color: white;
+      font-size: 20px;
+      font-family: sans-serif;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 20px;
+
+
+      position: fixed;
+      box-sizing: border-box;
+      pointer-events: all;
+
+      overflow: auto;
+      opacity: 0.85;
+    }
+
+    .windgets {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+
+        overflow: hidden;
+
+      position: fixed;
+      z-index: 5000;
+    }
+

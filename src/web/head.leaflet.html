@@ -24,6 +24,7 @@
         font-size: 170%;
         opacity: 0.8;
         max-width: 25%;
+        pointer-events: none;
     }
 
     .leaflet-container {
@@ -32,4 +33,8 @@
 
     /** useless shadow pane consuming rendering energy */
     .leaflet-shadow-pane { display: none }
+
+    .leaflet-container {
+    overflow: hidden !important;
+    }
 </style>

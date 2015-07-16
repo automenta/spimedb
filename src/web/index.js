@@ -31,8 +31,6 @@ function ready() {
     Backbone.history.start({pushState: true});
 
 
-
-
     $('#sidebar').append(app.newViewControl());
 
     app.index = new TagIndex(function (i) {
