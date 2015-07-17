@@ -4,16 +4,16 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color:black!important;
-    color: gray!important;
-    line-height:1.1!important;
-    font-family:Arial,Helvetica,sans-serif !important;
+    background-color: black !important;
+    color: gray !important;
+    line-height: 1.1 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
 
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        -o-user-select: none;
-        user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 #view {
@@ -33,17 +33,17 @@ body {
     margin: 0 !important;
 }
 
-
-
 /*TODO move to ui.slider.css */
 input[type=range].tagSlider {
     -webkit-appearance: none;
     width: 100%;
     margin: 9.8px 0;
 }
+
 input[type=range].tagSlider:focus {
     outline: none;
 }
+
 input[type=range].tagSlider::-webkit-slider-runnable-track {
     width: 100%;
     height: 9.4px;
@@ -53,6 +53,7 @@ input[type=range].tagSlider::-webkit-slider-runnable-track {
     border-radius: 0px;
     border: 0px solid #010101;
 }
+
 input[type=range].tagSlider::-webkit-slider-thumb {
     box-shadow: 0px 0px 1px #670000, 0px 0px 0px #810000;
     border: 0px solid #ff1e00;
@@ -64,9 +65,11 @@ input[type=range].tagSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
     margin-top: -9.8px;
 }
+
 input[type=range].tagSlider:focus::-webkit-slider-runnable-track {
     background: #484d4d;
 }
+
 input[type=range].tagSlider::-moz-range-track {
     width: 100%;
     height: 9.4px;
@@ -76,6 +79,7 @@ input[type=range].tagSlider::-moz-range-track {
     border-radius: 0px;
     border: 0px solid #010101;
 }
+
 input[type=range].tagSlider::-moz-range-thumb {
     box-shadow: 0px 0px 1px #670000, 0px 0px 0px #810000;
     border: 0px solid #ff1e00;
@@ -85,6 +89,7 @@ input[type=range].tagSlider::-moz-range-thumb {
     background: #8ad445;
     cursor: pointer;
 }
+
 input[type=range].tagSlider::-ms-track {
     width: 100%;
     height: 9.4px;
@@ -93,18 +98,21 @@ input[type=range].tagSlider::-ms-track {
     border-color: transparent;
     color: transparent;
 }
+
 input[type=range].tagSlider::-ms-fill-lower {
     background: #484d4d;
     border: 0px solid #010101;
     border-radius: 0px;
     box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
 }
+
 input[type=range].tagSlider::-ms-fill-upper {
     background: #484d4d;
     border: 0px solid #010101;
     border-radius: 0px;
     box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
 }
+
 input[type=range].tagSlider::-ms-thumb {
     box-shadow: 0px 0px 1px #670000, 0px 0px 0px #810000;
     border: 0px solid #ff1e00;
@@ -115,9 +123,11 @@ input[type=range].tagSlider::-ms-thumb {
     cursor: pointer;
     height: 9.4px;
 }
+
 input[type=range].tagSlider:focus::-ms-fill-lower {
     background: #484d4d;
 }
+
 input[type=range].tagSlider:focus::-ms-fill-upper {
     background: #484d4d;
 }
@@ -132,48 +142,85 @@ input[type=range].tagSlider:focus::-ms-fill-upper {
     left: 0;
     top: 0;
 
-
 }
 
 .maxHalfHeight {
     max-height: 50%;
     overflow: auto;
 }
+
 .maxFullHeight {
     max-height: 98%;
     overflow: auto;
 }
 
-    #baseLayerPickerContainer { position:absolute; top:5px; right:5px; width:38px; height:38px; border:0; }
-    .cesium-viewer-toolbar { display: block !important; position: absolute !important; top: 5px !important; right: 42px !important; }
+#baseLayerPickerContainer {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 38px;
+    height: 38px;
+    border: 0;
+}
+
+.cesium-viewer-toolbar {
+    display: block !important;
+    position: absolute !important;
+    top: 5px !important;
+    right: 42px !important;
+}
+
+.windgets {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+
+    overflow: hidden;
+
+    position: fixed;
+    z-index: 5000;
+}
 
 
-    .windget {
-      background-color: #29e;
-      color: white;
-      font-size: 20px;
-      font-family: sans-serif;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 30px 20px;
+.windget {
+    background-color: #29e;
+    color: white;
+    font-size: 20px;
+    font-family: sans-serif;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 30px 20px;
 
+    position: fixed;
+    box-sizing: border-box;
+    pointer-events: all;
 
-      position: fixed;
-      box-sizing: border-box;
-      pointer-events: all;
+    opacity: 0.85;
+}
 
-      overflow: auto;
-      opacity: 0.85;
-    }
+.windget .close_button {
+    top: 0;
+    right: 0;
+    opacity: 0.8;
+    width: 1em;
+    height: 1em;
+    overflow: hidden;
+    position: absolute;
+    color: black;
+    border: none;
 
-    .windgets {
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+}
 
-        overflow: hidden;
+.windget .content {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 1em;
+}
 
-      position: fixed;
-      z-index: 5000;
-    }
-
+.windget .font_slider {
+    bottom: 0;
+    left: auto;
+    width: 50%;
+    position: absolute;
+}
