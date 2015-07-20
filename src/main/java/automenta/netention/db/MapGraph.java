@@ -454,13 +454,12 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
         VertexContainer<C, E> ec = vertices.get(vertex);
 
         if (ec == null) {
-            ec = new VertexContainer(vertex, newEdgeSet(), newEdgeSet());
+            ec = new VertexContainer(value, newEdgeSet(), newEdgeSet());
             vertices.put(vertex, ec);
         }
-        else {
-            if (value!=null)
-                ec.setValue(value);
-        }
+
+        if ((value!=null) && (ec.getValue() == null))
+            ec.setValue(value);
 
         return ec;
     }

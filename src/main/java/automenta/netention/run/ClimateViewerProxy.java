@@ -2,6 +2,8 @@ package automenta.netention.run;
 
 
 import automenta.netention.data.ClimateViewerSources;
+import automenta.netention.data.SpimeScript;
+import automenta.netention.db.SpimeGraph;
 import automenta.netention.net.proxy.CachingProxyServer;
 import automenta.netention.net.proxy.URLSensor;
 import automenta.netention.web.Web;
@@ -27,6 +29,12 @@ public class ClimateViewerProxy {
 
 
         //new IRCBot(s.db, "RAWinput", "irc.freenode.net", "#netention");
+
+
+        SpimeGraph es = new SpimeGraph();
+        new SpimeScript(es).run(new File("data/climateviewer2.js"));
+
+        es.iterator().forEachRemaining(x -> System.out.println(x) );
 
 
         Web j = new Web()
