@@ -1,7 +1,6 @@
 package automenta.netention.net;
 
 
-import automenta.netention.web.Web;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +22,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -44,26 +46,30 @@ public class HttpCache {
         this.cachePath = cachePath + "/";
     }
 
-    public void get(String url, Consumer<CachedURL> target) {
-        get(url, null, target);
+    public void get(String url, Consumer<CachedURL> target, long maxAge) {
+        get(url, null, target, maxAge);
     }
 
-    public void get(String url, Consumer<CachedURL> filter, Consumer<CachedURL> target) {
-        logger.info("http request: " + url);
+
+    public void get(String url, Consumer<CachedURL> filter, Consumer<CachedURL> target, long maxAge) {
+        if (logger.isDebugEnabled())
+            logger.debug("http request: " + url);
 
         CachedURL response = null;
 
         //attempt to read, or if expired, just get the newest
         try {
-            response = get(url);
+            response = get(url, maxAge);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        boolean write = true;
+        boolean write;
 
         if (response == null) {
 
-            logger.debug("cache miss: " + url);
+            if (logger.isDebugEnabled())
+                logger.debug("cache miss: " + url);
 
             try {
                 response = executor.submit(
@@ -78,20 +84,23 @@ public class HttpCache {
             if (filter!=null && response!=null)
                 filter.accept(response);
 
-            logger.info("cache set: " + response.size + " bytes");
+            if (logger.isDebugEnabled())
+                logger.debug("cache set: " + response.size + " bytes");
 
             write = true;
 
         } else {
-            logger.info("cache hit: " + url);
+            if (logger.isDebugEnabled())
+                logger.debug("cache hit: " + url);
             target.accept(response);
+            write = false;
         }
 
         if (response == null) {
             logger.error("undownloaded: " + url);
             target.accept(null);
         } else {
-            target.accept(response);
+            //target.accept(response);
         }
 
         if (write && response!=null) {
@@ -135,7 +144,7 @@ public class HttpCache {
 
 
         File f = getCacheFile(uri, true);
-        logger.info("Caching " + uri + " to" + f.getAbsolutePath());
+        logger.info("Caching " + uri + " to " + f.getAbsolutePath());
 
         ObjectOutputStream ff = new ObjectOutputStream(new FileOutputStream(f));
         ff.writeObject(c);
@@ -169,16 +178,32 @@ public class HttpCache {
 
         File f = new File(target);
 
-        File parent = f.getParentFile();
-        parent.mkdirs();
+        if (!f.exists()) {
+            File parent = f.getParentFile();
+            parent.mkdirs();
+            f = new File(target);
+        }
 
         return f;
     }
 
-    public synchronized CachedURL get(String u) throws Exception {
+    public synchronized CachedURL get(String u, long maxAge) throws Exception {
 
+        long now = System.currentTimeMillis();
 
         File header = getCacheFile(u, true);
+
+        try {
+            long lastModified = Files.getLastModifiedTime(Paths.get(header.toURI())).toMillis();
+
+            if (maxAge > 0 && now - lastModified > maxAge) {
+                return null;
+            }
+        }
+        catch (NoSuchFileException e) {
+            //..
+        }
+
         ObjectInputStream deficheiro = new ObjectInputStream(new FileInputStream(header));
 
         CachedURL x = (CachedURL) deficheiro.readObject();
@@ -246,30 +271,45 @@ public class HttpCache {
         public void send(HttpServerExchange exchange) {
             final CachedURL response = this;
 
-            if (response == null) {
-                exchange.setResponseCode(404);
-                exchange.getResponseSender().send("?");
-            } else {
+//            if (response == null) {
+//                exchange.setResponseCode(404);
+//                exchange.getResponseSender().send("?");
+//            } else {
                 exchange.setResponseCode(response.responseCode);
                 for (String[] x : response.responseHeader) {
                     exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
                 }
                 if (response.content != null) {
-                    exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
-                } else {
-                    try {
-                        exchange.startBlocking();
-                        IOUtils.copyLarge(response.contentStream, exchange.getOutputStream());
-                        exchange.endExchange();
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Web.send(e.toString(), exchange);
-                    }
+                    exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
+
+
+                } else {
+
+                    exchange.startBlocking();
+
+                    exchange.getResponseSender().transferFrom(response.contentStream.getChannel(), null);
+                    exchange.getResponseSender().close();
+
+                    exchange.endExchange();
+
+//                    try {
+//                        exchange.startBlocking();
+//
+//
+//                        long send = IOUtils.copy(response.contentStream, exchange.getOutputStream());
+//                        System.err.println("sent: " + send + " from " + response.contentStream);
+//
+//                        exchange.endExchange();
+//
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                        Web.send(e.toString(), exchange);
+//                    }
                 }
 
 
-            }
+            //}
         }
     }
 

@@ -158,7 +158,8 @@ public class Web extends PathHandler {
                     new EncodingHandler(new ContentEncodingRepository()
                             .addEncodingHandler("gzip",
                                     new GzipEncodingProvider(), 5,
-                                    Predicates.parse("max-content-size[50000]")))
+                                   Predicates.parse("max-content-size[50000]"))
+                            )
                             .setNext(this);
 
 // ...

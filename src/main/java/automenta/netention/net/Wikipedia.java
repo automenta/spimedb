@@ -220,7 +220,7 @@ public class Wikipedia extends PathHandler {
 
         r -> {
             r.send(ex);
-        });
+        }, -1);
 
     }
 

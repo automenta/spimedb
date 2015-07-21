@@ -285,6 +285,44 @@ var nfield = {
     }
 };
 
+var NObject = Java.type('automenta.netention.NObject');
+
+function nobject(x) {
+    var y = new NObject(x.I, x.N);
+
+    /** TTL rules
+    <rezn8d> anything that is requested from the proxy should have a max TTL of 2 hours
+    <rezn8d> correct
+    <rezn8d> from the json list, everything else is denied
+    <rezn8d> all WMS are proxied
+    <rezn8d> and KML with proxy (P: true)
+    */
+
+
+    if (x.T === "wms") {
+        x.P = true;
+    }
+
+    if (x.P) {
+        x.PmaxAge = (2 * 60 * 60 * 1000); //2 hrs in milliseconds
+    }
+
+    for (var k in x) {
+        y.put(k, x[k]);
+    }
+
+
+
+    return y;
+}
+
+nobjectTree(layers, function(v) {
+    var x = nobject(v);
+    print('vertex:', x);
+    db.put(x);
+}, function(s, p, o) {
+    print('edge:', JSON.stringify(s), p, JSON.stringify(o) );
+});
 
 function nobjectize(x, parent) {
     if (!x.I) {
@@ -364,22 +402,3 @@ function nobjectTree(x, onVertex /* (contained, container) */, onEdge) {
 
 };
 
-var NObject = Java.type('automenta.netention.NObject');
-
-function nobject(x) {
-    var y = new NObject(x.I, x.N);
-
-    for (var k in x) {
-        y.put(k, x[k]);
-    }
-    return y;
-}
-
-nobjectTree(layers, function(v) {
-    var x = nobject(v);
-    print('vertex:', x);
-    print();
-    db.put(x);
-}, function(s, p, o) {
-    print('edge:', JSON.stringify(s), p, JSON.stringify(o) );
-});

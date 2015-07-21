@@ -1,11 +1,9 @@
 package automenta.netention.run;
 
 
-import automenta.netention.data.ClimateViewerSources;
 import automenta.netention.data.SpimeScript;
 import automenta.netention.db.SpimeGraph;
 import automenta.netention.net.proxy.CachingProxyServer;
-import automenta.netention.net.proxy.URLSensor;
 import automenta.netention.web.Web;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.MimeMappings;
@@ -21,6 +19,9 @@ public class ClimateViewerProxy {
     final static String cachePath = "cache";
 
     public static void main(String[] args) throws Exception {
+
+
+
 
         /*final static String eq4_5week = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.atom";
 
@@ -39,7 +40,7 @@ public class ClimateViewerProxy {
 
         Web j = new Web()
             //.add("/", ClientResources.handleClientResources())
-            .add("/proxy", new CachingProxyServer(cachePath))
+            .add("/proxy", new CachingProxyServer(es, cachePath))
             .add("/cache", resource(
                     new FileResourceManager(new File(cachePath), 64))
                     .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT))
@@ -47,19 +48,19 @@ public class ClimateViewerProxy {
 
 
         //InfiniPeer.local("i", cachePath, 32000);
-        new ClimateViewerSources() {
-
-            @Override
-            public void onLayer(String id, String name, String kml, String icon, String currentSection) {
-                URLSensor r = new URLSensor(currentSection + "/" + id, name, kml, icon);
-                //p.add(r);
-            }
-
-            @Override
-            public void onSection(String name, String id, String icon) {
-
-            }
-        };
+//        new ClimateViewerSources() {
+//
+//            @Override
+//            public void onLayer(String id, String name, String kml, String icon, String currentSection) {
+//                URLSensor r = new URLSensor(currentSection + "/" + id, name, kml, icon);
+//                //p.add(r);
+//            }
+//
+//            @Override
+//            public void onSection(String name, String id, String icon) {
+//
+//            }
+//        };
 
 
 //        int webPort = 9090;
