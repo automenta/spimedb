@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
+import static automenta.netention.web.Web.send;
+
 /**
  * Proxy server which caches requests and their data to files on disk
  */
@@ -48,66 +50,86 @@ public class CachingProxyServer extends PathHandler {
     @Override
     public void handleRequest(final HttpServerExchange exchange) throws Exception {
 
-//        if (exchange.isInIoThread()) {
-//            exchange.dispatch(this);
-//            return;
-//        }
+        if (exchange.isInIoThread()) {
+            exchange.dispatch(this);
+            return;
+        }
 
 
         String url = exchange.getQueryString();
         if (url == null || url.isEmpty()) {
-            if (logger.isDebugEnabled())
-                logger.debug(url + " layer unknown");
+            send("empty", exchange);
             exchange.endExchange();
             return;
         }
 
         url = HttpCache.decodeURIComponent(url);
 
-        String suffix = "";
-        if (url.contains("/")) {
-            int i = url.indexOf("/");
-            if (i < url.length()-1) {
-                suffix = url.substring(i + 1 /* +1 to exclude the '/' */);
-                url = url.substring(0, i);
+
+
+        NObject n = null;
+        try {
+            n = db.get(url);
+        }
+        catch (Exception e) {
+            //TODO remove need for this catch
+        }
+
+
+        String target;
+
+        long ttl;
+
+        if (n == null) {
+            //raw URL
+            target = url;
+            ttl = 2L * 60 * 60 * 1000; //default
+        }
+        else {
+
+            String suffix = "";
+            if (url.contains("/")) {
+                int i = url.indexOf("/");
+                if (i < url.length()-1) {
+                    suffix = url.substring(i + 1 /* +1 to exclude the '/' */);
+                    //url = url.substring(0, i);
+                }
             }
-            else {
+
+            Boolean canProxy = n.get("P");
+            if (canProxy != true) {
+                send(n.getId() + " proxying disabled", exchange);
                 exchange.endExchange();
+                return;
             }
-        }
 
-        NObject n = db.get(url);
-        Boolean canProxy = n.get("P");
-        if (canProxy != true) {
-            if (logger.isDebugEnabled())
-                logger.debug(n + " can not be proxied");
 
-            exchange.endExchange();
-            return;
-        }
+            url = n.get("G");
+            if (url == null) {
+                send(n.getId() + " missing PmaxAge", exchange);
+                exchange.endExchange();
+                return;
+            }
 
-        url = n.get("G");
-        if (url == null) {
-            logger.warn(n + " missing URL");
-            exchange.endExchange();
-            return;
-        }
+            Number maxAge = n.get("PmaxAge");
+            if (maxAge == null) {
+                send(n.getId() + " missing PmaxAge", exchange);
+                exchange.endExchange();
+                return;
+            }
 
-        Number maxAge = n.get("PmaxAge");
-        if (maxAge == null) {
-            logger.warn(n + " missing PmaxAge");
-            exchange.endExchange();
-            return;
+            target = url + suffix;
+            ttl = maxAge.longValue();
         }
 
 
-        cache.get(url + suffix, new Consumer<HttpCache.CachedURL>() {
+        cache.get(target, new Consumer<HttpCache.CachedURL>() {
 
             @Override
             public void accept(HttpCache.CachedURL response) {
                 response.send(exchange);
             }
-        }, maxAge.longValue());
+        }, ttl);
 
     }
 

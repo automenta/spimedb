@@ -113,7 +113,7 @@ public class HttpCache {
 
             try {
 
-                executor.submit( new CacheRequest(url, target, filter) );
+                executor.submit( new CacheRequest(url, target, filter) ).get();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -385,11 +385,10 @@ public class HttpCache {
             try {
                 HttpGet httpget = new HttpGet(url.toURI());
 
-                logger.info("HTTP GET " + httpget.getRequestLine());
+                logger.info("HTTP " + httpget.getRequestLine());
 
                 // Create a custom response handler
                 ResponseHandler<byte[]> responseHandler = new ResponseHandler<byte[]>() {
-                    ;
 
                     @Override
                     public byte[] handleResponse(final HttpResponse hresponse) throws ClientProtocolException, IOException {
