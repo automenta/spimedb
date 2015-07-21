@@ -23,10 +23,8 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -219,7 +217,7 @@ public class HttpCache {
             return x;
 
         }
-        catch (NoSuchFileException e) {
+        catch (Exception e) {
             //..
             return null;
         }
@@ -269,6 +267,8 @@ public class HttpCache {
                     case "X-Powered-By": continue;
                     case "Server": continue;
 
+                    case "Set-Cookie": continue;
+                    case "Connection": continue;
                 }
                 responseHeader.add(new String[]{h.getName(), h.getValue()});
             }
@@ -300,7 +300,6 @@ public class HttpCache {
 //            } else {
                 exchange.setResponseCode(response.responseCode);
                 for (String[] x : response.responseHeader) {
-                    System.out.println(Arrays.toString(x));
                     exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
                 }
 
