@@ -10,8 +10,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +36,23 @@ public class HttpCache {
 
     final String cachePath;
 
+
     final ExecutorService executor = Executors.newCachedThreadPool();
+
+    final int maxClientConnections = 64;
+    final String userAgent = "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0";
+
+    private final HttpClientBuilder clientbuilder;
 
     public HttpCache(String cachePath) {
         this.cachePath = cachePath + "/";
+
+
+        clientbuilder = HttpClientBuilder.create();
+        clientbuilder.setMaxConnTotal(maxClientConnections);
+        clientbuilder.setUserAgent(userAgent);
+        clientbuilder.setDefaultSocketConfig(SocketConfig.custom().setRcvBufSize(128 * 1024).build());
+
     }
 
     public void get(String url, Consumer<CachedURL> target, long maxAge) {
@@ -62,7 +76,8 @@ public class HttpCache {
         public CachedURL call() throws Exception {
             CachedURL response = super.call();
             if (response == null) {
-                logger.error("undownloaded: " + url);
+                if (logger.isWarnEnabled())
+                    logger.warn("undownloaded: " + url);
                 target.accept(null);
             } else {
 
@@ -380,12 +395,16 @@ public class HttpCache {
 
             //
 
-            CloseableHttpClient httpclient = HttpClients.createDefault();
+
+            CloseableHttpClient httpclient = clientbuilder.build();
+
+
             byte[] data;
             try {
                 HttpGet httpget = new HttpGet(url.toURI());
 
-                logger.info("HTTP " + httpget.getRequestLine());
+                if (logger.isInfoEnabled())
+                    logger.info("HTTP " + httpget.getRequestLine());
 
                 // Create a custom response handler
                 ResponseHandler<byte[]> responseHandler = new ResponseHandler<byte[]>() {
@@ -396,6 +415,7 @@ public class HttpCache {
                         responseCode = hresponse.getStatusLine().getStatusCode();
                         if (responseCode >= 200 && responseCode < 300) {
                             HttpEntity entity = hresponse.getEntity();
+
                             return EntityUtils.toByteArray(entity);
                             //return entity.getContent();
                         } else {

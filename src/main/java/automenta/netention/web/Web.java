@@ -9,6 +9,7 @@ import io.undertow.predicate.Predicates;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.SetHeaderHandler;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
@@ -165,7 +166,8 @@ public class Web extends PathHandler {
 // ...
             s = builder.setHandler(handler);
         } else {
-            s = builder.setHandler(this);
+
+            s = builder.setHandler(new SetHeaderHandler(this, "Access-Control-Allow-Origin","*"));
         }
         this.server = s.build();
         this.server.start();

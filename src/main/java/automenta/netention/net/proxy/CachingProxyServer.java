@@ -127,7 +127,14 @@ public class CachingProxyServer extends PathHandler {
 
             @Override
             public void accept(HttpCache.CachedURL response) {
-                response.send(exchange);
+                if (response != null) {
+                    response.send(exchange);
+                }
+                else {
+                    exchange.setResponseCode(404);
+                    exchange.endExchange();
+                }
+
             }
         }, ttl);
 
