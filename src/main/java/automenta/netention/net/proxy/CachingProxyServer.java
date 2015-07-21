@@ -67,8 +67,13 @@ public class CachingProxyServer extends PathHandler {
         String suffix = "";
         if (url.contains("/")) {
             int i = url.indexOf("/");
-            suffix = url.substring(i);
-            url = url.substring(0, i);
+            if (i < url.length()-1) {
+                suffix = url.substring(i + 1 /* +1 to exclude the '/' */);
+                url = url.substring(0, i);
+            }
+            else {
+                exchange.endExchange();
+            }
         }
 
         NObject n = db.get(url);
