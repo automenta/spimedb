@@ -298,6 +298,7 @@ public class HttpCache {
                     case "Server": continue;
 
                     case "Set-Cookie": continue;
+                    case "Access-Control-Allow-Origin": continue;
                     case "Connection": continue;
                 }
                 responseHeader.add(new String[]{h.getName(), h.getValue()});
