@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -78,16 +79,23 @@ public class HttpCache {
                         )
                 ).get();
             } catch (Exception e) {
+                e.printStackTrace();
                 target.accept(null);
             }
 
-            if (filter!=null && response!=null)
-                filter.accept(response);
+            if (response!=null) {
+                if (filter != null)
+                    filter.accept(response);
 
-            if (logger.isDebugEnabled())
-                logger.debug("cache set: " + response.size + " bytes");
+                if (logger.isDebugEnabled())
+                    logger.debug("cache set: " + response.size + " bytes");
 
-            write = true;
+                target.accept(response);
+                write = true;
+            }
+            else {
+                write = false;
+            }
 
         } else {
             if (logger.isDebugEnabled())
@@ -199,21 +207,24 @@ public class HttpCache {
             if (maxAge > 0 && now - lastModified > maxAge) {
                 return null;
             }
+
+            ObjectInputStream deficheiro = new ObjectInputStream(new FileInputStream(header));
+
+            CachedURL x = (CachedURL) deficheiro.readObject();
+            //x.content = new byte[x.size];
+
+            File content = getCacheFile(u, false);
+            final FileInputStream cc = new FileInputStream(content);
+            x.contentStream = cc;
+            return x;
+
         }
         catch (NoSuchFileException e) {
             //..
+            return null;
         }
 
-        ObjectInputStream deficheiro = new ObjectInputStream(new FileInputStream(header));
 
-        CachedURL x = (CachedURL) deficheiro.readObject();
-        //x.content = new byte[x.size];
-
-        File content = getCacheFile(u, false);
-        final FileInputStream cc = new FileInputStream(content);
-        x.contentStream = cc;
-
-        return x;
     }
 
 
@@ -243,10 +254,22 @@ public class HttpCache {
 //            }
             this.content = content;
             this.size = content.length;
+            this.responseCode = responseCode;
 
             responseHeader = new ArrayList(responseHeaders.length);
 
             for (Header h : responseHeaders) {
+                switch (h.getName()) {
+                    case "ServerFred":
+                        continue;
+                    case "Cache-Control":
+                        continue;
+                    case "Keep-Alive":
+                        continue;
+                    case "X-Powered-By": continue;
+                    case "Server": continue;
+
+                }
                 responseHeader.add(new String[]{h.getName(), h.getValue()});
             }
 
@@ -277,11 +300,18 @@ public class HttpCache {
 //            } else {
                 exchange.setResponseCode(response.responseCode);
                 for (String[] x : response.responseHeader) {
+                    System.out.println(Arrays.toString(x));
                     exchange.getResponseHeaders().add(new HttpString(x[0]), x[1]);
                 }
+
                 if (response.content != null) {
 
+                    exchange.startBlocking();
+
                     exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
+                    exchange.getResponseSender().close();
+
+                    exchange.endExchange();
 
 
                 } else {
