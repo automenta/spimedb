@@ -56,7 +56,7 @@ public class Web extends PathHandler {
     }
 
 
-    boolean compress = true;
+    boolean compress = false;
 
     public Undertow server;
 
@@ -181,13 +181,13 @@ public class Web extends PathHandler {
         return start(Undertow.builder()
                 .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
                 .setServerOption(UndertowOptions.ENABLE_SPDY, true)
-                .setWorkerThreads(2)
+                .setWorkerThreads(8)
 
 
                         //.addHttpsListener(8443, bindAddress, sslContext)
 
                 .addHttpListener(port, host)
-                .setIoThreads(4));
+                .setIoThreads(8));
 
     }
 

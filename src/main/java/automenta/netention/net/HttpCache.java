@@ -17,10 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,8 +35,7 @@ public class HttpCache {
 
     final String cachePath;
 
-    final static int threads = 4;
-    final ExecutorService executor = Executors.newFixedThreadPool(threads);
+    final ExecutorService executor = Executors.newCachedThreadPool();
 
     public HttpCache(String cachePath) {
         this.cachePath = cachePath + "/";
@@ -47,6 +43,47 @@ public class HttpCache {
 
     public void get(String url, Consumer<CachedURL> target, long maxAge) {
         get(url, null, target, maxAge);
+    }
+
+
+    public class CacheRequest extends Request {
+
+        private final Consumer<CachedURL> target;
+        private final Consumer<CachedURL> filter;
+
+        public CacheRequest(String url, Consumer<CachedURL> target, Consumer<CachedURL> filter) throws MalformedURLException, URISyntaxException {
+            super(new URL(url));
+            this.target = target;
+            this.filter = filter;
+        }
+
+
+        @Override
+        public CachedURL call() throws Exception {
+            CachedURL response = super.call();
+            if (response == null) {
+                logger.error("undownloaded: " + url);
+                target.accept(null);
+            } else {
+
+                if (filter != null)
+                    filter.accept(response);
+
+                if (logger.isDebugEnabled())
+                    logger.debug("cache set: " + response.size + " bytes");
+
+                target.accept(response);
+
+                try {
+                    put(decodeURIComponent(url.toString()), response);
+                } catch (Exception e) {
+                    logger.error(e.toString());
+                }
+            }
+
+            return response;
+        }
+
     }
 
 
@@ -69,60 +106,28 @@ public class HttpCache {
             e.printStackTrace();
         }
 
-        boolean write;
-
         if (response == null) {
 
             if (logger.isDebugEnabled())
                 logger.info("cache miss: " + url);
 
             try {
-                response = executor.submit(
-                        new Request(
-                                new URL(url)
-                        )
-                ).get();
+
+                executor.submit( new CacheRequest(url, target, filter) );
+
             } catch (Exception e) {
                 e.printStackTrace();
                 target.accept(null);
             }
 
-            if (response!=null) {
-                if (filter != null)
-                    filter.accept(response);
-
-                if (logger.isDebugEnabled())
-                    logger.debug("cache set: " + response.size + " bytes");
-
-                target.accept(response);
-                write = true;
-            }
-            else {
-                write = false;
-            }
 
         } else {
             if (logger.isDebugEnabled())
                 logger.debug("cache hit: " + url);
             target.accept(response);
-            write = false;
         }
 
-        if (response == null) {
-            logger.error("undownloaded: " + url);
-            target.accept(null);
-        } else {
-            //target.accept(response);
-        }
 
-        if (write && response!=null) {
-            try {
-                put(decodeURIComponent(url.toString()), response);
-            }
-            catch (Exception e) {
-                logger.error(e.toString());
-            }
-        }
 
     }
 
@@ -152,23 +157,25 @@ public class HttpCache {
 //        web.build().start();
 //    }
 
-    public synchronized void put(String uri, CachedURL c) throws IOException {
+    public void put(String uri, CachedURL c) throws IOException {
 
 
         File f = getCacheFile(uri, true);
+        File g = getCacheFile(uri, false);
 
 
         if (logger.isDebugEnabled())
             logger.debug("Caching " + uri + " to " + f.getAbsolutePath());
 
-        ObjectOutputStream ff = new ObjectOutputStream(new FileOutputStream(f));
-        ff.writeObject(c);
-        ff.close();
+        synchronized(executor) {
+            ObjectOutputStream ff = new ObjectOutputStream(new FileOutputStream(f));
+            ff.writeObject(c);
+            ff.close();
 
-        File g = getCacheFile(uri, false);
-        FileOutputStream gg = new FileOutputStream(g);
-        IOUtils.write(c.content, gg);
-        gg.close();
+            FileOutputStream gg = new FileOutputStream(g);
+            IOUtils.write(c.content, gg);
+            gg.close();
+        }
 
         //cache.put(pedido.URI, f.getAbsolutePath());
 
@@ -194,6 +201,7 @@ public class HttpCache {
         File f = new File(target);
 
         if (!f.exists()) {
+
             File parent = f.getParentFile();
             parent.mkdirs();
             f = new File(target);
@@ -202,7 +210,7 @@ public class HttpCache {
         return f;
     }
 
-    public synchronized CachedURL get(String u, long maxAge) throws Exception {
+    public CachedURL get(String u, long maxAge) throws Exception {
 
         long now = System.currentTimeMillis();
 
@@ -315,7 +323,6 @@ public class HttpCache {
                     exchange.startBlocking();
 
                     exchange.getResponseSender().send(ByteBuffer.wrap(response.content));
-                    exchange.getResponseSender().close();
 
                     exchange.endExchange();
 
@@ -325,7 +332,6 @@ public class HttpCache {
                     exchange.startBlocking();
 
                     exchange.getResponseSender().transferFrom(response.contentStream.getChannel(), null);
-                    exchange.getResponseSender().close();
 
                     exchange.endExchange();
 
