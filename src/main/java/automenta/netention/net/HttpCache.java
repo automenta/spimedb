@@ -56,10 +56,16 @@ public class HttpCache {
 
         CachedURL response = null;
 
+        url = decodeURIComponent(url);
+
         //attempt to read, or if expired, just get the newest
         try {
             response = get(url, maxAge);
-        } catch (Exception e) {
+        }
+        catch (FileNotFoundException e) {
+            //... normal, means cache miss
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -68,7 +74,7 @@ public class HttpCache {
         if (response == null) {
 
             if (logger.isDebugEnabled())
-                logger.debug("cache miss: " + url);
+                logger.info("cache miss: " + url);
 
             try {
                 response = executor.submit(
@@ -150,7 +156,10 @@ public class HttpCache {
 
 
         File f = getCacheFile(uri, true);
-        logger.info("Caching " + uri + " to " + f.getAbsolutePath());
+
+
+        if (logger.isDebugEnabled())
+            logger.debug("Caching " + uri + " to " + f.getAbsolutePath());
 
         ObjectOutputStream ff = new ObjectOutputStream(new FileOutputStream(f));
         ff.writeObject(c);
@@ -180,7 +189,7 @@ public class HttpCache {
         filename = filename.replace("%3A", ":"); //restore ',' this is valid in unix filename
 
 
-        String target = cachePath + filename + (header ? ".h" : "");
+        final String target = cachePath + filename + (header ? ".h" : "");
 
         File f = new File(target);
 
@@ -206,22 +215,20 @@ public class HttpCache {
                 return null;
             }
 
-            ObjectInputStream deficheiro = new ObjectInputStream(new FileInputStream(header));
-
-            CachedURL x = (CachedURL) deficheiro.readObject();
-            //x.content = new byte[x.size];
-
-            File content = getCacheFile(u, false);
-            final FileInputStream cc = new FileInputStream(content);
-            x.contentStream = cc;
-            return x;
-
         }
         catch (Exception e) {
             //..
-            return null;
         }
 
+        ObjectInputStream deficheiro = new ObjectInputStream(new FileInputStream(header));
+
+        CachedURL x = (CachedURL) deficheiro.readObject();
+        //x.content = new byte[x.size];
+
+        File content = getCacheFile(u, false);
+        final FileInputStream cc = new FileInputStream(content);
+        x.contentStream = cc;
+        return x;
 
     }
 
