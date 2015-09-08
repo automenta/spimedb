@@ -322,12 +322,13 @@ public class UdpCommunications implements GossipCommunications {
     @Override
     public void terminate() {
         if (running.compareAndSet(true, false)) {
-            if (log.isInfoEnabled()) {
-                log.info(String.format("Terminating UDP Communications on %s",
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Terminating UDP Communications on %s",
                                        socket.getLocalSocketAddress()));
+                log.debug(bufferPool.toString());
             }
+
             socket.close();
-            log.info(bufferPool.toString());
         }
     }
 

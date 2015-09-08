@@ -1,9 +1,10 @@
-package vectrex;
+package automenta.netention;
 
 import org.junit.Test;
 import spangraph.InfiniPeer;
 import toxi.geom.Vec3D;
 import toxi.geom.XYZ;
+import vectrex.OctMap;
 
 import java.io.Serializable;
 
@@ -58,17 +59,27 @@ public class OctMapTest {
         }
     }
 
+    InfiniPeer p = InfiniPeer.tmp();
+    OctMap<Event, String> o = new OctMap<>(p, "octmap",
+            new Vec3D(-180f, -90f, 0f), /* AD */
+            new Vec3D(180f, 90f, 2100f), /* 0AD .. 2100AD */
+            new Vec3D(1f, 0.75f, 2f)
+    );
+
     @Test
-    public void test1() {
-        InfiniPeer p = InfiniPeer.local("i", "/tmp/t", 1024);
-        OctMap<Event,String> o = new OctMap<>(p, "octmap",
-                new Vec3D(-180f,-90f,0f ), /* AD */
-                new Vec3D(180f,90f,2100f ), /* 0AD .. 2100AD */
-                new Vec3D(1f,0.75f,2f)
-        );
-
+    public synchronized void test0() {
         o.clear();
+        assertTrue(o.size() == 0);
+        assertTrue(o.isEmpty());
 
+        o.put(new Event("Beginning of Common Era", 75f, -20f, 0), "");
+        o.box().forEachInBox(x -> System.out.println(x));
+        assertTrue(o.validate());
+    }
+
+    @Test
+    public synchronized void test1() {
+        o.clear();
         Event[] ee = new Event[] {
                 new Event("Beginning of Common Era", 75f, -20f, 0),
                 new Event("Invasion of Western Hemisphere", 65f, 34f, 1492f),
@@ -79,14 +90,16 @@ public class OctMapTest {
             o.put(e, "");
         }
 
-        System.out.println(o);
+        //System.out.println(o);
         o.box().forEachInBox(x -> System.out.println(x));
-
 
         assertTrue(o.validate());
 
-
-        o.flush();
-        p.stop();
     }
+
+//    @After
+//    public void stop() {
+//        o.flush();
+//        p.stop();
+//    }
 }

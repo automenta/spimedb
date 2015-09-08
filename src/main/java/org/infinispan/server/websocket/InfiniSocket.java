@@ -46,7 +46,7 @@ public class InfiniSocket implements WebSocketConnectionCallback {
 
     public static void main(String[] args) {
 
-        InfiniPeer caches = InfiniPeer.local("x");
+        InfiniPeer caches = InfiniPeer.cluster("x");
         Cache<Object, Object> cacheC = caches.the("c");
 
         Undertow.builder()

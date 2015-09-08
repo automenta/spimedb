@@ -1,9 +1,10 @@
-package vectrex;
+package automenta.netention;
 
 import org.junit.Test;
 import toxi.geom.AABB;
 import toxi.geom.BB;
 import toxi.geom.Vec3D;
+import vectrex.OctBox;
 
 import java.util.List;
 

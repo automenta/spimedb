@@ -77,8 +77,9 @@ public class SystemView {
         for (InetSocketAddress seed : seedHosts) {
             connect(seed);
         }
-        log.info(format("System view initialized for: %s, seeds: %s",
-                        localAddress, seeds));
+        if (log.isDebugEnabled())
+            log.debug(format("System view initialized for: %s, seeds: %s",
+                            localAddress, seeds));
     }
 
     public void connect(InetSocketAddress seed) {

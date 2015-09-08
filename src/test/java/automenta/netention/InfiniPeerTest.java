@@ -1,4 +1,4 @@
-package java.com.syncleus.spangraph;
+package automenta.netention;
 
 import org.infinispan.Cache;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class InfiniPeerTest {
 
 
 
-        InfiniPeer cacheMan = InfiniPeer.local("me");
+        InfiniPeer cacheMan = InfiniPeer.tmp();
 
         final Cache<Object, Object> cache = cacheMan.the("abc", true);
 

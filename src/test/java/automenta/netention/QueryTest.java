@@ -1,4 +1,4 @@
-package java.com.syncleus.spangraph;
+package automenta.netention;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.CacheMode;
@@ -25,7 +25,8 @@ public class QueryTest {
 
         globalConfigBuilder.transport().nodeName("x")
                 .defaultTransport()
-                .addProperty("configurationFile", "fast.xml");
+                //.addProperty("configurationFile", "fast.xml")
+        ;
 
 
 
@@ -51,7 +52,6 @@ public class QueryTest {
                 globalConfigBuilder,
                 config
         );
-
 
 
         final Cache<Object, Object> cache = cacheMan.the("abc", true);

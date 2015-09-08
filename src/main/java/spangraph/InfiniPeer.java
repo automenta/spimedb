@@ -30,8 +30,13 @@ import java.util.logging.Logger;
  *
  * see: https://github.com/belaban/JGroups/tree/master/conf
  */
+/**
+ * Peer-to-peer node manager : wraps CacheManager functionality
+ *
+ * @see https://github.com/belaban/JGroups/tree/master/conf
+ */
 @Listener(sync = true)
-public class InfiniPeer extends DefaultCacheManager  {
+public class InfiniPeer extends DefaultCacheManager {
 
     static {
         Logger.getLogger(JGroupsTransport.class.getName()).setLevel(Level.WARNING);
@@ -43,7 +48,7 @@ public class InfiniPeer extends DefaultCacheManager  {
     public InfiniPeer(GlobalConfiguration globalConfig, Configuration config) {
         super(globalConfig, config);
 
-        if (globalConfig.transport()!=null)
+        if (globalConfig!=null && globalConfig.transport() != null)
             this.userID = globalConfig.transport().nodeName();
         else
             this.userID = null;
@@ -57,20 +62,25 @@ public class InfiniPeer extends DefaultCacheManager  {
 
     }
 
+    public InfiniPeer(ConfigurationBuilder config) {
+        this(null, config.build());
+    }
+
+
     public void print(Cache cache, PrintStream out) {
 
-        System.out.println(userID +  " -----");
+        System.out.println(userID + " -----");
         System.out.println(cache + " " + cache.size());
         System.out.println(cache.entrySet());
         System.out.println("---\n");
 
     }
 
-    public <K,V> Cache<K, V> the(String cacheID) {
+    public <K, V> Cache<K, V> the(String cacheID) {
         return the(cacheID, true);
     }
 
-    public <K,V> Cache<K, V> the(String cacheID, boolean createIfMissing) {
+    public <K, V> Cache<K, V> the(String cacheID, boolean createIfMissing) {
         Cache<K, V> cache = getCache(cacheID, createIfMissing);
         cache.addListener(this);
         return cache;
@@ -113,10 +123,10 @@ public class InfiniPeer extends DefaultCacheManager  {
 //    }
 
 
-
-
-    /** for local only mode on the same host */
-    public static InfiniPeer local(String userID) {
+    /**
+     * for local only mode on the same host
+     */
+    @Deprecated public static InfiniPeer clusterLocal(String userID) {
         return cluster(userID, t ->
                         t.nodeName(userID)
                                 .defaultTransport()
@@ -134,16 +144,28 @@ public class InfiniPeer extends DefaultCacheManager  {
     }
 
 
+    public static InfiniPeer file(String diskPath, int maxEntries) {
+        return file("_", diskPath, maxEntries);
+    }
+
 
     /** for local only mode on the same host, saved to disk */
-    public static InfiniPeer local(String userID, String diskPath, int maxEntries) {
+    public static InfiniPeer file(String userID, String diskPath, int maxEntries) {
 
+        ConfigurationBuilder config = new ConfigurationBuilder();
+        config.persistence()
+                .addSingleFileStore()
+                .location(diskPath)
+                .maxEntries(maxEntries);
+        /*
 
-        GlobalConfigurationBuilder globalConfigBuilder = new GlobalConfigurationBuilder();
+        GlobalConfigurationBuilder globalConfigBuilder = new GlobalConfigurationBuilder()
+                .globalJmxStatistics().enabled(false);
 
         globalConfigBuilder.transport().nodeName(userID)
-                .defaultTransport()
-                .addProperty("configurationFile", "fast.xml");
+                .defaultTransport();
+
+                //.addProperty("configurationFile", "fast.xml");
 
 
 
@@ -152,27 +174,33 @@ public class InfiniPeer extends DefaultCacheManager  {
 
         Configuration config = new ConfigurationBuilder()
                 .persistence()
-                    .addSingleFileStore()
-                    .location(diskPath)
-                    .maxEntries(maxEntries)
-                    .fetchPersistentState(true)
-                            .ignoreModifications(false)
+                .addSingleFileStore()
+                .location(diskPath)
+                .maxEntries(maxEntries)
+                .fetchPersistentState(true)
+                .ignoreModifications(false)
 
-                    //.purgeOnStartup(true)
+                        //.purgeOnStartup(true)
+
+                //.transaction().autoCommit(true).transactionMode(TransactionMode.NON_TRANSACTIONAL)
 
                 .unsafe()
-                .clustering()
+
+                        .clustering().sync()
+                //.clustering()
                         //.cacheMode(CacheMode.DIST_SYNC)
-                .cacheMode(CacheMode.DIST_SYNC)
-                .sync()
-                .l1().lifespan(25000L)
-                .hash().numOwners(3)
+                //.cacheMode(CacheMode.DIST_SYNC)
+                //.sync()
+                //.l1().lifespan(25000L)
+                //.hash().numOwners(3)
                 .build();
 
+        */
+
         return new InfiniPeer(
-                globalConfigBuilder.build(),
                 config
         );
+
 
     }
 
@@ -180,8 +208,8 @@ public class InfiniPeer extends DefaultCacheManager  {
     public static InfiniPeer cluster(String userID) {
         return cluster(userID, t ->
                         t.nodeName(userID)
-                        .defaultTransport()
-                        .addProperty("configurationFile", "udp-largecluster.xml")
+                                .defaultTransport()
+                                .addProperty("configurationFile", "udp-largecluster.xml")
         );
 
     }
@@ -190,9 +218,9 @@ public class InfiniPeer extends DefaultCacheManager  {
     /** creates a web-scale (> 100 nodes) infinipeer */
     public static InfiniPeer webLarge(String userID) {
         return cluster(userID, t ->
-            t.nodeName(userID)
-            .defaultTransport()
-            .addProperty("configurationFile", "udp-largecluster.xml")
+                        t.nodeName(userID)
+                                .defaultTransport()
+                                .addProperty("configurationFile", "udp-largecluster.xml")
         );
 
         //https://github.com/infinispan/infinispan/tree/master/core/src/main/resources/default-configs
@@ -229,8 +257,18 @@ public class InfiniPeer extends DefaultCacheManager  {
         );
     }
 
-    public static InfiniPeer local() {
-        return local("");
+    public static InfiniPeer clusterLocal() {
+        return clusterLocal("");
+    }
+
+
+    static InfiniPeer tmp;
+
+    public synchronized static InfiniPeer tmp() {
+        if (tmp==null) {
+            tmp = file("_", System.getProperty("java.io.tmpdir") + "/" + "spimedb", 128);
+        }
+        return tmp;
     }
 
 //    public static void main(String args[]) throws Exception {

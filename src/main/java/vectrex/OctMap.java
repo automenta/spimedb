@@ -116,6 +116,7 @@ public class OctMap<K extends XYZ, V> implements Map<K,V> {
     public void clear() {
         map.clear();
         box.zero();
+        box.clear();
     }
 
     @Override
