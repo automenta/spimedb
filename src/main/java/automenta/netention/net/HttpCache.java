@@ -44,6 +44,9 @@ public class HttpCache {
 
     private final HttpClientBuilder clientbuilder;
 
+    public HttpCache() {
+        this(System.getProperty("java.io.tmpdir") + "/http");
+    }
     public HttpCache(String cachePath) {
         this.cachePath = cachePath + "/";
 
@@ -411,7 +414,7 @@ public class HttpCache {
                 ResponseHandler<byte[]> responseHandler = new ResponseHandler<byte[]>() {
 
                     @Override
-                    public byte[] handleResponse(final HttpResponse hresponse) throws ClientProtocolException, IOException {
+                    public byte[] handleResponse(final HttpResponse hresponse) throws IOException {
                         response = hresponse;
                         responseCode = hresponse.getStatusLine().getStatusCode();
                         if (responseCode >= 200 && responseCode < 300) {

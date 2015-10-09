@@ -23,11 +23,11 @@ public interface SpimeBase extends Iterable<NObject> {
 
     Iterator<NObject> get(double lat, double lon, double radMeters, int maxResults);
 
-    public static NObject newNObject() {
+    static NObject newNObject() {
         return new NObject();
     }
 
-    public static NObject newNObject(String id) {
+    static NObject newNObject(String id) {
         return new NObject(id);
     }
 

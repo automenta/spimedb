@@ -42,6 +42,11 @@ public class Wikipedia extends PathHandler {
 
     private final HttpCache http;
 
+    /** uses default /tmp/ http file cache */
+    public Wikipedia() {
+        this(new HttpCache());
+    }
+
     public Wikipedia(HttpCache http) {
 
         this.http = http;

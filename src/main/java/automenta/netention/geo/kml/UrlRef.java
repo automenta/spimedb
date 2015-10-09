@@ -1587,11 +1587,8 @@ public final class UrlRef implements java.io.Serializable {
         if (c < 0xAC00) {
             return false;
         }
-        if (c <= 0xD7A3) {
-            return true;
-        }
+        return c <= 0xD7A3;
 
-        return false;
     }
 
     /**
@@ -1695,11 +1692,8 @@ public final class UrlRef implements java.io.Serializable {
         if (c < 0x0F20) {
             return false;
         }
-        if (c <= 0x0F29) {
-            return true;
-        }
+        return c <= 0x0F29;
 
-        return false;
     }
 
     /**
@@ -2217,11 +2211,7 @@ public final class UrlRef implements java.io.Serializable {
         if (c == 0x3099) {
             return true;
         }
-        if (c == 0x309A) {
-            return true;
-        }
-
-        return false;
+        return c == 0x309A;
 
     }
 
@@ -2278,11 +2268,8 @@ public final class UrlRef implements java.io.Serializable {
         if (c < 0x30FC) {
             return false;
         }
-        if (c <= 0x30FE) {
-            return true;
-        }
+        return c <= 0x30FE;
 
-        return false;
     }
 
     /**

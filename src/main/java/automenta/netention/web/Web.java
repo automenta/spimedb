@@ -1,6 +1,7 @@
 package automenta.netention.web;
 
 import automenta.netention.Core;
+import automenta.netention.run.SpimeServer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.undertow.Undertow;
@@ -92,7 +93,7 @@ public class Web extends PathHandler {
             s.accept(os);
             os.flush();
         } catch (Exception ex1) {
-            SpacetimeWebServer.logger.severe(ex1.toString());
+            SpimeServer.log.warn(ex1.toString());
         }
 
         ex.getResponseSender().close();
@@ -117,7 +118,7 @@ public class Web extends PathHandler {
         try {
             Core.json.writeValue(ex.getOutputStream(), d);
         } catch (IOException ex1) {
-            SpacetimeWebServer.logger.severe(ex1.toString());
+            SpimeServer.log.warn(ex1.toString());
         }
 
         ex.getResponseSender().close();

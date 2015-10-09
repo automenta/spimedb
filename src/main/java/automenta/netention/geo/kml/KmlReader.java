@@ -763,7 +763,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
      *
      * @see KmlReader#importFromNetworkLinks(ImportEventHandler)
      */
-    public static interface ImportEventHandler {
+    public interface ImportEventHandler {
 
         /**
          * The KmlReader will invoke this method for each GISObject encountered

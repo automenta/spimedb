@@ -2,7 +2,6 @@ package automenta.netention.run;
 
 import automenta.netention.data.SpimeScript;
 import automenta.netention.db.SpimeGraph;
-import automenta.netention.geo.ImportKML;
 
 import javax.script.ScriptException;
 import java.io.File;
@@ -15,38 +14,38 @@ public class ClimateEditor {
 
 
     public static void main(String[] args) throws IOException, ScriptException {
-        //InfinispanSpimeBase es = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
-        SpimeGraph es = new SpimeGraph();
+        //InfinispanSpimeBase db = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
+        SpimeGraph db = new SpimeGraph();
 
 
 
 
-        if (es.isEmpty()) {
+        if (db.isEmpty()) {
             System.out.println("Initializing database...");
 
-            new SpimeScript(es).run(new File("data/climateviewer.js"));
+            new SpimeScript(db).run(new File("data/climateviewer.js"));
 
-            String[] urls = new String[]{
-                    "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
-                    "file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
-                    "file:///home/me/kml/fusion-landing-points-CV3D.kmz",
-                    "file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
-            };
-
-            for (String u : urls) {
-                new ImportKML(es).url(u).run();
-            }
+//            String[] urls = new String[]{
+//                    "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
+//                    "file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
+//                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
+//                    "file:///home/me/kml/fusion-landing-points-CV3D.kmz",
+//                    "file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
+//            };
+//
+//            for (String u : urls) {
+//                new ImportKML(db).url(u).run();
+//            }
 
         }
 
-        System.out.println(es + " objects=" + es.size());
+        System.out.println(db + " objects=" + db.size());
 
 
-        //System.out.println(es.size() + " objects loaded");
+        //System.out.println(db.size() + " objects loaded");
 
 
-        new SpimeServer(es).start("localhost", 8080);
+        new SpimeServer(db).start("localhost", 8080);
     }
 
 

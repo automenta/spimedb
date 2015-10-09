@@ -6,9 +6,9 @@
 package automenta.netention.geo;
 
 
+import automenta.netention.NObject;
 import automenta.netention.geo.kml.KmlReader;
 import automenta.netention.geo.kml.UrlRef;
-import automenta.netention.NObject;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,11 +72,11 @@ public class ImportKML {
 
     public interface GISVisitor {
 
-        public boolean on(IGISObject go, String[] path) throws IOException;
+        boolean on(IGISObject go, String[] path) throws IOException;
 
-        public void start(String layer);
+        void start(String layer);
 
-        public void end();
+        void end();
     }
 
 

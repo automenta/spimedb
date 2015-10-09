@@ -4,6 +4,7 @@ package automenta.netention.run;
 import automenta.netention.Core;
 import automenta.netention.NObject;
 import automenta.netention.geo.SpimeBase;
+import automenta.netention.net.Wikipedia;
 import automenta.netention.web.ClientResources;
 import automenta.netention.web.Web;
 import automenta.netention.web.WebSocketCore;
@@ -164,6 +165,10 @@ public class SpimeServer extends Web {
                 }
             }
         });
+
+        addPrefixPath("/wikipedia", new Wikipedia());
+
+
         this.base = s;
 
     }

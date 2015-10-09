@@ -10,8 +10,8 @@ package automenta.netention;
  * @author me
  */
 public interface Spacetime {
-    public static final String VERSION = "Spacetime ClimateNet -0.00";
+    String VERSION = "Spacetime ClimateNet -0.00";
 
-    public void close();
+    void close();
     
 }

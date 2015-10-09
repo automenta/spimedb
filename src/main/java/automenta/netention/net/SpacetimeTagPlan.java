@@ -277,9 +277,9 @@ public static class Goal extends DoublePoint {
     }
 
 public interface PlanResult {
-    public void onFinished(SpacetimeTagPlan plan, List<Possibility> possibilities);
+    void onFinished(SpacetimeTagPlan plan, List<Possibility> possibilities);
 
-    public void onError(SpacetimeTagPlan plan, Exception e);
+    void onError(SpacetimeTagPlan plan, Exception e);
 }
 
 

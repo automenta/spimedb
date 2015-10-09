@@ -14,7 +14,7 @@ public class EventEmitter {
     
     /** Observes events emitted by EventEmitter */
     public interface EventObserver<C> {
-        public void event(Class<? extends C> event, Object[] args);
+        void event(Class<? extends C> event, Object[] args);
     }
 
     private final Map<Class<?>, List<EventObserver>> events;

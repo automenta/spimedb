@@ -31,6 +31,8 @@ import org.junit.Test;
 
 import java.util.Collections;
 
+import static org.junit.Assert.assertTrue;
+
 public class TestCosineDistance {
 final double epsilon = 0.00001;
 	
@@ -90,7 +92,7 @@ final double epsilon = 0.00001;
 		CosineDistance d = new CosineDistance();
 		double distance = d.aveMinDistance(Collections.singletonList(t1), Collections.singletonList(t2));
 		System.out.println(distance);
-		Assert.assertTrue(isEqual(distance, 0));
+		assertTrue(isEqual(distance, 0));
 	}
 	
 	@Test
