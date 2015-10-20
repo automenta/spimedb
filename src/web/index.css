@@ -32,6 +32,10 @@ body {
     /*background-color: black;*/
     margin: 0 !important;
 }
+#sidebar .buttons {
+    z-index: 100;
+    position: fixed;
+}
 
 /*TODO move to ui.slider.css */
 input[type=range].tagSlider {

@@ -148,11 +148,11 @@ function nobject(x) {
 
 nobjectTree(layers, function(v) {
     var x = nobject(v);
-    print('vertex:', x);
+    print('[', x, ']');
     print();
     db.put(x);
 }, function(s, p, o) {
-    print('edge:', JSON.stringify(s), p, JSON.stringify(o) );
+    print('(', JSON.stringify(s), p, JSON.stringify(o),')' );
 });
 
 

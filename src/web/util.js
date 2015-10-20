@@ -2,12 +2,13 @@
 
 class Tag {
 
-    constructor(id, data/*tagJSON*/) {
+    constructor(id/*, data*//*tagJSON*/) {
 
         this.id = id;
-        this.meta = data;
+        this.meta = { };
+        /*this.meta = data;
         this.name = data.name;
-        this.inh = data.inh;
+        this.inh = data.inh;*/
 
         //var n = tag.node(i);
         //if (!n) {
@@ -131,12 +132,12 @@ class TagIndex {
 
 
         var that = this;
-        $.getJSON('/api/tag')
+        $.getJSON('/index')
             .done(function(tagMap) {
 
 
                 _.each(tagMap, function(i) {
-                    that.updateTag(i.id, i);
+                    that.updateTag(i);
                 });
 
                 //add edges
@@ -293,9 +294,9 @@ class TagIndex {
         return n;
     }
 
-    updateTag(i,l) {
+    updateTag(i) {
         "use strict";
-        this.tag.setNode(i, new Tag(i, l));
+        this.tag.setNode(i, new Tag(i));
     }
 
 

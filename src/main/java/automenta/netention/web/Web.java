@@ -86,17 +86,19 @@ public class Web extends PathHandler {
 
         ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 
-        ex.startBlocking();
+        ex.dispatch(() -> {
+            ex.startBlocking();
 
-        try {
-            OutputStream os = ex.getOutputStream();
-            s.accept(os);
-            os.flush();
-        } catch (Exception ex1) {
-            SpimeServer.log.warn(ex1.toString());
-        }
+            try {
+                OutputStream os = ex.getOutputStream();
+                s.accept(os);
+                os.flush();
+            } catch (Exception ex1) {
+                SpimeServer.log.warn(ex1.toString());
+            }
 
-        ex.getResponseSender().close();
+            ex.getResponseSender().close();
+        });
     }
 
 
