@@ -46,7 +46,7 @@ public class SpimeGraph implements SpimeBase {
 
 
     final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph = new SpimeMapGraph();
-    public final OctBox<NObject> spacetime = new OctBox(
+    public final OctBox<byte[]> spacetime = new OctBox(
             new Vec3D(-180f, -90f, 0),
             new Vec3D(360f, 180f, 0),
             new Vec3D(0.05f, 0.05f, 0f)
@@ -144,7 +144,7 @@ public class SpimeGraph implements SpimeBase {
         };
 
         spacetime.forEachInSphere(new Vec3D((float)lat, (float)lon, 0), radDegrees, n -> {
-            l.add(n);
+            l.add((NObject)n); //TODO HACK avoid casting, maybe change generics
             //TODO exit from this loop early if capacity reached
         });
 

@@ -1,6 +1,7 @@
 package automenta.netention.net;
 
 import automenta.netention.NObject;
+import com.gs.collections.impl.list.mutable.FastList;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.ml.clustering.*;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
@@ -65,17 +66,17 @@ public class SpacetimeTagPlan {
             }
 
             List<Goal> goals = new LinkedList();
-            Map<String, Object> ts = o.getFields();
+            Map<String, Object> ts = o.getData();
 
 
 
 
-            List<Long> times = new ArrayList(1);
+            List<Long> times = new FastList(2);
 
             if (get(0).equals("time")) {
                 //convert time ranges to a set of time points
-                long start = o.getTimeStart();
-                long end = o.getTimeEnd();
+                long start = (long) o.timeStart();
+                long end = (long) o.timeStop();
 
                 if (end != ETERNAL) {
                     times.addAll(new TimeRange(start, end).discretize(timePeriod));

@@ -1,7 +1,7 @@
 package org.infinispan.server.websocket.json;
 
 
-import infinispan.org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Collection;

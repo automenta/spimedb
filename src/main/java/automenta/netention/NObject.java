@@ -5,17 +5,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.hibernate.search.annotations.*;
-import org.hibernate.search.spatial.Coordinates;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 import org.opensextant.geodesy.Geodetic2DPoint;
 import org.opensextant.geodesy.Geodetic3DPoint;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
-import toxi.geom.XYZ;
+import toxi.geom.AABB;
+import toxi.geom.BB;
+import vectrex.IdBB;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static automenta.netention.geo.ImportKML.toArray;
 
@@ -32,23 +38,23 @@ import static automenta.netention.geo.ImportKML.toArray;
 @JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
 @JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
 @Indexed
-@Spatial(spatialMode = SpatialMode.RANGE, store=Store.YES ) //http://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/
-public class NObject implements Serializable, Coordinates, XYZ {
+public class NObject implements Serializable, IdBB<byte[]> {
 
     final static long ETERNAL = Long.MIN_VALUE;
 
     @Field(store = Store.YES) @JsonProperty("I") final String id;
 
-    @Field(store = Store.YES) @JsonProperty("N") String name;
+    @Field(store = Store.YES) @JsonProperty("N") byte[] name;
 
-    @JsonProperty("T") long[] time = null;
+    //@JsonProperty("T") long[] time = null;
 
     /** lat, lon, alt (m), [planet ID?] */
-    @JsonProperty("S") float[] space = null;
+    //@JsonProperty("S")
+    final AABB spacetime = new AABB();
 
 
     //TODO use a ObjectDouble primitive map structure
-    @JsonProperty("^") Map<String, Object> fields = null;
+    @JsonProperty("^") Map<String, Object> data = null;
 
 
     /** extensional inheritance: what this nobject is "inside" of (its container) */
@@ -70,41 +76,42 @@ public class NObject implements Serializable, Coordinates, XYZ {
         if (id == null)
             id = Core.uuid();
         this.id = id;
-        this.name = name;
+        this.name = name.getBytes(); //TODO use nars Utf8 classes
     }
 
     public String getId() {
         return id;
     }
 
-    public String getName() {
+    public byte[] getName() {
         return name;
     }
 
-    public Map<String, Object> getFields() {
-        return fields;
+    public Map<String, Object> getData() {
+        return data;
     }
 
     /**
      * timepoint, or -1 if none
      */
-    public long[] getTime() {
-        return time;
+    final public float timeStart() {
+        return spacetime.minZ();
+    }
+    final public float timeStop() {
+        return spacetime.maxZ();
     }
 
 
     public Collection<String> tagSet() {
-        return fields.keySet();
+        return data.keySet();
     }
 
-    public NObject when(final long at) {
+    public NObject when(final float at) {
         return when(at,at);
     }
 
-    public NObject when(final long start, final long end) {
-        if (this.time == null) this.time = new long[2];
-        this.time[0] = start;
-        this.time[1] = end;
+    public NObject when(final float  start, final float end) {
+        spacetime.setRangeZ(start, end);
         return this;
     }
 
@@ -112,24 +119,26 @@ public class NObject implements Serializable, Coordinates, XYZ {
         return where(coord[0], coord[1], coord[2]);
     }
 
-    public NObject where(float lat, float lng, float alt, Object... shaped) {
+    public NObject where(float lat, float lng, float alt, Object... geometry) {
+        spacetime.setX(lat);
+        spacetime.setY(lng);
+        //TODO alt
 
-        if (space == null) space = new float[3];
-        space[0] = lat;
-        space[1] = lng;
-        space[2] = alt;
+//        space[0] = lat;
+//        space[1] = lng;
+//        space[2] = alt;
 
-        if (shaped.length > 0) {
-            put("s", shaped);
+        if (geometry.length > 0) {
+            put("g", geometry);
         }
 
 
         return this;
     }
 
-    public NObject where(NObject otherLocation) {
-        return where(otherLocation.space);
-    }
+//    public NObject where(NObject otherLocation) {
+//        return where(otherLocation.spacetime);
+//    }
 
     public NObject where(double lat, double lon) {
         return where((float)lat, (float)lon, Float.NaN);
@@ -142,32 +151,32 @@ public class NObject implements Serializable, Coordinates, XYZ {
         return where(lat, lng, Float.NaN);
     }
 
-    //TODO provide non-boxed versoins of these
-    @JsonIgnore
-    //@Latitude
-    public Double getLatitude() {
-        if (space!=null)
-            return Double.valueOf(space[0]);
-        return Double.NaN;
-    }
+//    //TODO provide non-boxed versoins of these
+//    @JsonIgnore
+//    //@Latitude
+//    public Double getLatitude() {
+//        if (space!=null)
+//            return Double.valueOf(space[0]);
+//        return Double.NaN;
+//    }
+//
+//    @JsonIgnore
+//    //@Longitude
+//    public Double getLongitude() {
+//        if (space!=null)
+//            return Double.valueOf(space[1]);
+//        return Double.NaN;
+//    }
 
-    @JsonIgnore
-    //@Longitude
-    public Double getLongitude() {
-        if (space!=null)
-            return Double.valueOf(space[1]);
-        return Double.NaN;
-    }
-
-    @JsonIgnore
-    public float getAltitude() {
-        if (space!=null)
-            return space[2];
-        return Float.NaN;
-    }
+//    @JsonIgnore
+//    public float getAltitude() {
+//        if (space!=null)
+//            return space[2];
+//        return Float.NaN;
+//    }
 
     public <X> X get(String tag) {
-        return (X) fields.get(tag);
+        return (X) data.get(tag);
     }
 
     public NObject put(String tag) {
@@ -190,8 +199,8 @@ public class NObject implements Serializable, Coordinates, XYZ {
             case "N": name(value.toString()); return this;
         }
 
-        if (fields == null) fields = new HashMap();
-        fields.put(tag, value);
+        if (data == null) data = new HashMap();
+        data.put(tag, value);
         return this;
     }
 
@@ -206,17 +215,9 @@ public class NObject implements Serializable, Coordinates, XYZ {
         return get("_").toString();
     }
 
-    @JsonIgnore
-    public long getTimeStart() {
-        if (time == null) return ETERNAL;
-        return time[0];
-    }
 
-    @JsonIgnore
-    public long getTimeEnd() {
-        if (time == null) return ETERNAL;
-        return time[1];
-    }
+
+
 
     @Override
     public String toString() {
@@ -226,13 +227,12 @@ public class NObject implements Serializable, Coordinates, XYZ {
 
     @JsonIgnore
     public boolean isSpatial() {
-        return space!=null;
+        return spacetime !=null;
     }
     @JsonIgnore
     public boolean isTemporal() {
-        return time!=null;
+        return spacetime.hasZ();
     }
-
 
     public NObject now() {
         when( System.currentTimeMillis() );
@@ -240,7 +240,7 @@ public class NObject implements Serializable, Coordinates, XYZ {
     }
 
     public NObject name(String name) {
-        this.name = name;
+        this.name = name.getBytes(); //TODO use nars Utf8
         return this;
     }
 
@@ -303,35 +303,41 @@ public class NObject implements Serializable, Coordinates, XYZ {
 
         sb.append("{\"I\":\"").append(getId()).append("\"");
 
-        String name = getName();
-        if (name!=null)
-            sb.append(",\"N\":\"").append(name).append("\"");
-        if (isSpatial())
-            sb.append(",\"S\":").append(Arrays.toString(space)); //TODO append
-        if (isTemporal())
-            sb.append(",\"T\":").append(Arrays.toString(time)); //TODO append
+        byte[] name = getName();
+        if (name!=null) {
+            //TODO use nars Utf8
+            sb.append(",\"N\":\"").append(new String(name)).append("\"");
+        }
+
+//        if (isSpatial())
+//            sb.append(",\"S\":").append(Arrays.toString(spacetime)); //TODO append
+//        if (isTemporal())
+//            sb.append(",\"T\":").append(Arrays.toString(time)); //TODO append
 
         sb.append('}');
 
         return sb.toString();
     }
 
-    @JsonIgnore @Override
-    public float x() {
-        if (space == null) return Float.NaN;
-        return space[0];
+
+    @Override
+    public final byte[] id() {
+        return name;
     }
 
-    @JsonIgnore @Override
-    public float y() {
-        if (space == null) return Float.NaN;
-        return space[1];
+    @Override
+    public final BB getBB() {
+        return spacetime;
     }
 
-    @JsonIgnore @Override
-    public float z() {
-        if (time == null)
-            return 0;
-        return time[0];
+    public final float getLatitude() {
+        return getBB().x();
+    }
+    public final float getLongitude() {
+        return getBB().y();
+    }
+
+    public final float getAltitude() {
+        return Float.NaN; //TODO
     }
 }

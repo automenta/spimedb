@@ -4,7 +4,6 @@ package vectrex;
 import org.infinispan.Cache;
 import spangraph.InfiniPeer;
 import toxi.geom.Vec3D;
-import toxi.geom.XYZ;
 
 import java.util.Collection;
 import java.util.Map;
@@ -12,9 +11,9 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /** TODO extract infinispan to subclass allowing any Map impl for index */
-public class OctMap<K extends XYZ, V> implements Map<K,V> {
+public class OctMap<K,V extends IdBB<K>> implements Map<K,V> {
 
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(OctMap.class.getSimpleName()); // + ":" + id);
 
     /** holder for _oct for infinispan persistence */
     protected final Cache<Long, OctBox<K>> _oct;
@@ -26,7 +25,7 @@ public class OctMap<K extends XYZ, V> implements Map<K,V> {
 
     public OctMap(InfiniPeer p, String id, Vec3D center, Vec3D radius, Vec3D resolution) {
 
-        this.logger = Logger.getLogger(OctMap.class.getSimpleName() + ":" + id);
+
 
         this.map = p.the(id);
         this._oct = p.the(id + ".oct");
@@ -70,46 +69,48 @@ public class OctMap<K extends XYZ, V> implements Map<K,V> {
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    final public boolean containsValue(Object value) {
         return map.containsValue(value);
     }
 
     @Override
-    public V get(Object key) {
+    final public V get(Object key) {
         return map.get(key);
+    }
+
+
+    final public V put(V value) {
+        return put(value.id(), value);
     }
 
     @Override
     public V put(K key, V value) {
         V removed = map.put(key, value);
         if (removed!=null) {
-            octRemove(key, removed);
+            box.remove(removed);
         }
-        if (box.ADD(key)==null) {
+        if (box.ADD(value)==null) {
             throw new RuntimeException("Octree rejected value=" + value + ", key=" + key );
         }
         return removed;
     }
 
-    private void octRemove(K key, V v) {
-        if (!box.remove(key)) {
-            throw new RuntimeException("Octree inconsistency detected on removal key=" + key + ", value=" + v);
-        }
-    }
 
     @Override
     public V remove(Object key) {
-        V v = map.remove(key);
-        if (v!=null) {
-            octRemove((K)key, v);
+        V removed = map.remove(key);
+        if (removed!=null) {
+            if (!box.remove(removed)) {
+                throw new RuntimeException("Octree missing value for key=" + key + "=" + removed);
+            }
         }
-        return v;
+        return removed;
     }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         map.putAll(m);
-        box.putAll(m.keySet());
+        box.putAll(m.values());
     }
 
     @Override
@@ -137,7 +138,7 @@ public class OctMap<K extends XYZ, V> implements Map<K,V> {
     public void reindex() {
         logger.info("re-indexing " + map.size() + " items");
         box.zero();
-        box.putAll(map.keySet());
+        box.putAll(map.values());
 
         validate();
     }

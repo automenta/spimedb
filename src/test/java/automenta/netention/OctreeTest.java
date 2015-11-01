@@ -4,9 +4,11 @@ import org.junit.Test;
 import toxi.geom.AABB;
 import toxi.geom.BB;
 import toxi.geom.Vec3D;
+import vectrex.IdBB;
 import vectrex.OctBox;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,35 +17,58 @@ import static org.junit.Assert.assertTrue;
  * Created by me on 6/13/15.
  */
 public class OctreeTest {
+
+    static class DummyPoint extends AABB implements IdBB<String> {
+
+        final String id = UUID.randomUUID().toString();
+
+        public DummyPoint(float x, float y, float z) {
+            super(x, y, z, 1);
+        }
+
+        @Override
+        public String id() {
+            return id;
+        }
+
+        @Override
+        public BB getBB() {
+            return this;
+        }
+    }
+
     @Test
     public void test1() {
-        OctBox o = new OctBox(
-                new Vec3D(-2f, -2f, -2f),
-                new Vec3D(4f, 4f, 4f),
-                new Vec3D(0.05f, 0.05f, 0.05f));
+        OctBox<String> o = new OctBox<>(
+                new DummyPoint(-2f, -2f, -2f),
+                new DummyPoint(4f, 4f, 4f),
+                new DummyPoint(0.05f, 0.05f, 0.05f));
 
         assertEquals(0, o.countPointsRecursively());
 
-        OctBox block = o.ADD(new Vec3D(3, 3, 3));
+        OctBox<String> block = o.ADD(new DummyPoint(3f, 3f, 3f));
         assertTrue(block!=null);
         assertEquals(1, o.countPointsRecursively());
 
-        o.ADD(new Vec3D(0, 1, 0));
-        o.ADD(new Vec3D(0, 1, 0));
-        o.ADD(new Vec3D(0, 0, 1));
-        o.ADD(new Vec3D(0, 0, 1.25f));
-        o.ADD(new Vec3D(0, 0, 1.5f));
-        o.ADD(new Vec3D(0, 0, -1));
-        o.ADD(new Vec3D(0, 0, -1.25f));
-        o.ADD(new Vec3D(0, 0, -1.50f));
-        o.ADD(new Vec3D(0, 0, -1.55f));
-        o.ADD(new Vec3D(0, 0, -1.575f));
+        o.ADD(new DummyPoint(0, 1, 0));
+        o.ADD(new DummyPoint(0, 1, 0));
+        o.ADD(new DummyPoint(0, 0, 1));
+        o.ADD(new DummyPoint(0, 0, 1.25f));
+        o.ADD(new DummyPoint(0, 0, 1.5f));
+        o.ADD(new DummyPoint(0, 0, -1));
+        o.ADD(new DummyPoint(0, 0, -1.25f));
+        o.ADD(new DummyPoint(0, 0, -1.50f));
+        o.ADD(new DummyPoint(0, 0, -1.55f));
+        o.ADD(new DummyPoint(0, 0, -1.575f));
+
+        System.out.println(o);
+        o.forEachInBox(System.out::println);
+
 
         o.forEachInBox(x -> {
-
-            List p = (((OctBox) x).getPointsRecursively());
+            Collection p = (x.getPoints());
             //if (!p.isEmpty())
-            //System.out.println(x + " " + p);
+            System.out.println(x + " " + p);
         });
 
         //System.out.println("size: " + o.getNumChildren());
@@ -64,7 +89,7 @@ public class OctreeTest {
         });
         assertEquals(3, boxCount[0]);
 
-        //o.print_tree();
+
 
     }
 }

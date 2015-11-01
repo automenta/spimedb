@@ -2,8 +2,8 @@ package automenta.netention;
 
 
 import automenta.netention.db.InfinispanSpimeBase;
-import automenta.netention.geo.SpimeBase;
 import automenta.netention.geo.ImportKML;
+import automenta.netention.geo.SpimeBase;
 
 
 public class TestKMZUnfucking {

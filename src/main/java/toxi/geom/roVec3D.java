@@ -186,23 +186,23 @@ public interface roVec3D extends XYZ {
 
     public float getComponent(int id);
 
-    /**
-     * Creates a copy of the vector which forcefully fits in the given AABB.
-     * 
-     * @param box
-     *            the box
-     * 
-     * @return fitted vector
-     */
-    public XYZ getConstrained(AABB box);
-
-    /**
-     * Creates a new vector whose components are the integer value of their
-     * current values.
-     * 
-     * @return result as new vector
-     */
-    public XYZ getFloored();
+//    /**
+//     * Creates a copy of the vector which forcefully fits in the given AABB.
+//     *
+//     * @param box
+//     *            the box
+//     *
+//     * @return fitted vector
+//     */
+//    public XYZ getConstrained(AABB box);
+//
+//    /**
+//     * Creates a new vector whose components are the integer value of their
+//     * current values.
+//     *
+//     * @return result as new vector
+//     */
+//    public XYZ getFloored();
 
     /**
      * Creates a new vector whose components are the fractional part of their

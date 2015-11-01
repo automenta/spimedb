@@ -1,5 +1,6 @@
 package toxi.geom;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import toxi.math.MathUtils;
 
 import java.util.List;
@@ -7,23 +8,27 @@ import java.util.List;
 /**
  * Created by me on 6/14/15.
  */
-public abstract class BB extends Vec3D {
+@JsonSerialize
+public interface BB extends XYZ, Shape3D {
 
 
-    protected Vec3D extent;
 
-    public BB() {
-        super();
-    }
-
-    public BB(XYZ v) {
-        super(v);
-    }
-
-    public BB(Vec3D center, Vec3D radius) {
-        super(center);
-        this.extent = (radius);
-    }
+//    public BB() {
+//        super();
+//    }
+//
+//    public BB(XYZ v) {
+//        super(v);
+//    }
+//
+//    public BB(Vec3D center, Vec3D radius) {
+//        super(center);
+//        this.extent = (radius);
+//    }
+//    public BB(Vec3D center, float radius) {
+//        super(center);
+//        this.extent = new Vec3D(radius,radius,radius);
+//    }
 
     /**
      * Creates a new instance from two vectors specifying opposite corners of
@@ -36,7 +41,7 @@ public abstract class BB extends Vec3D {
      * @return new AABB with centre at the half point between the 2 input
      *         vectors
      */
-    public static final BB fromMinMax(Vec3D min, Vec3D max) {
+    static AABB fromMinMax(Vec3D min, Vec3D max) {
         Vec3D a = Vec3D.min(min, max);
         Vec3D b = Vec3D.max(min, max);
         return new AABB(a.interpolateTo(b, 0.5f), b.sub(a).scaleSelf(0.5f));
@@ -49,7 +54,7 @@ public abstract class BB extends Vec3D {
      * @param points
      * @return bounding rect
      */
-    public static final BB getBoundingBox(List<? extends XYZ> points) {
+    static BB getBoundingBox(List<? extends XYZ> points) {
         if (points == null || points.size() == 0) {
             return null;
         }
@@ -67,24 +72,18 @@ public abstract class BB extends Vec3D {
         return fromMinMax(min, max);
     }
 
-    public boolean containsPoint(XYZ p) {
+
+    default boolean containsPoint(XYZ p) {
         return p.isInAABB(this);
     }
 
-    public Sphere getBoundingSphere() {
-        return new Sphere(this, extent.magnitude());
+    default Sphere getBoundingSphere() {
+        return new Sphere(this, getExtents().magnitude());
     }
 
-    /**
-     * Returns the current box size as new Vec3D instance (updating this vector
-     * will NOT update the box size! Use {@link #setExtent(roVec3D)} for
-     * those purposes)
-     *
-     * @return box size
-     */
-    public final Vec3D getExtent() {
-        return extent.copy();
-    }
+    XYZ getExtents();
+
+
 
     /**
      * Checks if the box intersects the passed in one.
@@ -93,15 +92,17 @@ public abstract class BB extends Vec3D {
      *            box to check
      * @return true, if boxes overlap
      */
-    public boolean intersectsBox(final BB box) {
-        return MathUtils.abs(box.x - x) <= (extent.x + box.extent.x)
-                && MathUtils.abs(box.y - y) <= (extent.y + box.extent.y)
-                && MathUtils.abs(box.z - z) <= (extent.z + box.extent.z);
+    default boolean intersectsBox(final BB box) {
+        XYZ extent = getExtents();
+        XYZ bext = box.getExtents();
+        return MathUtils.abs(box.x() - x()) <= (extent.x() + bext.x())
+                && MathUtils.abs(box.y() - y()) <= (extent.y() + bext.y())
+                && MathUtils.abs(box.z() - z()) <= (extent.z() + bext.z());
     }
 
 
 
-    public boolean intersectsSphere(Sphere s) {
+    default boolean intersectsSphere(Sphere s) {
         return intersectsSphere(s, s.radius);
     }
 
@@ -112,7 +113,7 @@ public abstract class BB extends Vec3D {
      *            sphere radius
      * @return true, if AABB intersects with sphere
      */
-    public boolean intersectsSphere(Vec3D c, float r) {
+    default boolean intersectsSphere(Vec3D c, float r) {
         float s, d = 0;
         // find the square of the distance
         // from the sphere to the box
@@ -143,7 +144,7 @@ public abstract class BB extends Vec3D {
         return d <= r * r;
     }
 
-    public boolean contains(final XYZ v) {
+    default boolean contains(final XYZ v) {
         final float x = v.x();
         if (x < minX() || x > maxX()) {
             return false;
@@ -155,19 +156,16 @@ public abstract class BB extends Vec3D {
         }
 
         final float z = v.z();
-        if (z < minZ() || z > maxZ()) {
-            return false;
-        }
+        return !(z < minZ() || z > maxZ());
 
-        return true;
     }
 
 
-    public float minX() { return x - extent.x(); }
-    public float maxX() { return x + extent.x(); }
-    public float minY() { return y - extent.y(); }
-    public float maxY() { return y + extent.y(); }
-    public float minZ() { return z - extent.z(); }
-    public float maxZ() { return z + extent.z(); }
+    float minX();// { return x - extent.x(); }
+    float maxX();// { return x + extent.x(); }
+    float minY();// { return y - extent.y(); }
+    float maxY();// { return y + extent.y(); }
+    float minZ();// { return z - extent.z(); }
+    float maxZ();// { return z + extent.z(); }
 
 }

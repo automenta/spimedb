@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 
-public class OctBox<V extends XYZ> extends BB implements Shape3D {
+public class OctBox<K> extends AABB implements Shape3D {
 
     /**
      * alternative tree recursion limit, number of world units when cells are
@@ -22,7 +22,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
 
     protected OctBox[] children;
 
-    protected Collection<V> points;
+    protected Collection<IdBB<K>> points;
 
 
     /**
@@ -46,9 +46,10 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
 
     }
 
-    public int depth() {
-        if (parent == null) return 0;
-        return parent.depth() + 1;
+    public final int depth() {
+        final OctBox p = parent;
+        if (p == null) return 0;
+        return p.depth() + 1;
     }
 
     /**
@@ -72,20 +73,19 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      *            point collection
      * @return how many points were added
      */
-    public int putAll(final Collection<? extends V> points) {
-        int count = 0;
-        for (final V p : points) {
-            if (ADD(p)!=null) count++;
-        }
-        return count;
+    public final void putAll(final Iterable<? extends IdBB<K>> points) {
+        points.forEach(this::ADD);
     }
 
     //TODO memoize this result in a special leaf subclass
-    public boolean belowResolution() {
-        return extent.x() <= resolution.x ||
-                extent.y() <= resolution.y ||
-                extent.z() <= resolution.z;
+    public final boolean belowResolution() {
+        Vec3D e = extent;
+        Vec3D r = resolution;
+        return e.x <= r.x ||
+                e.y <= r.y ||
+                e.z <= r.z;
     }
+
     /**
      * Adds a new point/particle to the tree structure. All points are stored
      * within leaf nodes only. The tree implementation is using lazy
@@ -94,9 +94,9 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      * @param p
      * @return the box it was inserted to, or null if wasn't
      */
-    public OctBox<V> ADD(final V p) {
+    public OctBox<K> ADD(final IdBB<K> x) {
 
-
+        BB p = x.getBB();
 
         // check if point is inside cube
         if (containsPoint(p)) {
@@ -105,13 +105,15 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
                 if (points == null) {
                     points = newPointsCollection();
                 }
-                points.add(p);
+                points.add(x);
                 return this;
             } else {
                 if (children == null) {
                     children = new OctBox[8];
                 }
                 int octant = getOctantID(p);
+
+                final Vec3D extent = this.extent;
                 if (children[octant] == null) {
                     Vec3D off = new Vec3D(
                             minX() + ((octant & 1) != 0 ? extent.x() : 0),
@@ -120,22 +122,18 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
                     children[octant] = new OctBox(this, off,
                             extent.scale(0.5f));
                 }
-                return children[octant].ADD(p);
+                return children[octant].ADD(x);
             }
         }
         return null;
     }
 
-    protected Collection<V> newPointsCollection() {
+    protected Collection<IdBB<K>> newPointsCollection() {
         return new FastList();
     }
 
 
-    /**
-     * Applies the given {@link OctreeVisitor} implementation to this node and
-     * all of its children.
-     */
-    public void forEachInBox(Consumer<OctBox> visitor) {
+    public void forEachInBox(Consumer<OctBox<K>> visitor) {
         visitor.accept(this);
         if (children!=null) {
             for (OctBox c : children) {
@@ -202,7 +200,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      *
      * @return the minimum size of tree nodes
      */
-    public Vec3D getResolution() {
+    public final Vec3D getResolution() {
         return resolution;
     }
 
@@ -240,7 +238,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
         return parent;
     }
 
-    public Collection<V> getPoints() {
+    public Collection<IdBB<K>> getPoints() {
         if (points == null) return Collections.EMPTY_LIST;
         return points;
     }
@@ -256,14 +254,15 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
         return points.size();
     }
 
-    public List<V> getPointsRecursively() {
+    public List<IdBB<K>> getPointsRecursively() {
         return getPointsRecursively(new ArrayList());
     }
 
     /**
      * @return the points
      */
-    public List<V> getPointsRecursively(List<V> results) {
+    public List<IdBB<K>> getPointsRecursively(List<IdBB<K>> results) {
+        final OctBox[] children = this.children;
         if (points != null) {
             results.addAll(points);
         } else if (children!=null) {
@@ -283,14 +282,14 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      *            AABB
      * @return all points with the box volume
      */
-    @Deprecated public List<V> getPointsWithinBox(BB b) {
-        ArrayList<V> results = null;
+    @Deprecated public List<IdBB<K>> getPointsWithinBox(BB b) {
+        List<IdBB<K>> results = null;
         if (this.intersectsBox(b)) {
             if (points != null) {
-                for (V q : points) {
-                    if (q.isInAABB(b)) {
+                for (IdBB<K> q : points) {
+                    if (q.getBB().isInAABB(b)) {
                         if (results == null) {
-                            results = new ArrayList();
+                            results = new FastList();
                         }
                         results.add(q);
                     }
@@ -298,10 +297,10 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
             } else if (children!=null) {
                 for (int i = 0; i < 8; i++) {
                     if (children[i] != null) {
-                        List<V> points = children[i].getPointsWithinBox(b);
+                        List<IdBB<K>> points = children[i].getPointsWithinBox(b);
                         if (points != null) {
                             if (results == null) {
-                                results = new ArrayList();
+                                results = new FastList();
                             }
                             results.addAll(points);
                         }
@@ -312,35 +311,38 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
         return results;
     }
 
-    public void forEachInBox(BB b, Consumer<V> c) {
+    public void forEachInBox(BB b, Consumer<IdBB<K>> c) {
         if (this.intersectsBox(b)) {
+            final OctBox[] childs = this.children;
             if (points != null) {
-                for (V q : points) {
-                    if (q.isInAABB(b)) {
+                for (IdBB<K> q : points) {
+                    if (q.getBB().isInAABB(b)) {
                         c.accept(q);
                     }
                 }
-            } else if (children!=null) {
+            } else if (childs!=null) {
                 for (int i = 0; i < 8; i++) {
-                    if (children[i] != null) {
-                        children[i].forEachInBox(b, c);
+
+                    OctBox ci = childs[i];
+                    if (ci != null) {
+                        ci.forEachInBox(b, c);
                     }
                 }
             }
         }
     }
 
-    public void forEachNeighbor(V item, XYZ boxRadius, Consumer<OctBox> visitor) {
+    public void forEachNeighbor(IdBB<K> item, XYZ boxRadius, Consumer<OctBox> visitor) {
         //SOON
         throw new UnsupportedOperationException();
     }
 
-    public void forEachInSphere(Sphere s, Consumer<V> c) {
+    public void forEachInSphere(Sphere s, Consumer<IdBB<K>> c) {
 
         if (this.intersectsSphere(s)) {
             if (points != null) {
-                for (V q : points) {
-                    if (s.containsPoint(q)) {
+                for (IdBB<K> q : points) {
+                    if (s.containsPoint(q.getBB())) {
                         c.accept(q);
                     }
                 }
@@ -363,14 +365,14 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      *            sphere
      * @return selected points
      */
-    @Deprecated public List<XYZ> getPointsWithinSphere(Sphere s) {
-        ArrayList<XYZ> results = null;
+    @Deprecated public List<IdBB<K>> getPointsWithinSphere(Sphere s) {
+        List<IdBB<K>> results = null;
         if (this.intersectsSphere(s)) {
             if (points != null) {
-                for (XYZ q : points) {
-                    if (s.containsPoint(q)) {
+                for (IdBB<K> q : points) {
+                    if (s.containsPoint(q.getBB())) {
                         if (results == null) {
-                            results = new ArrayList();
+                            results = new FastList();
                         }
                         results.add(q);
                     }
@@ -378,10 +380,10 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
             } else if (children!=null) {
                 for (int i = 0; i < 8; i++) {
                     if (children[i] != null) {
-                        List<XYZ> points = children[i].getPointsWithinSphere(s);
+                        List<IdBB<K>> points = children[i].getPointsWithinSphere(s);
                         if (points != null) {
                             if (results == null) {
-                                results = new ArrayList();
+                                results = new FastList();
                             }
                             results.addAll(points);
                         }
@@ -401,7 +403,7 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      * @param clipRadius
      * @return selected points
      */
-    public void forEachInSphere(Vec3D sphereOrigin, float clipRadius, Consumer<V> c) {
+    public void forEachInSphere(Vec3D sphereOrigin, float clipRadius, Consumer<IdBB<K>> c) {
         forEachInSphere(new Sphere(sphereOrigin, clipRadius), c);
     }
 
@@ -431,8 +433,8 @@ public class OctBox<V extends XYZ> extends BB implements Shape3D {
      */
     public boolean remove(Object _p) {
         boolean found = false;
-        V p = (V)_p;
-        OctBox leaf = getLeafForPoint(p);
+        IdBB<K> p = (IdBB<K>)_p;
+        OctBox leaf = getLeafForPoint(p.getBB());
         if (leaf != null) {
             if (leaf.points.remove(p)) {
                 found = true;

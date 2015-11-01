@@ -22,14 +22,15 @@ public class BoxIntersector implements Intersector3D {
     }
 
     public boolean intersectsRay(Ray3D ray) {
-        final Vec3D pos = box.intersectsRay(ray, 0, Float.MAX_VALUE);
-        isec.pos = pos;
-        isec.isIntersection = pos != null;
-        if (isec.isIntersection) {
-            isec.normal = box.getNormalForPoint(pos);
-            isec.dist = ray.distanceTo(pos);
-        }
-        return isec.isIntersection;
+        throw new RuntimeException("unimpl");
+//        final Vec3D pos = box.intersectsRay(ray, 0, Float.MAX_VALUE);
+//        isec.pos = pos;
+//        isec.isIntersection = pos != null;
+//        if (isec.isIntersection) {
+//            isec.normal = box.getNormalForPoint(pos);
+//            isec.dist = ray.distanceTo(pos);
+//        }
+//        return isec.isIntersection;
     }
 
     /**

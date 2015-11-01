@@ -27,25 +27,30 @@
 
 package toxi.geom;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import toxi.math.MathUtils;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Axis-aligned bounding box with basic intersection features for Ray, AABB and
  * Sphere classes.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class AABB extends BB implements Shape3D {
+@JsonSerialize
+public class AABB extends Vec3D implements BB {
 
-    @XmlTransient
-    protected Vec3D min, max;
+    protected final Vec3D extent;
 
     public AABB() {
         super();
-        setExtent(new Vec3D());
+        extent = new Vec3D();
+    }
+
+    @Override
+    public Vec3D getExtents() {
+        return extent;
     }
 
     /**
@@ -54,8 +59,16 @@ public class AABB extends BB implements Shape3D {
      * @param box
      */
     public AABB(BB box) {
-        this(box, box.getExtent());
+        this(box, box.getExtents());
     }
+
+    public float minX() { return x - extent.x(); }
+    public float maxX() { return x + extent.x(); }
+    public float minY() { return y - extent.y(); }
+    public float maxY() { return y + extent.y(); }
+    public float minZ() { return z - extent.z(); }
+    public float maxZ() { return z + extent.z(); }
+
 
     /**
      * Creates a new box of the given size at the world origin.
@@ -63,19 +76,24 @@ public class AABB extends BB implements Shape3D {
      * @param extent
      */
     public AABB(float extent) {
-        this(new Vec3D(), extent);
+        this(new Vec3D(), new Vec3D(extent,extent,extent));
+    }
+    public AABB(float x, float y, float z, float extent) {
+        this();
+        set(x, y, z);
+        size(extent,extent,extent);
     }
 
-    /**
-     * Creates a new instance from centre point and uniform extent in all
-     * directions.
-     * 
-     * @param center
-     * @param extent half size, radius
-     */
-    public AABB(roVec3D center, float extent) {
-        this(center, new Vec3D(extent, extent, extent));
-    }
+//    /**
+//     * Creates a new instance from centre point and uniform extent in all
+//     * directions.
+//     *
+//     * @param center
+//     * @param extent half size, radius
+//     */
+//    public AABB(roVec3D center, float extent) {
+//        this(center, extent);
+//    }
 
     /**
      * Creates a new instance from centre point and extent
@@ -85,23 +103,31 @@ public class AABB extends BB implements Shape3D {
      *            box dimensions (the box will be double the size in each
      *            direction)
      */
-    public AABB(XYZ center, Vec3D extent) {
-        super(center);
-        setExtent(extent);
+    public AABB(XYZ center, XYZ extent) {
+        this();
+        set(center);
+        size(extent);
     }
 
-    public BB copy() {
+    public final void size(XYZ extent) {
+        this.extent.set(extent);
+    }
+    public final void size(float x, float y, float z) {
+        this.extent.set(x, y, z);
+    }
+
+    public AABB copy() {
         return new AABB(this);
     }
 
-    public final Vec3D getMax() {
-        // return this.add(extent);
-        return max.copy();
-    }
-
-    public final Vec3D getMin() {
-        return min.copy();
-    }
+//    public final Vec3D getMax() {
+//        // return this.add(extent);
+//        return max.copy();
+//    }
+//
+//    public final Vec3D getMin() {
+//        return min.copy();
+//    }
 
     public XYZ getNormalForPoint(roVec3D p) {
         p = p.sub(this);
@@ -119,79 +145,79 @@ public class AABB extends BB implements Shape3D {
         return normal;
     }
 
-    /**
-     * Adjusts the box size and position such that it includes the given point.
-     * 
-     * @param p
-     *            point to include
-     * @return itself
-     */
-    public BB growToContainPoint(roVec3D p) {
-        min.minSelf(p);
-        max.maxSelf(p);
-        set(min.interpolateTo(max, 0.5f));
-        extent.set(max.sub(min).scaleSelf(0.5f));
-        return this;
-    }
+//    /**
+//     * Adjusts the box size and position such that it includes the given point.
+//     *
+//     * @param p
+//     *            point to include
+//     * @return itself
+//     */
+//    public BB growToContainPoint(roVec3D p) {
+//        min.minSelf(p);
+//        max.maxSelf(p);
+//        set(min.interpolateTo(max, 0.5f));
+//        extent.set(max.sub(min).scaleSelf(0.5f));
+//        return this;
+//    }
 
-    /**
-     * Calculates intersection with the given ray between a certain distance
-     * interval.
-     *
-     * Ray-box intersection is using IEEE numerical properties to ensure the
-     * test is both robust and efficient, as described in:
-     *
-     * Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley: "An
-     * Efficient and Robust Ray-Box Intersection Algorithm" Journal of graphics
-     * tools, 10(1):49-54, 2005
-     *
-     * @param ray
-     *            incident ray
-     * @param minDist
-     * @param maxDist
-     * @return intersection point on the bounding box (only the first is
-     *         returned) or null if no intersection
-     */
-    public Vec3D intersectsRay(Ray3D ray, float minDist, float maxDist) {
-        Vec3D invDir = ray.getDirection().reciprocal();
-        boolean signDirX = invDir.x < 0;
-        boolean signDirY = invDir.y < 0;
-        boolean signDirZ = invDir.z < 0;
-        Vec3D bbox = signDirX ? max : min;
-        float tmin = (bbox.x - ray.x) * invDir.x;
-        bbox = signDirX ? min : max;
-        float tmax = (bbox.x - ray.x) * invDir.x;
-        bbox = signDirY ? max : min;
-        float tymin = (bbox.y - ray.y) * invDir.y;
-        bbox = signDirY ? min : max;
-        float tymax = (bbox.y - ray.y) * invDir.y;
-        if ((tmin > tymax) || (tymin > tmax)) {
-            return null;
-        }
-        if (tymin > tmin) {
-            tmin = tymin;
-        }
-        if (tymax < tmax) {
-            tmax = tymax;
-        }
-        bbox = signDirZ ? max : min;
-        float tzmin = (bbox.z - ray.z) * invDir.z;
-        bbox = signDirZ ? min : max;
-        float tzmax = (bbox.z - ray.z) * invDir.z;
-        if ((tmin > tzmax) || (tzmin > tmax)) {
-            return null;
-        }
-        if (tzmin > tmin) {
-            tmin = tzmin;
-        }
-        if (tzmax < tmax) {
-            tmax = tzmax;
-        }
-        if ((tmin < maxDist) && (tmax > minDist)) {
-            return ray.getPointAtDistance(tmin);
-        }
-        return null;
-    }
+//    /**
+//     * Calculates intersection with the given ray between a certain distance
+//     * interval.
+//     *
+//     * Ray-box intersection is using IEEE numerical properties to ensure the
+//     * test is both robust and efficient, as described in:
+//     *
+//     * Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley: "An
+//     * Efficient and Robust Ray-Box Intersection Algorithm" Journal of graphics
+//     * tools, 10(1):49-54, 2005
+//     *
+//     * @param ray
+//     *            incident ray
+//     * @param minDist
+//     * @param maxDist
+//     * @return intersection point on the bounding box (only the first is
+//     *         returned) or null if no intersection
+//     */
+//    public Vec3D intersectsRay(Ray3D ray, float minDist, float maxDist) {
+//        Vec3D invDir = ray.getDirection().reciprocal();
+//        boolean signDirX = invDir.x < 0;
+//        boolean signDirY = invDir.y < 0;
+//        boolean signDirZ = invDir.z < 0;
+//        Vec3D bbox = signDirX ? max : min;
+//        float tmin = (bbox.x - ray.x) * invDir.x;
+//        bbox = signDirX ? min : max;
+//        float tmax = (bbox.x - ray.x) * invDir.x;
+//        bbox = signDirY ? max : min;
+//        float tymin = (bbox.y - ray.y) * invDir.y;
+//        bbox = signDirY ? min : max;
+//        float tymax = (bbox.y - ray.y) * invDir.y;
+//        if ((tmin > tymax) || (tymin > tmax)) {
+//            return null;
+//        }
+//        if (tymin > tmin) {
+//            tmin = tymin;
+//        }
+//        if (tymax < tmax) {
+//            tmax = tymax;
+//        }
+//        bbox = signDirZ ? max : min;
+//        float tzmin = (bbox.z - ray.z) * invDir.z;
+//        bbox = signDirZ ? min : max;
+//        float tzmax = (bbox.z - ray.z) * invDir.z;
+//        if ((tmin > tzmax) || (tzmin > tmax)) {
+//            return null;
+//        }
+//        if (tzmin > tmin) {
+//            tmin = tzmin;
+//        }
+//        if (tzmax < tmax) {
+//            tmax = tzmax;
+//        }
+//        if ((tmin < maxDist) && (tmax > minDist)) {
+//            return ray.getPointAtDistance(tmin);
+//        }
+//        return null;
+//    }
 
     public boolean intersectsTriangle(Triangle3D tri) {
         // use separating axis theorem to test overlap between triangle and box
@@ -328,49 +354,28 @@ public class AABB extends BB implements Shape3D {
         return false;
     }
 
-    public BB set(BB box) {
-        extent.set(box.extent);
-        return set((XYZ) box);
+    public AABB set(BB box) {
+        set(box);
+        extent.set(box.getExtents());
+        return this;
     }
 
     /**
-     * Updates the position of the box in space and calls
-     * {@link #updateBounds()} immediately
-     * 
+     * Updates the position of the box in space
      * @see toxi.geom.Vec3D#set(float, float, float)
      */
-    public Vec3D set(float x, float y, float z) {
+    public AABB set(float x, float y, float z) {
         this.x = x;
         this.y = y;
         this.z = z;
-        updateBounds();
+        //updateBounds();
         return this;
     }
 
-    /**
-     * Updates the position of the box in space and calls
-     * {@link #updateBounds()} immediately
-     * 
-     */
-    public BB set(XYZ v) {
-        x = v.x();
-        y = v.y();
-        z = v.z();
-        updateBounds();
-        return this;
+    public final AABB set(XYZ v) {
+        return set(v.x(), v.y(), v.z());
     }
 
-    /**
-     * Updates the size of the box and calls {@link #updateBounds()} immediately
-     * 
-     * @param extent
-     *            new box size
-     * @return itself, for method chaining
-     */
-    public BB setExtent(Vec3D extent) {
-        this.extent = extent;
-        return updateBounds();
-    }
 
     private boolean testAxis(float a, float b, float fa, float fb, float va,
             float vb, float wa, float wb, float ea, float eb) {
@@ -436,32 +441,38 @@ public class AABB extends BB implements Shape3D {
      */
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("<aabb @").append(super.toString()).append("x")
+        sb.append("<aabb@").append(super.toString()).append("x")
                 .append(extent);
         return sb.toString();
     }
 
-    public BB union(AABB box) {
-        min.minSelf(box.getMin());
-        max.maxSelf(box.getMax());
-        set(min.interpolateTo(max, 0.5f));
-        extent.set(max.sub(min).scaleSelf(0.5f));
-        return this;
+    public void setRangeZ(float min, float max) {
+        float mid = (min+max)/2f;
+        setZ(mid);
+        getExtents().setZ(Math.abs(max-min));
     }
 
-    /**
-     * Updates the min/max corner points of the box. MUST be called after moving
-     * the box in space by manipulating the public x,y,z coordinates directly.
-     * 
-     * @return itself
-     */
-    public final BB updateBounds() {
-        // this is check is necessary for the constructor
-        if (extent != null) {
-            this.min = this.sub(extent);
-            this.max = this.plus(extent);
-        }
-        return this;
-    }
+//    public BB union(AABB box) {
+//        min.minSelf(box.getMin());
+//        max.maxSelf(box.getMax());
+//        set(min.interpolateTo(max, 0.5f));
+//        extent.set(max.sub(min).scaleSelf(0.5f));
+//        return this;
+//    }
+
+//    /**
+//     * Updates the min/max corner points of the box. MUST be called after moving
+//     * the box in space by manipulating the public x,y,z coordinates directly.
+//     *
+//     * @return itself
+//     */
+//    public final BB updateBounds() {
+//        // this is check is necessary for the constructor
+//        if (extent != null) {
+//            this.min = this.sub(extent);
+//            this.max = this.plus(extent);
+//        }
+//        return this;
+//    }
 
 }

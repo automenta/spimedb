@@ -41,7 +41,9 @@ import java.util.Random;
  */
 public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
 
-
+    final public boolean hasX() { return Float.isNaN(x);    }
+    final public boolean hasY() { return Float.isNaN(y);    }
+    final public boolean hasZ() { return Float.isNaN(z);    }
 
     public static enum Axis {
 
@@ -346,17 +348,17 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
         return +1;
     }
 
-    /**
-     * Forcefully fits the vector in the given AABB.
-     * 
-     * @param box
-     *            the box
-     * 
-     * @return itself
-     */
-    public XYZ constrain(AABB box) {
-        return constrain(box.getMin(), box.getMax());
-    }
+//    /**
+//     * Forcefully fits the vector in the given AABB.
+//     *
+//     * @param box
+//     *            the box
+//     *
+//     * @return itself
+//     */
+//    public XYZ constrain(AABB box) {
+//        return constrain(box.getMin(), box.getMax());
+//    }
 
     /**
      * Forcefully fits the vector in the given AABB specified by the 2 given
@@ -571,14 +573,14 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
         throw new IllegalArgumentException("index must be 0, 1 or 2");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see toxi.geom.ReadonlyVec3D#getConstrained(toxi.geom.AABB)
-     */
-    public final XYZ getConstrained(AABB box) {
-        return new Vec3D(this).constrain(box);
-    }
+//    /*
+//     * (non-Javadoc)
+//     *
+//     * @see toxi.geom.ReadonlyVec3D#getConstrained(toxi.geom.AABB)
+//     */
+//    public final XYZ getConstrained(AABB box) {
+//        return new Vec3D(this).constrain(box);
+//    }
 
     /*
      * (non-Javadoc)
