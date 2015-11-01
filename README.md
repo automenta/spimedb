@@ -1,8 +1,6 @@
-NETENTION
-=========
+SpimeDB
+=======
 
-TrayTention (Desktop SysTray & Mobile version :: Java 8+)
----------------------------------------------------------
 
 Real-time decentralized global propagation, notification, and analysis tools for AUTONOMY MAXIMIZATION and AUTHORITY DISSOLUTION.
 
