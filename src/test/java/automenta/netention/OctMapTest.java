@@ -38,7 +38,7 @@ public class OctMapTest {
         assertTrue(o.isEmpty());
 
         o.put(new Event("Beginning of Common Era", 75f, -20f, 0));
-        o.box().forEachInBox(x -> System.out.println(x));
+        o.box().forEachBox(x -> System.out.println(x));
         assertTrue(o.validate());
     }
 
@@ -56,9 +56,10 @@ public class OctMapTest {
         }
 
         //System.out.println(o);
-        o.box().forEachInBox(x -> System.out.println(x));
+        o.box().forEachBox(x -> System.out.println(x));
 
         assertTrue(o.validate());
+        o.box().forEachBox(x -> System.out.println(x));
 
     }
 

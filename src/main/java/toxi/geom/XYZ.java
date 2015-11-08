@@ -11,43 +11,43 @@ import java.io.Serializable;
 @JsonIgnoreType
 public interface XYZ extends Serializable {
 
-    public float x();
+    float x();
 
-    public float y();
+    float y();
 
-    public float z();
+    float z();
 
-    default public XYZ interpolateTo(XYZ v, float f) {
+    default XYZ interpolateTo(XYZ v, float f) {
         return new Vec3D(x() + (v.x() - x()) * f, y() + (v.y() - y()) * f, z()
                 + (v.z() - z()) * f);
     }
 
-    default public XYZ interpolateTo(XYZ v, float f,
-                                     InterpolateStrategy s) {
+    default XYZ interpolateTo(XYZ v, float f,
+                              InterpolateStrategy s) {
         return new Vec3D(s.interpolate(x(), v.x(), f),
                 s.interpolate(y(), v.y(), f), s.interpolate(z(), v.z(), f));
     }
 
-    default public Vec3D interpolateTo(Vec3D v, float f) {
+    default Vec3D interpolateTo(Vec3D v, float f) {
         return new Vec3D(x() + (v.x - x()) * f, y() + (v.y - y()) * f, z() + (v.z - z())
                 * f);
     }
 
-    default public XYZ interpolateTo(Vec3D v, float f, InterpolateStrategy s) {
+    default XYZ interpolateTo(Vec3D v, float f, InterpolateStrategy s) {
         return new Vec3D(s.interpolate(x(), v.x, f), s.interpolate(y(), v.y, f),
                 s.interpolate(z(), v.z, f));
     }
 
 
-    default public Vec3D scale(float s) {
+    default Vec3D scale(float s) {
         return new Vec3D(x() * s, y() * s, z() * s);
     }
 
-    default public Vec3D sub(XYZ v) {
+    default Vec3D sub(XYZ v) {
         return new Vec3D(x() - v.x(), y() - v.y(), z() - v.z());
     }
 
-    default public float distanceTo(XYZ v) {
+    default float distanceTo(XYZ v) {
         if (v != null) {
             final float dx = x() - v.x();
             final float dy = y() - v.y();
@@ -58,7 +58,7 @@ public interface XYZ extends Serializable {
         }
     }
 
-    default public float distanceToSquared(roVec3D v) {
+    default float distanceToSquared(roVec3D v) {
         if (v != null) {
             final float dx = x() - v.x();
             final float dy = y() - v.y();
@@ -75,7 +75,7 @@ public interface XYZ extends Serializable {
      *
      * @see toxi.geom.ReadonlyVec3D#getNormalized()
      */
-    default public Vec3D getNormalized() {
+    default Vec3D getNormalized() {
         return new Vec3D(this).normalize();
     }
 
@@ -85,15 +85,15 @@ public interface XYZ extends Serializable {
      *
      * @see toxi.geom.ReadonlyVec3D#isInAABB(toxi.geom.AABB)
      */
-    default public boolean isInAABB(final BB box) {
+    default boolean isInAABB(final BB box) {
         return box.contains(this);
     }
 
-    default public float magnitude() {
+    default float magnitude() {
         return (float) Math.sqrt(magSquared());
     }
 
-    default public float magSquared() {
+    default float magSquared() {
         final float x = x();
         final float y = y();
         final float z = z();

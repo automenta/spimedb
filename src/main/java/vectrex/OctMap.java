@@ -89,7 +89,7 @@ public class OctMap<K,V extends IdBB<K>> implements Map<K,V> {
         if (removed!=null) {
             box.remove(removed);
         }
-        if (box.ADD(value)==null) {
+        if (box.put(value)==null) {
             throw new RuntimeException("Octree rejected value=" + value + ", key=" + key );
         }
         return removed;
@@ -150,7 +150,7 @@ public class OctMap<K,V extends IdBB<K>> implements Map<K,V> {
     }
 
     public boolean validate() {
-        int e = box.countPointsRecursively();
+        int e = box.itemCountRecursively();
         int msize = map.size();
         boolean consistent = (e == msize);
         logger.info("octbox contains " + e + " entries. consistent with map=" + msize + " is " + consistent);

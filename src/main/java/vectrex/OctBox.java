@@ -3,10 +3,10 @@ package vectrex;
 import com.gs.collections.impl.list.mutable.FastList;
 import toxi.geom.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 
@@ -22,7 +22,7 @@ public class OctBox<K> extends AABB implements Shape3D {
 
     protected OctBox[] children;
 
-    protected Collection<IdBB<K>> points;
+    protected Collection<IdBB<K>> items;
 
 
     /**
@@ -46,6 +46,24 @@ public class OctBox<K> extends AABB implements Shape3D {
 
     }
 
+    /** tests if the item is in this box (NOT recursively) */
+    public final boolean holds(IdBB<K> item) {
+        return items.contains(item);
+    }
+
+    public final boolean holdsRecursively(IdBB<K> item) {
+        if (!holds(item)) {
+            OctBox[] cc = this.children;
+            if (cc!=null) {
+                for (OctBox<K> c : cc) {
+                    if (c != null && c.holdsRecursively(item))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public final int depth() {
         final OctBox p = parent;
         if (p == null) return 0;
@@ -67,23 +85,31 @@ public class OctBox<K> extends AABB implements Shape3D {
 
 
     /**
-     * Adds all points of the collection to the octree.
+     * Adds all toAdd of the collection to the octree.
      *
-     * @param points
+     * @param toAdd
      *            point collection
-     * @return how many points were added
+     * @return how many toAdd were added
      */
-    public final void putAll(final Iterable<? extends IdBB<K>> points) {
-        points.forEach(this::ADD);
+    public final void putAll(final Iterable<? extends IdBB<K>> toAdd) {
+        toAdd.forEach(this::put);
+    }
+
+    public final void forEach(Consumer<IdBB<K>> visitor) {
+        Collection<IdBB<K>> ii = this.items;
+        if (ii !=null)
+            ii.forEach(visitor);
     }
 
     //TODO memoize this result in a special leaf subclass
-    public final boolean belowResolution() {
+    public final boolean belowResolution(BB content) {
         Vec3D e = extent;
         Vec3D r = resolution;
-        return e.x <= r.x ||
-                e.y <= r.y ||
-                e.z <= r.z;
+        XYZ ce = content.getExtents();
+
+        return e.x <= Math.max(r.x, ce.x()) ||
+                e.y <= Math.max(r.y, ce.y()) ||
+                e.z <= Math.max(r.z, ce.z());
     }
 
     /**
@@ -94,18 +120,18 @@ public class OctBox<K> extends AABB implements Shape3D {
      * @param p
      * @return the box it was inserted to, or null if wasn't
      */
-    public OctBox<K> ADD(final IdBB<K> x) {
+    public OctBox<K> put(final IdBB<K> x) {
 
         BB p = x.getBB();
 
         // check if point is inside cube
         if (containsPoint(p)) {
-            // only add points to leaves for now
-            if (belowResolution()) {
-                if (points == null) {
-                    points = newPointsCollection();
+            //find the largest leaf that can contain x
+            if (belowResolution(x.getBB())) {
+                if (items == null) {
+                    items = newItemCollection();
                 }
-                points.add(x);
+                items.add(x);
                 return this;
             } else {
                 if (children == null) {
@@ -122,23 +148,39 @@ public class OctBox<K> extends AABB implements Shape3D {
                     children[octant] = new OctBox(this, off,
                             extent.scale(0.5f));
                 }
-                return children[octant].ADD(x);
+                return children[octant].put(x);
             }
         }
         return null;
     }
 
-    protected Collection<IdBB<K>> newPointsCollection() {
+    protected Collection<IdBB<K>> newItemCollection() {
         return new FastList();
     }
 
 
-    public void forEachInBox(Consumer<OctBox<K>> visitor) {
+    public void forEach(BiConsumer<OctBox<K>, IdBB<K>> visitor) {
+        forEach(i -> {
+           visitor.accept(OctBox.this, i);
+        });
+
+        OctBox[] cc = this.children;
+        if (cc !=null) {
+            for (OctBox<K> c : cc) {
+                if (c!=null)
+                    c.forEach(visitor);
+            }
+        }
+
+    }
+
+    public void forEachBox(Consumer<OctBox<K>> visitor) {
         visitor.accept(this);
-        if (children!=null) {
-            for (OctBox c : children) {
+        OctBox[] cc = this.children;
+        if (cc !=null) {
+            for (OctBox c : cc) {
                 if (c != null) {
-                    c.forEachInBox(visitor);
+                    c.forEachBox(visitor);
                 }
             }
         }
@@ -146,14 +188,14 @@ public class OctBox<K> extends AABB implements Shape3D {
 
 
 
-    public boolean containsPoint(XYZ p) {
+    public final boolean containsPoint(XYZ p) {
         return p.isInAABB(this);
     }
 
     public void clear() {
         zero();
         children = null;
-        points = null;
+        items = null;
     }
 
     /**
@@ -184,7 +226,7 @@ public class OctBox<K> extends AABB implements Shape3D {
                 if (children[octant] != null) {
                     return children[octant].getLeafForPoint(p);
                 }
-            } else if (points != null) {
+            } else if (items != null) {
                 return this;
             }
         }
@@ -221,7 +263,6 @@ public class OctBox<K> extends AABB implements Shape3D {
 
     /** computes getOctantID for the point subtracted by another point,
      *  without needing to allocate a temporary object
-
      */
     private int getOctantID(final XYZ p) {
         //final XYZ h = this.extent;
@@ -234,41 +275,43 @@ public class OctBox<K> extends AABB implements Shape3D {
     /**
      * @return the parent
      */
-    public OctBox getParent() {
+    public final OctBox getParent() {
         return parent;
     }
 
-    public Collection<IdBB<K>> getPoints() {
-        if (points == null) return Collections.EMPTY_LIST;
-        return points;
+    public final Collection<IdBB<K>> getItems() {
+        final Collection<IdBB<K>> i = this.items;
+        if (i == null) return Collections.EMPTY_LIST;
+        return i;
     }
 
-    public int countPointsRecursively() {
+    public final int itemCountRecursively() {
         final int[] x = {0};
-        forEachInBox(n -> x[0] += n.countPoints());
+        forEachBox(n -> x[0] += n.itemCount());
         return x[0];
     }
 
-    public int countPoints() {
-        if (points == null) return 0;
-        return points.size();
+    public final int itemCount() {
+        final Collection<IdBB<K>> i = this.items;
+        if (i == null) return 0;
+        return i.size();
     }
 
-    public List<IdBB<K>> getPointsRecursively() {
-        return getPointsRecursively(new ArrayList());
+    public List<IdBB<K>> getItemsRecursively() {
+        return getItemsRecursively(new FastList());
     }
 
     /**
      * @return the points
      */
-    public List<IdBB<K>> getPointsRecursively(List<IdBB<K>> results) {
+    public List<IdBB<K>> getItemsRecursively(List<IdBB<K>> results) {
         final OctBox[] children = this.children;
-        if (points != null) {
-            results.addAll(points);
+        if (items != null) {
+            results.addAll(items);
         } else if (children!=null) {
             for (int i = 0; i < 8; i++) {
                 if (children[i] != null) {
-                    children[i].getPointsRecursively(results);
+                    children[i].getItemsRecursively(results);
                 }
             }
         }
@@ -282,11 +325,11 @@ public class OctBox<K> extends AABB implements Shape3D {
      *            AABB
      * @return all points with the box volume
      */
-    @Deprecated public List<IdBB<K>> getPointsWithinBox(BB b) {
+    @Deprecated public List<IdBB<K>> getItemsWithin(BB b) {
         List<IdBB<K>> results = null;
         if (this.intersectsBox(b)) {
-            if (points != null) {
-                for (IdBB<K> q : points) {
+            if (items != null) {
+                for (IdBB<K> q : items) {
                     if (q.getBB().isInAABB(b)) {
                         if (results == null) {
                             results = new FastList();
@@ -297,7 +340,7 @@ public class OctBox<K> extends AABB implements Shape3D {
             } else if (children!=null) {
                 for (int i = 0; i < 8; i++) {
                     if (children[i] != null) {
-                        List<IdBB<K>> points = children[i].getPointsWithinBox(b);
+                        List<IdBB<K>> points = children[i].getItemsWithin(b);
                         if (points != null) {
                             if (results == null) {
                                 results = new FastList();
@@ -311,11 +354,11 @@ public class OctBox<K> extends AABB implements Shape3D {
         return results;
     }
 
-    public void forEachInBox(BB b, Consumer<IdBB<K>> c) {
+    public void forEachBox(BB b, Consumer<IdBB<K>> c) {
         if (this.intersectsBox(b)) {
             final OctBox[] childs = this.children;
-            if (points != null) {
-                for (IdBB<K> q : points) {
+            if (items != null) {
+                for (IdBB<K> q : items) {
                     if (q.getBB().isInAABB(b)) {
                         c.accept(q);
                     }
@@ -325,7 +368,7 @@ public class OctBox<K> extends AABB implements Shape3D {
 
                     OctBox ci = childs[i];
                     if (ci != null) {
-                        ci.forEachInBox(b, c);
+                        ci.forEachBox(b, c);
                     }
                 }
             }
@@ -340,8 +383,8 @@ public class OctBox<K> extends AABB implements Shape3D {
     public void forEachInSphere(Sphere s, Consumer<IdBB<K>> c) {
 
         if (this.intersectsSphere(s)) {
-            if (points != null) {
-                for (IdBB<K> q : points) {
+            if (items != null) {
+                for (IdBB<K> q : items) {
                     if (s.containsPoint(q.getBB())) {
                         c.accept(q);
                     }
@@ -365,11 +408,11 @@ public class OctBox<K> extends AABB implements Shape3D {
      *            sphere
      * @return selected points
      */
-    @Deprecated public List<IdBB<K>> getPointsWithinSphere(Sphere s) {
+    @Deprecated public List<IdBB<K>> getItemsWithin(Sphere s) {
         List<IdBB<K>> results = null;
         if (this.intersectsSphere(s)) {
-            if (points != null) {
-                for (IdBB<K> q : points) {
+            if (items != null) {
+                for (IdBB<K> q : items) {
                     if (s.containsPoint(q.getBB())) {
                         if (results == null) {
                             results = new FastList();
@@ -380,7 +423,7 @@ public class OctBox<K> extends AABB implements Shape3D {
             } else if (children!=null) {
                 for (int i = 0; i < 8; i++) {
                     if (children[i] != null) {
-                        List<IdBB<K>> points = children[i].getPointsWithinSphere(s);
+                        List<IdBB<K>> points = children[i].getItemsWithin(s);
                         if (points != null) {
                             if (results == null) {
                                 results = new FastList();
@@ -410,12 +453,12 @@ public class OctBox<K> extends AABB implements Shape3D {
 
 
     private void reduceBranch() {
-        if (points != null && points.size() == 0) {
-            points = null;
+        if (items != null && items.size() == 0) {
+            items = null;
         }
         if (children!=null) {
             for (int i = 0; i < 8; i++) {
-                if (children[i] != null && children[i].points == null) {
+                if (children[i] != null && children[i].items == null) {
                     children[i] = null;
                 }
             }
@@ -436,9 +479,9 @@ public class OctBox<K> extends AABB implements Shape3D {
         IdBB<K> p = (IdBB<K>)_p;
         OctBox leaf = getLeafForPoint(p.getBB());
         if (leaf != null) {
-            if (leaf.points.remove(p)) {
+            if (leaf.items.remove(p)) {
                 found = true;
-                if (leaf.points.size() == 0) {
+                if (leaf.items.size() == 0) {
                     leaf.reduceBranch();
                 }
             }
@@ -460,9 +503,9 @@ public class OctBox<K> extends AABB implements Shape3D {
      * @see toxi.geom.AABB#toString()
      */
     public String toString() {
-        String x = "<OctBox @" + super.toString() + '>';
-        if (points!=null)
-            x += "=" + points.toString();
+        Collection<IdBB<K>> ii = this.items;
+        String x = "<OctBox:" + super.toString() + ":" +
+                ((ii !=null) ? ii.size() : 0);
         return x;
     }
 }

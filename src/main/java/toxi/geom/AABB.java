@@ -446,7 +446,7 @@ public class AABB extends Vec3D implements BB {
         return sb.toString();
     }
 
-    public void setRangeZ(float min, float max) {
+    public final void setRangeZ(float min, float max) {
         float mid = (min+max)/2f;
         setZ(mid);
         getExtents().setZ(Math.abs(max-min));

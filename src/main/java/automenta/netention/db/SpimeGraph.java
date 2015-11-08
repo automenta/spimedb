@@ -62,7 +62,7 @@ public class SpimeGraph implements SpimeBase {
         final String id = d.getId();
 
         if (d.isSpatial()) {
-            spacetime.ADD(d);
+            spacetime.put(d);
         }
 
         graph.addVertex(id, d);

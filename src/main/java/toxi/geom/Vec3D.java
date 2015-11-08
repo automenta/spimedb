@@ -1461,10 +1461,10 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
     public final XYZ toCartesian() {
         final float a = (float) (x * Math.cos(z));
         final float xx = (float) (a * Math.cos(y));
-        final float yy = (float) (x * Math.sin(z));
-        final float zz = (float) (a * Math.sin(y));
         x = xx;
+        final float yy = (float) (x * Math.sin(z));
         y = yy;
+        final float zz = (float) (a * Math.sin(y));
         z = zz;
         return this;
     }
@@ -1481,9 +1481,11 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
     }
 
     public String toString() {
-        final StringBuffer sb = new StringBuffer(48);
-        sb.append("{x:").append(x).append(", y:").append(y).append(", z:")
-                .append(z).append("}");
+        final StringBuffer sb = new StringBuffer(32);
+//        sb.append("{x:").append(x).append(", y:").append(y).append(", z:")
+//                .append(z).append("}");
+        sb.append("(").append(x).append(",").append(y).append(",")
+                .append(z).append(')');
         return sb.toString();
     }
 

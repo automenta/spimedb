@@ -144,6 +144,7 @@ public interface BB extends XYZ, Shape3D {
         return d <= r * r;
     }
 
+
     default boolean contains(final XYZ v) {
         final float x = v.x();
         if (x < minX() || x > maxX()) {
@@ -157,7 +158,6 @@ public interface BB extends XYZ, Shape3D {
 
         final float z = v.z();
         return !(z < minZ() || z > maxZ());
-
     }
 
 
