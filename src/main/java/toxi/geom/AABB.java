@@ -41,6 +41,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 @JsonSerialize
 public class AABB extends Vec3D implements BB {
 
+    // TODO extent as array
     protected final Vec3D extent;
 
     public AABB() {

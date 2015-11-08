@@ -1480,6 +1480,8 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
         return this;
     }
 
+    public static Vec3D v(float x, float y, float z) { return new Vec3D(x, y, z); }
+
     public String toString() {
         final StringBuffer sb = new StringBuffer(32);
 //        sb.append("{x:").append(x).append(", y:").append(y).append(", z:")

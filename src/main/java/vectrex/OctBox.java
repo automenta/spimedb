@@ -15,6 +15,7 @@ public class OctBox<K> extends AABB implements Shape3D {
     /**
      * alternative tree recursion limit, number of world units when cells are
      * not subdivided any further
+     * TODO resolution as array
      */
     protected Vec3D resolution;
 
@@ -154,6 +155,7 @@ public class OctBox<K> extends AABB implements Shape3D {
         return null;
     }
 
+    //TODO pass the target box as a parameter so it can base its decision on that
     protected Collection<IdBB<K>> newItemCollection() {
         return new FastList();
     }

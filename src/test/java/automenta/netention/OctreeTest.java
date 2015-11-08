@@ -13,6 +13,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static toxi.geom.Vec3D.v;
 
 /**
  * Created by me on 6/13/15.
@@ -114,22 +115,23 @@ public class OctreeTest {
      *  tree;
      *  the cubes will be stored in non-leaf nodes */
     @Test public void testNonPoints() {
-        OctBox<String> o = new OctBox<>(
-                point(-2f, -2f, -2f),
-                point(4f, 4f, 4f),
-                point(0.05f, 0.05f, 0.05f));
+        OctBox<String> octBox = new OctBox<>(
+                v(-2f, -2f, -2f),
+                v(4f, 4f, 4f),
+                v(0.05f, 0.05f, 0.05f));
 
         DummyPoint p;
-        o.put(p = point(0, 0, 0));
+        octBox.put(p = point(0, 0, 0));
         DummyPoint c;
-        o.put(c = cube(0, 0, 0, 0.5f));
+        octBox.put(c = cube(0, 0, 0, 0.5f));
 
-        assertEquals(2, o.itemCountRecursively());
+        assertEquals(2, octBox.itemCountRecursively());
 
-        //System.out.println(o);
-        o.forEach((b, i) -> System.out.println(b + " " + i));
+        //System.out.println(octBox);
+        octBox.forEach((subBox, item) ->
+                System.out.println(subBox + " " + item));
 
-        OctBox pBox = o.getLeafForPoint(p);
+        OctBox pBox = octBox.getLeafForPoint(p);
         //System.out.println("box for p: " + pBox);
         assertTrue(pBox.holds(p)); //the point is at the leaf
         assertEquals(1, pBox.itemCount());

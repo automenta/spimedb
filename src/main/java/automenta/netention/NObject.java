@@ -69,14 +69,14 @@ public class NObject implements Serializable, IdBB<byte[]> {
 
     public NObject(String id) {
         this(id, null);
-
     }
 
     public NObject(String id, String name) {
         if (id == null)
             id = Core.uuid();
         this.id = id;
-        this.name = name.getBytes(); //TODO use nars Utf8 classes
+        if (name!=null)
+            this.name = name.getBytes(); //TODO use nars Utf8 classes
     }
 
     public String getId() {
