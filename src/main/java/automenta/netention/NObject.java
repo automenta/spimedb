@@ -43,6 +43,7 @@ public class NObject implements Serializable, IdBB<byte[]> {
     final static long ETERNAL = Long.MIN_VALUE;
 
     @Field(store = Store.YES) @JsonProperty("I") final String id;
+    private final static byte[] emptyBytes = new byte[0];
 
     @Field(store = Store.YES) @JsonProperty("N") byte[] name;
 
@@ -77,6 +78,8 @@ public class NObject implements Serializable, IdBB<byte[]> {
         this.id = id;
         if (name!=null)
             this.name = name.getBytes(); //TODO use nars Utf8 classes
+        else
+            this.name = emptyBytes;
     }
 
     public String getId() {
@@ -240,7 +243,10 @@ public class NObject implements Serializable, IdBB<byte[]> {
     }
 
     public NObject name(String name) {
-        this.name = name.getBytes(); //TODO use nars Utf8
+        if (name == null)
+            this.name = emptyBytes;
+        else
+            this.name = name.getBytes(); //TODO use nars Utf8
         return this;
     }
 

@@ -752,7 +752,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     }
                 } else if (!handleProperties(cs, ee, qname)) {
                     // Ignore other container elements
-                    log.debug("ignore {}", qname);
+                    if (log.isDebugEnabled())
+                        log.debug("ignore {}", qname);
                 }
             }
         }

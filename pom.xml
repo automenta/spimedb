@@ -390,6 +390,16 @@
 
     <build>
 
+        <testResources>
+            <testResource>
+                <directory>${basedir}/src/test/java/automenta/netention/kml</directory>
+                <includes>
+                    <include>*.kmz</include>
+                </includes>
+                <filtering>false</filtering>
+            </testResource>
+        </testResources>
+
         <resources>
 
             <resource>
@@ -399,6 +409,8 @@
                 </includes>
                 <filtering>false</filtering>
             </resource>
+
+
 
             <!--<resource>-->
             <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->

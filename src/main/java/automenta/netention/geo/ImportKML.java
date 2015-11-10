@@ -22,6 +22,7 @@ import org.opensextant.giscore.geometry.Geometry;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.utils.Color;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URI;
@@ -151,9 +152,11 @@ public class ImportKML {
 
 
             } catch (Throwable t) {
-                System.err.println(t);
+                //System.err.println(t);
+                t.printStackTrace();
                 exceptions.incrementAndGet();
                 exceptionClass.add(t.getClass());
+                break;
             }
         } while (true);
 
@@ -301,7 +304,16 @@ public class ImportKML {
             }
         });
     }
-
+    public Runnable file(String id, File f) throws IOException {
+        return task(id, () -> {
+            try {
+                return new KmlReader(f);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+    }
 
     public Runnable task(String id, Supplier<KmlReader> reader) {
         return () -> {
@@ -388,197 +400,7 @@ public class ImportKML {
 
 
                 //2. process features
-                transformKML(reader, id, geo, new GISVisitor() {
-
-                    public boolean rootFound;
-
-                    @Override
-                    public void start(String layer) {
-
-                    }
-
-                    @Override
-                    public boolean on(IGISObject go, String[] path) throws IOException {
-                        if (go == null) {
-                            throw new RuntimeException("null GISObject: " + path);
-                        }
-
-                        NObject d;
-
-                        if (go instanceof ContainerStart) {
-                            ContainerStart cs = (ContainerStart) go;
-                            //TODO startTime?
-                            //System.out.println(cs + " " + cs.getId());
-
-
-
-
-                            if (path.length == 1) {
-                                if (rootFound) {
-                                    throw new RuntimeException("Multiple roots");
-                                }
-                                rootFound = true;
-                                //name the top level folder
-                                d = newNObject(id);
-                            }
-                            else {
-                                d = newNObject(pathString);
-                                d.setInside(parentPathString);
-                            }
-
-                            d.name(cs.getName());
-
-                            /*String styleUrl = cs.getStyleUrl();
-                             if (styleUrl != null) {
-                             if (styleUrl.startsWith("#")) {
-                             styleUrl = styleUrl.substring(1);
-                             }
-                             styleUrl = layer + "_" + styleUrl;
-                             System.err.println("Container styleUrl: " + styleUrl);
-                             d.put("styleUrl", styleUrl);
-                             }
-                             */
-                            if (enableDescriptions) {
-                                String desc = cs.getDescription();
-                                if ((desc != null) && (desc.length() > 0)) {
-                                    //filter
-                                    desc = filterHTML(desc);
-                                    if (desc.length() > 0) {
-                                        d.description(desc);
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            d = newNObject();
-                            d.setInside(pathString);
-                        }
-
-                        if (go instanceof Common) {
-                            Common cm = (Common)go;
-                            if (cm.getStartTime()!=null) {
-                                if (cm.getEndTime() != null) {
-                                    d.when(cm.getStartTime().getTime(), cm.getEndTime().getTime());
-                                }
-                                else {
-                                    d.when(cm.getStartTime().getTime());
-                                }
-                            }
-
-                        }
-
-                        if (go instanceof Feature) {
-                            Feature f = (Feature) go;
-
-                            d.name(f.getName());
-
-                            if (enableDescriptions) {
-                                String desc = f.getDescription();
-                                if ((desc != null) && (desc.length() > 0)) {
-                                    //filter
-                                    desc = filterHTML(desc);
-                                    if (desc.length() > 0) {
-                                        d.description(desc);
-                                    }
-                                }
-                            }
-
-                            if (f.getSnippet() != null) {
-                                if (f.getSnippet().length() > 0) {
-                                    d.put("snippet", f.getSnippet());
-                                }
-                            }
-
-
-                            Geometry g = f.getGeometry();
-
-
-                            if (g != null) {
-                                if (g instanceof Point) {
-                                    Point pp = (Point) g;
-                                    d.where(pp.getCenter(), NObject.POINT);
-
-                                } else if (g instanceof org.opensextant.giscore.geometry.Line) {
-                                    org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;
-
-                                    d.where( l );
-                                } else if (g instanceof org.opensextant.giscore.geometry.Polygon) {
-                                    org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) g;
-
-                                    d.where(p);
-                                }
-
-                                //TODO other types
-                            }
-
-                            Style styleInline = null;
-                            if (f.getStyle() != null) {
-
-                                if (f.getStyle() instanceof Style) {
-
-                                    Style ss = (Style) f.getStyle();
-                                    styleInline = ss;
-
-                                } else if (f.getStyle() instanceof StyleMap) {
-                                    StyleMap ss = (StyleMap) f.getStyle();
-                                    styleInline = styles.get(ss.getId());
-                                    if (styleInline == null) {
-                                        System.err.println("Missing: " + ss.getId());
-                                    }
-                                }
-
-                            }
-
-                            if ((f.getStyleUrl() != null) || (styleInline != null)) {
-
-                                //fb = jsonBuilder("style");
-
-                                if (f.getStyleUrl() != null) {
-                                    String su = f.getStyleUrl();
-                                    if (anchorHash(su)) {
-                                        su = su.substring(1);
-                                    }
-
-                                    Style s = styles.get(su);
-                                    if (s == null) {
-                                        //System.err.println("Missing: " + f.getStyleUrl());
-                                    } else {
-                                        styleJson(d, s);
-                                    }
-                                }
-
-                                if (styleInline != null) {
-                                    styleJson(d, styleInline);
-                                }
-
-
-
-                            }
-
-                        }
-
-                        if (go instanceof Schema) {
-                            //..
-                        }
-
-                        if (d!=null) {
-
-                            if (d.getName() == null)  {
-                                System.err.println("Un-NObjectized: " + go);
-                                return false;
-                            }
-                            geo.put(d);
-                        }
-
-                        return true;
-                    }
-
-                    @Override
-                    public void end() {
-                    }
-
-
-                });
+                transformKML(reader, id, geo, new MyGISVisitor(id, styles));
 
                 long end = System.currentTimeMillis();
                 log.warn(id+ " loaded: " + (end-start) + "(ms)");
@@ -720,4 +542,202 @@ public class ImportKML {
         return points;
     }
 
+    private class MyGISVisitor implements GISVisitor {
+
+        private final String id;
+        private final Map<String, Style> styles;
+        public boolean rootFound;
+
+        public MyGISVisitor(String id, Map<String, Style> styles) {
+            this.id = id;
+            this.styles = styles;
+        }
+
+        @Override
+        public void start(String layer) {
+
+        }
+
+        @Override
+        public boolean on(IGISObject go, String[] path) throws IOException {
+            if (go == null) {
+                throw new RuntimeException("null GISObject: " + path);
+            }
+
+            NObject d;
+
+            if (go instanceof ContainerStart) {
+                ContainerStart cs = (ContainerStart) go;
+                //TODO startTime?
+                //System.out.println(cs + " " + cs.getId());
+
+
+
+
+                if (path.length == 1) {
+                    if (rootFound) {
+                        throw new RuntimeException("Multiple roots");
+                    }
+                    rootFound = true;
+                    //name the top level folder
+                    d = newNObject(id);
+                }
+                else {
+                    d = newNObject(pathString);
+                    d.setInside(parentPathString);
+                }
+
+                d.name(cs.getName());
+
+                /*String styleUrl = cs.getStyleUrl();
+                 if (styleUrl != null) {
+                 if (styleUrl.startsWith("#")) {
+                 styleUrl = styleUrl.substring(1);
+                 }
+                 styleUrl = layer + "_" + styleUrl;
+                 System.err.println("Container styleUrl: " + styleUrl);
+                 d.put("styleUrl", styleUrl);
+                 }
+                 */
+                if (enableDescriptions) {
+                    String desc = cs.getDescription();
+                    if ((desc != null) && (desc.length() > 0)) {
+                        //filter
+                        desc = filterHTML(desc);
+                        if (desc.length() > 0) {
+                            d.description(desc);
+                        }
+                    }
+                }
+            }
+            else {
+                d = newNObject();
+                d.setInside(pathString);
+            }
+
+            if (go instanceof Common) {
+                Common cm = (Common)go;
+                if (cm.getStartTime()!=null) {
+                    if (cm.getEndTime() != null) {
+                        d.when(cm.getStartTime().getTime(), cm.getEndTime().getTime());
+                    }
+                    else {
+                        d.when(cm.getStartTime().getTime());
+                    }
+                }
+
+            }
+
+            if (go instanceof Feature) {
+                Feature f = (Feature) go;
+
+                d.name(f.getName());
+
+                if (enableDescriptions) {
+                    String desc = f.getDescription();
+                    if ((desc != null) && (desc.length() > 0)) {
+                        //filter
+                        desc = filterHTML(desc);
+                        if (desc.length() > 0) {
+                            d.description(desc);
+                        }
+                    }
+                }
+
+                if (f.getSnippet() != null) {
+                    if (f.getSnippet().length() > 0) {
+                        d.put("snippet", f.getSnippet());
+                    }
+                }
+
+
+                Geometry g = f.getGeometry();
+
+
+                if (g != null) {
+                    if (g instanceof Point) {
+                        Point pp = (Point) g;
+                        d.where(pp.getCenter(), NObject.POINT);
+
+                    } else if (g instanceof org.opensextant.giscore.geometry.Line) {
+                        org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;
+
+                        d.where( l );
+                    } else if (g instanceof org.opensextant.giscore.geometry.Polygon) {
+                        org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) g;
+
+                        d.where(p);
+                    }
+
+                    //TODO other types
+                }
+
+                Style styleInline = null;
+                if (f.getStyle() != null) {
+
+                    if (f.getStyle() instanceof Style) {
+
+                        Style ss = (Style) f.getStyle();
+                        styleInline = ss;
+
+                    } else if (f.getStyle() instanceof StyleMap) {
+                        StyleMap ss = (StyleMap) f.getStyle();
+                        styleInline = styles.get(ss.getId());
+                        if (styleInline == null) {
+                            System.err.println("Missing: " + ss.getId());
+                        }
+                    }
+
+                }
+
+                if ((f.getStyleUrl() != null) || (styleInline != null)) {
+
+                    //fb = jsonBuilder("style");
+
+                    if (f.getStyleUrl() != null) {
+                        String su = f.getStyleUrl();
+                        if (anchorHash(su)) {
+                            su = su.substring(1);
+                        }
+
+                        Style s = styles.get(su);
+                        if (s == null) {
+                            //System.err.println("Missing: " + f.getStyleUrl());
+                        } else {
+                            styleJson(d, s);
+                        }
+                    }
+
+                    if (styleInline != null) {
+                        styleJson(d, styleInline);
+                    }
+
+
+
+                }
+
+            }
+
+            if (go instanceof Schema) {
+                //..
+            }
+
+            if (d!=null) {
+
+                if (d.getName() == null)  {
+                    System.err.println("Un-NObjectized: " + go);
+                    return false;
+                }
+                geo.put(d);
+            }
+
+            return true;
+        }
+
+        @Override
+        public void end() {
+        }
+
+
+    }
 }
