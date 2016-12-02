@@ -5,24 +5,29 @@ import automenta.netention.Core;
 import automenta.netention.NObject;
 import automenta.netention.geo.SpimeBase;
 import automenta.netention.net.Wikipedia;
-import automenta.netention.web.ClientResources;
 import automenta.netention.web.Web;
 import automenta.netention.web.WebSocketCore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.HashMultimap;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import static io.undertow.Handlers.resource;
 
 public class SpimeServer extends Web {
 
@@ -69,8 +74,23 @@ public class SpimeServer extends Web {
         super();
 
 
-        //static content
-        add("/", ClientResources.handleClientResources());
+        addPrefixPath("/", resource(
+                //static content
+                new FileResourceManager(getResourcePath().toFile(), 0))
+
+//                        new CachingResourceManager(
+//                                16384,
+//                                16*1024*1024,
+//                                new DirectBufferCache(100, 10, 1000),
+//                                new PathResourceManager(getResourcePath(), 0, true, true),
+//                                0 //7 * 24 * 60 * 60 * 1000
+//                        ))
+                        .setCachable((x) -> false)
+
+                        .setDirectoryListingEnabled(true)
+                        .addWelcomeFiles("index.html")
+        );
+
 
         //websocket
         add("/ws", new SpimeSocket().get());
@@ -266,4 +286,19 @@ public class SpimeServer extends Web {
         }*/
     }
 
+    private Path getResourcePath() {
+        //TODO use ClassPathHandler and store the resources in the .jar
+
+        File c = new File("./src/web");
+        //File c = new File(WebServer.class.getResource("/").getPath());
+        String cp = c.getAbsolutePath().replace("./", "");
+
+//        if (cp.contains("web/web")) //happens if run from web/ directory
+//            cp = cp.replace("web", "web");
+
+        return Paths.get(
+                //System.getProperty("user.home")
+                cp
+        );
+    }
 }

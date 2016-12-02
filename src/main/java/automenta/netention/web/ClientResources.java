@@ -22,9 +22,10 @@ public class ClientResources {
     }
 
     public static HttpHandler handleClientResources(String clientPath) {
+        File base = new File(clientPath);
         return header(resource(
-                new FileResourceManager(new File(clientPath), 100, true, "/")).
-                setDirectoryListingEnabled(false), "Access-Control-Allow-Origin", "*");
+                new FileResourceManager(base, 100, true, "/")).
+                setDirectoryListingEnabled(true), "Access-Control-Allow-Origin", "*");
     }
 
 }

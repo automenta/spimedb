@@ -3,12 +3,12 @@ package automenta.netention.db;
 import automenta.netention.NObject;
 import automenta.netention.geo.SpimeBase;
 import com.google.common.collect.Iterators;
-import com.gs.collections.api.tuple.Pair;
-import com.gs.collections.api.tuple.Twin;
-import com.gs.collections.impl.list.mutable.FastList;
-import com.gs.collections.impl.map.mutable.ConcurrentHashMap;
-import com.gs.collections.impl.set.mutable.UnifiedSet;
-import com.gs.collections.impl.tuple.Tuples;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.api.tuple.Twin;
+import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
+import org.eclipse.collections.impl.tuple.Tuples;
 import toxi.geom.Vec3D;
 import vectrex.OctBox;
 

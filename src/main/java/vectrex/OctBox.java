@@ -1,6 +1,6 @@
 package vectrex;
 
-import com.gs.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import toxi.geom.*;
 
 import java.util.Collection;

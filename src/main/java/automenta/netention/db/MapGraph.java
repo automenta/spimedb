@@ -1,8 +1,8 @@
 package automenta.netention.db;
 
-import com.gs.collections.api.tuple.Pair;
-import com.gs.collections.api.tuple.Twin;
-import com.gs.collections.impl.tuple.Tuples;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.api.tuple.Twin;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jgrapht.*;
 import org.jgrapht.graph.AbstractGraph;
 import org.jgrapht.util.ArrayUnenforcedSet;

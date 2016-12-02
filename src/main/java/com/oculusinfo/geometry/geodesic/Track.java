@@ -24,8 +24,10 @@
  */
 package com.oculusinfo.geometry.geodesic;
 
-import com.gs.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+//import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+
 import com.oculusinfo.math.linearalgebra.ListUtilities;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;

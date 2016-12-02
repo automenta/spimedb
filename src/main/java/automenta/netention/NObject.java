@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
+//import org.hibernate.search.annotations.Field;
+//import org.hibernate.search.annotations.Indexed;
+//import org.hibernate.search.annotations.Store;
 import org.opensextant.geodesy.Geodetic2DPoint;
 import org.opensextant.geodesy.Geodetic3DPoint;
 import org.opensextant.giscore.geometry.Line;
@@ -37,15 +37,15 @@ import static automenta.netention.geo.ImportKML.toArray;
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
 @JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
-@Indexed
+//@Indexed
 public class NObject implements Serializable, IdBB<byte[]> {
 
     final static long ETERNAL = Long.MIN_VALUE;
 
-    @Field(store = Store.YES) @JsonProperty("I") final String id;
+    /*@Field(store = Store.YES)*/ @JsonProperty("I") final String id;
     private final static byte[] emptyBytes = new byte[0];
 
-    @Field(store = Store.YES) @JsonProperty("N") byte[] name;
+    /*@Field(store = Store.YES)*/ @JsonProperty("N") byte[] name;
 
     //@JsonProperty("T") long[] time = null;
 
@@ -59,7 +59,7 @@ public class NObject implements Serializable, IdBB<byte[]> {
 
 
     /** extensional inheritance: what this nobject is "inside" of (its container) */
-    @Field(name = "inside") @JsonProperty(">") private String inside = null;
+    /*@Field(name = "inside")*/ @JsonProperty(">") private String inside = null;
 
 //    /** extensional inheritance: what this nobject is "outside" of (its contents) */
 //    @Field(name = "outside") @JsonProperty("<") private Set<String> outside = new HashSet();

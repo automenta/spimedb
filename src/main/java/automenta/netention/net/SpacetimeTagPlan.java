@@ -1,7 +1,7 @@
 package automenta.netention.net;
 
 import automenta.netention.NObject;
-import com.gs.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.ml.clustering.*;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;

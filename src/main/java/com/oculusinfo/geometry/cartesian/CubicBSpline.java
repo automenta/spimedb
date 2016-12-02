@@ -23,7 +23,7 @@
  * SOFTWARE.
  */package com.oculusinfo.geometry.cartesian;
 
-import com.gs.collections.impl.list.mutable.primitive.DoubleArrayList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import com.oculusinfo.math.linearalgebra.TriDiagonalMatrix;
 import com.oculusinfo.math.linearalgebra.Vector;
 

@@ -32,7 +32,7 @@ public class OctMapTest {
     );
 
     @Test
-    public synchronized void test0() {
+    public void test0() {
         o.clear();
         assertTrue(o.size() == 0);
         assertTrue(o.isEmpty());
@@ -43,7 +43,7 @@ public class OctMapTest {
     }
 
     @Test
-    public synchronized void test1() {
+    public  void test1() {
         o.clear();
         Event[] ee = new Event[] {
                 new Event("Beginning of Common Era", 75f, -20f, 0),

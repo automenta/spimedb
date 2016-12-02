@@ -24,7 +24,7 @@
  */
 package com.oculusinfo.ml.stats;
 
-import com.gs.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import com.oculusinfo.geometry.geodesic.Track;
 import com.oculusinfo.math.statistics.StatTracker;
 import com.oculusinfo.ml.Instance;

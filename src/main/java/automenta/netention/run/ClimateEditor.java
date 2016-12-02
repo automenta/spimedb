@@ -2,10 +2,15 @@ package automenta.netention.run;
 
 import automenta.netention.data.SpimeScript;
 import automenta.netention.db.SpimeGraph;
+import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.util.MimeMappings;
 
 import javax.script.ScriptException;
 import java.io.File;
 import java.io.IOException;
+
+import static automenta.netention.run.ClimateViewerProxy.cachePath;
+import static io.undertow.Handlers.resource;
 
 /**
  * Created by me on 6/14/15.
@@ -45,7 +50,13 @@ public class ClimateEditor {
         //System.out.println(db.size() + " objects loaded");
 
 
-        new SpimeServer(db).start("localhost", 8080);
+        new SpimeServer(db)
+
+                //.add("/proxy", new CachingProxyServer(es, cachePath))
+                .add("/cache", resource(
+                        new FileResourceManager(new File(cachePath), 64))
+                        .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT))
+                .start("localhost", 8080);
     }
 
 
