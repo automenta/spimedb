@@ -1,11 +1,10 @@
 package vectrex;
 
 
-import org.infinispan.Cache;
-import spangraph.InfiniPeer;
 import toxi.geom.Vec3D;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -16,19 +15,17 @@ public class OctMap<K,V extends IdBB<K>> implements Map<K,V> {
     private static final Logger logger = Logger.getLogger(OctMap.class.getSimpleName()); // + ":" + id);
 
     /** holder for _oct for infinispan persistence */
-    protected final Cache<Long, OctBox<K>> _oct;
+    protected final Map<Long, OctBox<K>> _oct;
 
-    protected final Cache<K, V> map;
+    protected final Map<K, V> map;
     protected final OctBox<K> box;
 
     boolean startupCheck = true;
 
-    public OctMap(InfiniPeer p, String id, Vec3D center, Vec3D radius, Vec3D resolution) {
+    public OctMap(Vec3D center, Vec3D radius, Vec3D resolution) {
 
-
-
-        this.map = p.the(id);
-        this._oct = p.the(id + ".oct");
+        this.map = new HashMap(); //p.the(id);
+        this._oct = new HashMap(); //p.the(id + ".oct");
 
         if (_oct.isEmpty()) {
             OctBox newBox = this.box = new OctBox(center, radius, resolution);

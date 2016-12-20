@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
-import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -125,7 +124,7 @@ public class Core {
 
     //final public static JsonNodeFactory newJson = new JsonNodeFactory(false);
 
-    public final static ObjectMapper bson = new ObjectMapper(new BsonFactory());
+//    public final static ObjectMapper bson = new ObjectMapper(new BsonFactory());
 
     public static String toJSON(Object o) {
         try {

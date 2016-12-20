@@ -127,11 +127,20 @@
         </dependency>
 
 
+        <!--<dependency>-->
+            <!--<groupId>org.infinispan</groupId>-->
+            <!--<artifactId>infinispan-embedded</artifactId>-->
+            <!--<version>9.0.0.Alpha4</version>-->
+        <!--</dependency>-->
+
+        <!-- https://mvnrepository.com/artifact/io.baratine/baratine -->
         <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-embedded</artifactId>
-            <version>9.0.0.Alpha4</version>
+            <groupId>io.baratine</groupId>
+            <artifactId>baratine</artifactId>
+            <version>1.0.1</version>
         </dependency>
+
+
         <!--<dependency>-->
             <!--<groupId>org.infinispan</groupId>-->
             <!--<artifactId>infinispan-query</artifactId>-->
@@ -203,16 +212,16 @@
 
 
 
-        <dependency>
-            <groupId>io.undertow</groupId>
-            <artifactId>undertow-core</artifactId>
-            <version>2.0.0.Alpha1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.undertow</groupId>
-            <artifactId>undertow-websockets-jsr</artifactId>
-            <version>2.0.0.Alpha1</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.undertow</groupId>-->
+            <!--<artifactId>undertow-core</artifactId>-->
+            <!--<version>2.0.0.Alpha1</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>io.undertow</groupId>-->
+            <!--<artifactId>undertow-websockets-jsr</artifactId>-->
+            <!--<version>2.0.0.Alpha1</version>-->
+        <!--</dependency>-->
 
 
         <!--
@@ -223,12 +232,12 @@
 </dependency>
    <dependency>-->
 
-        <!-- https://mvnrepository.com/artifact/de.undercouch/bson4jackson -->
-        <dependency>
-            <groupId>de.undercouch</groupId>
-            <artifactId>bson4jackson</artifactId>
-            <version>2.7.0</version>
-        </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/de.undercouch/bson4jackson &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>de.undercouch</groupId>-->
+            <!--<artifactId>bson4jackson</artifactId>-->
+            <!--<version>2.7.0</version>-->
+        <!--</dependency>-->
 
 
 
@@ -441,7 +450,8 @@
                 <!-- NB! Set <version> to the latest released version of frontend-maven-plugin, like in README.md -->
                 <version>0.0.23</version>
                 <configuration>
-                    <workingDirectory>src/web</workingDirectory>
+                    <workingDirectory>src/main/resources/public</workingDirectory>
+                    <downloadRoot>/tmp</downloadRoot>
                 </configuration>
                 <executions>
 
@@ -451,8 +461,8 @@
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>v0.10.30</nodeVersion>
-                            <npmVersion>1.4.21</npmVersion>
+                            <nodeVersion>v7.2.0</nodeVersion>
+                            <npmVersion>3.10.10</npmVersion>
                         </configuration>
                     </execution>
 

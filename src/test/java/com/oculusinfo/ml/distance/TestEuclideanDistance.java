@@ -319,7 +319,7 @@ public class TestEuclideanDistance {
 		
 		long start = System.currentTimeMillis();
 		double distance = 0;
-		for (int i=0; i < 30000*3000; i++) {
+		for (int i=0; i < 10000*500; i++) {
 //			distance = d.distance(t1, t2);
 			distance = d.aveMinDistance(Collections.singletonList(t1), Collections.singletonList(t2));
 		}

@@ -2,61 +2,77 @@ package automenta.netention.run;
 
 import automenta.netention.data.SpimeScript;
 import automenta.netention.db.SpimeGraph;
-import io.undertow.server.handlers.resource.FileResourceManager;
-import io.undertow.util.MimeMappings;
+import automenta.netention.geo.ImportKML;
+import automenta.netention.web.AbstractWeb;
+import automenta.netention.web.MousePointer;
+import io.baratine.service.Service;
+import io.baratine.web.Get;
+import io.baratine.web.RequestWeb;
+import io.baratine.web.Web;
 
 import javax.script.ScriptException;
 import java.io.File;
 import java.io.IOException;
 
-import static automenta.netention.run.ClimateViewerProxy.cachePath;
-import static io.undertow.Handlers.resource;
-
 /**
  * Created by me on 6/14/15.
  */
-public class ClimateEditor {
+@Service
+public class ClimateEditor extends AbstractWeb {
+    //InfinispanSpimeBase db = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
+    final SpimeGraph db = new SpimeGraph();
 
-
-    public static void main(String[] args) throws IOException, ScriptException {
-        //InfinispanSpimeBase db = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
-        SpimeGraph db = new SpimeGraph();
-
-
-
+    public ClimateEditor() {
 
         if (db.isEmpty()) {
             System.out.println("Initializing database...");
 
-            new SpimeScript(db).run(new File("data/climateviewer.js"));
+            try {
+                new SpimeScript(db).run(new File("data/climateviewer2.js"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-//            String[] urls = new String[]{
-//                    "file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
-//                    "file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-//                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
-//                    "file:///home/me/kml/fusion-landing-points-CV3D.kmz",
-//                    "file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
-//            };
-//
-//            for (String u : urls) {
-//                new ImportKML(db).url(u).run();
-//            }
+
+            String[] urls = new String[]{
+                    //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
+                    //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
+                    "file:///tmp/kml/submarine-cables-CV3D.kmz",
+                    // http://climateviewer.org/layers/kml/3rdparty/places/submarine-cables-CV3D.kmz
+                    //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
+                    //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
+            };
+
+            for (String u : urls) {
+                try {
+                    new ImportKML(db).url(u).run();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
         }
 
-        System.out.println(db + " objects=" + db.size());
 
 
-        //System.out.println(db.size() + " objects loaded");
+    }
 
+    @Get("/hello")
+    public void doHello(RequestWeb request) {
+        request.ok(new MousePointer(2,2));
+    }
 
-        new SpimeServer(db)
+    public static void main(String[] args) throws IOException, ScriptException {
 
-                //.add("/proxy", new CachingProxyServer(es, cachePath))
-                .add("/cache", resource(
-                        new FileResourceManager(new File(cachePath), 64))
-                        .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT))
-                .start("localhost", 8080);
+        Web.include(ClimateEditor.class);
+        Web.go(args);
+//        new SpimeServer(db)
+//
+//                //.add("/proxy", new CachingProxyServer(es, cachePath))
+//                .add("/cache", resource(
+//                        new FileResourceManager(new File(cachePath), 64))
+//                        .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT))
+//                .start("localhost", 8080);
     }
 
 

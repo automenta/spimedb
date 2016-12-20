@@ -1,7 +1,6 @@
 package automenta.netention;
 
 import org.junit.Test;
-import spangraph.InfiniPeer;
 import toxi.geom.Vec3D;
 import vectrex.OctMap;
 
@@ -24,8 +23,7 @@ public class OctMapTest {
 
     }
 
-    InfiniPeer p = InfiniPeer.tmp();
-    OctMap<byte[], NObject> o = new OctMap<>(p, "octmap",
+    OctMap<byte[], NObject> o = new OctMap<>(
             new Vec3D(-180f, -90f, 0f), /* AD */
             new Vec3D(180f, 90f, 2100f), /* 0AD .. 2100AD */
             new Vec3D(1f, 0.75f, 2f)
