@@ -40,14 +40,14 @@ import java.util.Random;
  */
 public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
 
-    public static enum Axis {
+    public enum Axis {
 
         X(Vec2D.X_AXIS),
         Y(Vec2D.Y_AXIS);
 
         private final ReadonlyVec2D vector;
 
-        private Axis(ReadonlyVec2D v) {
+        Axis(ReadonlyVec2D v) {
             this.vector = v;
         }
 
@@ -64,7 +64,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
     /**
      * Defines positive Y axis
      */
-    public static final ReadonlyVec2D Y_AXIS = new Vec2D(0, 1);;
+    public static final ReadonlyVec2D Y_AXIS = new Vec2D(0, 1);
 
     /** Defines the zero vector. */
     public static final ReadonlyVec2D ZERO = new Vec2D();
@@ -94,7 +94,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
      * @param theta
      * @return new vector pointing into the direction of the passed in angle
      */
-    public static final Vec2D fromTheta(float theta) {
+    public static Vec2D fromTheta(float theta) {
         return new Vec2D((float) Math.cos(theta), (float) Math.sin(theta));
     }
 
@@ -109,7 +109,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
      * 
      * @return result as new vector
      */
-    public static final Vec2D max(ReadonlyVec2D a, ReadonlyVec2D b) {
+    public static Vec2D max(ReadonlyVec2D a, ReadonlyVec2D b) {
         return new Vec2D(Math.max(a.x(), b.x()), Math.max(a.y(), b.y()));
     }
 
@@ -124,7 +124,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
      * 
      * @return result as new vector
      */
-    public static final Vec2D min(ReadonlyVec2D a, ReadonlyVec2D b) {
+    public static Vec2D min(ReadonlyVec2D a, ReadonlyVec2D b) {
         return new Vec2D(MathUtils.min(a.x(), b.x()), MathUtils.min(a.y(),
                 b.y()));
     }
@@ -135,7 +135,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
      * 
      * @return a new random normalized unit vector.
      */
-    public static final Vec2D randomVector() {
+    public static Vec2D randomVector() {
         return randomVector(MathUtils.RND);
     }
 
@@ -147,7 +147,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
      * 
      * @return a new random normalized unit vector.
      */
-    public static final Vec2D randomVector(Random rnd) {
+    public static Vec2D randomVector(Random rnd) {
         Vec2D v = new Vec2D(rnd.nextFloat() * 2 - 1, rnd.nextFloat() * 2 - 1);
         return v.normalize();
     }
@@ -383,9 +383,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
         try {
             ReadonlyVec2D vv = (ReadonlyVec2D) v;
             return (x == vv.x() && y == vv.y());
-        } catch (NullPointerException e) {
-            return false;
-        } catch (ClassCastException e) {
+        } catch (NullPointerException | ClassCastException e) {
             return false;
         }
 
@@ -421,10 +419,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
             if (Float.isNaN(diff)) {
                 return false;
             }
-            if ((diff < 0 ? -diff : diff) > tolerance) {
-                return false;
-            }
-            return true;
+            return !((diff < 0 ? -diff : diff) > tolerance);
         } catch (NullPointerException e) {
             return false;
         }
@@ -642,10 +637,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
         if (x < r.x || x > r.x + r.width) {
             return false;
         }
-        if (y < r.y || y > r.y + r.height) {
-            return false;
-        }
-        return true;
+        return !(y < r.y || y > r.y + r.height);
     }
 
     public boolean isInTriangle(Vec2D a, Vec2D b, Vec2D c) {
@@ -1094,8 +1086,8 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
     }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer(32);
-        sb.append("{x:").append(x).append(", y:").append(y).append("}");
+        StringBuilder sb = new StringBuilder(32);
+        sb.append("{x:").append(x).append(", y:").append(y).append('}');
         return sb.toString();
     }
 

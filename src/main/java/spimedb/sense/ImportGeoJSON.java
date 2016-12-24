@@ -15,6 +15,7 @@ import java.net.URL;
 /**
  *
  * @see https://github.com/opendatalab-de/geojson-jackson
+ * TODO write unit test, with the file stored locally as a test-resource
  */
 public class ImportGeoJSON {
    //http://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php

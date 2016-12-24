@@ -196,11 +196,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
         ha = Math.abs(h);
 
         pmax = 1;
-        if (ha > fa) {
-            swap = true;
-        } else {
-            swap = false;
-        }
+        swap = ha > fa;
 
         if (swap) {
             pmax = 3;
@@ -971,13 +967,13 @@ public class GMatrix implements java.io.Serializable, Cloneable {
 
         mtmp.mul(u, mtmp);
         mtmp.mul(mtmp, v);
-        System.out.println("\n m = \n" + mtmp.toString(mtmp));
+        System.out.println("\n m = \n" + toString(mtmp));
 
     }
 
     private static void print_se(double[] s, double[] e) {
-        System.out.println("\ns =" + s[0] + " " + s[1] + " " + s[2]);
-        System.out.println("e =" + e[0] + " " + e[1]);
+        System.out.println("\ns =" + s[0] + ' ' + s[1] + ' ' + s[2]);
+        System.out.println("e =" + e[0] + ' ' + e[1]);
     }
 
     private static void print_svd(double[] s, double[] e, GMatrix u, GMatrix v) {
@@ -1014,7 +1010,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
     }
 
     private static String toString(GMatrix m) {
-        StringBuffer buffer = new StringBuffer(m.nRow * m.nCol * 8);
+        StringBuilder buffer = new StringBuilder(m.nRow * m.nCol * 8);
         int i, j;
 
         for (i = 0; i < m.nRow; i++) {
@@ -1022,10 +1018,10 @@ public class GMatrix implements java.io.Serializable, Cloneable {
                 if (Math.abs(m.values[i][j]) < MathUtils.EPS) {
                     buffer.append("0.0000 ");
                 } else {
-                    buffer.append(m.values[i][j]).append(" ");
+                    buffer.append(m.values[i][j]).append(' ');
                 }
             }
-            buffer.append("\n");
+            buffer.append('\n');
         }
         return buffer.toString();
     }
@@ -1261,9 +1257,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
         // Also need to clone array of values
         m1.values = new double[nRow][nCol];
         for (int i = 0; i < nRow; i++) {
-            for (int j = 0; j < nCol; j++) {
-                m1.values[i][j] = values[i][j];
-            }
+            System.arraycopy(values[i], 0, m1.values[i], 0, nCol);
         }
 
         return m1;
@@ -1551,9 +1545,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
                 }
             }
             return true;
-        } catch (ClassCastException e1) {
-            return false;
-        } catch (NullPointerException e2) {
+        } catch (ClassCastException | NullPointerException e1) {
             return false;
         }
     }
@@ -1816,9 +1808,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
      *            the array into which the row values will be placed
      */
     public final void getRow(int row, double[] array) {
-        for (int i = 0; i < nCol; i++) {
-            array[i] = values[row][i];
-        }
+        System.arraycopy(values[row], 0, array, 0, nCol);
     }
 
     /**
@@ -1834,9 +1824,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
             vector.setSize(nCol);
         }
 
-        for (int i = 0; i < nCol; i++) {
-            vector.values[i] = values[row][i];
-        }
+        System.arraycopy(values[row], 0, vector.values, 0, nCol);
     }
 
     /**
@@ -2395,9 +2383,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
      *            the source array
      */
     public final void setRow(int row, double[] array) {
-        for (int i = 0; i < nCol; i++) {
-            values[row][i] = array[i];
-        }
+        System.arraycopy(array, 0, values[row], 0, nCol);
     }
 
     /**
@@ -2410,9 +2396,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
      *            the source vector
      */
     public final void setRow(int row, GVector vector) {
-        for (int i = 0; i < nCol; i++) {
-            values[row][i] = vector.values[i];
-        }
+        System.arraycopy(vector.values, 0, values[row], 0, nCol);
     }
 
     /**
@@ -2551,15 +2535,15 @@ public class GMatrix implements java.io.Serializable, Cloneable {
      * @return the String representation
      */
     public String toString() {
-        StringBuffer buffer = new StringBuffer(nRow * nCol * 8);
+        StringBuilder buffer = new StringBuilder(nRow * nCol * 8);
 
         int i, j;
 
         for (i = 0; i < nRow; i++) {
             for (j = 0; j < nCol; j++) {
-                buffer.append(values[i][j]).append(" ");
+                buffer.append(values[i][j]).append(' ');
             }
-            buffer.append("\n");
+            buffer.append('\n');
         }
 
         return buffer.toString();

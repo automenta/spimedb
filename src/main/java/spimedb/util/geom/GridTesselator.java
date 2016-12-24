@@ -19,7 +19,7 @@ import java.util.List;
 public abstract class GridTesselator implements PolygonTesselator {
 
     protected float res;
-    private float rootSize;
+    private final float rootSize;
 
     /**
      * Creates a new instance with the given grid resolution.
@@ -62,7 +62,7 @@ public abstract class GridTesselator implements PolygonTesselator {
      * @return list of triangles
      */
     public List<Triangle2D> tesselatePolygon(Polygon2D poly) {
-        List<Triangle2D> triangles = new ArrayList<Triangle2D>();
+        List<Triangle2D> triangles = new ArrayList<>();
         Rect bounds = poly.getBounds();
         // a Voronoi diagram relies on a Delaunay triangulation behind the
         // scenes

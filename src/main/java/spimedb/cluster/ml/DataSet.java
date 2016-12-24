@@ -40,7 +40,7 @@ import java.util.*;
 public class DataSet implements Serializable, Iterable<Instance> {
 	private static final long serialVersionUID = -544003860939601075L;
 	
-	private final Map<String, Instance> map = new LinkedHashMap<String, Instance>();
+	private final Map<String, Instance> map = new LinkedHashMap<>();
 
 	public Set<String> getKeys() {
 		return map.keySet();
@@ -97,10 +97,10 @@ public class DataSet implements Serializable, Iterable<Instance> {
 		
 		long numToSample = Math.round( map.size() * fraction );
 		
-		ArrayList<String> keys = new ArrayList<String>(map.keySet());
+		ArrayList<String> keys = new ArrayList<>(map.keySet());
 		
 		// randomly pick k instances as the initial k means
-		ArrayList<String> indexes = new ArrayList<String>(keys.size()); 
+		ArrayList<String> indexes = new ArrayList<>(keys.size());
 		for (int i = 0; i < indexes.size(); i++) {
 			indexes.add( keys.get(i) );
 		}
@@ -111,13 +111,13 @@ public class DataSet implements Serializable, Iterable<Instance> {
 		return sample;
 	}
 	
-	private void swap(Instance a, Instance b) {
+	private static void swap(Instance a, Instance b) {
 		Instance tmp = a;
 		a = b;
 		b = tmp;
 	}
 	
-	private void shuffle(Instance[] array) {
+	private static void shuffle(Instance[] array) {
 		Random rnd = new Random();
 		int n = array.length;
 
@@ -137,7 +137,7 @@ public class DataSet implements Serializable, Iterable<Instance> {
 		// Make sure n is valid: each fold must have at least one instance!
 		if (n > size() || n < 1) return null;
 		
-		List<DataSet> folds = new LinkedList<DataSet>();
+		List<DataSet> folds = new LinkedList<>();
 		
 		Instance[] instances = new Instance[size()];
 		instances = map.values().toArray(instances);
@@ -175,7 +175,7 @@ public class DataSet implements Serializable, Iterable<Instance> {
 	 * @param featureName the name of the feature to normalize
 	 */
 	public void normalizeInstanceFeature(String featureName) {
-		List<Feature> allFeatures = new ArrayList<Feature>();
+		List<Feature> allFeatures = new ArrayList<>();
 		
 		// gather up all matching features
 		for (Instance inst : this) {
@@ -189,7 +189,7 @@ public class DataSet implements Serializable, Iterable<Instance> {
 		double N = allFeatures.size();
 		
 		// currently only support normalizing numeric vector features
-		if ( (allFeatures.get(0) instanceof NumericVectorFeature) == false ) return;
+		if (!(allFeatures.get(0) instanceof NumericVectorFeature)) return;
 		
 		double[] meanVector = ((NumericVectorFeature)allFeatures.get(0)).getValue().clone();
 		
@@ -275,7 +275,7 @@ public class DataSet implements Serializable, Iterable<Instance> {
 	 */
 	public boolean containsAll(Collection<Instance> c) {
 		for (Instance i : c) {
-			if (map.containsKey(i.getId()) == false) return false;
+			if (!map.containsKey(i.getId())) return false;
 		}
 		return true;
 	}

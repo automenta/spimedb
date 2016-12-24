@@ -38,7 +38,7 @@ import java.util.List;
 public class LineStrip2D implements Iterable<Vec2D> {
 
     @XmlElement(name = "v")
-    protected List<Vec2D> vertices = new ArrayList<Vec2D>();
+    protected List<Vec2D> vertices = new ArrayList<>();
 
     protected float[] arcLenIndex;
 
@@ -46,7 +46,7 @@ public class LineStrip2D implements Iterable<Vec2D> {
     }
 
     public LineStrip2D(Collection<? extends Vec2D> vertices) {
-        this.vertices = new ArrayList<Vec2D>(vertices);
+        this.vertices = new ArrayList<>(vertices);
     }
 
     public LineStrip2D add(float x, float y) {
@@ -126,7 +126,7 @@ public class LineStrip2D implements Iterable<Vec2D> {
      * @return point list
      */
     public List<Vec2D> getDecimatedVertices(float step, boolean doAddFinalVertex) {
-        ArrayList<Vec2D> uniform = new ArrayList<Vec2D>();
+        ArrayList<Vec2D> uniform = new ArrayList<>();
         if (vertices.size() < 3) {
             if (vertices.size() == 2) {
                 new Line2D(vertices.get(0), vertices.get(1)).splitIntoSegments(
@@ -168,7 +168,7 @@ public class LineStrip2D implements Iterable<Vec2D> {
      */
     public List<Line2D> getEdges() {
         int num = vertices.size();
-        List<Line2D> edges = new ArrayList<Line2D>(num - 1);
+        List<Line2D> edges = new ArrayList<>(num - 1);
         for (int i = 1; i < num; i++) {
             edges.add(new Line2D(vertices.get(i - 1), vertices.get(i)));
         }
@@ -226,7 +226,7 @@ public class LineStrip2D implements Iterable<Vec2D> {
 
     public List<Line2D> getSegments() {
         final int num = vertices.size();
-        List<Line2D> segments = new ArrayList<Line2D>(num - 1);
+        List<Line2D> segments = new ArrayList<>(num - 1);
         for (int i = 1; i < num; i++) {
             segments.add(new Line2D(vertices.get(i - 1), vertices.get(i)));
         }

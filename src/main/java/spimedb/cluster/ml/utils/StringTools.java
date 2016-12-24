@@ -55,10 +55,10 @@ public class StringTools {
     	String[] tokens = s.split("\\s+");
     	
     	// sort tokens and combine into new string
-    	TreeSet<String> set = new TreeSet<String>();
+    	TreeSet<String> set = new TreeSet<>();
         Collections.addAll(set, tokens);
         
-        StringBuffer fingerPrint = new StringBuffer();
+        StringBuilder fingerPrint = new StringBuilder();
         Iterator<String> i = set.iterator();
 
         while (i.hasNext()) {  
@@ -90,7 +90,7 @@ public class StringTools {
      */
     public static String toASCII(String s) {
         char[] chars = s.toCharArray();
-        StringBuffer ascii = new StringBuffer();
+        StringBuilder ascii = new StringBuilder();
         for (char c : chars) {
         	ascii.append(toASCII(c));
         }

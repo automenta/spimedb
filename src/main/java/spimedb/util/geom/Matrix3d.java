@@ -42,7 +42,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
     // Compatible with 1.1
     static final long serialVersionUID = 6837536777072402710L;
 
-    private static final boolean almostEqual(double a, double b) {
+    private static boolean almostEqual(double a, double b) {
         if (a == b) {
             return true;
         }
@@ -58,11 +58,8 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
             return true;
         }
 
-        if ((diff / max) < EPSILON_RELATIVE) {
-            return true;
-        }
+        return (diff / max) < EPSILON_RELATIVE;
 
-        return false;
     }
 
     static int compute_2X2(double f, double g, double h,
@@ -96,11 +93,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
         ha = Math.abs(h);
 
         pmax = 1;
-        if (ha > fa) {
-            swap = true;
-        } else {
-            swap = false;
-        }
+        swap = ha > fa;
 
         if (swap) {
             pmax = 3;
@@ -945,8 +938,8 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
     static void print_mat(double[] mat) {
         int i;
         for (i = 0; i < 3; i++) {
-            System.out.println(mat[i * 3 + 0] + " " + mat[i * 3 + 1] + " "
-                    + mat[i * 3 + 2] + "\n");
+            System.out.println(mat[i * 3 + 0] + " " + mat[i * 3 + 1] + ' '
+                    + mat[i * 3 + 2] + '\n');
         }
 
     }
@@ -1463,11 +1456,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
         }
 
         diff = m22 - m1.m22;
-        if ((diff < 0 ? -diff : diff) > epsilon) {
-            return false;
-        }
-
-        return true;
+        return !((diff < 0 ? -diff : diff) > epsilon);
     }
 
     /**
@@ -1506,9 +1495,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
                     && this.m02 == m2.m02 && this.m10 == m2.m10
                     && this.m11 == m2.m11 && this.m12 == m2.m12
                     && this.m20 == m2.m20 && this.m21 == m2.m21 && this.m22 == m2.m22);
-        } catch (ClassCastException e1) {
-            return false;
-        } catch (NullPointerException e2) {
+        } catch (ClassCastException | NullPointerException e1) {
             return false;
         }
 
@@ -1762,7 +1749,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      * Also note that since this routine is slow anyway, we won't worry about
      * allocating a little bit of garbage.
      */
-    private final void invertGeneral(Matrix3d m1) {
+    private void invertGeneral(Matrix3d m1) {
         double result[] = new double[9];
         int row_perm[] = new int[3];
         int i, r, c;
@@ -2979,9 +2966,9 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      * @return the String representation
      */
     public String toString() {
-        return this.m00 + ", " + this.m01 + ", " + this.m02 + "\n" + this.m10
-                + ", " + this.m11 + ", " + this.m12 + "\n" + this.m20 + ", "
-                + this.m21 + ", " + this.m22 + "\n";
+        return this.m00 + ", " + this.m01 + ", " + this.m02 + '\n' + this.m10
+                + ", " + this.m11 + ", " + this.m12 + '\n' + this.m20 + ", "
+                + this.m21 + ", " + this.m22 + '\n';
     }
 
     /**

@@ -32,7 +32,7 @@ import java.util.*;
 
 public class FeatureTable implements Serializable {
 	private static final long serialVersionUID = -5842770909462107078L;
-	private Map<String, List<Feature>> table = new HashMap<String, List<Feature>>();
+	private Map<String, List<Feature>> table = new HashMap<>();
 	
 	public FeatureTable() { super(); }
 	
@@ -42,8 +42,8 @@ public class FeatureTable implements Serializable {
 	
 	public void addFeature(Feature f) {
 		//TODO use Map.computeIfAbsent for this entire method
-		if (table.containsKey(f.getName()) == false) {
-			table.put(f.getName(), new LinkedList<Feature>());
+		if (!table.containsKey(f.getName())) {
+			table.put(f.getName(), new LinkedList<>());
 		}
 		Collection<Feature> featureList = table.get(f.getName());
 		featureList.add(f);

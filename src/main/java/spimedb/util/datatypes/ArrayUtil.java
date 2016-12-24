@@ -29,6 +29,7 @@ package spimedb.util.datatypes;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -49,11 +50,9 @@ public class ArrayUtil {
     public static <T> void addArrayToCollection(T[] array,
             Collection<T> collection) {
         if (collection == null) {
-            collection = new ArrayList<T>();
+            collection = new ArrayList<>();
         }
-        for (T o : array) {
-            collection.add(o);
-        }
+        Collections.addAll(collection, array);
     }
 
     /**
@@ -63,10 +62,8 @@ public class ArrayUtil {
      * @return array list version
      */
     public static <T> ArrayList<T> arrayToList(T[] array) {
-        ArrayList<T> list = new ArrayList<T>(array.length);
-        for (T element : array) {
-            list.add(element);
-        }
+        ArrayList<T> list = new ArrayList<>(array.length);
+        Collections.addAll(list, array);
         return list;
     }
 

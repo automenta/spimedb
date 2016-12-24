@@ -14,13 +14,13 @@ public class EventEmitter {
     
     /** Observes events emitted by EventEmitter */
     public interface EventObserver<C> {
-        void event(Class<? extends C> event, Object[] args);
+        void event(Class<? extends C> event, Object... args);
     }
 
     private final Map<Class<?>, List<EventObserver>> events;
             
     
-    private Deque<Object[]> pendingOps = new ArrayDeque();
+    private final Deque<Object[]> pendingOps = new ArrayDeque();
     
     /** EventEmitter that allows unknown events; must use concurrent collection
      *  for multithreading since new event classes may be added at any time.
@@ -41,7 +41,7 @@ public class EventEmitter {
         }
     }
 
-    protected List<EventObserver> newObserverList() {
+    protected static List<EventObserver> newObserverList() {
         return new ArrayList();
         /*return Concurrent ? 
                 new ArrayList() : Collections.synchronizedList(new ArrayList());*/

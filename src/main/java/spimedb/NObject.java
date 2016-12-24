@@ -299,12 +299,12 @@ public class NObject implements Serializable, IdBB {
     @JsonIgnore public String summary(StringBuilder sb) {
         sb.setLength(0);
 
-        sb.append("{\"I\":\"").append(getId()).append("\"");
+        sb.append("{\"I\":\"").append(getId()).append('"');
 
         String name = getName();
         if (name!=null) {
             //TODO use nars Utf8
-            sb.append(",\"N\":\"").append(new String(name)).append("\"");
+            sb.append(",\"N\":\"").append(name).append('"');
         }
 
 //        if (isSpatial())
@@ -335,7 +335,7 @@ public class NObject implements Serializable, IdBB {
         return getBB().y();
     }
 
-    public final float getAltitude() {
+    public static float getAltitude() {
         return Float.NaN; //TODO
     }
 }

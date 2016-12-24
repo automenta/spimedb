@@ -313,13 +313,10 @@ public class AABB extends Vec3D implements BB {
         // compute plane equation of triangle: normal*x+d=0
         normal = e0.cross(e1);
         float d = -normal.dot(v0);
-        if (!planeBoxOverlap(normal, d, extent)) {
-            return false;
-        }
-        return true;
+        return planeBoxOverlap(normal, d, extent);
     }
 
-    private boolean planeBoxOverlap(Vec3D normal, float d, Vec3D maxbox) {
+    private static boolean planeBoxOverlap(Vec3D normal, float d, Vec3D maxbox) {
         Vec3D vmin = new Vec3D();
         Vec3D vmax = new Vec3D();
 
@@ -349,14 +346,11 @@ public class AABB extends Vec3D implements BB {
         if (normal.dot(vmin) + d > 0.0f) {
             return false;
         }
-        if (normal.dot(vmax) + d >= 0.0f) {
-            return true;
-        }
-        return false;
+        return normal.dot(vmax) + d >= 0.0f;
     }
 
     public AABB set(BB box) {
-        set(box);
+        super.set(box);
         extent.set(box.getExtents());
         return this;
     }
@@ -378,8 +372,8 @@ public class AABB extends Vec3D implements BB {
     }
 
 
-    private boolean testAxis(float a, float b, float fa, float fb, float va,
-            float vb, float wa, float wb, float ea, float eb) {
+    private static boolean testAxis(float a, float b, float fa, float fb, float va,
+                                    float vb, float wa, float wb, float ea, float eb) {
         float p0 = a * va + b * vb;
         float p2 = a * wa + b * wb;
         float min, max;
@@ -441,8 +435,8 @@ public class AABB extends Vec3D implements BB {
      * @see toxi.geom.Vec3D#toString()
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("<aabb@").append(super.toString()).append("x")
+        StringBuilder sb = new StringBuilder();
+        sb.append("<aabb@").append(super.toString()).append('x')
                 .append(extent);
         return sb.toString();
     }

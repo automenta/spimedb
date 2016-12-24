@@ -35,7 +35,7 @@ public interface Intersector3D {
     /**
      * @return intersection data parcel
      */
-    public IsectData3D getIntersectionData();
+    IsectData3D getIntersectionData();
 
     /**
      * Checks if entity intersects with the given ray. Further intersection
@@ -46,6 +46,6 @@ public interface Intersector3D {
      *            ray to check
      * @return true, if ray hits the entity
      */
-    public boolean intersectsRay(Ray3D ray);
+    boolean intersectsRay(Ray3D ray);
 
 }

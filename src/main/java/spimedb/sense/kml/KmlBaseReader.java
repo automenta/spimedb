@@ -48,14 +48,14 @@ public abstract class KmlBaseReader implements IKml {
      * Earth 5.0.11337.1968 with KML 2.2 httpQuery names unchanged as of April
      * 2011 with Google Earth 6.0.2.2074.
      */
-    private static final Map<String, String> httpQueryLabels = new HashMap<String, String>();
+    private static final Map<String, String> httpQueryLabels = new HashMap<>();
     /**
      * names of supported viewFormat fields as of 2/19/09 in Google Earth
      * 5.0.11337.1968 with KML 2.2 viewFormat names unchanged as of April 2011
      * with Google Earth 6.0.2.2074. see
      * http://code.google.com/apis/kml/documentation/kmlreference.html#link
      */
-    private static final Map<String, String> VIEW_FORMAT_LABELS = new HashMap<String, String>();
+    private static final Map<String, String> VIEW_FORMAT_LABELS = new HashMap<>();
     static {
         final String[] labels = {
             "clientVersion", "5.2.1.1588",
@@ -144,7 +144,7 @@ public abstract class KmlBaseReader implements IKml {
                 try {
                     return new URI(href);
                 } catch (URISyntaxException e) {
-                    log.warn("Invalid link URI: " + href, e);
+                    log.warn("Invalid link URI: {}", href, e);
                 }
             }
         }
@@ -246,7 +246,7 @@ public abstract class KmlBaseReader implements IKml {
 
     private Geodetic2DBounds viewBounds;
 
-    private final Map<String, String> viewFormatLabels = new HashMap<String, String>();
+    private final Map<String, String> viewFormatLabels = new HashMap<>();
 
 
     KmlBaseReader() {
@@ -563,7 +563,7 @@ public abstract class KmlBaseReader implements IKml {
         try {
             return new URI(href);
         } catch (URISyntaxException e) {
-            log.error("Failed to create URI from URL=" + href, e);
+            log.error("Failed to create URI from URL={}", href, e);
             return null;
         }
     }
@@ -584,7 +584,7 @@ public abstract class KmlBaseReader implements IKml {
                 uri = new URI(href);
                 //href = url.toExternalForm();
             } else if (baseUrl == null) {
-                log.warn("no base URL to resolve relative URL: " + href);
+                log.warn("no base URL to resolve relative URL: {}", href);
             } else {
                 // relative URL
                 // if compressed amd relative link then need special encoded kmz URI
@@ -611,10 +611,8 @@ public abstract class KmlBaseReader implements IKml {
                     uri = new URL(baseUrl, href).toURI();
                 }
             }
-        } catch (URISyntaxException e) {
-            log.warn("Invalid link: " + href, e);
-        } catch (MalformedURLException e) {
-            log.warn("Invalid link: " + href, e);
+        } catch (URISyntaxException | MalformedURLException e) {
+            log.warn("Invalid link: {}", href, e);
         }
         return uri;
     }

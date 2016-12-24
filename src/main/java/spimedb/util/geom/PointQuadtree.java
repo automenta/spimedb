@@ -43,16 +43,17 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
     public enum Type {
         EMPTY,
         BRANCH,
-        LEAF;
+        LEAF
     }
 
-    private PointQuadtree parent;
+    private final PointQuadtree parent;
     private PointQuadtree childNW, childNE, childSW, childSE;
 
-    private Type type;
+    private PointQuadtree.Type type;
 
     private Vec2D value;
-    private float mx, my;
+    private final float mx;
+    private final float my;
 
     public PointQuadtree(float x, float y, float w, float h) {
         this(null, x, y, w, h);
@@ -126,17 +127,21 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
     }
 
     public PointQuadtree findNode(Vec2D p) {
-        switch (type) {
-            case EMPTY:
-                return null;
-            case LEAF:
-                return value.x == x && value.y == y ? this : null;
-            case BRANCH:
-                return getQuadrantForPoint(p.x, p.y).findNode(p);
-            default:
-                throw new IllegalStateException("Invalid node type");
+        PointQuadtree result = this;
+        while (true) {
+            switch (result.type) {
+                case EMPTY:
+                    return null;
+                case LEAF:
+                    return result.value.x == result.x && result.value.y == result.y ? result : null;
+                case BRANCH:
+                    result = result.getQuadrantForPoint(p.x, p.y);
+                    continue;
+                default:
+                    throw new IllegalStateException("Invalid node type");
+            }
         }
-    };
+    }
 
     private PointQuadtree getQuadrantForPoint(float x, float y) {
         if (x < mx) {
@@ -147,25 +152,30 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
     }
 
     public boolean index(Vec2D p) {
-        if (containsPoint(p)) {
-            switch (type) {
-                case EMPTY:
-                    setPoint(p);
-                    return true;
+        PointQuadtree other = this;
+        while (true) {
+            if (other.containsPoint(p)) {
+                switch (other.type) {
+                    case EMPTY:
+                        other.setPoint(p);
+                        return true;
 
-                case LEAF:
-                    if (value.x == p.x && value.y == p.y) {
-                        return false;
-                    } else {
-                        split();
-                        return getQuadrantForPoint(p.x, p.y).index(p);
-                    }
+                    case LEAF:
+                        if (other.value.x == p.x && other.value.y == p.y) {
+                            return false;
+                        } else {
+                            other.split();
+                            other = other.getQuadrantForPoint(p.x, p.y);
+                            continue;
+                        }
 
-                case BRANCH:
-                    return getQuadrantForPoint(p.x, p.y).index(p);
+                    case BRANCH:
+                        other = other.getQuadrantForPoint(p.x, p.y);
+                        continue;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     public boolean isIndexed(Vec2D p) {
@@ -178,7 +188,7 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
             if (type == Type.LEAF) {
                 if (value.distanceToSquared(p) < radius * radius) {
                     if (results == null) {
-                        results = new ArrayList<Vec2D>();
+                        results = new ArrayList<>();
                     }
                     results.add(value);
                 }
@@ -202,7 +212,7 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
             if (type == Type.LEAF) {
                 if (bounds.containsPoint(value)) {
                     if (results == null) {
-                        results = new ArrayList<Vec2D>();
+                        results = new ArrayList<>();
                     }
                     results.add(value);
                 }

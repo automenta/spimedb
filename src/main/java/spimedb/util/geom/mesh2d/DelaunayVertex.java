@@ -185,13 +185,13 @@ public class DelaunayVertex {
     public static String toString(DelaunayVertex[] matrix) {
         StringBuilder buf = new StringBuilder("{");
         for (DelaunayVertex row : matrix) {
-            buf.append(" " + row);
+            buf.append(" ").append(row);
         }
         buf.append(" }");
         return buf.toString();
     }
 
-    private double[] coordinates; // The point's coordinates
+    private final double[] coordinates; // The point's coordinates
 
     /**
      * Constructor.
@@ -513,9 +513,9 @@ public class DelaunayVertex {
         }
         String result = "DelaunayVertex(" + coordinates[0];
         for (int i = 1; i < coordinates.length; i++) {
-            result = result + "," + coordinates[i];
+            result = result + ',' + coordinates[i];
         }
-        result = result + ")";
+        result = result + ')';
         return result;
     }
 

@@ -94,7 +94,7 @@ public class BagOfWordsFeature extends Feature {
 		str.append(this.getName()).append(":[");
 		int i=1;
 		for (FeatureFrequency f : freqTable.getAll()) {
-			str.append(f.feature.getName()).append("=").append(f.frequency);
+			str.append(f.feature.getName()).append('=').append(f.frequency);
 			if (i < freqTable.getAll().size()) str.append(';');
 			i++;
 		}

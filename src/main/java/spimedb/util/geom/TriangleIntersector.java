@@ -32,7 +32,7 @@ import spimedb.util.math.MathUtils;
 public class TriangleIntersector implements Intersector3D {
 
     public Triangle3D triangle;
-    private IsectData3D isectData;
+    private final IsectData3D isectData;
 
     public TriangleIntersector() {
         this(new Triangle3D());

@@ -35,16 +35,16 @@ import java.util.logging.Logger;
  * instead of using "new" to enforce singletons of any class with a visible
  * default constructor. The registry itself is implemented as singleton.
  */
-public class SingletonRegistry {
+public enum SingletonRegistry {;
 
     /**
      * The singleton instance of the registry itself.
      */
-    public static final SingletonRegistry REGISTRY = new SingletonRegistry();
+    //public static final SingletonRegistry REGISTRY = new SingletonRegistry();
 
-    private static HashMap<String, Object> map = new HashMap<String, Object>();
+    private static final HashMap<String, Object> map = new HashMap<>();
 
-    private static Logger logger = Logger.getLogger(SingletonRegistry.class
+    private static final Logger logger = Logger.getLogger(SingletonRegistry.class
             .getName());
 
     /**
@@ -72,16 +72,5 @@ public class SingletonRegistry {
         return instance;
     }
 
-    /**
-     * Alternative, more conventional accessor to the singleton instance of the
-     * registry itself.
-     * 
-     * @return registry instance
-     */
-    public static SingletonRegistry getRegistry() {
-        return REGISTRY;
-    }
 
-    protected SingletonRegistry() {
-    }
 }

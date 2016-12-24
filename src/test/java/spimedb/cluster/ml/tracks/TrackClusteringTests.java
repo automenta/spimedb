@@ -24,6 +24,9 @@
  */
 package spimedb.cluster.ml.tracks;
 
+import junit.framework.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 import spimedb.cluster.geometry.cartesian.CubicBSpline;
 import spimedb.cluster.geometry.geodesic.Position;
 import spimedb.cluster.geometry.geodesic.PositionCalculationParameters;
@@ -41,9 +44,6 @@ import spimedb.cluster.ml.unsupervised.cluster.Cluster;
 import spimedb.cluster.ml.unsupervised.cluster.ClusterResult;
 import spimedb.cluster.ml.unsupervised.cluster.kmeans.KMeans;
 import spimedb.cluster.ml.validation.unsupervised.external.BCubed;
-import junit.framework.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;

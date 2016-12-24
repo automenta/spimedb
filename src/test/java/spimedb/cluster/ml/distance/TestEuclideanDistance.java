@@ -24,9 +24,9 @@
  */
 package spimedb.cluster.ml.distance;
 
+import org.junit.Test;
 import spimedb.cluster.ml.feature.spatial.GeoSpatialFeature;
 import spimedb.cluster.ml.feature.spatial.distance.EuclideanDistance;
-import org.junit.Test;
 
 import java.util.Collections;
 

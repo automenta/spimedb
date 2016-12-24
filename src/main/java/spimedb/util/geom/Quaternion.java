@@ -503,9 +503,9 @@ public class Quaternion {
     }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer(48);
-        sb.append("{axis: [").append(x).append(",").append(y).append(",")
-                .append(z).append("], w: ").append(w).append("}");
+        StringBuilder sb = new StringBuilder(48);
+        sb.append("{axis: [").append(x).append(',').append(y).append(',')
+                .append(z).append("], w: ").append(w).append('}');
         return sb.toString();
     }
 }

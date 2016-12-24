@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class WeightedRandomSet<T> {
 
-    protected List<WeightedRandomEntry<T>> elements = new ArrayList<WeightedRandomEntry<T>>();
+    protected List<WeightedRandomEntry<T>> elements = new ArrayList<>();
 
     protected int totalWeight;
 
@@ -55,7 +55,7 @@ public class WeightedRandomSet<T> {
      * @return itself
      */
     public WeightedRandomSet<T> add(T item, int weight) {
-        WeightedRandomEntry<T> e = new WeightedRandomEntry<T>(item, weight);
+        WeightedRandomEntry<T> e = new WeightedRandomEntry<>(item, weight);
         int num = elements.size();
         boolean isInserted = false;
         if (num > 0) {

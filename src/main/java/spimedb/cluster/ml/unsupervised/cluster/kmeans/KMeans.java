@@ -81,12 +81,12 @@ public class KMeans extends AbstractClusterer {
 	 */
 	private List<Cluster> initKMeans(DataSet ds) {
 		final int MAX_ATTEMPT = 3;
-		List<Cluster> kmeans = new LinkedList<Cluster>();
+		List<Cluster> kmeans = new LinkedList<>();
 		
 		int ki = (ds.size() < k) ? ds.size(): k;
 		
 		// randomly pick k instances as the initial k means
-		ArrayList<String> keys = new ArrayList<String>(ds.getKeys());
+		ArrayList<String> keys = new ArrayList<>(ds.getKeys());
 		
 	    // select first cluster with a uniform distribution
 	    Collections.shuffle(keys);
@@ -122,7 +122,7 @@ public class KMeans extends AbstractClusterer {
 	    }
     	
     	if (kmeans.size() < k) {
-    		log.info("Couldn't find k centroids to initialize kMeans++.  Using " + kmeans.size() + " centroids.");
+            log.info("Couldn't find k centroids to initialize kMeans++.  Using {} centroids.", kmeans.size());
     	}
     	
 	    return kmeans;
@@ -151,7 +151,7 @@ public class KMeans extends AbstractClusterer {
 			    log.info("Post iteration {};", iteration+1);
 			    int c=0;
 			    for (Cluster cluster: kmeans)
-			        log.info("\t "+c+": "+cluster.getIterationDebugInfo());
+                    log.info("\t {}: {}", c, cluster.getIterationDebugInfo());
 			}
 
 			if (modified.isEmpty()) break;

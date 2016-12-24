@@ -60,7 +60,7 @@ public class Hierarchical {
 		return f;
 	}
 	
-	public Score bestFmeasure(String label, double labelCount, Collection<? extends Instance> group) {
+	public static Score bestFmeasure(String label, double labelCount, Collection<? extends Instance> group) {
 		Score score = new Score(), best = new Score();
 		double lcount = 0, count = 0;
 		
@@ -89,7 +89,7 @@ public class Hierarchical {
 		return best;
 	}
 	
-	public int labelCount(String label, Collection<? extends Instance> group) {
+	public static int labelCount(String label, Collection<? extends Instance> group) {
 		int count = 0;
 		
 		for (Instance i : group) {
@@ -103,7 +103,7 @@ public class Hierarchical {
 		return count;
 	}
 	
-	public int instanceCount(Collection<? extends Instance> group) {
+	public static int instanceCount(Collection<? extends Instance> group) {
 		int count = 0;
 		
 		for (Instance i : group) {

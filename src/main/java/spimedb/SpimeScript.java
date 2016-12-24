@@ -8,7 +8,6 @@ package spimedb;
 import spimedb.index.graph.SpimeGraph;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,12 +24,8 @@ public class SpimeScript extends JSScript {
         super();
         this.db = db;
 
-        js.put("db", db);
+        engine.put("db", db);
     }
-
-    final static ScriptEngineManager factory = new ScriptEngineManager();
-
-    final ScriptEngine js = factory.getEngineByName("JavaScript");
 
 
     public static void setImports(ScriptEngine js) throws Exception {
@@ -40,15 +35,15 @@ public class SpimeScript extends JSScript {
         js.eval("importPackage('java.util')");
         js.eval("importPackage('java.io')");
 
-        js.eval("importPackage('nars.core')");
-        js.eval("importPackage('nars.core.build')");
-        js.eval("importPackage('nars.io')");
-        js.eval("importPackage('nars.gui')");
+//        js.eval("importPackage('nars.core')");
+//        js.eval("importPackage('nars.core.build')");
+//        js.eval("importPackage('nars.io')");
+//        js.eval("importPackage('nars.gui')");
 
     }
 
     public Object eval(String s) throws ScriptException {
-        return js.eval(s);
+        return engine.eval(s);
     }
 
     public static void printHelp() {
@@ -90,7 +85,7 @@ public class SpimeScript extends JSScript {
             }
         }
         catch (IOException e) {
-
+            e.printStackTrace();
         }
 
         try {
@@ -102,7 +97,7 @@ public class SpimeScript extends JSScript {
     }
 
     public static void main(String[] args) throws Exception {
-        repl(new SpimeScript(new SpimeGraph()).js);
+        repl(new SpimeScript(new SpimeGraph()).engine);
     }
 
 }

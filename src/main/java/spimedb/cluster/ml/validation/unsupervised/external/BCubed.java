@@ -45,7 +45,7 @@ public class BCubed {
 	 * @param clusters is a collection of all the clusters
 	 * @return the proportion of instances with class label that are members of cluster
 	 */
-	public double recall(String label, Cluster cluster, Collection<Cluster> clusters) {
+	public static double recall(String label, Cluster cluster, Collection<Cluster> clusters) {
 		double count = 0, total = 0, recall = 0;
 		
 		// first determine how many instances have class label in this cluster
@@ -72,7 +72,7 @@ public class BCubed {
 	 * @param cluster that we are evaluating
 	 * @return the proportion of instances in cluster that have the specified label
 	 */
-	public double precision(String label, Cluster cluster) {
+	public static double precision(String label, Cluster cluster) {
 		double count = 0, precision = 0;
 		
 		for (Instance i : cluster.getMembers()) {

@@ -68,7 +68,7 @@ public class Spline2D {
     protected Vec2D[] points;
 
     @XmlElement(name = "p")
-    public List<Vec2D> pointList = new ArrayList<Vec2D>();
+    public List<Vec2D> pointList = new ArrayList<>();
 
     @XmlTransient
     public BernsteinPolynomial bernstein;

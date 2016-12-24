@@ -1,14 +1,10 @@
 package spimedb.run;
 
-import io.baratine.service.Service;
-import io.baratine.web.Get;
-import io.baratine.web.RequestWeb;
-import io.baratine.web.Web;
+import spimedb.SpimeDB;
 import spimedb.SpimeScript;
 import spimedb.index.graph.SpimeGraph;
 import spimedb.sense.ImportKML;
-import spimedb.web.AbstractWeb;
-import spimedb.web.MousePointer;
+import spimedb.web.SpacetimeWebServer;
 
 import javax.script.ScriptException;
 import java.io.File;
@@ -17,12 +13,11 @@ import java.io.IOException;
 /**
  * Created by me on 6/14/15.
  */
-@Service
-public class ClimateEditor extends AbstractWeb {
-    //InfinispanSpimeBase db = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
-    final SpimeGraph db = new SpimeGraph();
 
-    public ClimateEditor() {
+public class ClimateEditor  {
+    //InfinispanSpimeBase db = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
+
+    public ClimateEditor(SpimeDB db) {
 
         if (db.isEmpty()) {
             System.out.println("Initializing database...");
@@ -51,27 +46,22 @@ public class ClimateEditor extends AbstractWeb {
                 }
             }
 
-            db.forEach(x -> {
-                System.out.println(x);
-            });
+//            db.forEach(x -> {
+//                System.out.println(x);
+//            });
         }
 
 
-
-
-
     }
 
-    @Get("/hello")
-    public void doHello(RequestWeb request) {
-        request.ok(new MousePointer(2,2));
-    }
 
     public static void main(String[] args) throws IOException, ScriptException {
 
-        Web.include(ClimateEditor.class);
-        Web.go(args);
-//        new SpimeServer(db)
+        SpimeGraph db = new SpimeGraph();
+
+        new ClimateEditor(db);
+
+        new SpacetimeWebServer(db, 8080);
 //
 //                //.add("/proxy", new CachingProxyServer(es, cachePath))
 //                .add("/cache", resource(

@@ -35,21 +35,21 @@ public class Axis3D {
     /**
      * Creates a new x-Axis3D object from the world origin.
      */
-    public static final Axis3D xAxis() {
+    public static Axis3D xAxis() {
         return new Axis3D(Vec3D.X_AXIS);
     }
 
     /**
      * Creates a new y-Axis3D object from the world origin.
      */
-    public static final Axis3D yAxis() {
+    public static Axis3D yAxis() {
         return new Axis3D(Vec3D.Y_AXIS);
     }
 
     /**
      * Creates a new z-Axis3D object from the world origin.
      */
-    public static final Axis3D zAxis() {
+    public static Axis3D zAxis() {
         return new Axis3D(Vec3D.Z_AXIS);
     }
 

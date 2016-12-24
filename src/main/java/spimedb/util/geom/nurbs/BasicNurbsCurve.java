@@ -19,10 +19,10 @@
  */
 package spimedb.util.geom.nurbs;
 
-import spimedb.util.geom.XYZ;
 import spimedb.util.geom.Polygon2D;
 import spimedb.util.geom.Vec3D;
 import spimedb.util.geom.Vec4D;
+import spimedb.util.geom.XYZ;
 
 /**
  * A Basic implementation of a NurbsCurve.
@@ -32,8 +32,8 @@ import spimedb.util.geom.Vec4D;
  */
 public class BasicNurbsCurve implements NurbsCurve, Cloneable {
 
-    private Vec4D[] cpoly;
-    private KnotVector uKnots;
+    private final Vec4D[] cpoly;
+    private final KnotVector uKnots;
 
     /**
      * Create a Nurbs Curve from the given Controlpoints, Knots and degree.<br>
@@ -76,9 +76,7 @@ public class BasicNurbsCurve implements NurbsCurve, Cloneable {
 
         // k=0 => control points
         int r = r2 - r1;
-        for (int i = 0; i <= r; i++) {
-            result[0][i] = cpoly[i];
-        }
+        System.arraycopy(cpoly, 0, result[0], 0, r + 1);
 
         // k=1 => 1st derivative, k=2 => 2nd derivative, etc...
         for (int k = 1; k <= d; k++) {

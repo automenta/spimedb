@@ -38,8 +38,8 @@ public class Spline {
 
     public Spline (boolean periodic) {
         _periodic = periodic;
-        _points = new ArrayList<Vector>();
-        _times = new ArrayList<Double>();
+        _points = new ArrayList<>();
+        _times = new ArrayList<>();
         _n = 0;
     }
 

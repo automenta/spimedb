@@ -46,7 +46,7 @@ public class Plane extends Vec3D implements Shape3D {
     public enum Classifier {
         FRONT,
         BACK,
-        ON_PLANE;
+        ON_PLANE
     }
 
     public static final Plane XY = new Plane(new Vec3D(), Vec3D.Z_AXIS);
@@ -222,7 +222,7 @@ public class Plane extends Vec3D implements Shape3D {
 //    }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("origin: ").append(super.toString()).append(" norm: ")
                 .append(normal.toString());
         return sb.toString();

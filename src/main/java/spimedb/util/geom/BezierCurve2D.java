@@ -31,10 +31,10 @@ public class BezierCurve2D {
         return new Vec2D(x, y).normalize();
     }
 
-    private List<Vec2D> points;
+    private final List<Vec2D> points;
 
     public BezierCurve2D() {
-        points = new ArrayList<Vec2D>();
+        points = new ArrayList<>();
     }
 
     public BezierCurve2D(List<Vec2D> points) {

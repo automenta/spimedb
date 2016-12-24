@@ -52,7 +52,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
 
     private DelaunayTriangle mostRecent = null;
 
-    private UndirectedGraph<DelaunayTriangle> triGraph;
+    private final UndirectedGraph<DelaunayTriangle> triGraph;
 
     /**
      * All sites must fall within the initial triangle.
@@ -61,7 +61,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
      *            the initial triangle
      */
     public DelaunayTriangulation(DelaunayTriangle triangle) {
-        triGraph = new UndirectedGraph<DelaunayTriangle>();
+        triGraph = new UndirectedGraph<>();
         triGraph.add(triangle);
         mostRecent = triangle;
     }
@@ -113,14 +113,14 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
      */
     private Set<DelaunayTriangle> getCavity(DelaunayVertex site,
             DelaunayTriangle triangle) {
-        Set<DelaunayTriangle> encroached = new HashSet<DelaunayTriangle>();
-        Queue<DelaunayTriangle> toBeChecked = new LinkedList<DelaunayTriangle>();
-        Set<DelaunayTriangle> marked = new HashSet<DelaunayTriangle>();
+        Set<DelaunayTriangle> encroached = new HashSet<>();
+        Queue<DelaunayTriangle> toBeChecked = new LinkedList<>();
+        Set<DelaunayTriangle> marked = new HashSet<>();
         toBeChecked.add(triangle);
         marked.add(triangle);
         while (!toBeChecked.isEmpty()) {
             triangle = toBeChecked.remove();
-            if (site.vsCircumcircle(triangle.toArray(new DelaunayVertex[0])) == 1) {
+            if (site.vsCircumcircle(triangle.toArray(new DelaunayVertex[triangle.size()])) == 1) {
                 // Site outside triangle => triangle not in cavity
                 continue;
             }
@@ -157,7 +157,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
         }
 
         // Try a directed walk (this works fine in 2D, but can fail in 3D)
-        Set<DelaunayTriangle> visited = new HashSet<DelaunayTriangle>();
+        Set<DelaunayTriangle> visited = new HashSet<>();
         while (triangle != null) {
             if (visited.contains(triangle)) { // This should never happen
                 System.out.println("Warning: Caught in a locate loop");
@@ -166,7 +166,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
             visited.add(triangle);
             // Corner opposite point
             DelaunayVertex corner = point.isOutside(triangle
-                    .toArray(new DelaunayVertex[0]));
+                    .toArray(new DelaunayVertex[triangle.size()]));
             if (corner == null) {
                 return triangle;
             }
@@ -175,7 +175,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
         // No luck; try brute force
         System.out.println("Warning: Checking all triangles for " + point);
         for (DelaunayTriangle tri : this) {
-            if (point.isOutside(tri.toArray(new DelaunayVertex[0])) == null) {
+            if (point.isOutside(tri.toArray(new DelaunayVertex[tri.size()])) == null) {
                 return tri;
             }
         }
@@ -241,7 +241,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
         if (!triangle.contains(site)) {
             throw new IllegalArgumentException("Site not in triangle");
         }
-        List<DelaunayTriangle> list = new ArrayList<DelaunayTriangle>();
+        List<DelaunayTriangle> list = new ArrayList<>();
         DelaunayTriangle start = triangle;
         DelaunayVertex guide = triangle.getVertexButNot(site); // Affects cw or
         // ccw
@@ -274,8 +274,8 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
      */
     private DelaunayTriangle update(DelaunayVertex site,
             Set<DelaunayTriangle> cavity) {
-        Set<Set<DelaunayVertex>> boundary = new HashSet<Set<DelaunayVertex>>();
-        Set<DelaunayTriangle> theTriangles = new HashSet<DelaunayTriangle>();
+        Set<Set<DelaunayVertex>> boundary = new HashSet<>();
+        Set<DelaunayTriangle> theTriangles = new HashSet<>();
 
         // Find boundary facets and adjacent triangles
         for (DelaunayTriangle triangle : cavity) {
@@ -297,7 +297,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
         }
 
         // Build each new triangle and add it to the triangulation
-        Set<DelaunayTriangle> newTriangles = new HashSet<DelaunayTriangle>();
+        Set<DelaunayTriangle> newTriangles = new HashSet<>();
         for (Set<DelaunayVertex> vertices : boundary) {
             vertices.add(site);
             DelaunayTriangle tri = new DelaunayTriangle(vertices);

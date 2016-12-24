@@ -53,7 +53,7 @@ public class SemMFDistance extends DistanceFunction<SemanticFeature> {
 		this.taxonomy = taxonomy;
 	}
 	
-	private double distance(Concept x, Concept y) {
+	private static double distance(Concept x, Concept y) {
 		int xlvl = x.getDepth();
 		int ylvl = y.getDepth();
 		return 0.5 / Math.pow(2, ylvl) -  0.5 / Math.pow(2, xlvl);

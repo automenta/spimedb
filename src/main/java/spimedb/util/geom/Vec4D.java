@@ -209,9 +209,7 @@ public class Vec4D implements ReadonlyVec4D, Cloneable {
         try {
             ReadonlyVec4D vv = (ReadonlyVec4D) v;
             return (x == vv.x() && y == vv.y() && z == vv.z() && w == vv.w());
-        } catch (NullPointerException e) {
-            return false;
-        } catch (ClassCastException e) {
+        } catch (NullPointerException | ClassCastException e) {
             return false;
         }
     }
@@ -259,10 +257,7 @@ public class Vec4D implements ReadonlyVec4D, Cloneable {
             if (Float.isNaN(diff)) {
                 return false;
             }
-            if ((diff < 0 ? -diff : diff) > tolerance) {
-                return false;
-            }
-            return true;
+            return !((diff < 0 ? -diff : diff) > tolerance);
         } catch (NullPointerException e) {
             return false;
         }
@@ -671,7 +666,7 @@ public class Vec4D implements ReadonlyVec4D, Cloneable {
     }
 
     public String toString() {
-        return "[x=" + x + ", y=" + y + ", z=" + z + ", w=" + w + "]";
+        return "[x=" + x + ", y=" + y + ", z=" + z + ", w=" + w + ']';
     }
 
     public final Vec4D translate(float xx, float yy, float zz) {

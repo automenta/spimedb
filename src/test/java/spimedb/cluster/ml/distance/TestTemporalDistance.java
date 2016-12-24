@@ -23,9 +23,10 @@
  * SOFTWARE.
  */
 package spimedb.cluster.ml.distance;
+
+import org.junit.Test;
 import spimedb.cluster.ml.feature.temporal.TemporalFeature;
 import spimedb.cluster.ml.feature.temporal.distance.TemporalDistance;
-import org.junit.Test;
 
 import java.util.*;
 

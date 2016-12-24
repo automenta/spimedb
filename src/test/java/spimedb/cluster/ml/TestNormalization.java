@@ -24,8 +24,8 @@
  */
 package spimedb.cluster.ml;
 
-import spimedb.cluster.ml.feature.numeric.NumericVectorFeature;
 import org.junit.Test;
+import spimedb.cluster.ml.feature.numeric.NumericVectorFeature;
 
 public class TestNormalization {
 

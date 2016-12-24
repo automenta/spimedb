@@ -19,10 +19,10 @@
  */
 package spimedb.util.geom.nurbs;
 
-import spimedb.util.geom.XYZ;
 import spimedb.util.geom.Polygon2D;
 import spimedb.util.geom.Vec3D;
 import spimedb.util.geom.Vec4D;
+import spimedb.util.geom.XYZ;
 
 /**
  * Interface for Nurbs Curves
@@ -46,11 +46,11 @@ public interface NurbsCurve {
      *            - to control point (n for all control points)<br />
      * @return Vec4D[k][i] kth derivative, ith control point
      */
-    public Vec4D[][] curveDerivCpts(int d, int r1, int r2);
+    Vec4D[][] curveDerivCpts(int d, int r1, int r2);
 
-    public abstract XYZ[] derivativesOnCurve(float u, int d);
+    XYZ[] derivativesOnCurve(float u, int d);
 
-    public abstract XYZ[] derivativesOnCurve(float u, int d, XYZ[] ders);
+    XYZ[] derivativesOnCurve(float u, int d, XYZ[] ders);
 
     /**
      * Get the ControlPoints of this curve

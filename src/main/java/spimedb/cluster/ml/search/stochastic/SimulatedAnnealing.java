@@ -143,7 +143,7 @@ public class SimulatedAnnealing {
 		return solution;
 	}
 	
-	private void printSolution(String msg, Solution sln, double s) {
+	private static void printSolution(String msg, Solution sln, double s) {
 		System.out.println("--------------------");
 		System.out.println(msg);
 		System.out.println("Score: " + s);

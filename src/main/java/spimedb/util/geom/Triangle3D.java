@@ -282,7 +282,7 @@ public class Triangle3D implements Shape3D {
         return Triangle3D.isClockwiseInXY(a, b, c);
     }
 
-    private boolean isSameClockDir(Vec3D a, Vec3D b, roVec3D p, Vec3D norm) {
+    private static boolean isSameClockDir(Vec3D a, Vec3D b, roVec3D p, Vec3D norm) {
         float bax = b.x - a.x;
         float bay = b.y - a.y;
         float baz = b.z - a.z;
@@ -325,6 +325,6 @@ public class Triangle3D implements Shape3D {
     }
 
     public String toString() {
-        return "Triangle3D: " + a + "," + b + "," + c;
+        return "Triangle3D: " + a + ',' + b + ',' + c;
     }
 }

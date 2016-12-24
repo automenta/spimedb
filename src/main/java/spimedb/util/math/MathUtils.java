@@ -125,7 +125,7 @@ public final class MathUtils {
      * @param x
      * @return power^2 value
      */
-    public static final int ceilPowerOf2(int x) {
+    public static int ceilPowerOf2(int x) {
         int pow2 = 1;
         while (pow2 < x) {
             pow2 <<= 1;
@@ -133,15 +133,15 @@ public final class MathUtils {
         return pow2;
     }
 
-    public static final double clip(double a, double min, double max) {
+    public static double clip(double a, double min, double max) {
         return a < min ? min : (a > max ? max : a);
     }
 
-    public static final float clip(float a, float min, float max) {
+    public static float clip(float a, float min, float max) {
         return a < min ? min : (a > max ? max : a);
     }
 
-    public static final int clip(int a, int min, int max) {
+    public static int clip(int a, int min, int max) {
         return a < min ? min : (a > max ? max : a);
     }
 
@@ -161,7 +161,7 @@ public final class MathUtils {
      * @return clipped value
      * @since 0012
      */
-    public static final float clipNormalized(float a) {
+    public static float clipNormalized(float a) {
         if (a < 0) {
             return 0;
         } else if (a > 1) {
@@ -170,7 +170,7 @@ public final class MathUtils {
         return a;
     }
 
-    public static final double cos(final double theta) {
+    public static double cos(final double theta) {
         return sin(theta + HALF_PI);
     }
 
@@ -183,15 +183,15 @@ public final class MathUtils {
      *            angle in radians.
      * @return cosine of theta.
      */
-    public static final float cos(final float theta) {
+    public static float cos(final float theta) {
         return sin(theta + HALF_PI);
     }
 
-    public static final double degrees(double radians) {
+    public static double degrees(double radians) {
         return radians * RAD2DEG;
     }
 
-    public static final float degrees(float radians) {
+    public static float degrees(float radians) {
         return radians * RAD2DEG;
     }
 
@@ -207,7 +207,7 @@ public final class MathUtils {
      *            angle in -PI/2 .. +PI/2 interval
      * @return cosine
      */
-    public static final double fastCos(final double x) {
+    public static double fastCos(final double x) {
         return fastSin(x + ((x > HALF_PI) ? -THREE_HALVES_PI : HALF_PI));
     }
 
@@ -215,7 +215,7 @@ public final class MathUtils {
      * @deprecated
      */
     @Deprecated
-    public static final float fastInverseSqrt(float x) {
+    public static float fastInverseSqrt(float x) {
         float half = 0.5F * x;
         int i = Float.floatToIntBits(x);
         i = 0x5f375a86 - (i >> 1);
@@ -234,7 +234,7 @@ public final class MathUtils {
      * @return a^b
      * 
      */
-    public static final float fastPow(float a, float b) {
+    public static float fastPow(float a, float b) {
         float x = Float.floatToRawIntBits(a);
         x *= INV_SHIFT23;
         x -= 127;
@@ -252,7 +252,7 @@ public final class MathUtils {
      *            angle in -PI/2 .. +PI/2 interval
      * @return sine
      */
-    public static final double fastSin(double x) {
+    public static double fastSin(double x) {
         // float B = 4/pi;
         // float C = -4/(pi*pi);
         // float y = B * x + C * x * abs(x);
@@ -261,15 +261,15 @@ public final class MathUtils {
         return SIN_P * (x * Math.abs(x) - x) + x;
     }
 
-    public static final boolean flipCoin() {
+    public static boolean flipCoin() {
         return RND.nextBoolean();
     }
 
-    public static final boolean flipCoin(Random rnd) {
+    public static boolean flipCoin(Random rnd) {
         return rnd.nextBoolean();
     }
 
-    public static final long floor(double x) {
+    public static long floor(double x) {
         long y = (long) x;
         if (x < 0 && x != y) {
             y--;
@@ -285,7 +285,7 @@ public final class MathUtils {
      * @return floored value as integer
      * @since 0012
      */
-    public static final int floor(float x) {
+    public static int floor(float x) {
         int y = (int) x;
         if (x < 0 && x != y) {
             y--;
@@ -299,7 +299,7 @@ public final class MathUtils {
      * @param x
      * @return power^2 value
      */
-    public static final int floorPowerOf2(int x) {
+    public static int floorPowerOf2(int x) {
         return (int) Math.pow(2, (int) (Math.log(x) / LOG2));
     }
 
@@ -310,7 +310,7 @@ public final class MathUtils {
      * @param q
      * @return gcd
      */
-    public static final int gcd(int p, int q) {
+    public static int gcd(int p, int q) {
         if (q == 0) {
             return p;
         }
@@ -349,7 +349,7 @@ public final class MathUtils {
         return (float) (h * Math.exp(1.0f - h));
     }
 
-    public static final int lcm(int p, int q) {
+    public static int lcm(int p, int q) {
         return Math.abs(p * q) / gcd(p, q);
     }
 
@@ -371,15 +371,15 @@ public final class MathUtils {
         return minOut + (maxOut - minOut) * (x - minIn) / (maxIn - minIn);
     }
 
-    public static final double max(double a, double b) {
+    public static double max(double a, double b) {
         return a > b ? a : b;
     }
 
-    public static final double max(double a, double b, double c) {
+    public static double max(double a, double b, double c) {
         return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
     }
 
-    public static final double max(double[] values) {
+    public static double max(double[] values) {
         return max(values[0], values[1], values[2]);
     }
 
@@ -391,15 +391,15 @@ public final class MathUtils {
      * @param c
      * @return max val
      */
-    public static final float max(float a, float b, float c) {
+    public static float max(float a, float b, float c) {
         return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
     }
 
-    public static final float max(float[] values) {
+    public static float max(float[] values) {
         return max(values[0], values[1], values[2]);
     }
 
-    public static final int max(int a, int b) {
+    public static int max(int a, int b) {
         return a > b ? a : b;
     }
 
@@ -411,23 +411,23 @@ public final class MathUtils {
      * @param c
      * @return max val
      */
-    public static final int max(int a, int b, int c) {
+    public static int max(int a, int b, int c) {
         return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
     }
 
-    public static final int max(int[] values) {
+    public static int max(int[] values) {
         return max(values[0], values[1], values[2]);
     }
 
-    public static final double min(double a, double b) {
+    public static double min(double a, double b) {
         return a < b ? a : b;
     }
 
-    public static final double min(double a, double b, double c) {
+    public static double min(double a, double b, double c) {
         return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
     }
 
-    public static final float min(float a, float b) {
+    public static float min(float a, float b) {
         return a < b ? a : b;
     }
 
@@ -439,11 +439,11 @@ public final class MathUtils {
      * @param c
      * @return min val
      */
-    public static final float min(float a, float b, float c) {
+    public static float min(float a, float b, float c) {
         return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
     }
 
-    public static final int min(int a, int b) {
+    public static int min(int a, int b) {
         return a < b ? a : b;
     }
 
@@ -455,7 +455,7 @@ public final class MathUtils {
      * @param c
      * @return min val
      */
-    public static final int min(int a, int b, int c) {
+    public static int min(int a, int b, int c) {
         return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
     }
 
@@ -464,7 +464,7 @@ public final class MathUtils {
      * 
      * @return random float
      */
-    public static final float normalizedRandom() {
+    public static float normalizedRandom() {
         return RND.nextFloat() * 2 - 1;
     }
 
@@ -474,7 +474,7 @@ public final class MathUtils {
      * 
      * @return random float
      */
-    public static final float normalizedRandom(Random rnd) {
+    public static float normalizedRandom(Random rnd) {
         return rnd.nextFloat() * 2 - 1;
     }
 
@@ -482,67 +482,67 @@ public final class MathUtils {
         return degrees * DEG2RAD;
     }
 
-    public static final float radians(float degrees) {
+    public static float radians(float degrees) {
         return degrees * DEG2RAD;
     }
 
-    public static final float random(float max) {
+    public static float random(float max) {
         return RND.nextFloat() * max;
     }
 
-    public static final float random(float min, float max) {
+    public static float random(float min, float max) {
         return RND.nextFloat() * (max - min) + min;
     }
 
-    public static final int random(int max) {
+    public static int random(int max) {
         return (int) (RND.nextFloat() * max);
     }
 
-    public static final int random(int min, int max) {
+    public static int random(int min, int max) {
         return (int) (RND.nextFloat() * (max - min)) + min;
     }
 
-    public static final double random(Random rnd, double max) {
+    public static double random(Random rnd, double max) {
         return rnd.nextDouble() * max;
     }
 
-    public static final double random(Random rnd, double min, double max) {
+    public static double random(Random rnd, double min, double max) {
         return rnd.nextDouble() * (max - min) + min;
     }
 
-    public static final float random(Random rnd, float max) {
+    public static float random(Random rnd, float max) {
         return rnd.nextFloat() * max;
     }
 
-    public static final float random(Random rnd, float min, float max) {
+    public static float random(Random rnd, float min, float max) {
         return rnd.nextFloat() * (max - min) + min;
     }
 
-    public static final int random(Random rnd, int max) {
-        return (int) (rnd.nextDouble() * max);
+    public static int random(Random rnd, int max) {
+        return rnd.nextInt((int) max);
     }
 
-    public static final int random(Random rnd, int min, int max) {
-        return (int) (rnd.nextDouble() * (max - min)) + min;
+    public static int random(Random rnd, int min, int max) {
+        return rnd.nextInt((int) (max - min)) + min;
     }
 
-    public static final boolean randomChance(double chance) {
+    public static boolean randomChance(double chance) {
         return RND.nextDouble() < chance;
     }
 
-    public static final boolean randomChance(float chance) {
+    public static boolean randomChance(float chance) {
         return RND.nextFloat() < chance;
     }
 
-    public static final boolean randomChance(Random rnd, double chance) {
+    public static boolean randomChance(Random rnd, double chance) {
         return rnd.nextDouble() < chance;
     }
 
-    public static final boolean randomChance(Random rnd, float chance) {
+    public static boolean randomChance(Random rnd, float chance) {
         return rnd.nextFloat() < chance;
     }
 
-    public static final double reduceAngle(double theta) {
+    public static double reduceAngle(double theta) {
         theta %= TWO_PI;
         if (Math.abs(theta) > PI) {
             theta = theta - TWO_PI;
@@ -564,7 +564,7 @@ public final class MathUtils {
      * @see #sin(float)
      * @see #cos(float)
      */
-    public static final float reduceAngle(float theta) {
+    public static float reduceAngle(float theta) {
         theta %= TWO_PI;
         if (Math.abs(theta) > PI) {
             theta = theta - TWO_PI;
@@ -582,7 +582,7 @@ public final class MathUtils {
      * @param prec
      * @return rounded value
      */
-    public static final double roundTo(double val, double prec) {
+    public static double roundTo(double val, double prec) {
         return floor(val / prec + 0.5) * prec;
     }
 
@@ -593,7 +593,7 @@ public final class MathUtils {
      * @param prec
      * @return rounded value
      */
-    public static final float roundTo(float val, float prec) {
+    public static float roundTo(float val, float prec) {
         return floor(val / prec + 0.5f) * prec;
     }
 
@@ -604,7 +604,7 @@ public final class MathUtils {
      * @param prec
      * @return rounded value
      */
-    public static final int roundTo(int val, int prec) {
+    public static int roundTo(int val, int prec) {
         return floor((float) val / prec + 0.5f) * prec;
     }
 
@@ -631,7 +631,7 @@ public final class MathUtils {
         return x < 0 ? -1 : (x > 0 ? 1 : 0);
     }
 
-    public static final double sin(double theta) {
+    public static double sin(double theta) {
         theta = reduceAngle(theta);
         if (Math.abs(theta) <= QUARTER_PI) {
             return (float) fastSin(theta);
@@ -648,7 +648,7 @@ public final class MathUtils {
      *            angle in radians.
      * @return sine of theta.
      */
-    public static final float sin(float theta) {
+    public static float sin(float theta) {
         theta = reduceAngle(theta);
         if (Math.abs(theta) <= QUARTER_PI) {
             return (float) fastSin(theta);
@@ -660,7 +660,7 @@ public final class MathUtils {
      * @deprecated
      */
     @Deprecated
-    public static final float sqrt(float x) {
+    public static float sqrt(float x) {
         x = fastInverseSqrt(x);
         if (x > 0) {
             return 1.0f / x;

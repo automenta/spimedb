@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class UndirectedGraph<N> {
 
-    protected Map<N, Set<N>> nodeLinks = new HashMap<N, Set<N>>();
+    protected Map<N, Set<N>> nodeLinks = new HashMap<>();
     protected Set<N> nodeIDs = Collections.unmodifiableSet(nodeLinks.keySet());
 
     /**
@@ -48,7 +48,7 @@ public class UndirectedGraph<N> {
         if (nodeLinks.containsKey(node)) {
             return;
         }
-        nodeLinks.put(node, new ArraySet<N>());
+        nodeLinks.put(node, new ArraySet<>());
     }
 
     /**

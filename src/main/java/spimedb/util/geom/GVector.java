@@ -55,9 +55,7 @@ public class GVector implements java.io.Serializable, Cloneable {
     public GVector(double vector[], int length) {
         this.length = length;
         values = new double[length];
-        for (int i = 0; i < length; i++) {
-            values[i] = vector[i];
-        }
+        System.arraycopy(vector, 0, values, 0, length);
     }
 
     /**
@@ -71,9 +69,7 @@ public class GVector implements java.io.Serializable, Cloneable {
     public GVector(double[] vector) {
         length = vector.length;
         values = new double[vector.length];
-        for (int i = 0; i < length; i++) {
-            values[i] = vector[i];
-        }
+        System.arraycopy(vector, 0, values, 0, length);
     }
 
     /**
@@ -86,9 +82,7 @@ public class GVector implements java.io.Serializable, Cloneable {
     public GVector(GVector vector) {
         values = new double[vector.length];
         length = vector.length;
-        for (int i = 0; i < length; i++) {
-            values[i] = vector.values[i];
-        }
+        System.arraycopy(vector.values, 0, values, 0, length);
     }
 
     /**
@@ -296,9 +290,7 @@ public class GVector implements java.io.Serializable, Cloneable {
             throw new InternalError();
         }
         v.values = new double[length];
-        for (int i = 0; i < length; i++) {
-            v.values[i] = values[i];
-        }
+        System.arraycopy(values, 0, v.values, 0, length);
         return v;
     }
 
@@ -365,9 +357,7 @@ public class GVector implements java.io.Serializable, Cloneable {
                 }
             }
             return true;
-        } catch (ClassCastException e) {
-            return false;
-        } catch (NullPointerException e) {
+        } catch (ClassCastException | NullPointerException e) {
             return false;
         }
 
@@ -802,9 +792,7 @@ public class GVector implements java.io.Serializable, Cloneable {
         } else {
             max = length;
         }
-        for (int i = 0; i < max; i++) {
-            tmp[i] = values[i];
-        }
+        System.arraycopy(values, 0, tmp, 0, max);
         this.length = length;
         values = tmp;
         return this;
@@ -862,7 +850,7 @@ public class GVector implements java.io.Serializable, Cloneable {
     public String toString() {
         StringBuilder buffer = new StringBuilder(length * 8);
         for (int i = 0; i < length; i++) {
-            buffer.append(values[i]).append(" ");
+            buffer.append(values[i]).append(' ');
         }
         return buffer.toString();
     }

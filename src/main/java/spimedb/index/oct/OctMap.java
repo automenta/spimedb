@@ -99,7 +99,7 @@ public class OctMap<K,V extends IdBB> implements Map<K,V> {
         V removed = map.remove(key);
         if (removed!=null) {
             if (!box.remove(removed)) {
-                throw new RuntimeException("Octree missing value for key=" + key + "=" + removed);
+                throw new RuntimeException("Octree missing value for key=" + key + '=' + removed);
             }
         }
         return removed;

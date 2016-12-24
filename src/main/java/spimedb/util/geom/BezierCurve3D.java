@@ -32,7 +32,7 @@ public class BezierCurve3D {
         return new Vec3D(x, y, z).normalize();
     }
 
-    private List<Vec3D> points;
+    private final List<Vec3D> points;
 
     public BezierCurve3D() {
         points = new ArrayList();

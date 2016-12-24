@@ -29,10 +29,7 @@ package spimedb.util.datatypes;
 
 import spimedb.util.math.MathUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Random;
+import java.util.*;
 
 public class GenericSet<T> implements Iterable<T> {
 
@@ -43,15 +40,13 @@ public class GenericSet<T> implements Iterable<T> {
     protected Random random = new Random();
 
     public GenericSet(Collection<T> items) {
-        this.items = new ArrayList<T>(items);
+        this.items = new ArrayList<>(items);
         pickRandom();
     }
 
-    public GenericSet(T... obj) {
-        items = new ArrayList<T>(obj.length);
-        for (int i = 0; i < obj.length; i++) {
-            items.add(obj[i]);
-        }
+    public GenericSet(T[] obj) {
+        items = new ArrayList<>(obj.length);
+        Collections.addAll(items, obj);
         if (items.size() > 0) {
             pickRandom();
         }
@@ -78,7 +73,7 @@ public class GenericSet<T> implements Iterable<T> {
     }
 
     public GenericSet<T> copy() {
-        GenericSet<T> set = new GenericSet<T>(items);
+        GenericSet<T> set = new GenericSet<>(items);
         set.current = current;
         set.currID = currID;
         set.random = random;

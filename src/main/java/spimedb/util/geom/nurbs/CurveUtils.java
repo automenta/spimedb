@@ -18,7 +18,7 @@ public final class CurveUtils {
             x--;
         }
         return bin;
-    };
+    }
 
     public static NurbsCurve connectCurves(NurbsCurve curve1, NurbsCurve curve2) {
         return connectCurves(new NurbsCurve[] {
@@ -31,11 +31,11 @@ public final class CurveUtils {
             throw new IllegalArgumentException("Must be at least 2 curves");
         }
         int degree = curves[0].getDegree();
-        LinkedList<Float> knots = new LinkedList<Float>();
+        LinkedList<Float> knots = new LinkedList<>();
         for (int i = 0; i <= degree; i++) {
             knots.add(0f);
         }
-        LinkedList<Vec4D> cps = new LinkedList<Vec4D>();
+        LinkedList<Vec4D> cps = new LinkedList<>();
         cps.add(curves[0].getControlPoints()[0]);
         for (int i = 0; i < curves.length; i++) {
             float[] u = curves[i].getKnots();
@@ -218,9 +218,7 @@ public final class CurveUtils {
         }
         int nh = mh - ph - 1;
         float[] uNew = new float[mh + 1];
-        for (int i = 0; i < uNew.length; i++) {
-            uNew[i] = uh[i];
-        }
+        System.arraycopy(uh, 0, uNew, 0, uNew.length);
         Vec4D[] cpNew = new Vec4D[nh + 1];
         for (int i = 0; i < cpNew.length; i++) {
             cpNew[i] = new Vec4D(cph[i]);
@@ -231,7 +229,7 @@ public final class CurveUtils {
     private CurveUtils() {
     }
 
-    public NurbsCurve equalizeConnectCurves(NurbsCurve[] curves) {
+    public static NurbsCurve equalizeConnectCurves(NurbsCurve[] curves) {
         // TODO equalize degrees and movw curves so that end of curves[i-1] is
         // the same as start of curves[i];
         return connectCurves(curves);

@@ -74,7 +74,7 @@ public class TemporalDistance extends DistanceFunction<TemporalFeature> {
 		return normDist;
 	}
 	
-	private double durationInMS(Date start, Date end) {
+	private static double durationInMS(Date start, Date end) {
 		double duration = end.getTime() - start.getTime();
 		// handle edge case so single points are not zero
 		return (duration == 0 ? MS_PER_DAY : duration); 

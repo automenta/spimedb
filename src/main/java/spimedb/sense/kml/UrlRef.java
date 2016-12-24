@@ -88,7 +88,9 @@ import java.io.*;
 import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -127,7 +129,7 @@ import java.util.zip.ZipInputStream;
  *
  * @author Jason Mathews
  */
-public final class UrlRef implements java.io.Serializable {
+public final class UrlRef implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(UrlRef.class);
 
@@ -153,6 +155,7 @@ public final class UrlRef implements java.io.Serializable {
      * either.
      */
     private static final Pattern absUrlPattern = Pattern.compile("^[a-zA-Z]+:/");
+    private static final Pattern Percent20 = Pattern.compile("%20", Pattern.LITERAL);
 
     private static SSLSocketFactory sslFactory;
 
@@ -281,11 +284,7 @@ public final class UrlRef implements java.io.Serializable {
             httpConn.setRequestProperty("User-Agent", USER_AGENT);
             if (httpConn instanceof HttpsURLConnection) {
                 HttpsURLConnection conn1 = (HttpsURLConnection) httpConn;
-                conn1.setHostnameVerifier(new HostnameVerifier() {
-                    public boolean verify(String hostname, SSLSession session) {
-                        return true;
-                    }
-                });
+                conn1.setHostnameVerifier((hostname, session) -> true);
                 setDefaultSSLSocketFactory(conn1);
             }
         }
@@ -380,7 +379,7 @@ public final class UrlRef implements java.io.Serializable {
         }
         String newVal = buf.toString();
         if (log.isDebugEnabled() && newVal.length() != href.length()) {
-            log.debug("Escaped illegal characters in URL: " + href);
+            log.debug("Escaped illegal characters in URL: {}", href);
         }
         return newVal;
     }
@@ -2297,12 +2296,10 @@ public final class UrlRef implements java.io.Serializable {
                 }
                 };
 
-                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                sc.init(null, trustAllCerts, new SecureRandom());
                 UrlRef.sslFactory = sc.getSocketFactory();
                 log.trace("XXX: initialize SSLSocketFactory");
-            } catch (NoSuchAlgorithmException e) {
-                log.debug("", e);
-            } catch (KeyManagementException e) {
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 log.debug("", e);
             }
         }
@@ -2464,7 +2461,7 @@ public final class UrlRef implements java.io.Serializable {
         // so need to convert back to spaces to match exactly how it is stored in KMZ file
         final boolean isEscaped = kmzPath.contains("%20");
         if (isEscaped) {
-            kmzPath = kmzPath.replace("%20", " "); // unescape all escaped whitespace chars
+            kmzPath = Percent20.matcher(kmzPath).replaceAll(Matcher.quoteReplacement(" ")); // unescape all escaped whitespace chars
         }
         URLConnection conn = getConnection(url, proxy);
         ZipInputStream zis = new ZipInputStream(conn.getInputStream());
@@ -2474,7 +2471,7 @@ public final class UrlRef implements java.io.Serializable {
             while ((entry = zis.getNextEntry()) != null) {
                 String name = entry.getName();
                 if (isEscaped) {
-                    name = name.replace("%20", " "); // unescape all escaped whitespace chars
+                    name = Percent20.matcher(name).replaceAll(Matcher.quoteReplacement(" ")); // unescape all escaped whitespace chars
                 }				// find matching KML file in archive
                 if (kmzPath.equals(name)) {
                     closeOnExit = false;
@@ -2580,7 +2577,7 @@ public final class UrlRef implements java.io.Serializable {
                 if (ind > 0) {
                     char ch = s.charAt(--ind);
                     if (ch == '?' || ch == '&') {
-                        s = s.substring(0, ind) + "/" + s.substring(ind + 6);
+                        s = s.substring(0, ind) + '/' + s.substring(ind + 6);
                     }
                 }
             }

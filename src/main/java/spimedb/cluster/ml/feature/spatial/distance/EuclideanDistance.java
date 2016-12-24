@@ -53,7 +53,7 @@ public class EuclideanDistance extends DistanceFunction<GeoSpatialFeature> {
 		return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2)) * normConst;
 	}
 	
-	public double distanceInCartesianPlane(GeoSpatialFeature x, GeoSpatialFeature y) {
+	public static double distanceInCartesianPlane(GeoSpatialFeature x, GeoSpatialFeature y) {
 		double lat1 = Math.toRadians(x.getLatitude());
 		double lat2 = Math.toRadians(y.getLatitude());
 		double lon1 = Math.toRadians(x.getLongitude());

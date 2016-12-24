@@ -22,7 +22,7 @@ public interface SpimeDB extends Iterable<NObject> {
 
     Iterator<NObject> get(double lat, double lon, double radMeters, int maxResults);
 
-    public enum Scope {
+    enum Scope {
         Private, Trusted, Public, Anonymous, Advertise
     }
 

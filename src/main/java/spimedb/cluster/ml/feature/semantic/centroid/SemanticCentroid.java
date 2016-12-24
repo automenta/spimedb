@@ -47,7 +47,7 @@ public class SemanticCentroid implements Centroid<SemanticFeature> {
 	private static final int MAX_ENTITIES_PER_FEATURE = 3;
 	
 	protected final FeatureFrequencyTable freqTable = new FeatureFrequencyTable();
-	protected final HashMap<String, FeatureFrequencyTable> entityFreqTable = new HashMap<String, FeatureFrequencyTable>();
+	protected final HashMap<String, FeatureFrequencyTable> entityFreqTable = new HashMap<>();
 	
 	@Override
 	public void add(SemanticFeature feature) {
@@ -73,7 +73,7 @@ public class SemanticCentroid implements Centroid<SemanticFeature> {
 
 	@Override
 	public Collection<SemanticFeature> getAggregatableCentroid () {
-        Collection<SemanticFeature> rawCounts = new LinkedList<SemanticFeature>();
+        Collection<SemanticFeature> rawCounts = new LinkedList<>();
         
         Collection<FeatureFrequency> freqs = freqTable.getAll();
         for (FeatureFrequency freq : freqs) {
@@ -88,7 +88,7 @@ public class SemanticCentroid implements Centroid<SemanticFeature> {
 
     @Override
 	public SemanticFeature getCentroid() {
-		Collection<SemanticFeature> medoid = new LinkedList<SemanticFeature>();
+		Collection<SemanticFeature> medoid = new LinkedList<>();
 		
 		// semantic medoid is the top N most frequent semantic features
 		Collection<FeatureFrequency> freqs = freqTable.getTopN(MAX_CENTROID_FEATURES);

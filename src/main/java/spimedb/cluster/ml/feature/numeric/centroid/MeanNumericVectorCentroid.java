@@ -69,11 +69,13 @@ public class MeanNumericVectorCentroid implements Centroid<NumericVectorFeature>
 	    double removedWeight = feature.getWeight();
 	    double newWeight = weight - removedWeight;
 
-	    if (0.0 == weight) return;
+	    if (0.0 == weight)
+	    	return;
 
 		// decrement centroid vector
+		double[] v = feature.getValue();
 		for (int i=0; i < meanVector.length; i++) {
-			meanVector[i] = (meanVector[i] * weight - feature.getValue()[i] * removedWeight) / newWeight;
+			meanVector[i] = (meanVector[i] * weight - v[i] * removedWeight) / newWeight;
 		}
 		weight = newWeight;
 	}

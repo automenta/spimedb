@@ -25,9 +25,9 @@
 package spimedb.cluster.geometry.cartesian;
 
 
-import spimedb.cluster.math.linearalgebra.Vector;
 import junit.framework.Assert;
 import org.junit.Test;
+import spimedb.cluster.math.linearalgebra.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;

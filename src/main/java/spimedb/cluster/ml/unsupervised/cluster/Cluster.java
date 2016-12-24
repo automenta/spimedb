@@ -46,8 +46,8 @@ public class Cluster extends Instance {
 	
 	protected boolean onlineUpdate = false;  	// default to not updating centroid when new members are added
 	@SuppressWarnings("rawtypes")
-	protected final Map<String, Centroid> centroids = new HashMap<String, Centroid>();
-	protected final Set<Instance> members = new LinkedHashSet<Instance>();
+	protected final Map<String, Centroid> centroids = new HashMap<>();
+	protected final Set<Instance> members = new LinkedHashSet<>();
 
 	public Cluster() {
 		super();
@@ -166,7 +166,7 @@ public class Cluster extends Instance {
 	@SuppressWarnings("rawtypes")
 	@JsonIgnore
 	public Collection<FeatureTypeDefinition> getTypeDefs() {
-		Collection<FeatureTypeDefinition> typedefs = new LinkedList<FeatureTypeDefinition>();
+		Collection<FeatureTypeDefinition> typedefs = new LinkedList<>();
 		for (Centroid centroid : centroids.values()) {
 			typedefs.add(new FeatureTypeDefinition(centroid.getName(), centroid.getClass(), null));
 		}

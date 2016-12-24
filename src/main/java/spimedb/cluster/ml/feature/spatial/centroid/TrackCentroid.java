@@ -101,7 +101,7 @@ public class TrackCentroid implements Centroid<TrackFeature>{
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Class<TrackFeature> getType() {
-        return (Class) TrackFeature.class;
+        return TrackFeature.class;
     }
 
     @Override

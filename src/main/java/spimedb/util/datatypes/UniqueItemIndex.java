@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class UniqueItemIndex<T> implements ItemIndex<T> {
 
-    protected final HashMap<T, Integer> uniqueItems = new HashMap<T, Integer>();
-    protected final ArrayList<T> index = new ArrayList<T>();
+    protected final HashMap<T, Integer> uniqueItems = new HashMap<>();
+    protected final ArrayList<T> index = new ArrayList<>();
 
     public UniqueItemIndex() {
     }

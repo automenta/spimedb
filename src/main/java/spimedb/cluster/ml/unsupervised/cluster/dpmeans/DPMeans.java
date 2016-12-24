@@ -63,13 +63,13 @@ public class DPMeans extends KMeans {
 	}
 	
 	private List<Cluster> initKMeans(DataSet ds) {
-		List<Cluster> kmeans = new LinkedList<Cluster>();
+		List<Cluster> kmeans = new LinkedList<>();
 		
 		int ki = (ds.size() < k) ? ds.size(): k;
 		
 		// randomly pick k instances as the initial k means
-		ArrayList<String> indexes = new ArrayList<String>(ds.size()); 
-		ArrayList<String> keys = new ArrayList<String>(ds.getKeys());
+		ArrayList<String> indexes = new ArrayList<>(ds.size());
+		ArrayList<String> keys = new ArrayList<>(ds.getKeys());
 	    for (int i = 0; i < keys.size(); i++) {
 	        indexes.add( keys.get(i) );
 	    }

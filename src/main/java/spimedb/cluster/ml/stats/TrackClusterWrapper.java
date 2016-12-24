@@ -25,14 +25,14 @@
 package spimedb.cluster.ml.stats;
 
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.cluster.geometry.geodesic.Track;
 import spimedb.cluster.math.statistics.StatTracker;
 import spimedb.cluster.ml.Instance;
 import spimedb.cluster.ml.feature.Feature;
 import spimedb.cluster.ml.feature.spatial.TrackFeature;
 import spimedb.cluster.ml.unsupervised.cluster.Cluster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.*;
@@ -80,7 +80,7 @@ public class TrackClusterWrapper {
     }
 
     public TrackClusterWrapper (Collection<Cluster> clusters) {
-        _statistics = new HashMap<String, StatTracker>();
+        _statistics = new HashMap<>();
         _clusterName = null;
         _clusterColor = null;
 
@@ -92,7 +92,7 @@ public class TrackClusterWrapper {
     }
 
     private void initializeTracks (Collection<Cluster> clusters) {
-        _tracks = new ArrayList<Track>();
+        _tracks = new ArrayList<>();
         _trueMean = null;
 
         // Pull all tracks out of the cluster, and calculate their true mean
@@ -116,12 +116,12 @@ public class TrackClusterWrapper {
         }
 
         // Sort them in order of distance from the true mean
-        _distancesFromTrueMean = new HashMap<Track, Double>();
+        _distancesFromTrueMean = new HashMap<>();
         for (Track track: _tracks) {
             _distancesFromTrueMean.put(track, track.getDistance(_trueMean));
         }
 
-        Collections.sort(_tracks, (t1, t2) -> _distancesFromTrueMean.get(t1).compareTo(_distancesFromTrueMean.get(t2)));
+        _tracks.sort(Comparator.comparing(_distancesFromTrueMean::get));
     }
 
 
@@ -165,7 +165,7 @@ public class TrackClusterWrapper {
         }
 
         // Precalculate distances from practical mean and total standard deviation
-        _distanceFromPracticalMean = new HashMap<Track, Double>();
+        _distanceFromPracticalMean = new HashMap<>();
         double variance = 0.0;
         for (Track track: _tracks) {
             double distance = track.getDistance(_practicalMean);

@@ -259,7 +259,7 @@ public class FileUtils {
         if (dotIndex != -1 && numDigits > 0) {
             String base = path.substring(0, zeroIndex);
             String extension = path.substring(dotIndex);
-            String filePattern = base + "%0" + numDigits + "d" + extension;
+            String filePattern = base + "%0" + numDigits + 'd' + extension;
             int start = Integer.parseInt(path.substring(zeroIndex, dotIndex));
             return new FileSequenceDescriptor(filePattern, extension, dotIndex
                     - zeroIndex, start);
@@ -297,7 +297,7 @@ public class FileUtils {
         StringBuilder result = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
-            result.append(line).append("\n");
+            result.append(line).append('\n');
         }
         return result.toString();
     }
@@ -374,12 +374,7 @@ public class FileUtils {
             final String title, String path) {
         System.setProperty("apple.awt.fileDialogForDirectories", "true");
         String result = showFileDialog(frame, title, path,
-                new FilenameFilter() {
-
-                    public boolean accept(File dir, String name) {
-                        return new File(dir + "/" + name).isDirectory();
-                    }
-                }, LOAD);
+                (dir, name) -> new File(dir + "/" + name).isDirectory(), LOAD);
         System.setProperty("apple.awt.fileDialogForDirectories", "false");
         return result;
     }
@@ -442,18 +437,15 @@ public class FileUtils {
             fd.setDirectory(path);
         }
         if (formats != null) {
-            fd.setFilenameFilter(new FilenameFilter() {
-
-                public boolean accept(File dir, String name) {
-                    boolean isAccepted = false;
-                    for (String ext : formats) {
-                        if (name.indexOf(ext) != -1) {
-                            isAccepted = true;
-                            break;
-                        }
+            fd.setFilenameFilter((dir, name) -> {
+                boolean isAccepted = false;
+                for (String ext : formats) {
+                    if (name.indexOf(ext) != -1) {
+                        isAccepted = true;
+                        break;
                     }
-                    return isAccepted;
                 }
+                return isAccepted;
             });
         }
         fd.setVisible(true);

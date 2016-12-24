@@ -40,6 +40,6 @@ public interface PolygonClipper2D {
      *            polygon to be clipped
      * @return clipped poly
      */
-    public Polygon2D clipPolygon(Polygon2D poly);
+    Polygon2D clipPolygon(Polygon2D poly);
 
 }

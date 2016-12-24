@@ -24,9 +24,9 @@
  */
 package spimedb.cluster.geometry.geodesic;
 
-import spimedb.cluster.geometry.geodesic.tracks.GeodeticTrack;
 import org.junit.Assert;
 import org.junit.Test;
+import spimedb.cluster.geometry.geodesic.tracks.GeodeticTrack;
 
 public class TrackSimplificationTests {
     // Test to make sure intermediate colinear points are removed. 

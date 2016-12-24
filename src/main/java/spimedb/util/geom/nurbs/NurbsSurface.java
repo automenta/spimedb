@@ -59,7 +59,7 @@ public interface NurbsSurface {
      */
     float[] getUKnots();
 
-    public abstract KnotVector getUKnotVector();
+    KnotVector getUKnotVector();
 
     /**
      * Get the degree in v direction
@@ -75,9 +75,9 @@ public interface NurbsSurface {
      */
     float[] getVKnots();
 
-    public abstract KnotVector getVKnotVector();
+    KnotVector getVKnotVector();
 
-    public abstract Vec3D pointOnSurface(double u, double v);
+    Vec3D pointOnSurface(double u, double v);
 
     /**
      * Calculate point on surface for the given u and v values
@@ -128,6 +128,6 @@ public interface NurbsSurface {
      *         times<br />
      *         with respect to u and l times with respect to v
      */
-    public Vec4D[][][][] surfaceDerivCpts(int d, int r1, int r2, int s1, int s2);
+    Vec4D[][][][] surfaceDerivCpts(int d, int r1, int r2, int s1, int s2);
 
 }

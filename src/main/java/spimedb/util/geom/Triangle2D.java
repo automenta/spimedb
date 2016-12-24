@@ -205,7 +205,7 @@ public class Triangle2D implements Shape2D {
      * @return Vec2D
      */
     public Vec2D getRandomPoint() {
-        List<Float> barycentric = new ArrayList<Float>(3);
+        List<Float> barycentric = new ArrayList<>(3);
         barycentric.add(MathUtils.random(1f));
         barycentric.add(MathUtils.random(1f - barycentric.get(0)));
         barycentric.add(1 - (barycentric.get(0) + barycentric.get(1)));
@@ -302,6 +302,6 @@ public class Triangle2D implements Shape2D {
     }
 
     public String toString() {
-        return "Triangle2D: " + a + "," + b + "," + c;
+        return "Triangle2D: " + a + ',' + b + ',' + c;
     }
 }

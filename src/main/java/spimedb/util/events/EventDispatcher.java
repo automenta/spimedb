@@ -33,7 +33,7 @@ import java.util.List;
 
 public class EventDispatcher<T> implements Iterable<T> {
 
-    protected List<T> listeners = new LinkedList<T>();
+    protected List<T> listeners = new LinkedList<>();
 
     public EventDispatcher() {
     }

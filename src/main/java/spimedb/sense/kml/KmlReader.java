@@ -59,7 +59,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
 
     private final KmlInputStream kis;
 
-    private final List<URI> gisNetworkLinks = new ArrayList<URI>();
+    private final List<URI> gisNetworkLinks = new ArrayList<>();
 
     private int maxLinkCount = 5000;
     private boolean maxLinkCountExceeded;
@@ -156,7 +156,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
             url = file.toURI().toURL();
         } catch (Exception e) {
             // this should not happen
-            log.warn("Failed to convert file URI to URL: " + e);
+            log.warn("Failed to convert file URI to URL: {}", e);
             url = null;
         }
         baseUrl = url;
@@ -546,17 +546,17 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
         if (gisNetworkLinks.isEmpty()) {
             return Collections.emptyList();
         }
-        List<IGISObject> linkedFeatures = new ArrayList<IGISObject>();
+        List<IGISObject> linkedFeatures = new ArrayList<>();
 
         // keep track of URLs visited to prevent revisits
-        Set<URI> visited = new HashSet<URI>();
-        LinkedList<URI> networkLinks = new LinkedList<URI>();
+        Set<URI> visited = new HashSet<>();
+        LinkedList<URI> networkLinks = new LinkedList<>();
         networkLinks.addAll(gisNetworkLinks);
         while (!networkLinks.isEmpty()) {
             URI uri = networkLinks.removeFirst();
             if (visited.add(uri)) {
                 if (visited.size() > maxLinkCount) {
-                    log.warn("Max NetworkLink count exceeded: max links=" + maxLinkCount);
+                    log.warn("Max NetworkLink count exceeded: max links={}", maxLinkCount);
                     maxLinkCountExceeded = true;
                     break;
                 }
@@ -611,18 +611,13 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                             log.debug("*** got new URLs from network link ***");
                         }
                     }
-                } catch (java.net.ConnectException e) {
-                    log.error("Failed to import from network link: " + uri + "\n" + e);
-                    if (handler != null) {
-                        handler.kmlError(uri, e);
-                    }
-                } catch (FileNotFoundException e) {
-                    log.error("Failed to import from network link: " + uri + "\n" + e);
+                } catch (java.net.ConnectException | FileNotFoundException e) {
+                    log.error("Failed to import from network link: {}\n{}", uri, e);
                     if (handler != null) {
                         handler.kmlError(uri, e);
                     }
                 } catch (Exception e) {
-                    log.error("Failed to import from network link: " + uri, e);
+                    log.error("Failed to import from network link: {}", uri, e);
                     if (handler != null) {
                         handler.kmlError(uri, e);
                     }
@@ -646,7 +641,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
      */
     @NonNull
     public List<IGISObject> readAll() throws IOException {
-        List<IGISObject> features = new ArrayList<IGISObject>();
+        List<IGISObject> features = new ArrayList<>();
         try {
             IGISObject gisObj;
             while ((gisObj = read(kis, null, null)) != null) {

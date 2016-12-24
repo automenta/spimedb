@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
  */
 public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
 
-    private int idNumber; // The id number
+    private final int idNumber; // The id number
     private DelaunayVertex circumcenter = null; // The triangle's circumcenter
 
     private static int idGenerator = 0; // Used to create id numbers
@@ -96,7 +96,7 @@ public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
      *             if the vertex is not in triangle
      */
     public ArraySet<DelaunayVertex> facetOpposite(DelaunayVertex vertex) {
-        ArraySet<DelaunayVertex> facet = new ArraySet<DelaunayVertex>(this);
+        ArraySet<DelaunayVertex> facet = new ArraySet<>(this);
         if (!facet.remove(vertex)) {
             throw new IllegalArgumentException("Vertex not in triangle");
         }
@@ -109,7 +109,7 @@ public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
     public DelaunayVertex getCircumcenter() {
         if (circumcenter == null) {
             circumcenter = DelaunayVertex.circumcenter(this
-                    .toArray(new DelaunayVertex[0]));
+                    .toArray(new DelaunayVertex[this.size()]));
         }
         return circumcenter;
     }
@@ -137,7 +137,7 @@ public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
 
     @Override
     public int hashCode() {
-        return (idNumber ^ (idNumber >>> 32));
+        return (idNumber ^ (idNumber >>> 32)); //wtf?
     }
 
     /**
@@ -164,7 +164,7 @@ public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
     public Iterator<DelaunayVertex> iterator() {
         return new Iterator<DelaunayVertex>() {
 
-            private Iterator<DelaunayVertex> it = DelaunayTriangle.super
+            private final Iterator<DelaunayVertex> it = DelaunayTriangle.super
                     .iterator();
 
             public boolean hasNext() {

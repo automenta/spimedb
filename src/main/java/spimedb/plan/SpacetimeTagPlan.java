@@ -1,10 +1,10 @@
 package spimedb.plan;
 
-import spimedb.NObject;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.ml.clustering.*;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import org.eclipse.collections.impl.list.mutable.FastList;
+import spimedb.NObject;
 
 import java.util.*;
 
@@ -114,28 +114,34 @@ public class SpacetimeTagPlan {
             int i = 0;
 
             for (String s : this) {
-                if (s.equals("lat")) {
-                    if (o.isSpatial())
-                        d[i] = o.getLatitude();
-                    else {
-                        return goals; //this nobject is invalid, return; goals will be empty
-                    }
-                } else if (s.equals("lon")) {
-                    d[i] = o.getLongitude();
-                } else if (s.equals("time")) {
-                    d[i] = currentTime;
-                } else if (s.equals("alt")) {
-                    d[i] = o.getAltitude();
-                } else {
-                    if (tagIndex == -1) {
-                        tagIndex = i;
-                    }
-                    Object v = ts.get(s);
-                    if (v instanceof Number) {
-                        double strength = ((Number) v).doubleValue();
-                        d[i] = strength;
+                switch (s) {
+                    case "lat":
+                        if (o.isSpatial())
+                            d[i] = o.getLatitude();
+                        else {
+                            return goals; //this nobject is invalid, return; goals will be empty
+                        }
+                        break;
+                    case "lon":
+                        d[i] = o.getLongitude();
+                        break;
+                    case "time":
+                        d[i] = currentTime;
+                        break;
+                    case "alt":
+                        d[i] = NObject.getAltitude();
+                        break;
+                    default:
+                        if (tagIndex == -1) {
+                            tagIndex = i;
+                        }
+                        Object v = ts.get(s);
+                        if (v instanceof Number) {
+                            double strength = ((Number) v).doubleValue();
+                            d[i] = strength;
 
-                    }
+                        }
+                        break;
                 }
                 i++;
             }
@@ -288,7 +294,6 @@ public interface PlanResult {
         try {
             List<Possibility> result = compute();
             r.onFinished(this, result);
-            return;
         } catch (Exception e) {
             r.onError(this, e);
         }
@@ -313,48 +318,43 @@ public interface PlanResult {
 
 
         //4. distance function
-        DistanceMeasure distanceMetric = new DistanceMeasure() {
+        DistanceMeasure distanceMetric = (DistanceMeasure) (a, b) -> {
+            double dist = 0;
+            int i = 0;
 
-            @Override
-            public double compute(double[] a, double[] b) {
-                double dist = 0;
-                int i = 0;
+            if (time) {
+                dist += Math.abs(a[i] - b[i]) * timeWeight;
+                i++;
+            }
+            if (space) {
+                //TODO use earth surface distance measurement on non-normalized space lat,lon coordinates
 
-                if (time) {
-                    dist += Math.abs(a[i] - b[i]) * timeWeight;
+                if (spaceWeight != 0) {
+                    double dx = Math.abs(a[i] - b[i]);
                     i++;
+                    double dy = Math.abs(a[i] - b[i]);
+                    i++;
+
+                    double ed = Math.sqrt(dx * dx + dy * dy);
+                    dist += ed * spaceWeight;
+                } else {
+                    i += 2;
                 }
-                if (space) {
-                    //TODO use earth surface distance measurement on non-normalized space lat,lon coordinates
-
-                    if (spaceWeight != 0) {
-                        double dx = Math.abs(a[i] - b[i]);
-                        i++;
-                        double dy = Math.abs(a[i] - b[i]);
-                        i++;
-
-                        double ed = Math.sqrt(dx * dx + dy * dy);
-                        dist += ed * spaceWeight;
-                    } else {
-                        i += 2;
+            }
+            if (spaceAltitude) {
+                dist += Math.abs(a[i] - b[i]) * altWeight;
+                i++;
+            }
+            if (tags) {
+                if ((a.length > 0) && (tagWeight != 0)) {
+                    double tagWeightFraction = tagWeight / (a.length);
+                    for (; i < a.length; i++) {
+                        dist += Math.abs(a[i] - b[i]) * tagWeightFraction;
                     }
                 }
-                if (spaceAltitude) {
-                    dist += Math.abs(a[i] - b[i]) * altWeight;
-                    i++;
-                }
-                if (tags) {
-                    if ((a.length > 0) && (tagWeight != 0)) {
-                        double tagWeightFraction = tagWeight / (a.length);
-                        for (; i < a.length; i++) {
-                            dist += Math.abs(a[i] - b[i]) * tagWeightFraction;
-                        }
-                    }
-                }
-
-                return dist;
             }
 
+            return dist;
         };
 
         //5. cluster
@@ -376,7 +376,7 @@ public interface PlanResult {
 
     private List<Cluster<Goal>> clusterDBScan(DistanceMeasure distanceMetric) {
         double radius = 1.0; //if all points are normalized
-        DBSCANClusterer<Goal> clusterer = new DBSCANClusterer<Goal>(radius, 1, distanceMetric);
+        DBSCANClusterer<Goal> clusterer = new DBSCANClusterer<>(radius, 1, distanceMetric);
         return clusterer.cluster(goals);
     }
 
@@ -387,7 +387,7 @@ public interface PlanResult {
         int maxIterations = 5;
         double fuzziness = 1.05; // > 1
 
-        FuzzyKMeansClusterer<Goal> clusterer = new FuzzyKMeansClusterer<Goal>(numCentroids, fuzziness, maxIterations, distanceMetric);
+        FuzzyKMeansClusterer<Goal> clusterer = new FuzzyKMeansClusterer<>(numCentroids, fuzziness, maxIterations, distanceMetric);
         List<CentroidCluster<Goal>> centroids = clusterer.cluster(goals);
         return centroids;
     }
@@ -397,7 +397,7 @@ public interface PlanResult {
         return dimensions;
     }
 
-public class Possibility extends NObject {
+public static class Possibility extends NObject {
     //private final double[] center;
 
     public Possibility(String id) {

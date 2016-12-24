@@ -51,8 +51,8 @@ public class ConvexPolygonClipper implements PolygonClipper2D {
     }
 
     public Polygon2D clipPolygon(Polygon2D poly) {
-        List<Vec2D> points = new ArrayList<Vec2D>(poly.vertices);
-        List<Vec2D> clipped = new ArrayList<Vec2D>();
+        List<Vec2D> points = new ArrayList<>(poly.vertices);
+        List<Vec2D> clipped = new ArrayList<>();
         points.add(points.get(0));
         for (Line2D clipEdge : bounds.getEdges()) {
             clipped.clear();
@@ -88,11 +88,11 @@ public class ConvexPolygonClipper implements PolygonClipper2D {
         return bounds;
     }
 
-    protected Vec2D getClippedPosOnEdge(Line2D clipEdge, Vec2D p, Vec2D q) {
+    protected static Vec2D getClippedPosOnEdge(Line2D clipEdge, Vec2D p, Vec2D q) {
         return clipEdge.intersectLine(new Line2D(p, q)).getPos();
     }
 
-    protected boolean isKnownVertex(List<Vec2D> list, Vec2D q) {
+    protected static boolean isKnownVertex(List<Vec2D> list, Vec2D q) {
         for (Vec2D p : list) {
             if (p.equalsWithTolerance(q, 0.001f)) {
                 return true;

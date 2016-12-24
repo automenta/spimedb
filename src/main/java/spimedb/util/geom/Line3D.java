@@ -38,7 +38,7 @@ public class Line3D {
 
     public static class LineIntersection {
 
-        public static enum Type {
+        public enum Type {
             NON_INTERSECTING,
             INTERSECTING
         }
@@ -111,8 +111,8 @@ public class Line3D {
      *            false, if A is NOT to be added to results
      * @return list of result vectors
      */
-    public static final List<XYZ> splitIntoSegments(Vec3D a, Vec3D b,
-            float stepLength, List<XYZ> segments, boolean addFirst) {
+    public static List<XYZ> splitIntoSegments(Vec3D a, Vec3D b,
+                                              float stepLength, List<XYZ> segments, boolean addFirst) {
         if (segments == null) {
             segments = new ArrayList();
         }

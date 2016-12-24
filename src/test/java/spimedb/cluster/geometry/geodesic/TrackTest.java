@@ -24,9 +24,9 @@
  */
 package spimedb.cluster.geometry.geodesic;
 
-import spimedb.cluster.geometry.geodesic.tracks.GeodeticTrack;
 import junit.framework.Assert;
 import org.junit.Test;
+import spimedb.cluster.geometry.geodesic.tracks.GeodeticTrack;
 
 public class TrackTest {
     private static final double EPSILON = 1E-12;

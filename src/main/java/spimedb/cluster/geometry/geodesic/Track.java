@@ -26,8 +26,8 @@ package spimedb.cluster.geometry.geodesic;
 
 //import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 
-import spimedb.cluster.math.linearalgebra.ListUtilities;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+import spimedb.cluster.math.linearalgebra.ListUtilities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +49,7 @@ abstract public class Track {
     protected Track (PositionCalculationParameters parameters,
                      List<Position> points) {
         _parameters = parameters;
-        _points = new ArrayList<Position>(points);
+        _points = new ArrayList<>(points);
         _reverse = null;
         _statistics = null;
 
@@ -62,8 +62,8 @@ abstract public class Track {
                      List<Position> points,
                      List<Double> parameterization) {
         _parameters = parameters;
-        _points = new ArrayList<Position>(points);
-        _parameterization = new ArrayList<Double>(parameterization);
+        _points = new ArrayList<>(points);
+        _parameterization = new ArrayList<>(parameterization);
         _reverse = null;
         _statistics = null;
 
@@ -74,8 +74,8 @@ abstract public class Track {
 
     protected Track (Track oldTrack, PositionCalculationParameters newParameters) {
         _parameters = newParameters;
-        _points = new ArrayList<Position>();
-        _parameterization = new ArrayList<Double>();
+        _points = new ArrayList<>();
+        _parameterization = new ArrayList<>();
         _reverse = null;
         _statistics = null;
 
@@ -94,9 +94,9 @@ abstract public class Track {
 
     public Track reverse () {
         if (null == _reverse) {
-            List<Position> reversePoints = new ArrayList<Position>(_points);
+            List<Position> reversePoints = new ArrayList<>(_points);
             Collections.reverse(reversePoints);
-            List<Double> reverseParameterization = new ArrayList<Double>(_parameterization);
+            List<Double> reverseParameterization = new ArrayList<>(_parameterization);
             Collections.reverse(reverseParameterization);
             for (int i=0; i<reverseParameterization.size(); ++i)
                 reverseParameterization.set(i, 1.0-reverseParameterization.get(i));
@@ -137,7 +137,7 @@ abstract public class Track {
      * Universal precalculation step - figure out the length parameterization of the trajectory
      */
     private void calculateLengthParameterization () {
-        _parameterization = new ArrayList<Double>(_points.size());
+        _parameterization = new ArrayList<>(_points.size());
 
         calculateLength();
         double cumulativeLength = 0.0;
@@ -272,7 +272,7 @@ abstract public class Track {
                                                                       _parameters.getPrecision());
 
         // Average the tracks along each parameterization point
-        List<Position> meanPath = new ArrayList<Position>();
+        List<Position> meanPath = new ArrayList<>();
         for (double d: joinedParameterization) {
             Position pUs = getLengthParamterizedPoint(d);
             Position pThem = them.getLengthParamterizedPoint(d);
@@ -283,12 +283,12 @@ abstract public class Track {
         return createTrack(meanPath);
     }
 
-    protected String getLabel () {
+    protected static String getLabel() {
         return "Trajectory";
     }
     @Override
     public String toString () {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append(getLabel());
         result.append('<');
         result.append(getParameters().getCalculationType());
@@ -407,7 +407,7 @@ abstract public class Track {
 
     public void addStatistic (String statName, double stat) {
         if (null == _statistics)
-            _statistics = new ObjectDoubleHashMap<String>();
+            _statistics = new ObjectDoubleHashMap<>();
 
         _statistics.put(statName, stat);
     }

@@ -93,7 +93,7 @@ public class Vector implements Serializable {
     /**
      * {@inheritDoc}
      */
-    public Vector mean (List<? extends Vector> data) {
+    public static Vector mean(List<? extends Vector> data) {
         if (data.isEmpty())
             throw new IllegalArgumentException("Attempt to take the mean of 0 vectors");
 
@@ -223,7 +223,7 @@ public class Vector implements Serializable {
 
     @Override
     public String toString () {
-        StringBuffer res = new StringBuffer();
+        StringBuilder res = new StringBuilder();
         res.append('[');
         for (int i=0; i<_data.length; ++i) {
             if (i>0)

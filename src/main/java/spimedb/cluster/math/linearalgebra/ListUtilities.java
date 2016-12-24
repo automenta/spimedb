@@ -48,7 +48,7 @@ public class ListUtilities {
      */
     public static List<Double> joinLists (List<Double> A, List<Double> B,
                                           double epsilon) {
-        List<Double> C = new ArrayList<Double>();
+        List<Double> C = new ArrayList<>();
         int nA = 0;
         int NA = A.size();
         double a = A.get(nA);

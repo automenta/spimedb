@@ -47,7 +47,7 @@ public class DateUtils {
      * 
      * @return timestamp
      */
-    public static final String timeStamp() {
+    public static String timeStamp() {
         return timeStamp(new Date(), null);
     }
 
@@ -58,7 +58,7 @@ public class DateUtils {
      * @param date
      * @return timestamp
      */
-    public static final String timeStamp(Date date) {
+    public static String timeStamp(Date date) {
         return timeStamp(date, null);
     }
 
@@ -70,7 +70,7 @@ public class DateUtils {
      * @param zone
      * @return timestamp
      */
-    public static final String timeStamp(Date date, TimeZone zone) {
+    public static String timeStamp(Date date, TimeZone zone) {
         if (zone == null) {
             zone = TimeZone.getDefault();
         }
@@ -86,7 +86,7 @@ public class DateUtils {
      *            unix epoch timestamp
      * @return timestamp
      */
-    public static final String timeStamp(long t) {
+    public static String timeStamp(long t) {
         return timeStamp(new Date(t), null);
     }
 
@@ -100,7 +100,7 @@ public class DateUtils {
      * @param date
      * @return timestamp
      */
-    public static final String timeStampForZone(String zoneID, Date date) {
+    public static String timeStampForZone(String zoneID, Date date) {
         return timeStamp(date, TimeZone.getTimeZone(zoneID));
     }
 
@@ -109,7 +109,7 @@ public class DateUtils {
      * 
      * @return timestamp
      */
-    public static final String timeStampGMT() {
+    public static String timeStampGMT() {
         return timeStamp(new Date(), GMT);
     }
 
@@ -118,7 +118,7 @@ public class DateUtils {
      * 
      * @return timestamp
      */
-    public static final String timeStampGMT(Date date) {
+    public static String timeStampGMT(Date date) {
         return timeStamp(date, GMT);
     }
 
@@ -127,7 +127,7 @@ public class DateUtils {
      * 
      * @return timestamp
      */
-    public static final String timeStampGMT(long t) {
+    public static String timeStampGMT(long t) {
         return timeStamp(new Date(t), GMT);
     }
 }

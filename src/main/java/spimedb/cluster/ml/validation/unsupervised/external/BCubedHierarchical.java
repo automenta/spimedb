@@ -51,7 +51,7 @@ public class BCubedHierarchical {
 		return f;
 	}
 	
-	private boolean contains(Instance inst, Cluster c) {
+	private static boolean contains(Instance inst, Cluster c) {
 		for (Instance i : c.getMembers()) {
 			if (i instanceof Cluster) {
 				if ( contains(inst, (Cluster)i) ) return true;
@@ -61,8 +61,8 @@ public class BCubedHierarchical {
 		return false;
 	}
 	
-	private Collection<Cluster> getClusters(Instance inst, Collection<? extends Instance> clusters) {
-		Collection<Cluster> iclusters = new LinkedList<Cluster>();
+	private static Collection<Cluster> getClusters(Instance inst, Collection<? extends Instance> clusters) {
+		Collection<Cluster> iclusters = new LinkedList<>();
 		
 		for (Instance i : clusters) {
 			Cluster c = (Cluster)i;
@@ -71,7 +71,7 @@ public class BCubedHierarchical {
 		return iclusters;
 	}
 	
-	public double avePrecision(Instance inst, Collection<Cluster> clusters) {
+	public static double avePrecision(Instance inst, Collection<Cluster> clusters) {
 		double p = 0;
 		
 		Collection<Cluster> iclusters = getClusters(inst, clusters);
@@ -82,7 +82,7 @@ public class BCubedHierarchical {
 		return (p / iclusters.size());
 	}
 	
-	public double aveRecall(Instance inst, Collection<Cluster> clusters) {
+	public static double aveRecall(Instance inst, Collection<Cluster> clusters) {
 		double r = 0, labelCount = labelCount(inst.getClassLabel(), clusters);
 		
 		Collection<Cluster> iclusters = getClusters(inst, clusters);
@@ -95,7 +95,7 @@ public class BCubedHierarchical {
 		return (r / iclusters.size());
 	}
 	
-	public int instanceCount(Collection<? extends Instance> group) {
+	public static int instanceCount(Collection<? extends Instance> group) {
 		int count = 0;
 		
 		for (Instance i : group) {
@@ -109,7 +109,7 @@ public class BCubedHierarchical {
 		return count;
 	}
 	
-	public int labelCount(String label, Collection<? extends Instance> group) {
+	public static int labelCount(String label, Collection<? extends Instance> group) {
 		int count = 0;
 		
 		for (Instance i : group) {

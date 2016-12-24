@@ -23,9 +23,9 @@ package spimedb.cluster; /**
  * SOFTWARE.
  */
 
+import org.junit.Test;
 import spimedb.cluster.ml.feature.spatial.GeoSpatialFeature;
 import spimedb.cluster.ml.feature.spatial.centroid.GeoSpatialCentroid;
-import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 

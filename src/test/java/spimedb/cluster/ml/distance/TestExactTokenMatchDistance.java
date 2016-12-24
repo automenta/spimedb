@@ -24,10 +24,10 @@
  */
 package spimedb.cluster.ml.distance;
 
-import spimedb.cluster.ml.feature.bagofwords.BagOfWordsFeature;
-import spimedb.cluster.ml.feature.bagofwords.distance.ExactTokenMatchDistance;
 import junit.framework.Assert;
 import org.junit.Test;
+import spimedb.cluster.ml.feature.bagofwords.BagOfWordsFeature;
+import spimedb.cluster.ml.feature.bagofwords.distance.ExactTokenMatchDistance;
 
 import java.util.Collections;
 

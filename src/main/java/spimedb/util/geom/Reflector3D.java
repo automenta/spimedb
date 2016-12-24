@@ -40,12 +40,12 @@ public interface Reflector3D extends Intersector3D {
      *            distance from isect position
      * @return point on reflected ray
      */
-    public roVec3D getReflectedRayPointAtDistance(float dist);
+    roVec3D getReflectedRayPointAtDistance(float dist);
 
     /**
      * @return angle between incident ray and surface normal
      */
-    public float getReflectionAngle();
+    float getReflectionAngle();
 
     /**
      * Reflects given ray on the entity's surface
@@ -54,5 +54,5 @@ public interface Reflector3D extends Intersector3D {
      *            incident ray
      * @return reflected ray starting from intersection point
      */
-    public Ray3D reflectRay(Ray3D ray);
+    Ray3D reflectRay(Ray3D ray);
 }

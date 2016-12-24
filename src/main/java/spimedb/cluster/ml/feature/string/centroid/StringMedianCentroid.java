@@ -52,7 +52,7 @@ public class StringMedianCentroid implements Centroid<StringFeature> {
 	private String[] referencePoints = new String[NUM_REFERENCE];
 	private String[] testPoints = new String[NUM_REFERENCE];
 	
-	private final Map<String, StringFeature> points = new HashMap<String, StringFeature>();
+	private final Map<String, StringFeature> points = new HashMap<>();
 	
 	
 	private static class DistanceScore {
@@ -84,7 +84,7 @@ public class StringMedianCentroid implements Centroid<StringFeature> {
 		int nr = Math.min(NUM_REFERENCE, points.size());
 		
 		// compute the distances of all points to the reference points
-		List<DistanceScore> distances = new LinkedList<DistanceScore>();
+		List<DistanceScore> distances = new LinkedList<>();
 		for (Map.Entry<String, StringFeature> stringStringFeatureEntry : points.entrySet()) {
 			double sum = 0;
 			StringFeature f = stringStringFeatureEntry.getValue();
@@ -95,7 +95,7 @@ public class StringMedianCentroid implements Centroid<StringFeature> {
 		}
 		
 		// sort by distance
-		Collections.sort(distances, dsc);
+		distances.sort(dsc);
 		
 		// set the test points
 		int nt = Math.min(NUM_TEST, points.size());
@@ -111,7 +111,7 @@ public class StringMedianCentroid implements Centroid<StringFeature> {
 		if (nt == 0) return "";
 		
 		// compute the distances of test points all points 
-		List<DistanceScore> distances = new LinkedList<DistanceScore>();
+		List<DistanceScore> distances = new LinkedList<>();
 		for (int i=0; i < nt; i++) {
 			double sum = 0;
 			for (Map.Entry<String, StringFeature> stringStringFeatureEntry : points.entrySet()) {
@@ -122,7 +122,7 @@ public class StringMedianCentroid implements Centroid<StringFeature> {
 		}
 		
 		// sort by distance
-		Collections.sort(distances, dsc);
+		distances.sort(dsc);
 		
 		// return the smallest distance point as median	
 		return distances.get(0).feature;
@@ -131,7 +131,7 @@ public class StringMedianCentroid implements Centroid<StringFeature> {
 	private void setReferencePoints() {
 		int n = Math.min(NUM_REFERENCE, points.size());
 		
-		ArrayList<String> keys = new ArrayList<String>(points.keySet());
+		ArrayList<String> keys = new ArrayList<>(points.keySet());
 		Collections.shuffle(keys);
 		
 		for (int i=0; i < n; i++) {

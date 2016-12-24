@@ -11,10 +11,10 @@ public class BooleanShapeBuilder {
         UNION,
         INTERSECTION,
         DIFFERENCE,
-        XOR;
+        XOR
     }
 
-    private int bezierRes;
+    private final int bezierRes;
 
     private final Area area;
     private final Type type;
@@ -52,7 +52,7 @@ public class BooleanShapeBuilder {
     }
 
     public List<Polygon2D> computeShapes() {
-        List<Polygon2D> shapes = new ArrayList<Polygon2D>();
+        List<Polygon2D> shapes = new ArrayList<>();
         PathIterator i = area.getPathIterator(null);
         float[] buf = new float[6];
         Vec2D prev = new Vec2D();
@@ -91,7 +91,7 @@ public class BooleanShapeBuilder {
         return shapes;
     }
 
-    private Shape convertToAWTShape(Shape2D s) {
+    private static Shape convertToAWTShape(Shape2D s) {
         if (s instanceof Rect) {
             Rect r = (Rect) s;
             return new Rectangle2D.Float(r.x, r.y, r.width, r.height);

@@ -43,7 +43,7 @@ public class CubicBSpline {
 
     public CubicBSpline (boolean periodic) {
 //        _periodic = periodic;
-        _points = new ArrayList<Vector>();
+        _points = new ArrayList<>();
         _times = new DoubleArrayList(); //ArrayList<Double>();
         _n = 0;
     }
@@ -81,7 +81,7 @@ public class CubicBSpline {
         TriDiagonalMatrix M = new TriDiagonalMatrix(matrixEntries);
 
         // Create our target vectors
-        List<Vector> Ys = new ArrayList<Vector>();
+        List<Vector> Ys = new ArrayList<>();
         Vector K0 = Ks.get(0);
         Vector K1 = Ks.get(1);
         Ys.add(K0.add(K1.scale(2)));
@@ -95,8 +95,8 @@ public class CubicBSpline {
         Ys.add(Knm1.scale(8).add(Kn));
         
         
-        List<Vector> P1coords = new ArrayList<Vector>();
-        List<Vector> P2coords = new ArrayList<Vector>();
+        List<Vector> P1coords = new ArrayList<>();
+        List<Vector> P2coords = new ArrayList<>();
         for (int i=0; i<d; ++i) {
             Vector Y = getCoordinateVector(Ys, i);
             Vector K = getCoordinateVector(Ks, i);
@@ -114,7 +114,7 @@ public class CubicBSpline {
         }
 
         // These are coordinate vectors; revert to points
-        List<Vector> splinePoints = new ArrayList<Vector>();
+        List<Vector> splinePoints = new ArrayList<>();
         for (int i=0; i<n; ++i) {
             splinePoints.add(Ks.get(i));
             splinePoints.add(getCoordinateVector(P1coords, i));

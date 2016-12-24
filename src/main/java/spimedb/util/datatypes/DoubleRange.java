@@ -143,13 +143,13 @@ public class DoubleRange {
     }
 
     public Double[] toArray(double step) {
-        List<Double> range = new LinkedList<Double>();
+        List<Double> range = new LinkedList<>();
         double v = min;
         while (v < max) {
             range.add(v);
             v += step;
         }
-        return range.toArray(new Double[0]);
+        return range.toArray(new Double[range.size()]);
     }
 
     @Override

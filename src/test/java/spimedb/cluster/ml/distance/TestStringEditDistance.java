@@ -24,10 +24,10 @@
  */
 package spimedb.cluster.ml.distance;
 
-import spimedb.cluster.ml.feature.string.StringFeature;
-import spimedb.cluster.ml.feature.string.distance.EditDistance;
 import junit.framework.Assert;
 import org.junit.Test;
+import spimedb.cluster.ml.feature.string.StringFeature;
+import spimedb.cluster.ml.feature.string.distance.EditDistance;
 
 import java.util.Collections;
 

@@ -36,7 +36,7 @@ public abstract class BaseClusterer implements Clusterer {
 
 	protected ClusterFactory clusterFactory;
 	protected final boolean onlineUpdate;
-	protected final Map<String, FeatureTypeDefinition> typeDefs = new HashMap<String, FeatureTypeDefinition>();
+	protected final Map<String, FeatureTypeDefinition> typeDefs = new HashMap<>();
 	
 	public BaseClusterer(boolean onlineUpdate) {
 		this.onlineUpdate = onlineUpdate;

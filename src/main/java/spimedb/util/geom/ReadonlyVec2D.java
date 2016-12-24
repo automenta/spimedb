@@ -46,7 +46,7 @@ public interface ReadonlyVec2D {
      *            Y coordinate
      * @return result as new vector
      */
-    public Vec2D add(float a, float b);
+    Vec2D add(float a, float b);
 
     /**
      * Add vector v and returns result as new vector.
@@ -55,7 +55,7 @@ public interface ReadonlyVec2D {
      *            vector to add
      * @return result as new vector
      */
-    public Vec2D add(ReadonlyVec2D v);
+    Vec2D add(ReadonlyVec2D v);
 
     /**
      * Computes the angle between this vector and vector V. This function
@@ -66,7 +66,7 @@ public interface ReadonlyVec2D {
      *            vector
      * @return angle in radians, or NaN if vectors are parallel
      */
-    public float angleBetween(ReadonlyVec2D v);
+    float angleBetween(ReadonlyVec2D v);
 
     /**
      * Computes the angle between this vector and vector V
@@ -79,7 +79,7 @@ public interface ReadonlyVec2D {
      *            altered by this method)
      * @return angle in radians, or NaN if vectors are parallel
      */
-    public float angleBetween(ReadonlyVec2D v, boolean forceNormalize);
+    float angleBetween(ReadonlyVec2D v, boolean forceNormalize);
 
     /**
      * Computes the perpendicular bisector of two points.
@@ -88,7 +88,7 @@ public interface ReadonlyVec2D {
      *            other point
      * @return bisector coefficients as {@link Vec3D}
      */
-    public Vec3D bisect(Vec2D p);
+    Vec3D bisect(Vec2D p);
 
     /**
      * Compares the length of the vector with another one.
@@ -97,12 +97,12 @@ public interface ReadonlyVec2D {
      *            vector to compare with
      * @return -1 if other vector is longer, 0 if both are equal or else +1
      */
-    public int compareTo(ReadonlyVec2D v);
+    int compareTo(ReadonlyVec2D v);
 
     /**
      * @return a new independent instance/copy of a given vector
      */
-    public Vec2D copy();
+    Vec2D copy();
 
     /**
      * Calculates the cross-product with the given vector.
@@ -118,7 +118,7 @@ public interface ReadonlyVec2D {
      * @see <a href="http://stackoverflow.com/questions/243945/">Stackoverflow
      *      entry</a>
      */
-    public float cross(ReadonlyVec2D v);
+    float cross(ReadonlyVec2D v);
 
     /**
      * Calculates distance to another vector
@@ -127,7 +127,7 @@ public interface ReadonlyVec2D {
      *            non-null vector
      * @return distance or Float.NaN if v=null
      */
-    public float distanceTo(ReadonlyVec2D v);
+    float distanceTo(ReadonlyVec2D v);
 
     /**
      * Calculates the squared distance to another vector
@@ -137,7 +137,7 @@ public interface ReadonlyVec2D {
      *            non-null vector
      * @return distance or NaN if v=null
      */
-    public float distanceToSquared(ReadonlyVec2D v);
+    float distanceToSquared(ReadonlyVec2D v);
 
     /**
      * Computes the scalar product (dot product) with the given vector.
@@ -148,9 +148,9 @@ public interface ReadonlyVec2D {
      * @param v
      * @return dot product
      */
-    public float dot(ReadonlyVec2D v);
+    float dot(ReadonlyVec2D v);
 
-    public boolean equals(Object obj);
+    boolean equals(Object obj);
 
     /**
      * Compares this vector with the one given. The vectors are deemed equal if
@@ -164,9 +164,9 @@ public interface ReadonlyVec2D {
      * 
      * @return true, if equal
      */
-    public boolean equalsWithTolerance(ReadonlyVec2D v, float tolerance);
+    boolean equalsWithTolerance(ReadonlyVec2D v, float tolerance);
 
-    public Vec2D getAbs();
+    Vec2D getAbs();
 
     /**
      * Converts the vector from polar to Cartesian space. Assumes this order:
@@ -174,11 +174,11 @@ public interface ReadonlyVec2D {
      * 
      * @return new vector
      */
-    public Vec2D getCartesian();
+    Vec2D getCartesian();
 
-    public float getComponent(Vec2D.Axis id);
+    float getComponent(Vec2D.Axis id);
 
-    public float getComponent(int id);
+    float getComponent(int id);
 
     /**
      * Creates a copy of the vector which forcefully fits in the given
@@ -187,7 +187,7 @@ public interface ReadonlyVec2D {
      * @param r
      * @return fitted vector
      */
-    public Vec2D getConstrained(Rect r);
+    Vec2D getConstrained(Rect r);
 
     /**
      * Creates a new vector whose components are the integer value of their
@@ -195,7 +195,7 @@ public interface ReadonlyVec2D {
      * 
      * @return result as new vector
      */
-    public Vec2D getFloored();
+    Vec2D getFloored();
 
     /**
      * Creates a new vector whose components are the fractional part of their
@@ -203,14 +203,14 @@ public interface ReadonlyVec2D {
      * 
      * @return result as new vector
      */
-    public Vec2D getFrac();
+    Vec2D getFrac();
 
     /**
      * Scales vector uniformly by factor -1 ( v = -v )
      * 
      * @return result as new vector
      */
-    public Vec2D getInverted();
+    Vec2D getInverted();
 
     /**
      * Creates a copy of the vector with its magnitude limited to the length
@@ -220,7 +220,7 @@ public interface ReadonlyVec2D {
      *            new maximum magnitude
      * @return result as new vector
      */
-    public Vec2D getLimited(float lim);
+    Vec2D getLimited(float lim);
 
     /**
      * Produces a new vector with its coordinates passed through the given
@@ -229,14 +229,14 @@ public interface ReadonlyVec2D {
      * @param map
      * @return mapped vector
      */
-    public Vec2D getMapped(ScaleMap map);
+    Vec2D getMapped(ScaleMap map);
 
     /**
      * Produces the normalized version as a new vector
      * 
      * @return new vector
      */
-    public Vec2D getNormalized();
+    Vec2D getNormalized();
 
     /**
      * Produces a new vector normalized to the given length.
@@ -246,9 +246,9 @@ public interface ReadonlyVec2D {
      * 
      * @return new vector
      */
-    public Vec2D getNormalizedTo(float len);
+    Vec2D getNormalizedTo(float len);
 
-    public Vec2D getPerpendicular();
+    Vec2D getPerpendicular();
 
     /**
      * Converts the current vector into polar coordinates. After the conversion
@@ -257,11 +257,11 @@ public interface ReadonlyVec2D {
      * 
      * @return new vector
      */
-    public Vec2D getPolar();
+    Vec2D getPolar();
 
-    public Vec2D getReciprocal();
+    Vec2D getReciprocal();
 
-    public Vec2D getReflected(ReadonlyVec2D normal);
+    Vec2D getReflected(ReadonlyVec2D normal);
 
     /**
      * Creates a new vector rotated by the given angle around the Z axis.
@@ -269,7 +269,7 @@ public interface ReadonlyVec2D {
      * @param theta
      * @return rotated vector
      */
-    public Vec2D getRotated(float theta);
+    Vec2D getRotated(float theta);
 
     /**
      * Creates a new vector with its coordinates rounded to the given precision
@@ -278,7 +278,7 @@ public interface ReadonlyVec2D {
      * @param prec
      * @return grid aligned vector
      */
-    public Vec2D getRoundedTo(float prec);
+    Vec2D getRoundedTo(float prec);
 
     /**
      * Creates a new vector in which all components are replaced with the signum
@@ -287,7 +287,7 @@ public interface ReadonlyVec2D {
      * 
      * @return result vector
      */
-    public Vec2D getSignum();
+    Vec2D getSignum();
 
     /**
      * Computes the vector's direction in the XY plane (for example for 2D
@@ -295,7 +295,7 @@ public interface ReadonlyVec2D {
      * 
      * @return rotation angle
      */
-    public float heading();
+    float heading();
 
     /**
      * Interpolates the vector towards the given target vector, using linear
@@ -307,7 +307,7 @@ public interface ReadonlyVec2D {
      *            interpolation factor (should be in the range 0..1)
      * @return result as new vector
      */
-    public Vec2D interpolateTo(ReadonlyVec2D v, float f);
+    Vec2D interpolateTo(ReadonlyVec2D v, float f);
 
     /**
      * Interpolates the vector towards the given target vector, using the given
@@ -321,7 +321,7 @@ public interface ReadonlyVec2D {
      *            InterpolateStrategy instance
      * @return result as new vector
      */
-    public Vec2D interpolateTo(ReadonlyVec2D v, float f, InterpolateStrategy s);
+    Vec2D interpolateTo(ReadonlyVec2D v, float f, InterpolateStrategy s);
 
     /**
      * Checks if the point is inside the given sphere.
@@ -333,7 +333,7 @@ public interface ReadonlyVec2D {
      * @return true, if point is in sphere
      */
 
-    public boolean isInCircle(ReadonlyVec2D sO, float sR);
+    boolean isInCircle(ReadonlyVec2D sO, float sR);
 
     /**
      * Checks if the point is inside the given rectangle.
@@ -342,7 +342,7 @@ public interface ReadonlyVec2D {
      *            bounding rectangle
      * @return true, if point is inside
      */
-    public boolean isInRectangle(Rect r);
+    boolean isInRectangle(Rect r);
 
     /**
      * Checks if point vector is inside the triangle created by the points a, b
@@ -353,7 +353,7 @@ public interface ReadonlyVec2D {
      * 
      * @return true, if point is in triangle.
      */
-    public boolean isInTriangle(Vec2D a, Vec2D b, Vec2D c);
+    boolean isInTriangle(Vec2D a, Vec2D b, Vec2D c);
 
     /**
      * Checks if the vector is parallel with either the X or Y axis (any
@@ -362,7 +362,7 @@ public interface ReadonlyVec2D {
      * @param tolerance
      * @return true, if parallel within the given tolerance
      */
-    public boolean isMajorAxis(float tolerance);
+    boolean isMajorAxis(float tolerance);
 
     /**
      * Checks if vector has a magnitude equals or close to zero (tolerance used
@@ -370,14 +370,14 @@ public interface ReadonlyVec2D {
      * 
      * @return true, if zero vector
      */
-    public boolean isZeroVector();
+    boolean isZeroVector();
 
     /**
      * Calculates the magnitude/eucledian length of the vector
      * 
      * @return vector length
      */
-    public float magnitude();
+    float magnitude();
 
     /**
      * Calculates only the squared magnitude/length of the vector. Useful for
@@ -390,7 +390,7 @@ public interface ReadonlyVec2D {
      * 
      * @return squared magnitude (x^2 + y^2)
      */
-    public float magSquared();
+    float magSquared();
 
     /**
      * Constructs a new vector consisting of the largest components of both
@@ -399,7 +399,7 @@ public interface ReadonlyVec2D {
      * @param v
      * @return result as new vector
      */
-    public Vec2D max(ReadonlyVec2D v);
+    Vec2D max(ReadonlyVec2D v);
 
     /**
      * Constructs a new vector consisting of the smallest components of both
@@ -409,7 +409,7 @@ public interface ReadonlyVec2D {
      *            comparing vector
      * @return result as new vector
      */
-    public Vec2D min(ReadonlyVec2D v);
+    Vec2D min(ReadonlyVec2D v);
 
     /**
      * Scales vector uniformly and returns result as new vector.
@@ -418,7 +418,7 @@ public interface ReadonlyVec2D {
      *            scale factor
      * @return new vector
      */
-    public Vec2D scale(float s);
+    Vec2D scale(float s);
 
     /**
      * Scales vector non-uniformly and returns result as new vector.
@@ -429,9 +429,9 @@ public interface ReadonlyVec2D {
      *            scale factor for Y coordinate
      * @return new vector
      */
-    public Vec2D scale(float a, float b);
+    Vec2D scale(float a, float b);
 
-    public Vec2D scale(ReadonlyVec2D s);
+    Vec2D scale(ReadonlyVec2D s);
 
     /**
      * Scales vector non-uniformly by vector v and returns result as new vector
@@ -440,7 +440,7 @@ public interface ReadonlyVec2D {
      *            scale vector
      * @return new vector
      */
-    public Vec2D scale(Vec2D s);
+    Vec2D scale(Vec2D s);
 
     /**
      * Subtracts vector {a,b,c} and returns result as new vector.
@@ -451,9 +451,9 @@ public interface ReadonlyVec2D {
      *            Y coordinate
      * @return result as new vector
      */
-    public Vec2D sub(float a, float b);
+    Vec2D sub(float a, float b);
 
-    public Vec2D sub(ReadonlyVec2D v);
+    Vec2D sub(ReadonlyVec2D v);
 
     /**
      * Subtracts vector v and returns result as new vector.
@@ -462,7 +462,7 @@ public interface ReadonlyVec2D {
      *            vector to be subtracted
      * @return result as new vector
      */
-    public Vec2D sub(Vec2D v);
+    Vec2D sub(Vec2D v);
 
     /**
      * Calculates the normal vector on the given ellipse in the direction of the
@@ -476,14 +476,14 @@ public interface ReadonlyVec2D {
      *         point.
      */
 
-    public Vec2D tangentNormalOfEllipse(Vec2D eO, Vec2D eR);
+    Vec2D tangentNormalOfEllipse(Vec2D eO, Vec2D eR);
 
     /**
      * Creates a 3D version of this vector in the XY plane.
      * 
      * @return 3D vector
      */
-    public Vec3D to3DXY();
+    Vec3D to3DXY();
 
     /**
      * Creates a 3D version of this vector in the XZ plane. (The 2D Y coordinate
@@ -491,7 +491,7 @@ public interface ReadonlyVec2D {
      * 
      * @return 3D vector
      */
-    public Vec3D to3DXZ();
+    Vec3D to3DXZ();
 
     /**
      * Creates a 3D version of this vector in the YZ plane. (The 2D X coordinate
@@ -499,17 +499,17 @@ public interface ReadonlyVec2D {
      * 
      * @return 3D vector
      */
-    public XYZ to3DYZ();
+    XYZ to3DYZ();
 
     /*
      * (non-Javadoc)
      * 
      * @see toxi.geom.DimensionalVector#toArray()
      */
-    public float[] toArray();
+    float[] toArray();
 
-    public float x();
+    float x();
 
-    public float y();
+    float y();
 
 }

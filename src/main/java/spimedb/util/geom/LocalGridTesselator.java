@@ -26,7 +26,7 @@ public class LocalGridTesselator extends GridTesselator {
     }
 
     protected List<Vec2D> createInsidePoints(Polygon2D poly, Rect bounds) {
-        List<Vec2D> points = new ArrayList<Vec2D>();
+        List<Vec2D> points = new ArrayList<>();
         int ires = (int) res;
         ScaleMap xmap = new ScaleMap(0, ires, bounds.getLeft(),
                 bounds.getRight());

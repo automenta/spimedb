@@ -49,7 +49,7 @@ public abstract class AbstractWave {
      *            sampling rate in Hz (equals period length @ 1 Hz)
      * @return frequency in radians
      */
-    public static final float hertzToRadians(float hz, float sampleRate) {
+    public static float hertzToRadians(float hz, float sampleRate) {
         return hz / sampleRate * TWO_PI;
     }
 
@@ -62,7 +62,7 @@ public abstract class AbstractWave {
      *            sampling rate in Hz (equals period length @ 1 Hz)
      * @return freq in Hz
      */
-    public static final float radiansToHertz(float f, float sampleRate) {
+    public static float radiansToHertz(float f, float sampleRate) {
         return f / TWO_PI * sampleRate;
     }
 
@@ -151,7 +151,7 @@ public abstract class AbstractWave {
 
     public void push() {
         if (stateStack == null) {
-            stateStack = new Stack<WaveState>();
+            stateStack = new Stack<>();
         }
         stateStack.push(new WaveState(phase, frequency, amp, offset));
     }
@@ -183,7 +183,7 @@ public abstract class AbstractWave {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(this.getClass().getName()).append(" phase: ").append(phase);
         sb.append(" frequency: ").append(frequency);
         sb.append(" amp: ").append(amp);

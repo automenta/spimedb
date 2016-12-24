@@ -32,7 +32,7 @@ import java.util.*;
 
 public class FeatureFrequencyTable implements Serializable {
 	private static final long serialVersionUID = 2702669296496944069L;
-	private Map<String, FeatureFrequency> table = new HashMap<String, FeatureFrequency>();
+	private Map<String, FeatureFrequency> table = new HashMap<>();
 	
 	public FeatureFrequencyTable() { }
 	
@@ -49,7 +49,7 @@ public class FeatureFrequencyTable implements Serializable {
 	}
 	
 	public FeatureFrequency add(FeatureFrequency freq) {
-		if (containsFeature(freq.feature) == false) {
+		if (!containsFeature(freq.feature)) {
 			FeatureFrequency f = new FeatureFrequency(freq.feature);
 			f.frequency = freq.frequency;
 			return table.put(freq.feature.getId(), f);
@@ -58,7 +58,7 @@ public class FeatureFrequencyTable implements Serializable {
 	}
 	
 	public FeatureFrequency add(Feature feature) {
-		if (containsFeature(feature) == false) {
+		if (!containsFeature(feature)) {
 			return table.put(feature.getId(), new FeatureFrequency(feature));
 		}
 		return increment(feature);
@@ -113,8 +113,8 @@ public class FeatureFrequencyTable implements Serializable {
 	}
 	
 	public Collection<FeatureFrequency> getTopN(int n) {
-		Collection<FeatureFrequency> topN = new LinkedList<FeatureFrequency>();
-		PriorityQueue<FeatureFrequency> freq = new PriorityQueue<FeatureFrequency>(11, new FeatureFreqComparator());
+		Collection<FeatureFrequency> topN = new LinkedList<>();
+		PriorityQueue<FeatureFrequency> freq = new PriorityQueue<>(11, new FeatureFreqComparator());
 		
 		// sort features by decreasing frequency
 		for (FeatureFrequency f : table.values()) {

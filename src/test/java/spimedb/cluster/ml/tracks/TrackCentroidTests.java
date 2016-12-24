@@ -24,6 +24,8 @@
  */
 package spimedb.cluster.ml.tracks;
 
+import junit.framework.Assert;
+import org.junit.Test;
 import spimedb.cluster.geometry.geodesic.Position;
 import spimedb.cluster.geometry.geodesic.PositionCalculationParameters;
 import spimedb.cluster.geometry.geodesic.PositionCalculationType;
@@ -31,8 +33,6 @@ import spimedb.cluster.geometry.geodesic.Track;
 import spimedb.cluster.geometry.geodesic.tracks.Cartesian3DTrack;
 import spimedb.cluster.ml.feature.spatial.TrackFeature;
 import spimedb.cluster.ml.feature.spatial.centroid.TrackCentroid;
-import junit.framework.Assert;
-import org.junit.Test;
 
 public class TrackCentroidTests {
     private static final double EPSILON = 1E-12;

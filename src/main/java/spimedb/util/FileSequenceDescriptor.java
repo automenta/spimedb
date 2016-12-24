@@ -38,7 +38,7 @@ public class FileSequenceDescriptor implements Iterable<String> {
     private class SequenceIterator implements Iterator<String> {
 
         private int curr;
-        private int end;
+        private final int end;
 
         public SequenceIterator(int start, int end) {
             this.curr = start;

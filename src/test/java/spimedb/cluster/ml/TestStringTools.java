@@ -24,9 +24,9 @@
  */
 package spimedb.cluster.ml;
 
-import spimedb.cluster.ml.utils.StringTools;
 import org.junit.Assert;
 import org.junit.Test;
+import spimedb.cluster.ml.utils.StringTools;
 
 public class TestStringTools {
 

@@ -17,7 +17,7 @@ import java.util.List;
  */
 abstract public class ImportSchemaOrg {
 
-    public static void load(final Object self) throws IOException {
+    public static void load(final Object self) {
         try {
             new ImportSchemaOrg() {
 
@@ -80,7 +80,7 @@ abstract public class ImportSchemaOrg {
             //System.out.println("  " + supertypes);
             //System.out.println("  " + properties);
             if (id.equals("Action")) {
-                supertypes = Collections.EMPTY_LIST;
+                supertypes = Collections.emptyList();
             }
 
             onClass(id, label, supertypes, comment);
@@ -109,7 +109,7 @@ abstract public class ImportSchemaOrg {
             if ((line.length >= 4) && (line[3].length() > 0)) {
                 domains = Arrays.asList(line[3].split(" "));
             } else {
-                domains = Collections.EMPTY_LIST;
+                domains = Collections.emptyList();
             }
             if ((line.length >= 5) && (line[4].length() > 0)) {
                 ranges = Arrays.asList(line[4].split(" "));
@@ -120,7 +120,7 @@ abstract public class ImportSchemaOrg {
                  }).collect(toList());*/
 
             } else {
-                ranges = Collections.EMPTY_LIST;
+                ranges = Collections.emptyList();
             }
             onProperty(id, label, domains, ranges, comment);
         }

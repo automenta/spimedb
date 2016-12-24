@@ -48,9 +48,9 @@ public interface roVec3D extends XYZ {
      * 
      * @return result as new vector
      */
-    public Vec3D plus(float a, float b, float c);
+    Vec3D plus(float a, float b, float c);
 
-    public Vec3D plus(roVec3D v);
+    Vec3D plus(roVec3D v);
 
     /**
      * Add vector v and returns result as new vector.
@@ -60,7 +60,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return result as new vector
      */
-    public Vec3D plus(Vec3D v);
+    Vec3D plus(Vec3D v);
 
     /**
      * Computes the angle between this vector and vector V. This function
@@ -72,7 +72,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return angle in radians, or NaN if vectors are parallel
      */
-    public float angleBetween(XYZ v);
+    float angleBetween(XYZ v);
 
     /**
      * Computes the angle between this vector and vector V.
@@ -86,7 +86,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return angle in radians, or NaN if vectors are parallel
      */
-    public float angleBetween(XYZ v, boolean forceNormalize);
+    float angleBetween(XYZ v, boolean forceNormalize);
 
     /**
      * Compares the length of the vector with another one.
@@ -96,14 +96,14 @@ public interface roVec3D extends XYZ {
      * 
      * @return -1 if other vector is longer, 0 if both are equal or else +1
      */
-    public int compareTo(roVec3D v);
+    int compareTo(roVec3D v);
 
     /**
      * Copy.
      * 
      * @return a new independent instance/copy of a given vector
      */
-    public Vec3D copy();
+    Vec3D copy();
 
     /**
      * Calculates cross-product with vector v. The resulting vector is
@@ -114,7 +114,7 @@ public interface roVec3D extends XYZ {
      *
      * @return cross-product as new vector
      */
-    public Vec3D cross(XYZ v);
+    Vec3D cross(XYZ v);
 
     /**
      * Calculates cross-product with vector v. The resulting vector is
@@ -128,7 +128,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return result vector
      */
-    public Vec3D crossInto(XYZ v, Vec3D result);
+    Vec3D crossInto(XYZ v, Vec3D result);
 
 
     /**
@@ -142,14 +142,14 @@ public interface roVec3D extends XYZ {
      * @see <a href="http://en.wikipedia.org/wiki/Dot_product">Wikipedia
      *      entry</a>
      */
-    public float dot(XYZ v);
+    float dot(XYZ v);
 
     /*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object obj);
+    boolean equals(Object obj);
 
     /**
      * Compares this vector with the one given. The vectors are deemed equal if
@@ -163,27 +163,27 @@ public interface roVec3D extends XYZ {
      * 
      * @return true, if equal
      */
-    public boolean equalsWithTolerance(roVec3D v, float tolerance);
+    boolean equalsWithTolerance(roVec3D v, float tolerance);
 
     /**
      * Gets the abs.
      * 
      * @return the abs
      */
-    public Vec3D getAbs();
+    Vec3D getAbs();
 
     /**
      * Converts the spherical vector back into cartesian coordinates.
      * 
      * @return new vector
      */
-    public XYZ getCartesian();
+    XYZ getCartesian();
 
-    public Vec3D.Axis getClosestAxis();
+    Vec3D.Axis getClosestAxis();
 
-    public float getComponent(Vec3D.Axis id);
+    float getComponent(Vec3D.Axis id);
 
-    public float getComponent(int id);
+    float getComponent(int id);
 
 //    /**
 //     * Creates a copy of the vector which forcefully fits in the given AABB.
@@ -209,14 +209,14 @@ public interface roVec3D extends XYZ {
      * 
      * @return result as new vector
      */
-    public XYZ getFrac();
+    XYZ getFrac();
 
     /**
      * Scales vector uniformly by factor -1 ( v = -v ).
      * 
      * @return result as new vector
      */
-    public Vec3D getInverted();
+    Vec3D getInverted();
 
     /**
      * Creates a copy of the vector with its magnitude limited to the length
@@ -227,7 +227,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return result as new vector
      */
-    public XYZ getLimited(float lim);
+    XYZ getLimited(float lim);
 
     /**
      * Produces a new vector with its coordinates passed through the given
@@ -236,7 +236,7 @@ public interface roVec3D extends XYZ {
      * @param map
      * @return mapped vector
      */
-    public XYZ getMapped(ScaleMap map);
+    XYZ getMapped(ScaleMap map);
 
 
     /**
@@ -247,16 +247,16 @@ public interface roVec3D extends XYZ {
      * 
      * @return new vector
      */
-    public Vec3D getNormalizedTo(float len);
+    Vec3D getNormalizedTo(float len);
 
     /**
      * Returns a multiplicative inverse copy of the vector.
      * 
      * @return new vector
      */
-    public XYZ getReciprocal();
+    XYZ getReciprocal();
 
-    public XYZ getReflected(roVec3D normal);
+    XYZ getReflected(roVec3D normal);
 
     /**
      * Gets the rotated around axis.
@@ -268,7 +268,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return new result vector
      */
-    public XYZ getRotatedAroundAxis(roVec3D axis, float theta);
+    XYZ getRotatedAroundAxis(roVec3D axis, float theta);
 
     /**
      * Creates a new vector rotated by the given angle around the X axis.
@@ -278,7 +278,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return rotated vector
      */
-    public XYZ getRotatedX(float theta);
+    XYZ getRotatedX(float theta);
 
     /**
      * Creates a new vector rotated by the given angle around the Y axis.
@@ -288,7 +288,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return rotated vector
      */
-    public XYZ getRotatedY(float theta);
+    XYZ getRotatedY(float theta);
 
     /**
      * Creates a new vector rotated by the given angle around the Z axis.
@@ -298,7 +298,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return rotated vector
      */
-    public XYZ getRotatedZ(float theta);
+    XYZ getRotatedZ(float theta);
 
     /**
      * Creates a new vector with its coordinates rounded to the given precision
@@ -307,7 +307,7 @@ public interface roVec3D extends XYZ {
      * @param prec
      * @return grid aligned vector
      */
-    public XYZ getRoundedTo(float prec);
+    XYZ getRoundedTo(float prec);
 
     /**
      * Creates a new vector in which all components are replaced with the signum
@@ -316,7 +316,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return result vector
      */
-    public Vec3D getSignum();
+    Vec3D getSignum();
 
     /**
      * Converts the vector into spherical coordinates. After the conversion the
@@ -329,7 +329,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return new vector
      */
-    public XYZ getSpherical();
+    XYZ getSpherical();
 
     /**
      * Computes the vector's direction in the XY plane (for example for 2D
@@ -337,7 +337,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return rotation angle
      */
-    public float headingXY();
+    float headingXY();
 
     /**
      * Computes the vector's direction in the XZ plane. The positive X axis
@@ -345,7 +345,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return rotation angle
      */
-    public float headingXZ();
+    float headingXZ();
 
     /**
      * Computes the vector's direction in the YZ plane. The positive Z axis
@@ -353,7 +353,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return rotation angle
      */
-    public float headingYZ();
+    float headingYZ();
 
 
     /**
@@ -377,7 +377,7 @@ public interface roVec3D extends XYZ {
      * @return true, if point is inside the box
      */
 
-    public boolean isInAABB(Vec3D boxOrigin, Vec3D boxExtent);
+    boolean isInAABB(Vec3D boxOrigin, Vec3D boxExtent);
 
     /**
      * Checks if the vector is parallel with either the X or Y axis (any
@@ -386,7 +386,7 @@ public interface roVec3D extends XYZ {
      * @param tolerance
      * @return true, if parallel within the given tolerance
      */
-    public boolean isMajorAxis(float tolerance);
+    boolean isMajorAxis(float tolerance);
 
     /**
      * Checks if vector has a magnitude equals or close to zero (tolerance used
@@ -394,7 +394,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return true, if zero vector
      */
-    public boolean isZeroVector();
+    boolean isZeroVector();
 
 
 
@@ -410,7 +410,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return new vector
      */
-    public XYZ scale(roVec3D s);
+    XYZ scale(roVec3D s);
 
     /**
      * Subtracts vector {a,b,c} and returns result as new vector.
@@ -424,7 +424,7 @@ public interface roVec3D extends XYZ {
      * 
      * @return result as new vector
      */
-    public XYZ sub(float a, float b, float c);
+    XYZ sub(float a, float b, float c);
 
     /**
      * Subtracts vector v and returns result as new vector.
@@ -434,35 +434,35 @@ public interface roVec3D extends XYZ {
      * 
      * @return result as new vector
      */
-    public Vec3D sub(roVec3D v);
+    Vec3D sub(roVec3D v);
 
     /**
      * Creates a new 2D vector of the XY components.
      * 
      * @return new vector
      */
-    public Vec2D to2DXY();
+    Vec2D to2DXY();
 
     /**
      * Creates a new 2D vector of the XZ components.
      * 
      * @return new vector
      */
-    public Vec2D to2DXZ();
+    Vec2D to2DXZ();
 
     /**
      * Creates a new 2D vector of the YZ components.
      * 
      * @return new vector
      */
-    public Vec2D to2DYZ();
+    Vec2D to2DYZ();
 
     /**
      * Creates a Vec4D instance of this vector with the w component set to 1.0
      * 
      * @return 4d vector
      */
-    public Vec4D to4D();
+    Vec4D to4D();
 
     /**
      * Creates a Vec4D instance of this vector with it w component set to the
@@ -471,10 +471,10 @@ public interface roVec3D extends XYZ {
      * @param w
      * @return weighted 4d vector
      */
-    public Vec4D to4D(float w);
+    Vec4D to4D(float w);
 
-    public float[] toArray3();
+    float[] toArray3();
 
-    public float[] toArray4(float w);
+    float[] toArray4(float w);
 
 }

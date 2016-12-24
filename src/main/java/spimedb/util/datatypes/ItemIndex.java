@@ -4,22 +4,22 @@ import java.util.List;
 
 public interface ItemIndex<T> {
 
-    public void clear();
+    void clear();
 
-    public T forID(int id);
+    T forID(int id);
 
-    public int getID(T item);
+    int getID(T item);
 
-    public List<T> getItems();
+    List<T> getItems();
 
-    public int index(T item);
+    int index(T item);
 
-    public boolean isIndexed(T item);
+    boolean isIndexed(T item);
 
-    public int reindex(T item, T newItem);
+    int reindex(T item, T newItem);
 
-    public int size();
+    int size();
 
-    public int unindex(T item);
+    int unindex(T item);
 
 }

@@ -47,8 +47,8 @@ public class SutherlandHodgemanClipper implements PolygonClipper2D {
     }
 
     public Polygon2D clipPolygon(Polygon2D poly) {
-        List<Vec2D> points = new ArrayList<Vec2D>(poly.vertices);
-        List<Vec2D> clipped = new ArrayList<Vec2D>();
+        List<Vec2D> points = new ArrayList<>(poly.vertices);
+        List<Vec2D> clipped = new ArrayList<>();
         points.add(points.get(0));
         for (int edgeID = 0; edgeID < 4; edgeID++) {
             clipped.clear();
@@ -86,7 +86,7 @@ public class SutherlandHodgemanClipper implements PolygonClipper2D {
         return bounds;
     }
 
-    private final Vec2D getClippedPosOnEdge(int edgeID, Vec2D p1, Vec2D p2) {
+    private Vec2D getClippedPosOnEdge(int edgeID, Vec2D p1, Vec2D p2) {
         switch (edgeID) {
             case 0:
                 return new Vec2D(p1.x + ((bounds.y - p1.y) * (p2.x - p1.x))
@@ -108,7 +108,7 @@ public class SutherlandHodgemanClipper implements PolygonClipper2D {
         }
     }
 
-    private final boolean isInsideEdge(Vec2D p, int edgeID) {
+    private boolean isInsideEdge(Vec2D p, int edgeID) {
         switch (edgeID) {
             case 0:
                 return p.y >= bounds.y;
@@ -123,7 +123,7 @@ public class SutherlandHodgemanClipper implements PolygonClipper2D {
         }
     }
 
-    protected boolean isKnownVertex(List<Vec2D> list, Vec2D q) {
+    protected static boolean isKnownVertex(List<Vec2D> list, Vec2D q) {
         for (Vec2D p : list) {
             if (p.equalsWithTolerance(q, 0.0001f)) {
                 return true;

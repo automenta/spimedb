@@ -48,9 +48,9 @@ public class Concept implements Serializable {
 	private int height = -1;
 	private final String name;
 	private Concept parent = null;
-	private final Set<Concept> children = new HashSet<Concept>();
-	private final HashMap<String, Concept> lookupcache = new HashMap<String, Concept>();
-	private final Hashtable<String, Concept> lcacache = new Hashtable<String, Concept>();
+	private final Set<Concept> children = new HashSet<>();
+	private final HashMap<String, Concept> lookupcache = new HashMap<>();
+	private final Hashtable<String, Concept> lcacache = new Hashtable<>();
 	
 	public Concept(String name) {
 		this.name = name;

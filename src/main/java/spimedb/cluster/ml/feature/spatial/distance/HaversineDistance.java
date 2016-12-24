@@ -58,7 +58,7 @@ public class HaversineDistance extends DistanceFunction<GeoSpatialFeature> {
 	    return normDist;
 	}
 	
-	public double distanceInKM(GeoSpatialFeature x, GeoSpatialFeature y) {
+	public static double distanceInKM(GeoSpatialFeature x, GeoSpatialFeature y) {
 		double lat1 = x.getLatitude();
 		double lat2 = y.getLatitude();
 		double lon1 = x.getLongitude();

@@ -11,6 +11,6 @@ public interface PolygonTesselator {
      *            polygon
      * @return list of triangles
      */
-    public List<Triangle2D> tesselatePolygon(Polygon2D poly);
+    List<Triangle2D> tesselatePolygon(Polygon2D poly);
 
 }

@@ -6,7 +6,7 @@ import java.util.TreeSet;
 
 public class NonLinearScaleMap {
 
-    public class Sample implements Comparable<Sample> {
+    public static class Sample implements Comparable<Sample> {
 
         public final double x, y;
 
@@ -20,13 +20,13 @@ public class NonLinearScaleMap {
         }
     }
 
-    private TreeSet<Sample> samples;
+    private final TreeSet<Sample> samples;
 
     private double rangeMin = Float.MAX_VALUE;
     private double rangeMax = Float.MIN_VALUE;
 
     public NonLinearScaleMap() {
-        samples = new TreeSet<Sample>();
+        samples = new TreeSet<>();
     }
 
     public NonLinearScaleMap addSample(double x, double y) {

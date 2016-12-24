@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.List;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
 
 /**
  * Created by me on 6/14/15.

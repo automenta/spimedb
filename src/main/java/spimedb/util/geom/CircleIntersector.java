@@ -34,7 +34,7 @@ package spimedb.util.geom;
  */
 public class CircleIntersector implements Intersector2D {
 
-    private IsectData2D isec = new IsectData2D();
+    private final IsectData2D isec = new IsectData2D();
     private Circle circle;
 
     public CircleIntersector(Circle circle) {

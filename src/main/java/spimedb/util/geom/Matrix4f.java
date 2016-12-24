@@ -697,9 +697,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
                     && this.m22 == m2.m22 && this.m23 == m2.m23
                     && this.m30 == m2.m30 && this.m31 == m2.m31
                     && this.m32 == m2.m32 && this.m33 == m2.m33);
-        } catch (ClassCastException e1) {
-            return false;
-        } catch (NullPointerException e2) {
+        } catch (ClassCastException | NullPointerException e1) {
             return false;
         }
     }
@@ -1256,7 +1254,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
         return ((float) MathUtils.max(tmp_scale));
     }
 
-    private final void getScaleRotate(double scales[], double rots[]) {
+    private void getScaleRotate(double scales[], double rots[]) {
 
         double[] tmp = new double[9]; // scratch matrix
         tmp[0] = m00;
@@ -3238,10 +3236,10 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public String toString() {
         return this.m00 + ", " + this.m01 + ", " + this.m02 + ", " + this.m03
-                + "\n" + this.m10 + ", " + this.m11 + ", " + this.m12 + ", "
-                + this.m13 + "\n" + this.m20 + ", " + this.m21 + ", "
-                + this.m22 + ", " + this.m23 + "\n" + this.m30 + ", "
-                + this.m31 + ", " + this.m32 + ", " + this.m33 + "\n";
+                + '\n' + this.m10 + ", " + this.m11 + ", " + this.m12 + ", "
+                + this.m13 + '\n' + this.m20 + ", " + this.m21 + ", "
+                + this.m22 + ", " + this.m23 + '\n' + this.m30 + ", "
+                + this.m31 + ", " + this.m32 + ", " + this.m33 + '\n';
     }
 
     /**

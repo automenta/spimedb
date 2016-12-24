@@ -19,9 +19,9 @@
  */
 package spimedb.util.geom.nurbs;
 
-import spimedb.util.geom.XYZ;
 import spimedb.util.geom.Vec3D;
 import spimedb.util.geom.Vec4D;
+import spimedb.util.geom.XYZ;
 
 /**
  * A Basic NurbsSurface implementation.
@@ -31,9 +31,9 @@ import spimedb.util.geom.Vec4D;
  */
 public class BasicNurbsSurface implements NurbsSurface {
 
-    private KnotVector uKnots;
-    private KnotVector vKnots;
-    private ControlNet cpnet;
+    private final KnotVector uKnots;
+    private final KnotVector vKnots;
+    private final ControlNet cpnet;
 
     // private List<TrimCurve> trimms = new LinkedList<TrimCurve>();
 
@@ -179,18 +179,14 @@ public class BasicNurbsSurface implements NurbsSurface {
                 final int length = resk0[i].length;
                 final Vec4D[] resk0i = resk0[i];
                 Vec4D[] vcps = new Vec4D[length];
-                for (int idx = 0; idx < length; idx++) {
-                    vcps[idx] = resk0i[idx];
-                }
+                System.arraycopy(resk0i, 0, vcps, 0, length);
                 final int dd = (d - k) < dv ? (d - k) : dv;
                 Vec4D[][] tmp = new BasicNurbsCurve(vcps, vKnots)
                         .curveDerivCpts(dd, 0, s);
                 for (int l = 1; l <= dd; l++) {
                     final Vec4D[] reskli = result[k][l][i];
                     final Vec4D[] tmpL = tmp[l];
-                    for (int j = 0; j <= (s - 1); j++) {
-                        reskli[j] = tmpL[j];
-                    }
+                    System.arraycopy(tmpL, 0, reskli, 0, s - 1 + 1);
                 }
             }
         }

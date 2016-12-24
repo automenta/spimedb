@@ -4,18 +4,18 @@ import java.util.List;
 
 public interface SpatialIndex<T> {
 
-    public void clear();
+    void clear();
 
-    public boolean index(T p);
+    boolean index(T p);
 
-    public boolean isIndexed(T item);
+    boolean isIndexed(T item);
 
-    public List<T> itemsWithinRadius(T p, float radius, List<T> results);
+    List<T> itemsWithinRadius(T p, float radius, List<T> results);
 
-    public boolean reindex(T p, T q);
+    boolean reindex(T p, T q);
 
-    public int size();
+    int size();
 
-    public boolean unindex(T p);
+    boolean unindex(T p);
 
 }

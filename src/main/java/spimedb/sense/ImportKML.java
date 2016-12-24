@@ -6,10 +6,6 @@
 package spimedb.sense;
 
 
-import spimedb.NObject;
-import spimedb.SpimeDB;
-import spimedb.sense.kml.KmlReader;
-import spimedb.sense.kml.UrlRef;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +18,10 @@ import org.opensextant.giscore.events.SimpleField.Type;
 import org.opensextant.giscore.geometry.Geometry;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.utils.Color;
+import spimedb.NObject;
+import spimedb.SpimeDB;
+import spimedb.sense.kml.KmlReader;
+import spimedb.sense.kml.UrlRef;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class ImportKML {
                 //.toByteArray();
     }
 
-    public String[] pathArray(Deque<String> p) {
+    public static String[] pathArray(Deque<String> p) {
         return p.toArray(new String[p.size()]);
     }
 
@@ -82,7 +82,7 @@ public class ImportKML {
     }
 
 
-    public void transformKML(Supplier<KmlReader> source, String layer, SpimeDB st, final GISVisitor visitor) throws Exception {
+    public void transformKML(Supplier<KmlReader> source, String layer, SpimeDB st, final GISVisitor visitor) {
 
         this.layer = layer;
 
@@ -297,7 +297,7 @@ public class ImportKML {
         return url(id, "file:///" + path, null);
     }
 
-    public Runnable url(String id, String url, Proxy proxy) throws IOException {
+    public Runnable url(String id, String url, Proxy proxy) {
         return task(id, () -> {
             try {
                 return new KmlReader(new URL(url), proxy);
@@ -307,7 +307,7 @@ public class ImportKML {
             }
         });
     }
-    public Runnable file(String id, File f) throws IOException {
+    public Runnable file(String id, File f) {
         return task(id, () -> {
             try {
                 return new KmlReader(f);
@@ -362,7 +362,7 @@ public class ImportKML {
                     }
 
                     @Override
-                    public boolean on(IGISObject go, String[] path) throws IOException {
+                    public boolean on(IGISObject go, String[] path) {
 
                         if (go instanceof Style) {
                             onStyle((Style) go);
@@ -407,11 +407,10 @@ public class ImportKML {
                 transformKML(reader, id, geo, new MyGISVisitor(id, styles));
 
                 long end = System.currentTimeMillis();
-                log.warn(id+ " loaded: " + (end-start) + "(ms)");
+                log.warn("{} loaded: {}(ms)", id, end - start);
 
             } catch (Throwable e) {
-                //e.printStackTrace();;
-                System.err.println(e);
+                log.error("error {}", e);
             }
 
         };
@@ -440,7 +439,7 @@ public class ImportKML {
 
     }
 
-    private String filterHTML(String html) {
+    private static String filterHTML(String html) {
 
         try {
             String compressedHtml = compressor.compress(html);
@@ -459,7 +458,7 @@ public class ImportKML {
 //    }
 
 
-    NObject styleJson(NObject fb, Style s) throws IOException {
+    static NObject styleJson(NObject fb, Style s) {
 
         //System.out.println("Applying style: " + s);
         String iconUrl = s.getIconUrl();
@@ -565,7 +564,7 @@ public class ImportKML {
         @Override
         public boolean on(IGISObject go, String[] path) throws IOException {
             if (go == null) {
-                throw new RuntimeException("null GISObject: " + path);
+                throw new RuntimeException("null GISObject: " + Arrays.toString(path));
             }
 
             NObject d;

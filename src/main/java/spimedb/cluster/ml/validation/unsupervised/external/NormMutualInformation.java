@@ -37,13 +37,13 @@ import java.util.*;
  */
 public class NormMutualInformation {
 
-	private Map<String, Collection<Instance>> getEvents(Collection<Cluster> clusters) {
-		Map<String, Collection<Instance>> events = new HashMap<String, Collection<Instance>>();
+	private static Map<String, Collection<Instance>> getEvents(Collection<Cluster> clusters) {
+		Map<String, Collection<Instance>> events = new HashMap<>();
 		
 		for (Cluster c : clusters) {
 			for (Instance inst : c.getMembers()) {
-				if (events.containsKey(inst.getClassLabel()) == false) {
-					events.put(inst.getClassLabel(), new ArrayList<Instance>());
+				if (!events.containsKey(inst.getClassLabel())) {
+					events.put(inst.getClassLabel(), new ArrayList<>());
 				}
 				events.get(inst.getClassLabel()).add(inst);
 			}
@@ -51,18 +51,18 @@ public class NormMutualInformation {
 		return events;
 	}
 	
-	private double getNormFactor(int numInstances, Collection<Instance> instances) {
+	private static double getNormFactor(int numInstances, Collection<Instance> instances) {
 		double val = ((double)instances.size() / numInstances);
 		double norm = val * Math.log(val);
 		return norm;
 	}
 	
-	private double getMI(int numInstances, Collection<Instance> event, Collection<Cluster> clusters) {
+	private static double getMI(int numInstances, Collection<Instance> event, Collection<Cluster> clusters) {
 		double mi = 0;
 		
 		for (Cluster c : clusters) {
 			// calc the intersection of the event with the cluster
-			Set<Instance> intersect = new HashSet<Instance>(c.getMembers());
+			Set<Instance> intersect = new HashSet<>(c.getMembers());
 			intersect.retainAll(event);
 			
 			if (intersect.isEmpty()) continue;
@@ -74,7 +74,7 @@ public class NormMutualInformation {
 		return mi;
 	}
 	
-	public double validate(Collection<Cluster> clusters) {
+	public static double validate(Collection<Cluster> clusters) {
 		int numInstances = 0;
 		double norm = 0, factor1 = 0, factor2 = 0, mi = 0;
 		

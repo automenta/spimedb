@@ -24,11 +24,11 @@
  */
 package spimedb.cluster.ml.unsupervised.cluster;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.cluster.ml.DataSet;
 import spimedb.cluster.ml.Instance;
 import spimedb.cluster.ml.feature.Feature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -61,12 +61,7 @@ public abstract class AbstractClusterer extends BaseClusterer {
 	public void init() {
 		exec = Executors.newFixedThreadPool(DEFAULT_THREAD_POOL, new MyThreadFactory()); //.newSingleThreadExecutor();
 		
-		Runtime.getRuntime().addShutdownHook(new Thread(){
-			@Override
-			public void run(){
-				terminate();
-			}
-		});
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate()));
 	}
 	
 	@Override
@@ -158,11 +153,11 @@ public abstract class AbstractClusterer extends BaseClusterer {
 	
 	@Override
 	public ClusterResult doCluster(DataSet ds) {
-		return doCluster(ds, new LinkedList<Cluster>());
+		return doCluster(ds, new LinkedList<>());
 	}
 	
-	private List<List<? extends Instance>> createBlocks(List<? extends Instance> clusters, int blocksize) {
-		List<List<? extends Instance>> blocks = new LinkedList<List<? extends Instance>>();
+	private static List<List<? extends Instance>> createBlocks(List<? extends Instance> clusters, int blocksize) {
+		List<List<? extends Instance>> blocks = new LinkedList<>();
 		
 		int sIdx = 0;
 		int eIdx = 0;
@@ -187,7 +182,7 @@ public abstract class AbstractClusterer extends BaseClusterer {
 	public DistanceResult bestCluster(final Instance inst, final List<List<? extends Instance>> clusterBlocks) {
 		double bestScore 		= Double.MAX_VALUE;
 		Cluster bestCluster 	= null;
-		CompletionService<DistanceResult> batch = new ExecutorCompletionService<DistanceResult>(getExecutor());
+		CompletionService<DistanceResult> batch = new ExecutorCompletionService<>(getExecutor());
 		
 	
 		for (final List<? extends Instance> clusters : clusterBlocks) {
@@ -237,7 +232,7 @@ public abstract class AbstractClusterer extends BaseClusterer {
 		// if the clusterer hasn't been initially manually then init it now
 		if (exec == null) init();
 		
-		LinkedHashSet<Cluster> modified = new LinkedHashSet<Cluster>();
+		LinkedHashSet<Cluster> modified = new LinkedHashSet<>();
 		
 		for (Instance inst : ds) {
 			// Process in batches of blocks of 100 clusters
@@ -270,7 +265,7 @@ public abstract class AbstractClusterer extends BaseClusterer {
 		double clusterTime = System.currentTimeMillis() - start;
 		log.debug("Clustering time (s): {}", clusterTime / 1000);
 		
-		return new InMemoryClusterResult(new LinkedList<Cluster>(modified));
+		return new InMemoryClusterResult(new LinkedList<>(modified));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -298,7 +293,7 @@ public abstract class AbstractClusterer extends BaseClusterer {
 			}
 		}
 		catch (Exception e) {
-			log.error("Error calculating distance between:\n---\n" + inst1.toString() + "---\n" + inst2.toString() + "---\nException:", e);
+			log.error("Error calculating distance between:\n---\n{}---\n{}---\nException:", inst1.toString(), inst2.toString(), e);
 		}
 		
 		return totalDist;

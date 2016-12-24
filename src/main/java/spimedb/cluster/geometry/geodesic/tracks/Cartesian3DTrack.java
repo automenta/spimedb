@@ -75,8 +75,8 @@ public class Cartesian3DTrack extends Track {
 
 
     private void fillInNeededPoints () {
-        List<Position> filledPoints = new ArrayList<Position>();
-        List<Double> filledParameterization = new ArrayList<Double>();
+        List<Position> filledPoints = new ArrayList<>();
+        List<Double> filledParameterization = new ArrayList<>();
 
         // Calculate the maximum chord length we're allowed with a given error
         // For a chord of angular length theta, the distance from the sphere

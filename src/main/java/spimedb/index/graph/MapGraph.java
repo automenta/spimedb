@@ -245,7 +245,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
 
             // cannot iterate over list - will cause
             // ConcurrentModificationException
-            removeAllEdges(new ArrayList<E>(touchingEdgesList));
+            removeAllEdges(new ArrayList<>(touchingEdgesList));
 
             getVertexSet().remove(v); // remove the vertex itself
 
@@ -323,15 +323,11 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
         Set<E> edges = null;
 
         if (containsVertex(sourceVertex) && containsVertex(targetVertex)) {
-            edges = new ArrayUnenforcedSet<E>();
+            edges = new ArrayUnenforcedSet<>();
 
-            VertexContainer ec = getEdgeContainer(sourceVertex);
+            VertexContainer<C,E> ec = getEdgeContainer(sourceVertex);
 
-            Iterator<E> iter = ec.outgoing.iterator();
-
-            while (iter.hasNext()) {
-                E e = iter.next();
-
+            for (E e : ec.outgoing) {
                 if (getEdgeTarget(e).equals(targetVertex)) {
                     edges.add(e);
                 }
@@ -383,7 +379,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
     @Override
     public Set<E> edgesOf(V vertex) {
         ArrayUnenforcedSet<E> inAndOut =
-                new ArrayUnenforcedSet<E>(getEdgeContainer(vertex).incoming);
+                new ArrayUnenforcedSet<>(getEdgeContainer(vertex).incoming);
         inAndOut.addAll(getEdgeContainer(vertex).outgoing);
 
         // we have two copies for each self-loop - remove one of them.
@@ -391,7 +387,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
             Set<E> loops = getAllEdges(vertex, vertex);
 
             for (int i = 0; i < inAndOut.size(); ) {
-                Object e = inAndOut.get(i);
+                E e = inAndOut.get(i);
 
                 if (loops.contains(e)) {
                     inAndOut.remove(i);
@@ -456,9 +452,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
      */
     private VertexContainer<C, E> getEdgeContainer(V vertex) {
 
-        VertexContainer<C, E> ec = vertices.computeIfAbsent(vertex, v -> {
-            return new VertexContainer(null, newEdgeSet(), newEdgeSet());
-        });
+        VertexContainer<C, E> ec = vertices.computeIfAbsent(vertex, v -> new VertexContainer(null, newEdgeSet(), newEdgeSet()));
 
         return ec;
     }

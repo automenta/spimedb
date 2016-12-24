@@ -24,6 +24,8 @@
  */
 package spimedb.cluster.ml.tracks;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.cluster.geometry.cartesian.CubicBSpline;
 import spimedb.cluster.geometry.geodesic.Position;
 import spimedb.cluster.geometry.geodesic.PositionCalculationParameters;
@@ -40,8 +42,6 @@ import spimedb.cluster.ml.unsupervised.cluster.Cluster;
 import spimedb.cluster.ml.unsupervised.cluster.ClusterResult;
 import spimedb.cluster.ml.unsupervised.cluster.kmeans.KMeans;
 import spimedb.cluster.ml.validation.unsupervised.external.BCubed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;

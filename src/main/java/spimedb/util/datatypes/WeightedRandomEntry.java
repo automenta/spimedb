@@ -32,8 +32,7 @@ package spimedb.util.datatypes;
  * 
  * @param <T>
  */
-public class WeightedRandomEntry<T> implements
-        Comparable<WeightedRandomEntry<T>> {
+public class WeightedRandomEntry<T> implements Comparable<WeightedRandomEntry<T>> {
 
     protected T item;
     protected int weight;

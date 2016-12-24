@@ -35,7 +35,7 @@ public interface Intersector2D {
     /**
      * @return intersection data parcel
      */
-    public IsectData2D getIntersectionData();
+    IsectData2D getIntersectionData();
 
     /**
      * Check if entity intersects with the given ray
@@ -44,6 +44,6 @@ public interface Intersector2D {
      *            ray to check
      * @return true, if ray hits the entity
      */
-    public boolean intersectsRay(Ray2D ray);
+    boolean intersectsRay(Ray2D ray);
 
 }

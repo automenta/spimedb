@@ -38,7 +38,7 @@ package spimedb.util.math;
  */
 public class ExponentialInterpolation implements InterpolateStrategy {
 
-    private float exponent;
+    private final float exponent;
 
     /**
      * Default constructor uses square parabola (exp=2)

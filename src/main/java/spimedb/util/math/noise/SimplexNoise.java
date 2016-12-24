@@ -108,7 +108,7 @@ public class SimplexNoise {
      * To remove the need for index wrapping, double the permutation table
      * length
      */
-    private static int[] perm = new int[0x200];
+    private static final int[] perm = new int[0x200];
     /**
      * A lookup table to traverse the simplex around a given point in 4D.
      * Details can be found where this table is used, in the 4D noise method.
@@ -186,7 +186,7 @@ public class SimplexNoise {
      *            value to be floored
      * @return
      */
-    private static final int fastfloor(double x) {
+    private static int fastfloor(double x) {
         return x >= 0 ? (int) x : (int) x - 1;
     }
 

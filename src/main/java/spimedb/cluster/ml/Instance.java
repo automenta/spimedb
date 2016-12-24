@@ -48,7 +48,7 @@ public class Instance implements Serializable {
 	
 	protected String 	id;
 	protected String	classLabel;
-	protected final Map<String, Feature> features = new LinkedHashMap<String, Feature>();
+	protected final Map<String, Feature> features = new LinkedHashMap<>();
 	
 	public Instance() { 
 		this(UUID.randomUUID().toString());

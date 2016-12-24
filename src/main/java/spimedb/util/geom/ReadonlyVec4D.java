@@ -28,8 +28,8 @@
 package spimedb.util.geom;
 
 import spimedb.util.math.InterpolateStrategy;
-import spimedb.util.math.ScaleMap;
 import spimedb.util.math.MathUtils;
+import spimedb.util.math.ScaleMap;
 
 /**
  * Readonly, immutable interface wrapper for Vec3D instances. Used throughout
@@ -45,9 +45,9 @@ public interface ReadonlyVec4D {
      * 
      * @return result as new vector
      */
-    public Vec4D add(ReadonlyVec4D v);
+    Vec4D add(ReadonlyVec4D v);
 
-    public Vec4D addScaled(ReadonlyVec4D t, float s);
+    Vec4D addScaled(ReadonlyVec4D t, float s);
 
     /**
      * Adds vector {a,b,c} and returns result as new vector.
@@ -61,7 +61,7 @@ public interface ReadonlyVec4D {
      * 
      * @return result as new vector
      */
-    public Vec4D addXYZ(float a, float b, float c);
+    Vec4D addXYZ(float a, float b, float c);
 
     /**
      * Returns the (4-space) angle in radians between this vector and the vector
@@ -71,7 +71,7 @@ public interface ReadonlyVec4D {
      *            the other vector
      * @return the angle in radians in the range [0,PI]
      */
-    public float angleBetween(ReadonlyVec4D v);
+    float angleBetween(ReadonlyVec4D v);
 
     /**
      * Compares the length of the vector with another one.
@@ -81,14 +81,14 @@ public interface ReadonlyVec4D {
      * 
      * @return -1 if other vector is longer, 0 if both are equal or else +1
      */
-    public int compareTo(ReadonlyVec4D v);
+    int compareTo(ReadonlyVec4D v);
 
     /**
      * Copy.
      * 
      * @return a new independent instance/copy of a given vector
      */
-    public Vec4D copy();
+    Vec4D copy();
 
     /**
      * Calculates distance to another vector.
@@ -98,7 +98,7 @@ public interface ReadonlyVec4D {
      * 
      * @return distance or Float.NaN if v=null
      */
-    public float distanceTo(ReadonlyVec4D v);
+    float distanceTo(ReadonlyVec4D v);
 
     /**
      * Calculates the squared distance to another vector.
@@ -110,7 +110,7 @@ public interface ReadonlyVec4D {
      * 
      * @see #magSquared()
      */
-    public float distanceToSquared(ReadonlyVec4D v);
+    float distanceToSquared(ReadonlyVec4D v);
 
     /**
      * Computes the scalar product (dot product) with the given vector.
@@ -123,14 +123,14 @@ public interface ReadonlyVec4D {
      * @see <a href="http://en.wikipedia.org/wiki/Dot_product">Wikipedia
      *      entry</a>
      */
-    public float dot(ReadonlyVec4D v);
+    float dot(ReadonlyVec4D v);
 
     /*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object obj);
+    boolean equals(Object obj);
 
     /**
      * Compares this vector with the one given. The vectors are deemed equal if
@@ -144,21 +144,21 @@ public interface ReadonlyVec4D {
      * 
      * @return true, if equal
      */
-    public boolean equalsWithTolerance(ReadonlyVec4D v, float tolerance);
+    boolean equalsWithTolerance(ReadonlyVec4D v, float tolerance);
 
     /**
      * Gets the abs.
      * 
      * @return the abs
      */
-    public Vec4D getAbs();
+    Vec4D getAbs();
 
     /**
      * Scales vector uniformly by factor -1 ( v = -v ).
      * 
      * @return result as new vector
      */
-    public Vec4D getInvertedXYZ();
+    Vec4D getInvertedXYZ();
 
     /**
      * Produces a new vector with all of its coordinates passed through the
@@ -168,7 +168,7 @@ public interface ReadonlyVec4D {
      * @param map
      * @return mapped vector
      */
-    public Vec4D getMapped(ScaleMap map);
+    Vec4D getMapped(ScaleMap map);
 
     /**
      * Produces a new vector with only its XYZ coordinates passed through the
@@ -178,14 +178,14 @@ public interface ReadonlyVec4D {
      * @param map
      * @return mapped vector
      */
-    public Vec4D getMappedXYZ(ScaleMap map);
+    Vec4D getMappedXYZ(ScaleMap map);
 
     /**
      * Produces the normalized version as a new vector.
      * 
      * @return new vector
      */
-    public Vec4D getNormalized();
+    Vec4D getNormalized();
 
     /**
      * Produces a new vector normalized to the given length.
@@ -195,7 +195,7 @@ public interface ReadonlyVec4D {
      * 
      * @return new vector
      */
-    public Vec4D getNormalizedTo(float len);
+    Vec4D getNormalizedTo(float len);
 
     /**
      * Gets the rotated around axis.
@@ -207,7 +207,7 @@ public interface ReadonlyVec4D {
      * 
      * @return new result vector
      */
-    public Vec4D getRotatedAroundAxis(roVec3D axis, float theta);
+    Vec4D getRotatedAroundAxis(roVec3D axis, float theta);
 
     /**
      * Creates a new vector rotated by the given angle around the X axis.
@@ -217,7 +217,7 @@ public interface ReadonlyVec4D {
      * 
      * @return rotated vector
      */
-    public Vec4D getRotatedX(float theta);
+    Vec4D getRotatedX(float theta);
 
     /**
      * Creates a new vector rotated by the given angle around the Y axis.
@@ -227,7 +227,7 @@ public interface ReadonlyVec4D {
      * 
      * @return rotated vector
      */
-    public Vec4D getRotatedY(float theta);
+    Vec4D getRotatedY(float theta);
 
     /**
      * Creates a new vector rotated by the given angle around the Z axis.
@@ -237,7 +237,7 @@ public interface ReadonlyVec4D {
      * 
      * @return rotated vector
      */
-    public Vec4D getRotatedZ(float theta);
+    Vec4D getRotatedZ(float theta);
 
     /**
      * Creates a new vector with its XYZ coordinates rounded to the given
@@ -246,11 +246,11 @@ public interface ReadonlyVec4D {
      * @param prec
      * @return grid aligned vector
      */
-    public Vec4D getRoundedXYZTo(float prec);
+    Vec4D getRoundedXYZTo(float prec);
 
-    public Vec4D getUnweighted();
+    Vec4D getUnweighted();
 
-    public Vec4D getWeighted();
+    Vec4D getWeighted();
 
     /**
      * Interpolates the vector towards the given target vector, using linear
@@ -263,7 +263,7 @@ public interface ReadonlyVec4D {
      * 
      * @return result as new vector
      */
-    public Vec4D interpolateTo(ReadonlyVec4D v, float f);
+    Vec4D interpolateTo(ReadonlyVec4D v, float f);
 
     /**
      * Interpolates the vector towards the given target vector, using the given
@@ -278,7 +278,7 @@ public interface ReadonlyVec4D {
      * 
      * @return result as new vector
      */
-    public Vec4D interpolateTo(ReadonlyVec4D v, float f, InterpolateStrategy s);
+    Vec4D interpolateTo(ReadonlyVec4D v, float f, InterpolateStrategy s);
 
     /**
      * Checks if vector has a magnitude equals or close to zero (tolerance used
@@ -286,14 +286,14 @@ public interface ReadonlyVec4D {
      * 
      * @return true, if zero vector
      */
-    public boolean isZeroVector();
+    boolean isZeroVector();
 
     /**
      * Calculates the magnitude/eucledian length of the vector.
      * 
      * @return vector length
      */
-    public float magnitude();
+    float magnitude();
 
     /**
      * Calculates only the squared magnitude/length of the vector. Useful for
@@ -302,7 +302,7 @@ public interface ReadonlyVec4D {
      * 
      * @return squared magnitude (x^2 + y^2 + z^2)
      */
-    public float magSquared();
+    float magSquared();
 
     /**
      * Scales vector uniformly and returns result as new vector.
@@ -312,7 +312,7 @@ public interface ReadonlyVec4D {
      * 
      * @return new vector
      */
-    public Vec4D scale(float s);
+    Vec4D scale(float s);
 
     /**
      * Scales vector non-uniformly and returns result as new vector.
@@ -326,7 +326,7 @@ public interface ReadonlyVec4D {
      * 
      * @return new vector
      */
-    public Vec4D scale(float x, float y, float z, float w);
+    Vec4D scale(float x, float y, float z, float w);
 
     /**
      * Scales vector non-uniformly by vector v and returns result as new vector.
@@ -336,7 +336,7 @@ public interface ReadonlyVec4D {
      * 
      * @return new vector
      */
-    public Vec4D scale(ReadonlyVec4D s);
+    Vec4D scale(ReadonlyVec4D s);
 
     /**
      * Subtracts vector v and returns result as new vector.
@@ -346,7 +346,7 @@ public interface ReadonlyVec4D {
      * 
      * @return result as new vector
      */
-    public Vec4D sub(ReadonlyVec4D v);
+    Vec4D sub(ReadonlyVec4D v);
 
     /**
      * Subtracts vector {a,b,c} and returns result as new vector.
@@ -360,19 +360,19 @@ public interface ReadonlyVec4D {
      * 
      * @return result as new vector
      */
-    public Vec4D subXYZ(float a, float b, float c);
+    Vec4D subXYZ(float a, float b, float c);
 
-    public float[] toArray();
+    float[] toArray();
 
-    public Vec3D unweightInto(Vec3D out);
+    Vec3D unweightInto(Vec3D out);
 
-    public float w();
+    float w();
 
-    public XYZ weightInto(Vec3D out);
+    XYZ weightInto(Vec3D out);
 
-    public float x();
+    float x();
 
-    public float y();
+    float y();
 
-    public float z();
+    float z();
 }

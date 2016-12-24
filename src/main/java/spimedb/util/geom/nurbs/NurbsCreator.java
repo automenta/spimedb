@@ -663,7 +663,7 @@ public final class NurbsCreator {
      *             thrown if interpolation failed or is not possible.
      */
     public static NurbsSurface globalSurfaceInterpolation(Vec3D[][] points,
-            int uDegrees, int vDegrees) throws InterpolationException {
+            int uDegrees, int vDegrees) {
         final int n = points.length;
         final int m = points[0].length;
         float[][] uv = surfaceMeshParameters(points, n - 1, m - 1);

@@ -36,7 +36,7 @@ import java.util.List;
 public class LineStrip3D implements Iterable<XYZ> {
 
     @XmlElement(name = "v")
-    protected List<XYZ> vertices = new ArrayList<XYZ>();
+    protected List<XYZ> vertices = new ArrayList<>();
 
     protected float[] arcLenIndex;
 
@@ -154,7 +154,7 @@ public class LineStrip3D implements Iterable<XYZ> {
 
     public List<Line3D> getSegments() {
         final int num = vertices.size();
-        List<Line3D> segments = new ArrayList<Line3D>(num - 1);
+        List<Line3D> segments = new ArrayList<>(num - 1);
         for (int i = 1; i < num; i++) {
             segments.add(new Line3D(vertices.get(i - 1), vertices.get(i)));
         }

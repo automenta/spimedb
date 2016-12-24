@@ -31,8 +31,9 @@ import spimedb.util.geom.roVec3D;
  */
 public class ControlNet {
 
-    private int nU, nV;
-    private Vec4D[][] cps;
+    private final int nU;
+    private final int nV;
+    private final Vec4D[][] cps;
 
     /**
      * Create a ControlNet from the given points the two dimensional array must

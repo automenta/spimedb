@@ -43,7 +43,7 @@ public interface InterpolateStrategy {
      *            normalized interpolation factor (0.0 .. 1.0)
      * @return interpolated value
      */
-    public double interpolate(double a, double b, double f);
+    double interpolate(double a, double b, double f);
 
     /**
      * Implements an interpolation equation using float values.
@@ -56,5 +56,5 @@ public interface InterpolateStrategy {
      *            normalized interpolation factor (0.0 .. 1.0)
      * @return interpolated value
      */
-    public float interpolate(float a, float b, float f);
+    float interpolate(float a, float b, float f);
 }

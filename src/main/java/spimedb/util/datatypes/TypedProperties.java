@@ -53,7 +53,7 @@ public class TypedProperties extends Properties {
      * @return prop value
      */
     public boolean getBoolean(String id, boolean defaultState) {
-        return Boolean.parseBoolean(getProperty(id, "" + defaultState));
+        return Boolean.parseBoolean(getProperty(id, String.valueOf(defaultState)));
     }
 
     /**
@@ -105,7 +105,7 @@ public class TypedProperties extends Properties {
      * @return prop value
      */
     public float getFloat(String id, float defaultValue) {
-        return Float.parseFloat(getProperty(id, "" + defaultValue));
+        return Float.parseFloat(getProperty(id, String.valueOf(defaultValue)));
     }
 
     /**
@@ -170,7 +170,7 @@ public class TypedProperties extends Properties {
      * @return prop value
      */
     public int getInt(String id, int defaultValue) {
-        return Integer.parseInt(getProperty(id, "" + defaultValue));
+        return Integer.parseInt(getProperty(id, String.valueOf(defaultValue)));
     }
 
     /**
@@ -260,7 +260,7 @@ public class TypedProperties extends Properties {
     }
 
     public HashMap<String, String> toHashMap() {
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
         for (String id : stringPropertyNames()) {
             map.put(id, getProperty(id));
         }

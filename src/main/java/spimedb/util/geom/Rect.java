@@ -46,7 +46,7 @@ public class Rect implements Shape2D {
      * @param extent
      * @return new rect
      */
-    public static final Rect fromCenterExtent(ReadonlyVec2D center, Vec2D extent) {
+    public static Rect fromCenterExtent(ReadonlyVec2D center, Vec2D extent) {
         return new Rect(center.sub(extent), center.add(extent));
     }
 
@@ -58,7 +58,7 @@ public class Rect implements Shape2D {
      * @return bounding rect
      * @since 0021
      */
-    public static final Rect getBoundingRect(List<? extends Vec2D> points) {
+    public static Rect getBoundingRect(List<? extends Vec2D> points) {
         final Vec2D first = points.get(0);
         final Rect bounds = new Rect(first.x, first.y, 0, 0);
         for (int i = 1, num = points.size(); i < num; i++) {
@@ -122,10 +122,7 @@ public class Rect implements Shape2D {
         if (px < x || px >= x + width) {
             return false;
         }
-        if (py < y || py >= y + height) {
-            return false;
-        }
-        return true;
+        return !(py < y || py >= y + height);
     }
 
     /**
@@ -149,9 +146,7 @@ public class Rect implements Shape2D {
         try {
             Rect r = (Rect) o;
             return (x == r.x && y == r.y && width == r.width && height == r.height);
-        } catch (NullPointerException e) {
-            return false;
-        } catch (ClassCastException e) {
+        } catch (NullPointerException | ClassCastException e) {
             return false;
         }
     }
@@ -259,7 +254,7 @@ public class Rect implements Shape2D {
     }
 
     public List<Line2D> getEdges() {
-        List<Line2D> edges = new ArrayList<Line2D>();
+        List<Line2D> edges = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             edges.add(getEdge(i));
         }
@@ -519,8 +514,8 @@ public class Rect implements Shape2D {
      * @param theta
      * @param res
      */
-    private void toPolyArc(Polygon2D poly, Vec2D o, float radius, float theta,
-            int res) {
+    private static void toPolyArc(Polygon2D poly, Vec2D o, float radius, float theta,
+                                  int res) {
         for (int i = 0; i <= res; i++) {
             poly.add(o.add(Vec2D.fromTheta(theta + i * MathUtils.HALF_PI / res)
                     .scaleSelf(radius)));
@@ -568,7 +563,7 @@ public class Rect implements Shape2D {
     @Override
     public String toString() {
         return "rect: {x:" + x + ", y:" + y + ", width:" + width + ", height:"
-                + height + "}";
+                + height + '}';
     }
 
     public Rect translate(float dx, float dy) {

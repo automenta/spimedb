@@ -32,7 +32,7 @@ import spimedb.util.math.MathUtils;
 public class Ray3DIntersector implements Intersector3D {
 
     public Ray3D ray;
-    private IsectData3D isec;
+    private final IsectData3D isec;
 
     public Ray3DIntersector(Ray3D ray) {
         this.ray = ray;

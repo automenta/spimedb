@@ -285,7 +285,7 @@ var nfield = {
     }
 };
 
-var NObject = Java.type('automenta.netention.NObject');
+var NObject = Java.type('spimedb.NObject');
 
 function nobject(x) {
     var y = new NObject(x.I, x.N);

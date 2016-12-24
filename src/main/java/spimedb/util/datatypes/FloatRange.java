@@ -143,13 +143,13 @@ public class FloatRange {
     }
 
     public Float[] toArray(float step) {
-        List<Float> range = new LinkedList<Float>();
+        List<Float> range = new LinkedList<>();
         double v = min;
         while (v < max) {
             range.add((float) v);
             v += step;
         }
-        return range.toArray(new Float[0]);
+        return range.toArray(new Float[range.size()]);
     }
 
     @Override

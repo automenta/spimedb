@@ -27,14 +27,14 @@ package spimedb.cluster.math.linearalgebra;
 
 
 public class TriDiagonalMatrix {
-    private int      _n;
+    private final int      _n;
     // The n-1 entries below the diagonal; the array is of size n, though, and
     // the first entry is ignored, for consistency with standard nomenclature
-    private double[] _a;
+    private final double[] _a;
     // The n diagonal entries
-    private double[] _b;
+    private final double[] _b;
     // The n-1 entries above the diagonal
-    private double[] _c;
+    private final double[] _c;
 
     private double EPSILON;
     
@@ -108,7 +108,6 @@ public class TriDiagonalMatrix {
         // there are one, two, or three-or-more rows left to solve.
         int rowsLeft = _n-currentColumn;
         if (0 == rowsLeft) {
-            return; // Nothing left to solve
         } else if (1 == rowsLeft) {
             solveSingleRow(d, x, currentColumn, b0, c0, d0);
         } else if (2 == rowsLeft) {
@@ -118,10 +117,10 @@ public class TriDiagonalMatrix {
         }
     }
 
-    private double anythingIfNotNaN (double testValue) {
+    private static double anythingIfNotNaN(double testValue) {
         return ifNotNaN(testValue, 1.0);
     }
-    private double ifNotNaN (double testValue, double value) {
+    private static double ifNotNaN(double testValue, double value) {
         if (Double.isNaN(testValue)) return Double.NaN;
         else return value;
     }
@@ -186,11 +185,9 @@ public class TriDiagonalMatrix {
                 if (Math.abs(d0) < EPSILON && Math.abs(d1) < EPSILON) {
                     x[currentColumn] = 1;
                     x[currentColumn+1] = 1;
-                    return;
                 } else {
                     x[currentColumn] = Double.NaN;
                     x[currentColumn+1] = Double.NaN;
-                    return;
                 }
             } else {
                 // figure out the proportion
@@ -229,7 +226,6 @@ public class TriDiagonalMatrix {
             //    (b0 b1 - a1 c0) x0 = (b1 d0 - c0 d1)
             x[currentColumn+0] = (b1 * d0 - c0 * d1) / determinate; 
             x[currentColumn+1] = (b0 * d1 - a1 * d0) / determinate;
-            return;
         }
     }
     private double solveDegenerate2D (double a0, double b0, double d0, double a1, double b1, double d1) {
@@ -270,10 +266,8 @@ public class TriDiagonalMatrix {
                 // Nope; doesn't work.
                 for (int i=currentColumn; i<_n; ++i)
                     x[i] = Double.NaN;
-                return;
             } else {
                 x[currentColumn] = anythingIfNotNaN(x[currentColumn+1]);
-                return;
             }
         } else if (Math.abs(b0) < EPSILON) {
             // b0 is 0
@@ -286,7 +280,6 @@ public class TriDiagonalMatrix {
             // a1 x0 + b1 x1 + c1 x2 = d1
             // a1 is known not to be zero, so we shouldn't have any problems.
             x[currentColumn] = (d1 - b1 * x1 - c1 * x2) / a1;
-            return;
         } else if (Math.abs(a1) < EPSILON) {
             // a1 is 0
 
@@ -297,7 +290,6 @@ public class TriDiagonalMatrix {
             double x1 = x[currentColumn+1];
             // b0 x0 + c0 x1 = d0
             x[currentColumn] = (d0 - c0 * x1) / b0;
-            return;
         } else {
             // neither is 0
 
@@ -319,7 +311,6 @@ public class TriDiagonalMatrix {
             double x1 = x[currentColumn+1];
             // b0 x0 + c0 x1 = d0
             x[currentColumn] = (d0 - c0 * x1) / b0;
-            return;
         }
     }
 

@@ -73,9 +73,7 @@ public class Sphere extends Vec3D implements Shape3D {
 
         float dz = z() - p.z(); dz*=dz;
         d += dz;
-        if (d > rsquare) return false;
-
-        return true;
+        return !(d > rsquare);
     }
 
     /**

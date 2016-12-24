@@ -36,7 +36,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
     protected EventReaderImpl stream;
 
     @NonNull
-    private String encoding = "UTF-8";
+    private final String encoding = "UTF-8";
 
     public XmlInputStream(InputStream inputStream) throws IOException {
 
@@ -97,15 +97,15 @@ public abstract class XmlInputStream extends GISInputStreamBase {
 //
 //    }
 
-    protected boolean foundEndTag(XMLEvent event, String tag) {
-        return event == null?true:event.getEventType() == 2 && event.asEndElement().getName().getLocalPart().equals(tag);
+    protected static boolean foundEndTag(XMLEvent event, String tag) {
+        return event == null || event.getEventType() == 2 && event.asEndElement().getName().getLocalPart().equals(tag);
     }
 
-    protected boolean foundEndTag(XMLEvent event, QName name) {
-        return event == null?true:event.getEventType() == 2 && event.asEndElement().getName().equals(name);
+    protected static boolean foundEndTag(XMLEvent event, QName name) {
+        return event == null || event.getEventType() == 2 && event.asEndElement().getName().equals(name);
     }
 
-    protected boolean foundStartTag(StartElement se, String tag) {
+    protected static boolean foundStartTag(StartElement se, String tag) {
         return se.getName().getLocalPart().equals(tag);
     }
 
@@ -119,7 +119,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
             try {
                 el.setNamespace(Namespace.getNamespace(qName.getPrefix(), nsURI));
             } catch (IllegalArgumentException var10) {
-                log.error("Failed to assign namespace " + qName);
+                log.error("Failed to assign namespace {}", qName);
             }
         }
 
@@ -142,7 +142,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
             if(StringUtils.isBlank(oldText)) {
                 text = nextel1.getName().getLocalPart();
             } else {
-                text = oldText + ":" + nextel1.getName().getLocalPart();
+                text = oldText + ':' + nextel1.getName().getLocalPart();
             }
         }
 
@@ -171,11 +171,9 @@ public abstract class XmlInputStream extends GISInputStreamBase {
     protected String getSerializedElement(StartElement start) throws XMLStreamException {
         Element el = (Element)this.getForeignElement(start);
         StringBuilder sb = new StringBuilder(100);
-        Iterator i$ = el.getChildren().iterator();
 
-        while(i$.hasNext()) {
-            Element child = (Element)i$.next();
-            this.serialize(child, sb);
+        for (Object child : el.getChildren()) {
+            this.serialize((Element)child, sb);
         }
 
         sb.append(el.getText());
@@ -183,7 +181,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
     }
 
     private void serialize(Element el, StringBuilder sb) {
-        String name = StringUtils.isNotBlank(el.getPrefix())?el.getPrefix() + ":" + el.getName():el.getName();
+        String name = StringUtils.isNotBlank(el.getPrefix())?el.getPrefix() + ':' + el.getName():el.getName();
         sb.append('<');
         sb.append(name);
         Iterator i$ = el.getAttributes().entrySet().iterator();
@@ -228,9 +226,9 @@ public abstract class XmlInputStream extends GISInputStreamBase {
         String elementText = this.getNonEmptyElementText();
         if(elementText != null) {
             try {
-                return Integer.valueOf(Integer.parseInt(elementText));
+                return Integer.parseInt(elementText);
             } catch (NumberFormatException var4) {
-                log.warn("Ignoring bad value for " + localName + ": " + var4);
+                log.warn("Ignoring bad value for {}: {}", localName, var4);
             }
         }
 
@@ -242,9 +240,9 @@ public abstract class XmlInputStream extends GISInputStreamBase {
         String elementText = this.stream.getElementText();
         if(elementText != null && StringUtils.isNotBlank(elementText)) {
             try {
-                return Double.valueOf(Double.parseDouble(elementText));
+                return Double.parseDouble(elementText);
             } catch (NumberFormatException var4) {
-                log.warn("Ignoring bad value for " + localName + ": " + var4);
+                log.warn("Ignoring bad value for {}: {}", localName, var4);
             }
         }
 
@@ -256,7 +254,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
         try {
             return this.getNonEmptyElementText();
         } catch (XMLStreamException var3) {
-            log.warn("Unable to parse " + name.getLocalPart() + " as text element: " + var3);
+            log.warn("Unable to parse {} as text element: {}", name.getLocalPart(), var3);
             this.skipNextElement(this.stream, name);
             return null;
         }
@@ -266,7 +264,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
         XMLEvent next;
         do {
             next = element.nextEvent();
-        } while(next != null && !this.foundEndTag(next, name));
+        } while(next != null && !XmlInputStream.foundEndTag(next, name));
 
     }
 }

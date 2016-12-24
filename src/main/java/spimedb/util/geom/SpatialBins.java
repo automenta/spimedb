@@ -19,9 +19,9 @@ public class SpatialBins<T> implements SpatialIndex<T> {
     public SpatialBins(float min, float max, int numBins,
             CoordinateExtractor<T> extractor) {
         this.extractor = extractor;
-        this.bins = new ArrayList<HashSet<T>>();
+        this.bins = new ArrayList<>();
         for (int i = 0; i < numBins; i++) {
-            bins.add(new HashSet<T>());
+            bins.add(new HashSet<>());
         }
         this.minOffset = min;
         this.numBins = numBins;
@@ -72,7 +72,7 @@ public class SpatialBins<T> implements SpatialIndex<T> {
         for (int i = Math.max(id - tol, 0), n = Math.min(
                 Math.min(id + tol, numBins), numBins - 1); i <= n; i++) {
             if (results == null) {
-                results = new ArrayList<T>();
+                results = new ArrayList<>();
             }
             results.addAll(bins.get(i));
         }

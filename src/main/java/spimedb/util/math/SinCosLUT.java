@@ -42,7 +42,7 @@ public final class SinCosLUT {
 
     private static SinCosLUT DEFAULT_INSTANCE;
 
-    public static final SinCosLUT getDefaultInstance() {
+    public static SinCosLUT getDefaultInstance() {
         if (DEFAULT_INSTANCE == null) {
             DEFAULT_INSTANCE = new SinCosLUT();
         }
