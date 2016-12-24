@@ -15,38 +15,26 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <geotools.version>12.1</geotools.version>
-        <geotk.version>4.x-SNAPSHOT</geotk.version>
-        <junit.version>4.10</junit.version>
-        <!--<vaadin.version>7.5.0.alpha1</vaadin.version>-->
-
-        <slf4j.version>1.7.7</slf4j.version>
-        <netty.version>4.0.23.Final</netty.version>
-        <reactor.version>1.1.3.RELEASE</reactor.version>
-        <hawtdispatch.version>1.21</hawtdispatch.version>
-
-        <protostuff.version>1.0.8</protostuff.version>
-
-        <!-- testing -->
-        <mockito.version>1.9.5</mockito.version>
-        <aalto.version>0.9.9</aalto.version>
-        <stax2-api.version>3.1.3</stax2-api.version>
-        <jdom.version>2.0.5</jdom.version>
-
 
     </properties>
 
 
     <dependencies>
 
-
-
-
+        <!-- https://mvnrepository.com/artifact/net.sourceforge.argparse4j/argparse4j -->
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
             <artifactId>argparse4j</artifactId>
-            <version>0.5.0</version>
+            <version>0.7.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.fasterxml/aalto-xml -->
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>aalto-xml</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
 
         <dependency>
             <groupId>junit</groupId>
@@ -61,24 +49,25 @@
             <version>2.3</version>
         </dependency>
 
-
+        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.8.3</version>
+            <version>1.10.1</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.pircbotx</groupId>
             <artifactId>pircbotx</artifactId>
-            <version>2.0.1</version>
+            <version>2.1</version>
         </dependency>
 
 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <version>2.5</version>
         </dependency>
 
         <dependency>
@@ -90,21 +79,21 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.1</version>
+            <version>4.5.2</version>
         </dependency>
 
 
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0-rc2</version>
+            <version>21.0-rc1</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.0.31-beta</version>
+            <version>2.4.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -117,7 +106,7 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>0.9.1</version>
+            <version>1.0.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/de.grundid.opendatalab/geojson-jackson -->
         <dependency>
@@ -196,10 +185,11 @@
         -->
 
 
+        <!-- https://mvnrepository.com/artifact/com.rometools/rome-modules -->
         <dependency>
             <groupId>com.rometools</groupId>
             <artifactId>rome-modules</artifactId>
-            <version>1.5.1</version>
+            <version>1.7.0</version>
         </dependency>
 
 
@@ -255,12 +245,13 @@
             <version>1.1.0</version>
         </dependency>
 
-
+        <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.9</version>
+            <version>2.9.6</version>
         </dependency>
+
         <dependency>
             <groupId>com.spatial4j</groupId>
             <artifactId>spatial4j</artifactId>
@@ -415,9 +406,10 @@
 
         <testResources>
             <testResource>
-                <directory>${basedir}/src/test/java/automenta/netention/kml</directory>
+                <directory>${basedir}/src/test/java/spimedb/sense/kml</directory>
                 <includes>
                     <include>*.kmz</include>
+                    <include>*.kml</include>
                 </includes>
                 <filtering>false</filtering>
             </testResource>
