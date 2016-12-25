@@ -6,7 +6,6 @@ import spimedb.impl.InfiniSpimeDB;
 import spimedb.sense.ImportKML;
 import spimedb.web.SpacetimeWebServer;
 
-import javax.script.ScriptException;
 import java.io.File;
 import java.io.IOException;
 
@@ -27,12 +26,12 @@ public class ClimateEditor  {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
             String[] urls = new String[]{
                     //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
                     //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
                     "file:///home/me/kml/submarine-cables-CV3D.kmz",
+                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
+                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
                     // http://climateviewer.org/layers/kml/3rdparty/places/submarine-cables-CV3D.kmz
                     //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
                     //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
@@ -46,19 +45,19 @@ public class ClimateEditor  {
                 }
             }
 
-//            db.forEach(x -> {
-//                System.out.println(x);
-//            });
+            db.forEach(x -> {
+                System.out.println(x);
+            });
         }
 
 
     }
 
 
-    public static void main(String[] args) throws IOException, ScriptException {
+    public static void main(String[] args) {
 
         SpimeDB db = //new OctSpimeDB();
-                InfiniSpimeDB.get("/tmp/climate");
+                InfiniSpimeDB.get(null /* "/tmp/climate" */);
 
         new ClimateEditor(db);
 

@@ -21,6 +21,8 @@ package spimedb.index.rtree;
  */
 
 
+import com.google.common.base.Joiner;
+
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -89,10 +91,11 @@ final class Branch<T> implements Node<T> {
         final HyperRect tRect = builder.apply(t);
         if (size < mMin) {
             for (int i = 0; i < size; i++) {
-                if (child[i].bounds().contains(tRect)) {
-                    child[i] = child[i].add(t);
-                    mbr = mbr.getMbr(child[i].bounds());
-                    return child[i];
+                Node ci = child[i];
+                if (ci.bounds().contains(tRect)) {
+                    child[i] = ci = ci.add(t);
+                    mbr = mbr.getMbr(ci.bounds());
+                    return ci;
                 }
             }
             // no overlapping node - grow
@@ -219,7 +222,7 @@ final class Branch<T> implements Node<T> {
                     leastEnlargement = nodeEnlargement;
                     leastPerimeter = childMbr.perimeter();
                     bestNode = i;
-                } else if (RTree.isEqual(nodeEnlargement, leastEnlargement)) {
+                } else if (RTree.equals(nodeEnlargement, leastEnlargement)) {
                     final double childPerimeter = childMbr.perimeter();
                     if (childPerimeter < leastPerimeter) {
                         leastEnlargement = nodeEnlargement;
@@ -282,5 +285,11 @@ final class Branch<T> implements Node<T> {
             child[i] = child[i].instrument();
         }
         return new CounterNode<>(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Branch" + splitType + "{" + mbr + "x" + size + ":\n\t" +
+                (child!=null ? Joiner.on("\n\t").skipNulls().join(child) : "null") + "\n}";
     }
 }

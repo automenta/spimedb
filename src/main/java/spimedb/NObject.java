@@ -199,10 +199,6 @@ public class NObject extends RectND implements Serializable {
     }
 
 
-    @JsonIgnore
-    public boolean isSpatial() {
-        return Double.isFinite(getRange(1));
-    }
 
 
     public NObject name(String name) {

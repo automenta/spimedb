@@ -3,7 +3,7 @@ package spimedb.sense.kml;
 
 import org.junit.Test;
 import spimedb.SpimeDB;
-import spimedb.impl.OctSpimeDB;
+import spimedb.impl.RTreeSpimeDB;
 import spimedb.sense.ImportKML;
 
 import java.io.File;
@@ -15,7 +15,7 @@ import static junit.framework.TestCase.assertEquals;
 
 public class TestKMZUnfucking {
     @Test public void testKMLGeometry1() throws IOException {
-        SpimeDB es = new OctSpimeDB();
+        SpimeDB es = new RTreeSpimeDB();
         URL v = TestKMZUnfucking.class.getClassLoader().getResource("WeeklyVolcanoGE-Reports.kmz");
         //System.out.println(v);
 

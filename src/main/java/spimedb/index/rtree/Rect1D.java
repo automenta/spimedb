@@ -38,7 +38,12 @@ public abstract class Rect1D implements HyperRect<Point1D> {
 
     @Override
     public HyperPoint center() {
-        return new Point1D((from() + to()) / 2.0);
+        return new Point1D(center(0));
+    }
+
+    @Override public double center(int d) {
+        assert(d==0);
+        return (from() + to()) / 2.0;
     }
 
     @Override

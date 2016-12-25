@@ -114,11 +114,7 @@ public class SpacetimeTagPlan {
                 for (String s : this) {
                     switch (s) {
                         case "lat":
-                            if (o.isSpatial())
-                                d[i] = latitude(o);
-                            else {
-                                return goals; //this nobject is invalid, return; goals will be empty
-                            }
+                            d[i] = latitude(o);
                             break;
                         case "lon":
                             d[i] = longitude(o);

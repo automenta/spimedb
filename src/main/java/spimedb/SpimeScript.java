@@ -5,7 +5,7 @@
  */
 package spimedb;
 
-import spimedb.impl.OctSpimeDB;
+import spimedb.impl.RTreeSpimeDB;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -97,7 +97,7 @@ public class SpimeScript extends JSScript {
     }
 
     public static void main(String[] args) throws Exception {
-        repl(new SpimeScript(new OctSpimeDB()).engine);
+        repl(new SpimeScript(new RTreeSpimeDB()).engine);
     }
 
 }

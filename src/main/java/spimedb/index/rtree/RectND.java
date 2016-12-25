@@ -91,7 +91,7 @@ public class RectND implements HyperRect<PointND> {
         float sigma = 1f;
         int dim = dim();
         for (int i = 0; i < dim; i++) {
-            sigma *= max.coord[i] - min.coord[i];
+            sigma *= getRangeFinite(i, 1 /* an infinite dimension can not be compared, so just ignore it */);
         }
         return sigma;
     }
@@ -111,11 +111,15 @@ public class RectND implements HyperRect<PointND> {
     }
 
 
-    public float center(int dim) {
+    @Override public double center(int dim) {
+        return centerF(dim);
+    }
+
+    public float centerF(int dim) {
         float min = this.min.coord[dim];
         float max = this.max.coord[dim];
         if ((min == Float.NEGATIVE_INFINITY) && (max == Float.POSITIVE_INFINITY))
-            return Float.NaN;
+            return 0;
         if (min == Float.NEGATIVE_INFINITY)
             return max;
         if (max == Float.POSITIVE_INFINITY)
@@ -129,7 +133,7 @@ public class RectND implements HyperRect<PointND> {
         int dim = dim();
         float[] c = new float[dim];
         for (int i = 0; i < dim; i++) {
-            c[i] = center(i);
+            c[i] = centerF(i);
         }
         return new PointND(c);
     }
@@ -153,8 +157,10 @@ public class RectND implements HyperRect<PointND> {
     @Override public double getRange(final int i) {
         float min = this.min.coord[i];
         float max = this.max.coord[i];
+        if (min == max)
+            return 0;
         if ((min == Float.NEGATIVE_INFINITY) || (max == Float.POSITIVE_INFINITY))
-            return Float.NaN;
+            return Float.POSITIVE_INFINITY;
         return (max - min);
     }
 

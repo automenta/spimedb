@@ -53,24 +53,23 @@ public class RTree<T> implements SpatialSearch<T> {
         root = Leaf.create(builder, mMin, mMax, splitType);
     }
 
-    static boolean isEqual(final double a, final double b) {
-        return equals(a, b, EPSILON);
-    }
-
     public static boolean equals(float a, float b) {
-        return equals(a, b, Float.MIN_VALUE * 2);
+        return equals(a, b, FPSILON );
     }
     public static boolean equals(float a, float b, float epsilon) {
-        return Math.abs(a - b) < epsilon;
+        return a==b || Math.abs(a - b) < epsilon;
     }
     public static boolean equals(double a, double b) {
-        return equals(a, b, Double.MIN_VALUE * 2);
+        return equals(a, b, EPSILON);
     }
-    public static boolean equals(double a, double b, double epsilon) { return Math.abs(a - b) < epsilon;     }
+    public static boolean equals(double a, double b, double epsilon) {
+        return a == b || Math.abs(a - b) < epsilon;
+    }
+
     public static boolean equals(float[] a, float[] b, float epsilon) {
         if (a == b) return true;
         for (int i = 0; i < a.length; i++) {
-            if (Math.abs(a[i] - b[i]) >= epsilon)
+            if (!equals(a[i], b[i], epsilon))
                 return false;
         }
         return true;

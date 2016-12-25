@@ -31,8 +31,10 @@ import java.util.function.Predicate;
 abstract class Leaf<T> implements Node<T> {
     final int mMax;       // max entries per node
     final int mMin;       // least number of entries per node
+
     final HyperRect[] r;
     final T[] entry;
+
     final RectBuilder<T> builder;
     final RTree.Split splitType;
     HyperRect mbr;
@@ -52,12 +54,11 @@ abstract class Leaf<T> implements Node<T> {
     static <R> Node<R> create(final RectBuilder<R> builder, final int mMin, final int M, final RTree.Split splitType) {
 
         switch (splitType) {
-            case AXIAL:
-                return new AxialSplitLeaf<>(builder, mMin, M);
             case LINEAR:
                 return new LinearSplitLeaf<>(builder, mMin, M);
             case QUADRATIC:
                 return new QuadraticSplitLeaf<>(builder, mMin, M);
+            case AXIAL:
             default:
                 return new AxialSplitLeaf<>(builder, mMin, M);
 
@@ -208,24 +209,30 @@ abstract class Leaf<T> implements Node<T> {
      * @param t      data entry to be added
      */
     final void classify(final Node<T> l1Node, final Node<T> l2Node, final T t) {
+
         final HyperRect tRect = builder.apply(t);
         final HyperRect l1Mbr = l1Node.bounds().getMbr(tRect);
+
+        double tCost = tRect.cost();
+
+        double l1c = l1Mbr.cost();
+        final double l1CostInc = Math.max(l1c - (l1Node.bounds().cost() + tCost), 0.0);
         final HyperRect l2Mbr = l2Node.bounds().getMbr(tRect);
-        final double l1CostInc = Math.max(l1Mbr.cost() - (l1Node.bounds().cost() + tRect.cost()), 0.0);
-        final double l2CostInc = Math.max(l2Mbr.cost() - (l2Node.bounds().cost() + tRect.cost()), 0.0);
+        double l2c = l2Mbr.cost();
+        final double l2CostInc = Math.max(l2c - (l2Node.bounds().cost() + tCost), 0.0);
         if (l2CostInc > l1CostInc) {
             l1Node.add(t);
-        } else if (RTree.isEqual(l1CostInc, l2CostInc)) {
-            final double l1MbrCost = l1Mbr.cost();
-            final double l2MbrCost = l2Mbr.cost();
+        } else if (RTree.equals(l1CostInc, l2CostInc)) {
+            final double l1MbrCost = l1c;
+            final double l2MbrCost = l2c;
             if (l1MbrCost < l2MbrCost) {
                 l1Node.add(t);
-            } else if (RTree.isEqual(l1MbrCost, l2MbrCost)) {
+            } else if (RTree.equals(l1MbrCost, l2MbrCost)) {
                 final double l1MbrMargin = l1Mbr.perimeter();
                 final double l2MbrMargin = l2Mbr.perimeter();
                 if (l1MbrMargin < l2MbrMargin) {
                     l1Node.add(t);
-                } else if (RTree.isEqual(l1MbrMargin, l2MbrMargin)) {
+                } else if (RTree.equals(l1MbrMargin, l2MbrMargin)) {
                     // break ties with least number
                     ((l1Node.size() < l2Node.size()) ? l1Node : l2Node).add(t);
 
@@ -244,5 +251,10 @@ abstract class Leaf<T> implements Node<T> {
     @Override
     public Node<T> instrument() {
         return new CounterNode<>(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Leaf" + splitType + "{" + mbr + "x" + size +'}';
     }
 }

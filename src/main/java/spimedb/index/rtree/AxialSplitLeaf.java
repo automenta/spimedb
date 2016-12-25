@@ -21,6 +21,7 @@ package spimedb.index.rtree;
  */
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Fast RTree split suggested by Yufei Tao taoyf@cse.cuhk.edu.hk
@@ -42,29 +43,26 @@ public final class AxialSplitLeaf<T> extends Leaf<T> {
         final Node<T> l2Node = create(builder, mMin, mMax, splitType);
         final int nD = r[0].dim();
 
-        final HyperRect[] sortedMbr = new HyperRect[size];
-        System.arraycopy(r, 0, sortedMbr, 0, size);
+        final HyperRect[] sortedMbr = r.clone();
 
         // choose axis to split
         int axis = 0;
-        double rangeD = mbr.getRange(0);
+        double rangeD = mbr.getRangeFinite(0, 0);
         for (int d = 1; d < nD; d++) {
-            // split along the greatest range extent
-            final double dr = mbr.getRange(d);
+            // split along the greatest finite range extent
+            final double dr = mbr.getRangeFinite(d, 0);
             if (dr > rangeD) {
                 axis = d;
                 rangeD = dr;
             }
         }
 
+        if (rangeD == 0 || !Double.isFinite(rangeD))
+            throw new UnsupportedOperationException("non-finite range can not be split in " + this);
+
         final int splitDimension = axis;
 
-        Arrays.sort(sortedMbr, (o1, o2) -> {
-            final HyperPoint p1 = o1.center();
-            final HyperPoint p2 = o2.center();
-
-            return p1.coord(splitDimension).compareTo(p2.coord(splitDimension));
-        });
+        Arrays.sort(sortedMbr, Comparator.comparingDouble(o -> o.center(splitDimension)));
 
         for (int i = 0; i < size / 2; i++) {
             outerLoop:

@@ -3,9 +3,13 @@ package spimedb.index.rtree;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.IntFunction;
 
-import static spimedb.index.rtree.RTree2DTest.createRectNDTree;
-import static spimedb.index.rtree.RTree2DTest.generateRandomRects;
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static spimedb.index.rtree.RTree2DTest.*;
 
 /**
  * Created by me on 12/21/16.
@@ -47,13 +51,19 @@ public class RTreeNDTest {
 
             // If the order of nodes in the tree changes, this test may fail while returning the correct results.
             for (int i = 0; i < resultCount; i++) {
-                Assert.assertTrue("Unexpected result found", results[i].min.coord[0] == i + 2 && results[i].min.coord[1] == i + 2 && results[i].max.coord[0] == i + 5 && results[i].max.coord[1] == i + 5);
+                assertTrue("Unexpected result found", results[i].min.coord[0] == i + 2 && results[i].min.coord[1] == i + 2 && results[i].max.coord[0] == i + 5 && results[i].max.coord[1] == i + 5);
             }
 
             System.out.println("\t" + rTree.stats());
         }
     }
 
+    @Test
+    public void testSearchAllWithOneDimensionRandomlyInfinite() {
+        System.out.println("\n\nINfinites");
+        final int entryCount = 400;
+        searchAll(2, 4, (dim)-> generateRandomRectsWithOneDimensionRandomlyInfinite(dim, entryCount));
+    }
 
     /**
      * Use an enormous bounding box to ensure that every rectangle is returned.
@@ -61,13 +71,20 @@ public class RTreeNDTest {
      */
     @Test
     public void RectNDSearchAllTest() {
+        System.out.println("\n\nfinites");
+        final int entryCount = 400;
+        searchAll(1, 6, (dim)->generateRandomRects(dim, entryCount));
+    }
 
-        final int entryCount = 1000;
-        for (int dim = 2; dim <= 7; dim++) {
+    static void searchAll(int minDim, int maxDim, IntFunction<RectND[]> generator) {
+        for (int dim = minDim; dim <= maxDim; dim++) {
 
-            final RectND[] rects = generateRandomRects(dim, entryCount);
+            final RectND[] rects = generator.apply(dim);
+            Set<RectND> input = new HashSet();
+            for (RectND r : rects)
+                input.add(r);
 
-            System.out.println("RectNDSearchAllTest[dim=" + dim + ']');
+            System.out.println("\tRectNDSearchAllTest[dim=" + dim + ']');
 
             for (RTree.Split type : RTree.Split.values()) {
                 RTree<RectND> rTree = createRectNDTree(2, 8, type);
@@ -80,7 +97,7 @@ public class RTreeNDTest {
                         PointND.fill(dim, Float.POSITIVE_INFINITY)
                 );
 
-                RectND[] results = new RectND[entryCount];
+                RectND[] results = new RectND[rects.length];
 
                 final int foundCount = rTree.containing(searchRect, results);
                 int resultCount = 0;
@@ -90,12 +107,22 @@ public class RTreeNDTest {
                     }
                 }
 
-                final int expectedCount = entryCount;
+                final int expectedCount = rects.length;
                 Assert.assertEquals("[" + type + "] Search returned incorrect search result count - expected: " + expectedCount + " actual: " + foundCount, expectedCount, foundCount);
                 Assert.assertEquals("[" + type + "] Search returned incorrect number of rectangles - expected: " + expectedCount + " actual: " + resultCount, expectedCount, resultCount);
 
-                System.out.println("\t" + rTree.stats());
+                Set<RectND> output = new HashSet();
+                for (RectND r : results)
+                    output.add(r);
 
+
+                assertEquals( " same content", input, output);
+
+
+                Stats s = rTree.stats();
+                System.out.println("\t" + s);
+                //System.out.println("\t" + rTree.getRoot());
+                assertTrue(s.getMaxDepth() < 8 /* reasonable */);
             }
         }
     }

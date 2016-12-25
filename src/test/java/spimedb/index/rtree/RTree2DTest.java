@@ -294,6 +294,7 @@ public class RTree2DTest {
 
         return rects;
     }
+
     /**
      * Generate 'count' random rectangles with fixed ranges.
      *
@@ -324,6 +325,49 @@ public class RTree2DTest {
 
         return rects;
     }
+
+    /**
+     * Generate 'count' random rectangles with fixed ranges.
+     *
+     * @param count - number of rectangles to generate
+     * @return array of generated rectangles
+     */
+    public static RectND[] generateRandomRectsWithOneDimensionRandomlyInfinite(int dimension, int count) {
+        final Random rand = new Random(13);
+
+        // changing these values changes the rectangle sizes and consequently the distribution density
+        final int minX = 500;
+        final int maxXRange = 25;
+
+
+
+        final RectND[] rects = new RectND[count];
+        for (int i = 0; i < count; i++) {
+
+            float[] min = new float[dimension];
+            float[] max = new float[dimension];
+            for (int d = 0; d < dimension; d++){
+                float x1 = min[d] = rand.nextInt(minX);
+                max[d] = x1 + rand.nextInt(maxXRange);
+            }
+
+            //zero or one dimension will have infinite range, 50% probability of being infinite
+            //int infDim = rand.nextInt(dimension*2);
+            //if (infDim < dimension) {
+
+            //one dimension (0) randomly infinite:
+            if (rand.nextBoolean()) {
+                int infDim = 0;
+                min[infDim] = Float.NEGATIVE_INFINITY;
+                max[infDim] = Float.POSITIVE_INFINITY;
+            }
+
+            rects[i] = new RectND(min, max);
+        }
+
+        return rects;
+    }
+
     /**
      * Create a tree capable of holding rectangles with default minM (2) and maxM (8) values.
      *

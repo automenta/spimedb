@@ -81,13 +81,22 @@ public class Rect2D implements HyperRect<Rect2D> {
 
     @Override
     public HyperPoint center() {
-        final double dx = min.x + (max.x - min.x) / 2.0;
-        final double dy = min.y + (max.y - min.y) / 2.0;
+        final double dx = center(0);
+        final double dy = center(1);
 
         return new Point2D(dx, dy);
     }
 
-    @Override
+    @Override public double center(int d) {
+        if (d == 0) {
+            return min.x + (max.x - min.x) / 2.0;
+        } else {
+            assert(d==1);
+            return min.y + (max.y - min.y) / 2.0;
+        }
+    }
+
+        @Override
     public HyperPoint getMin() {
         return min;
     }
@@ -141,10 +150,10 @@ public class Rect2D implements HyperRect<Rect2D> {
 
         Rect2D rect2D = (Rect2D) o;
 
-        return RTree.isEqual(min.x , rect2D.min.x) &&
-                RTree.isEqual(max.x , rect2D.max.x) &&
-                RTree.isEqual(min.y , rect2D.min.y) &&
-                RTree.isEqual(max.y , rect2D.max.y);
+        return RTree.equals(min.x, rect2D.min.x) &&
+                RTree.equals(max.x, rect2D.max.x) &&
+                RTree.equals(min.y, rect2D.min.y) &&
+                RTree.equals(max.y, rect2D.max.y);
     }
 
     @Override

@@ -7,6 +7,8 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.graph.MapGraph;
@@ -27,7 +29,9 @@ import java.util.function.Consumer;
 import static spimedb.index.rtree.SpatialSearch.*;
 
 
-public class OctSpimeDB implements SpimeDB {
+public class RTreeSpimeDB implements SpimeDB {
+
+    final static Logger logger = LoggerFactory.getLogger(RTreeSpimeDB.class);
 
     public enum OpEdge {
         extinh, intinh
@@ -37,11 +41,11 @@ public class OctSpimeDB implements SpimeDB {
     public final SpatialSearch<NObject> r;
 
     /** in-memory, map-based */
-    public OctSpimeDB() {
+    public RTreeSpimeDB() {
         this(new SpimeMapGraph());
     }
 
-    public OctSpimeDB(MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> g) {
+    public RTreeSpimeDB(MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> g) {
         this.graph = g;
 
         /*this.oct = new MyOctBox(
@@ -50,20 +54,27 @@ public class OctSpimeDB implements SpimeDB {
                 new Vec3D(0.05f, 0.05f, 0.05f));*/
 
         r = new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
-                DEFAULT_MIN_M, DEFAULT_MAX_M, DEFAULT_SPLIT_TYPE),
-                new ReentrantReadWriteLock(true));
+                2, 8, DEFAULT_SPLIT_TYPE),
+                new ReentrantReadWriteLock());
 
         /** add any pre-existing values */
         graph.vertices.forEach((k,v)->{
-            r.add(v.value());
+
+            tryIndex(v.value());
         });
+
+    }
+
+    private void tryIndex(NObject value) {
+        if (value.bounded())
+            r.add(value);
     }
 
     @Override
     public String toString() {
-        return "OctSpimeDB{" +
+        return "RTreeSpimeDB{" +
                 graph +
-                "\n, r=" + r +
+                "\n, r=" + r.stats() +
                 '}';
     }
 
@@ -76,9 +87,7 @@ public class OctSpimeDB implements SpimeDB {
     public NObject put(NObject d) {
         final String id = d.getId();
 
-        if (d.isSpatial()) {
-            r.add(d);
-        }
+        tryIndex(d);
 
         graph.put(id, d);
 

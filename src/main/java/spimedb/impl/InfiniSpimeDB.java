@@ -4,12 +4,12 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.infinispan.Cache;
-import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.stats.Stats;
+import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.graph.MapGraph;
@@ -23,7 +23,7 @@ import java.util.Set;
  */
 public class InfiniSpimeDB {
 
-    public static SpimeDB get(String path) {
+    public static SpimeDB get(@Nullable String path) {
 
         GlobalConfiguration global = new GlobalConfigurationBuilder()
                 .serialization()
@@ -31,19 +31,20 @@ public class InfiniSpimeDB {
 //                .addAdvancedExternalizer(new ConceptExternalizer())
                 .build();
 
-        Configuration infinispanConfiguration = new ConfigurationBuilder()
-                .unsafe()
-                //.versioning().disable()
-                .storeAsBinary().storeKeysAsBinary(true).storeValuesAsBinary(true)
-                .persistence()
-                //.passivation(true)
-                .addSingleFileStore().location(path)
-                //cb.locking().concurrencyLevel(1);
-                //cb.customInterceptors().addInterceptor();
-                .jmxStatistics().disable()
-                .build();
+        ConfigurationBuilder cfg = new ConfigurationBuilder();
+        cfg
+            .unsafe()
+            .storeAsBinary().storeKeysAsBinary(true).storeValuesAsBinary(true)
+            .jmxStatistics().disable();
+            //.versioning().disable()
+            //.passivation(true)
+            //cb.locking().concurrencyLevel(1);
+            //cb.customInterceptors().addInterceptor();
 
-        DefaultCacheManager cm = new DefaultCacheManager(global, infinispanConfiguration);
+        if (path!=null)
+            cfg.persistence().addSingleFileStore().location(path);
+
+        DefaultCacheManager cm = new DefaultCacheManager(global, cfg.build());
 
 //        this.conceptsLocal = new DecoratedCache<>(
 //                concepts.getAdvancedCache(),
@@ -52,20 +53,20 @@ public class InfiniSpimeDB {
 //        this.conceptsLocalNoResult = conceptsLocal.withFlags(Flag.IGNORE_RETURN_VALUES, Flag.SKIP_CACHE_LOAD, Flag.SKIP_REMOTE_LOOKUP);
 
 
-        Cache<String, VertexContainer<NObject, Pair<OctSpimeDB.OpEdge, Twin<String>>>> vertex =
+        Cache<String, VertexContainer<NObject, Pair<RTreeSpimeDB.OpEdge, Twin<String>>>> vertex =
                 cm.getCache("vertex");
 
-        Cache<Pair<OctSpimeDB.OpEdge, Twin<String>>, Twin<String>> edge =
+        Cache<Pair<RTreeSpimeDB.OpEdge, Twin<String>>, Twin<String>> edge =
                 cm.getCache("edge");
 
         enableStats(vertex);
         enableStats(edge);
 
-        OctSpimeDB db = new OctSpimeDB(new MapGraph<String, NObject, Pair<OctSpimeDB.OpEdge, Twin<String>>>(vertex, edge) {
+        RTreeSpimeDB db = new RTreeSpimeDB(new MapGraph<String, NObject, Pair<RTreeSpimeDB.OpEdge, Twin<String>>>(vertex, edge) {
 
 
             @Override
-            protected Set<Pair<OctSpimeDB.OpEdge, Twin<String>>> newEdgeSet() {
+            protected Set<Pair<RTreeSpimeDB.OpEdge, Twin<String>>> newEdgeSet() {
                 return new UnifiedSet<>(0);
             }
 
