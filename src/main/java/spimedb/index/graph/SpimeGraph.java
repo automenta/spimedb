@@ -28,6 +28,7 @@ public class SpimeGraph implements SpimeDB {
 
 
     final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph = new SpimeMapGraph();
+
     public final OctBox<byte[]> spacetime = new OctBox(
             new Vec3D(-180f, -90f, 0),
             new Vec3D(360f, 180f, 0),

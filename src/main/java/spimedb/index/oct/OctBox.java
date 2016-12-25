@@ -453,8 +453,6 @@ public class OctBox<K> extends AABB implements Shape3D {
         forEachInSphere(new Sphere(sphereOrigin, clipRadius), c);
     }
 
-
-
     private void reduceBranch() {
         if (items != null && items.size() == 0) {
             items = null;
