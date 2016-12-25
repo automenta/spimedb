@@ -12,7 +12,7 @@ import java.util.Set;
  *
  * @author Barak Naveh
  */
-class VertexContainer<C, EE> implements Serializable
+public class VertexContainer<C, EE> implements Serializable
 {
     private static final long serialVersionUID = 7494242245729767106L;
     final Set<EE> incoming;

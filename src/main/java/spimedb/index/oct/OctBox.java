@@ -6,6 +6,7 @@ import spimedb.util.geom.*;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -97,7 +98,7 @@ public class OctBox<K> extends AABB implements Shape3D {
         toAdd.forEach(this::put);
     }
 
-    public final void forEach(Consumer<IdBB> visitor) {
+    public final void forEachLocal(Consumer<IdBB> visitor) {
         Collection<IdBB> ii = this.items;
         if (ii !=null)
             ii.forEach(visitor);
@@ -158,12 +159,24 @@ public class OctBox<K> extends AABB implements Shape3D {
 
     //TODO pass the target box as a parameter so it can base its decision on that
     protected Collection<IdBB> newItemCollection() {
-        return new FastList();
+        //return new FastList();
+        return new HashSet<>();
     }
 
 
-    public void forEach(BiConsumer<OctBox<K>, IdBB> visitor) {
-        forEach(i -> {
+    public void forEachRecursive(Consumer<IdBB> visitor) {
+        forEachLocal(visitor);
+        OctBox[] cc = this.children;
+        if (cc !=null) {
+            for (OctBox<K> c : cc) {
+                if (c!=null)
+                    c.forEachRecursive(visitor);
+            }
+        }
+    }
+
+    public void forEachRecursiveWithBox(BiConsumer<OctBox<K>, IdBB> visitor) {
+        forEachLocal(i -> {
            visitor.accept(OctBox.this, i);
         });
 
@@ -171,7 +184,7 @@ public class OctBox<K> extends AABB implements Shape3D {
         if (cc !=null) {
             for (OctBox<K> c : cc) {
                 if (c!=null)
-                    c.forEach(visitor);
+                    c.forEachRecursiveWithBox(visitor);
             }
         }
 

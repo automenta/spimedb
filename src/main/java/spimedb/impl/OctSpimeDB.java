@@ -1,43 +1,53 @@
-package spimedb.index.graph;
+package spimedb.impl;
 
 import com.google.common.collect.Iterators;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.eclipse.collections.impl.tuple.Tuples;
 import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.graph.MapGraph;
+import spimedb.index.graph.VertexContainer;
 import spimedb.index.oct.OctBox;
 import spimedb.util.geom.Vec3D;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
 
-public class SpimeGraph implements SpimeDB {
-
+public class OctSpimeDB implements SpimeDB {
 
     public enum OpEdge {
         extinh, intinh
     }
 
+    public final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph;
 
-    final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph = new SpimeMapGraph();
-
-    public final OctBox<byte[]> spacetime = new OctBox(
+    public final OctBox<byte[]> oct = new OctBox(
             new Vec3D(-180f, -90f, 0),
             new Vec3D(360f, 180f, 0),
             new Vec3D(0.05f, 0.05f, 0f)
     );
 
-    public SpimeGraph() {
+    /** in-memory, map-based */
+    public OctSpimeDB() {
+        this(new SpimeMapGraph());
+    }
 
+    public OctSpimeDB(MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> g) {
+        this.graph = g;
+    }
 
+    @Override
+    public String toString() {
+        return "OctSpimeDB{" +
+                graph +
+                "\n, oct=" + oct +
+                '}';
     }
 
     @Override
@@ -50,10 +60,10 @@ public class SpimeGraph implements SpimeDB {
         final String id = d.getId();
 
         if (d.isSpatial()) {
-            spacetime.put(d);
+            oct.put(d);
         }
 
-        graph.addVertex(id, d);
+        graph.put(id, d);
 
         String parent = d.inside();
         if (parent != null) {
@@ -123,7 +133,7 @@ public class SpimeGraph implements SpimeDB {
             }
         };
 
-        spacetime.forEachInSphere(new Vec3D((float)lat, (float)lon, 0), radDegrees, n -> {
+        oct.forEachInSphere(new Vec3D((float)lat, (float)lon, 0), radDegrees, n -> {
             l.add((NObject)n); //TODO HACK avoid casting, maybe change generics
             //TODO exit from this loop early if capacity reached
         });
@@ -137,21 +147,21 @@ public class SpimeGraph implements SpimeDB {
         return radMeters / 110648f;
     }
 
-    private static class SpimeMapGraph extends MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> {
+    public static class SpimeMapGraph extends MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> {
 
-        @Override
-        protected Map<String, VertexContainer<NObject, Pair<OpEdge, Twin<String>>>> newVertexMap() {
-            return new ConcurrentHashMap();
-        }
-
-        @Override
-        protected Map<Pair<OpEdge, Twin<String>>, Twin<String>> newEdgeMap() {
-            return new ConcurrentHashMap();
+        public SpimeMapGraph() {
+            super(new java.util.concurrent.ConcurrentHashMap(), new java.util.concurrent.ConcurrentHashMap());
         }
 
         @Override
         protected Set<Pair<OpEdge, Twin<String>>> newEdgeSet() {
             return new UnifiedSet<>();
+        }
+
+        @Override
+        protected NObject newBlankVertex(String s) {
+            //return new NObject(s);
+            return null;
         }
     }
 }

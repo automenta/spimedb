@@ -2,17 +2,18 @@ package spimedb.index.graph;
 
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.jetbrains.annotations.NotNull;
 import org.jgrapht.*;
 import org.jgrapht.graph.AbstractGraph;
 import org.jgrapht.util.ArrayUnenforcedSet;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Created by me on 7/15/15.
  */
 public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
-    private static final long serialVersionUID = -1263088497616142427L;
 
     private static final String LOOPS_NOT_ALLOWED = "loops not allowed";
     private static final String NOT_IN_DIRECTED_GRAPH = "no such operation in a directed graph";
@@ -30,14 +31,13 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
      * @throws NullPointerException if the specified edge factory is <code>
      *                              null</code>.
      */
-    protected MapGraph() {
-        vertices = newVertexMap(); //new LinkedHashMap<V, DirectedEdgeContainer<V, E>>();
-        edges = newEdgeMap(); //new LinkedHashMap<E, IntrusiveEdge>();
+    public MapGraph(Map<V, VertexContainer<C, E>> vertexMap, Map<E, Twin<V>> edgeMap) {
+        vertices = vertexMap;
+        edges = edgeMap;
+//        vertices = newVertexMap(); //new LinkedHashMap<V, DirectedEdgeContainer<V, E>>();
+//        edges = newEdgeMap(); //new LinkedHashMap<E, IntrusiveEdge>();
     }
 
-    protected abstract Map<V, VertexContainer<C, E>> newVertexMap();
-
-    protected abstract Map<E, Twin<V>> newEdgeMap();
 
     /**
      * Returns <code>true</code> if and only if self-loops are allowed in this
@@ -298,15 +298,35 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
     abstract protected Set<E> newEdgeSet();
 
     @Override
-    public boolean addVertex(V v) {
+    public boolean addVertex(V id) {
         // add with a lazy edge container entry
-        return vertices.putIfAbsent(v, null) == null;
+        //return vertices.putIfAbsent(v, null) == null;
+        vertices.computeIfAbsent(id, k -> {
+            C v = newBlankVertex(k);
+            if (v == null)
+                return null;
+            else
+                return new VertexContainer<>(v, newEdgeSet(), newEdgeSet());
+        });
+        return true;
     }
 
-    public void addVertex(V id, C value) {
-        vertices.computeIfAbsent(id, k ->
+    abstract protected C newBlankVertex(V v);
+
+    public void put(V vertexID, @NotNull C value) {
+        vertices.put(vertexID,
             new VertexContainer<>(value, newEdgeSet(), newEdgeSet() )
         );
+    }
+    public void putIfAbsent(V vertexID, @NotNull C value) {
+        vertices.putIfAbsent(vertexID,
+                new VertexContainer<>(value, newEdgeSet(), newEdgeSet() )
+        );
+    }
+    public void computeIfAbsent(V vertexID, @NotNull Function<V,C> value) {
+        vertices.computeIfAbsent(vertexID, k -> {
+            return new VertexContainer<>(value.apply(k), newEdgeSet(), newEdgeSet());
+        });
     }
 
 

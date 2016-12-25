@@ -2,7 +2,7 @@ package spimedb.run;
 
 import spimedb.SpimeDB;
 import spimedb.SpimeScript;
-import spimedb.index.graph.SpimeGraph;
+import spimedb.impl.InfiniSpimeDB;
 import spimedb.sense.ImportKML;
 import spimedb.web.SpacetimeWebServer;
 
@@ -57,9 +57,12 @@ public class ClimateEditor  {
 
     public static void main(String[] args) throws IOException, ScriptException {
 
-        SpimeGraph db = new SpimeGraph();
+        SpimeDB db = //new OctSpimeDB();
+                InfiniSpimeDB.get("/tmp/climate");
 
         new ClimateEditor(db);
+
+        System.out.println(db);
 
         new SpacetimeWebServer(db, 8080);
 //

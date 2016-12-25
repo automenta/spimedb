@@ -102,6 +102,12 @@
             <!--<groupId>opennars-gui</groupId>-->
             <!--<version>1.7-SNAPSHOT</version>-->
         <!--</dependency>-->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>15.0</version>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.jgrapht</groupId>

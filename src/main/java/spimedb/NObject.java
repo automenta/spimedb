@@ -41,7 +41,6 @@ import java.util.Map;
 //@Indexed
 public class NObject implements Serializable, IdBB {
 
-    final static long ETERNAL = Long.MIN_VALUE;
 
     /*@Field(store = Store.YES)*/ @JsonProperty("I") final String id;
 
@@ -328,14 +327,13 @@ public class NObject implements Serializable, IdBB {
         return bounds;
     }
 
-    public final float getLatitude() {
+    @JsonIgnore public final float getLatitude() {
         return getBB().x();
     }
-    public final float getLongitude() {
+    @JsonIgnore public final float getLongitude() {
         return getBB().y();
     }
-
-    public static float getAltitude() {
+    @JsonIgnore public static float getAltitude() {
         return Float.NaN; //TODO
     }
 }

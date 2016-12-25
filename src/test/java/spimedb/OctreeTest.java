@@ -125,7 +125,7 @@ public class OctreeTest {
         assertEquals(2, octBox.itemCountRecursively());
 
         //System.out.println(octBox);
-        octBox.forEach((subBox, item) ->
+        octBox.forEachRecursiveWithBox((subBox, item) ->
                 System.out.println(subBox + " " + item));
 
         OctBox pBox = octBox.getLeafForPoint(p);
