@@ -258,12 +258,14 @@ final class Branch<T> implements Node<T> {
     }
 
     @Override
-    public void intersecting(Consumer<T> consumer, HyperRect rect) {
+    public boolean intersecting(HyperRect rect, Predicate<T> consumer) {
         for (int i = 0; i < size; i++) {
             if (rect.intersects(child[i].bounds())) {
-                child[i].intersecting(consumer, rect);
+                if (!child[i].intersecting(rect, consumer))
+                    return false;
             }
         }
+        return true;
     }
 
     @Override

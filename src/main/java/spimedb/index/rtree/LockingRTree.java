@@ -23,6 +23,7 @@ package spimedb.index.rtree;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Created by jcovert on 12/30/15.
@@ -33,7 +34,7 @@ public class LockingRTree<T> implements SpatialSearch<T> {
     private final Lock readLock;
     private final Lock writeLock;
 
-    LockingRTree(SpatialSearch<T> rTree, ReadWriteLock lock) {
+    public LockingRTree(SpatialSearch<T> rTree, ReadWriteLock lock) {
         this.rTree = rTree;
         this.readLock = lock.readLock();
         this.writeLock = lock.writeLock();
@@ -191,7 +192,7 @@ public class LockingRTree<T> implements SpatialSearch<T> {
     }
 
     @Override
-    public void intersecting(HyperRect rect, Consumer<T> consumer) {
+    public void intersecting(HyperRect rect, Predicate<T> consumer) {
         readLock.lock();
         try {
             rTree.intersecting(rect, consumer);

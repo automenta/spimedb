@@ -1,6 +1,5 @@
 package spimedb;
 
-import java.util.Iterator;
 import java.util.function.Consumer;
 
 
@@ -20,7 +19,7 @@ public interface SpimeDB extends Iterable<NObject> {
 
     void children(String parent, Consumer<String> each);
 
-    Iterator<NObject> get(double lat, double lon, double radMeters, int maxResults);
+    Iterable<NObject> get(double lat, double lon, double radMeters, int maxResults);
 
     enum Scope {
         Private, Trusted, Public, Anonymous, Advertise

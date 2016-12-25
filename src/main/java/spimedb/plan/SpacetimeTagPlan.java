@@ -69,21 +69,21 @@ public class SpacetimeTagPlan {
             Map<String, Object> ts = o.getData();
 
 
-
-
             List<Long> times = new FastList(2);
 
             if (get(0).equals("time")) {
                 //convert time ranges to a set of time points
-                long start = (long) o.timeStart();
-                long end = (long) o.timeStop();
+                long[] startEnd = o.whenLong();
+
+                long start = startEnd[0];
+                long end = startEnd[1];
 
                 if (end != ETERNAL) {
                     times.addAll(new TimeRange(start, end).discretize(timePeriod));
                 } else if (start != ETERNAL) {
                     times.add(start);
                 }
-            //} else {
+                //} else {
 //                    long tp = o.when();
 //                    if (tp!=-1) {
 //                        times.add(tp);
@@ -93,148 +93,158 @@ public class SpacetimeTagPlan {
                 return goals;
                 //}
 
-        }
+            } else
 
-        else
-
-        {
-            //add a null timepoint so the following iteration occurs
-            times.add(NullTimePoint);
-        }
-
-        tagIndex=-1;
-
-        for(
-        long currentTime
-        :times)
-
-        {
-
-            double[] d = new double[this.size()];
-            int i = 0;
-
-            for (String s : this) {
-                switch (s) {
-                    case "lat":
-                        if (o.isSpatial())
-                            d[i] = o.getLatitude();
-                        else {
-                            return goals; //this nobject is invalid, return; goals will be empty
-                        }
-                        break;
-                    case "lon":
-                        d[i] = o.getLongitude();
-                        break;
-                    case "time":
-                        d[i] = currentTime;
-                        break;
-                    case "alt":
-                        d[i] = NObject.getAltitude();
-                        break;
-                    default:
-                        if (tagIndex == -1) {
-                            tagIndex = i;
-                        }
-                        Object v = ts.get(s);
-                        if (v instanceof Number) {
-                            double strength = ((Number) v).doubleValue();
-                            d[i] = strength;
-
-                        }
-                        break;
-                }
-                i++;
-            }
-            if (firstGoal) {
-                System.arraycopy(d, 0, min, 0, d.length);
-                System.arraycopy(d, 0, max, 0, d.length);
-            } else {
-                for (int j = 0; j < d.length; j++) {
-                    if (d[j] < min[j]) min[j] = d[j];
-                    if (d[j] > max[j]) max[j] = d[j];
-                }
+            {
+                //add a null timepoint so the following iteration occurs
+                times.add(NullTimePoint);
             }
 
-            goals.add(new Goal(o, this, d));
+            tagIndex = -1;
+
+            for (
+                    long currentTime
+                    : times)
+
+            {
+
+                double[] d = new double[this.size()];
+                int i = 0;
+
+                for (String s : this) {
+                    switch (s) {
+                        case "lat":
+                            if (o.isSpatial())
+                                d[i] = latitude(o);
+                            else {
+                                return goals; //this nobject is invalid, return; goals will be empty
+                            }
+                            break;
+                        case "lon":
+                            d[i] = longitude(o);
+                            break;
+                        case "time":
+                            d[i] = currentTime;
+                            break;
+                        case "alt":
+                            d[i] = altitude(o);
+                            break;
+                        default:
+                            if (tagIndex == -1) {
+                                tagIndex = i;
+                            }
+                            Object v = ts.get(s);
+                            if (v instanceof Number) {
+                                double strength = ((Number) v).doubleValue();
+                                d[i] = strength;
+
+                            }
+                            break;
+                    }
+                    i++;
+                }
+                if (firstGoal) {
+                    System.arraycopy(d, 0, min, 0, d.length);
+                    System.arraycopy(d, 0, max, 0, d.length);
+                } else {
+                    for (int j = 0; j < d.length; j++) {
+                        if (d[j] < min[j]) min[j] = d[j];
+                        if (d[j] > max[j]) max[j] = d[j];
+                    }
+                }
+
+                goals.add(new Goal(o, this, d));
+            }
+
+            return goals;
         }
 
-        return goals;
-    }
+        double latitude(NObject o) {
+            return o.center(1);
+        }
 
-    /**
-     * normalize (to 0..1.0) a collection of Goals with respect to the min/max calculated during the prior goal generation
-     */
-    public void normalize(Collection<Goal> goals) {
+        double longitude(NObject o) {
+            return o.center(2);
+        }
 
-        for (Goal g : goals) {
-            double d[] = g.getPoint();
+        double altitude(NObject o) {
+            return o.center(3);
+        }
+
+        /**
+         * normalize (to 0..1.0) a collection of Goals with respect to the min/max calculated during the prior goal generation
+         */
+        public void normalize(Collection<Goal> goals) {
+
+            for (Goal g : goals) {
+                double d[] = g.getPoint();
+                for (int i = 0; i < d.length; i++) {
+                    double MIN = min[i];
+                    double MAX = max[i];
+                    if (MIN != MAX) {
+                        d[i] = (d[i] - MIN) / (MAX - MIN);
+                    } else {
+                        d[i] = 0.5;
+                    }
+                }
+            }
+        }
+
+        public void denormalize(Goal g) {
+            denormalize(g.getPoint());
+        }
+
+        public void denormalize(double[] d) {
             for (int i = 0; i < d.length; i++) {
                 double MIN = min[i];
                 double MAX = max[i];
                 if (MIN != MAX) {
-                    d[i] = (d[i] - MIN) / (MAX - MIN);
+                    d[i] = d[i] * (MAX - MIN) + MIN;
                 } else {
-                    d[i] = 0.5;
+                    d[i] = MIN;
                 }
             }
-        }
-    }
 
-    public void denormalize(Goal g) {
-        denormalize(g.getPoint());
-    }
+            //normalize tags against each other
+            if (tagIndex >= d.length) return;
 
-    public void denormalize(double[] d) {
-        for (int i = 0; i < d.length; i++) {
-            double MIN = min[i];
-            double MAX = max[i];
-            if (MIN != MAX) {
-                d[i] = d[i] * (MAX - MIN) + MIN;
-            } else {
-                d[i] = MIN;
+            double min, max;
+            min = max = d[tagIndex];
+            for (int i = tagIndex + 1; i < d.length; i++) {
+                if (d[i] > max) max = d[i];
+                if (d[i] < min) min = d[i];
             }
-        }
-
-        //normalize tags against each other
-        if (tagIndex >= d.length) return;
-
-        double min, max;
-        min = max = d[tagIndex];
-        for (int i = tagIndex + 1; i < d.length; i++) {
-            if (d[i] > max) max = d[i];
-            if (d[i] < min) min = d[i];
-        }
-        if (min != max) {
-            for (int i = tagIndex; i < d.length; i++) {
-                d[i] = (d[i] - min) / (max - min);
+            if (min != max) {
+                for (int i = tagIndex; i < d.length; i++) {
+                    d[i] = (d[i] - min) / (max - min);
+                }
             }
+
         }
+
 
     }
 
-
-}
-
-
-/**
- * a point in goal-space; the t parameter is included for referencing what the dimensions mean
- */
-public static class Goal extends DoublePoint {
-    private final Dimensions mapping;
 
     /**
-     * the involved object
+     * a point in goal-space; the t parameter is included for referencing what the dimensions mean
      */
-    private final NObject object;
+    public static class Goal extends DoublePoint {
+        private final Dimensions mapping;
 
-    public Goal(NObject o, Dimensions t, double[] v) {
-        super(v);
-        this.object = o;
-        this.mapping = t;
+        /**
+         * the involved object
+         */
+        private final NObject object;
+
+        public Goal(NObject o, Dimensions t, double[] v) {
+            super(v);
+            this.object = o;
+            this.mapping = t;
+        }
+
+
     }
-
-
-}
 
     //TODO add a maxDimensions parameter that will exclude dimensions with low aggregate strength
 
@@ -283,11 +293,11 @@ public static class Goal extends DoublePoint {
 
     }
 
-public interface PlanResult {
-    void onFinished(SpacetimeTagPlan plan, List<Possibility> possibilities);
+    public interface PlanResult {
+        void onFinished(SpacetimeTagPlan plan, List<Possibility> possibilities);
 
-    void onError(SpacetimeTagPlan plan, Exception e);
-}
+        void onError(SpacetimeTagPlan plan, Exception e);
+    }
 
 
     public void computeAsync(PlanResult r) {
@@ -397,20 +407,20 @@ public interface PlanResult {
         return dimensions;
     }
 
-public static class Possibility extends NObject {
-    //private final double[] center;
+    public static class Possibility extends NObject {
+        //private final double[] center;
 
-    public Possibility(String id) {
-        super(id);
-        //this.center = center;
+        public Possibility(String id) {
+            super(id);
+            //this.center = center;
+        }
+
+        //public double[] getCenter() {
+        //return center;
+        //}
+
+
     }
-
-    //public double[] getCenter() {
-    //return center;
-    //}
-
-
-}
 
     protected List<Possibility> getPossibilities(List<? extends Cluster<Goal>> centroids) {
         List<Possibility> l = new ArrayList(centroids.size());
@@ -447,7 +457,7 @@ public static class Possibility extends NObject {
             if (space) {
                 double lat = point[i++];
                 double lon = point[i++];
-                p.where((float)lat, (float)lon);
+                p.where((float) lat, (float) lon);
             }
 
 
@@ -455,7 +465,7 @@ public static class Possibility extends NObject {
                 double alt = point[i++];
                 if (s == null) {
                     //this shouldnt be used
-                    p.where(0, 0, (float)alt);
+                    p.where(0, 0, (float) alt);
                 } else
                     s.setAltitude(alt);
             }

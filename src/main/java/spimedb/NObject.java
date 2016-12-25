@@ -10,9 +10,9 @@ import org.opensextant.geodesy.Geodetic3DPoint;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
+import spimedb.index.rtree.PointND;
+import spimedb.index.rtree.RectND;
 import spimedb.sense.ImportKML;
-import spimedb.util.geom.AABB;
-import spimedb.util.geom.BB;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -28,6 +28,8 @@ import java.util.Map;
 
 /**
  *
+ * dimensions: time, lat, lon, alt, ...
+ *
  * https://github.com/FasterXML/jackson-annotations/
  *
  * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/test/Person.java
@@ -39,7 +41,7 @@ import java.util.Map;
 @JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
 @JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
 //@Indexed
-public class NObject implements Serializable, IdBB {
+public class NObject extends RectND implements Serializable {
 
 
     /*@Field(store = Store.YES)*/ @JsonProperty("I") final String id;
@@ -48,9 +50,6 @@ public class NObject implements Serializable, IdBB {
 
     //@JsonProperty("T") long[] time = null;
 
-    /** lat, lon, alt (m), [planet ID?] */
-    //@JsonProperty("S")
-    final AABB bounds = new AABB();
 
 
     //TODO use a ObjectDouble primitive map structure
@@ -72,6 +71,8 @@ public class NObject implements Serializable, IdBB {
     }
 
     public NObject(String id, String name) {
+        super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY));
+
         this.id = id!=null ? id : Core.uuid();
         this.name = name;
     }
@@ -88,90 +89,67 @@ public class NObject implements Serializable, IdBB {
         return data;
     }
 
-    /**
-     * timepoint, or -1 if none
-     */
-    final public float timeStart() {
-        return bounds.minZ();
-    }
-    final public float timeStop() {
-        return bounds.maxZ();
-    }
 
 
     public Collection<String> tagSet() {
         return data.keySet();
     }
 
-    public NObject when(final float at) {
-        return when(at,at);
-    }
-
-    public NObject when(final float  start, final float end) {
-        bounds.setRangeZ(start, end);
-        return this;
-    }
-
-    public NObject where(float[] coord) {
-        return where(coord[0], coord[1], coord[2]);
-    }
-
-    public NObject where(float lat, float lng, float alt, Object... geometry) {
-        bounds.setX(lat);
-        bounds.setY(lng);
-        bounds.setZ(alt);
-
-//        space[0] = lat;
-//        space[1] = lng;
-//        space[2] = alt;
-
-        if (geometry.length > 0) {
-            put("g", geometry);
-        }
-
-
-        return this;
-    }
-
-//    public NObject where(NObject otherLocation) {
-//        return where(otherLocation.spacetime);
+//    /**
+//     * timepoint, or -1 if none
+//     */
+//    final public float timeStart() {
+//        return bounds.minZ();
 //    }
-
-    public NObject where(double lat, double lon) {
-        return where((float)lat, (float)lon);
-    }
-
-    public NObject where(double lat, double lon, double alt, Object... shape) {
-        return where((float)lat, (float)lon, (float)alt, shape);
-    }
-
-    public NObject where(float lat, float lng) {
-
-        return where(lat, lng, 0 /* Float.NaN*/);
-    }
-
-//    //TODO provide non-boxed versoins of these
-//    @JsonIgnore
-//    //@Latitude
-//    public Double getLatitude() {
-//        if (space!=null)
-//            return Double.valueOf(space[0]);
-//        return Double.NaN;
+//    final public float timeStop() {
+//        return bounds.maxZ();
 //    }
 //
-//    @JsonIgnore
-//    //@Longitude
-//    public Double getLongitude() {
-//        if (space!=null)
-//            return Double.valueOf(space[1]);
-//        return Double.NaN;
+//    public NObject when(final float at) {
+//        return when(at,at);
 //    }
-
-//    @JsonIgnore
-//    public float getAltitude() {
-//        if (space!=null)
-//            return space[2];
-//        return Float.NaN;
+//
+//    public NObject when(final float  start, final float end) {
+//        bounds.setRangeZ(start, end);
+//        return this;
+//    }
+//
+//    public NObject where(float[] coord) {
+//        return where(coord[0], coord[1], coord[2]);
+//    }
+//
+//    public NObject where(float lat, float lng, float alt, Object... geometry) {
+//        bounds.setX(lat);
+//        bounds.setY(lng);
+//        bounds.setZ(alt);
+//
+////        space[0] = lat;
+////        space[1] = lng;
+////        space[2] = alt;
+//
+//        if (geometry.length > 0) {
+//            put("g", geometry);
+//        }
+//
+//
+//        return this;
+//    }
+//
+////    public NObject where(NObject otherLocation) {
+////        return where(otherLocation.spacetime);
+////    }
+//
+//    public NObject where(double lat, double lon) {
+//        return where((float)lat, (float)lon);
+//    }
+//
+//    public NObject where(double lat, double lon, double alt, Object... shape) {
+//        return where((float)lat, (float)lon, (float)alt, shape);
+//    }
+//
+//    public NObject where(float lat, float lng) {
+//
+//        return where(lat, lng, 0 /* Float.NaN*/);
 //    }
 
     public <X> X get(String tag) {
@@ -215,9 +193,6 @@ public class NObject implements Serializable, IdBB {
     }
 
 
-
-
-
     @Override
     public String toString() {
         return Core.toJSON(this);
@@ -226,21 +201,9 @@ public class NObject implements Serializable, IdBB {
 
     @JsonIgnore
     public boolean isSpatial() {
-        AABB bounds = this.bounds;
-        if (bounds == null) return false;
-        float x = bounds.x;
-        return x==x;
+        return Double.isFinite(getRange(1));
     }
 
-    @JsonIgnore
-    public boolean isTemporal() {
-        return bounds.hasZ();
-    }
-
-    public NObject now() {
-        when( System.currentTimeMillis() );
-        return this;
-    }
 
     public NObject name(String name) {
         this.name = name;
@@ -254,15 +217,23 @@ public class NObject implements Serializable, IdBB {
 
     public NObject where(Geodetic2DPoint c, Object... shape) {
 
-        double lat = c.getLatitudeAsDegrees();
-        double lon = c.getLongitudeAsDegrees();
-        double ele = Double.NaN;
+        float lat = (float) c.getLatitudeAsDegrees();
+
+        min.coord[1] = max.coord[1] = lat;
+
+        float lon = (float) c.getLongitudeAsDegrees();
+        min.coord[2] = max.coord[2] = lon;
+
+
         if (c instanceof Geodetic3DPoint) {
-            ele = ((Geodetic3DPoint)c).getElevation();
+            float ele = (float) ((Geodetic3DPoint) c).getElevation();
+            min.coord[3] = max.coord[3] = ele;
+        } else {
+            min.coord[3] = Float.NEGATIVE_INFINITY;
+            max.coord[3] = Float.POSITIVE_INFINITY;
         }
 
-        //http://geojson.org/
-        return where(lat, lon, ele, shape);
+        return this;
     }
 
     public NObject where(Line l) {
@@ -323,23 +294,41 @@ public class NObject implements Serializable, IdBB {
     }
 
 
-    @Override
     public final String id() {
         return id;
     }
 
-    @Override
-    public final BB getBB() {
-        return bounds;
+    public void when(long start, long end) {
+        min.coord[0] = start;
+        max.coord[0] = end;
+    }
+    public void when(float when) {
+        min.coord[0] = when;
+        max.coord[0] = when;
     }
 
-    @JsonIgnore public final float getLatitude() {
-        return getBB().x();
+    public void eternal() {
+        min.coord[0] = Float.NEGATIVE_INFINITY;
+        max.coord[0] = Float.POSITIVE_INFINITY;
     }
-    @JsonIgnore public final float getLongitude() {
-        return getBB().y();
+
+    public void where(float x, float y) {
+        min.coord[1] = x;
+        max.coord[1] = x;
+        min.coord[2] = y;
+        max.coord[2] = y;
     }
-    @JsonIgnore public static float getAltitude() {
-        return Float.NaN; //TODO
+
+    public void where(float x, float y, float z) {
+        where(x, y);
+        min.coord[3] = z;
+        max.coord[3] = z;
     }
+
+    @Deprecated public long[] whenLong() {
+        float a = min.coord[0];
+        float b = max.coord[0];
+        return new long[] { (long)a, (long)b };
+    }
+
 }

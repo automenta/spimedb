@@ -20,23 +20,30 @@ package spimedb.index.rtree;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Created by jcovert on 6/15/15.
  */
 public class RectND implements HyperRect<PointND> {
 
-    final PointND min, max;
+    @JsonProperty("a")
+    protected final PointND min;
+
+    @JsonProperty("b")
+    protected final PointND max;
 
     RectND(final PointND p) {
         min = p;
         max = p;
     }
 
-    RectND(float[] a, float[] b) {
+
+    public RectND(float[] a, float[] b) {
         this(new PointND(a), new PointND(b));
     }
 
-    RectND(final PointND a, final PointND b) {
+    protected RectND(final PointND a, final PointND b) {
         int dim = a.dim();
 
         float[] min = new float[dim];
@@ -104,16 +111,25 @@ public class RectND implements HyperRect<PointND> {
     }
 
 
+    public float center(int dim) {
+        float min = this.min.coord[dim];
+        float max = this.max.coord[dim];
+        if ((min == Float.NEGATIVE_INFINITY) && (max == Float.POSITIVE_INFINITY))
+            return Float.NaN;
+        if (min == Float.NEGATIVE_INFINITY)
+            return max;
+        if (max == Float.POSITIVE_INFINITY)
+            return min;
+
+        return (max + min)/2f;
+    }
+
     @Override
     public HyperPoint center() {
         int dim = dim();
         float[] c = new float[dim];
-        float[] minf = this.min.coord;
-        float[] maxf = this.max.coord;
         for (int i = 0; i < dim; i++) {
-            float min = minf[i];
-            float max = maxf[i];
-            c[i] = min + (max - min) / 2f;
+            c[i] = center(i);
         }
         return new PointND(c);
     }
@@ -134,9 +150,12 @@ public class RectND implements HyperRect<PointND> {
         return max;
     }
 
-    @Override
-    public double getRange(final int i) {
-        return max.coord[i] - min.coord[i];
+    @Override public double getRange(final int i) {
+        float min = this.min.coord[i];
+        float max = this.max.coord[i];
+        if ((min == Float.NEGATIVE_INFINITY) || (max == Float.POSITIVE_INFINITY))
+            return Float.NaN;
+        return (max - min);
     }
 
     @Override
@@ -165,10 +184,10 @@ public class RectND implements HyperRect<PointND> {
         return sb.toString();
     }
 
-    public final static class Builder implements RectBuilder<RectND> {
+    public final static class Builder<X extends RectND> implements RectBuilder<X> {
 
         @Override
-        public HyperRect apply(final RectND rect2D) {
+        public X apply(final X rect2D) {
             return rect2D;
         }
 

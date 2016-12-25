@@ -181,12 +181,14 @@ abstract class Leaf<T> implements Node<T> {
     }
 
     @Override
-    public void intersecting(Consumer<T> consumer, HyperRect rect) {
+    public boolean intersecting(HyperRect rect, Predicate<T> consumer) {
         for (int i = 0; i < size; i++) {
             if (rect.intersects(r[i])) {
-                consumer.accept(entry[i]);
+                if (!consumer.test(entry[i]))
+                    return false;
             }
         }
+        return false;
     }
 
     @Override

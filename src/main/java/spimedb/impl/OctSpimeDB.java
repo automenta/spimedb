@@ -12,13 +12,19 @@ import spimedb.SpimeDB;
 import spimedb.index.graph.MapGraph;
 import spimedb.index.graph.VertexContainer;
 import spimedb.index.oct.OctBox;
-import spimedb.util.geom.BB;
+import spimedb.index.rtree.LockingRTree;
+import spimedb.index.rtree.RTree;
+import spimedb.index.rtree.RectND;
+import spimedb.index.rtree.SpatialSearch;
 import spimedb.util.geom.Vec3D;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+
+import static spimedb.index.rtree.SpatialSearch.*;
 
 
 public class OctSpimeDB implements SpimeDB {
@@ -28,7 +34,7 @@ public class OctSpimeDB implements SpimeDB {
     }
 
     public final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph;
-    public final OctBox oct;
+    public final SpatialSearch<NObject> r;
 
     /** in-memory, map-based */
     public OctSpimeDB() {
@@ -38,18 +44,18 @@ public class OctSpimeDB implements SpimeDB {
     public OctSpimeDB(MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> g) {
         this.graph = g;
 
-        this.oct = new MyOctBox(
+        /*this.oct = new MyOctBox(
                 new Vec3D(-180f, -90f, -1),
                 new Vec3D(360f, 180f, 2),
-                new Vec3D(0.05f, 0.05f, 0.05f));
+                new Vec3D(0.05f, 0.05f, 0.05f));*/
+
+        r = new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
+                DEFAULT_MIN_M, DEFAULT_MAX_M, DEFAULT_SPLIT_TYPE),
+                new ReentrantReadWriteLock(true));
 
         /** add any pre-existing values */
         graph.vertices.forEach((k,v)->{
-            NObject vv = v.value();
-            BB spatial = vv.getBB();
-            float x = spatial.x(); //HACK use x=NaN to signal non-spatial
-            if (x==x)
-                oct.put(vv);
+            r.add(v.value());
         });
     }
 
@@ -57,7 +63,7 @@ public class OctSpimeDB implements SpimeDB {
     public String toString() {
         return "OctSpimeDB{" +
                 graph +
-                "\n, oct=" + oct +
+                "\n, r=" + r +
                 '}';
     }
 
@@ -71,7 +77,7 @@ public class OctSpimeDB implements SpimeDB {
         final String id = d.getId();
 
         if (d.isSpatial()) {
-            oct.put(d);
+            r.add(d);
         }
 
         graph.put(id, d);
@@ -125,8 +131,7 @@ public class OctSpimeDB implements SpimeDB {
     }
 
     @Override
-    public Iterator<NObject> get(double lat, double lon, double radMeters, int maxResults) {
-        float radDegrees = metersToDegrees((float)radMeters);
+    public List<NObject> get(double lat, double lon, double radMeters, int maxResults) {
 
         List<NObject> l = new FastList() {
 
@@ -144,14 +149,21 @@ public class OctSpimeDB implements SpimeDB {
             }
         };
 
-        oct.forEachInSphere(new Vec3D((float)lat, (float)lon, 0), radDegrees, n -> {
-            l.add((NObject)n); //TODO HACK avoid casting, maybe change generics
-            //TODO exit from this loop early if capacity reached
-        });
+        float radDegrees = metersToDegrees((float)radMeters);
 
+        r.intersecting(new RectND(
+                new float[] { Float.NEGATIVE_INFINITY, (float) lat - radDegrees, (float) lon - radDegrees, Float.NEGATIVE_INFINITY },
+                new float[] { Float.POSITIVE_INFINITY, (float) lat + radDegrees, (float) lon + radDegrees, Float.POSITIVE_INFINITY }
+        ), l::add);
+
+//        oct.forEachInSphere(new Vec3D((float)lat, (float)lon, 0), radDegrees, n -> {
+//            l.add((NObject)n); //TODO HACK avoid casting, maybe change generics
+//            //TODO exit from this loop early if capacity reached
+//        });
+//
         //System.out.println(lat + " " + lon + " " + radDegrees + " -> " + l);
 
-        return l.iterator();
+        return l;
     }
 
     private float metersToDegrees(float radMeters) {

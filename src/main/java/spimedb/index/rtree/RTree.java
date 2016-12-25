@@ -129,8 +129,8 @@ public class RTree<T> implements SpatialSearch<T> {
     }
 
     @Override
-    public void intersecting(HyperRect intersecting, Consumer<T> consumer) {
-        root.intersecting(consumer, intersecting);
+    public void intersecting(HyperRect intersecting, Predicate<T> consumer) {
+        root.intersecting(intersecting, consumer);
     }
 
     @Override

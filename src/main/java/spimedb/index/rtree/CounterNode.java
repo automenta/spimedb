@@ -85,8 +85,9 @@ final class CounterNode<T> implements Node<T> {
     }
 
     @Override
-    public void intersecting(Consumer<T> consumer, HyperRect rect) {
-        this.node.intersecting(consumer, rect);
+    public boolean intersecting(HyperRect rect, Predicate<T> consumer) {
+        this.node.intersecting(rect, consumer);
+        return false;
     }
 
     @Override

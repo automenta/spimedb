@@ -87,11 +87,11 @@ interface Node<T> {
 
     /**
      * Consumer "accepts" every node in the given rect
-     *
-     * @param consumer
-     * @param rect     - limiting rect
+     *  @param rect     - limiting rect
+     *  @param consumer
+     *  @return whether to continue visit
      */
-    void intersecting(Consumer<T> consumer, HyperRect rect);
+    boolean intersecting(HyperRect rect, Predicate<T> consumer);
 
     /**
      * Recurses over index collecting stats

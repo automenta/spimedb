@@ -22,6 +22,7 @@ package spimedb.index.rtree;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Created by jcovert on 12/30/15.
@@ -64,7 +65,7 @@ public interface SpatialSearch<T> {
      * @param <T>     - The store type of the bound
      * @return SpatialSearch - The spatial search and index structure
      */
-    static <T> SpatialSearch<T> lockingRTree(final RectBuilder<T> builder) {
+    static <T> SpatialSearch<T> lockingRTree(final RectBuilder builder) {
         return new LockingRTree<>(rTree(builder), new ReentrantReadWriteLock(true));
     }
 
@@ -123,7 +124,7 @@ public interface SpatialSearch<T> {
 
     void forEach(Consumer<T> consumer);
 
-    void intersecting(HyperRect rect, Consumer<T> consumer);
+    void intersecting(HyperRect rect, Predicate<T> consumer);
 
     Stats stats();
 
