@@ -4,6 +4,8 @@ import org.junit.Test;
 import spimedb.index.oct.OctMap;
 import spimedb.util.geom.Vec3D;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -23,7 +25,7 @@ public class OctMapTest {
 
     }
 
-    OctMap<byte[], NObject> o = new OctMap<>(
+    OctMap<byte[], NObject> o = new OctMap<>(new HashMap(), new HashMap(),
             new Vec3D(-180f, -90f, 0f), /* AD */
             new Vec3D(180f, 90f, 2100f), /* 0AD .. 2100AD */
             new Vec3D(1f, 0.75f, 2f)

@@ -26,7 +26,7 @@ public class VertexContainer<C, EE> implements Serializable
         this.value = value;
     }
 
-    public C getValue() {
+    public C value() {
         return value;
     }
 

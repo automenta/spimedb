@@ -5,7 +5,6 @@ import spimedb.IdBB;
 import spimedb.util.geom.Vec3D;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -16,29 +15,29 @@ public class OctMap<K,V extends IdBB> implements Map<K,V> {
     private static final Logger logger = Logger.getLogger(OctMap.class.getSimpleName()); // + ":" + id);
 
     /** holder for _oct for infinispan persistence */
-    protected final Map<Long, OctBox<K>> _oct;
+    protected final Map<Long, OctBox<K>> box;
 
     protected final Map<K, V> map;
-    protected final OctBox<K> box;
+    protected final OctBox<K> root;
 
     boolean startupCheck = true;
 
-    public OctMap(Vec3D center, Vec3D radius, Vec3D resolution) {
+    public OctMap(Map<K, V> items, Map<Long, OctBox<K>> boxes, Vec3D center, Vec3D radius, Vec3D resolution) {
 
-        this.map = new HashMap(); //p.the(id);
-        this._oct = new HashMap(); //p.the(id + ".oct");
+        this.map = items;
+        this.box = boxes;
 
-        if (_oct.isEmpty()) {
-            OctBox newBox = this.box = new OctBox(center, radius, resolution);
-            _oct.put(0L, newBox);
-            logger.info("new octree created: " + box);
+        if (box.isEmpty()) {
+            OctBox newBox = this.root = new OctBox(center, radius, resolution);
+            box.put(0L, newBox);
+            logger.info("new octree created: " + root);
         }
         else {
-            this.box = _oct.get(0L);
-            if (this.box == null) {
-                throw new RuntimeException("Unable to load persisted OctBox:" + this._oct);
+            this.root = box.get(0L);
+            if (this.root == null) {
+                throw new RuntimeException("Unable to load persisted OctBox:" + this.box);
             }
-            logger.info("existing octbox loaded: " + box);
+            logger.info("existing octbox loaded: " + root);
 
 
             if (startupCheck) {
@@ -85,9 +84,9 @@ public class OctMap<K,V extends IdBB> implements Map<K,V> {
     public V put(K key, V value) {
         V removed = map.put(key, value);
         if (removed!=null) {
-            box.remove(removed);
+            root.remove(removed);
         }
-        if (box.put(value)==null) {
+        if (root.put(value)==null) {
             throw new RuntimeException("Octree rejected value=" + value + ", key=" + key );
         }
         return removed;
@@ -98,7 +97,7 @@ public class OctMap<K,V extends IdBB> implements Map<K,V> {
     public V remove(Object key) {
         V removed = map.remove(key);
         if (removed!=null) {
-            if (!box.remove(removed)) {
+            if (!root.remove(removed)) {
                 throw new RuntimeException("Octree missing value for key=" + key + '=' + removed);
             }
         }
@@ -108,14 +107,14 @@ public class OctMap<K,V extends IdBB> implements Map<K,V> {
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         map.putAll(m);
-        box.putAll(m.values());
+        root.putAll(m.values());
     }
 
     @Override
     public void clear() {
         map.clear();
-        box.zero();
-        box.clear();
+        root.zero();
+        root.clear();
     }
 
     @Override
@@ -135,20 +134,20 @@ public class OctMap<K,V extends IdBB> implements Map<K,V> {
 
     public void reindex() {
         logger.info("re-indexing " + map.size() + " items");
-        box.zero();
-        box.putAll(map.values());
+        root.zero();
+        root.putAll(map.values());
 
         validate();
     }
 
     /** manually flush the octree to persistence */
     public boolean flush() {
-        _oct.put(0L, box);
+        box.put(0L, root);
         return validate();
     }
 
     public boolean validate() {
-        int e = box.itemCountRecursively();
+        int e = root.itemCountRecursively();
         int msize = map.size();
         boolean consistent = (e == msize);
         logger.info("octbox contains " + e + " entries. consistent with map=" + msize + " is " + consistent);
@@ -156,6 +155,6 @@ public class OctMap<K,V extends IdBB> implements Map<K,V> {
     }
 
     public OctBox box() {
-        return box;
+        return root;
     }
 }

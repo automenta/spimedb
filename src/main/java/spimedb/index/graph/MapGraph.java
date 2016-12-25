@@ -20,8 +20,8 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
     final boolean allowingLoops = false;
     final boolean allowingMultipleEdges = true;
 
-    protected final Map<V, VertexContainer<C, E>> vertices;
-    protected final Map<E, Twin<V>> edges;
+    public final Map<V, VertexContainer<C, E>> vertices;
+    public final Map<E, Twin<V>> edges;
 
 
     /**
@@ -37,6 +37,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
 //        vertices = newVertexMap(); //new LinkedHashMap<V, DirectedEdgeContainer<V, E>>();
 //        edges = newEdgeMap(); //new LinkedHashMap<E, IntrusiveEdge>();
     }
+
 
 
     /**
@@ -484,7 +485,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
 
     public C getVertexValue(V i) {
         VertexContainer<C, E> c = vertices.get(i);
-        return c!=null ? c.getValue() : null;
+        return c!=null ? c.value() : null;
     }
 
 }

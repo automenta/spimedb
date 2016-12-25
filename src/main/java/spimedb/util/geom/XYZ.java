@@ -102,4 +102,9 @@ public interface XYZ extends Serializable {
 
 
     default XYZ copy() { return new Vec3D(this); }
+
+    default float volume() {
+        return x() * y() * z();
+    }
+
 }

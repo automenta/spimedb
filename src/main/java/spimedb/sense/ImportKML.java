@@ -47,7 +47,7 @@ public class ImportKML {
 
     static final HtmlCompressor compressor = new HtmlCompressor();
     private final Proxy proxy;
-    private final SpimeDB geo;
+    private final SpimeDB db;
     final AtomicLong serial = new AtomicLong();
 
     private String layer;
@@ -275,12 +275,12 @@ public class ImportKML {
         }
     }
 
-    public ImportKML(SpimeDB geo) {
-        this(geo, null);
+    public ImportKML(SpimeDB db) {
+        this(db, null);
     }
 
-    public ImportKML(SpimeDB geo, Proxy proxy) {
-        this.geo = geo;
+    public ImportKML(SpimeDB db, Proxy proxy) {
+        this.db = db;
         this.proxy = proxy;
     }
 
@@ -329,7 +329,7 @@ public class ImportKML {
 
 
                 //1. pre-process: collect style information
-                transformKML(reader, id, geo, new GISVisitor() {
+                transformKML(reader, id, db, new GISVisitor() {
 
                     final Map<String, String> styleMap = new LinkedHashMap();
 
@@ -404,7 +404,7 @@ public class ImportKML {
 
 
                 //2. process features
-                transformKML(reader, id, geo, new MyGISVisitor(id, styles));
+                transformKML(reader, id, db, new MyGISVisitor(id, styles));
 
                 long end = System.currentTimeMillis();
                 log.warn("{} loaded: {}(ms)", id, end - start);
@@ -722,13 +722,13 @@ public class ImportKML {
                 //..
             }
 
-            if (d!=null) {
+            /*if (d!=null)*/ {
 
                 /*if (d.getName() == null)  {
                     System.err.println("Un-NObjectized: " + go);
                     return false;
                 }*/
-                geo.put(d);
+                db.put(d);
             }
 
             return true;

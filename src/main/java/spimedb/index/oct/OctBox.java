@@ -1,6 +1,7 @@
 package spimedb.index.oct;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.jetbrains.annotations.NotNull;
 import spimedb.IdBB;
 import spimedb.util.geom.*;
 
@@ -27,6 +28,22 @@ public class OctBox<K> extends AABB implements Shape3D {
 
     protected Collection<IdBB> items;
 
+
+
+    /**
+     * Constructs a new AbstractOctree node within the AABB cube volume: {o.x, o.y,
+     * o.z} ... {o.x+size, o.y+size, o.z+size}
+     *
+     * @param o
+     *            tree origin
+     *            size of the tree volume along a single axis
+     */
+    public OctBox(Vec3D o, Vec3D extents, Vec3D resolution) {
+        this(null, o, extents);
+        this.resolution = resolution;
+        if (resolution.volume() <= 0)
+            throw new RuntimeException("resolution must have non-zero volume"); //otherwise the root will hold everything due to root being always below threshold
+    }
 
     /**
      * Constructs a new AbstractOctree node within the AABB cube volume: {o.x, o.y,
@@ -73,18 +90,6 @@ public class OctBox<K> extends AABB implements Shape3D {
         return p.depth() + 1;
     }
 
-    /**
-     * Constructs a new AbstractOctree node within the AABB cube volume: {o.x, o.y,
-     * o.z} ... {o.x+size, o.y+size, o.z+size}
-     *
-     * @param o
-     *            tree origin
-     *            size of the tree volume along a single axis
-     */
-    public OctBox(Vec3D o, Vec3D extents, Vec3D resolution) {
-        this(null, o, extents);
-        this.resolution = resolution;
-    }
 
 
     /**
@@ -133,28 +138,50 @@ public class OctBox<K> extends AABB implements Shape3D {
             if (belowResolution(x.getBB())) {
                 if (items == null) {
                     items = newItemCollection();
+                    items.add(x);
+                    onModified();
+                } else if (items.add(x)) {
+                    onModified();
                 }
-                items.add(x);
                 return this;
             } else {
-                if (children == null) {
-                    children = new OctBox[8];
-                }
                 int octant = getOctantID(p);
 
+                boolean modified = false;
+
+                if (children == null) {
+                    children = new OctBox[8];
+                    modified = true;
+                }
+
                 final Vec3D extent = this.extent;
-                if (children[octant] == null) {
+                OctBox target = children[octant];
+                if (target == null) {
                     Vec3D off = new Vec3D(
                             minX() + ((octant & 1) != 0 ? extent.x() : 0),
                             minY() + ((octant & 2) != 0 ? extent.y() : 0),
                             minZ() + ((octant & 4) != 0 ? extent.z() : 0));
-                    children[octant] = new OctBox(this, off,
-                            extent.scale(0.5f));
+                    target = children[octant] = newBox(this, off, extent.scale(0.5f));
+                    modified = true;
                 }
-                return children[octant].put(x);
+
+                OctBox result = target.put(x);
+                if (result == null)
+                    System.err.println(x + " was not inserted in a child of " + this);
+                //throw new NullPointerException
+
+                if (modified)
+                    onModified();
+
+                return result;
             }
         }
         return null;
+    }
+
+    @NotNull
+    protected OctBox newBox(OctBox parent, Vec3D off, Vec3D extent) {
+        return new OctBox(parent, off, extent);
     }
 
     //TODO pass the target box as a parameter so it can base its decision on that
@@ -219,9 +246,10 @@ public class OctBox<K> extends AABB implements Shape3D {
      */
     public OctBox[] getChildrenCopy() {
         if (children != null) {
-            OctBox[] clones = new OctBox[8];
-            System.arraycopy(children, 0, clones, 0, 8);
-            return clones;
+            return children.clone();
+//            OctBox[] clones = new OctBox[8];
+//            System.arraycopy(children, 0, clones, 0, 8);
+//            return clones;
         }
         return null;
     }
@@ -466,20 +494,40 @@ public class OctBox<K> extends AABB implements Shape3D {
         forEachInSphere(new Sphere(sphereOrigin, clipRadius), c);
     }
 
-    private void reduceBranch() {
-        if (items != null && items.size() == 0) {
+    private boolean reduceBranch() {
+        boolean modified = false;
+        if (items != null && items.isEmpty()) {
             items = null;
+            modified = true;
         }
         if (children!=null) {
+            int nullCount = 0;
             for (int i = 0; i < 8; i++) {
-                if (children[i] != null && children[i].items == null) {
-                    children[i] = null;
+                OctBox ci = children[i];
+                if (ci != null) {
+                    if ((ci.items == null)) {
+                        children[i] = null;
+                        modified = true;
+                        nullCount++;
+                    }
+                } else {
+                    nullCount++;
                 }
+            }
+            if (nullCount == 8) {
+                children = null;
+                modified = true;
             }
         }
         if (parent != null) {
-            parent.reduceBranch();
+            if (parent.reduceBranch())
+                parent.onModified();
         }
+        return modified;
+    }
+
+    protected void onModified() {
+
     }
 
     /**
@@ -500,6 +548,10 @@ public class OctBox<K> extends AABB implements Shape3D {
                 }
             }
         }
+
+        if (found)
+            onModified();
+
         return found;
     }
 

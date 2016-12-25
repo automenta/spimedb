@@ -6,11 +6,13 @@ import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.jetbrains.annotations.NotNull;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.graph.MapGraph;
 import spimedb.index.graph.VertexContainer;
 import spimedb.index.oct.OctBox;
+import spimedb.util.geom.BB;
 import spimedb.util.geom.Vec3D;
 
 import java.util.Iterator;
@@ -26,12 +28,7 @@ public class OctSpimeDB implements SpimeDB {
     }
 
     public final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph;
-
-    public final OctBox<byte[]> oct = new OctBox(
-            new Vec3D(-180f, -90f, 0),
-            new Vec3D(360f, 180f, 0),
-            new Vec3D(0.05f, 0.05f, 0f)
-    );
+    public final OctBox oct;
 
     /** in-memory, map-based */
     public OctSpimeDB() {
@@ -40,6 +37,20 @@ public class OctSpimeDB implements SpimeDB {
 
     public OctSpimeDB(MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> g) {
         this.graph = g;
+
+        this.oct = new MyOctBox(
+                new Vec3D(-180f, -90f, -1),
+                new Vec3D(360f, 180f, 2),
+                new Vec3D(0.05f, 0.05f, 0.05f));
+
+        /** add any pre-existing values */
+        graph.vertices.forEach((k,v)->{
+            NObject vv = v.value();
+            BB spatial = vv.getBB();
+            float x = spatial.x(); //HACK use x=NaN to signal non-spatial
+            if (x==x)
+                oct.put(vv);
+        });
     }
 
     @Override
@@ -83,7 +94,7 @@ public class OctSpimeDB implements SpimeDB {
 
     @Override
     public Iterator<NObject> iterator() {
-        return Iterators.transform(graph.containerSet().iterator(), VertexContainer::getValue );
+        return Iterators.transform(graph.containerSet().iterator(), VertexContainer::value);
     }
 
     @Override
@@ -163,5 +174,23 @@ public class OctSpimeDB implements SpimeDB {
             //return new NObject(s);
             return null;
         }
+    }
+
+    static class MyOctBox extends OctBox {
+
+        public MyOctBox(Vec3D origin, Vec3D extents, Vec3D resolution) {
+            super(origin, extents, resolution);
+        }
+
+        @NotNull
+        @Override
+        protected OctBox newBox(OctBox parent, Vec3D off, Vec3D extent) {
+            return new MyOctBox(parent, off, extent);
+        }
+
+        @Override protected void onModified() {
+            System.out.println(this + " modified");
+        }
+
     }
 }

@@ -44,9 +44,13 @@ public class AABB extends Vec3D implements BB {
     // TODO extent as array
     protected final Vec3D extent;
 
-    public AABB() {
-        super();
+    public AABB(float x, float y, float z) {
+        super(x, y, z);
         extent = new Vec3D();
+    }
+
+    public AABB() {
+        this(Float.NaN, Float.NaN, Float.NaN);
     }
 
     @Override

@@ -148,6 +148,10 @@ public interface BB extends XYZ, Shape3D {
 
     default boolean contains(final XYZ v) {
         final float x = v.x();
+
+        if (x!=x)
+            return false;
+
         if (x < minX() || x > maxX()) {
             return false;
         }

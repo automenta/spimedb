@@ -119,7 +119,7 @@ public class NObject implements Serializable, IdBB {
     public NObject where(float lat, float lng, float alt, Object... geometry) {
         bounds.setX(lat);
         bounds.setY(lng);
-        //TODO alt
+        bounds.setZ(alt);
 
 //        space[0] = lat;
 //        space[1] = lng;
@@ -138,14 +138,16 @@ public class NObject implements Serializable, IdBB {
 //    }
 
     public NObject where(double lat, double lon) {
-        return where((float)lat, (float)lon, Float.NaN);
+        return where((float)lat, (float)lon);
     }
+
     public NObject where(double lat, double lon, double alt, Object... shape) {
         return where((float)lat, (float)lon, (float)alt, shape);
     }
 
     public NObject where(float lat, float lng) {
-        return where(lat, lng, Float.NaN);
+
+        return where(lat, lng, 0 /* Float.NaN*/);
     }
 
 //    //TODO provide non-boxed versoins of these
@@ -224,8 +226,12 @@ public class NObject implements Serializable, IdBB {
 
     @JsonIgnore
     public boolean isSpatial() {
-        return bounds !=null;
+        AABB bounds = this.bounds;
+        if (bounds == null) return false;
+        float x = bounds.x;
+        return x==x;
     }
+
     @JsonIgnore
     public boolean isTemporal() {
         return bounds.hasZ();

@@ -84,12 +84,6 @@ public class InfiniSpimeDB {
             }
         });
 
-
-        //reindex existing values
-        vertex.forEach(( k, v) -> {
-            db.oct.put(v.getValue());
-        });
-
         return db;
     }
 
