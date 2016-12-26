@@ -657,7 +657,7 @@ public class ImportKML {
                 if (g != null) {
                     if (g instanceof Point) {
                         Point pp = (Point) g;
-                        d.where(pp.getCenter(), NObject.POINT);
+                        d.where(pp.getCenter());
 
                     } else if (g instanceof org.opensextant.giscore.geometry.Line) {
                         org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;

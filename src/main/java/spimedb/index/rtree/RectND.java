@@ -33,7 +33,20 @@ public class RectND implements HyperRect<PointND> {
     @JsonProperty("b")
     protected final PointND max;
 
-    RectND(final PointND p) {
+
+    private static final PointND unbounded = new PointND(new float[0]) {
+        @Override
+        public String toString() {
+            return "*";
+        }
+    };
+
+    public RectND() {
+        min = unbounded;
+        max = unbounded;
+    }
+
+    public RectND(final PointND p) {
         min = p;
         max = p;
     }
@@ -63,12 +76,13 @@ public class RectND implements HyperRect<PointND> {
 
 
     @Override
-    public boolean contains(final HyperRect r) {
-        final RectND x = (RectND) r;
+    public boolean contains(final HyperRect _inner) {
+        final RectND inner = (RectND) _inner;
 
         int dim = dim();
         for (int i = 0; i < dim; i++) {
-            if (!(min.coord[i] <= x.min.coord[i] && max.coord[i] >= x.max.coord[i]))
+            if (!(min.coord[i] <= inner.min.coord[i] && max.coord[i] >= inner.max.coord[i]))
+            //if (min.coord[i] > inner.min.coord[i] || max.coord[i] < inner.max.coord[i])
                 return false;
         }
         return true;
@@ -80,6 +94,9 @@ public class RectND implements HyperRect<PointND> {
 
         int dim = dim();
         for (int i = 0; i < dim; i++) {
+            /*return !((min.x > r2.max.x) || (r2.min.x > max.x) ||
+                    (min.y > r2.max.y) || (r2.min.y > max.y));*/
+
             if (min.coord[i] > x.max.coord[i] || x.min.coord[i] > max.coord[i])
                 return false;
         }
@@ -181,13 +198,17 @@ public class RectND implements HyperRect<PointND> {
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        sb.append(min);
-        sb.append(',');
-        sb.append(max);
-        sb.append(')');
-        return sb.toString();
+        if (min.equals(max)) {
+            return min.toString();
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            sb.append('(');
+            sb.append(min);
+            sb.append(',');
+            sb.append(max);
+            sb.append(')');
+            return sb.toString();
+        }
     }
 
     public final static class Builder<X extends RectND> implements RectBuilder<X> {

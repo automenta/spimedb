@@ -69,28 +69,20 @@ public interface SpatialSearch<T> {
         return new LockingRTree<>(rTree(builder), new ReentrantReadWriteLock(true));
     }
 
-    /**
-     * Create a protected R-Tree with specified values for m, M, and split type
-     *
-     * @param builder   - Builder implementation used to create HyperRects out of T's
-     * @param minM      - minimum number of entries per node of this tree
-     * @param maxM      - maximum number of entries per node of this tree (exceeding this causes node split)
-     * @param splitType - type of split to use when M+1 entries are added to a node
-     * @param <T>       - The store type of the bound
-     * @return SpatialSearch - The spatial search and index structure
-     */
-    static <T> SpatialSearch<T> lockingRTree(final RectBuilder<T> builder, final int minM, final int maxM, final RTree.Split splitType) {
-        return new LockingRTree<>(rTree(builder, minM, maxM, splitType), new ReentrantReadWriteLock(true));
-    }
+//    /**
+//     * Create a protected R-Tree with specified values for m, M, and split type
+//     *
+//     * @param builder   - Builder implementation used to create HyperRects out of T's
+//     * @param minM      - minimum number of entries per node of this tree
+//     * @param maxM      - maximum number of entries per node of this tree (exceeding this causes node split)
+//     * @param splitType - type of split to use when M+1 entries are added to a node
+//     * @param <T>       - The store type of the bound
+//     * @return SpatialSearch - The spatial search and index structure
+//     */
+//    static <T> SpatialSearch<T> lockingRTree(final RectBuilder<T> builder, final int minM, final int maxM, final RTree.Split splitType) {
+//        return new LockingRTree<>(rTree(builder, minM, maxM, splitType), new ReentrantReadWriteLock(true));
+//    }
 
-    /**
-     * Search for entries intersecting given bounding rect
-     *
-     * @param rect - Bounding rectangle to use for querying
-     * @param t    - Array to store found entries
-     * @return Number of results found
-     */
-    int containing(final HyperRect rect, final T[] t);
 
 
     /**
@@ -125,6 +117,17 @@ public interface SpatialSearch<T> {
     void forEach(Consumer<T> consumer);
 
     void intersecting(HyperRect rect, Predicate<T> consumer);
+    void containing(HyperRect rect, Predicate<T> consumer);
+
+    /**
+     * Search for entries intersecting given bounding rect
+     *
+     * @param rect - Bounding rectangle to use for querying
+     * @param t    - Array to store found entries
+     * @return Number of results found
+     */
+    @Deprecated int containing(final HyperRect rect, final T[] t);
+
 
     Stats stats();
 

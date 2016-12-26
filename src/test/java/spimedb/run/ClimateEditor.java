@@ -1,5 +1,7 @@
 package spimedb.run;
 
+import com.google.common.base.Joiner;
+import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.SpimeScript;
 import spimedb.impl.InfiniSpimeDB;
@@ -29,8 +31,8 @@ public class ClimateEditor  {
             String[] urls = new String[]{
                     //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
                     //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
-                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
+                    //"file:///home/me/kml/submarine-cables-CV3D.kmz",
+                    //"file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
                     "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
                     // http://climateviewer.org/layers/kml/3rdparty/places/submarine-cables-CV3D.kmz
                     //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
@@ -45,9 +47,13 @@ public class ClimateEditor  {
                 }
             }
 
-            db.forEach(x -> {
-                System.out.println(x);
-            });
+//            db.forEach(x -> {
+//                System.out.println(x);
+//            });
+
+            Iterable<NObject> r = db.intersecting(40.44, -79.99, 420000, -1);
+
+            System.out.println(Joiner.on("\n").join(r));
         }
 
 

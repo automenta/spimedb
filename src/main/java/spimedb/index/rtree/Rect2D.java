@@ -131,8 +131,8 @@ public class Rect2D implements HyperRect<Rect2D> {
     public boolean intersects(final HyperRect r) {
         final Rect2D r2 = (Rect2D) r;
 
-        return !(min.x > r2.max.x || r2.min.x > max.x ||
-                min.y > r2.max.y || r2.min.y > max.y);
+        return !((min.x > r2.max.x) || (r2.min.x > max.x) ||
+                (min.y > r2.max.y) || (r2.min.y > max.y));
     }
 
     @Override

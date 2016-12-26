@@ -38,17 +38,14 @@ public final class AxialSplitLeaf<T> extends Leaf<T> {
 
     @Override
     protected Node<T> split(final T t) {
-        final Branch<T> pNode = new Branch<>(builder, mMin, mMax, splitType);
-        final Node<T> l1Node = create(builder, mMin, mMax, splitType);
-        final Node<T> l2Node = create(builder, mMin, mMax, splitType);
         final int nD = r[0].dim();
 
         final HyperRect[] sortedMbr = r.clone();
 
         // choose axis to split
         int axis = 0;
-        double rangeD = mbr.getRangeFinite(0, 0);
-        for (int d = 1; d < nD; d++) {
+        double rangeD = 0;
+        for (int d = 0; d < nD; d++) {
             // split along the greatest finite range extent
             final double dr = mbr.getRangeFinite(d, 0);
             if (dr > rangeD) {
@@ -57,13 +54,14 @@ public final class AxialSplitLeaf<T> extends Leaf<T> {
             }
         }
 
-        if (rangeD == 0 || !Double.isFinite(rangeD))
-            throw new UnsupportedOperationException("non-finite range can not be split in " + this);
+        if (rangeD == 0/* || !Double.isFinite(rangeD)*/)
+            throw new UnsupportedOperationException("infinitisemal range can not be split in " + this);
 
         final int splitDimension = axis;
 
         Arrays.sort(sortedMbr, Comparator.comparingDouble(o -> o.center(splitDimension)));
 
+        final Node<T> l1Node = create(builder, mMin, mMax, splitType);
         for (int i = 0; i < size / 2; i++) {
             outerLoop:
             for (int j = 0; j < size; j++) {
@@ -74,6 +72,7 @@ public final class AxialSplitLeaf<T> extends Leaf<T> {
             }
         }
 
+        final Node<T> l2Node = create(builder, mMin, mMax, splitType);
         for (int i = size / 2; i < size; i++) {
             outerLoop:
             for (int j = 0; j < size; j++) {
@@ -86,6 +85,7 @@ public final class AxialSplitLeaf<T> extends Leaf<T> {
 
         classify(l1Node, l2Node, t);
 
+        final Branch<T> pNode = new Branch<>(builder, mMin, mMax, splitType);
         pNode.addChild(l1Node);
         pNode.addChild(l2Node);
 

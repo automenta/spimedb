@@ -24,6 +24,8 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -70,23 +72,23 @@ public class RTree2DTest {
             }
 
             final Rect2D searchRect = new Rect2D(5, 5, 10, 10);
-            Rect2D[] results = new Rect2D[entryCount];
+            List<Rect2D> results = new ArrayList();
 
-            final int foundCount = rTree.containing(searchRect, results);
+            rTree.intersecting(searchRect, results::add);
             int resultCount = 0;
-            for(int i = 0; i < results.length; i++) {
-                if(results[i] != null) {
+            for(int i = 0; i < results.size(); i++) {
+                if(results.get(i) != null) {
                     resultCount++;
                 }
             }
 
             final int expectedCount = 9;
-            Assert.assertEquals("[" + type + "] Search returned incorrect search result count - expected: " + expectedCount + " actual: " + foundCount, expectedCount, foundCount);
+            //Assert.assertEquals("[" + type + "] Search returned incorrect search result count - expected: " + expectedCount + " actual: " + foundCount, expectedCount, foundCount);
             Assert.assertEquals("[" + type + "] Search returned incorrect number of rectangles - expected: " + expectedCount + " actual: " + resultCount, expectedCount, resultCount);
 
             // If the order of nodes in the tree changes, this test may fail while returning the correct results.
             for (int i = 0; i < resultCount; i++) {
-                Assert.assertTrue("Unexpected result found", results[i].min.x == i + 2 && results[i].min.y == i + 2 && results[i].max.x == i + 5 && results[i].max.y == i + 5);
+                Assert.assertTrue("Unexpected result found", results.get(i).min.x == i + 2 && results.get(i).min.y == i + 2 && results.get(i).max.x == i + 5 && results.get(i).max.y == i + 5);
             }
         }
     }

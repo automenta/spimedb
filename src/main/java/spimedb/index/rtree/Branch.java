@@ -71,7 +71,7 @@ final class Branch<T> implements Node<T> {
     }
 
     @Override
-    public boolean isLeaf() {
+    public final boolean isLeaf() {
         return false;
     }
 
@@ -192,9 +192,11 @@ final class Branch<T> implements Node<T> {
 
         for (int i = 0; i < size; i++) {
             Node c = child[i];
-            if (rect.intersects(c.bounds())) {
+            if (rect.contains(c.bounds())) {
                 if (!c.containing(rect, t))
                     return false;
+            } else {
+                System.out.println(rect + " does not contain " + c.bounds());
             }
         }
         return true;
@@ -263,8 +265,9 @@ final class Branch<T> implements Node<T> {
     @Override
     public boolean intersecting(HyperRect rect, Predicate<T> consumer) {
         for (int i = 0; i < size; i++) {
-            if (rect.intersects(child[i].bounds())) {
-                if (!child[i].intersecting(rect, consumer))
+            Node ci = child[i];
+            if (rect.intersects(ci.bounds())) {
+                if (!ci.intersecting(rect, consumer))
                     return false;
             }
         }

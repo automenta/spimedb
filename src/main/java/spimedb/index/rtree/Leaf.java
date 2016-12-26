@@ -125,7 +125,7 @@ abstract class Leaf<T> implements Node<T> {
     @Override
     public boolean containing(HyperRect rect, Predicate<T> t) {
         for (int i = 0; i < size; i++) {
-            if (rect.intersects(r[i])) {
+            if (rect.contains(r[i])) {
                 if (!t.test(entry[i]))
                     return false;
             }
@@ -139,7 +139,7 @@ abstract class Leaf<T> implements Node<T> {
         final int n0 = n;
 
         for (int i = 0; i < size && n < tLen; i++) {
-            if (rect.intersects(r[i])) {
+            if (rect.contains(r[i])) {
                 t[n++] = entry[i];
             }
         }
@@ -182,14 +182,14 @@ abstract class Leaf<T> implements Node<T> {
     }
 
     @Override
-    public boolean intersecting(HyperRect rect, Predicate<T> consumer) {
+    public boolean intersecting(HyperRect rect, Predicate<T> t) {
         for (int i = 0; i < size; i++) {
             if (rect.intersects(r[i])) {
-                if (!consumer.test(entry[i]))
+                if (!t.test(entry[i]))
                     return false;
             }
         }
-        return false;
+        return true;
     }
 
     @Override

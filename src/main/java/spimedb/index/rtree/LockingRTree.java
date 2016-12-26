@@ -192,6 +192,15 @@ public class LockingRTree<T> implements SpatialSearch<T> {
     }
 
     @Override
+    public void containing(HyperRect rect, Predicate<T> consumer) {
+        readLock.lock();
+        try {
+            rTree.containing(rect, consumer);
+        } finally {
+            readLock.unlock();
+        }
+    }
+    @Override
     public void intersecting(HyperRect rect, Predicate<T> consumer) {
         readLock.lock();
         try {

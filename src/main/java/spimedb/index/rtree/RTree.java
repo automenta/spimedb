@@ -138,8 +138,8 @@ public class RTree<T> implements SpatialSearch<T> {
         return root.containing(rect, t, 0);
     }
 
-    public boolean containing(HyperRect rect, final Predicate<T> t) {
-        return root.containing(rect, t);
+    public void containing(HyperRect rect, final Predicate<T> t) {
+        root.containing(rect, t);
     }
 
     void instrumentTree() {

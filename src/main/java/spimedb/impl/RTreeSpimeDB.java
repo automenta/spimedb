@@ -140,7 +140,7 @@ public class RTreeSpimeDB implements SpimeDB {
     }
 
     @Override
-    public List<NObject> get(double lat, double lon, double radMeters, int maxResults) {
+    public List<NObject> intersecting(double lat, double lon, double radMeters, int maxResults) {
 
         List<NObject> l = new FastList() {
 
@@ -148,12 +148,11 @@ public class RTreeSpimeDB implements SpimeDB {
 
             @Override
             public boolean add(Object newItem) {
-                if (count == maxResults) return false;
 
                 if (super.add(newItem)) {
-                    count++;
-                    return true;
+                    return (++count != maxResults);
                 }
+
                 return false;
             }
         };

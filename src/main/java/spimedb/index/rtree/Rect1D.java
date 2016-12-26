@@ -41,8 +41,9 @@ public abstract class Rect1D implements HyperRect<Point1D> {
         return new Point1D(center(0));
     }
 
-    @Override public double center(int d) {
-        assert(d==0);
+    @Override
+    public double center(int d) {
+        assert (d == 0);
         return (from() + to()) / 2.0;
     }
 
@@ -53,8 +54,8 @@ public abstract class Rect1D implements HyperRect<Point1D> {
 
     @Override
     public boolean contains(HyperRect r) {
-        Rect1D rr = (Rect1D) r;
-        return rr.from() >= from() && rr.to() <= to();
+        Rect1D inner = (Rect1D) r;
+        return inner.from() >= from() && inner.to() <= to();
     }
 
     @Override
@@ -67,6 +68,7 @@ public abstract class Rect1D implements HyperRect<Point1D> {
     public double cost() {
         return getRange(0);
     }
+
 
     public static class DefaultRect1D extends Rect1D {
 
@@ -88,6 +90,12 @@ public abstract class Rect1D implements HyperRect<Point1D> {
                 throw new UnsupportedOperationException("order fault");
             this.from = from;
             this.to = to;
+        }
+
+
+        @Override
+        public String toString() {
+            return "[" + from +  "," + to + "]";
         }
 
         @Override

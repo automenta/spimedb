@@ -20,6 +20,8 @@ package spimedb.index.rtree;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * An N dimensional rectangle or "hypercube" that is a representation of a data entry.
  * <p>
@@ -73,7 +75,7 @@ public interface HyperRect<X> {
      */
     double getRange(final int d);
 
-    default double getRangeFinite(int d, double elseValue) {
+    @JsonIgnore  default double getRangeFinite(int d, double elseValue) {
         double r = getRange(d);
         if (!Double.isFinite(r))
             return elseValue;
@@ -91,7 +93,7 @@ public interface HyperRect<X> {
     boolean contains(HyperRect r);
 
     /**
-     * Determines if this HyperRect intersects parameter HyperRect
+     * Determines if this HyperRect contains or intersects parameter HyperRect
      *
      * @param r - HyperRect to test
      * @return true if intersects, false otherwise
@@ -110,16 +112,17 @@ public interface HyperRect<X> {
      *
      * @return - perimeter
      */
-    default double perimeter() {
+    @JsonIgnore  default double perimeter() {
         double p = 0.0;
         final int nD = this.dim();
         for (int d = 0; d < nD; d++) {
-            p += 2.0 * this.getRange(d);
+            p += 2.0 * this.getRangeFinite(d, 0);
         }
         return p;
     }
 
-    default double getRangeMin() {
+
+    @JsonIgnore  default double getRangeMin() {
         int dim = dim();
         double min = Double.POSITIVE_INFINITY;
         for (int i = 0; i < dim; i++) {
@@ -132,7 +135,7 @@ public interface HyperRect<X> {
     }
 
     /** whether any of the dimensions are finite */
-    default boolean bounded() {
+    @JsonIgnore  default boolean bounded() {
         int dim = dim();
         for (int i = 0; i < dim; i++) {
             double r = getRange(i);

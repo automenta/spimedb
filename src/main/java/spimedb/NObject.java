@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.opensextant.geodesy.Geodetic2DPoint;
-import org.opensextant.geodesy.Geodetic3DPoint;
+import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
@@ -211,10 +210,9 @@ public class NObject extends RectND implements Serializable {
     public final static String POLYGON = "*";
 
 
-    public NObject where(Geodetic2DPoint c, Object... shape) {
+    public NObject where(Geodetic2DPoint c) {
 
         float lat = (float) c.getLatitudeAsDegrees();
-
         min.coord[1] = max.coord[1] = lat;
 
         float lon = (float) c.getLongitudeAsDegrees();
@@ -229,16 +227,61 @@ public class NObject extends RectND implements Serializable {
             max.coord[3] = Float.POSITIVE_INFINITY;
         }
 
+        //put("g" + NObject.POINT, )
+
         return this;
     }
+
+    public NObject where(Latitude AX, Latitude BX, Longitude AY, Longitude BY) {
+
+
+        {
+            float ax = (float) AX.inDegrees();
+            float bx = (float) BX.inDegrees();
+            if (ax > bx) { float t = ax; ax = bx; bx = t; } //swap
+            min.coord[1] = ax;
+            max.coord[1] = bx;
+            assert (min.coord[1] < max.coord[1]);
+        }
+
+        {
+            float ay = (float) AY.inDegrees();
+            float by = (float) BY.inDegrees();
+            if (ay > by) { float t = ay; ay = by; by = t; } //swap
+            min.coord[2] = ay;
+            max.coord[2] = by;
+            assert (min.coord[2] < max.coord[2]);
+        }
+
+//        if ((a instanceof Geodetic3DPoint) && (b instanceof Geodetic3DPoint)) {
+//            float az = (float) ((Geodetic3DPoint) a).getElevation();
+//            float bz = (float) ((Geodetic3DPoint) b).getElevation();
+//            if (az > bz) { float t = az; az = bz; bz = t; } //swap
+//            min.coord[3] = az;
+//            max.coord[3] = bz;
+//            assert(min.coord[3] < max.coord[3]);
+//        } else {
+//            min.coord[3] = Float.NEGATIVE_INFINITY;
+//            max.coord[3] = Float.POSITIVE_INFINITY;
+//        }
+
+        return this;
+    }
+
+    public void where(Geodetic2DBounds bb) {
+        where(bb.getSouthLat(), bb.getNorthLat(), bb.getEastLon(), bb.getWestLon());
+    }
+
 
     public NObject where(Line l) {
 
         List<Point> lp = l.getPoints();
         double[][] points = ImportKML.toArray(lp);
 
-        return where(l.getCenter(), NObject.LINESTRING, points);
-
+        Geodetic2DBounds bb = l.getBoundingBox();
+        where(bb);
+        put("g" + NObject.LINESTRING, points);
+        return this;
     }
 
     public NObject where(Polygon p) {
@@ -246,7 +289,9 @@ public class NObject extends RectND implements Serializable {
 
         //TODO handle inner rings
 
-        return where(p.getCenter(), NObject.POLYGON, new double[][][]{outerRing /* inner rings */});
+        where(p.getBoundingBox());
+        put("g" + NObject.POLYGON, outerRing);
+        return this;
     }
 
     /** sets the inside property */

@@ -69,7 +69,6 @@ interface Node<T> {
      */
     int containing(HyperRect rect, T[] t, int n);
 
-    boolean containing(HyperRect rect, Predicate<T> t);
 
     /**
      * The number of entries in the node
@@ -92,6 +91,8 @@ interface Node<T> {
      *  @return whether to continue visit
      */
     boolean intersecting(HyperRect rect, Predicate<T> consumer);
+
+    boolean containing(HyperRect rect, Predicate<T> t);
 
     /**
      * Recurses over index collecting stats

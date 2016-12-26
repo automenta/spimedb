@@ -19,7 +19,7 @@ public interface SpimeDB extends Iterable<NObject> {
 
     void children(String parent, Consumer<String> each);
 
-    Iterable<NObject> get(double lat, double lon, double radMeters, int maxResults);
+    Iterable<NObject> intersecting(double lat, double lon, double radMeters, int maxResults);
 
     enum Scope {
         Private, Trusted, Public, Anonymous, Advertise
