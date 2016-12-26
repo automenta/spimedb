@@ -1,9 +1,10 @@
 {
-    "name":  "netention",
+    "name":  "spimedb",
     "version": "1.0.0",
     "dependencies": {
         "jquery": "latest",
         "jquery-ui": "latest",
+	    "msgpack-lite": "latest",
         "cytoscape": "latest",
         "cytoscape-edgehandles": "latest",
         "cesiumjs": "latest",

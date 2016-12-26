@@ -28,8 +28,10 @@ public class ClimateEditor  {
             }
 
             String[] urls = new String[]{
-                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
+                    "file:///home/me/kml/Indian-Lands.kmz",
+                    "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
                     "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
+                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
                     "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
 
                     //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
@@ -57,7 +59,7 @@ public class ClimateEditor  {
 
     public static void main(String[] args) {
 
-        SpimeDB db =  InfiniSpimeDB.get(null /* "/tmp/climate" */);
+        SpimeDB db =  InfiniSpimeDB.get("/tmp/climate" /* null */);
 
         new ClimateEditor(db);
 

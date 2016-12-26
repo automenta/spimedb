@@ -1,6 +1,7 @@
 package spimedb.index.rtree;
 
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import static spimedb.index.rtree.RTree.FPSILON;
@@ -9,7 +10,7 @@ import static spimedb.index.rtree.RTree.FPSILON;
 /**
  * Created by me on 12/21/16.
  */
-public class PointND implements HyperPoint {
+public class PointND implements HyperPoint, Serializable {
 
     public final float[] coord;
 

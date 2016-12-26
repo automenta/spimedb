@@ -433,15 +433,17 @@ public class ImportKML {
         compressor.setRemoveMultiSpaces(true);         //if false keeps multiple whitespace characters (default is true)
         compressor.setRemoveIntertagSpaces(true);      //removes iter-tag whitespace characters
         compressor.setRemoveQuotes(true);              //removes unnecessary tag attribute quotes
-        compressor.setSimpleDoctype(true);             //simplify existing doctype
         compressor.setRemoveScriptAttributes(true);    //remove optional attributes from script tags
-
         compressor.setRemoveLinkAttributes(true);      //remove optional attributes from link tags
         compressor.setRemoveJavaScriptProtocol(true);      //remove optional attributes from link tags
         compressor.setRemoveHttpProtocol(true);        //replace "http://" with "//" inside tag attributes
         compressor.setRemoveHttpsProtocol(true);       //replace "https://" with "//" inside tag attributes
         compressor.setRemoveSurroundingSpaces("br,p"); //remove spaces around provided tags
-        compressor.setCompressCss(false);               //compress inline css 
+        compressor.setRemoveStyleAttributes(true);
+
+        compressor.setSimpleDoctype(true);             //simplify existing doctype
+        compressor.setCompressCss(true);               //compress inline css
+
 
     }
 
@@ -545,8 +547,8 @@ public class ImportKML {
         
         for (int i = 0; i < points.length; i++) {
             Geodetic2DPoint c = lp.get(i).getCenter();
-            points[i][0] = c.getLongitudeAsDegrees();
-            points[i][1] = c.getLatitudeAsDegrees();
+            points[i][0] = c.getLatitudeAsDegrees();
+            points[i][1] = c.getLongitudeAsDegrees();
         }
         return points;
     }
@@ -661,18 +663,26 @@ public class ImportKML {
 
 
                 if (g != null) {
-                    if (g instanceof Point) {
+                    /*if (g instanceof Circle) {
+
+                    }
+                    else */if (g instanceof Point) {
                         Point pp = (Point) g;
                         d.where(pp.getCenter());
 
+                    } else if (g instanceof org.opensextant.giscore.geometry.LinearRing) {
+                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g );
+
                     } else if (g instanceof org.opensextant.giscore.geometry.Line) {
                         org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;
-
                         d.where( l );
+                    } else if (g instanceof org.opensextant.giscore.geometry.MultiLinearRings) {
+                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g );
                     } else if (g instanceof org.opensextant.giscore.geometry.Polygon) {
                         org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) g;
-
                         d.where(p);
+                    } else {
+                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g );
                     }
 
                     //TODO other types
@@ -690,7 +700,7 @@ public class ImportKML {
                         StyleMap ss = (StyleMap) f.getStyle();
                         styleInline = styles.get(ss.getId());
                         if (styleInline == null) {
-                            System.err.println("Missing: " + ss.getId());
+                            logger.warn("Missing style: {}", ss.getId());
                         }
                     }
 

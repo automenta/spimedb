@@ -270,7 +270,7 @@ public class NObject extends RectND implements Serializable {
         return this;
     }
 
-    public final static String POINT = ".";
+    //public final static String POINT = ".";
     public final static String LINESTRING = "-";
     public final static String POLYGON = "*";
 
@@ -301,20 +301,20 @@ public class NObject extends RectND implements Serializable {
 
 
         {
-            float ax = (float) AX.inDegrees();
-            float bx = (float) BX.inDegrees();
-            if (ax > bx) { float t = ax; ax = bx; bx = t; } //swap
-            min.coord[1] = ax;
-            max.coord[1] = bx;
+            float a = (float) AY.inDegrees();
+            float b = (float) BY.inDegrees();
+            if (a > b) { float t = a; a = b; b = t; } //swap
+            min.coord[0] = a;
+            max.coord[0] = b;
             assert (min.coord[1] < max.coord[1]);
         }
 
         {
-            float ay = (float) AY.inDegrees();
-            float by = (float) BY.inDegrees();
-            if (ay > by) { float t = ay; ay = by; by = t; } //swap
-            min.coord[2] = ay;
-            max.coord[2] = by;
+            float a = (float) AX.inDegrees();
+            float b = (float) BX.inDegrees();
+            if (a > b) { float t = a; a = b; b = t; } //swap
+            min.coord[2] = a;
+            max.coord[2] = b;
             assert (min.coord[2] < max.coord[2]);
         }
 

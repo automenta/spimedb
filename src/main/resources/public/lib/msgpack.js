@@ -1,0 +1,1 @@
+../bower_components/msgpack-lite/dist/msgpack.min.js

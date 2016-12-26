@@ -170,11 +170,11 @@ class Map2DView extends NView {
                     var linePath, polygon;
                     if (linePath = f['g-']) {
 
-                        m = L.polyline(linePath, {color: 'gray', data: f, title: label});
+                        m = L.polyline(linePath, {color: 'gray', data: f, title: label}).addTo(map);
 
                     } else if (polygon = f['g*']) {
 
-                        console.log('polygon', polygon);
+                        m = L.polygon(polygon, {color: 'gray', data: f, title: label}).addTo(map);
 
                     } else {
                         //default point or bounding rect marker:
@@ -188,7 +188,7 @@ class Map2DView extends NView {
 
                         if (!(Array.isArray(lat) || Array.isArray(lon))) {
                             mm.zIndexOffset = 100;
-                            m = L.circleMarker( [ lat, lon ], mm);
+                            m = L.circleMarker( [ lat, lon ], mm).addTo(clustering);
                         } else {
                             var latMin = lat[0], latMax = lat[1];
                             var lonMin = lon[0], lonMax = lon[1];
@@ -197,7 +197,7 @@ class Map2DView extends NView {
 
                             mm.opacity = 0.1; //TODO decrease this by the bounds area
 
-                            m = L.rectangle(bounds, mm);
+                            m = L.rectangle(bounds, mm).addTo(map);
                         }
 
 
@@ -211,7 +211,6 @@ class Map2DView extends NView {
                         m.on('mouseout', outHandler);
 
                         features.set(id, m);
-                        m.addTo(clustering);
 
                     }
 
@@ -479,7 +478,11 @@ class Map2DView extends NView {
                     console.log('err', v, m);
                 });*/
 
-        }, uiBoundsReactionPeriodMS );
+        //}, uiBoundsReactionPeriodMS );
+        },  0, {
+         'leading': true,
+         'trailing': true
+       });
 
 
 

@@ -7,6 +7,7 @@ package spimedb.web;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -69,9 +70,11 @@ public class SpacetimeWebServer extends PathHandler {
 
         addPrefixPath("/planet/earth/region2d/circle/summary", new HttpHandler() {
 
-            final int MAX_RESULTS = 128;
-            final int MAX_RESPONSE_BYTES = 128 * 1024;
-            final int BLOOM_SIZE = 4096;
+            final ObjectMapper mapper = Core.msgPackMapper;
+
+            final int MAX_RESULTS = 1024;
+            final int MAX_RESPONSE_BYTES = 1024 * 1024;
+            final int BLOOM_SIZE = 64 * 1024;
 
             final ConcurrentWeakKeyHashMap<ServerConnection, UnBloomFilter<String>> sent =
                     new ConcurrentWeakKeyHashMap<>();
@@ -90,6 +93,7 @@ public class SpacetimeWebServer extends PathHandler {
                     float lon = Float.parseFloat(lons.getFirst());
                     float rad = Float.parseFloat(rads.getFirst());
 
+                    ex.setPersistent(true);
 
                     ServerConnection con = ex.getConnection();
                     UnBloomFilter<String> bloom = sent.computeIfAbsent(con,
@@ -98,13 +102,13 @@ public class SpacetimeWebServer extends PathHandler {
                     Web.stream(ex, (o) -> {
 
                         try {
-                            JsonGenerator gen = Core.json.getFactory().createGenerator(o);
+                            JsonGenerator gen =
+                                    mapper.getFactory().createGenerator(o);
 
                             gen.writeStartArray();
 
                             final int[] count = {0};
 
-                            ex.setPersistent(true);
 
                             db.intersecting(lat, lon, rad, (n) -> {
 

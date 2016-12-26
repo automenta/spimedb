@@ -225,15 +225,37 @@ class NClient extends EventEmitter {
         //adds a spatial boundary region to the focus
         //console.log('spaceOn', bounds);
 
-        $.get(bounds.toURL())
+
+
+        //https://github.com/jDataView/jBinary ?
+        var oReq = new XMLHttpRequest();
+        oReq.open("GET", bounds.toURL(), true);
+        oReq.responseType = "arraybuffer"; //"blob"
+
+        oReq.onload = function(oEvent) {
+          var arrayBuffer = oReq.response;
+          if (arrayBuffer) {
+              var byteArray = new Uint8Array(arrayBuffer);
+              var p = msgpack.decode(byteArray);
+              onFocus(p);
+          }
+        };
+        oReq.send(null);
+
+
+
+        /*$.get(bounds.toURL())
             .done(function(s) {
                 if (s.length == 0) return;
                 try {
-                    var p = JSON.parse(s);
+                    //var p = JSON.parse(s);
+
+                    var p = msgpack.decode(s);
+                    console.log(s.length, p);
                     onFocus(p);
                 } catch (e) {
                     onError(e);
                 }
-            }).fail(onError);
+            }).fail(onError);*/
     }
 }

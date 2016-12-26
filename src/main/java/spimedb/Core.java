@@ -1,13 +1,16 @@
 package spimedb;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
+import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -101,29 +104,30 @@ public class Core {
             .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, true)
     ;
 
-    final public static ObjectWriter jsonWriter = json.writer();
+
+    public final static ObjectMapper msgPackMapper = new ObjectMapper(new MessagePackFactory());
 
 
 
 
 
-    final public static ObjectMapper jsonAnnotated = new ObjectMapper()
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
-            .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, false)
-            .configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true)
-            .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, false)
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-
-    final public static ObjectMapper jsonFields = new ObjectMapper()
-            .enableDefaultTyping()
-            .configure(SerializationFeature.INDENT_OUTPUT, true)
-            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
-            .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, false)
-            .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true)
-            .configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true)
-            .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, true)
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+//    final public static ObjectMapper jsonAnnotated = new ObjectMapper()
+//            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+//            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+//            .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, false)
+//            .configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true)
+//            .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, false)
+//            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+//
+//    final public static ObjectMapper jsonFields = new ObjectMapper()
+//            .enableDefaultTyping()
+//            .configure(SerializationFeature.INDENT_OUTPUT, true)
+//            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+//            .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, false)
+//            .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true)
+//            .configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true)
+//            .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, true)
+//            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
 
     //final public static JsonNodeFactory newJson = new JsonNodeFactory(false);
@@ -147,7 +151,7 @@ public class Core {
 
     public static boolean toJSON(Object x, OutputStream out, char suffix) {
         try {
-            jsonWriter.writeValue(out, x);
+            json.writer().writeValue(out, x);
             out.write(suffix);
             return true;
         } catch (Exception ex) {
