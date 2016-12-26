@@ -1,0 +1,148 @@
+<html>
+
+<head>
+    <style>
+        body {
+            background-color: black;
+            color: #aaa;
+            font-family: monospace;
+            margin: 0em;
+            font-size: 150%;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #in {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1.5em;
+            background-color: black;
+            color: orange;
+            margin: 0;
+            overflow-x: auto;
+        }
+
+        #out {
+        }
+
+        #outout {
+          width: 100%;
+          top: 0;
+          left: 0;
+          position: absolute;
+          max-height: 100%;
+          overflow-y: auto;
+          padding-bottom:2em;
+        }
+    </style>
+</head>
+
+
+
+<script src="../lib/jquery.js"></script>
+<script src="ReconnectingWebsocket.js"></script>
+<!--<script src="../lib/web_socket.js"></script>-->
+
+<body>
+    <div id="outout">
+      <div id="out"></div>
+    </div>
+    <input id="in" type="text" placeholder="?" />
+</body>
+
+<script>
+    $(document).ready(() => {
+
+        const path = "shell";
+        const defaultHostname = window.location.hostname || 'localhost';
+        const defaultWSPort = window.location.port || 8080;
+        const options = undefined;
+
+        /** creates a websocket connection to a path on the server that hosts the currently visible webpage */
+        const ws = new ReconnectingWebSocket(
+          'ws://' + window.location.hostname + ':' + window.location.port + '/' + path,
+          null /* protocols */,
+          options || {
+              //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
+              /*
+               // The number of milliseconds to delay before attempting to reconnect.
+               reconnectInterval: 1000,
+               // The maximum number of milliseconds to delay a reconnection attempt.
+               maxReconnectInterval: 30000,
+               // The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist.
+               reconnectDecay: 1.5,
+
+               // The maximum time in milliseconds to wait for a connection to succeed before closing and retrying.
+               timeoutInterval: 2000,
+               */
+          });
+
+
+        ws.onopen = function() {
+
+            show('websocket connect');
+
+        };
+
+        ws.onclose = function() {
+            //already disconnected?
+            if (!this.opt)
+                return;
+
+            show("Websocket disconnect");
+
+            //attempt reconnect?
+        };
+
+        function show(msg) {
+            O.append(msg);
+
+            //scroll to bottom
+
+            setTimeout(()=>{
+              const height = O[0].scrollHeight;
+              Oo.scrollTop(height);
+            },0);
+        }
+
+        function showCode(e) {
+            show($('<pre>').text(JSON.stringify(e, null, 2)));
+        }
+
+        ws.onmessage = function(e) {
+            try {
+                var c = e.data;
+                var d = JSON.parse(c);
+                showCode(d);
+            } catch (e) {
+                showCode(c);
+            }
+        };
+
+        ws.onclose = function(e) {
+            show(['Websocket disconnected', e]);
+        };
+
+        ws.onerror = function(e) {
+            show(["Websocket error", e]);
+        };
+
+
+        var O = $('#out');
+        var Oo = $('#outout');
+        var I = $('#in');
+
+        I.keyup(function(e) {
+            if (e.keyCode == 13) {
+                var x = I.val();
+                I.val('');
+                ws.send(x);
+            }
+        });
+    });
+</script>
+
+</html>

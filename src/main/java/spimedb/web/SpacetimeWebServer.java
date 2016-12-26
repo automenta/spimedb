@@ -39,7 +39,7 @@ import static io.undertow.UndertowOptions.ENABLE_SPDY;
  */
 public class SpacetimeWebServer extends PathHandler {
 
-    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(SpacetimeWebServer.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SpacetimeWebServer.class);
     public static final String resourcePath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
     private final SpimeDB db;
 
@@ -68,7 +68,11 @@ public class SpacetimeWebServer extends PathHandler {
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
 
-        addPrefixPath("/planet/earth/region2d/circle/summary", new HttpHandler() {
+        addPrefixPath("/shell", new JavascriptShell().with((e)->{
+            e.put("db", db);
+        }));
+
+        addPrefixPath("/earth/region2d/summary", new HttpHandler() {
 
             final ObjectMapper mapper = Core.msgPackMapper;
 
@@ -84,14 +88,19 @@ public class SpacetimeWebServer extends PathHandler {
 
                 Map<String, Deque<String>> reqParams = ex.getQueryParameters();
 
+                /*Deque<String> rads = reqParams.get("r");
                 Deque<String> lons = reqParams.get("x");
-                Deque<String> lats = reqParams.get("y");
-                Deque<String> rads = reqParams.get("r");
+                Deque<String> lats = reqParams.get("y");*/
 
-                if (lats != null && lons != null && rads != null) {
-                    float lat = Float.parseFloat(lats.getFirst());
-                    float lon = Float.parseFloat(lons.getFirst());
-                    float rad = Float.parseFloat(rads.getFirst());
+                Deque<String> x1 = reqParams.get("x1");
+                Deque<String> x2 = reqParams.get("x2");
+                Deque<String> y1 = reqParams.get("y1");
+                Deque<String> y2 = reqParams.get("y2");
+
+                //if (lats != null && lons != null && rads != null) {
+                if (x1!=null && x2!=null && y1!=null && y2!=null) {
+                    float[] lon = new float[] { Float.parseFloat(x1.getFirst()), Float.parseFloat(x2.getFirst()) };
+                    float[] lat = new float[] { Float.parseFloat(y1.getFirst()), Float.parseFloat(y2.getFirst()) };
 
                     ex.setPersistent(true);
 
@@ -110,10 +119,10 @@ public class SpacetimeWebServer extends PathHandler {
                             final int[] count = {0};
 
 
-                            db.intersecting(lat, lon, rad, (n) -> {
+                            db.intersecting(lon, lat, (n) -> {
 
                                 String i = n.id();
-                                if (bloom.containsAndAdd(i)) {
+                                if (!bloom.containsAndAdd(i)) {
                                     try {
 
                                         //gen.writeStartObject();

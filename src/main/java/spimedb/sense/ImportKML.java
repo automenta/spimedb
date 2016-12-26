@@ -11,7 +11,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import org.opensextant.geodesy.Geodetic2DPoint;
 import org.opensextant.giscore.events.*;
 import org.opensextant.giscore.events.SimpleField.Type;
@@ -45,7 +44,6 @@ import static spimedb.sense.kml.KmlReader.logger;
  */
 public class ImportKML {
 
-    static final HtmlCompressor compressor = new HtmlCompressor();
     private final Proxy proxy;
     private final SpimeDB db;
     final AtomicLong serial = new AtomicLong();
@@ -426,40 +424,7 @@ public class ImportKML {
         return su.charAt(0) == '#';
     }
 
-    static {
-        //https://code.google.com/p/htmlcompressor/wiki/Documentation#Using_HTML_Compressor_from_Java_API
-
-        compressor.setRemoveComments(true);            //if false keeps HTML comments (default is true)
-        compressor.setRemoveMultiSpaces(true);         //if false keeps multiple whitespace characters (default is true)
-        compressor.setRemoveIntertagSpaces(true);      //removes iter-tag whitespace characters
-        compressor.setRemoveQuotes(true);              //removes unnecessary tag attribute quotes
-        compressor.setRemoveScriptAttributes(true);    //remove optional attributes from script tags
-        compressor.setRemoveLinkAttributes(true);      //remove optional attributes from link tags
-        compressor.setRemoveJavaScriptProtocol(true);      //remove optional attributes from link tags
-        compressor.setRemoveHttpProtocol(true);        //replace "http://" with "//" inside tag attributes
-        compressor.setRemoveHttpsProtocol(true);       //replace "https://" with "//" inside tag attributes
-        compressor.setRemoveSurroundingSpaces("br,p"); //remove spaces around provided tags
-        compressor.setRemoveStyleAttributes(true);
-
-        compressor.setSimpleDoctype(true);             //simplify existing doctype
-        compressor.setCompressCss(true);               //compress inline css
-
-
-    }
-
-    private static String filterHTML(String html) {
-
-        try {
-            String compressedHtml = compressor.compress(html);
-
-            return compressedHtml;
-        } catch (Exception e) {
-            return html;
-        }
-
-    }
-
-//    NObject stylemapJson(NObject fb, StyleMap s) throws IOException {
+    //    NObject stylemapJson(NObject fb, StyleMap s) throws IOException {
 //        Pair normal = s.getPair(StyleMap.NORMAL);
 //        //System.out.println(normal.getStyleUrl() + " " + normal.getStyleSelector());
 //        return fb;
@@ -547,8 +512,9 @@ public class ImportKML {
         
         for (int i = 0; i < points.length; i++) {
             Geodetic2DPoint c = lp.get(i).getCenter();
-            points[i][0] = c.getLatitudeAsDegrees();
-            points[i][1] = c.getLongitudeAsDegrees();
+            double[] pi = points[i];
+            pi[0] = c.getLatitudeAsDegrees();
+            pi[1] = c.getLongitudeAsDegrees();
         }
         return points;
     }
@@ -611,7 +577,7 @@ public class ImportKML {
                     String desc = cs.getDescription();
                     if ((desc != null) && (desc.length() > 0)) {
                         //filter
-                        desc = filterHTML(desc);
+                        desc = HTMLFilter.filterHTML(desc);
                         if (desc.length() > 0) {
                             d.description(desc);
                         }
@@ -645,7 +611,7 @@ public class ImportKML {
                     String desc = f.getDescription();
                     if ((desc != null) && (desc.length() > 0)) {
                         //filter
-                        desc = filterHTML(desc);
+                        desc = HTMLFilter.filterHTML(desc);
                         if (desc.length() > 0) {
                             d.description(desc);
                         }

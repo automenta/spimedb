@@ -1,22 +1,22 @@
-function newWindow() {
+function newWindow(content) {
     var w = newFrame();
 
-    $('<a>').text('x').addClass('close_button').appendTo(w).click(function() {
-        w.fadeOut(300, function() { $(this).remove(); });
+    var closeButton = $('<button>').text('x').addClass('close_button').click(function() {
+        w.fadeOut(150, function() { $(this).remove(); });
     });
 
-    /*NSlider({ }).addClass('font_slider').css({
-        width: '300px',
-        height: '2em',
-        position: 'fixed',
-        right: '1em',
-        top: '1em'
-    }).appendTo(w);*/
+    var fontSlider = NSlider({ }).addClass('font_slider').css({
+        width: '1em',
+        position: 'absolute',
+        left: 0,
+        top: 0
+    });
+  
+    w.append(content = (content || $('<div>')), fontSlider, closeButton);
 
-    var c = $('<div>').addClass('content').appendTo(w);
+    content.addClass('content');
 
-    return c;
-
+    return content;
 }
 
 function newFrame() {

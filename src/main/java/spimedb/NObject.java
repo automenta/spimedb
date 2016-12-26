@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  *
- * dimensions: time, lat, lon, alt, ...
+ * dimensions: time (t), lon (x), lat (y), alt (z), ...
  *
  * https://github.com/FasterXML/jackson-annotations/
  *
@@ -182,39 +182,13 @@ public class NObject extends RectND implements Serializable {
 //        return where(coord[0], coord[1], coord[2]);
 //    }
 //
-//    public NObject where(float lat, float lng, float alt, Object... geometry) {
-//        bounds.setX(lat);
-//        bounds.setY(lng);
-//        bounds.setZ(alt);
-//
-////        space[0] = lat;
-////        space[1] = lng;
-////        space[2] = alt;
-//
-//        if (geometry.length > 0) {
-//            put("g", geometry);
-//        }
-//
-//
-//        return this;
-//    }
+
 //
 ////    public NObject where(NObject otherLocation) {
 ////        return where(otherLocation.spacetime);
 ////    }
-//
-//    public NObject where(double lat, double lon) {
-//        return where((float)lat, (float)lon);
-//    }
-//
-//    public NObject where(double lat, double lon, double alt, Object... shape) {
-//        return where((float)lat, (float)lon, (float)alt, shape);
-//    }
-//
-//    public NObject where(float lat, float lng) {
-//
-//        return where(lat, lng, 0 /* Float.NaN*/);
-//    }
+
+
 
     public <X> X get(String tag) {
         return (X) data.get(tag);
@@ -277,11 +251,11 @@ public class NObject extends RectND implements Serializable {
 
     public NObject where(Geodetic2DPoint c) {
 
-        float lat = (float) c.getLatitudeAsDegrees();
-        min.coord[1] = max.coord[1] = lat;
-
         float lon = (float) c.getLongitudeAsDegrees();
-        min.coord[2] = max.coord[2] = lon;
+        min.coord[1] = max.coord[1] = lon;
+
+        float lat = (float) c.getLatitudeAsDegrees();
+        min.coord[2] = max.coord[2] = lat;
 
 
         if (c instanceof Geodetic3DPoint) {
@@ -297,25 +271,25 @@ public class NObject extends RectND implements Serializable {
         return this;
     }
 
-    public NObject where(Latitude AX, Latitude BX, Longitude AY, Longitude BY) {
+    public NObject where(Longitude AX, Longitude BX, Latitude AY, Latitude BY) {
 
-
-        {
-            float a = (float) AY.inDegrees();
-            float b = (float) BY.inDegrees();
-            if (a > b) { float t = a; a = b; b = t; } //swap
-            min.coord[0] = a;
-            max.coord[0] = b;
-            assert (min.coord[1] < max.coord[1]);
-        }
 
         {
             float a = (float) AX.inDegrees();
             float b = (float) BX.inDegrees();
             if (a > b) { float t = a; a = b; b = t; } //swap
+            min.coord[1] = a;
+            max.coord[1] = b;
+            assert (a <= b);
+        }
+
+        {
+            float a = (float) AY.inDegrees();
+            float b = (float) BY.inDegrees();
+            if (a > b) { float t = a; a = b; b = t; } //swap
             min.coord[2] = a;
             max.coord[2] = b;
-            assert (min.coord[2] < max.coord[2]);
+            assert (a <= b);
         }
 
 //        if ((a instanceof Geodetic3DPoint) && (b instanceof Geodetic3DPoint)) {
@@ -334,7 +308,7 @@ public class NObject extends RectND implements Serializable {
     }
 
     public void where(Geodetic2DBounds bb) {
-        where(bb.getSouthLat(), bb.getNorthLat(), bb.getEastLon(), bb.getWestLon());
+        where(bb.getEastLon(), bb.getWestLon(), bb.getSouthLat(), bb.getNorthLat());
     }
 
 
@@ -343,8 +317,7 @@ public class NObject extends RectND implements Serializable {
         List<Point> lp = l.getPoints();
         double[][] points = ImportKML.toArray(lp);
 
-        Geodetic2DBounds bb = l.getBoundingBox();
-        where(bb);
+        where(l.getBoundingBox());
         put("g" + NObject.LINESTRING, points);
         return this;
     }

@@ -71,10 +71,10 @@ public class UnBloomFilter<X> {
         total++;
         if ((prev == null || !element.equals(prev))) {
             hit++;
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
 
     }
 

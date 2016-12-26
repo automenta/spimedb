@@ -1,6 +1,9 @@
 package spimedb.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Iterators;
+import com.spatial4j.core.shape.Rectangle;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -20,12 +23,11 @@ import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
 import spimedb.util.geom.Vec3D;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
@@ -38,8 +40,10 @@ public class RTreeSpimeDB implements SpimeDB {
         extinh, intinh
     }
 
+    @JsonIgnore
     public final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph;
-    public final SpatialSearch<NObject> r;
+    @JsonIgnore
+    public final SpatialSearch<NObject> spacetime;
 
     /** in-memory, map-based */
     public RTreeSpimeDB() {
@@ -54,7 +58,7 @@ public class RTreeSpimeDB implements SpimeDB {
                 new Vec3D(360f, 180f, 2),
                 new Vec3D(0.05f, 0.05f, 0.05f));*/
 
-        r = new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
+        spacetime = new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
                 2, 8, DEFAULT_SPLIT_TYPE),
                 new ReentrantReadWriteLock());
 
@@ -68,15 +72,15 @@ public class RTreeSpimeDB implements SpimeDB {
 
     private void tryIndex(NObject value) {
         if (value.bounded())
-            r.add(value);
+            spacetime.add(value);
     }
 
-    @Override
+    @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/ @Override
     public String toString() {
-        return "RTreeSpimeDB{" +
-                graph +
-                "\n, r=" + r.stats() +
-                '}';
+        return "{\"" + getClass().getSimpleName() + "\":{\"size\":" + size() +
+                ",\"vertices\":" + graph.vertexSet().size() +
+                ",\"edges\":" + graph.edgeSet().size() +
+                ",\"spacetime\":\"" + spacetime.stats() + "\"}}";
     }
 
     @Override
@@ -113,12 +117,12 @@ public class RTreeSpimeDB implements SpimeDB {
         return Iterators.transform(graph.containerSet().iterator(), VertexContainer::value);
     }
 
-    @Override
+    @JsonIgnore @Override
     public boolean isEmpty() {
         return size() == 0;
     }
 
-    @Override
+    @JsonIgnore @Override
     public int size() {
         return graph.vertexSet().size();
     }
@@ -141,7 +145,7 @@ public class RTreeSpimeDB implements SpimeDB {
     }
 
     @Override
-    public List<NObject> intersecting(double lat, double lon, double radMeters, int maxResults) {
+    public List<NObject> intersecting(double lon, double lat, double radMeters, int maxResults) {
 
         List<NObject> l = new FastList() {
 
@@ -158,29 +162,36 @@ public class RTreeSpimeDB implements SpimeDB {
             }
         };
 
-        intersecting((float) lat, (float) lon, (float) radMeters, l::add);
+        intersecting((float) lon, (float) lat, (float) radMeters, l::add);
         return l;
     }
 
     @Override @NotNull
-    public void intersecting(float lat, float lon, float radMeters, Predicate<NObject> l) {
+    public void intersecting(float lon, float lat, float radMeters, Predicate<NObject> l) {
         float radDegrees = metersToDegrees(radMeters);
 
-        r.intersecting(new RectND(
-                new float[] { Float.NEGATIVE_INFINITY, lat - radDegrees, lon - radDegrees, Float.NEGATIVE_INFINITY },
-                new float[] { Float.POSITIVE_INFINITY, lat + radDegrees, lon + radDegrees, Float.POSITIVE_INFINITY }
+        spacetime.intersecting(new RectND(
+                new float[] { Float.NEGATIVE_INFINITY, lon - radDegrees, lat - radDegrees, Float.NEGATIVE_INFINITY },
+                new float[] { Float.POSITIVE_INFINITY, lon + radDegrees, lat + radDegrees, Float.POSITIVE_INFINITY }
         ), l);
-
-//        oct.forEachInSphere(new Vec3D((float)lat, (float)lon, 0), radDegrees, n -> {
-//            l.add((NObject)n); //TODO HACK avoid casting, maybe change generics
-//            //TODO exit from this loop early if capacity reached
-//        });
-//
-        //System.out.println(lat + " " + lon + " " + radDegrees + " -> " + l);
-
     }
 
-    private float metersToDegrees(float radMeters) {
+    @Override @NotNull
+    public void intersecting(float[] lon, float[] lat, Predicate<NObject> l) {
+
+        //System.out.println(lon[0] + "," + lat[0] + " .. " + lon[1] + "," + lat[1] );
+        spacetime.intersecting(new RectND(
+                new float[] { Float.NEGATIVE_INFINITY, lon[0], lat[0], Float.NEGATIVE_INFINITY },
+                new float[] { Float.POSITIVE_INFINITY, lon[1], lat[1], Float.POSITIVE_INFINITY }
+        ), l);
+    }
+
+
+    public Collection<String> root() {
+        return graph.vertexSet().stream().filter(x -> graph.inDegreeOf(x)==0).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private static float metersToDegrees(float radMeters) {
         return radMeters / 110648f;
     }
 

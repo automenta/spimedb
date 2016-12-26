@@ -5,7 +5,24 @@ function b36float(x, decimals) {
     //(parseInt(x.toPrecision(decimals)) * (Math.pow(10,decimals))).toString(36)
     parseInt( (x*Math.pow(10,decimals)).toFixed(decimals) ).toString(36)
 }
-function circleBoundsCompact(lat, lon, radMeters, decimals) {
+
+function rectBounds(b) {
+    return {
+        "x1": b.getWest(),
+        "x2": b.getEast(),
+        "y1": b.getSouth(),
+        "y2": b.getNorth(),
+        toURL: function() {
+            return "/earth/region2d/summary?" +
+                 "x1=" + this.x1 +
+                "&y1=" + this.y1 +
+                "&x2=" + this.x2 +
+                "&y2=" + this.y2;
+        }
+    };
+}
+
+function circleBoundsCompact(lon, lat, radMeters, decimals) {
 
     return {
         "y":  b36float(lat,decimals),
@@ -14,7 +31,7 @@ function circleBoundsCompact(lat, lon, radMeters, decimals) {
         "p": "e" //earth
     }
 }
-function circleBounds(lat, lon, radMeters, decimals) {
+function circleBounds(lon, lat, radMeters, decimals) {
 
     return {
         "y":  lat.toFixed(decimals),
@@ -38,7 +55,7 @@ class Map2DView extends NView {
 
     start(v, app, cb) {
 
-        var uiBoundsReactionPeriodMS = 100;
+        var uiBoundsReactionPeriodMS = 75;
 
         var testIcon = L.icon({
             iconUrl: 'icon/unknown.png',
@@ -52,7 +69,7 @@ class Map2DView extends NView {
             continuousWorld: true,
             worldCopyJump: true
         });
-        map.setView([51.505, -0.09], 13);
+        map.setView([51.505, -0.09], 10);
         //map.setView([-35.98909,-54.2566178],9);
         //map.setView([0,0], 7);
 
@@ -99,7 +116,7 @@ class Map2DView extends NView {
             var obj = e.target.options.data;
             var x = JSON.stringify(obj, null, 4);
 
-            var w = newWindow().append(x);
+            var w = newWindow($('<pre>').text(x));
             $.getJSON('/obj/' + obj.I, function(c) {
                  var desc = c['^']['_'];
                  if (desc)
@@ -147,6 +164,7 @@ class Map2DView extends NView {
 
         function addFeatures(ff) {
             var i;
+
             for (i = 0; i < ff.length; i++) {
 
                 var f = ff[i];
@@ -154,13 +172,16 @@ class Map2DView extends NView {
                 try {
                     var id = f.I;
 
+
                     var bounds = f['@'];
-                    if (bounds && features.get(id))
+                    if (!bounds || features.get(id))
                         return;
 
+                    //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
+
                     //when = bounds[0]
-                    var lat = bounds[1];
-                    var lon = bounds[2];
+                    var lon = bounds[1];
+                    var lat = bounds[2];
                     //alt = bounds[3]
 
                     var label = f.N || f.I || "?";
@@ -169,12 +190,12 @@ class Map2DView extends NView {
 
                     var linePath, polygon;
                     if (linePath = f['g-']) {
-
-                        m = L.polyline(linePath, {color: 'gray', data: f, title: label}).addTo(map);
+                        //TODO f.lineWidth
+                        m = L.polyline(linePath, {color: f.color || 'gray', data: f, title: label}).addTo(map);
 
                     } else if (polygon = f['g*']) {
 
-                        m = L.polygon(polygon, {color: 'gray', data: f, title: label}).addTo(map);
+                        m = L.polygon(polygon, {color: f.polyColor || f.color || 'gray', data: f, title: label}).addTo(map);
 
                     } else {
                         //default point or bounding rect marker:
@@ -188,6 +209,7 @@ class Map2DView extends NView {
 
                         if (!(Array.isArray(lat) || Array.isArray(lon))) {
                             mm.zIndexOffset = 100;
+                            //f.iconUrl
                             m = L.circleMarker( [ lat, lon ], mm).addTo(clustering);
                         } else {
                             var latMin = lat[0], latMax = lat[1];
@@ -450,24 +472,41 @@ class Map2DView extends NView {
 
         var agentIcons = { };
 
+        var prevBounds = undefined;
 
         const errFunc = function(errV, errM) { console.error('err', errV, errM); };
 
+        function diff(curBounds,prevBounds) {
+            if (curBounds.intersects(prevBounds)) {
+                //console.log('diff', curBounds, prevBounds);
+                //TODO http://stackoverflow.com/questions/25068538/intersection-and-difference-of-two-rectangles/25068722#25068722
+                //return L.bounds([[p1y,p1x],[p2y,p2x]]);
+                return curBounds;
+            } else {
+                return curBounds; //no commonality to subtract
+            }
+        }
+
         var updateBounds = _.debounce(function (e) {
-            var b = map.getBounds();
 
-            var radiusMeters = b.getSouthEast().distanceTo(b.getNorthWest()) / 2.0;
-            var center = b.getCenter();
-            var lon = center.lng;
-            var lat = center.lat;
+            var curBounds = map.getBounds();
+
+            var b = prevBounds ? /*difference*/diff(curBounds, prevBounds) : curBounds;
+
+            prevBounds = curBounds;
+
+            /*var radiusMeters =
+                Math.max(b.getEast()-b.getWest(), b.getNorth()-b.getSouth()) / 2.0;*/
 
 
 
-            app.spaceOn(circleBounds/*Compact*/(lat, lon, radiusMeters, 4),
 
-                focus, errFunc
+            //var center = b.getCenter();
+            //var lon = center.lng;
+            //var lat = center.lat;
+            //app.spaceOn(circleBounds/*Compact*/(lon, lat, radiusMeters, 4),
 
-            );
+            app.spaceOn(rectBounds(b), focus, errFunc);
 
                 /*.done(focus) //function (r) {
                     //console.log(r);
@@ -479,9 +518,9 @@ class Map2DView extends NView {
                 });*/
 
         //}, uiBoundsReactionPeriodMS );
-        },  0, {
+        },  uiBoundsReactionPeriodMS, {
          'leading': true,
-         'trailing': true
+         'trailing': false
        });
 
 

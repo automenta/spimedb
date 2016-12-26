@@ -24,7 +24,6 @@
         "es6-shim": "latest",
         "jquery.atwho": "ichord/At.js",
         "fullcalendar": "latest",
-        "interact": "latest",
-        "webcola": "tgdwyer/WebCola"
+        "interact": "latest"
     }
 }

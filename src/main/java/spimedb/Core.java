@@ -109,7 +109,19 @@ public class Core {
 
 
 
-
+    final public static BatchObjectMapper jsonLoose = (BatchObjectMapper) new BatchObjectMapper()
+            .disable(SerializationFeature.CLOSE_CLOSEABLE)
+            .enable(SerializationFeature.WRAP_EXCEPTIONS)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false)
+            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, false)
+            .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, false)
+            .configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true)
+            .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true)
+            .configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true)
+            .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, true)
+            ;
 
 //    final public static ObjectMapper jsonAnnotated = new ObjectMapper()
 //            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)

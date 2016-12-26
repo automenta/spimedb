@@ -1,5 +1,6 @@
 package spimedb.index.graph;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
@@ -13,15 +14,17 @@ import java.util.function.Function;
 /**
  * Created by me on 7/15/15.
  */
+
 public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
 
     private static final String LOOPS_NOT_ALLOWED = "loops not allowed";
     private static final String NOT_IN_DIRECTED_GRAPH = "no such operation in a directed graph";
-    final boolean allowingLoops = false;
-    final boolean allowingMultipleEdges = true;
 
-    public final Map<V, VertexContainer<C, E>> vertices;
-    public final Map<E, Twin<V>> edges;
+    @JsonIgnore final boolean allowingLoops = false;
+    @JsonIgnore final boolean allowingMultipleEdges = true;
+
+    @JsonIgnore public final Map<V, VertexContainer<C, E>> vertices;
+    @JsonIgnore public final Map<E, Twin<V>> edges;
 
 
     /**

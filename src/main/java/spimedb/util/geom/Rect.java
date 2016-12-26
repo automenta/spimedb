@@ -50,6 +50,73 @@ public class Rect implements Shape2D {
         return new Rect(center.sub(extent), center.add(extent));
     }
 
+    /** http://stackoverflow.com/questions/5144615/difference-xor-between-two-rectangles-as-rectangles */
+    public static class _Rect
+    {
+        private float minX, maxX, minY, maxY;
+
+        public _Rect( float minX, float maxX, float minY, float maxY )
+        {
+            this.minX = minX;
+            this.maxX = maxX;
+            this.minY = minY;
+            this.maxY = maxY;
+        }
+
+        /**
+         * Finds the difference between two intersecting rectangles
+         *
+         * @param r
+         * @param s
+         * @return An array of rectangle areas that are covered by either r or s, but
+         *         not both
+         */
+        public static _Rect[] diff( _Rect r, _Rect s )
+        {
+            float a = Math.min( r.minX, s.minX );
+            float b = Math.max( r.minX, s.minX );
+            float c = Math.min( r.maxX, s.maxX );
+            float d = Math.max( r.maxX, s.maxX );
+
+            float e = Math.min( r.minY, s.minY );
+            float f = Math.max( r.minY, s.minY );
+            float g = Math.min( r.maxY, s.maxY );
+            float h = Math.max( r.maxY, s.maxY );
+
+            // X = intersection, 0-7 = possible difference areas
+            // h +-+-+-+
+            // . |5|6|7|
+            // g +-+-+-+
+            // . |3|X|4|
+            // f +-+-+-+
+            // . |0|1|2|
+            // e +-+-+-+
+            // . a b c d
+
+            _Rect[] result = new _Rect[ 6 ];
+
+            // we'll always have _Rectangles 1, 3, 4 and 6
+            result[ 0 ] = new _Rect( b, c, e, f );
+            result[ 1 ] = new _Rect( a, b, f, g );
+            result[ 2 ] = new _Rect( c, d, f, g );
+            result[ 3 ] = new _Rect( b, c, g, h );
+
+            // decide which corners
+            if( r.minX == a && r.minY == e || s.minX == a && s.minY == e )
+            { // corners 0 and 7
+                result[ 4 ] = new _Rect( a, b, e, f );
+                result[ 5 ] = new _Rect( c, d, g, h );
+            }
+            else
+            { // corners 2 and 5
+                result[ 4 ] = new _Rect( c, d, e, f );
+                result[ 5 ] = new _Rect( a, b, g, h );
+            }
+
+            return result;
+        }
+    }
+
     /**
      * Factory method, computes & returns the bounding rect for the given list
      * of points.

@@ -2,7 +2,6 @@ package spimedb.web;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.undertow.server.HttpHandler;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.*;
@@ -22,26 +21,13 @@ import static io.undertow.Handlers.websocket;
  */
 abstract public class WebSocketCore extends AbstractReceiveListener implements WebSocketCallback<Void>, WebSocketConnectionCallback {
 
-    public static final Logger log = LoggerFactory.getLogger(WebSocketCore.class);
-    private final boolean attemptJSONParseOfText;
-
-
-    public WebSocketCore(boolean attemptJSONParseOfText) {
-        super();
-        this.attemptJSONParseOfText = attemptJSONParseOfText;
-    }
-
-
-    public HttpHandler get() {
-        return websocket(this).addExtension(new PerMessageDeflateHandshake());
-    }
+    static final Logger logger = LoggerFactory.getLogger(WebSocketCore.class);
 
 
     @Override
     public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel socket) {
 
-        if (log.isInfoEnabled())
-            log.info("{} connected websocket", socket.getPeerAddress());
+        logger.info("{} connect", socket.getPeerAddress());
 
         socket.getReceiveSetter().set(this);
         socket.resumeReceives();
@@ -51,28 +37,70 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
     @Override
     protected void onClose(WebSocketChannel socket, StreamSourceFrameChannel channel) throws IOException {
 
-        if (log.isInfoEnabled())
-            log.info("{} disconnected websocket", socket.getPeerAddress());
+        logger.info("{} disconnect", socket.getPeerAddress());
     }
 
 
     @Override
     protected void onFullTextMessage(WebSocketChannel socket, BufferedTextMessage message) throws IOException {
 
-        if (attemptJSONParseOfText) {
-            try {
-                //System.out.println(socket + " recv txt: " + message.getData());
-                JsonNode j = Core.json.readValue(message.getData(), JsonNode.class);
-                onJSONMessage(socket, j);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+    }
+
+
+    @Override
+    protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
+
+        //System.out.println(channel + " recv bin: " + message.getData());
+    }
+
+
+    public void send(WebSocketChannel socket, String s) {
+
+        try {
+            WebSockets.sendTextBlocking(s, socket);
+        } catch (IOException e) {
+            logger.error("err: {} {}", socket, e.toString());
         }
-    }
-
-    protected void onJSONMessage(WebSocketChannel socket, JsonNode j) {
 
     }
+
+    public void send(WebSocketChannel socket, Object object) {
+
+
+        try {
+            ByteBuffer data = ByteBuffer.wrap(Core.jsonLoose.writeValueAsBytes(object));
+            WebSockets.sendTextBlocking(data, socket);
+        } catch (JsonProcessingException t) {
+            send(socket, object.toString()); //could not make json so just use toString()
+        } catch (IOException e) {
+            logger.error("err: {} {}", socket, e.toString());
+        }
+
+
+    }
+
+
+    @Override
+    public void onError(WebSocketChannel wsc, Void t, Throwable thrwbl) {
+        logger.error("err: {} {}", wsc, thrwbl.toString());
+    }
+
+    @Override
+    public void complete(WebSocketChannel channel, Void context) {
+    }
+
+
+
+    public HttpHandler get() {
+        return websocket(this).addExtension(new PerMessageDeflateHandshake());
+    }
+
+}
+
+//    protected void onJSONMessage(WebSocketChannel socket, JsonNode j) {
+//
+//    }
 
 //        public final EventObserver channelObserver = new EventObserver() {
 //
@@ -112,43 +140,3 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
 //        }
 //
 
-
-    @Override
-    protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
-
-        //System.out.println(channel + " recv bin: " + message.getData());
-    }
-
-
-
-    public void send(WebSocketChannel socket, Object object) {
-        try {
-
-            System.out.println("Sending: " + object);
-
-            ByteBuffer data = ByteBuffer.wrap(Core.json.writeValueAsBytes(object));
-
-            WebSockets.sendText(data, socket, this);
-
-
-        } catch (JsonProcessingException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-//    @Override
-//    public void complete(WebSocketChannel wsc, Void t) {
-//        //System.out.println("Sent: " + wsc);
-//    }
-
-    @Override
-    public void onError(WebSocketChannel wsc, Void t, Throwable thrwbl) {
-        //System.out.println("Error: " + thrwbl);
-        log.error(thrwbl.toString());
-    }
-
-    @Override
-    public void complete(WebSocketChannel channel, Void context) {
-        //log.info("Complete: " + channel);
-    }
-}
