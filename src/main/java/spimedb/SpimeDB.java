@@ -1,6 +1,7 @@
 package spimedb;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 
 public interface SpimeDB extends Iterable<NObject> {
@@ -20,6 +21,8 @@ public interface SpimeDB extends Iterable<NObject> {
     void children(String parent, Consumer<String> each);
 
     Iterable<NObject> intersecting(double lat, double lon, double radMeters, int maxResults);
+
+    void intersecting(float lat, float lon, float radMeters, Predicate<NObject> each);
 
     enum Scope {
         Private, Trusted, Public, Anonymous, Advertise

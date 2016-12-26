@@ -26,7 +26,8 @@ package spimedb.cluster.geometry;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import spimedb.cluster.math.linearalgebra.Vector;
+import spimedb.util.geom.SphereUtilities;
+import spimedb.util.math.linearalgebra.Vector;
 
 public class SphereUtilityTests {
     private static final double EPSILON = 1E-12;

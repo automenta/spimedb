@@ -1,15 +1,14 @@
 package spimedb;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -93,13 +92,18 @@ public class Core {
     final public static BatchObjectMapper json = (BatchObjectMapper) new BatchObjectMapper()
             .disable(SerializationFeature.CLOSE_CLOSEABLE)
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
-            .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, false)
+            .configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false)
+            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, false)
+            .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, false)
             .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true)
             .configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true)
             .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, true)
-            .configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true)
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+    ;
+
+    final public static ObjectWriter jsonWriter = json.writer();
+
+
 
 
 
@@ -126,20 +130,31 @@ public class Core {
 
 //    public final static ObjectMapper bson = new ObjectMapper(new BsonFactory());
 
-    public static String toJSON(Object o) {
+    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(Core.class);
+
+    public static String toJSON(Object x) {
         try {
-            return json.writeValueAsString(o);
+            return json.writeValueAsString(x);
         } catch (JsonProcessingException ex) {
             System.out.println(ex.toString());
             try {
-                return json.writeValueAsString( o.toString() );
+                return json.writeValueAsString( x.toString() );
             } catch (JsonProcessingException ex1) {
                 return null;
             }
         }
     }
 
-
+    public static boolean toJSON(Object x, OutputStream out, char suffix) {
+        try {
+            jsonWriter.writeValue(out, x);
+            out.write(suffix);
+            return true;
+        } catch (Exception ex) {
+            logger.error("toJSON: {}", ex);
+            return false;
+        }
+    }
 
     public static ObjectNode fromJSON(String x) {
         try {

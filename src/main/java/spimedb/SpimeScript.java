@@ -5,7 +5,7 @@
  */
 package spimedb;
 
-import spimedb.impl.RTreeSpimeDB;
+import spimedb.db.RTreeSpimeDB;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;

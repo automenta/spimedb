@@ -1,9 +1,10 @@
 package spimedb;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
@@ -13,6 +14,7 @@ import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
 import spimedb.sense.ImportKML;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,12 +38,75 @@ import java.util.Map;
  *
  */
 
-@JsonSerialize
-@JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
-@JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
+@JsonSerialize(using=NObject.NObjectSerializer.class)
+//@JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
+//@JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
 //@Indexed
 public class NObject extends RectND implements Serializable {
 
+    static final class NObjectSerializer extends JsonSerializer<NObject> {
+
+        @Override
+        public void serialize(NObject o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeStartObject();
+            {
+                jsonGenerator.writeStringField("I", o.id);
+                if (o.name!=null)
+                    jsonGenerator.writeStringField("N", o.name);
+
+                if (o.data!=null) {
+                    //inline the map data
+                    o.data.forEach((k,v)->{
+                        try {
+                            jsonGenerator.writeObjectField(k, v);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                //zip the min/max bounds
+                jsonGenerator.writeFieldName("@");
+                jsonGenerator.writeStartArray();
+                if (!o.max.equals(o.min)) {
+                    int dim = o.min.dim();
+                    for (int i = 0; i < dim; i++) {
+                        float a = o.min.coord[i];
+                        float b = o.max.coord[i];
+                        if (a == b) {
+                            jsonGenerator.writeNumber(a);
+                        } else {
+                            if (a == Float.NEGATIVE_INFINITY && b == Float.POSITIVE_INFINITY) {
+                                jsonGenerator.writeNumber(Float.NaN);
+                            } else {
+                                jsonGenerator.writeStartArray();
+                                jsonGenerator.writeNumber(a);
+                                jsonGenerator.writeNumber(b);
+                                jsonGenerator.writeEndArray();
+                            }
+                        }
+                    }
+                } else {
+                    writeArrayValues(o.min.coord, jsonGenerator);
+                }
+                jsonGenerator.writeEndArray();
+            }
+            jsonGenerator.writeEndObject();
+        }
+
+        private static void writeArrayValues(float[] xx, JsonGenerator jsonGenerator) throws IOException {
+            for (float x : xx) {
+                float y;
+                if (x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY)
+                    y = Float.NaN; //shorter than infinity
+                else
+                    y = x;
+
+                jsonGenerator.writeNumber(y);
+            }
+        }
+
+    }
 
     /*@Field(store = Store.YES)*/ @JsonProperty("I") final String id;
 

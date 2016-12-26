@@ -6,14 +6,28 @@
 package spimedb.web;
 
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.ServerConnection;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.encoding.ContentEncodingRepository;
+import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
+import io.undertow.server.handlers.encoding.EncodingHandler;
+import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
+import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
+import spimedb.Core;
 import spimedb.SpimeDB;
+import spimedb.util.bloom.UnBloomFilter;
 
+import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Deque;
+import java.util.Map;
 
-import static io.undertow.Handlers.path;
 import static io.undertow.Handlers.resource;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static io.undertow.UndertowOptions.ENABLE_SPDY;
@@ -22,9 +36,9 @@ import static io.undertow.UndertowOptions.ENABLE_SPDY;
  *
  * @author me
  */
-public class SpacetimeWebServer  {
+public class SpacetimeWebServer extends PathHandler {
 
-    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(SpacetimeWebServer.class.toString());
+    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(SpacetimeWebServer.class);
     public static final String resourcePath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
     private final SpimeDB db;
 
@@ -49,18 +63,143 @@ public class SpacetimeWebServer  {
 //        this.host = host;
 //        this.port = port;
 
+
+        addPrefixPath("/",resource(new FileResourceManager(
+                Paths.get(resourcePath).toFile(), 0, true, "/")));
+
+        addPrefixPath("/planet/earth/region2d/circle/summary", new HttpHandler() {
+
+            final int MAX_RESULTS = 128;
+            final int MAX_RESPONSE_BYTES = 128 * 1024;
+            final int BLOOM_SIZE = 4096;
+
+            final ConcurrentWeakKeyHashMap<ServerConnection, UnBloomFilter<String>> sent =
+                    new ConcurrentWeakKeyHashMap<>();
+
+            @Override
+            public void handleRequest(final HttpServerExchange ex) throws Exception {
+
+                Map<String, Deque<String>> reqParams = ex.getQueryParameters();
+
+                Deque<String> lons = reqParams.get("x");
+                Deque<String> lats = reqParams.get("y");
+                Deque<String> rads = reqParams.get("r");
+
+                if (lats != null && lons != null && rads != null) {
+                    float lat = Float.parseFloat(lats.getFirst());
+                    float lon = Float.parseFloat(lons.getFirst());
+                    float rad = Float.parseFloat(rads.getFirst());
+
+
+                    ServerConnection con = ex.getConnection();
+                    UnBloomFilter<String> bloom = sent.computeIfAbsent(con,
+                            c -> new UnBloomFilter<>(BLOOM_SIZE, String::getBytes));
+
+                    Web.stream(ex, (o) -> {
+
+                        try {
+                            JsonGenerator gen = Core.json.getFactory().createGenerator(o);
+
+                            gen.writeStartArray();
+
+                            final int[] count = {0};
+
+                            ex.setPersistent(true);
+
+                            db.intersecting(lat, lon, rad, (n) -> {
+
+                                String i = n.id();
+                                if (bloom.containsAndAdd(i)) {
+                                    try {
+
+                                        //gen.writeStartObject();
+                                        gen.writeObject(n);
+                                        if (count[0]++ >= MAX_RESULTS || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
+                                            return false;
+
+                                        //gen.writeEndObject();
+
+                                        //gen.writeRaw(',');
+
+                                    } catch (IOException e) {
+                                        logger.error("{} {}", gen, ex.getRequestPath(), e);
+                                        return false;
+                                    }
+                                }
+
+                                return true; //continue
+
+                            });
+
+                            gen.writeEndArray();
+                            gen.close();
+
+                        } catch (IOException e2) {
+                            logger.error("{} {}", ex.getRequestPath(), e2);
+                        }
+
+                    });
+
+                    //System.out.println("bloom hit rate= " + bloom.hitrate(false));
+
+                } else {
+                    ex.getResponseSender().send("invalid parameters");
+                }
+
+
+
+            }
+
+
+        });
+
+
+
         Undertow.Builder b = Undertow.builder()
                 .addHttpListener(port, host)
                 .setServerOption(ENABLE_HTTP2, true)
                 .setServerOption(ENABLE_SPDY, true)
                 .setIoThreads(8)
-                .setHandler(path().addPrefixPath("/",resource(new FileResourceManager(
-                        Paths.get(resourcePath).toFile(), 0, true, "/"))
-                        //.setDirectoryListingEnabled(true)
-                //.setHandler(path().addPrefixPath("/", ClientResources.handleClientResources())
-                ));
+                .setHandler(new EncodingHandler(this, new ContentEncodingRepository()
+                        .addEncodingHandler("gzip", new GzipEncodingProvider(), 100)
+                        .addEncodingHandler("deflate", new DeflateEncodingProvider(), 50))
+                );
 
-        logger.info("Starting web server @ {}:{}\n : resources={}", host, port, resourcePath);
+
+
+                //.setDirectoryListingEnabled(true)
+                //.setHandler(path().addPrefixPath("/", ClientResources.handleClientResources())
+
+//        addPrefixPath("/tag/meta", new HttpHandler() {
+//
+//            @Override
+//            public void handleRequest(HttpServerExchange ex) throws Exception {
+//
+//                sendTags(
+//                        db.searchID(
+//                                getStringArrayParameter(ex, "id"), 0, 60, "tag"
+//                        ),
+//                        ex);
+//
+//            }
+//
+//        });
+//        addPrefixPath("/style/meta", new HttpHandler() {
+//
+//            @Override
+//            public void handleRequest(HttpServerExchange ex) throws Exception {
+//
+//                send(json(
+//                                db.searchID(
+//                                        getStringArrayParameter(ex, "id"), 0, 60, "style"
+//                                )),
+//                        ex);
+//
+//            }
+//
+//        });
+//
+        logger.info("Start @ {}:{}\n\tdb={}\n\tresources={}", host, port, db, resourcePath);
 
 
         b.build().start();
@@ -154,65 +293,7 @@ public class SpacetimeWebServer  {
 //        }).handler());
 //
 //
-//        addPrefixPath("/tag/meta", new HttpHandler() {
-//
-//            @Override
-//            public void handleRequest(HttpServerExchange ex) throws Exception {
-//
-//                sendTags(
-//                        db.searchID(
-//                                getStringArrayParameter(ex, "id"), 0, 60, "tag"
-//                        ),
-//                        ex);
-//
-//            }
-//
-//        });
-//        addPrefixPath("/style/meta", new HttpHandler() {
-//
-//            @Override
-//            public void handleRequest(HttpServerExchange ex) throws Exception {
-//
-//                send(json(
-//                                db.searchID(
-//                                        getStringArrayParameter(ex, "id"), 0, 60, "style"
-//                                )),
-//                        ex);
-//
-//            }
-//
-//        });
-//
-//        addPrefixPath("/geoCircle", new HttpHandler() {
-//
-//            @Override
-//            public void handleRequest(final HttpServerExchange ex) throws Exception {
-//                Map<String, Deque<String>> reqParams = ex.getQueryParameters();
-//
-//                //   Deque<String> deque = reqParams.get("attrName");
-//                //Deque<String> dequeVal = reqParams.get("value");
-//                Deque<String> lats = reqParams.get("lat");
-//                Deque<String> lons = reqParams.get("lon");
-//                Deque<String> rads = reqParams.get("radiusM");
-//
-//                if (lats != null && lons != null && rads != null) {
-//                    //System.out.println(lats.getFirst() + "  "+ lons.getFirst() + " "+ rads.getFirst());
-//                    double lat = Double.parseDouble(lats.getFirst());
-//                    double lon = Double.parseDouble(lons.getFirst());
-//                    double rad = Double.parseDouble(rads.getFirst());
-//
-//                    SearchHits result = db.search(lat, lon, rad, 60);
-//
-//                    XContentBuilder d = responseTagOrFeature(result);
-//
-//                    send(d, ex);
-//
-//                }
-//                ex.getResponseSender().send("");
-//
-//            }
-//
-//        });
+
 //
         //addPrefixPath("/wikipedia", new Wikipedia());
 

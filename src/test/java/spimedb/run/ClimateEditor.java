@@ -1,15 +1,13 @@
 package spimedb.run;
 
-import com.google.common.base.Joiner;
-import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.SpimeScript;
-import spimedb.impl.InfiniSpimeDB;
+import spimedb.db.InfiniSpimeDB;
 import spimedb.sense.ImportKML;
 import spimedb.web.SpacetimeWebServer;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.stream.Stream;
 
 /**
  * Created by me on 6/14/15.
@@ -28,32 +26,29 @@ public class ClimateEditor  {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             String[] urls = new String[]{
+                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
+                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
+                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
+
                     //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
                     //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-                    //"file:///home/me/kml/submarine-cables-CV3D.kmz",
-                    //"file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
-                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
                     // http://climateviewer.org/layers/kml/3rdparty/places/submarine-cables-CV3D.kmz
                     //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
                     //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
             };
 
-            for (String u : urls) {
-                try {
-                    new ImportKML(db).url(u).run();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            Stream.of(urls).parallel().forEach(u -> new ImportKML(db).url(u).run());
+
 
 //            db.forEach(x -> {
 //                System.out.println(x);
 //            });
 
-            Iterable<NObject> r = db.intersecting(40.44, -79.99, 420000, -1);
+//            Iterable<NObject> r = db.intersecting(40.44, -79.99, 420000, -1);
+//            System.out.println(Joiner.on("\n").join(r));
 
-            System.out.println(Joiner.on("\n").join(r));
         }
 
 
@@ -62,12 +57,10 @@ public class ClimateEditor  {
 
     public static void main(String[] args) {
 
-        SpimeDB db = //new OctSpimeDB();
-                InfiniSpimeDB.get(null /* "/tmp/climate" */);
+        SpimeDB db =  InfiniSpimeDB.get(null /* "/tmp/climate" */);
 
         new ClimateEditor(db);
 
-        System.out.println(db);
 
         new SpacetimeWebServer(db, 8080);
 //

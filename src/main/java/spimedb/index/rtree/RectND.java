@@ -20,21 +20,24 @@ package spimedb.index.rtree;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.io.Serializable;
 
 /**
  * Created by jcovert on 6/15/15.
  */
-public class RectND implements HyperRect<PointND> {
 
-    @JsonProperty("a")
+public class RectND implements HyperRect<PointND>, Serializable {
+
+    @JsonIgnore
     protected final PointND min;
 
-    @JsonProperty("b")
+    @JsonIgnore
     protected final PointND max;
 
 
-    private static final PointND unbounded = new PointND(new float[0]) {
+    private static final PointND unbounded = new PointND() {
         @Override
         public String toString() {
             return "*";
@@ -219,5 +222,6 @@ public class RectND implements HyperRect<PointND> {
         }
 
     }
+
 
 }

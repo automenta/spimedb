@@ -1,3 +1,5 @@
+var DEBUG = false;
+
 /*
     LEGENED http://climateviewer.net/
     var layerId = l.I,
@@ -318,10 +320,12 @@ function nobject(x) {
 
 nobjectTree(layers, function(v) {
     var x = nobject(v);
-    print('vertex:', x);
+    if (DEBUG)
+        print('vertex:', x);
     db.put(x);
 }, function(s, p, o) {
-    print('edge:', JSON.stringify(s), p, JSON.stringify(o) );
+    if (DEBUG)
+        print('edge:', JSON.stringify(s), p, JSON.stringify(o) );
 });
 
 function nobjectize(x, parent) {

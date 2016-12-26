@@ -52,8 +52,8 @@ class Map2DView extends NView {
             continuousWorld: true,
             worldCopyJump: true
         });
-        //map.setView([51.505, -0.09], 13);
-        map.setView([-35.98909,-54.2566178],9);
+        map.setView([51.505, -0.09], 13);
+        //map.setView([-35.98909,-54.2566178],9);
         //map.setView([0,0], 7);
 
 
@@ -150,30 +150,74 @@ class Map2DView extends NView {
             for (i = 0; i < ff.length; i++) {
 
                 var f = ff[i];
-                var id = f.I;
 
-                if (!f.S)
-                    return;
+                try {
+                    var id = f.I;
 
-                if (features.get(id))
-                    return;
+                    var bounds = f['@'];
+                    if (bounds && features.get(id))
+                        return;
+
+                    //when = bounds[0]
+                    var lat = bounds[1];
+                    var lon = bounds[2];
+                    //alt = bounds[3]
+
+                    var label = f.N || f.I || "?";
+
+                    var m;
+
+                    var linePath, polygon;
+                    if (linePath = f['g-']) {
+
+                        m = L.polyline(linePath, {color: 'gray', data: f, title: label});
+
+                    } else if (polygon = f['g*']) {
+
+                        console.log('polygon', polygon);
+
+                    } else {
+                        //default point or bounding rect marker:
+
+                        var mm = {
+                                    data: f,
+                                    title: label,
+                                    color: "#ff7800",
+                                    weight: 1
+                            };
+
+                        if (!(Array.isArray(lat) || Array.isArray(lon))) {
+                            mm.zIndexOffset = 100;
+                            m = L.circleMarker( [ lat, lon ], mm);
+                        } else {
+                            var latMin = lat[0], latMax = lat[1];
+                            var lonMin = lon[0], lonMax = lon[1];
+
+                            var bounds = [[latMin, lonMin], [latMax, lonMax]];
+
+                            mm.opacity = 0.1; //TODO decrease this by the bounds area
+
+                            m = L.rectangle(bounds, mm);
+                        }
 
 
-                var m = L.circleMarker( [ f.S[0], f.S[1] ], {
-                        data: f,
-                        title: f.N || f.I,
-                        zIndexOffset: 100
-                });
-                m.on('click', clickHandler);
-                m.on('mouseover', overHandler);
-                m.on('mouseout', outHandler);
 
+                    }
 
+                    if (m) {
 
+                        m.on('click', clickHandler);
+                        m.on('mouseover', overHandler);
+                        m.on('mouseout', outHandler);
 
-                m.addTo(clustering);
+                        features.set(id, m);
+                        m.addTo(clustering);
 
-                features.set(id, m);
+                    }
+
+                } catch (e) {
+                    console.error(e, f);
+                }
 
             }
 
@@ -408,21 +452,21 @@ class Map2DView extends NView {
         var agentIcons = { };
 
 
+        const errFunc = function(errV, errM) { console.error('err', errV, errM); };
 
         var updateBounds = _.debounce(function (e) {
             var b = map.getBounds();
 
             var radiusMeters = b.getSouthEast().distanceTo(b.getNorthWest()) / 2.0;
-            var lon = b.getCenter().lng;
-            var lat = b.getCenter().lat;
+            var center = b.getCenter();
+            var lon = center.lng;
+            var lat = center.lat;
 
 
 
             app.spaceOn(circleBounds/*Compact*/(lat, lon, radiusMeters, 4),
 
-                focus, function(errV, errM) {
-                    console.error('err', errV, errM);
-                }
+                focus, errFunc
 
             );
 

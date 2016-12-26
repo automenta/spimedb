@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import static spimedb.sense.kml.KmlReader.log;
+import static spimedb.sense.kml.KmlReader.logger;
 
 /**
  *
@@ -156,7 +156,7 @@ public class ImportKML {
                 //System.err.println(t);
                 exceptions.incrementAndGet();
                 exceptionClass.add(t.getClass());
-                log.error("error: {}", t);
+                logger.error("error: {}", t);
                 break;
             }
         } while (true);
@@ -197,7 +197,7 @@ public class ImportKML {
                             try {
                                 visitor.on(gisObj, pathArray(path));
                             } catch (Throwable t) {
-                                log.error("visit {}: {}", gisObj, t);
+                                logger.error("visit {}: {}", gisObj, t);
                             }
 
                             if (pathChanged) {
@@ -285,8 +285,14 @@ public class ImportKML {
     }
 
 
-    public Runnable url(String url) throws IOException {
-        return url(new URL(url).getFile(), url);
+    public Runnable url(String url)  {
+        try {
+            return url(new URL(url).getFile(), url);
+        } catch (IOException e) {
+            return ()->{
+                logger.error("invalid url \"{}\": {}", e);
+            };
+        }
     }
 
     public Runnable url(String id, String url) throws IOException {
@@ -407,10 +413,10 @@ public class ImportKML {
                 transformKML(reader, id, db, new MyGISVisitor(id, styles));
 
                 long end = System.currentTimeMillis();
-                log.warn("{} loaded: {}(ms)", id, end - start);
+                logger.warn("{} loaded: {}(ms)", id, end - start);
 
             } catch (Throwable e) {
-                log.error("error {}", e);
+                logger.error("error {}", e);
             }
 
         };

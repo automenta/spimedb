@@ -231,10 +231,9 @@ class NClient extends EventEmitter {
                 try {
                     var p = JSON.parse(s);
                     onFocus(p);
-                }
-                catch (e) {
+                } catch (e) {
                     onError(e);
                 }
-            }).error(onError);
+            }).fail(onError);
     }
 }

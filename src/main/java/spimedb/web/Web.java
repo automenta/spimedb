@@ -2,7 +2,6 @@ package spimedb.web;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.util.Headers;
@@ -48,9 +47,9 @@ public class Web extends PathHandler {
 //    }
 
 
-    boolean compress = true;
-
-    public Undertow server;
+//    boolean compress = true;
+//
+//    public Undertow server;
 
 //    static void send(String s, HttpServerExchange ex) {
 //        ex.startBlocking();
@@ -66,28 +65,27 @@ public class Web extends PathHandler {
 //        ex.getResponseSender().close();
 //    }
 
+    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(Web.class);
+
     public static void send(String s, HttpServerExchange ex) {
         ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
         ex.getResponseSender().send(s);
         ex.endExchange();
     }
 
-    public static void send(Consumer<OutputStream> s, HttpServerExchange ex) {
+    public static void stream(HttpServerExchange ex, Consumer<OutputStream> s) {
 
         ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 
         ex.dispatch(() -> {
             ex.startBlocking();
 
-            try {
-                OutputStream os = ex.getOutputStream();
-                s.accept(os);
-                os.flush();
-            } catch (Exception ex1) {
-                log.warn(ex1.toString());
-            }
+            OutputStream os = ex.getOutputStream();
+            s.accept(os);
 
-            ex.getResponseSender().close();
+            //ex.getResponseSender().close();
+            ex.endExchange();
+
         });
     }
 
@@ -105,12 +103,15 @@ public class Web extends PathHandler {
     static void send(JsonNode d, HttpServerExchange ex) {
         ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 
+
+
+
         ex.startBlocking();
 
         try {
             Core.json.writeValue(ex.getOutputStream(), d);
         } catch (IOException ex1) {
-            log.warn(ex1.toString());
+            log.warn("send: {}", ex1);
         }
 
         ex.getResponseSender().close();
@@ -133,39 +134,39 @@ public class Web extends PathHandler {
     }
 
 
-    public Web start(Undertow.Builder s) {
-//        deploy(new Application() {
-//            @Override public Set<Class<?>> getClasses() {
-//                return services;
-//            }
-//        }, "/api");
-
-
-//        if (compress) {
+//    public Web start(Undertow.Builder s) {
+////        deploy(new Application() {
+////            @Override public Set<Class<?>> getClasses() {
+////                return services;
+////            }
+////        }, "/api");
 //
-//            final EncodingHandler handler =
-//                    new EncodingHandler(new ContentEncodingRepository()
-//                            .addEncodingHandler("gzip",
-//                                    new GzipEncodingProvider(), 5,
-//                                   Predicates.parse("max-content-size[50000]"))
-//                            )
-//                            .setNext(this);
 //
-//// ...
-//            s.setHandler(handler);
-//        } else {
+////        if (compress) {
+////
+////            final EncodingHandler handler =
+////                    new EncodingHandler(new ContentEncodingRepository()
+////                            .addEncodingHandler("gzip",
+////                                    new GzipEncodingProvider(), 5,
+////                                   Predicates.parse("max-content-size[50000]"))
+////                            )
+////                            .setNext(this);
+////
+////// ...
+////            s.setHandler(handler);
+////        } else {
+////
+////            s.setHandler(new SetHeaderHandler(this, "Access-Control-Allow-Origin","*"));
+////        }
 //
-//            s.setHandler(new SetHeaderHandler(this, "Access-Control-Allow-Origin","*"));
-//        }
+//        this.server = s.build();
+//        this.server.start();
+//        return this;
+//    }
 
-        this.server = s.build();
-        this.server.start();
-        return this;
-    }
-
-    public void stop() {
-        this.server.stop();
-    }
+//    public void stop() {
+//        this.server.stop();
+//    }
 
 //    public Web start(String host, int port) {
 //

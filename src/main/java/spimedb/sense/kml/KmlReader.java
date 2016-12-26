@@ -52,7 +52,7 @@ import java.util.zip.ZipInputStream;
  */
 public class KmlReader extends KmlBaseReader implements IGISInputStream {
 
-    public static final Logger log = LoggerFactory.getLogger(KmlReader.class);
+    public static final Logger logger = LoggerFactory.getLogger(KmlReader.class);
     private static final int BUFFER_SIZE = 1024 * 1024;
 
     private InputStream iStream;
@@ -156,7 +156,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
             url = file.toURI().toURL();
         } catch (Exception e) {
             // this should not happen
-            log.warn("Failed to convert file URI to URL: {}", e);
+            logger.warn("Failed to convert file URI to URL: {}", e);
             url = null;
         }
         baseUrl = url;
@@ -350,7 +350,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
             TaggedMap region = link.getRegion();
             // check/ignore networklinks if region not in view
             if (ignoreInactiveRegionNetworkLinks && checkRegion(region)) {
-                log.debug("ignore out of region NetworkLink");
+                logger.debug("ignore out of region NetworkLink");
                 skipCount++;
             } else {
                 checkStyleUrl(parent, link);
@@ -366,10 +366,10 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                             networkLinks.add(uri);
                         }
                     } else {
-                        log.debug("duplicate NetworkLink href");
+                        logger.debug("duplicate NetworkLink href");
                     }
                 } else {
-                    log.debug("NetworkLink href is empty or missing");
+                    logger.debug("NetworkLink href is empty or missing");
                 }
                 // Note: NetworkLinks can have inline Styles & StyleMaps
             }
@@ -426,7 +426,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                     styleUrl = uri.toString();
                     // store rewritten relative URL back as absolute
                     f.setStyleUrl(styleUrl);
-                    log.debug("XXX: rewrite relative styleUrl: {}", styleUrl);
+                    logger.debug("XXX: rewrite relative styleUrl: {}", styleUrl);
                 }
             }
         }
@@ -455,7 +455,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                         styleUrl = uri.toString();
                         // store rewritten relative URL back as absolute
                         pair.setStyleUrl(styleUrl);
-                        log.debug("XXX: rewrite relative StyleMap pair styleUrl: {}", styleUrl);
+                        logger.debug("XXX: rewrite relative StyleMap pair styleUrl: {}", styleUrl);
                     }
                 }
             }
@@ -556,7 +556,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
             URI uri = networkLinks.removeFirst();
             if (visited.add(uri)) {
                 if (visited.size() > maxLinkCount) {
-                    log.warn("Max NetworkLink count exceeded: max links={}", maxLinkCount);
+                    logger.warn("Max NetworkLink count exceeded: max links={}", maxLinkCount);
                     maxLinkCountExceeded = true;
                     break;
                 }
@@ -585,14 +585,14 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                     int oldSize = networkLinks.size();
                     int oldFeatSize = linkedFeatures.size();
                     KmlInputStream kis = new KmlInputStream(is);
-                    log.debug("Parse networkLink: {}", ref);
+                    logger.debug("Parse networkLink: {}", ref);
                     try {
                         IGISObject gisObj;
                         while ((gisObj = read(kis, ref, networkLinks)) != null) {
                             if (handler != null) {
                                 if (!handler.kmlEvent(ref, gisObj)) {
                                     // clear out temp list of links to abort following networkLinks
-                                    log.info("Abort following networkLinks");
+                                    logger.info("Abort following networkLinks");
                                     networkLinks.clear();
                                     break;
                                 }
@@ -603,21 +603,21 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                     } finally {
                         kis.close();
                     }
-                    if (log.isDebugEnabled()) {
+                    if (logger.isDebugEnabled()) {
                         if (oldFeatSize != linkedFeatures.size()) {
-                            log.debug("*** got features from network link ***");
+                            logger.debug("*** got features from network link ***");
                         }
                         if (oldSize != networkLinks.size()) {
-                            log.debug("*** got new URLs from network link ***");
+                            logger.debug("*** got new URLs from network link ***");
                         }
                     }
                 } catch (java.net.ConnectException | FileNotFoundException e) {
-                    log.error("Failed to import from network link: {}\n{}", uri, e);
+                    logger.error("Failed to import from network link: {}\n{}", uri, e);
                     if (handler != null) {
                         handler.kmlError(uri, e);
                     }
                 } catch (Exception e) {
-                    log.error("Failed to import from network link: {}", uri, e);
+                    logger.error("Failed to import from network link: {}", uri, e);
                     if (handler != null) {
                         handler.kmlError(uri, e);
                     }

@@ -3,7 +3,7 @@ package spimedb.sense.kml;
 
 import org.junit.Test;
 import spimedb.SpimeDB;
-import spimedb.impl.RTreeSpimeDB;
+import spimedb.db.RTreeSpimeDB;
 import spimedb.sense.ImportKML;
 
 import java.io.File;
