@@ -22,6 +22,7 @@ public class ImportSchemaOrgTest {
 
         assertTrue(r.obj.size() > 500);
 
+
 //        System.out.println(r.graph.vertexSet().size() + " " + r.graph.edgeSet().size());
 //        assertTrue(r.graph.edgeSet().size() > 1000);
 

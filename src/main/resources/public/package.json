@@ -1,9 +1,9 @@
 {
-  "name": "netention",
+  "name": "spimedb",
   "version": "1.0.0",
-  "description": "netention",  
+  "description": "spimedb",
   "author": "",
-  "license": "GPL",
+  "license": "AGPL",
   "dependencies": {
     "bower": "latest"
   }

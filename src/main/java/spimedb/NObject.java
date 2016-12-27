@@ -44,6 +44,21 @@ import java.util.Map;
 //@Indexed
 public class NObject extends RectND implements Serializable {
 
+    static {
+
+
+//        RootLogger root = (RootLogger) (Log..getLogManager());
+//        root.removeAllAppenders();
+//
+//        ConsoleAppender ca = new ConsoleAppender();
+//        ca.setLayout(new SimpleLayout());
+//        ca.setWriter(new PrintWriter(System.out));
+//        ca.setName("console");
+//        root.addAppender(ca);
+//
+//        root.setLevel(Level.INFO);
+
+    }
     static final class NObjectSerializer extends JsonSerializer<NObject> {
 
         @Override

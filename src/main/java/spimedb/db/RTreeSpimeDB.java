@@ -2,6 +2,7 @@ package spimedb.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import net.bytebuddy.ByteBuddy;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.index.graph.MapGraph;
 import spimedb.index.oct.OctBox;
 import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
@@ -55,6 +55,49 @@ public class RTreeSpimeDB implements SpimeDB {
 
 
 
+    }
+
+    protected final Map<String,Class> tagClasses = new ConcurrentHashMap<>();
+    protected final ClassLoader cl = ClassLoader.getSystemClassLoader();
+    final ByteBuddy tagProxyBuilder = new ByteBuddy();
+
+    Class[] resolve(String... tags) {
+        Class[] c = new Class[tags.length];
+        int i = 0;
+        for (String s : tags) {
+            Class x = tagClasses.get(s);
+            if (x == null)
+                throw new NullPointerException("missing class: " + s);
+            c[i++] = x;
+        }
+        return c;
+    }
+
+    @Override public Class the(String tagID, String... supertags) {
+
+        synchronized (tagClasses) {
+            if (tagClasses.containsKey(tagID))
+                throw new RuntimeException(tagID + " class already defined");
+
+            Class[] s = resolve(supertags);
+            Class proxy = tagProxyBuilder.makeInterface(s).name("_" + tagID).make().load(cl).getLoaded();
+            tagClasses.put(tagID, proxy);
+            return proxy;
+        }
+
+        //.subclass(NObject.class).implement(s)
+                    /*.method(any())
+                    .intercept(MethodDelegation.to(MyInterceptor.class)
+                            .andThen(SuperMethodCall.INSTANCE)
+                            .defineField("myCustomField", Object.class, Visibility.PUBLIC)*/
+                    /*.make()
+                    .load(cl)
+                    .getLoaded();*/
+    }
+
+    @Override
+    public NObject a(String id, String... tags) {
+        return null;
     }
 
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/ @Override
@@ -154,32 +197,6 @@ public class RTreeSpimeDB implements SpimeDB {
         return radMeters / 110648f;
     }
 
-    public static class SpimeMapGraph extends MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> {
-
-        public SpimeMapGraph() {
-            super(new java.util.concurrent.ConcurrentHashMap(), new java.util.concurrent.ConcurrentHashMap());
-        }
-
-        @Override
-        public String getEdgeSource(@NotNull Pair<OpEdge, Twin<String>> opEdgeTwinPair) {
-            return opEdgeTwinPair.getTwo().getOne();
-        }
-
-        @Override
-        public String getEdgeTarget(@NotNull Pair<OpEdge, Twin<String>> opEdgeTwinPair) {
-            return opEdgeTwinPair.getTwo().getTwo();
-        }
-
-        @Override
-        protected Set<Pair<OpEdge, Twin<String>>> newEdgeSet() {
-            return new HashSet<>();
-        }
-
-        @Override
-        protected NObject newBlankVertex(String s) {
-            return new NObject(s);
-        }
-    }
 
     static class MyOctBox extends OctBox {
 

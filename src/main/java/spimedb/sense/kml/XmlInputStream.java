@@ -5,7 +5,7 @@ import com.fasterxml.aalto.evt.EventReaderImpl;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.opensextant.giscore.DocumentType;
 import org.opensextant.giscore.Namespace;
 import org.opensextant.giscore.events.DocumentStart;

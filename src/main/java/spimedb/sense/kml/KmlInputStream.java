@@ -408,8 +408,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                     } else {
                                         // starting new coordinate (numparts => 1)
                                         lon = new Longitude(st.nval, Angle.DEGREES);
-                                        if (log.isDebugEnabled() && Math.abs(st.nval) > 180) {
-                                            log.debug("longitude out of range: {}", st.nval);
+                                        if (Math.abs(st.nval) > 180) {
+                                            log.warn("longitude out of range: {}", st.nval);
                                         }
                                     }
                                     break;
@@ -425,8 +425,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                         //else System.out.println("\tERROR: drop bad coord");
                                         // start new tuple
                                         lon = new Longitude(st.nval, Angle.DEGREES);
-                                        if (log.isDebugEnabled() && Math.abs(st.nval) > 180) {
-                                            log.debug("longitude out of range: ", st.nval);
+                                        if (Math.abs(st.nval) > 180) {
+                                            log.warn("longitude out of range: ", st.nval);
                                         }
                                         numparts = 1;
                                     }
@@ -442,8 +442,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                         //else System.out.println("\tERROR: drop bad coord");
                                         // start new tuple
                                         lon = new Longitude(st.nval, Angle.DEGREES);
-                                        if (log.isDebugEnabled() && Math.abs(st.nval) > 180) {
-                                            log.debug("longitude out of range: ", st.nval);
+                                        if (Math.abs(st.nval) > 180) {
+                                            log.warn("longitude out of range: ", st.nval);
                                         }
                                         numparts = 1;
                                     }
@@ -754,8 +754,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     }
                 } else if (!handleProperties(cs, ee, qname)) {
                     // Ignore other container elements
-                    if (log.isDebugEnabled())
-                        log.debug("ignore {}", qname);
+                    log.warn("ignore {}", qname);
                 }
             }
         }
@@ -857,7 +856,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         }
                     } else {
                         // TODO: should we add all-non KML elements as-is or only expected ones ??
-                        log.debug("Skip unknown namespace {}", name);
+                        log.warn("Skip unknown namespace {}", name);
                         skipNextElement(stream, name);
                     }
                     return true;
@@ -909,7 +908,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     } else {
                         // no name skip any value element
                         // TODO: if Data has id attr but no name can we use still the value ??
-                        log.debug("No name attribute for Data. Skip element");
+                        log.warn("No name attribute for Data. Skip element");
                         skipNextElement(stream, qname);
                     }
                 } else if (tag.equals(SCHEMA_DATA)) {
@@ -927,7 +926,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     } else {
                         // no schemaUrl skip SchemaData element
                         // TODO: if SchemaData has SimpleData but no schemaUrl attr can we use still the value ??
-                        log.debug("No schemaUrl attribute for Data. Skip element");
+                        log.warn("No schemaUrl attribute for Data. Skip element");
                         skipNextElement(stream, qname);
                     }
                 } else {
@@ -946,7 +945,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                      </ExtendedData>
                      */
                     try {
-                        log.debug("ExtendedData other {}", qname);
+                        //log.debug("ExtendedData other {}", qname);
                         Element el = (Element) getForeignElement(se.asStartElement());
                         cs.getExtendedElements().add(el);
                     } catch (XMLStreamException e) {
@@ -1139,7 +1138,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     // inline Styles within StyleMap
                 } else if (foundStartTag(se, STYLE_MAP)) {
                     // nested StyleMaps are not supported nor does it even make sense
-                    log.debug("skip nested StyleMap");
+                    //log.warn("skip nested StyleMap");
                     skipNextElement(stream, se.getName());
                 }
             }
@@ -1654,7 +1653,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             // //ns.startsWith("http://www.google.com/kml/ext/")) { ...
             // handle extension namespace
             // http://code.google.com/apis/kml/documentation/kmlreference.html#kmlextensions
-            log.debug("XXX: handle as foreign element: {}", name);
+            //log.debug("XXX: handle as foreign element: {}", name);
             return getForeignElement(se);
         }
 
@@ -1687,11 +1686,11 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             } else if (NETWORK_LINK_CONTROL.equals(localname)) {
                 return handleNetworkLinkControl(stream, name);
             } else if (STYLE.equals(localname)) {
-                log.debug("Out of order element: {}", localname);
+                //log.debug("Out of order element: {}", localname);
                 // note this breaks the strict ordering required by KML 2.2
                 return handleStyle(null, se, name);
             } else if (STYLE_MAP.equals(localname)) {
-                log.debug("Out of order element: {}", localname);
+                //log.debug("Out of order element: {}", localname);
                 // note this breaks the strict ordering required by KML 2.2
                 return handleStyleMap(null, se, name);
             } else {
@@ -1704,14 +1703,14 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             next = stream.nextTag();
                             return handleStartElement(next);
                         } else if (next.getEventType() == XMLStreamConstants.END_ELEMENT) {
-                            log.debug("Skip element: {}", localname);
+                            //log.debug("Skip element: {}", localname);
                             stream.nextTag();
                         } else {
                             throw new XMLStreamException("unexpected element");
                         }
                     }
                 } else {
-                    log.debug("XXX: handle startElement with foreign namespace: {}", name);
+                    //log.debug("XXX: handle startElement with foreign namespace: {}", name);
                     return getForeignElement(se);
                 }
             }
@@ -2098,8 +2097,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 fs.setGeometry(geo);
                             }
                         } catch (XMLStreamException xe) {
-                            log.warn("Failed XML parsing: skip geometry ", localname);
-                            log.debug("", xe);
+                            log.warn("Failed XML parsing: skip geometry {} {} {}", localname, qName, xe);
+                            //log.debug("", xe);
                             skipNextElement(stream, qName);
                         } catch (RuntimeException rte) {
                             // IllegalStateException or IllegalArgumentException
@@ -2369,7 +2368,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 if (map.containsKey(ALTITUDE_MODE)) {
                     if (!dupAltitudeModeWarn) {
                         // Google Earth-generated output may have this on every placemark
-                        log.debug("Element has duplicate altitudeMode defined"); // ignore but return as element processed
+                        //log.debug("Element has duplicate altitudeMode defined"); // ignore but return as element processed
                         dupAltitudeModeWarn = true;
                     }
                     return true;
@@ -2377,7 +2376,9 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             } else {
                 eltname = prefix + ':' + eltname; // prefix name with namespace prefix
             }
-            log.debug("Handle tag data {}:{}", prefix, el.getName());
+
+            //log.debug("Handle tag data {}:{}", prefix, el.getName());
+
         } // else log.debug("non-prefix ns=" + el.getNamespace());
         if (namePrefix == null) {
             namePrefix = eltname;
@@ -2419,7 +2420,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             // reverse hack/fix in KmlOutputStream for bug in Google Earth crossing IDL
                             // must be consistent with handling in KmlOutputStream.handleOverlay()
                             if (angle < -180) {
-                                log.debug("Normalized GroundOverlay west value");
+                                //log.debug("Normalized GroundOverlay west value");
                                 angle += 360;
                             }
                             overlay.setWest(angle);
@@ -2484,12 +2485,12 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 }
                 // if no valid geometries then return null
                 if (geometries.isEmpty()) {
-                    log.debug("No valid geometries in MultiGeometry");
+                    log.warn("No valid geometries in MultiGeometry");
                     return null;
                 }
                 // if only one valid geometry then drop collection and use single geometry
                 if (geometries.size() == 1) {
-                    log.debug("Convert MultiGeometry to single geometry");
+                    //log.debug("Convert MultiGeometry to single geometry");
                     // tesselate/extrude properties are preserved on target geometry
                     return geometries.get(0);
                 }
@@ -2767,7 +2768,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 geom.altitudeMode = getNonEmptyElementText();
             } else {
                 // e.g. qName = {http://www.google.com/kml/ext/2.2}altitudeMode
-                log.debug("Skip duplicate value for {}", name);
+                //log.debug("Skip duplicate value for {}", name);
             }
         } else if (EXTRUDE.equals(localPart)) {
             if (isTrue(stream.getElementText())) {
@@ -2854,7 +2855,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         altitudeMode = getNonEmptyElementText();
                     } else if (!dupAltitudeModeWarn) {
                         // e.g. qName = {http://www.google.com/kml/ext/2.2}altitudeMode
-                        log.debug("Skip duplicate value for {}", qName);
+                        //log.debug("Skip duplicate value for {}", qName);
                         dupAltitudeModeWarn = true;
                     }
                 } else if (EXTRUDE.equals(localPart)) {
