@@ -3,6 +3,7 @@ package spimedb.sense;
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;
 import spimedb.NObject;
+import spimedb.SpimeDB;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,31 +18,37 @@ import java.util.List;
  */
 abstract public class ImportSchemaOrg {
 
-    public static void load(final Object self) {
+    public static void load(SpimeDB db) {
         try {
             new ImportSchemaOrg() {
 
                 @Override
                 public void onClass(String id, String label, List<String> supertypes, String comment) {
 
-
                     NObject t = new NObject(id, label);
-
-
                     t.description(comment);
 
+                    db.put(t);
+
                     for (String s : supertypes) {
-                        t.put(s);
-                        //t.inh.put(s, 1.0);
+                        db.edgeAdd(id, SpimeDB.OpEdge.intinh, s);
                     }
-
-                    //self.add(t);
-
-
                 }
 
                 @Override
                 public void onProperty(String id, String label, List<String> domains, List<String> ranges, String comment) {
+                    NObject t = new NObject(id, label);
+                    t.description(comment);
+
+                    db.put(t);
+
+                    for (String s : domains) {
+                        db.edgeAdd(id, SpimeDB.OpEdge.extinh, s);
+                    }
+                    for (String s : ranges) {
+                        db.edgeAdd(s, SpimeDB.OpEdge.extinh, id);
+                    }
+
                 }
 
             };

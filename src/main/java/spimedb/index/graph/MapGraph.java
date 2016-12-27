@@ -15,7 +15,7 @@ import java.util.function.Function;
  * Created by me on 7/15/15.
  */
 
-public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
+public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> implements DirectedGraph<V,E> {
 
     private static final String LOOPS_NOT_ALLOWED = "loops not allowed";
     private static final String NOT_IN_DIRECTED_GRAPH = "no such operation in a directed graph";
@@ -230,7 +230,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
     public boolean removeEdge(E e) {
         synchronized (edges) {
             if (edges.remove(e)!=null) {
-                removeEdgeFromTouchingVertices(e);
+                removeEdgeFromIncidentVertices(e);
                 return true;
             } else {
                 return false;
@@ -453,7 +453,7 @@ public abstract class MapGraph<V, C, E> extends AbstractGraph<V, E> {
         return getEdgeContainer(vertex).outgoing;
     }
 
-    public void removeEdgeFromTouchingVertices(E e) {
+    public void removeEdgeFromIncidentVertices(E e) {
         removeEdgeFromSource(e);
         removeEdgeFromTarget(e);
     }

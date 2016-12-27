@@ -143,17 +143,21 @@ class Map3DView extends NView {
             var d = newDiv(u);
             v.append(d);
 
-
+            //https://cesiumjs.org/Cesium/Build/Documentation/createOpenStreetMapImageryProvider.html
+            var osm = Cesium.createOpenStreetMapImageryProvider({
+                url : 'https://a.tile.openstreetmap.org/'
+            });
+            /*new Cesium.OpenStreetMapImageryProvider({
+                url: '//stamen-tiles.a.ssl.fastly.net/toner/',
+                credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
+            }),*/
 
             var viewer = new Cesium.Viewer(u /*'cesiumContainer'*/, {
                 timeline: false,
                 animation: false,
 
                 _imageryProvider: false,
-                imageryProvider : new Cesium.OpenStreetMapImageryProvider({
-                    url: '//stamen-tiles.a.ssl.fastly.net/toner/',
-                    credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
-                }),
+                imageryProvider : osm,
 
                 baseLayerPicker: false,
 

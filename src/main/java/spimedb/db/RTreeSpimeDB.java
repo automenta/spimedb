@@ -3,7 +3,6 @@ package spimedb.db;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Iterators;
-import com.spatial4j.core.shape.Rectangle;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -35,10 +34,6 @@ import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 public class RTreeSpimeDB implements SpimeDB {
 
     final static Logger logger = LoggerFactory.getLogger(RTreeSpimeDB.class);
-
-    public enum OpEdge {
-        extinh, intinh
-    }
 
     @JsonIgnore
     public final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph;
@@ -99,8 +94,7 @@ public class RTreeSpimeDB implements SpimeDB {
         String parent = d.inside();
         if (parent != null) {
             graph.addVertex(parent);
-            graph.addEdge(parent, id, edge(OpEdge.extinh, parent, id));
-
+            edgeAdd(id, OpEdge.extinh, parent);
         }
 
         return null;
@@ -130,6 +124,18 @@ public class RTreeSpimeDB implements SpimeDB {
     @Override
     public NObject get(String nobjectID) {
         return graph.getVertexValue(nobjectID);
+    }
+
+    @Override
+    public void edgeAdd(String subject, OpEdge e, String object) {
+        graph.addVertex(subject);
+        graph.addVertex(object);
+        graph.addEdge(subject, object, edge(e, subject, object));
+    }
+
+    @Override
+    public void edgeRemove(String subject, OpEdge e, String object) {
+        graph.removeEdge(edge(e, subject,object));
     }
 
     @Override
@@ -202,14 +208,23 @@ public class RTreeSpimeDB implements SpimeDB {
         }
 
         @Override
+        public String getEdgeSource(@NotNull Pair<OpEdge, Twin<String>> opEdgeTwinPair) {
+            return opEdgeTwinPair.getTwo().getOne();
+        }
+
+        @Override
+        public String getEdgeTarget(@NotNull Pair<OpEdge, Twin<String>> opEdgeTwinPair) {
+            return opEdgeTwinPair.getTwo().getTwo();
+        }
+
+        @Override
         protected Set<Pair<OpEdge, Twin<String>>> newEdgeSet() {
-            return new UnifiedSet<>();
+            return new HashSet<>();
         }
 
         @Override
         protected NObject newBlankVertex(String s) {
-            //return new NObject(s);
-            return null;
+            return new NObject(s);
         }
     }
 

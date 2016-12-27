@@ -4,6 +4,7 @@ import spimedb.SpimeDB;
 import spimedb.SpimeScript;
 import spimedb.db.InfiniSpimeDB;
 import spimedb.sense.ImportKML;
+import spimedb.sense.ImportSchemaOrg;
 import spimedb.web.SpacetimeWebServer;
 
 import java.io.File;
@@ -26,6 +27,8 @@ public class ClimateEditor  {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            ImportSchemaOrg.load(db);
 
             String[] urls = new String[]{
                     "file:///home/me/kml/Indian-Lands.kmz",
