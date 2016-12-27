@@ -1,8 +1,5 @@
 package spimedb.db;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.api.tuple.Twin;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfiguration;
@@ -12,10 +9,6 @@ import org.infinispan.stats.Stats;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.index.graph.MapGraph;
-import spimedb.index.graph.VertexContainer;
-
-import java.util.Set;
 
 /**
  * Infinispan Impl
@@ -53,37 +46,13 @@ public class InfiniSpimeDB {
 //        this.conceptsLocalNoResult = conceptsLocal.withFlags(Flag.IGNORE_RETURN_VALUES, Flag.SKIP_CACHE_LOAD, Flag.SKIP_REMOTE_LOOKUP);
 
 
-        Cache<String, VertexContainer<NObject, Pair<RTreeSpimeDB.OpEdge, Twin<String>>>> vertex =
+        Cache<String, NObject> vertex =
                 cm.getCache("vertex");
 
-        Cache<Pair<RTreeSpimeDB.OpEdge, Twin<String>>, Twin<String>> edge =
-                cm.getCache("edge");
 
         enableStats(vertex);
-        enableStats(edge);
 
-        RTreeSpimeDB db = new RTreeSpimeDB(new MapGraph<String, NObject, Pair<RTreeSpimeDB.OpEdge, Twin<String>>>(vertex, edge) {
-
-
-            @Override
-            protected Set<Pair<RTreeSpimeDB.OpEdge, Twin<String>>> newEdgeSet() {
-                return new UnifiedSet<>(0);
-            }
-
-            @Override
-            protected NObject newBlankVertex(String s) {
-                return new NObject(s);
-            }
-
-            @Override
-            public String toString() {
-                return cm.toString() + ": " +
-                        //cm.getCacheManagerStatus() +
-                        " vertices=" + vertex.size() + "," + statString(vertex) +
-                        " edges=" + edges.size() + "," + statString(edge)
-                        ;
-            }
-        });
+        RTreeSpimeDB db = new RTreeSpimeDB(vertex);
 
         return db;
     }

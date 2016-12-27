@@ -1,8 +1,5 @@
 package spimedb;
 
-import spimedb.db.RTreeSpimeDB;
-
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 
@@ -16,14 +13,11 @@ public interface SpimeDB extends Iterable<NObject> {
 
     NObject get(String nobjectID);
 
-    void edgeAdd(String subject, RTreeSpimeDB.OpEdge e, String object);
-    void edgeRemove(String subject, RTreeSpimeDB.OpEdge e, String object);
 
     boolean isEmpty();
 
     int size();
 
-    void children(String parent, Consumer<String> each);
 
     Iterable<NObject> intersecting(double lon, double lat, double radMeters, int maxResults);
 

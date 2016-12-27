@@ -2,11 +2,9 @@ package spimedb.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Iterators;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -14,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.graph.MapGraph;
-import spimedb.index.graph.VertexContainer;
 import spimedb.index.oct.OctBox;
 import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
@@ -23,10 +20,9 @@ import spimedb.index.rtree.SpatialSearch;
 import spimedb.util.geom.Vec3D;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
@@ -36,17 +32,17 @@ public class RTreeSpimeDB implements SpimeDB {
     final static Logger logger = LoggerFactory.getLogger(RTreeSpimeDB.class);
 
     @JsonIgnore
-    public final MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> graph;
-    @JsonIgnore
     public final SpatialSearch<NObject> spacetime;
+    public final Map<String, NObject> obj;
 
     /** in-memory, map-based */
     public RTreeSpimeDB() {
-        this(new SpimeMapGraph());
+        this(new ConcurrentHashMap());
     }
 
-    public RTreeSpimeDB(MapGraph<String, NObject, Pair<OpEdge, Twin<String>>> g) {
-        this.graph = g;
+    public RTreeSpimeDB(Map<String, NObject> g) {
+
+        this.obj = g;
 
         /*this.oct = new MyOctBox(
                 new Vec3D(-180f, -90f, -1),
@@ -57,24 +53,13 @@ public class RTreeSpimeDB implements SpimeDB {
                 2, 8, DEFAULT_SPLIT_TYPE),
                 new ReentrantReadWriteLock());
 
-        /** add any pre-existing values */
-        graph.vertices.forEach((k,v)->{
 
-            tryIndex(v.value());
-        });
 
-    }
-
-    private void tryIndex(NObject value) {
-        if (value.bounded())
-            spacetime.add(value);
     }
 
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/ @Override
     public String toString() {
         return "{\"" + getClass().getSimpleName() + "\":{\"size\":" + size() +
-                ",\"vertices\":" + graph.vertexSet().size() +
-                ",\"edges\":" + graph.edgeSet().size() +
                 ",\"spacetime\":\"" + spacetime.stats() + "\"}}";
     }
 
@@ -85,17 +70,13 @@ public class RTreeSpimeDB implements SpimeDB {
 
     @Override
     public NObject put(NObject d) {
-        final String id = d.getId();
+        //final String id = d.getId();
 
-        tryIndex(d);
+        //TODO use 'obj.merge' for correct un-indexing of prevoius value
+        NObject previous = obj.put(d.getId(), d);
 
-        graph.put(id, d);
-
-        String parent = d.inside();
-        if (parent != null) {
-            graph.addVertex(parent);
-            edgeAdd(id, OpEdge.extinh, parent);
-        }
+        if (d.bounded())
+            spacetime.add(d);
 
         return null;
     }
@@ -108,7 +89,7 @@ public class RTreeSpimeDB implements SpimeDB {
 
     @Override
     public Iterator<NObject> iterator() {
-        return Iterators.transform(graph.containerSet().iterator(), VertexContainer::value);
+        return obj.values().iterator();
     }
 
     @JsonIgnore @Override
@@ -118,36 +99,12 @@ public class RTreeSpimeDB implements SpimeDB {
 
     @JsonIgnore @Override
     public int size() {
-        return graph.vertexSet().size();
+        return obj.size();
     }
 
     @Override
     public NObject get(String nobjectID) {
-        return graph.getVertexValue(nobjectID);
-    }
-
-    @Override
-    public void edgeAdd(String subject, OpEdge e, String object) {
-        graph.addVertex(subject);
-        graph.addVertex(object);
-        graph.addEdge(subject, object, edge(e, subject, object));
-    }
-
-    @Override
-    public void edgeRemove(String subject, OpEdge e, String object) {
-        graph.removeEdge(edge(e, subject,object));
-    }
-
-    @Override
-    public void children(String parent, Consumer<String> each) {
-
-
-
-        (parent == null ? (graph.edgeSet()) : (graph.outgoingEdgesOf(parent))).forEach(e -> {
-            if (e.getOne() == OpEdge.extinh)
-                each.accept(e.getTwo().getOne());
-        });
-
+        return obj.get(nobjectID);
     }
 
     @Override
@@ -192,10 +149,6 @@ public class RTreeSpimeDB implements SpimeDB {
         ), l);
     }
 
-
-    public Collection<String> root() {
-        return graph.vertexSet().stream().filter(x -> graph.inDegreeOf(x)==0).collect(Collectors.toCollection(TreeSet::new));
-    }
 
     private static float metersToDegrees(float radMeters) {
         return radMeters / 110648f;

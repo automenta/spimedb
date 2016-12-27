@@ -15,13 +15,15 @@ public class ImportSchemaOrgTest {
     public void test1() {
         RTreeSpimeDB r = new RTreeSpimeDB();
         ImportSchemaOrg.load(r);
-        r.graph.vertexSet().forEach(v -> {
-            System.out.println(v);
-            System.out.println("\t" + r.graph.edgesOf(v));
-        });
-        System.out.println(r.graph.vertexSet().size() + " " + r.graph.edgeSet().size());
-        assertTrue(r.graph.vertexSet().size() > 500);
-        assertTrue(r.graph.edgeSet().size() > 1000);
+//        r.graph.vertexSet().forEach(v -> {
+//            System.out.println(v);
+//            System.out.println("\t" + r.graph.edgesOf(v));
+//        });
+
+        assertTrue(r.obj.size() > 500);
+
+//        System.out.println(r.graph.vertexSet().size() + " " + r.graph.edgeSet().size());
+//        assertTrue(r.graph.edgeSet().size() > 1000);
 
 
         //AllDirectedPaths a = new AllDirectedPaths(r.graph);

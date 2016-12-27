@@ -340,14 +340,6 @@ public class NObject extends RectND implements Serializable {
         return this;
     }
 
-//    /** sets the children property */
-//    public NObject setOutside(Set<String> content) {
-//        this.outside = content;
-//        return this;
-//    }
-
-    public String inside() { return inside; }
-    //public Set<String> outside() { return outside; }
 
 
     /** produces a "1-line" summar JSON object as a string */

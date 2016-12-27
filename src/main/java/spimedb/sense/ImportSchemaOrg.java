@@ -30,9 +30,9 @@ abstract public class ImportSchemaOrg {
 
                     db.put(t);
 
-                    for (String s : supertypes) {
+                    /*for (String s : supertypes) {
                         db.edgeAdd(id, SpimeDB.OpEdge.intinh, s);
-                    }
+                    }*/
                 }
 
                 @Override
@@ -42,12 +42,12 @@ abstract public class ImportSchemaOrg {
 
                     db.put(t);
 
-                    for (String s : domains) {
+                    /*for (String s : domains) {
                         db.edgeAdd(id, SpimeDB.OpEdge.extinh, s);
                     }
                     for (String s : ranges) {
                         db.edgeAdd(s, SpimeDB.OpEdge.extinh, id);
-                    }
+                    }*/
 
                 }
 
