@@ -128,8 +128,8 @@ public class RTree<T> implements SpatialSearch<T> {
     }
 
     @Override
-    public void intersecting(HyperRect intersecting, Predicate<T> consumer) {
-        root.intersecting(intersecting, consumer);
+    public boolean intersecting(HyperRect intersecting, Predicate<T> consumer) {
+        return root.intersecting(intersecting, consumer);
     }
 
     @Override
@@ -138,8 +138,8 @@ public class RTree<T> implements SpatialSearch<T> {
         return root.containing(rect, t, 0);
     }
 
-    public void containing(HyperRect rect, final Predicate<T> t) {
-        root.containing(rect, t);
+    public boolean containing(HyperRect rect, final Predicate<T> t) {
+        return root.containing(rect, t);
     }
 
     void instrumentTree() {
@@ -156,6 +156,11 @@ public class RTree<T> implements SpatialSearch<T> {
         stats.setMinFill(mMin);
         root.collectStats(stats, 0);
         return stats;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[size=" + size() + "]";
     }
 
     public Node<T> getRoot() {

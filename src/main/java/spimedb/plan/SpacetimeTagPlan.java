@@ -281,7 +281,7 @@ public class SpacetimeTagPlan {
         if (tags) {
             Set<String> uniqueTags = new HashSet();
             for (NObject o : n) {
-                uniqueTags.addAll(o.tagSet());
+                Collections.addAll(uniqueTags, o.tag);
             }
             dimensions.addAll(uniqueTags);
         }

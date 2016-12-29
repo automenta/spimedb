@@ -1,14 +1,12 @@
 package spimedb.run;
 
-import spimedb.SpimeDB;
 import spimedb.SpimeScript;
 import spimedb.db.InfiniSpimeDB;
-import spimedb.sense.ImportKML;
+import spimedb.db.RTreeSpimeDB;
 import spimedb.sense.ImportSchemaOrg;
 import spimedb.web.SpacetimeWebServer;
 
 import java.io.File;
-import java.util.stream.Stream;
 
 /**
  * Created by me on 6/14/15.
@@ -17,7 +15,7 @@ import java.util.stream.Stream;
 public class ClimateEditor  {
     //InfinispanSpimeBase db = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
 
-    public ClimateEditor(SpimeDB db) {
+    public ClimateEditor(RTreeSpimeDB db) {
 
         if (db.isEmpty()) {
             System.out.println("Initializing database...");
@@ -30,21 +28,23 @@ public class ClimateEditor  {
 
             ImportSchemaOrg.load(db);
 
-            String[] urls = new String[]{
-                    "file:///home/me/kml/Indian-Lands.kmz",
-                    "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
-                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
-                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
-                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
+            System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
 
-                    //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
-                    //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-                    // http://climateviewer.org/layers/kml/3rdparty/places/submarine-cables-CV3D.kmz
-                    //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
-                    //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
-            };
 
-            Stream.of(urls).parallel().forEach(u -> new ImportKML(db).url(u).run());
+//            String[] urls = new String[]{
+//                    "file:///home/me/kml/Indian-Lands.kmz",
+//                    "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
+//                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
+//                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
+//                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
+//
+//                    //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
+//                    //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
+//                    // http://climateviewer.org/layers/kml/3rdparty/places/submarine-cables-CV3D.kmz
+//                    //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
+//                    //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
+//            };
+//            Stream.of(urls).parallel().forEach(u -> new ImportKML(db).url(u).run());
 
 
 //            db.forEach(x -> {
@@ -62,9 +62,13 @@ public class ClimateEditor  {
 
     public static void main(String[] args) {
 
-        SpimeDB db =  InfiniSpimeDB.get("/tmp/climate" /* null */);
+        RTreeSpimeDB db =  InfiniSpimeDB.get(
+                //"/tmp/climate"
+                null
+        );
 
         new ClimateEditor(db);
+
 
 
         new SpacetimeWebServer(db, 8080);

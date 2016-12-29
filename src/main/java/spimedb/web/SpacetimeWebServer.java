@@ -119,6 +119,8 @@ public class SpacetimeWebServer extends PathHandler {
                             final int[] count = {0};
 
 
+                            String[] tags = new String[] {};
+
                             db.intersecting(lon, lat, (n) -> {
 
                                 String i = n.id();
@@ -142,7 +144,7 @@ public class SpacetimeWebServer extends PathHandler {
 
                                 return true; //continue
 
-                            });
+                            }, tags);
 
                             gen.writeEndArray();
                             gen.close();

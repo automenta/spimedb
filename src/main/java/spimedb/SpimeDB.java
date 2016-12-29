@@ -23,15 +23,15 @@ public interface SpimeDB extends Iterable<NObject> {
 
     Iterable<NObject> intersecting(double lon, double lat, double radMeters, int maxResults);
 
-    void intersecting(float lon, float lat, float radMeters, Predicate<NObject> each);
+    void intersecting(float lon, float lat, float radMeters, Predicate<NObject> each, String[] tags);
 
-    void intersecting(float[] lon, float[] lat, Predicate<NObject> each);
+    void intersecting(float[] lon, float[] lat, Predicate<NObject> each, String[] tags);
 
     /** (re-)creates new tag (class) */
     Class the(String id, String... supertags);
 
     /** (re-)creates new instance */
-    NObject a(String id, String... tags);
+//    NObject a(String id, String... tags);
 
     enum Scope {
         Private, Trusted, Public, Anonymous, Advertise

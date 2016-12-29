@@ -292,6 +292,7 @@ var NObject = Java.type('spimedb.NObject');
 function nobject(x) {
     var y = new NObject(x.I, x.N);
 
+
     /** TTL rules
     <rezn8d> anything that is requested from the proxy should have a max TTL of 2 hours
     <rezn8d> correct
@@ -313,15 +314,13 @@ function nobject(x) {
         y.put(k, x[k]);
     }
 
-
-
     return y;
 }
 
 nobjectTree(layers, function(v) {
     var x = nobject(v);
     if (DEBUG)
-        print('vertex:', x);
+        print('vertex:', v);
     db.put(x);
 }, function(s, p, o) {
     if (DEBUG)
@@ -369,9 +368,9 @@ function nobjectTree(x, onVertex /* (contained, container) */, onEdge) {
 
             onVertex(w);
 
-            //onEdge(x, '>', w);
+            onEdge(x, '>', w);
 
-            delete x[k];
+            //delete x[k];
 
         }
         else if (k === '<') {
@@ -391,7 +390,7 @@ function nobjectTree(x, onVertex /* (contained, container) */, onEdge) {
 
                     onVertex(w);
 
-                    //onEdge(x, '>', w);
+                    onEdge(x, '>', w);
 
                 }
             }

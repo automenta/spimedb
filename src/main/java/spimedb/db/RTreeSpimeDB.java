@@ -2,6 +2,9 @@ package spimedb.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.graph.ElementOrder;
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.MutableGraph;
 import net.bytebuddy.ByteBuddy;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
@@ -19,7 +22,9 @@ import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
 import spimedb.util.geom.Vec3D;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
@@ -31,8 +36,10 @@ public class RTreeSpimeDB implements SpimeDB {
 
     final static Logger logger = LoggerFactory.getLogger(RTreeSpimeDB.class);
 
-    @JsonIgnore
-    public final SpatialSearch<NObject> spacetime;
+    public final MutableGraph<String> tag = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
+
+    @JsonIgnore public final Map<String,SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
+
     public final Map<String, NObject> obj;
 
     /** in-memory, map-based */
@@ -49,12 +56,14 @@ public class RTreeSpimeDB implements SpimeDB {
                 new Vec3D(360f, 180f, 2),
                 new Vec3D(0.05f, 0.05f, 0.05f));*/
 
-        spacetime = new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
-                2, 8, DEFAULT_SPLIT_TYPE),
-                new ReentrantReadWriteLock());
+    }
 
-
-
+    public SpatialSearch<NObject> space(String tag) {
+        return spacetime.computeIfAbsent(tag, (t) -> {
+            return new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
+                    2, 8, DEFAULT_SPLIT_TYPE),
+                    new ReentrantReadWriteLock());
+        });
     }
 
     protected final Map<String,Class> tagClasses = new ConcurrentHashMap<>();
@@ -95,15 +104,15 @@ public class RTreeSpimeDB implements SpimeDB {
                     .getLoaded();*/
     }
 
-    @Override
-    public NObject a(String id, String... tags) {
-        return null;
-    }
+//    @Override
+//    public NObject a(String id, String... tags) {
+//        return null;
+//    }
 
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/ @Override
     public String toString() {
         return "{\"" + getClass().getSimpleName() + "\":{\"size\":" + size() +
-                ",\"spacetime\":\"" + spacetime.stats() + "\"}}";
+                ",\"spacetime\":\"" + spacetime + "\"}}";
     }
 
     @Override
@@ -116,12 +125,44 @@ public class RTreeSpimeDB implements SpimeDB {
         //final String id = d.getId();
 
         //TODO use 'obj.merge' for correct un-indexing of prevoius value
-        NObject previous = obj.put(d.getId(), d);
+        String id = d.getId();
 
-        if (d.bounded())
-            spacetime.add(d);
+        NObject previous = obj.put(id, d);
+
+        /*if (tag.nodes().contains(id)) {
+            //TODO re-tag
+        }*/
+
+        String[] tags = d.tag;
+        if (tags!=null) {
+            for (String t : tags) {
+                if (this.tag.addNode(t)) {
+                    //index the tag if it doesnt exist in the graph
+                    NObject tagJect = get(t);
+                    if (tagJect!=null) {
+                        String[] parents = tagJect.tag;
+                        if (parents != null)
+                            tag(t, parents);
+                    }
+                }
+            }
+            tag(id, tags);
+
+            if (d.bounded()) {
+                for (String t : tags)
+                    space(t).add(d);
+            }
+        }
+
+        //Object tags = obj.get(">");
 
         return null;
+    }
+
+    private void tag(String id, String[] parents) {
+        for (String parentTag : parents) {
+            tag.putEdge(parentTag, id);
+        }
     }
 
 
@@ -173,23 +214,29 @@ public class RTreeSpimeDB implements SpimeDB {
     }
 
     @Override @NotNull
-    public void intersecting(float lon, float lat, float radMeters, Predicate<NObject> l) {
+    public void intersecting(float lon, float lat, float radMeters, Predicate<NObject> l, String... tags) {
         float radDegrees = metersToDegrees(radMeters);
 
-        spacetime.intersecting(new RectND(
-                new float[] { Float.NEGATIVE_INFINITY, lon - radDegrees, lat - radDegrees, Float.NEGATIVE_INFINITY },
-                new float[] { Float.POSITIVE_INFINITY, lon + radDegrees, lat + radDegrees, Float.POSITIVE_INFINITY }
-        ), l);
+        for (String t : tags) {
+            if (!space(t).intersecting(new RectND(
+                    new float[]{Float.NEGATIVE_INFINITY, lon - radDegrees, lat - radDegrees, Float.NEGATIVE_INFINITY},
+                    new float[]{Float.POSITIVE_INFINITY, lon + radDegrees, lat + radDegrees, Float.POSITIVE_INFINITY}
+            ), l))
+                return;
+        }
     }
 
     @Override @NotNull
-    public void intersecting(float[] lon, float[] lat, Predicate<NObject> l) {
+    public void intersecting(float[] lon, float[] lat, Predicate<NObject> l, String[] tags) {
 
         //System.out.println(lon[0] + "," + lat[0] + " .. " + lon[1] + "," + lat[1] );
-        spacetime.intersecting(new RectND(
-                new float[] { Float.NEGATIVE_INFINITY, lon[0], lat[0], Float.NEGATIVE_INFINITY },
-                new float[] { Float.POSITIVE_INFINITY, lon[1], lat[1], Float.POSITIVE_INFINITY }
-        ), l);
+        for (String t : tags) {
+            if (!space(t).intersecting(new RectND(
+                    new float[]{Float.NEGATIVE_INFINITY, lon[0], lat[0], Float.NEGATIVE_INFINITY},
+                    new float[]{Float.POSITIVE_INFINITY, lon[1], lat[1], Float.POSITIVE_INFINITY}
+            ), l))
+                return;
+        }
     }
 
 

@@ -16,7 +16,6 @@ import spimedb.sense.ImportKML;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +135,8 @@ public class NObject extends RectND implements Serializable {
 
 
     /** extensional inheritance: what this nobject is "inside" of (its container) */
-    /*@Field(name = "inside")*/ @JsonProperty(">") private String inside = null;
+    /*@Field(name = "inside")*/ @JsonProperty(">")
+    public String[] tag = null;
 
 //    /** extensional inheritance: what this nobject is "outside" of (its contents) */
 //    @Field(name = "outside") @JsonProperty("<") private Set<String> outside = new HashSet();
@@ -169,10 +169,6 @@ public class NObject extends RectND implements Serializable {
     }
 
 
-
-    public Collection<String> tagSet() {
-        return data.keySet();
-    }
 
 //    /**
 //     * timepoint, or -1 if none
@@ -215,11 +211,20 @@ public class NObject extends RectND implements Serializable {
 
     public NObject put(String tag, Object value) {
         switch (tag) {
-            case ">": setInside((String)value); return this;
+            case ">":
+                if (value instanceof String[])
+                    setTag((String[])value);
+                else if (value instanceof String)
+                    setTag((String)value);
+                else
+                    throw new RuntimeException("invalid tag property");
+                return this;
+
 //            case "<":
 //                //HACK
 //                setOutside(Sets.newHashSet((String[])value));
 //                return this;
+
             case "I":
                 if ((value instanceof String) && (value.equals(id))) {
                     //already being set to same ID
@@ -229,7 +234,7 @@ public class NObject extends RectND implements Serializable {
             case "N": name(value.toString()); return this;
         }
 
-        if (data == null) data = new HashMap();
+        if (data == null) data = new HashMap<>();
         data.put(tag, value);
         return this;
     }
@@ -348,10 +353,20 @@ public class NObject extends RectND implements Serializable {
     }
 
     /** sets the inside property */
-    public NObject setInside(String parents) {
-        this.inside = parents;
-        if (this.inside.equals(getId()))
-            throw new RuntimeException("object can not be inside itself");
+    public NObject setTag(String... tags) {
+
+        for (String t : tags) {
+            if (t.equals(getId()))
+                throw new RuntimeException("object can not be inside itself");
+        }
+
+        if (tags.length > 1) {
+            //TODO remove any duplicates
+        }
+
+        this.tag = tags;
+
+
         return this;
     }
 

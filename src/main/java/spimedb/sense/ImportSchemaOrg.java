@@ -2,10 +2,6 @@ package spimedb.sense;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;
-import com.google.common.graph.ElementOrder;
-import com.google.common.graph.GraphBuilder;
-import com.google.common.graph.Graphs;
-import com.google.common.graph.MutableGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
@@ -16,7 +12,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Schema.org and ActivityStreams Ontology import
@@ -28,7 +23,7 @@ abstract public class ImportSchemaOrg {
     final static Logger logger = LoggerFactory.getLogger(ImportSchemaOrg.class);
 
     public static void load(SpimeDB db) {
-        MutableGraph<String> types = GraphBuilder.directed().allowsSelfLoops(false).nodeOrder(ElementOrder.unordered()).expectedNodeCount(1024).build();
+        //MutableGraph<String> types = GraphBuilder.directed().allowsSelfLoops(false).nodeOrder(ElementOrder.unordered()).expectedNodeCount(1024).build();
 
 
         try {
@@ -43,16 +38,18 @@ abstract public class ImportSchemaOrg {
 
                     id = escape(id);
 
-                    //NObject t = new NObject(id, label);
-                    //t.description(comment);
+                    NObject t = new NObject(id, label);
+                    t.description(comment);
+                    t.put(">", supertypes.toArray(new String[supertypes.size()]));
 
-                    //db.put(t);
+                    db.put(t);
 
-                    types.addNode(id);
-                    for (String s : supertypes) {
-                        if (!s.isEmpty())
-                            types.putEdge(escape(s), id);
-                    }
+
+//                    types.addNode(id);
+//                    for (String s : supertypes) {
+//                        if (!s.isEmpty())
+//                            types.putEdge(escape(s), id);
+//                    }
 
 
                 }
@@ -63,10 +60,10 @@ abstract public class ImportSchemaOrg {
 
                 @Override
                 public void onProperty(String id, String label, List<String> domains, List<String> ranges, String comment) {
-                    NObject t = new NObject(id, label);
-                    t.description(comment);
-
-                    db.put(t);
+//                    NObject t = new NObject(id, label);
+//                    t.description(comment);
+//
+//                    db.put(t);
 
                     /*for (String s : domains) {
                         db.edgeAdd(id, SpimeDB.OpEdge.extinh, s);
@@ -85,28 +82,30 @@ abstract public class ImportSchemaOrg {
 
 
 
-        MutableGraph<String> copy = Graphs.copyOf(types);
-
-
-        //topological sort
-        while (!copy.nodes().isEmpty()) {
-            //find roots
-            for (String r : Lists.newArrayList(copy.nodes())) {
-                if (copy.inDegree(r) == 0) {
-                    copy.removeNode(r);
-
-                    Set<String> superClasses = types.predecessors(r);
-                    Class<? extends NObject> rc = db.the(r, superClasses.toArray(new String[superClasses.size()]));
-                    //System.out.println(r + "\t" + rc + ":\t" + getSuperInterfacesOf(rc) );
-                }
-
-            }
-
-            //NObject t = db.newTag(id, supertypes.toArray(new String[supertypes.size()]));
-
-        }
-
-        logger.info("{} classes created ({} inheritances)", types.nodes().size(), types.edges().size());
+//        MutableGraph<String> copy = Graphs.copyOf(types);
+//
+//
+//        //topological sort
+//        while (!copy.nodes().isEmpty()) {
+//            //find roots
+//            for (String r : Lists.newArrayList(copy.nodes())) {
+//                if (copy.inDegree(r) == 0) {
+//                    copy.removeNode(r);
+//
+//                    Set<String> superClasses = types.predecessors(r);
+//                    Class<? extends NObject> rc = db.the(r, superClasses.toArray(new String[superClasses.size()]));
+//                    //System.out.println(r + "\t" + rc + ":\t" + getSuperInterfacesOf(rc) );
+//
+//
+//                }
+//
+//            }
+//
+//            //NObject t = db.newTag(id, supertypes.toArray(new String[supertypes.size()]));
+//
+//        }
+//
+//        logger.info("{} classes created ({} inheritances)", types.nodes().size(), types.edges().size());
     }
 
 

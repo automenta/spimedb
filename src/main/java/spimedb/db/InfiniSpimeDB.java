@@ -8,7 +8,6 @@ import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.stats.Stats;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
-import spimedb.SpimeDB;
 
 /**
  * Infinispan Impl
@@ -16,7 +15,7 @@ import spimedb.SpimeDB;
  */
 public class InfiniSpimeDB {
 
-    public static SpimeDB get(@Nullable String path) {
+    public static RTreeSpimeDB get(@Nullable String path) {
 
         GlobalConfiguration global = new GlobalConfigurationBuilder()
                 .serialization()

@@ -116,8 +116,8 @@ public interface SpatialSearch<T> {
 
     void forEach(Consumer<T> consumer);
 
-    void intersecting(HyperRect rect, Predicate<T> consumer);
-    void containing(HyperRect rect, Predicate<T> consumer);
+    boolean intersecting(HyperRect rect, Predicate<T> consumer);
+    boolean containing(HyperRect rect, Predicate<T> consumer);
 
     /**
      * Search for entries intersecting given bounding rect

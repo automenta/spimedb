@@ -44,6 +44,7 @@ import static spimedb.sense.kml.KmlReader.logger;
  */
 public class ImportKML {
 
+    final int maxPathDepth = 3;
     private final Proxy proxy;
     private final SpimeDB db;
     final AtomicLong serial = new AtomicLong();
@@ -139,8 +140,7 @@ public class ImportKML {
                     }
 
                     //System.out.println(cs + " " + cs.getId());
-                    path.add(i);
-                    updatePath();
+                    updatePath(i);
 
                 }
 
@@ -223,8 +223,16 @@ public class ImportKML {
 
     }
 
+    void updatePath(String next) {
+        path.add(next);
+        if (path.size() < maxPathDepth) {
+            updatePath();
+        }
+    }
+
     void updatePath() {
-        if (path.size() > 0) {
+        int ps = path.size();
+        if (ps > 0 ) {
             parentPathString = String.join("/",  new ArrayList(path).subList(0, path.size()-1));
         }
         else {
@@ -558,7 +566,7 @@ public class ImportKML {
                 }
                 else {
                     d = new NObject(pathString);
-                    d.setInside(parentPathString);
+                    d.setTag(parentPathString);
                 }
 
                 d.name(cs.getName());
@@ -586,7 +594,7 @@ public class ImportKML {
             }
             else {
                 d = new NObject();
-                d.setInside(pathString);
+                d.setTag(pathString);
             }
 
             if (go instanceof Common) {
