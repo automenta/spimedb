@@ -3,8 +3,7 @@ package spimedb.run;
 import spimedb.SpimeScript;
 import spimedb.db.InfiniSpimeDB;
 import spimedb.db.RTreeSpimeDB;
-import spimedb.sense.ImportSchemaOrg;
-import spimedb.web.SpacetimeWebServer;
+import spimedb.web.WebServer;
 
 import java.io.File;
 
@@ -26,9 +25,10 @@ public class ClimateEditor  {
                 e.printStackTrace();
             }
 
-            ImportSchemaOrg.load(db);
+            //ImportSchemaOrg.load(db);
 
-            System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
+            //System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
+
 
 
 //            String[] urls = new String[]{
@@ -71,7 +71,7 @@ public class ClimateEditor  {
 
 
 
-        new SpacetimeWebServer(db, 8080);
+        new WebServer(db, 8080);
 //
 //                //.add("/proxy", new CachingProxyServer(es, cachePath))
 //                .add("/cache", resource(

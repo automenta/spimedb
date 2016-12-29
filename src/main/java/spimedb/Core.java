@@ -161,10 +161,15 @@ public class Core {
         }
     }
 
+    public static boolean toJSON(Object x, OutputStream out) {
+        return toJSON(x, out, (char)0);
+    }
+
     public static boolean toJSON(Object x, OutputStream out, char suffix) {
         try {
             json.writer().writeValue(out, x);
-            out.write(suffix);
+            if (suffix!=0)
+                out.write(suffix);
             return true;
         } catch (Exception ex) {
             logger.error("toJSON: {}", ex);

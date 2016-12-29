@@ -8,6 +8,8 @@ package spimedb.web;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -22,6 +24,7 @@ import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
 import spimedb.Core;
 import spimedb.SpimeDB;
+import spimedb.db.RTreeSpimeDB;
 import spimedb.util.bloom.UnBloomFilter;
 
 import java.io.IOException;
@@ -37,9 +40,9 @@ import static io.undertow.UndertowOptions.ENABLE_SPDY;
  *
  * @author me
  */
-public class SpacetimeWebServer extends PathHandler {
+public class WebServer extends PathHandler {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SpacetimeWebServer.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
     public static final String resourcePath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
     private final SpimeDB db;
 
@@ -54,11 +57,11 @@ public class SpacetimeWebServer extends PathHandler {
 //        return this;
 //    }
 
-    public SpacetimeWebServer(SpimeDB db, int port)   {
+    public WebServer(SpimeDB db, int port)   {
         this(db, "0.0.0.0", port);
     }
 
-    public SpacetimeWebServer(final SpimeDB db, String host, int port) {
+    public WebServer(final SpimeDB db, String host, int port) {
         super();
         this.db = db;
 //        this.host = host;
@@ -67,6 +70,16 @@ public class SpacetimeWebServer extends PathHandler {
 
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
+
+        addPrefixPath("/tag", new HttpHandler() {
+
+            @Override
+            public void handleRequest(HttpServerExchange ex) throws Exception {
+                Web.stream(ex, (o) -> {
+                    Core.toJSON( Lists.newArrayList(Iterables.transform( ((RTreeSpimeDB)db).tag.nodes(), db::get)), o);
+                });
+            }
+        });
 
         addPrefixPath("/shell", new JavascriptShell().with((e)->{
             e.put("db", db);

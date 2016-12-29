@@ -310,6 +310,9 @@ function nobject(x) {
         x.PmaxAge = (2 * 60 * 60 * 1000); //2 hrs in milliseconds
     }
 
+    if (x.G && x.G[0] == '/')
+        x.G = "http://climateviewer.org/layers" + x.G;
+
     for (var k in x) {
         y.put(k, x[k]);
     }

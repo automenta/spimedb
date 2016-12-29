@@ -125,7 +125,123 @@ class GraphView extends NView {
     }
 
     start(v, app, cb) {
-        this.s = spacegraph(v, {
+
+      var degreeScale = function ( node ) { // returns numeric value for each node, placing higher nodes in levels towards the centre
+          return 10 + 10 * node.degree();
+      };
+
+      var cy = this.s = cytoscape({
+          container: v,
+          style: [ // the stylesheet for the graph
+            {
+              selector: 'node',
+              style: {
+                'color': 'white',
+                'shape': 'hexagon',
+                'background-color': '#666',
+                'label': 'data(N)',
+                'width': degreeScale,
+                'height': degreeScale,
+              }
+            },
+
+            {
+              selector: 'edge',
+              style: {
+                'width': 3,
+                'line-color': '#ccc',
+                'target-arrow-color': '#ccc',
+                'target-arrow-shape': 'triangle'
+              }
+            }
+          ],
+
+          layout: {
+            name: 'grid'
+          }
+      });
+
+
+      var that = this;
+      $.getJSON('/tag')
+          .done(function(tagMap) {
+
+
+              cy.batch(()=>{
+
+                _.each(tagMap, function(i) {
+
+                  if (!i)
+                    return;
+
+                  i.id = i.I; //HACK
+
+
+                  cy.add({
+                      group: "nodes",
+                      data: i
+                  });
+                  if (i['>']) {
+                    _.each(i['>'], function(superTag) {
+                      var src = i.id;
+                      var tgt = superTag;
+                      cy.add({
+                          group: 'edges',
+                          data: {
+                            id: src+"_"+tgt, source: src, target: tgt
+                          }
+                      });
+                    });
+                  }
+
+
+
+                    //if (i)
+                      ///that.updateTag(i);
+                });
+
+              });
+
+              var options = {
+                name: 'breadthfirst',
+
+                fit: true, // whether to fit the viewport to the graph
+                directed: false, // whether the tree is directed downwards (or edges can point in any direction if false)
+                padding: 10, // padding on fit
+                circle: true, // put depths in concentric circles if true, put depths top down if false
+                spacingFactor: 1.75, // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
+                boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+                avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
+                roots: undefined, // the roots of the trees
+                maximalAdjustments: 0, // how many times to try to position the nodes in a maximal way (i.e. no backtracking)
+                animate: false, // whether to transition the node positions
+                animationDuration: 500, // duration of animation in ms if enabled
+                animationEasing: undefined, // easing of animation if enabled
+                ready: undefined, // callback on layoutready
+                stop: undefined // callback on layoutstop
+              };
+              cy.layout( options );
+
+              //add edges
+              /*var nn = that.tag.nodes();
+              for (var i = 0; i < nn.length; i++) {
+                  var t = that.tag.node(nn[i]);
+                  if (!t.inh) continue;
+
+                  for (var j in t.inh) {
+                      //var strength = t.inh[j];
+                      //that.tag.setEdge(j, t.id);
+                  }
+              }*/
+
+              /*if (callback)
+                  callback(that);*/
+          })
+          .fail(ajaxFail);
+
+
+
+        /*this.s = spacegraph(v, {
             start: function () {
 
                 newSpacePopupMenu(this);
@@ -144,7 +260,7 @@ class GraphView extends NView {
 
                 if (cb) cb();
             }
-        });
+        });*/
     }
 
     stop() {

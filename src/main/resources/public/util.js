@@ -4,8 +4,10 @@ class Tag {
 
     constructor(id/*, data*//*tagJSON*/) {
 
-        this.id = id;
-        this.meta = { };
+
+        this.id = id.I;
+
+        this.meta = id;
         /*this.meta = data;
         this.name = data.name;
         this.inh = data.inh;*/
@@ -90,73 +92,6 @@ class TagIndex {
 
         this.tag = new graphlib.Graph({multigraph: true});
 
-        //TEMPORARY
-        var x = {
-            id: 'untitled_' + parseInt(Math.random() * 100),
-            style: {
-                'node': {
-                    'content': 'data(content)',
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'shape': 'rectangle',
-                    'font-size': '8px',
-                },
-                '$node > node': {
-                    'padding-top': '2px',
-                    'padding-left': '2px',
-                    'padding-bottom': '2px',
-                    'padding-right': '2px',
-                    'text-valign': 'top',
-                    'text-halign': 'center'
-                },
-                'edge': {
-                    'target-arrow-shape': 'triangle',
-                    //'line-style': 'dashed',
-                    'line-width': '16'
-                },
-                ':selected': {
-                    //'background-color': 'black',
-                    'line-color': 'black',
-                    'target-arrow-color': 'black',
-                    'source-arrow-color': 'black'
-                }
-            },
-            nodes: [],
-            edges: []
-        };
-
-
-
-
-        this.channel = new Channel(x);
-
-
-        var that = this;
-        $.getJSON('/index')
-            .done(function(tagMap) {
-
-
-                _.each(tagMap, function(i) {
-                    that.updateTag(i);
-                });
-
-                //add edges
-                var nn = that.tag.nodes();
-                for (var i = 0; i < nn.length; i++) {
-                    var t = that.tag.node(nn[i]);
-                    if (!t.inh) continue;
-
-                    for (var j in t.inh) {
-                        //var strength = t.inh[j];
-                        that.tag.setEdge(j, t.id);
-                    }
-                }
-
-                if (callback)
-                    callback(that);
-            })
-            .fail(ajaxFail);
-
         /*
         $.getJSON('/tag/meta', {id: JSON.stringify(layerIDs)})
             .done(function (r) {
@@ -181,6 +116,8 @@ class TagIndex {
             var t = this.tag.node(nn[i]);
             if (!t) continue;
 
+
+
             //TODO temporary - should be filtered by server
             if (!t.id || t.id.indexOf(' ')!=-1) {
                 console.error('invalid tag', t);
@@ -191,7 +128,7 @@ class TagIndex {
 
 
             var parent = this.tag.predecessors( id );
-            if (parent.length > 0) {
+            if (parent && parent.length > 0) {
                 continue;
             }
 
@@ -214,8 +151,11 @@ class TagIndex {
 
         if (typeof(t) === "string") t = this.tag.node(t);
 
+        if (!t)
+          return;
+
         //TODO temporary
-        if (t.id.indexOf(' ')!=-1) {
+        if (!t.id || t.id.indexOf(' ')!=-1) {
             console.error('invalid tag ID: ' + t.id);
             return null;
         }
@@ -546,13 +486,13 @@ class SocketChannel extends Channel {
 function Websocket(path, conn) {
 
     if (!conn) conn = { };
-    
+
     if (!conn.url)
-        conn.url = 'ws://' + window.location.hostname + ':' + window.location.port + '/' + path;    
-    
+        conn.url = 'ws://' + window.location.hostname + ':' + window.location.port + '/' + path;
+
     //subscriptions: channel id -> channel
     conn.subs = { };
-    
+
 
     var ws = conn.socket = new WebSocket(conn.url);
 
@@ -567,7 +507,7 @@ function Websocket(path, conn) {
 
 
     };
-    
+
     ws.onclose = function () {
         //already disconnected?
         if (!this.opt)
@@ -579,7 +519,7 @@ function Websocket(path, conn) {
 
         if (conn.onClose)
             conn.onClose();
-        
+
         //attempt reconnect?
     };
     ws.onerror = function (e) {
@@ -590,7 +530,7 @@ function Websocket(path, conn) {
 
     conn.send = function(data) {
         var jdata = /*jsonUnquote*/( JSON.stringify(data) );
-        
+
         //console.log('send:', jdata.length, jdata);
 
         this.socket.send(jdata);
@@ -599,9 +539,9 @@ function Websocket(path, conn) {
     conn.handler = {
         '=': function(d) {
             var channelData = d[1];
-                        
+
             //console.log('replace', channelData);
-            
+
             var chanID = channelData.id;
             var chan = conn.subs[chanID];
             if (!chan) {
@@ -618,24 +558,24 @@ function Websocket(path, conn) {
                   //  window.s.updateChannel(chan);
 
                 if (conn.onChange)
-                    conn.onChange(chan);                
+                    conn.onChange(chan);
             }
         },
         '+': function(d) {
             var channelID = d[1];
             var patch = d[2];
-            
-                        
+
+
             //{ id: channelData.id, data:channelData}
             var c = conn.subs[channelID];
             if (c) {
                 //console.log('patch', patch, c, c.data);
 
                 jsonpatch.apply(c.data, patch);
-                
+
                 //if (window.s)
                    // window.s.addChannel(c);
-                
+
                 if (conn.onChange)
                     conn.onChange(c);
             }
@@ -644,27 +584,27 @@ function Websocket(path, conn) {
             }
         }
 
-                
+
     };
-    
+
     ws.onmessage = function (e) {
         /*e.data.split("\n").forEach(function (l) {
          output(l, true);
          });*/
-        
+
         //try {
             var d = JSON.parse(e.data);
-            
+
             if (d[0]) {
-                
+
                 //array, first element = message type
                 var messageHandler = conn.handler[d[0]];
-                if (messageHandler) {                    
+                if (messageHandler) {
                     //return conn.apply(messageHandler,d);
                     return messageHandler(d);
                 }
             }
-            
+
             notify('websocket data (unrecognized): ' + JSON.stringify(d));
         /*}
         catch (ex) {
@@ -672,34 +612,34 @@ function Websocket(path, conn) {
             console.log(ex);
         }*/
     };
-    
+
     conn.on = function(channelID, callback) {
-        
+
         if (conn.subs[channelID]) {
-            //already subbed            
+            //already subbed
         }
         else {
             conn.subs[channelID] = new Channel(channelID);
             if (callback)
-                callback.off = function() { conn.off(channelID); };            
+                callback.off = function() { conn.off(channelID); };
         }
-        
+
         conn.send(['on', channelID]);
-        
+
         //TODO save callback in map so when updates arrive it can be called
-        
+
         return callback;
     };
-    
+
     //reload is just sending an 'on' event again
     conn.reload = function(channelID) {
         conn.send(['!', channelID]);
     };
-    
+
     conn.operation = function(op, channelID) {
         conn.send([op, channelID]);
     };
-    
+
     conn.off = function(channelID) {
         if (!channelID) {
             //close everything and stop the wbsocket
@@ -716,7 +656,7 @@ function Websocket(path, conn) {
 
             conn.send(['off', channelID]);
         }
-        
+
     };
 
     return conn;
@@ -813,4 +753,3 @@ function loadJS(url) {
             })
     );
 }
-

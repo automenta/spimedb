@@ -36,7 +36,7 @@ abstract public class ImportSchemaOrg {
 
 
 
-                    id = escape(id);
+                    //id = escape(id);
 
                     NObject t = new NObject(id, label);
                     t.description(comment);

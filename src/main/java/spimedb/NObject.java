@@ -68,6 +68,10 @@ public class NObject extends RectND implements Serializable {
                 if (o.name!=null)
                     jsonGenerator.writeStringField("N", o.name);
 
+                if (o.tag!=null && o.tag.length > 0) {
+                    jsonGenerator.writeObjectField(">", o.tag);
+                }
+
                 if (o.data!=null) {
                     //inline the map data
                     o.data.forEach((k,v)->{
