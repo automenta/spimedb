@@ -1,5 +1,6 @@
 package spimedb;
 
+import java.io.PrintStream;
 import java.util.function.Predicate;
 
 
@@ -29,6 +30,10 @@ public interface SpimeDB extends Iterable<NObject> {
 
     /** (re-)creates new tag (class) */
     Class the(String id, String... supertags);
+
+    default void print(PrintStream out) {
+        forEach(out::println);
+    }
 
     /** (re-)creates new instance */
 //    NObject a(String id, String... tags);

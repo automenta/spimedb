@@ -145,6 +145,17 @@
         <!--<version>2.4.7</version>-->
         <!--</dependency>-->
 
+        <dependency>
+            <groupId>com.syncleus.ferma</groupId>
+            <artifactId>ferma</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>tinkergraph-gremlin</artifactId>
+            <version>3.2.3</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.infinispan</groupId>
@@ -458,6 +469,16 @@
                 <includes>
                     <include>*.kmz</include>
                     <include>*.kml</include>
+                    <include>*.json</include>
+                    <include>*.geojson</include>
+                </includes>
+                <filtering>false</filtering>
+            </testResource>
+            <testResource>
+                <directory>${basedir}/src/test/java/spimedb/sense</directory>
+                <includes>
+                    <include>*.json</include>
+                    <include>*.geojson</include>
                 </includes>
                 <filtering>false</filtering>
             </testResource>

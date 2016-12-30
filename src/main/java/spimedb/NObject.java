@@ -1,5 +1,6 @@
 package spimedb;
 
+import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -10,6 +11,8 @@ import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
 import spimedb.sense.ImportKML;
@@ -19,10 +22,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-//import org.hibernate.search.annotations.Field;
-//import org.hibernate.search.annotations.Indexed;
-//import org.hibernate.search.annotations.Store;
 
 
 
@@ -43,21 +42,7 @@ import java.util.Map;
 //@Indexed
 public class NObject extends RectND implements Serializable {
 
-    static {
 
-
-//        RootLogger root = (RootLogger) (Log..getLogManager());
-//        root.removeAllAppenders();
-//
-//        ConsoleAppender ca = new ConsoleAppender();
-//        ca.setLayout(new SimpleLayout());
-//        ca.setWriter(new PrintWriter(System.out));
-//        ca.setName("console");
-//        root.addAppender(ca);
-//
-//        root.setLevel(Level.INFO);
-
-    }
     static final class NObjectSerializer extends JsonSerializer<NObject> {
 
         @Override
@@ -434,6 +419,14 @@ public class NObject extends RectND implements Serializable {
         float a = min.coord[0];
         float b = max.coord[0];
         return new long[] { (long)a, (long)b };
+    }
+
+
+    static {
+
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.INFO);
+
     }
 
 }

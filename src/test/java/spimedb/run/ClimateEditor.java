@@ -12,7 +12,16 @@ import java.io.File;
  */
 
 public class ClimateEditor  {
-    //InfinispanSpimeBase db = InfinispanSpimeBase.disk("/tmp/sf", 128 * 1024);
+
+
+    static {
+        //HACK force programmatic logger settings
+        try {
+            Class.forName("spimedb.NObject");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     public ClimateEditor(RTreeSpimeDB db) {
 
@@ -20,11 +29,12 @@ public class ClimateEditor  {
             System.out.println("Initializing database...");
 
             try {
-                new SpimeScript(db).run(new File("data/climateviewer2.js"));
+                new SpimeScript(db).run(new File("data/climateviewer.js"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
+            //ImportGeoJSON
             //ImportSchemaOrg.load(db);
 
             //System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
