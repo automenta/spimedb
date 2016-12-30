@@ -1,4 +1,4 @@
-package spimedb.db;
+package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.NObject;
 import spimedb.index.oct.OctBox;
 import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
 import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
+import spimedb.query.Query;
 import spimedb.util.geom.Vec3D;
 
 import java.util.HashSet;

@@ -1,7 +1,6 @@
 package spimedb.index.oct;
 
 
-import spimedb.IdBB;
 import spimedb.util.geom.Vec3D;
 
 import java.util.Collection;
@@ -10,7 +9,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /** TODO extract infinispan to subclass allowing any Map impl for index */
-public class OctMap<K,V extends IdBB> implements Map<K,V> {
+public class OctMap<K,V extends OctBox.IdBB> implements Map<K,V> {
 
     private static final Logger logger = Logger.getLogger(OctMap.class.getSimpleName()); // + ":" + id);
 

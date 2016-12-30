@@ -2,7 +2,7 @@ package spimedb.sense.kml;
 
 
 import org.junit.Test;
-import spimedb.db.SpimeDB;
+import spimedb.SpimeDB;
 import spimedb.sense.ImportKML;
 
 import java.io.File;

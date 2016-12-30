@@ -1,4 +1,4 @@
-package spimedb.db;
+package spimedb.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -6,10 +6,9 @@ import spimedb.NObject;
 import spimedb.index.rtree.RectND;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.Predicate;
 
-import static spimedb.db.Query.BoundsCondition.Intersect;
+import static spimedb.query.Query.BoundsCondition.Intersect;
 
 /**
  * General spatiotemporal x tag Query
@@ -120,21 +119,6 @@ public class Query {
     private void ensureNotStarted() {
         if (whenStarted != 0)
             throw new RuntimeException("Query already executing");
-    }
-
-    public static class QueryCollection extends Query implements Predicate<NObject> {
-        public final Collection<NObject> result;
-
-        public QueryCollection(Collection<NObject> result) {
-            super();
-            this.result = result;
-        }
-
-        @Override
-        public boolean test(NObject next) {
-            result.add(next);
-            return true;
-        }
     }
 
     @Override

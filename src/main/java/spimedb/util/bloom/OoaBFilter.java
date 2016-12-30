@@ -3,14 +3,13 @@
 // license that can be found in the LICENSE file.
 package spimedb.util.bloom;
 
-import java.math.RoundingMode;
-import java.util.Arrays;
-import java.nio.ByteBuffer;
-
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.math.IntMath;
+
+import java.math.RoundingMode;
+import java.nio.ByteBuffer;
 
 /**
  * OoaBFilter is used to filter out duplicate elements from a given dataset or stream. It is
@@ -35,7 +34,7 @@ public class OoaBFilter {
      *
      * @return A ByteBuffer that represents the element.
      */
-    public ByteBuffer getByteBuffer();
+    ByteBuffer getByteBuffer();
   }
 
   private static final HashFunction HASH_FUNC = Hashing.murmur3_32();

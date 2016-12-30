@@ -1,8 +1,8 @@
 package spimedb.run;
 
-import spimedb.SpimeScript;
+import spimedb.util.js.SpimeScript;
 import spimedb.db.InfiniSpimeDB;
-import spimedb.db.SpimeDB;
+import spimedb.SpimeDB;
 import spimedb.web.WebServer;
 
 import java.io.File;

@@ -18,7 +18,7 @@ import static spimedb.util.geom.Vec3D.v;
 public class OctreeTest {
 
 
-    static class DummyPoint extends AABB implements IdBB {
+    static class DummyPoint extends AABB implements OctBox.IdBB {
 
         final String id = UUID.randomUUID().toString();
 

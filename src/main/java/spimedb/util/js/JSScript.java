@@ -1,4 +1,4 @@
-package spimedb;
+package spimedb.util.js;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

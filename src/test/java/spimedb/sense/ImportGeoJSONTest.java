@@ -1,8 +1,8 @@
 package spimedb.sense;
 
 import org.junit.Test;
-import spimedb.db.Query;
-import spimedb.db.SpimeDB;
+import spimedb.query.QueryCollection;
+import spimedb.SpimeDB;
 import spimedb.index.rtree.RectND;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class ImportGeoJSONTest {
         assertTrue(all > 50);
 
         //time query
-        Query.QueryCollection a = new Query.QueryCollection(new ArrayList<>()).when(1.48252053E12f, 1.48250336E12f);
+        QueryCollection a = new QueryCollection(new ArrayList<>()).when(1.48252053E12f, 1.48250336E12f);
         db.get(a);
         int aNum = a.result.size();
         assertTrue(aNum > 0);
@@ -39,7 +39,7 @@ public class ImportGeoJSONTest {
         System.out.println();
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
-        Query.QueryCollection b = new Query.QueryCollection(new ArrayList<>()).bounds(
+        QueryCollection b = new QueryCollection(new ArrayList<>()).bounds(
             new RectND(
                     new float[] {  1.48252053E12f, 0, 0, Float.NEGATIVE_INFINITY },
                     new float[] {  1.48250336E12f, 180, 180, Float.POSITIVE_INFINITY } )

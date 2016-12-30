@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spimedb;
+package spimedb.util.js;
 
-import spimedb.db.SpimeDB;
+import spimedb.SpimeDB;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;

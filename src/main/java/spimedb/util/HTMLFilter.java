@@ -1,4 +1,4 @@
-package spimedb.sense;
+package spimedb.util;
 
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import org.jsoup.Jsoup;

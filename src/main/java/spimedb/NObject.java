@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
 import spimedb.sense.ImportKML;
+import spimedb.util.JSON;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -131,7 +132,7 @@ public class NObject extends RectND implements Serializable {
 //    @Field(name = "outside") @JsonProperty("<") private Set<String> outside = new HashSet();
 
     public NObject() {
-        this(Core.uuid());
+        this(JSON.uuid());
     }
 
     public NObject(String id) {
@@ -141,7 +142,7 @@ public class NObject extends RectND implements Serializable {
     public NObject(String id, String name) {
         super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY));
 
-        this.id = id!=null ? id : Core.uuid();
+        this.id = id!=null ? id : JSON.uuid();
         this.name = name;
     }
 
@@ -255,7 +256,7 @@ public class NObject extends RectND implements Serializable {
 
     @Override
     public String toString() {
-        return Core.toJSON(this);
+        return JSON.toJSON(this);
     }
 
 

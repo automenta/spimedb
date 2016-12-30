@@ -1,6 +1,7 @@
 package spimedb;
 
 import org.junit.Test;
+import spimedb.index.oct.OctBox;
 import spimedb.index.oct.OctMap;
 import spimedb.util.geom.AABB;
 import spimedb.util.geom.BB;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class OctMapTest {
 
-    public static class Event extends AABB implements IdBB { //implements XYZ, Serializable {
+    public static class Event extends AABB implements OctBox.IdBB { //implements XYZ, Serializable {
 
         //private final float lon, lat, year;
         final String name;

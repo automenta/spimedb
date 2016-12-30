@@ -22,9 +22,9 @@ import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
-import spimedb.Core;
-import spimedb.db.Query;
-import spimedb.db.SpimeDB;
+import spimedb.SpimeDB;
+import spimedb.query.Query;
+import spimedb.util.JSON;
 import spimedb.util.bloom.UnBloomFilter;
 
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class WebServer extends PathHandler {
             @Override
             public void handleRequest(HttpServerExchange ex) throws Exception {
                 Web.stream(ex, (o) -> {
-                    Core.toJSON( Lists.newArrayList(Iterables.transform( ((SpimeDB)db).tag.nodes(), db::get)), o);
+                    JSON.toJSON( Lists.newArrayList(Iterables.transform( db.tag.nodes(), db::get)), o);
                 });
             }
         });
@@ -87,7 +87,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/earth/region2d/summary", new HttpHandler() {
 
-            final ObjectMapper mapper = Core.msgPackMapper;
+            final ObjectMapper mapper = JSON.msgPackMapper;
 
             final int MAX_RESULTS = 1024;
             final int MAX_RESPONSE_BYTES = 1024 * 1024;

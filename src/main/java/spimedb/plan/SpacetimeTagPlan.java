@@ -4,6 +4,7 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.ml.clustering.*;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.geojson.LngLatAlt;
 import spimedb.NObject;
 
 import java.util.*;
@@ -449,7 +450,7 @@ public class SpacetimeTagPlan {
                 //p.add("when", new TimePoint((long)when));
                 p.when(when);
             }
-            SpacePoint s = null;
+            LngLatAlt s = null;
             if (space) {
                 double lat = point[i++];
                 double lon = point[i++];

@@ -18,9 +18,10 @@ import org.opensextant.giscore.geometry.Geometry;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.utils.Color;
 import spimedb.NObject;
-import spimedb.db.SpimeDB;
+import spimedb.SpimeDB;
 import spimedb.sense.kml.KmlReader;
 import spimedb.sense.kml.UrlRef;
+import spimedb.util.HTMLFilter;
 
 import java.io.File;
 import java.io.IOException;

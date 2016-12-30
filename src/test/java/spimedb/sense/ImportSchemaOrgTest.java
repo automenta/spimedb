@@ -1,7 +1,7 @@
 package spimedb.sense;
 
 import org.junit.Test;
-import spimedb.db.SpimeDB;
+import spimedb.SpimeDB;
 
 import static org.junit.Assert.assertTrue;
 

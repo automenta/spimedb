@@ -1,4 +1,4 @@
-package spimedb;
+package spimedb.util;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -18,7 +18,7 @@ import java.io.OutputStream;
 import java.util.Base64;
 import java.util.Iterator;
 
-public class Core {
+public class JSON {
 
 
     public static class BatchObjectMapper extends ObjectMapper {
@@ -146,7 +146,7 @@ public class Core {
 
 //    public final static ObjectMapper bson = new ObjectMapper(new BsonFactory());
 
-    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(Core.class);
+    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(JSON.class);
 
     public static String toJSON(Object x) {
         try {

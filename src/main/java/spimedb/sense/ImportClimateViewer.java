@@ -6,7 +6,7 @@
 package spimedb.sense;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import spimedb.Core;
+import spimedb.util.JSON;
 
 import java.io.File;
 import java.net.URI;
@@ -41,7 +41,7 @@ public abstract class ImportClimateViewer {
 
         String layers = new String(encoded, "UTF8");
 
-        JsonNode lll = Core.fromJSON(layers).get("cv");
+        JsonNode lll = JSON.fromJSON(layers).get("cv");
 
         JsonNode n = lll;
 

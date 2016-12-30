@@ -40,7 +40,7 @@ public interface SpatialSearch<T> {
      * @param <T>     - The store type of the bound
      * @return SpatialSearch - The spatial search and index structure
      */
-    public static <T> SpatialSearch<T> rTree(final RectBuilder<T> builder) {
+    static <T> SpatialSearch<T> rTree(final RectBuilder<T> builder) {
         return new RTree<>(builder, DEFAULT_MIN_M, DEFAULT_MAX_M, DEFAULT_SPLIT_TYPE);
     }
 

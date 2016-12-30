@@ -9,7 +9,7 @@ import io.undertow.websockets.extensions.PerMessageDeflateHandshake;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.Core;
+import spimedb.util.JSON;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -69,7 +69,7 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
 
 
         try {
-            ByteBuffer data = ByteBuffer.wrap(Core.jsonLoose.writeValueAsBytes(object));
+            ByteBuffer data = ByteBuffer.wrap(JSON.jsonLoose.writeValueAsBytes(object));
             WebSockets.sendTextBlocking(data, socket);
         } catch (JsonProcessingException t) {
             send(socket, object.toString()); //could not make json so just use toString()

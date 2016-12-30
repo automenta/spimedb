@@ -2,7 +2,6 @@ package spimedb.index.oct;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.jetbrains.annotations.NotNull;
-import spimedb.IdBB;
 import spimedb.util.geom.*;
 
 import java.util.Collection;
@@ -573,5 +572,11 @@ public class OctBox<K> extends AABB implements Shape3D {
         String x = "<OctBox:" + super.toString() + ":" +
                 ((ii !=null) ? ii.size() : 0);
         return x;
+    }
+
+    /** identified bounding box */
+    public static interface IdBB {
+        String id();
+        BB getBB();
     }
 }

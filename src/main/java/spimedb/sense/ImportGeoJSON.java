@@ -13,7 +13,7 @@ import org.geojson.GeoJsonObject;
 import org.geojson.LngLatAlt;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
-import spimedb.db.SpimeDB;
+import spimedb.SpimeDB;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -7,7 +7,7 @@ import io.undertow.server.handlers.PathHandler;
 import io.undertow.util.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.Core;
+import spimedb.util.JSON;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -109,7 +109,7 @@ public class Web extends PathHandler {
         ex.startBlocking();
 
         try {
-            Core.json.writeValue(ex.getOutputStream(), d);
+            JSON.json.writeValue(ex.getOutputStream(), d);
         } catch (IOException ex1) {
             log.warn("send: {}", ex1);
         }
@@ -122,7 +122,7 @@ public class Web extends PathHandler {
 
         Deque<String> idArray = reqParams.get(param);
 
-        ArrayNode a = Core.json.readValue(idArray.getFirst(), ArrayNode.class);
+        ArrayNode a = JSON.json.readValue(idArray.getFirst(), ArrayNode.class);
 
         String[] ids = new String[a.size()];
         int j = 0;

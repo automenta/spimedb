@@ -53,7 +53,10 @@ public class Rect implements Shape2D {
     /** http://stackoverflow.com/questions/5144615/difference-xor-between-two-rectangles-as-rectangles */
     public static class _Rect
     {
-        private float minX, maxX, minY, maxY;
+        private final float minX;
+        private final float maxX;
+        private final float minY;
+        private final float maxY;
 
         public _Rect( float minX, float maxX, float minY, float maxY )
         {

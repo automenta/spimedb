@@ -1,8 +1,7 @@
 package spimedb;
 
 import org.junit.Test;
-import spimedb.db.Query;
-import spimedb.db.SpimeDB;
+import spimedb.query.Query;
 import spimedb.sense.ImportSchemaOrg;
 
 import java.util.ArrayList;
