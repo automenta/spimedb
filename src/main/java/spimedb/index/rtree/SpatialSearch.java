@@ -131,4 +131,8 @@ public interface SpatialSearch<T> {
 
     Stats stats();
 
+    default boolean isEmpty() {
+        return size()==0;
+    }
+
 }

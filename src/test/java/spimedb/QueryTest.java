@@ -1,6 +1,7 @@
 package spimedb;
 
 import org.junit.Test;
+import spimedb.db.Query;
 import spimedb.db.SpimeDB;
 import spimedb.sense.ImportSchemaOrg;
 
@@ -36,7 +37,7 @@ public class QueryTest {
         System.out.println( db.children("Action") );
 
         ArrayList found = new ArrayList();
-        db.intersecting(new float[] { 0, 1}, new float[] { 0, 1}, found::add, new String[] { "Place" });
+        db.get(new Query(found::add).in("Place").where(new float[] { 0, 1}, new float[] { 0, 1}));
 
         assertTrue(found.contains(place));
         assertFalse(found.contains(action));

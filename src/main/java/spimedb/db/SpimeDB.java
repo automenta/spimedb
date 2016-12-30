@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.graph.ElementOrder;
 import com.google.common.graph.GraphBuilder;
-import com.google.common.graph.Graphs;
 import com.google.common.graph.MutableGraph;
 import net.bytebuddy.ByteBuddy;
 import org.eclipse.collections.api.tuple.Pair;
@@ -14,7 +13,6 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.ISpimeDB;
 import spimedb.NObject;
 import spimedb.index.oct.OctBox;
 import spimedb.index.rtree.LockingRTree;
@@ -31,7 +29,9 @@ import java.util.function.Predicate;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB implements ISpimeDB {
+public class SpimeDB  {
+
+    public static final String VERSION = "SpimeDB v-0.00";
 
     final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
@@ -81,7 +81,7 @@ public class SpimeDB implements ISpimeDB {
         return c;
     }
 
-    @Override public Class the(String tagID, String... supertags) {
+    public Class the(String tagID, String... supertags) {
 
         synchronized (tagClasses) {
             if (tagClasses.containsKey(tagID))
@@ -114,12 +114,12 @@ public class SpimeDB implements ISpimeDB {
                 ",\"spacetime\":\"" + spacetime + "\"}}";
     }
 
-    @Override
+
     public void close() {
 
     }
 
-    @Override
+
     public NObject put(NObject d) {
         //final String id = d.getId();
 
@@ -169,74 +169,54 @@ public class SpimeDB implements ISpimeDB {
         return Tuples.pair(e, Tuples.twin(from, to));
     }
 
-
-    @Override
     public Iterator<NObject> iterator() {
         return obj.values().iterator();
     }
 
-    @JsonIgnore @Override
+    @JsonIgnore
     public boolean isEmpty() {
         return size() == 0;
     }
 
-    @JsonIgnore @Override
+    @JsonIgnore
     public int size() {
         return obj.size();
     }
 
-    @Override
+
     public NObject get(String nobjectID) {
         return obj.get(nobjectID);
     }
 
-    @Override
-    public List<NObject> intersecting(double lon, double lat, double radMeters, int maxResults) {
 
-        List<NObject> l = new FastList() {
+    public Query get(Query q) {
+        q.onStart();
 
-            int count = 0;
+        main:
+        for (String t : children(q.include)) {
 
-            @Override
-            public boolean add(Object newItem) {
+            SpatialSearch<NObject> s = space(t);
+            if (s.isEmpty())
+                continue;
 
-                if (super.add(newItem)) {
-                    return (++count != maxResults);
+            for (RectND x : q.bounds) {
+                switch (q.boundsCondition) {
+                    case Contain:
+                        if (!s.containing(x, q.each))
+                            break main;
+                        break;
+                    case Intersect:
+                        if (!s.intersecting(x, q.each))
+                            break main;
+                        break;
                 }
-
-                return false;
             }
-        };
-
-        intersecting((float) lon, (float) lat, (float) radMeters, l::add);
-        return l;
-    }
-
-    @Override @NotNull
-    public void intersecting(float lon, float lat, float radMeters, Predicate<NObject> l, String... tags) {
-        float radDegrees = metersToDegrees(radMeters);
-
-        for (String t : tags) {
-            if (!space(t).intersecting(new RectND(
-                    new float[]{Float.NEGATIVE_INFINITY, lon - radDegrees, lat - radDegrees, Float.NEGATIVE_INFINITY},
-                    new float[]{Float.POSITIVE_INFINITY, lon + radDegrees, lat + radDegrees, Float.POSITIVE_INFINITY}
-            ), l))
-                return;
         }
+
+        q.onEnd();
+        return q;
     }
 
-    @Override @NotNull
-    public void intersecting(float[] lon, float[] lat, Predicate<NObject> l, String[] tags) {
-
-        //System.out.println(lon[0] + "," + lat[0] + " .. " + lon[1] + "," + lat[1] );
-        for (String t : children(tags)) {
-            if (!space(t).intersecting(new RectND(
-                    new float[]{Float.NEGATIVE_INFINITY, lon[0], lat[0], Float.NEGATIVE_INFINITY},
-                    new float[]{Float.POSITIVE_INFINITY, lon[1], lat[1], Float.POSITIVE_INFINITY}
-            ), l))
-                return;
-        }
-    }
 
     /** computes the set of subtree (children) tags held by the extension of the input (parent) tags */
     public Set<String> children(String... parents) {

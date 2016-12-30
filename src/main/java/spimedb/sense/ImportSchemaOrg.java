@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
-import spimedb.ISpimeDB;
+import spimedb.db.SpimeDB;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,7 +22,7 @@ abstract public class ImportSchemaOrg {
 
     final static Logger logger = LoggerFactory.getLogger(ImportSchemaOrg.class);
 
-    public static void load(ISpimeDB db) {
+    public static void load(SpimeDB db) {
         //MutableGraph<String> types = GraphBuilder.directed().allowsSelfLoops(false).nodeOrder(ElementOrder.unordered()).expectedNodeCount(1024).build();
 
 

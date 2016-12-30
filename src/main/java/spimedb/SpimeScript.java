@@ -18,9 +18,9 @@ import java.io.InputStreamReader;
  */
 public class SpimeScript extends JSScript {
 
-    private final ISpimeDB db;
+    private final SpimeDB db;
 
-    public SpimeScript(ISpimeDB db) {
+    public SpimeScript(SpimeDB db) {
         super();
         this.db = db;
 
@@ -52,7 +52,7 @@ public class SpimeScript extends JSScript {
 
     public static void repl(ScriptEngine js) {
 
-        System.out.println(ISpimeDB.VERSION +  " javascript console - :h for help, :q to exit");
+        System.out.println(SpimeDB.VERSION +  " javascript console - :h for help, :q to exit");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("> ");
 

@@ -23,6 +23,7 @@ import io.undertow.server.handlers.resource.FileResourceManager;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
 import spimedb.Core;
+import spimedb.db.Query;
 import spimedb.db.SpimeDB;
 import spimedb.util.bloom.UnBloomFilter;
 
@@ -133,7 +134,7 @@ public class WebServer extends PathHandler {
 
                             String[] tags = new String[] {};
 
-                            db.intersecting(lon, lat, (n) -> {
+                            db.get(new Query((n) -> {
 
                                 String i = n.id();
                                 if (!bloom.containsAndAdd(i)) {
@@ -156,7 +157,7 @@ public class WebServer extends PathHandler {
 
                                 return true; //continue
 
-                            }, tags);
+                            }).where(lon, lat).in(tags));
 
                             gen.writeEndArray();
                             gen.close();
