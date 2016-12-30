@@ -201,17 +201,22 @@ public class SpimeDB implements Iterable<NObject>  {
             if (s.isEmpty())
                 continue;
 
-            for (RectND x : q.bounds) {
-                switch (q.boundsCondition) {
-                    case Contain:
-                        if (!s.containing(x, q.each))
-                            break main;
-                        break;
-                    case Intersect:
-                        if (!s.intersecting(x, q.each))
-                            break main;
-                        break;
+            if (q.bounds!=null && q.bounds.length > 0) {
+                for (RectND x : q.bounds) {
+                    switch (q.boundsCondition) {
+                        case Contain:
+                            if (!s.containing(x, q.each))
+                                break main;
+                            break;
+                        case Intersect:
+                            if (!s.intersecting(x, q.each))
+                                break main;
+                            break;
+                    }
                 }
+            } else {
+                //TODO iterate all items
+                //s.iterator() ...
             }
         }
 

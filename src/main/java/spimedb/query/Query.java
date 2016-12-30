@@ -53,7 +53,7 @@ public class Query {
     }
 
 
-    enum BoundsCondition {
+    public enum BoundsCondition {
         /**
          * the query bound may intersect or contain a matched bound
          */
@@ -69,11 +69,11 @@ public class Query {
     /**
      * called by the db when the query begins executing
      */
-    void onStart() {
+    public void onStart() {
         this.whenStarted = System.currentTimeMillis();
     }
 
-    void onEnd() {
+    public void onEnd() {
         this.whenEnded = System.currentTimeMillis();
     }
 
