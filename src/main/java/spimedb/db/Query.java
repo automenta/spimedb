@@ -1,8 +1,12 @@
 package spimedb.db;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
 import spimedb.index.rtree.RectND;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.function.Predicate;
 
 import static spimedb.db.Query.BoundsCondition.Intersect;
@@ -36,10 +40,19 @@ public class Query {
      */
     public String[] include = null;
 
-    public Query(Predicate<NObject> each) {
-        this.whenCreated = System.currentTimeMillis();
-        this.each = each;
+    Query() {
+        this(null);
     }
+
+    /**
+     *
+     * @param each if null, attempts to use this instance as the predicate (as it can be implemented in subclasses)
+     */
+    public Query(@Nullable Predicate<NObject> each) {
+        this.whenCreated = System.currentTimeMillis();
+        this.each = each != null ? each : (Predicate)this;
+    }
+
 
     enum BoundsCondition {
         /**
@@ -73,18 +86,35 @@ public class Query {
         return this;
     }
 
+
+    /** time-axis only */
+    public <Q extends Query> Q when(float start, float end) {
+        return (Q) bounds(new RectND(
+                new float[]{start, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY},
+                new float[]{end, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY}
+        ));
+    }
+
     /**
      * specific lat x lon region, at any time
      */
-    public Query where(float[] lon, float[] lat) {
-        ensureNotStarted();
-
-        bounds = new RectND[]{new RectND(
+    public <Q extends Query> Q where(float[] lon, float[] lat) {
+        return (Q) bounds(new RectND(
                 new float[]{Float.NEGATIVE_INFINITY, lon[0], lat[0], Float.NEGATIVE_INFINITY},
                 new float[]{Float.POSITIVE_INFINITY, lon[1], lat[1], Float.POSITIVE_INFINITY}
-        )};
+        ));
+    }
 
-        return this;
+    @NotNull
+    public <Q extends Query> Q bounds(RectND... newBounds) {
+        ensureNotStarted();
+
+        if (bounds!=null)
+            throw new RuntimeException("bounds already specified");
+
+        bounds = newBounds;
+
+        return (Q) this;
     }
 
     private void ensureNotStarted() {
@@ -92,4 +122,31 @@ public class Query {
             throw new RuntimeException("Query already executing");
     }
 
+    public static class QueryCollection extends Query implements Predicate<NObject> {
+        public final Collection<NObject> result;
+
+        public QueryCollection(Collection<NObject> result) {
+            super();
+            this.result = result;
+        }
+
+        @Override
+        public boolean test(NObject next) {
+            result.add(next);
+            return true;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "each=" + (each != this ? each : "this" ) +
+                ", whenCreated=" + whenCreated +
+                ", whenStarted=" + whenStarted +
+                ", whenEnded=" + whenEnded + "=(" + ((double)(whenEnded - whenStarted)) + "ms)" +
+                ", bounds=" + Arrays.toString(bounds) +
+                ", boundsCondition=" + boundsCondition +
+                ", include=" + ((include == null || include.length == 0) ? "ALL" : Arrays.toString(include)) +
+                '}';
+    }
 }

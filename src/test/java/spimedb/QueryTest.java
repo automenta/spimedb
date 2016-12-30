@@ -33,8 +33,8 @@ public class QueryTest {
         action.setTag("InteractAction");
         db.put(action);
 
-        System.out.println( db.children("Place") );
-        System.out.println( db.children("Action") );
+        System.out.println( db.tagsAndSubtags("Place") );
+        System.out.println( db.tagsAndSubtags("Action") );
 
         ArrayList found = new ArrayList();
         db.get(new Query(found::add).in("Place").where(new float[] { 0, 1}, new float[] { 0, 1}));

@@ -8,9 +8,9 @@ import com.google.common.graph.MutableGraph;
 import net.bytebuddy.ByteBuddy;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.Twin;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
@@ -21,15 +21,17 @@ import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
 import spimedb.util.geom.Vec3D;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Predicate;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB  {
+public class SpimeDB implements Iterable<NObject>  {
 
     public static final String VERSION = "SpimeDB v-0.00";
 
@@ -193,7 +195,7 @@ public class SpimeDB  {
         q.onStart();
 
         main:
-        for (String t : children(q.include)) {
+        for (String t : tagsAndSubtags(q.include)) {
 
             SpatialSearch<NObject> s = space(t);
             if (s.isEmpty())
@@ -218,11 +220,18 @@ public class SpimeDB  {
     }
 
 
-    /** computes the set of subtree (children) tags held by the extension of the input (parent) tags */
-    public Set<String> children(String... parents) {
+    /** computes the set of subtree (children) tags held by the extension of the input (parent) tags
+     * @param parentTags if empty, searches all tags; otherwise searches the specified tags and all their subtags
+     */
+    public Set<String> tagsAndSubtags(@Nullable String... parentTags) {
+
+        if (parentTags == null || parentTags.length == 0) {
+            return tag.nodes();
+        }
+
         Set<String> s = new HashSet();
 
-        for (String x : parents) {
+        for (String x : parentTags) {
             if (s.add(x)) {
                 s.addAll( tag.successors(x) );
             }
