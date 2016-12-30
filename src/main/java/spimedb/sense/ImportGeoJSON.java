@@ -12,14 +12,11 @@ import org.geojson.FeatureCollection;
 import org.geojson.GeoJsonObject;
 import org.geojson.LngLatAlt;
 import org.jetbrains.annotations.Nullable;
-import org.opensextant.giscore.geometry.Point;
 import spimedb.NObject;
-import spimedb.db.RTreeSpimeDB;
+import spimedb.db.SpimeDB;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-import static spimedb.sense.kml.KmlReader.logger;
 
 
 /**
@@ -34,7 +31,7 @@ public class ImportGeoJSON {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 
-    public ImportGeoJSON(InputStream i, RTreeSpimeDB db) throws IOException {
+    public ImportGeoJSON(InputStream i, SpimeDB db) throws IOException {
 
         FeatureCollection featureCollection = geojsonMapper.readValue(i, FeatureCollection.class);
 

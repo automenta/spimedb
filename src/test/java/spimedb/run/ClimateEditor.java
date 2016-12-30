@@ -2,7 +2,7 @@ package spimedb.run;
 
 import spimedb.SpimeScript;
 import spimedb.db.InfiniSpimeDB;
-import spimedb.db.RTreeSpimeDB;
+import spimedb.db.SpimeDB;
 import spimedb.web.WebServer;
 
 import java.io.File;
@@ -23,7 +23,7 @@ public class ClimateEditor  {
         }
     }
 
-    public ClimateEditor(RTreeSpimeDB db) {
+    public ClimateEditor(SpimeDB db) {
 
         if (db.isEmpty()) {
             System.out.println("Initializing database...");
@@ -72,7 +72,7 @@ public class ClimateEditor  {
 
     public static void main(String[] args) {
 
-        RTreeSpimeDB db =  InfiniSpimeDB.get(
+        SpimeDB db =  InfiniSpimeDB.get(
                 //"/tmp/climate"
                 null
         );

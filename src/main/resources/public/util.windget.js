@@ -1,5 +1,5 @@
 function newWindow(content) {
-    var w = newFrame();
+    const w = newFrame();
 
     var closeButton = $('<button>').text('x').addClass('close_button').click(function() {
         w.fadeOut(150, function() { $(this).remove(); });

@@ -5,7 +5,7 @@
  */
 package spimedb;
 
-import spimedb.db.RTreeSpimeDB;
+import spimedb.db.SpimeDB;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -18,9 +18,9 @@ import java.io.InputStreamReader;
  */
 public class SpimeScript extends JSScript {
 
-    private final SpimeDB db;
+    private final ISpimeDB db;
 
-    public SpimeScript(SpimeDB db) {
+    public SpimeScript(ISpimeDB db) {
         super();
         this.db = db;
 
@@ -52,7 +52,7 @@ public class SpimeScript extends JSScript {
 
     public static void repl(ScriptEngine js) {
 
-        System.out.println(SpimeDB.VERSION +  " javascript console - :h for help, :q to exit");
+        System.out.println(ISpimeDB.VERSION +  " javascript console - :h for help, :q to exit");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("> ");
 
@@ -97,7 +97,7 @@ public class SpimeScript extends JSScript {
     }
 
     public static void main(String[] args) throws Exception {
-        repl(new SpimeScript(new RTreeSpimeDB()).engine);
+        repl(new SpimeScript(new SpimeDB()).engine);
     }
 
 }

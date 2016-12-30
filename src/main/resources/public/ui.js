@@ -62,7 +62,7 @@ function UI(e, s) {
             dropdown.append(l);
 
             if (t === 'www') {
-                v = $('<input style="margin: 4px; width:85%" type="text" placeholder="http://"></input>');
+                v = $('<input style="margin: 4px; width:85%" type="text" placeholder="http://"/>');
                 a = $('<button style="float: right">www</button>').data('type', t);
 
                 l.append(v, a);

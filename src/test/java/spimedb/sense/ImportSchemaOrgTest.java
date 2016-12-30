@@ -1,7 +1,7 @@
 package spimedb.sense;
 
 import org.junit.Test;
-import spimedb.db.RTreeSpimeDB;
+import spimedb.db.SpimeDB;
 
 import static org.junit.Assert.assertTrue;
 
@@ -13,7 +13,7 @@ public class ImportSchemaOrgTest {
 
     @Test
     public void test1() {
-        RTreeSpimeDB r = new RTreeSpimeDB();
+        SpimeDB r = new SpimeDB();
         ImportSchemaOrg.load(r);
 //        r.graph.vertexSet().forEach(v -> {
 //            System.out.println(v);

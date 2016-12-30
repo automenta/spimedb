@@ -15,7 +15,7 @@ import spimedb.NObject;
  */
 public class InfiniSpimeDB {
 
-    public static RTreeSpimeDB get(@Nullable String path) {
+    public static SpimeDB get(@Nullable String path) {
 
         GlobalConfiguration global = new GlobalConfigurationBuilder()
                 .serialization()
@@ -51,7 +51,7 @@ public class InfiniSpimeDB {
 
         enableStats(vertex);
 
-        RTreeSpimeDB db = new RTreeSpimeDB(vertex);
+        SpimeDB db = new SpimeDB(vertex);
 
         return db;
     }

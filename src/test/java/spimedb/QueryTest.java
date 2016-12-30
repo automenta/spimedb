@@ -1,91 +1,47 @@
-//package automenta.netention;
-//
-//import org.infinispan.Cache;
-//import org.infinispan.configuration.cache.CacheMode;
-//import org.infinispan.configuration.cache.Configuration;
-//import org.infinispan.configuration.cache.ConfigurationBuilder;
-//import org.infinispan.configuration.global.GlobalConfigurationBuilder;
-//import org.junit.Test;
-//import spangraph.InfiniPeer;
-//
-//import static org.junit.Assert.assertEquals;
-//import static org.junit.Assert.assertTrue;
-//
-///**
-// * Created by me on 6/13/15.
-// */
-//public class QueryTest {
-//
-//    @Test
-//    public void testInfiniPeerCache() {
-//
-//
-//
-//        GlobalConfigurationBuilder globalConfigBuilder = new GlobalConfigurationBuilder();
-//
-//        globalConfigBuilder.transport().nodeName("x")
-//                .defaultTransport()
-//                //.addProperty("configurationFile", "fast.xml")
-//        ;
-//
-//
-//
-//        globalConfigBuilder.globalJmxStatistics().allowDuplicateDomains(true)
-//                .build();
-//
-//        Configuration config = new ConfigurationBuilder()
-//                /*.persistence()
-//                .addSingleFileStore()
-//                .location("/tmp/t")
-//                .maxEntries(1000)*/
-//
-//
-//                .unsafe()
-//                .clustering()
-//                        //.cacheMode(CacheMode.DIST_SYNC)
-//                .cacheMode(CacheMode.DIST_SYNC)
-//                .sync()
-//                .l1().lifespan(25000L)
-//                .hash().numOwners(3).build();
-//
-//        InfiniPeer cacheMan = InfiniPeer.the(
-//                globalConfigBuilder,
-//                config
-//        );
-//
-//
-//        final Cache<Object, Object> cache = cacheMan.the("abc", true);
-//
-//
-//        // Add a entry
-//        cache.put("key", "value");
-//
-//        //cache.putForExternalRead(UUID.randomUUID().toString(), cacheMan.getAddress());
-//        //cache.put(UUID.randomUUID().toString(), cacheMan.getAddress());
-//
-//// Validate the entry is now in the cache
-//        assertEquals(1, cache.size());
-//        assertTrue(cache.containsKey("key"));
-//// Remove the entry from the cache
-//        Object v = cache.remove("key");
-//// Validate the entry is no longer in the cache
-//        assertEquals("value", v);
-//
-//        try {
-//            Thread.sleep(500);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        /*
-//
-//        //synchronize for display purposes
-//        synchronized(cache) {
-//            cacheMan.print(cache, System.out);
-//        }
-//        */
-//
-//    }
-//
-//
-//}
+package spimedb;
+
+import org.junit.Test;
+import spimedb.db.SpimeDB;
+import spimedb.sense.ImportSchemaOrg;
+
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * Created by me on 6/13/15.
+ */
+public class QueryTest {
+
+    @Test
+    public void testDAGActivation() {
+        SpimeDB db = new SpimeDB();
+
+        ImportSchemaOrg.load(db);
+
+        //System.out.println(db.tag);
+
+        NObject place = new NObject("civicstructure");
+        place.where(0.5f, 0.5f);
+        place.setTag("CivicStructure");
+        db.put(place);
+
+        NObject action = new NObject("action");
+        action.where(0.5f, 0.5f);
+        action.setTag("InteractAction");
+        db.put(action);
+
+        System.out.println( db.children("Place") );
+        System.out.println( db.children("Action") );
+
+        ArrayList found = new ArrayList();
+        db.intersecting(new float[] { 0, 1}, new float[] { 0, 1}, found::add, new String[] { "Place" });
+
+        assertTrue(found.contains(place));
+        assertFalse(found.contains(action));
+
+    }
+
+
+}

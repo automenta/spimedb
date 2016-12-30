@@ -12,7 +12,6 @@ body {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    -o-user-select: none;
     user-select: none;
 }
 
@@ -120,7 +119,6 @@ input[type=range].tagSlider::-ms-fill-upper {
 input[type=range].tagSlider::-ms-thumb {
     box-shadow: 0px 0px 1px #670000, 0px 0px 0px #810000;
     border: 0px solid #ff1e00;
-    height: 29px;
     width: 18px;
     border-radius: 0px;
     background: #8ad445;

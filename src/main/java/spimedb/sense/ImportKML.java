@@ -18,7 +18,7 @@ import org.opensextant.giscore.geometry.Geometry;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.utils.Color;
 import spimedb.NObject;
-import spimedb.SpimeDB;
+import spimedb.ISpimeDB;
 import spimedb.sense.kml.KmlReader;
 import spimedb.sense.kml.UrlRef;
 
@@ -46,7 +46,7 @@ public class ImportKML {
 
     final int maxPathDepth = 3;
     private final Proxy proxy;
-    private final SpimeDB db;
+    private final ISpimeDB db;
     final AtomicLong serial = new AtomicLong();
 
     private String layer;
@@ -81,7 +81,7 @@ public class ImportKML {
     }
 
 
-    public void transformKML(Supplier<KmlReader> source, String layer, SpimeDB st, final GISVisitor visitor) {
+    public void transformKML(Supplier<KmlReader> source, String layer, ISpimeDB st, final GISVisitor visitor) {
 
         this.layer = layer;
 
@@ -281,11 +281,11 @@ public class ImportKML {
         }
     }
 
-    public ImportKML(SpimeDB db) {
+    public ImportKML(ISpimeDB db) {
         this(db, null);
     }
 
-    public ImportKML(SpimeDB db, Proxy proxy) {
+    public ImportKML(ISpimeDB db, Proxy proxy) {
         this.db = db;
         this.proxy = proxy;
     }

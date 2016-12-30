@@ -1,7 +1,7 @@
 package spimedb.sense;
 
 import org.junit.Test;
-import spimedb.db.RTreeSpimeDB;
+import spimedb.db.SpimeDB;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ public class ImportGeoJSONTest {
     @Test
     public void test1() throws IOException {
         InputStream resourceAsStream = ImportGeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson");
-        RTreeSpimeDB db = new RTreeSpimeDB();
+        SpimeDB db = new SpimeDB();
         new ImportGeoJSON(resourceAsStream, db);
 
         db.print(System.out);

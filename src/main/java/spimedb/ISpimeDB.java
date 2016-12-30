@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.function.Predicate;
 
 
-public interface SpimeDB extends Iterable<NObject> {
+public interface ISpimeDB extends Iterable<NObject> {
 
 
 

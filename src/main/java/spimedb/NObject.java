@@ -189,6 +189,19 @@ public class NObject extends RectND implements Serializable {
 ////    }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        NObject no =(NObject)o;
+        return id.equals(no.id);// && super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode(); //super.hashCode();
+    }
+
+
 
     public <X> X get(String tag) {
         return (X) data.get(tag);

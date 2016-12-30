@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.graph.ElementOrder;
 import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.Graphs;
 import com.google.common.graph.MutableGraph;
 import net.bytebuddy.ByteBuddy;
 import org.eclipse.collections.api.tuple.Pair;
@@ -13,8 +14,8 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.ISpimeDB;
 import spimedb.NObject;
-import spimedb.SpimeDB;
 import spimedb.index.oct.OctBox;
 import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
@@ -22,9 +23,7 @@ import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
 import spimedb.util.geom.Vec3D;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
@@ -32,9 +31,9 @@ import java.util.function.Predicate;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class RTreeSpimeDB implements SpimeDB {
+public class SpimeDB implements ISpimeDB {
 
-    final static Logger logger = LoggerFactory.getLogger(RTreeSpimeDB.class);
+    final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     public final MutableGraph<String> tag = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
 
@@ -43,11 +42,11 @@ public class RTreeSpimeDB implements SpimeDB {
     public final Map<String, NObject> obj;
 
     /** in-memory, map-based */
-    public RTreeSpimeDB() {
+    public SpimeDB() {
         this(new ConcurrentHashMap());
     }
 
-    public RTreeSpimeDB(Map<String, NObject> g) {
+    public SpimeDB(Map<String, NObject> g) {
 
         this.obj = g;
 
@@ -230,13 +229,25 @@ public class RTreeSpimeDB implements SpimeDB {
     public void intersecting(float[] lon, float[] lat, Predicate<NObject> l, String[] tags) {
 
         //System.out.println(lon[0] + "," + lat[0] + " .. " + lon[1] + "," + lat[1] );
-        for (String t : tags) {
+        for (String t : children(tags)) {
             if (!space(t).intersecting(new RectND(
                     new float[]{Float.NEGATIVE_INFINITY, lon[0], lat[0], Float.NEGATIVE_INFINITY},
                     new float[]{Float.POSITIVE_INFINITY, lon[1], lat[1], Float.POSITIVE_INFINITY}
             ), l))
                 return;
         }
+    }
+
+    /** computes the set of subtree (children) tags held by the extension of the input (parent) tags */
+    public Set<String> children(String... parents) {
+        Set<String> s = new HashSet();
+
+        for (String x : parents) {
+            if (s.add(x)) {
+                s.addAll( tag.successors(x) );
+            }
+        }
+        return s;
     }
 
 

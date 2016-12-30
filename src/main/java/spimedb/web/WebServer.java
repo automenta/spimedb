@@ -23,8 +23,7 @@ import io.undertow.server.handlers.resource.FileResourceManager;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
 import spimedb.Core;
-import spimedb.SpimeDB;
-import spimedb.db.RTreeSpimeDB;
+import spimedb.db.SpimeDB;
 import spimedb.util.bloom.UnBloomFilter;
 
 import java.io.IOException;
@@ -76,7 +75,7 @@ public class WebServer extends PathHandler {
             @Override
             public void handleRequest(HttpServerExchange ex) throws Exception {
                 Web.stream(ex, (o) -> {
-                    Core.toJSON( Lists.newArrayList(Iterables.transform( ((RTreeSpimeDB)db).tag.nodes(), db::get)), o);
+                    Core.toJSON( Lists.newArrayList(Iterables.transform( ((SpimeDB)db).tag.nodes(), db::get)), o);
                 });
             }
         });
