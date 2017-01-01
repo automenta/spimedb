@@ -1,6 +1,6 @@
 # SpimeDB
 
-![SpimeDB Logo](https://raw.githubusercontent.com/automenta/spimedb/master/data/spimedb_logo.svg)
+![SpimeDB Logo](https://raw.githubusercontent.com/automenta/spimedb/master/data/spimedb_logo.png)
 
 Real-time decentralized global propagation, notification, and analysis tools for AUTONOMY MAXIMIZATION and AUTHORITY DISSOLUTION.
 
