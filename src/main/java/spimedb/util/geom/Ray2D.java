@@ -27,17 +27,13 @@
 
 package spimedb.util.geom;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-
 /**
  * A simple 2D ray datatype
  */
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class Ray2D extends Vec2D {
 
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     protected Vec2D dir;
 
     public Ray2D() {

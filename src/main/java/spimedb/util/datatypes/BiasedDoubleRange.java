@@ -29,14 +29,12 @@ package spimedb.util.datatypes;
 
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlAttribute;
-
 public class BiasedDoubleRange extends DoubleRange {
 
-    @XmlAttribute
+    //@XmlAttribute
     protected double bias = 0.5;
 
-    @XmlAttribute
+    //@XmlAttribute
     protected double standardDeviation = bias * 0.5;
 
     public BiasedDoubleRange() {

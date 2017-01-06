@@ -29,13 +29,10 @@ package spimedb.util.geom;
 
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import java.util.ArrayList;
 import java.util.List;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class Rect implements Shape2D {
 
     /**
@@ -137,7 +134,7 @@ public class Rect implements Shape2D {
         return bounds;
     }
 
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float x, y, width, height;
 
     /**

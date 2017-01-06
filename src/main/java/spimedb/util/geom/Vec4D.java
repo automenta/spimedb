@@ -31,24 +31,22 @@ import spimedb.util.math.InterpolateStrategy;
 import spimedb.util.math.MathUtils;
 import spimedb.util.math.ScaleMap;
 
-import javax.xml.bind.annotation.XmlAttribute;
-
 public class Vec4D implements ReadonlyVec4D, Cloneable {
 
     /** X coordinate */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float x;
 
     /** Y coordinate */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float y;
 
     /** Z coordinate */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float z;
 
     /** W coordinate (weight) */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float w;
 
     public Vec4D() {

@@ -29,7 +29,6 @@ package spimedb.util.datatypes;
 
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -56,10 +55,10 @@ public class FloatRange {
         return new FloatRange(min, max);
     }
 
-    @XmlAttribute
+    //@XmlAttribute
     public float min, max;
 
-    @XmlAttribute(name = "default")
+    //@XmlAttribute(name = "default")
     public float currValue;
 
     protected Random random = new Random();

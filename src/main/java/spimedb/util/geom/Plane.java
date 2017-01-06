@@ -29,15 +29,11 @@ package spimedb.util.geom;
 
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-
 /**
  * Class to describe and work with infinite generic 3D planes. Useful for
  * intersection problems and classifying points.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class Plane extends Vec3D implements Shape3D {
 
     /**
@@ -53,7 +49,7 @@ public class Plane extends Vec3D implements Shape3D {
     public static final Plane XZ = new Plane(new Vec3D(), Vec3D.Y_AXIS);
     public static final Plane YZ = new Plane(new Vec3D(), Vec3D.X_AXIS);
 
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     public Vec3D normal;
 
     public Plane() {

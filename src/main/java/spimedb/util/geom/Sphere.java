@@ -27,11 +27,7 @@
 
 package spimedb.util.geom;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class Sphere extends Vec3D implements Shape3D {
 
     /**
@@ -40,7 +36,7 @@ public class Sphere extends Vec3D implements Shape3D {
      */
     public static final float EARTH_RADIUS = (float) ((2 * 6378.1370 + 6356.752314245) / 3.0);
 
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float radius;
 
     public Sphere() {

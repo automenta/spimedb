@@ -6,9 +6,6 @@ import com.google.common.graph.ElementOrder;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import net.bytebuddy.ByteBuddy;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.api.tuple.Twin;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -27,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
@@ -57,6 +55,10 @@ public class SpimeDB implements Iterable<NObject>  {
                 new Vec3D(360f, 180f, 2),
                 new Vec3D(0.05f, 0.05f, 0.05f));*/
 
+    }
+
+    public SpatialSearch<NObject> spaceIfExists(String tag) {
+        return spacetime.get(tag);
     }
 
     public SpatialSearch<NObject> space(String tag) {
@@ -167,9 +169,9 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
 
-    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
-        return Tuples.pair(e, Tuples.twin(from, to));
-    }
+//    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
+//        return Tuples.pair(e, Tuples.twin(from, to));
+//    }
 
     public Iterator<NObject> iterator() {
         return obj.values().iterator();
@@ -194,29 +196,31 @@ public class SpimeDB implements Iterable<NObject>  {
     public Query get(Query q) {
         q.onStart();
 
+        Predicate<NObject> each = q.each;
+
         main:
         for (String t : tagsAndSubtags(q.include)) {
 
-            SpatialSearch<NObject> s = space(t);
-            if (s.isEmpty())
+            SpatialSearch<NObject> s = spaceIfExists(t);
+            if (s == null || s.isEmpty())
                 continue;
+
 
             if (q.bounds!=null && q.bounds.length > 0) {
                 for (RectND x : q.bounds) {
                     switch (q.boundsCondition) {
                         case Contain:
-                            if (!s.containing(x, q.each))
+                            if (!s.containing(x, each))
                                 break main;
                             break;
                         case Intersect:
-                            if (!s.intersecting(x, q.each))
+                            if (!s.intersecting(x, each))
                                 break main;
                             break;
                     }
                 }
             } else {
-                //TODO iterate all items
-                //s.iterator() ...
+                s.intersecting(RectND.ALL_4, each); //iterate all items
             }
         }
 

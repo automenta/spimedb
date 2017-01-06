@@ -24,11 +24,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
 
+import static java.lang.Float.NEGATIVE_INFINITY;
+import static java.lang.Float.POSITIVE_INFINITY;
+
 /**
  * Created by jcovert on 6/15/15.
  */
 
 public class RectND implements HyperRect<PointND>, Serializable {
+
+    public static final HyperRect ALL_1 = RectND.all(1);
+    public static final HyperRect ALL_2 = RectND.all(2);
+    public static final HyperRect ALL_3 = RectND.all(3);
+    public static final HyperRect ALL_4 = RectND.all(4);
 
     @JsonIgnore
     protected final PointND min;
@@ -43,6 +51,10 @@ public class RectND implements HyperRect<PointND>, Serializable {
             return "*";
         }
     };
+
+    public static HyperRect all(int i) {
+        return new RectND(PointND.fill(i, NEGATIVE_INFINITY), PointND.fill(i, POSITIVE_INFINITY));
+    }
 
     public RectND() {
         min = unbounded;
@@ -138,9 +150,9 @@ public class RectND implements HyperRect<PointND>, Serializable {
     public float centerF(int dim) {
         float min = this.min.coord[dim];
         float max = this.max.coord[dim];
-        if ((min == Float.NEGATIVE_INFINITY) && (max == Float.POSITIVE_INFINITY))
+        if ((min == NEGATIVE_INFINITY) && (max == Float.POSITIVE_INFINITY))
             return 0;
-        if (min == Float.NEGATIVE_INFINITY)
+        if (min == NEGATIVE_INFINITY)
             return max;
         if (max == Float.POSITIVE_INFINITY)
             return min;
@@ -179,7 +191,7 @@ public class RectND implements HyperRect<PointND>, Serializable {
         float max = this.max.coord[i];
         if (min == max)
             return 0;
-        if ((min == Float.NEGATIVE_INFINITY) || (max == Float.POSITIVE_INFINITY))
+        if ((min == NEGATIVE_INFINITY) || (max == Float.POSITIVE_INFINITY))
             return Float.POSITIVE_INFINITY;
         return (max - min);
     }
@@ -213,6 +225,8 @@ public class RectND implements HyperRect<PointND>, Serializable {
             return sb.toString();
         }
     }
+
+
 
     public final static class Builder<X extends RectND> implements RectBuilder<X> {
 

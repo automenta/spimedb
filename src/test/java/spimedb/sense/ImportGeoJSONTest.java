@@ -1,9 +1,9 @@
 package spimedb.sense;
 
 import org.junit.Test;
-import spimedb.query.QueryCollection;
 import spimedb.SpimeDB;
 import spimedb.index.rtree.RectND;
+import spimedb.query.QueryCollection;
 
 import java.io.IOException;
 import java.io.InputStream;

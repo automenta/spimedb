@@ -27,7 +27,6 @@
 
 package spimedb.util.geom;
 
-import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,35 +56,35 @@ import java.util.List;
  * @version 0015 Added JAXB annotations and List support for dynamic building of
  *          spline
  */
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class Spline2D {
 
     public static final float DEFAULT_TIGHTNESS = 0.25f;
 
     public static final int DEFAULT_RES = 16;
 
-    @XmlTransient
+    //@XmlTransient
     protected Vec2D[] points;
 
-    @XmlElement(name = "p")
+    //@XmlElement(name = "p")
     public List<Vec2D> pointList = new ArrayList<>();
 
-    @XmlTransient
+    //@XmlTransient
     public BernsteinPolynomial bernstein;
 
-    @XmlTransient
+    //@XmlTransient
     public Vec2D[] delta;
 
-    @XmlTransient
+    //@XmlTransient
     public Vec2D[] coeffA;
 
-    @XmlTransient
+    //@XmlTransient
     public float[] bi;
 
-    @XmlAttribute
+    //@XmlAttribute
     protected float tightness;
 
-    @XmlTransient
+    //@XmlTransient
     protected float invTightness;
 
     /**

@@ -30,15 +30,11 @@ package spimedb.util.geom;
 import spimedb.util.geom.Line2D.LineIntersection.Type;
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class Triangle2D implements Shape2D {
 
     public static Triangle2D createEquilateralFrom(ReadonlyVec2D a,
@@ -55,10 +51,10 @@ public class Triangle2D implements Shape2D {
         return (determ > 0.0);
     }
 
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     public Vec2D a, b, c;
 
-    @XmlTransient
+    //@XmlTransient
     public Vec2D centroid;
 
     public Triangle2D() {

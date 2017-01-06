@@ -135,4 +135,5 @@ public interface SpatialSearch<T> {
         return size()==0;
     }
 
+
 }

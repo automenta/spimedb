@@ -29,7 +29,6 @@ package spimedb.util.geom;
 
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -97,7 +96,7 @@ public class Polygon2D implements Shape2D, Iterable<Vec2D> {
         return len / (2 * MathUtils.sin(MathUtils.PI / res));
     }
 
-    @XmlElement(name = "v")
+    //@XmlElement(name = "v")
     public List<Vec2D> vertices = new ArrayList<>();
 
     public Polygon2D() {

@@ -27,7 +27,6 @@
 
 package spimedb.util.geom;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -35,7 +34,7 @@ import java.util.List;
 
 public class LineStrip3D implements Iterable<XYZ> {
 
-    @XmlElement(name = "v")
+    //@XmlElement(name = "v")
     protected List<XYZ> vertices = new ArrayList<>();
 
     protected float[] arcLenIndex;

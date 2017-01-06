@@ -31,7 +31,6 @@ import spimedb.util.math.InterpolateStrategy;
 import spimedb.util.math.MathUtils;
 import spimedb.util.math.ScaleMap;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import java.util.Random;
 
 /**
@@ -155,13 +154,13 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
     /**
      * X coordinate
      */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float x;
 
     /**
      * Y coordinate
      */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float y;
 
     /**

@@ -30,14 +30,11 @@ package spimedb.util.geom;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
 /**
  * Axis-aligned bounding box with basic intersection features for Ray, AABB and
  * Sphere classes.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize
 public class AABB extends Vec3D implements BB {
 

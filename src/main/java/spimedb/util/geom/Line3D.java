@@ -30,7 +30,6 @@ package spimedb.util.geom;
 import spimedb.util.geom.Line3D.LineIntersection.Type;
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,7 +132,7 @@ public class Line3D {
         return segments;
     }
 
-    @XmlElement
+    //@XmlElement
     public Vec3D a, b;
 
     public Line3D(float x1, float y1, float z1, float x2, float y2, float z2) {

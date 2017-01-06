@@ -29,7 +29,6 @@ package spimedb.util.geom;
 
 import spimedb.util.geom.Line2D.LineIntersection.Type;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,7 +129,7 @@ public class Line2D {
         return segments;
     }
 
-    @XmlElement
+    //@XmlElement
     public Vec2D a, b;
 
     public Line2D(float x1, float y1, float x2, float y2) {

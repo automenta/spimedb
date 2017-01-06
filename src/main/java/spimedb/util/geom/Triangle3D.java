@@ -29,12 +29,7 @@ package spimedb.util.geom;
 
 import spimedb.util.math.MathUtils;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class Triangle3D implements Shape3D {
 
     public static Triangle3D createEquilateralFrom(Vec3D a, Vec3D b) {
@@ -60,13 +55,13 @@ public class Triangle3D implements Shape3D {
         return (determ < 0.0);
     }
 
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     public Vec3D a, b, c;
 
-    @XmlElement(required = true)
+    //@XmlElement(required = true)
     public Vec3D normal;
 
-    @XmlTransient
+    //@XmlTransient
     public Vec3D centroid;
 
     public Triangle3D() {

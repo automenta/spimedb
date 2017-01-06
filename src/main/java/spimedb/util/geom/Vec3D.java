@@ -31,7 +31,6 @@ import spimedb.util.math.InterpolateStrategy;
 import spimedb.util.math.MathUtils;
 import spimedb.util.math.ScaleMap;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import java.io.Serializable;
 import java.util.Random;
 
@@ -195,15 +194,15 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
     }
 
     /** X coordinate. */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float x;
 
     /** Y coordinate. */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float y;
 
     /** Z coordinate. */
-    @XmlAttribute(required = true)
+    //@XmlAttribute(required = true)
     public float z;
 
     /**

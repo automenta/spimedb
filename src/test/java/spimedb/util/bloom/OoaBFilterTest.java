@@ -3,14 +3,11 @@
 // license that can be found in the LICENSE file.
 package spimedb.util.bloom;
 
-import java.nio.ByteBuffer;
-
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.nio.ByteBuffer;
+
+import static org.junit.Assert.*;
 
 public class OoaBFilterTest {
 
