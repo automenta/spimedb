@@ -2,6 +2,7 @@ package spimedb.run;
 
 import spimedb.SpimeDB;
 import spimedb.db.InfiniSpimeDB;
+import spimedb.sense.ImportSchemaOrg;
 import spimedb.util.js.SpimeScript;
 import spimedb.web.WebServer;
 
@@ -35,7 +36,8 @@ public class ClimateEditor  {
             }
 
             //ImportGeoJSON
-            //ImportSchemaOrg.load(db);
+
+            ImportSchemaOrg.load(db);
 
             //System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
 

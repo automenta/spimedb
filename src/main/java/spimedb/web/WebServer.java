@@ -71,19 +71,15 @@ public class WebServer extends PathHandler {
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
 
-        addPrefixPath("/tag", new HttpHandler() {
+        addPrefixPath("/tag", ex -> Web.stream(ex, (o) ->
+                JSON.toJSON( Lists.newArrayList(Iterables.transform( db.tag.nodes(), db::get)), o)));
 
-            @Override
-            public void handleRequest(HttpServerExchange ex) throws Exception {
-                Web.stream(ex, (o) -> {
-                    JSON.toJSON( Lists.newArrayList(Iterables.transform( db.tag.nodes(), db::get)), o);
-                });
-            }
-        });
-
+        //SECURITY RISK: DANGER
+        /*
         addPrefixPath("/shell", new JavascriptShell().with((e)->{
             e.put("db", db);
         }));
+        */
 
         addPrefixPath("/earth/region2d/summary", new HttpHandler() {
 

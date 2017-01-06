@@ -139,6 +139,7 @@
             <version>1.7</version>
         </dependency>
 
+
         <!--<dependency>-->
         <!--<groupId>org.jsimpledb</groupId>-->
         <!--<artifactId>jsimpledb-main</artifactId>-->
@@ -225,6 +226,12 @@
             </exclusions>
         </dependency>
         -->
+        <!-- https://mvnrepository.com/artifact/org.openstreetmap.osmosis/osmosis-pbf2 -->
+        <dependency>
+            <groupId>org.openstreetmap.osmosis</groupId>
+            <artifactId>osmosis-pbf2</artifactId>
+            <version>0.45</version>
+        </dependency>
 
 
         <!-- https://mvnrepository.com/artifact/com.rometools/rome-modules -->
