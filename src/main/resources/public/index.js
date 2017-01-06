@@ -33,7 +33,7 @@ function ready() {
 
     $('#sidebar').append(app.newViewControl());
 
-    app.index = new TagIndex(function (i) {
+    /*app.index = new TagIndex(function (i) {
 
         //called after index has been loaded, but this won't be necessary when events are used
 
@@ -68,6 +68,7 @@ function ready() {
         });
 
     });
+    */
 
     app.setView(VIEW_STARTUP);
 

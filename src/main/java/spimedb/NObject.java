@@ -70,30 +70,33 @@ public class NObject extends RectND implements Serializable {
                 }
 
                 //zip the min/max bounds
-                jsonGenerator.writeFieldName("@");
-                jsonGenerator.writeStartArray();
-                if (!o.max.equals(o.min)) {
-                    int dim = o.min.dim();
-                    for (int i = 0; i < dim; i++) {
-                        float a = o.min.coord[i];
-                        float b = o.max.coord[i];
-                        if (a == b) {
-                            jsonGenerator.writeNumber(a);
-                        } else {
-                            if (a == Float.NEGATIVE_INFINITY && b == Float.POSITIVE_INFINITY) {
-                                jsonGenerator.writeNumber(Float.NaN);
-                            } else {
-                                jsonGenerator.writeStartArray();
+                if (o.bounded()) {
+                    jsonGenerator.writeFieldName("@");
+                    jsonGenerator.writeStartArray();
+                    if (!o.max.equals(o.min)) {
+                        int dim = o.min.dim();
+                        for (int i = 0; i < dim; i++) {
+                            float a = o.min.coord[i];
+                            float b = o.max.coord[i];
+                            if (a == b) {
                                 jsonGenerator.writeNumber(a);
-                                jsonGenerator.writeNumber(b);
-                                jsonGenerator.writeEndArray();
+                            } else {
+                                if (a == Float.NEGATIVE_INFINITY && b == Float.POSITIVE_INFINITY) {
+                                    jsonGenerator.writeNumber(Float.NaN);
+                                } else {
+                                    jsonGenerator.writeStartArray();
+                                    jsonGenerator.writeNumber(a);
+                                    jsonGenerator.writeNumber(b);
+                                    jsonGenerator.writeEndArray();
+                                }
                             }
                         }
+                    } else {
+                        writeArrayValues(o.min.coord, jsonGenerator);
                     }
-                } else {
-                    writeArrayValues(o.min.coord, jsonGenerator);
+                    jsonGenerator.writeEndArray();
                 }
-                jsonGenerator.writeEndArray();
+
             }
             jsonGenerator.writeEndObject();
         }
@@ -102,7 +105,7 @@ public class NObject extends RectND implements Serializable {
             for (float x : xx) {
                 float y;
                 if (x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY)
-                    y = Float.NaN; //shorter than infinity
+                    y = Float.NaN; //as string, "NaN" is shorter than "Infinity"
                 else
                     y = x;
 
@@ -159,37 +162,6 @@ public class NObject extends RectND implements Serializable {
     }
 
 
-
-//    /**
-//     * timepoint, or -1 if none
-//     */
-//    final public float timeStart() {
-//        return bounds.minZ();
-//    }
-//    final public float timeStop() {
-//        return bounds.maxZ();
-//    }
-//
-//    public NObject when(final float at) {
-//        return when(at,at);
-//    }
-//
-//    public NObject when(final float  start, final float end) {
-//        bounds.setRangeZ(start, end);
-//        return this;
-//    }
-//
-//    public NObject where(float[] coord) {
-//        return where(coord[0], coord[1], coord[2]);
-//    }
-//
-
-//
-////    public NObject where(NObject otherLocation) {
-////        return where(otherLocation.spacetime);
-////    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -234,7 +206,9 @@ public class NObject extends RectND implements Serializable {
                     return this;
                 }
                 throw new RuntimeException(this + " can not change ID");
-            case "N": name(value.toString()); return this;
+            case "N":
+                name(value.toString());
+                return this;
         }
 
         if (data == null) data = new HashMap<>();
@@ -242,15 +216,19 @@ public class NObject extends RectND implements Serializable {
         return this;
     }
 
-
-
-
     public void description(String d) {
+        if (d.isEmpty()) {
+            if (data!=null)
+                data.remove("_");
+            return;
+        }
+
         put("_", d);
     }
 
     public String description() {
-        return get("_").toString();
+        Object d = get("_");
+        return d == null ? "" : d.toString();
     }
 
 

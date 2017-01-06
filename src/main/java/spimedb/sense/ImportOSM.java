@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * https://mapzen.com/data/metro-extracts/
+ * PBF datasets: https://mapzen.com/data/metro-extracts/
  */
 public class ImportOSM implements Sink, EntityProcessor {
 

@@ -63,8 +63,6 @@ public class ClimateEditor  {
 //                System.out.println(x);
 //            });
 
-//            Iterable<NObject> r = db.intersecting(40.44, -79.99, 420000, -1);
-//            System.out.println(Joiner.on("\n").join(r));
 
         }
 
