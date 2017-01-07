@@ -33,13 +33,17 @@ public class SpimeDB implements Iterable<NObject>  {
 
     public static final String VERSION = "SpimeDB v-0.00";
 
-    final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
+    @JsonIgnore final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
-    public final MutableGraph<String> tag = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
+    @JsonIgnore public final MutableGraph<String> tag = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
 
     @JsonIgnore public final Map<String,SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
-    public final Map<String, NObject> obj;
+    @JsonIgnore public final Map<String, NObject> obj;
+
+    @JsonIgnore protected final Map<String,Class> tagClasses = new ConcurrentHashMap<>();
+    @JsonIgnore protected final ClassLoader cl = ClassLoader.getSystemClassLoader();
+    @JsonIgnore final ByteBuddy tagProxyBuilder = new ByteBuddy();
 
     /** in-memory, map-based */
     public SpimeDB() {
@@ -68,10 +72,6 @@ public class SpimeDB implements Iterable<NObject>  {
                     new ReentrantReadWriteLock());
         });
     }
-
-    protected final Map<String,Class> tagClasses = new ConcurrentHashMap<>();
-    protected final ClassLoader cl = ClassLoader.getSystemClassLoader();
-    final ByteBuddy tagProxyBuilder = new ByteBuddy();
 
     Class[] resolve(String... tags) {
         Class[] c = new Class[tags.length];
