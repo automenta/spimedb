@@ -30,7 +30,7 @@ public class SpimeDB implements Iterable<NObject>  {
 
     @JsonIgnore final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
-    @JsonIgnore public final Map<String,SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
+    @JsonIgnore public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
     @JsonIgnore public final Map<String, NObject> obj;
 
@@ -44,11 +44,6 @@ public class SpimeDB implements Iterable<NObject>  {
     public SpimeDB(Map<String, NObject> g) {
 
         this.obj = g;
-
-        /*this.oct = new MyOctBox(
-                new Vec3D(-180f, -90f, -1),
-                new Vec3D(360f, 180f, 2),
-                new Vec3D(0.05f, 0.05f, 0.05f));*/
 
     }
 
@@ -98,17 +93,24 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
 
+    /** returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics */
     public NObject put(NObject d) {
-        //final String id = d.getId();
 
         //TODO use 'obj.merge' for correct un-indexing of prevoius value
         String id = d.getId();
 
         NObject previous = obj.put(id, d);
 
-        /*if (tag.nodes().contains(id)) {
-            //TODO re-tag
-        }*/
+        boolean changed = false;
+
+        if (previous!=null) {
+             if (previous.equals(d))
+                 return previous;
+             else {
+                 changed = true;
+             }
+        }
+
 
         String[] tags = d.tag;
         if (tags!=null) {
@@ -131,9 +133,11 @@ public class SpimeDB implements Iterable<NObject>  {
             }
         }
 
-        //Object tags = obj.get(">");
+        if (changed) {
+            //TODO emit notification
+        }
 
-        return null;
+        return d;
     }
 
     private void tag(String id, String[] parents) {
@@ -141,9 +145,6 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
 
-//    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
-//        return Tuples.pair(e, Tuples.twin(from, to));
-//    }
 
     public Iterator<NObject> iterator() {
         return obj.values().iterator();
@@ -233,4 +234,7 @@ public class SpimeDB implements Iterable<NObject>  {
 
     }
 
+//    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
+//        return Tuples.pair(e, Tuples.twin(from, to));
+//    }
 }

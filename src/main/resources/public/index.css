@@ -6,7 +6,7 @@ body {
     padding: 0;
     background-color: black !important;
     color: gray !important;
-    line-height: 1.1 !important;
+
     font-family: Arial, Helvetica, sans-serif !important;
 
     -webkit-user-select: none;
@@ -27,9 +27,6 @@ body {
     left: 0;
     top: 0;
     z-index: 6000;
-    font-size: 100%;
-    /*background-color: black;*/
-    margin: 0 !important;
 }
 #sidebar .buttons {
     z-index: 100;
@@ -49,7 +46,6 @@ input[type=range].tagSlider:focus {
 
 input[type=range].tagSlider::-webkit-slider-runnable-track {
     width: 100%;
-    height: 9.4px;
     cursor: pointer;
     box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
     background: #484d4d;
@@ -187,8 +183,7 @@ input[type=range].tagSlider:focus::-ms-fill-upper {
 .windget {
     background-color: #29e;
     color: white;
-    font-size: 20px;
-    font-family: sans-serif;
+
 
     max-width: 75%;
     max-height: 75%;
@@ -204,13 +199,9 @@ input[type=range].tagSlider:focus::-ms-fill-upper {
 .windget .close_button {
     top: 0;
     right: 0;
-    opacity: 0.8;
-    width: 1em;
-    height: 1em;
+    opacity: 0.9;
     overflow: hidden;
     position: absolute;
-    color: black;
-    border: none;
 }
 
 .windget .content {

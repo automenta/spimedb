@@ -160,6 +160,10 @@ class GraphView extends NView {
             ]
         });
 
+        cy.on('tap', function(evt){
+            const tgt = evt.cyTarget.id();
+            newWindow($('<div>' + tgt + '</div>'));
+        });
 
         var that = this;
         $.getJSON('/tag')

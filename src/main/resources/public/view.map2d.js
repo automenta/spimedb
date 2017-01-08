@@ -53,7 +53,9 @@ class Map2DView extends NView {
         super("Map (2D)", "road");
     }
 
-    start(v, app, cb) {
+    start(v, me, cb) {
+
+        this.me = me;
 
         var uiBoundsReactionPeriodMS = 75;
 
@@ -506,7 +508,7 @@ class Map2DView extends NView {
             //var lat = center.lat;
             //app.spaceOn(circleBounds/*Compact*/(lon, lat, radiusMeters, 4),
 
-            app.spaceOn(rectBounds(b), focus, errFunc);
+            me.spaceOn(rectBounds(b), focus, errFunc);
 
                 /*.done(focus) //function (r) {
                     //console.log(r);
@@ -537,12 +539,12 @@ class Map2DView extends NView {
 
         if (cb) cb();
 
-        app.on(['focus','change'], this.listener = function(c) {
+        me.on(['focus','change'], this.listener = function(c) {
 
             //TODO remove removed icons
 
-            for (var c in app.focus) {
-                var d = app.data(c);
+            for (var c in me.focus) {
+                var d = me.data(c);
                 for (var a in d) {
                     //console.log(d[a]);
 
@@ -569,7 +571,7 @@ class Map2DView extends NView {
 
     stop() {
 
-        app.off(['focus','change'], this.listener);
+        this.me.off(['focus','change'], this.listener);
 
         this.map.remove();
         this.map = null;

@@ -1,18 +1,18 @@
 function newWindow(content) {
     const w = newFrame();
 
-    var closeButton = $('<button>').text('x').addClass('close_button').click(function() {
+    var closeButton = $('<button/>').text('x').addClass('close_button').click(function() {
         w.fadeOut(150, function() { $(this).remove(); });
     });
 
-    var fontSlider = NSlider({ }).addClass('font_slider').css({
+    /*var fontSlider = NSlider({ }).addClass('font_slider').css({
         width: '1em',
         position: 'absolute',
         left: 0,
         top: 0
-    });
+    });*/
   
-    w.append(content = (content || $('<div>')), fontSlider, closeButton);
+    w.append(content = (content || $('<div/>')), /*fontSlider,*/ closeButton);
 
     content.addClass('content');
 
@@ -24,7 +24,7 @@ function newFrame() {
 
 
     var div = $('.windgets');
-    if (div.length == 0)
+    if (div.length === 0)
         div = $('<div>').addClass('windgets').appendTo($('body'));
 
     var content = $('<div>').addClass('windget').fadeIn().appendTo(div);
@@ -59,15 +59,15 @@ function newFrame() {
                 y = (parseFloat(target.getAttribute('data-y')) || 0);
 
             // update the element's style
-            target.style.width = event.rect.width + 'px';
-            target.style.height = event.rect.height + 'px';
+            target.style.width = parseInt(event.rect.width);// + 'px';
+            target.style.height = parseInt(event.rect.height);// + 'px';
 
             // translate when resizing from top or left edges
             x += event.deltaRect.left;
             y += event.deltaRect.top;
 
             target.style.webkitTransform = target.style.transform =
-                'translate(' + x + 'px,' + y + 'px)';
+                'translate(' + parseInt(x) + ',' + parseInt(y) + ')';
 
             target.setAttribute('data-x', x);
             target.setAttribute('data-y', y);

@@ -7,7 +7,7 @@ function ready() {
 
     var app = new NClient();
 
-    window.app = app; //for console access
+    window.me = app; //for browser js development tools console usage
 
     Backbone.Router.extend({
 
@@ -32,47 +32,13 @@ function ready() {
 
     $('#sidebar').append(app.newViewControl());
 
-    /*app.index = new TagIndex(function (i) {
-
-     //called after index has been loaded, but this won't be necessary when events are used
-
-     function newIndex() {
-     var t = new TagIndexAccordion(app.index);
-
-     t.newElementHeader = function(tag) {
-
-     //http://codepen.io/thehonestape/pen/yjlGi
-     //http://thecodeplayer.com/walkthrough/spicing-up-the-html5-range-slider-input
-
-     var d = newDiv();
-     var ii = $('<input class="tagSlider" type = "range" value="0" min="0" max="100" _onchange="rangevalue.value=value"/>');
-     ii.change(function(c) {
-     app.setFocus(tag, parseInt(ii.val()) * 0.01);
-     });
-     d.html(ii);
-     return d;
-     };
-
-     t.addClass('tagIndexAccordion');
-     $('#sidebar').append(t);
-
-     }
-
-     newIndex();
-
-     //TODO make this part of TagIndexAccordion when it is refactored as a class
-     app.on('index.change', function() {
-     $('.' + 'tagIndexAccordion').remove();
-     newIndex();
-     });
-
-     });
-     */
 
     app.setView(VIEW_STARTUP);
 
 }
 
+//base websocket url path */
+const ws = 'ws://' + window.location.hostname + ':' + window.location.port + '/';
 
 class NClient extends EventEmitter {
 
@@ -94,41 +60,24 @@ class NClient extends EventEmitter {
             //'space1': new HTMLView('Spaces Test', 'lab', 'space.html')
         };
 
-        /** creates a websocket connection to a path on the server that hosts the currently visible webpage */
-        const session = new ReconnectingWebSocket(
-            'ws://' + window.location.hostname + ':' + window.location.port + '/session',
-            null /* protocols */,
-            /*options ||*/ {
-                //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
-                /*
-                 reconnectInterval: 1000, // The number of milliseconds to delay before attempting to reconnect.
-                 maxReconnectInterval: 30000, // The maximum number of milliseconds to delay a reconnection attempt.
-                 reconnectDecay: 1.5, // The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist.
-                 timeoutInterval: 2000, // The maximum time in milliseconds to wait for a connection to succeed before closing and retrying.
-                 */
-            }
-        );
-        session.onopen = ((e)=>{
-            session.send("connecttt");
+        this.socket = {};
+
+
+        const attn = this.socket['attn'] = new ReconnectingWebSocket( ws + 'attn' );
+        attn.onopen = ((e)=>{
+            // attn.send("Earthquake\t1.0");
+            // attn.send("Pollution\t0.5");
         });
-
-    }
-
-    data(channel) {
-
-        var d = this.index.tag.node(channel);
-        if (d.channel) {
+        this.attn = (tag, value)=>{
             try {
-                //TODO this is a mess:
-                return d.channel.subs[channel].data;
+                attn.send((tag + '\t') + value);
+            } catch (x) {
+                //TODO if not connected, accept a buffer of finite # of commands in a wrapper extension of ReconnectingWebsocket
+                console.error(x);
             }
-            catch (e) {
-                console.error('no channel data for channel', channel, e)
-                return d;
-            }
-        }
+        };
 
-        return d;
+
     }
 
 
@@ -142,10 +91,7 @@ class NClient extends EventEmitter {
         this.currentView = this.views[v];
 
         if (this.currentView) {
-            var viewTarget = $('<div id="view"></div>');
-            $('body').append(viewTarget);
-
-            this.currentView.start(viewTarget, this, cb);
+            this.currentView.start( $('<div id="view"/>').appendTo($('body')) , this, cb);
         }
 
     }
@@ -183,14 +129,17 @@ class NClient extends EventEmitter {
                     var target = $('<div id="graphpopup"/>').css({
                         position: 'fixed',
                         width: '100%', height: '100%',
-                        zIndex: 5000
-                    }).appendTo($('#sidebar'));
+                        zIndex: 500
+                    }).appendTo($('body')).hide().fadeIn("slow");
                     graphPopup = new GraphView();
-                    graphPopup.start(target, app);
+                    graphPopup.start(target, window.me);
                 } else {
                     if (graphPopup) {
-                        graphPopup.stop();
-                        $('#graphpopup').remove();
+
+                        $('#graphpopup').fadeOut("slow", ()=>{
+                            graphPopup.stop();
+                            $("#graphpopup").remove();
+                        });
                     }
                 }
             })

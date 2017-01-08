@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Deque;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
@@ -68,9 +69,6 @@ public class WebServer extends PathHandler {
     public WebServer(final SpimeDB db, String host, int port) {
         super();
         this.db = db;
-//        this.host = host;
-//        this.port = port;
-
 
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
@@ -78,11 +76,25 @@ public class WebServer extends PathHandler {
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) ->
                 JSON.toJSON( Lists.newArrayList(Iterables.transform(db.schema.inh.nodes(), db::get)), o)));
 
-        addPrefixPath("/session", websocket(new SessionSocket() {
+        /* client attention management */
+        addPrefixPath("/attn", websocket(new SessionSocket() {
 
             @Override
             protected void onMessage(WebSocketChannel socket, BufferedTextMessage message, Session session) {
                 //System.out.println(socket + " " + message + " " + session);
+
+                StringTokenizer t = new StringTokenizer(message.getData(), "\t");
+                String tag = t.nextToken();
+                String value = t.nextToken();
+
+                logger.info("attn {} {}:{}", session, tag, value);
+
+                float fv = Float.valueOf(value);
+                if (fv!=fv) /* NaN */
+                    session.attention.remove(tag);
+                else
+                    session.attention.put(tag, fv);
+
             }
         }));
 

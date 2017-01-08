@@ -17,6 +17,7 @@ import spimedb.SpimeDB;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Function;
 
 
 /**
@@ -24,31 +25,28 @@ import java.io.InputStream;
  * @see https://github.com/opendatalab-de/geojson-jackson
  * TODO write unit test, with the file stored locally as a test-resource
  */
-public class ImportGeoJSON {
+public class GeoJSON   {
    //http://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
     
     public final static ObjectMapper geojsonMapper = new ObjectMapper().
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 
-    public ImportGeoJSON(InputStream i, SpimeDB db) throws IOException {
+
+    public static void fromGeoJSON(InputStream i, SpimeDB db, Function<Feature,NObject> builder) throws IOException {
 
         FeatureCollection featureCollection = geojsonMapper.readValue(i, FeatureCollection.class);
 
         featureCollection.forEach(f -> {
-            NObject n = apply(f);
+            NObject n = builder.apply(f);
             if (n!=null)
                 db.put(n);
         });
 
     }
 
-    @Nullable
-    protected NObject apply(Feature f) {
-
-        //System.out.println(f);
-        //Feature{properties={mag=6.2, place=33km S of Tolotangga, Indonesia, time=1483050618360, updated=1483052912295, tz=480, url=http://earthquake.usgs.gov/earthquakes/eventpage/us10007nl0, detail=http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us10007nl0.geojson, felt=73, cdi=7, mmi=4.81, alert=green, status=reviewed, tsunami=1, sig=642, net=us, code=10007nl0, ids=,us10007nl0,, sources=,us,, types=,dyfi,geoserve,losspager,origin,phase-data,shakemap,, nst=null, dmin=3.611, rms=1.52, gap=26, magType=mwp, type=earthquake, title=M 6.2 - 33km S of Tolotangga, Indonesia}, geometry=Point{coordinates=LngLatAlt{longitude=118.6088, latitude=-9.0665, altitude=72.27}} GeoJsonObject{}, id='us10007nl0'}
-
+    /** TODO remove Earthquake specific tags into an extended builder */
+    public static final Function<Feature,NObject> baseGeoJSONBuilder = (f) -> {
         NObject d = new NObject(f.getId());
 
 
@@ -69,6 +67,7 @@ public class ImportGeoJSON {
         }
 
         //EQ specific mappnig
+        //Feature{properties={mag=6.2, place=33km S of Tolotangga, Indonesia, time=1483050618360, updated=1483052912295, tz=480, url=http://earthquake.usgs.gov/earthquakes/eventpage/us10007nl0, detail=http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us10007nl0.geojson, felt=73, cdi=7, mmi=4.81, alert=green, status=reviewed, tsunami=1, sig=642, net=us, code=10007nl0, ids=,us10007nl0,, sources=,us,, types=,dyfi,geoserve,losspager,origin,phase-data,shakemap,, nst=null, dmin=3.611, rms=1.52, gap=26, magType=mwp, type=earthquake, title=M 6.2 - 33km S of Tolotangga, Indonesia}, geometry=Point{coordinates=LngLatAlt{longitude=118.6088, latitude=-9.0665, altitude=72.27}} GeoJsonObject{}, id='us10007nl0'}
         d.name( f.getProperty("place") );
         d.setTag("Earthquake");
         d.put( "eqMag", f.getProperty("mag") );
@@ -100,7 +99,7 @@ public class ImportGeoJSON {
 //        }
 
         return d;
-    }
+    };
 
 //    public static void main(String[] arg) throws Exception {
 //        URL pointFile = new URL("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson");

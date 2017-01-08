@@ -31,7 +31,8 @@ public class Session {
 
     @Override
     public String toString() {
-        return "session:{\"peer\":\"" + peer + "\"}";
+        //return "session:{\"peer\":\"" + peer + "\"}";
+        return peer.toString();
     }
 
     static AttachmentKey<Session> SESSION = AttachmentKey.create(Session.class);

@@ -293,7 +293,11 @@ function nobject(x) {
 
     if (!x.I) return;
 
-    var y = new NObject(x.I, x.N);
+    var y;
+//    if (x.T == 'geojson')
+//        y = new GeoJSON(x.I, x.N);
+//    else
+        y = new NObject(x.I, x.N);
 
 
     /** TTL rules

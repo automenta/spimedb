@@ -14,13 +14,13 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by me on 12/29/16.
  */
-public class ImportGeoJSONTest {
+public class GeoJSONTest {
 
     @Test
     public void test1() throws IOException {
-        InputStream resourceAsStream = ImportGeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson");
+        InputStream resourceAsStream = GeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson");
         SpimeDB db = new SpimeDB();
-        new ImportGeoJSON(resourceAsStream, db);
+        GeoJSON.fromGeoJSON(resourceAsStream, db, GeoJSON.baseGeoJSONBuilder);
 
         int all = db.size();
         assertTrue(all > 50);
@@ -32,11 +32,11 @@ public class ImportGeoJSONTest {
         assertTrue(aNum > 0);
         assertTrue(aNum < all/4);
 
-        System.out.println(a);
-        System.out.println(aNum + " / " + all + " found:");
-        System.out.println("\t" + a.result);
-
-        System.out.println();
+//        System.out.println(a);
+//        System.out.println(aNum + " / " + all + " found:");
+//        System.out.println("\t" + a.result);
+//
+//        System.out.println();
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
         QueryCollection b = new QueryCollection(new ArrayList<>()).bounds(
