@@ -15,7 +15,7 @@ class Map3DView extends NView {
 
     start(v, app, cb) {
 
-        var that = this;
+        const  that = this;
 
         var init = function () {
 
@@ -85,10 +85,10 @@ class Map3DView extends NView {
                 });
                 */
 
-                app.addTag(_.flatten([
+                /*app.addTag(_.flatten([
                     cesiumProviders,
                     //leafletProviders
-                ]));
+                ]));*/
 
             }
 

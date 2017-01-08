@@ -85,10 +85,10 @@ class NClient extends EventEmitter {
         this.views = {
 
         'map2d': new Map2DView(),
-        'feed': new FeedView(),
-        'graph': new GraphView(),
         'map3d': new Map3DView(),
-        'wikipedia': new WikipediaView('Happiness'),
+        //'feed': new FeedView(),
+        //'graph': new GraphView(),
+        //'wikipedia': new WikipediaView('Happiness'),
         'time': new TimeView()
 
         //    'edit1': new NObjectEditView('New NObject')
@@ -113,61 +113,6 @@ class NClient extends EventEmitter {
         return d;
     }
 
-    setFocus(tag, amount) {
-        var prevFocus = this.focus[tag] || 0;
-        if (prevFocus == amount) return;
-
-        this.focus[tag] = amount;
-
-        var t = this.index.tag.node(tag);
-
-        var app = this;
-
-        if (prevFocus == 0) {
-            //add focus
-
-            if (t.channel) {
-                //already open??? this shouldnt happen normally
-                console.error('newly focused tag', t, 'already has channel opened');
-            } else if (t.newChannel) {
-                var c = t.newChannel({
-
-                    onOpen: function() {
-
-                    },
-
-                    //TODO onClose ?
-
-                    onChange: function (cc) {
-                        //console.log('change', cc.data);
-                        app.emit( tag + '.change', cc.data);
-                        app.emit('change', this);
-                    }
-                });
-                t.channel = c; //the default, we'll store there
-            }
-
-            console.log('app focus on: ', tag, t, c);
-        }
-        else if (amount == 0) {
-            //remove focus
-            if (t.channel) {
-                if (t.channel.off)
-                    t.channel.off();
-                delete t.channel;
-            }
-            console.log('app focus off: ', tag, t, c);
-            delete this.focus[tag];
-        }
-        else {
-            //change focus
-        }
-
-        console.log('app focus: ', app.focus);
-
-        app.emit('focus'); //focus change
-
-    }
 
 
     setView(v, cb) {
@@ -198,10 +143,11 @@ class NClient extends EventEmitter {
          */
         var that = this;
 
-        var d = $('<SPAN/>')
+        var d = $('<span/>')
         _.each(that.views, function(v, k) {
-            d.append($('<button>' + v.icon + '</button>')
-                //.append($('<i class="' + v.icon + ' icon"></i>'))
+            d.append($('<button/>')
+            //.append($('<button>' + v.icon + '</button>')
+                .append($('<i class="fa fa-' + v.icon + '"></i>'))
                 /*.attr('data-content', v.name)
                  .popup()*/
                 .click(function() {
@@ -210,18 +156,41 @@ class NClient extends EventEmitter {
                     //}, 0);
                 }));
         });
+
+        var graphPopup;
+
+        d.append(
+            $('<i class="fa fa-adjust"><input type="checkbox"/></i>').click(e=>{
+                var checked =  $(e.target).is(':checked');
+                if (checked) {
+                    var target = $('<div id="graphpopup"/>').css({
+                        position: 'fixed',
+                        width: '100%', height: '100%',
+                        zIndex: 5000
+                    }).appendTo($('#sidebar'));
+                    graphPopup = new GraphView();
+                    graphPopup.start(target, app);
+                } else {
+                    if (graphPopup) {
+                        graphPopup.stop();
+                        $('#graphpopup').remove();
+                    }
+                }
+            })
+        );
+
         return d;
 
     }
 
-    addTag(tags) {
-        if (!Array.isArray(tags)) tags = [tags];
-
-        for (var i = 0; i < tags.length; i++)
-            this.index.tag.setNode(tags[i].id, tags[i]);
-
-        this.emit('index.change', [tags /* additions */, null /* removals */]);
-    }
+    // /*addTag(tags) {
+    //     if (!Array.isArray(tags)) tags = [tags];
+    //
+    //     for (var i = 0; i < tags.length; i++)
+    //         this.index.tag.setNode(tags[i].id, tags[i]);
+    //
+    //     this.emit('index.change', [tags /* additions */, null /* removals */]);
+    // }*/
 
     spaceOn(bounds, onFocus, onError) {
         //adds a spatial boundary region to the focus
@@ -230,16 +199,15 @@ class NClient extends EventEmitter {
 
 
         //https://github.com/jDataView/jBinary ?
-        var oReq = new XMLHttpRequest();
+        const oReq = new XMLHttpRequest();
         oReq.open("GET", bounds.toURL(), true);
         oReq.responseType = "arraybuffer"; //"blob"
 
         oReq.onload = function(oEvent) {
-          var arrayBuffer = oReq.response;
+          const arrayBuffer = oReq.response;
           if (arrayBuffer) {
-              var byteArray = new Uint8Array(arrayBuffer);
-              var p = msgpack.decode(byteArray);
-              onFocus(p);
+              const byteArray = new Uint8Array(arrayBuffer);
+              onFocus( msgpack.decode(byteArray) );
           }
         };
         oReq.send(null);
@@ -261,3 +229,60 @@ class NClient extends EventEmitter {
             }).fail(onError);*/
     }
 }
+
+
+// setFocus(tag, amount) {
+//     var prevFocus = this.focus[tag] || 0;
+//     if (prevFocus === amount) return;
+//
+//     this.focus[tag] = amount;
+//
+//     var t = this.index.tag.node(tag);
+//
+//     var app = this;
+//
+//     if (prevFocus === 0) {
+//         //add focus
+//
+//         if (t.channel) {
+//             //already open??? this shouldnt happen normally
+//             console.error('newly focused tag', t, 'already has channel opened');
+//         } else if (t.newChannel) {
+//             var c = t.newChannel({
+//
+//                 onOpen: function() {
+//
+//                 },
+//
+//                 //TODO onClose ?
+//
+//                 onChange: function (cc) {
+//                     //console.log('change', cc.data);
+//                     app.emit( tag + '.change', cc.data);
+//                     app.emit('change', this);
+//                 }
+//             });
+//             t.channel = c; //the default, we'll store there
+//         }
+//
+//         console.log('app focus on: ', tag, t, c);
+//     }
+//     else if (amount == 0) {
+//         //remove focus
+//         if (t.channel) {
+//             if (t.channel.off)
+//                 t.channel.off();
+//             delete t.channel;
+//         }
+//         console.log('app focus off: ', tag, t, c);
+//         delete this.focus[tag];
+//     }
+//     else {
+//         //change focus
+//     }
+//
+//     console.log('app focus: ', app.focus);
+//
+//     app.emit('focus'); //focus change
+//
+// }

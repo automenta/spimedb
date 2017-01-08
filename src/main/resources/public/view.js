@@ -126,7 +126,10 @@ class GraphView extends NView {
         };
 
         var cy = this.s = cytoscape({
-            container: v,textureOnViewport:true,pixelRatio:0.25,motionBlur:false,
+            container: v,
+            textureOnViewport:true,
+            pixelRatio:0.5,
+            motionBlur:false,
             style: [ // the stylesheet for the graph
                 {
                     selector: 'node',
@@ -140,7 +143,7 @@ class GraphView extends NView {
                         'height': degreeScale,
                         'text-valign': 'center',
 
-                        'min-zoomed-font-size': 6
+                        'min-zoomed-font-size': 3
                     }
                 },
 
@@ -212,9 +215,8 @@ class GraphView extends NView {
                         infinite: true
                     };
                     //cy.layout(options);
-                    var ly = cy.makeLayout(options);
-                    console.log(ly);
-                    ly.run();
+                    that.layout = cy.makeLayout(options);
+                    that.layout.run();
                 }, 0);
 
 
@@ -279,9 +281,13 @@ class GraphView extends NView {
     }
 
     stop() {
+        if (this.layout) {
+            this.layout.stop();
+            delete this.layout;
+        }
         if (this.s) {
             this.s.destroy();
-            this.s = null;
+            delete this.s;
         }
     }
 
