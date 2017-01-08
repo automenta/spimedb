@@ -129,7 +129,7 @@ public class RectND implements HyperRect<PointND>, Serializable {
     }
 
     @Override
-    public HyperRect getMbr(final HyperRect r) {
+    public HyperRect mbr(final HyperRect r) {
         final RectND x = (RectND) r;
 
         int dim = dim();
@@ -177,12 +177,12 @@ public class RectND implements HyperRect<PointND>, Serializable {
     }
 
     @Override
-    public HyperPoint getMin() {
+    public HyperPoint min() {
         return min;
     }
 
     @Override
-    public HyperPoint getMax() {
+    public HyperPoint max() {
         return max;
     }
 

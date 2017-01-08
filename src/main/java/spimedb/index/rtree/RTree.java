@@ -50,7 +50,7 @@ public class RTree<T> implements SpatialSearch<T> {
         this.builder = builder;
         this.splitType = splitType;
         this.entryCount = 0;
-        root = Leaf.create(builder, mMin, mMax, splitType);
+        root = splitType.newLeaf(builder, mMin, mMax);
     }
 
     public static boolean equals(float a, float b) {
@@ -176,8 +176,26 @@ public class RTree<T> implements SpatialSearch<T> {
      * Created by ewhite on 10/28/15.
      */
     public enum Split {
-        AXIAL,
-        LINEAR,
-        QUADRATIC,
+        AXIAL {
+            @Override
+            public <R> Node<R> newLeaf(RectBuilder<R> builder, int mMin, int m) {
+                return new AxialSplitLeaf<>(builder, mMin, m);
+            }
+        },
+        LINEAR {
+            @Override
+            public <R> Node<R> newLeaf(RectBuilder<R> builder, int mMin, int m) {
+                return new LinearSplitLeaf<>(builder, mMin, m);
+            }
+        },
+        QUADRATIC {
+            @Override
+            public <R> Node<R> newLeaf(RectBuilder<R> builder, int mMin, int m) {
+                return new QuadraticSplitLeaf<>(builder, mMin, m);
+            }
+        },;
+
+        abstract public <R> Node<R> newLeaf(RectBuilder<R> builder, int mMin, int m);
+
     }
 }

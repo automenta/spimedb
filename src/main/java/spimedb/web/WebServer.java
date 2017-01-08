@@ -7,7 +7,6 @@ package spimedb.web;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.undertow.Undertow;
@@ -20,12 +19,14 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.websockets.core.BufferedTextMessage;
+import io.undertow.websockets.core.WebSocketChannel;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
+import spimedb.util.HTTP;
 import spimedb.util.JSON;
-import spimedb.util.bloom.UnBloomFilter;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -33,6 +34,7 @@ import java.util.Deque;
 import java.util.Map;
 
 import static io.undertow.Handlers.resource;
+import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static io.undertow.UndertowOptions.ENABLE_SPDY;
 
@@ -45,6 +47,8 @@ public class WebServer extends PathHandler {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
     public static final String resourcePath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
     private final SpimeDB db;
+
+    final ConcurrentWeakKeyHashMap<ServerConnection, Session> session = new ConcurrentWeakKeyHashMap<>();
 
 
 //    private List<String> paths = new ArrayList();
@@ -71,8 +75,16 @@ public class WebServer extends PathHandler {
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
 
-        addPrefixPath("/tag", ex -> Web.stream(ex, (o) ->
-                JSON.toJSON( Lists.newArrayList(Iterables.transform( db.tag.nodes(), db::get)), o)));
+        addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) ->
+                JSON.toJSON( Lists.newArrayList(Iterables.transform(db.schema.inh.nodes(), db::get)), o)));
+
+        addPrefixPath("/session", websocket(new SessionSocket() {
+
+            @Override
+            protected void onMessage(WebSocketChannel socket, BufferedTextMessage message, Session session) {
+                //System.out.println(socket + " " + message + " " + session);
+            }
+        }));
 
         //SECURITY RISK: DANGER
         /*
@@ -83,14 +95,8 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/earth/region2d/summary", new HttpHandler() {
 
-            final ObjectMapper mapper = JSON.msgPackMapper;
-
             final int MAX_RESULTS = 1024;
             final int MAX_RESPONSE_BYTES = 1024 * 1024;
-            final int BLOOM_SIZE = 64 * 1024;
-
-            final ConcurrentWeakKeyHashMap<ServerConnection, UnBloomFilter<String>> sent =
-                    new ConcurrentWeakKeyHashMap<>();
 
             @Override
             public void handleRequest(final HttpServerExchange ex) throws Exception {
@@ -113,15 +119,13 @@ public class WebServer extends PathHandler {
 
                     ex.setPersistent(true);
 
-                    ServerConnection con = ex.getConnection();
-                    UnBloomFilter<String> bloom = sent.computeIfAbsent(con,
-                            c -> new UnBloomFilter<>(BLOOM_SIZE, String::getBytes));
+                    Session session = Session.session(ex);
 
-                    Web.stream(ex, (o) -> {
+                    HTTP.stream(ex, (o) -> {
 
                         try {
                             JsonGenerator gen =
-                                    mapper.getFactory().createGenerator(o);
+                                    JSON.msgPackMapper.getFactory().createGenerator(o);
 
                             gen.writeStartArray();
 
@@ -133,7 +137,7 @@ public class WebServer extends PathHandler {
                             db.get(new Query((n) -> {
 
                                 String i = n.id();
-                                if (!bloom.containsAndAdd(i)) {
+                                if (!session.sent.containsAndAdd(i)) {
                                     try {
 
                                         //gen.writeStartObject();
@@ -323,6 +327,7 @@ public class WebServer extends PathHandler {
 
 
     }
+
 
 
 //    public void start() {

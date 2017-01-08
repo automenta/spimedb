@@ -34,8 +34,8 @@ final class LinearSplitLeaf<T> extends Leaf<T> {
     @Override
     protected Node<T> split(final T t) {
         final Branch<T> pNode = new Branch<>(builder, mMin, mMax, splitType);
-        final Node<T> l1Node = create(builder, mMin, mMax, splitType);
-        final Node<T> l2Node = create(builder, mMin, mMax, splitType);
+        final Node<T> l1Node = splitType.newLeaf(builder, mMin, mMax);
+        final Node<T> l2Node = splitType.newLeaf(builder, mMin, mMax);
 
         final int MIN = 0;
         final int MAX = 1;
@@ -56,30 +56,30 @@ final class LinearSplitLeaf<T> extends Leaf<T> {
                 int[][] rd = rIndex[d];
 
                 HyperRect rj = r[j];
-                Comparable rjMin = rj.getMin().coord(d);
-                if (r[rd[MIN][MIN]].getMin().coord(d).compareTo(rjMin) > 0) {
+                Comparable rjMin = rj.min().coord(d);
+                if (r[rd[MIN][MIN]].min().coord(d).compareTo(rjMin) > 0) {
                     rd[MIN][MIN] = j;
                 }
 
-                if (r[rd[MIN][MAX]].getMin().coord(d).compareTo(rjMin) < 0) {
+                if (r[rd[MIN][MAX]].min().coord(d).compareTo(rjMin) < 0) {
                     rd[MIN][MAX] = j;
                 }
 
-                Comparable rjMax = rj.getMax().coord(d);
-                if (r[rd[MAX][MIN]].getMax().coord(d).compareTo(rjMax) > 0) {
+                Comparable rjMax = rj.max().coord(d);
+                if (r[rd[MAX][MIN]].max().coord(d).compareTo(rjMax) > 0) {
                     rd[MAX][MIN] = j;
                 }
 
-                if (r[rd[MAX][MAX]].getMax().coord(d).compareTo(rjMax) < 0) {
+                if (r[rd[MAX][MAX]].max().coord(d).compareTo(rjMax) < 0) {
                     rd[MAX][MAX] = j;
                 }
             }
 
             // highest max less lowest min
-            final double width = r[rIndex[d][MAX][MAX]].getMax().distance(r[rIndex[d][MIN][MIN]].getMin(), d);
+            final double width = r[rIndex[d][MAX][MAX]].max().distance(r[rIndex[d][MIN][MIN]].min(), d);
 
             // lowest max less highest min (normalized)
-            separation[d] = r[rIndex[d][MAX][MIN]].getMax().distance(r[rIndex[d][MIN][MAX]].getMin(), d) / width;
+            separation[d] = r[rIndex[d][MAX][MIN]].max().distance(r[rIndex[d][MIN][MAX]].min(), d) / width;
         }
 
         int r1Ext = rIndex[0][MAX][MIN], r2Ext = rIndex[0][MIN][MAX];

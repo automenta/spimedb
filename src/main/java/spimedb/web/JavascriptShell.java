@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 /**
  * Created by me on 12/26/16.
  */
-class JavascriptShell extends WebSocketCore {
+class JavascriptShell extends WebSocket {
     private final Logger logger = LoggerFactory.getLogger("/shell");
 
     final ScriptEngineManager engineManager = new ScriptEngineManager();

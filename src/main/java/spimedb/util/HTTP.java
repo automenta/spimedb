@@ -1,17 +1,28 @@
 package spimedb.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.rometools.rome.io.impl.Base64;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.util.Headers;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Deque;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static io.undertow.Handlers.resource;
 
 /**
  * dead simple HTTP response cache
@@ -19,9 +30,10 @@ import java.util.function.Function;
 public class HTTP {
 
 
+    static final String defaultClientPath = "./src/main/resources/public";
     private static final Logger logger = LoggerFactory.getLogger(HTTP.class);
 
-    public static final String TMP_SPIMEDB_CACHE = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
+    static final String TMP_SPIMEDB_CACHE = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
 
     private final Path cachePath;
 
@@ -31,6 +43,100 @@ public class HTTP {
 
     public HTTP(String cachePath) throws IOException {
         this.cachePath = Files.createDirectories(Paths.get(cachePath));
+    }
+
+    public static void send(String s, HttpServerExchange ex) {
+        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+        ex.getResponseSender().send(s);
+        ex.endExchange();
+    }
+
+    public static void stream(HttpServerExchange ex, Consumer<OutputStream> s) {
+
+        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+
+        ex.dispatch(() -> {
+            ex.startBlocking();
+
+            OutputStream os = ex.getOutputStream();
+            s.accept(os);
+
+            //ex.getResponseSender().close();
+            ex.endExchange();
+
+        });
+    }
+
+    static void send(byte[] s, HttpServerExchange ex, String type) {
+
+        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, type);
+
+        ex.getResponseSender().send(ByteBuffer.wrap(s));
+
+        //ex.getResponseSender().close();
+        ex.endExchange();
+    }
+
+    static void send(JsonNode d, HttpServerExchange ex) {
+        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+
+
+
+
+        ex.startBlocking();
+
+        try {
+            JSON.json.writeValue(ex.getOutputStream(), d);
+        } catch (IOException ex1) {
+            logger.warn("send: {}", ex1);
+        }
+
+        ex.getResponseSender().close();
+    }
+
+    static String[] getStringArrayParameter(HttpServerExchange ex, String param) throws IOException {
+        Map<String, Deque<String>> reqParams = ex.getQueryParameters();
+
+        Deque<String> idArray = reqParams.get(param);
+
+        ArrayNode a = JSON.json.readValue(idArray.getFirst(), ArrayNode.class);
+
+        String[] ids = new String[a.size()];
+        int j = 0;
+        for (JsonNode x : a) {
+            ids[j++] = x.textValue();
+        }
+
+        return ids;
+    }
+
+    public static HttpHandler handleClientResources() {
+        return handleClientResources(defaultClientPath);
+    }
+
+    public static HttpHandler handleClientResources(String clientPath) {
+        File base = new File(clientPath);
+
+        return resource(
+
+                new FileResourceManager(base, 0))
+
+//                        new CachingResourceManager(
+//                                16384,
+//                                16*1024*1024,
+//                                new DirectBufferCache(100, 10, 1000),
+//                                new PathResourceManager(getResourcePath(), 0, true, true),
+//                                0 //7 * 24 * 60 * 60 * 1000
+//                        ))
+                .setCachable((x) -> true)
+                //.setDirectoryListingEnabled(true)
+                .addWelcomeFiles("index.html")
+        ;
+
+
+//        return header(resource( new FileResourceManager(base, 100, true, "/") )
+//                    .setWelcomeFiles("index.html")
+//                    .setDirectoryListingEnabled(true), "Access-Control-Allow-Origin", "*");
     }
 
     public void asStream(String url, /* long maxAge */ Consumer<InputStream> result) throws IOException {

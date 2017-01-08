@@ -61,7 +61,7 @@ public final class AxialSplitLeaf<T> extends Leaf<T> {
 
         Arrays.sort(sortedMbr, Comparator.comparingDouble(o -> o.center(splitDimension)));
 
-        final Node<T> l1Node = create(builder, mMin, mMax, splitType);
+        final Node<T> l1Node = splitType.newLeaf(builder, mMin, mMax);
         for (int i = 0; i < size / 2; i++) {
             outerLoop:
             for (int j = 0; j < size; j++) {
@@ -72,7 +72,7 @@ public final class AxialSplitLeaf<T> extends Leaf<T> {
             }
         }
 
-        final Node<T> l2Node = create(builder, mMin, mMax, splitType);
+        final Node<T> l2Node = splitType.newLeaf(builder, mMin, mMax);
         for (int i = size / 2; i < size; i++) {
             outerLoop:
             for (int j = 0; j < size; j++) {

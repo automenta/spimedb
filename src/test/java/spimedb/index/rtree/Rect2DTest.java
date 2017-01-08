@@ -47,15 +47,15 @@ public class Rect2DTest {
 
         // shouldn't affect MBR
         Rect2D rectInside = new Rect2D(0, 0, 1, 1);
-        HyperRect mbr = rect.getMbr(rectInside);
-        double expectedMinX = rect.getMin().coord(0);
-        double expectedMinY = rect.getMin().coord(1);
-        double expectedMaxX = rect.getMax().coord(0);
-        double expectedMaxY = rect.getMax().coord(1);
-        double actualMinX = mbr.getMin().coord(0);
-        double actualMinY = mbr.getMin().coord(1);
-        double actualMaxX = mbr.getMax().coord(0);
-        double actualMaxY = mbr.getMax().coord(1);
+        HyperRect mbr = rect.mbr(rectInside);
+        double expectedMinX = rect.min().coord(0);
+        double expectedMinY = rect.min().coord(1);
+        double expectedMaxX = rect.max().coord(0);
+        double expectedMaxY = rect.max().coord(1);
+        double actualMinX = mbr.min().coord(0);
+        double actualMinY = mbr.min().coord(1);
+        double actualMaxX = mbr.max().coord(0);
+        double actualMaxY = mbr.max().coord(1);
         Assert.assertTrue("Bad minX - Expected: " + expectedMinX + " Actual: " + actualMinX, actualMinX == expectedMinX);
         Assert.assertTrue("Bad minY - Expected: " + expectedMinY + " Actual: " + actualMinY, actualMinY == expectedMinY);
         Assert.assertTrue("Bad maxX - Expected: " + expectedMaxX + " Actual: " + actualMaxX, actualMaxX == expectedMaxX);
@@ -63,15 +63,15 @@ public class Rect2DTest {
 
         // should affect MBR
         Rect2D rectOverlap = new Rect2D(3, 1, 5, 4);
-        mbr = rect.getMbr(rectOverlap);
+        mbr = rect.mbr(rectOverlap);
         expectedMinX = 0.0d;
         expectedMinY = 0.0d;
         expectedMaxX = 5.0d;
         expectedMaxY = 4.0d;
-        actualMinX = mbr.getMin().coord(0);
-        actualMinY = mbr.getMin().coord(1);
-        actualMaxX = mbr.getMax().coord(0);
-        actualMaxY = mbr.getMax().coord(1);
+        actualMinX = mbr.min().coord(0);
+        actualMinY = mbr.min().coord(1);
+        actualMaxX = mbr.max().coord(0);
+        actualMaxY = mbr.max().coord(1);
         Assert.assertTrue("Bad minX - Expected: " + expectedMinX + " Actual: " + actualMinX, actualMinX == expectedMinX);
         Assert.assertTrue("Bad minY - Expected: " + expectedMinY + " Actual: " + actualMinY, actualMinY == expectedMinY);
         Assert.assertTrue("Bad maxX - Expected: " + expectedMaxX + " Actual: " + actualMaxX, actualMaxX == expectedMaxX);

@@ -35,15 +35,15 @@ final class QuadraticSplitLeaf<T> extends Leaf<T> {
     protected Node<T> split(final T t) {
 
         final Branch<T> pNode = new Branch<>(builder, mMin, mMax, splitType);
-        final Node<T> l1Node = create(builder, mMin, mMax, splitType);
-        final Node<T> l2Node = create(builder, mMin, mMax, splitType);
+        final Node<T> l1Node = splitType.newLeaf(builder, mMin, mMax);
+        final Node<T> l2Node = splitType.newLeaf(builder, mMin, mMax);
 
         // find the two rectangles that are most wasteful
         double minCost = Double.MIN_VALUE;
         int r1Max = 0, r2Max = size - 1;
         for (int i = 0; i < size; i++) {
             for (int j = i + 1; j < size; j++) {
-                final HyperRect mbr = r[i].getMbr(r[j]);
+                final HyperRect mbr = r[i].mbr(r[j]);
                 final double cost = mbr.cost() - (r[i].cost() + r[j].cost());
                 if (cost > minCost) {
                     r1Max = i;

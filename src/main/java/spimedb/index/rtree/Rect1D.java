@@ -11,7 +11,7 @@ public abstract class Rect1D implements HyperRect<Point1D> {
     abstract public double to();
 
     @Override
-    public HyperRect getMbr(HyperRect r) {
+    public HyperRect mbr(HyperRect r) {
 
         Rect1D s = (Rect1D) r;
         double from = from();
@@ -27,12 +27,12 @@ public abstract class Rect1D implements HyperRect<Point1D> {
     }
 
     @Override
-    public HyperPoint getMin() {
+    public HyperPoint min() {
         return new Point1D(from());
     }
 
     @Override
-    public HyperPoint getMax() {
+    public HyperPoint max() {
         return new Point1D(to());
     }
 

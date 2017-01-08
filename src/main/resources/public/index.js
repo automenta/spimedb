@@ -1,7 +1,6 @@
 "use strict";
 
 
-
 function ready() {
 
     var VIEW_STARTUP = 'feed';
@@ -35,40 +34,40 @@ function ready() {
 
     /*app.index = new TagIndex(function (i) {
 
-        //called after index has been loaded, but this won't be necessary when events are used
+     //called after index has been loaded, but this won't be necessary when events are used
 
-        function newIndex() {
-            var t = new TagIndexAccordion(app.index);
+     function newIndex() {
+     var t = new TagIndexAccordion(app.index);
 
-            t.newElementHeader = function(tag) {
+     t.newElementHeader = function(tag) {
 
-                //http://codepen.io/thehonestape/pen/yjlGi
-                //http://thecodeplayer.com/walkthrough/spicing-up-the-html5-range-slider-input
+     //http://codepen.io/thehonestape/pen/yjlGi
+     //http://thecodeplayer.com/walkthrough/spicing-up-the-html5-range-slider-input
 
-                var d = newDiv();
-                var ii = $('<input class="tagSlider" type = "range" value="0" min="0" max="100" _onchange="rangevalue.value=value"/>');
-                ii.change(function(c) {
-                    app.setFocus(tag, parseInt(ii.val()) * 0.01);
-                });
-                d.html(ii);
-                return d;
-            };
+     var d = newDiv();
+     var ii = $('<input class="tagSlider" type = "range" value="0" min="0" max="100" _onchange="rangevalue.value=value"/>');
+     ii.change(function(c) {
+     app.setFocus(tag, parseInt(ii.val()) * 0.01);
+     });
+     d.html(ii);
+     return d;
+     };
 
-            t.addClass('tagIndexAccordion');
-            $('#sidebar').append(t);
+     t.addClass('tagIndexAccordion');
+     $('#sidebar').append(t);
 
-        }
+     }
 
-        newIndex();
+     newIndex();
 
-        //TODO make this part of TagIndexAccordion when it is refactored as a class
-        app.on('index.change', function() {
-            $('.' + 'tagIndexAccordion').remove();
-            newIndex();
-        });
+     //TODO make this part of TagIndexAccordion when it is refactored as a class
+     app.on('index.change', function() {
+     $('.' + 'tagIndexAccordion').remove();
+     newIndex();
+     });
 
-    });
-    */
+     });
+     */
 
     app.setView(VIEW_STARTUP);
 
@@ -80,20 +79,39 @@ class NClient extends EventEmitter {
     constructor() {
         super();
 
-        this.focus = { };
-        this.index = { };
+        this.focus = {};
+        this.index = {};
         this.views = {
 
-        'map2d': new Map2DView(),
-        'map3d': new Map3DView(),
-        //'feed': new FeedView(),
-        //'graph': new GraphView(),
-        //'wikipedia': new WikipediaView('Happiness'),
-        'time': new TimeView()
+            'map2d': new Map2DView(),
+            'map3d': new Map3DView(),
+            //'feed': new FeedView(),
+            //'graph': new GraphView(),
+            //'wikipedia': new WikipediaView('Happiness'),
+            'time': new TimeView()
 
-        //    'edit1': new NObjectEditView('New NObject')
+            //    'edit1': new NObjectEditView('New NObject')
             //'space1': new HTMLView('Spaces Test', 'lab', 'space.html')
         };
+
+        /** creates a websocket connection to a path on the server that hosts the currently visible webpage */
+        const session = new ReconnectingWebSocket(
+            'ws://' + window.location.hostname + ':' + window.location.port + '/session',
+            null /* protocols */,
+            /*options ||*/ {
+                //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
+                /*
+                 reconnectInterval: 1000, // The number of milliseconds to delay before attempting to reconnect.
+                 maxReconnectInterval: 30000, // The maximum number of milliseconds to delay a reconnection attempt.
+                 reconnectDecay: 1.5, // The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist.
+                 timeoutInterval: 2000, // The maximum time in milliseconds to wait for a connection to succeed before closing and retrying.
+                 */
+            }
+        );
+        session.onopen = ((e)=>{
+            session.send("connecttt");
+        });
+
     }
 
     data(channel) {
@@ -112,7 +130,6 @@ class NClient extends EventEmitter {
 
         return d;
     }
-
 
 
     setView(v, cb) {
@@ -144,13 +161,13 @@ class NClient extends EventEmitter {
         var that = this;
 
         var d = $('<span/>')
-        _.each(that.views, function(v, k) {
+        _.each(that.views, function (v, k) {
             d.append($('<button/>')
             //.append($('<button>' + v.icon + '</button>')
                 .append($('<i class="fa fa-' + v.icon + '"></i>'))
                 /*.attr('data-content', v.name)
                  .popup()*/
-                .click(function() {
+                .click(function () {
                     //setTimeout(function() {
                     that.setView(k);
                     //}, 0);
@@ -160,8 +177,8 @@ class NClient extends EventEmitter {
         var graphPopup;
 
         d.append(
-            $('<i class="fa fa-adjust"><input type="checkbox"/></i>').click(e=>{
-                var checked =  $(e.target).is(':checked');
+            $('<i class="fa fa-adjust"><input type="checkbox"/></i>').click(e => {
+                var checked = $(e.target).is(':checked');
                 if (checked) {
                     var target = $('<div id="graphpopup"/>').css({
                         position: 'fixed',
@@ -197,36 +214,34 @@ class NClient extends EventEmitter {
         //console.log('spaceOn', bounds);
 
 
-
         //https://github.com/jDataView/jBinary ?
         const oReq = new XMLHttpRequest();
         oReq.open("GET", bounds.toURL(), true);
         oReq.responseType = "arraybuffer"; //"blob"
 
-        oReq.onload = function(oEvent) {
-          const arrayBuffer = oReq.response;
-          if (arrayBuffer) {
-              const byteArray = new Uint8Array(arrayBuffer);
-              onFocus( msgpack.decode(byteArray) );
-          }
+        oReq.onload = function (oEvent) {
+            const arrayBuffer = oReq.response;
+            if (arrayBuffer) {
+                const byteArray = new Uint8Array(arrayBuffer);
+                onFocus(msgpack.decode(byteArray));
+            }
         };
         oReq.send(null);
 
 
-
         /*$.get(bounds.toURL())
-            .done(function(s) {
-                if (s.length == 0) return;
-                try {
-                    //var p = JSON.parse(s);
+         .done(function(s) {
+         if (s.length == 0) return;
+         try {
+         //var p = JSON.parse(s);
 
-                    var p = msgpack.decode(s);
-                    console.log(s.length, p);
-                    onFocus(p);
-                } catch (e) {
-                    onError(e);
-                }
-            }).fail(onError);*/
+         var p = msgpack.decode(s);
+         console.log(s.length, p);
+         onFocus(p);
+         } catch (e) {
+         onError(e);
+         }
+         }).fail(onError);*/
     }
 }
 

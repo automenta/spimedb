@@ -2,10 +2,6 @@ package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.graph.ElementOrder;
-import com.google.common.graph.GraphBuilder;
-import com.google.common.graph.MutableGraph;
-import net.bytebuddy.ByteBuddy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -18,7 +14,6 @@ import spimedb.index.rtree.SpatialSearch;
 import spimedb.query.Query;
 import spimedb.util.geom.Vec3D;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -35,15 +30,11 @@ public class SpimeDB implements Iterable<NObject>  {
 
     @JsonIgnore final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
-    @JsonIgnore public final MutableGraph<String> tag = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
-
     @JsonIgnore public final Map<String,SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
     @JsonIgnore public final Map<String, NObject> obj;
 
-    @JsonIgnore protected final Map<String,Class> tagClasses = new ConcurrentHashMap<>();
-    @JsonIgnore protected final ClassLoader cl = ClassLoader.getSystemClassLoader();
-    @JsonIgnore final ByteBuddy tagProxyBuilder = new ByteBuddy();
+    public final Schema schema = new Schema();
 
     /** in-memory, map-based */
     public SpimeDB() {
@@ -74,28 +65,10 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
     Class[] resolve(String... tags) {
-        Class[] c = new Class[tags.length];
-        int i = 0;
-        for (String s : tags) {
-            Class x = tagClasses.get(s);
-            if (x == null)
-                throw new NullPointerException("missing class: " + s);
-            c[i++] = x;
-        }
-        return c;
+        return schema.resolve(tags);
     }
 
     public Class the(String tagID, String... supertags) {
-
-        synchronized (tagClasses) {
-            if (tagClasses.containsKey(tagID))
-                throw new RuntimeException(tagID + " class already defined");
-
-            Class[] s = resolve(supertags);
-            Class proxy = tagProxyBuilder.makeInterface(s).name("_" + tagID).make().load(cl).getLoaded();
-            tagClasses.put(tagID, proxy);
-            return proxy;
-        }
 
         //.subclass(NObject.class).implement(s)
                     /*.method(any())
@@ -105,6 +78,7 @@ public class SpimeDB implements Iterable<NObject>  {
                     /*.make()
                     .load(cl)
                     .getLoaded();*/
+        return schema.the(tagID, supertags);
     }
 
 //    @Override
@@ -139,17 +113,17 @@ public class SpimeDB implements Iterable<NObject>  {
         String[] tags = d.tag;
         if (tags!=null) {
             for (String t : tags) {
-                if (this.tag.addNode(t)) {
+                if (this.schema.inh.addNode(t)) {
                     //index the tag if it doesnt exist in the graph
                     NObject tagJect = get(t);
                     if (tagJect!=null) {
                         String[] parents = tagJect.tag;
                         if (parents != null)
-                            tag(t, parents);
+                            schema.tag(t, parents);
                     }
                 }
             }
-            tag(id, tags);
+            schema.tag(id, tags);
 
             if (d.bounded()) {
                 for (String t : tags)
@@ -163,9 +137,7 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
     private void tag(String id, String[] parents) {
-        for (String parentTag : parents) {
-            tag.putEdge(parentTag, id);
-        }
+        schema.tag(id, parents);
     }
 
 
@@ -199,7 +171,7 @@ public class SpimeDB implements Iterable<NObject>  {
         Predicate<NObject> each = q.each;
 
         main:
-        for (String t : tagsAndSubtags(q.include)) {
+        for (String t : schema.tagsAndSubtags(q.include)) {
 
             SpatialSearch<NObject> s = spaceIfExists(t);
             if (s == null || s.isEmpty())
@@ -234,18 +206,7 @@ public class SpimeDB implements Iterable<NObject>  {
      */
     public Set<String> tagsAndSubtags(@Nullable String... parentTags) {
 
-        if (parentTags == null || parentTags.length == 0) {
-            return tag.nodes();
-        }
-
-        Set<String> s = new HashSet();
-
-        for (String x : parentTags) {
-            if (s.add(x)) {
-                s.addAll( tag.successors(x) );
-            }
-        }
-        return s;
+        return schema.tagsAndSubtags(parentTags);
     }
 
 
@@ -271,4 +232,5 @@ public class SpimeDB implements Iterable<NObject>  {
         }
 
     }
+
 }

@@ -128,7 +128,7 @@ class GraphView extends NView {
         var cy = this.s = cytoscape({
             container: v,
             textureOnViewport:true,
-            pixelRatio:0.5,
+            //pixelRatio:0.5,
             motionBlur:false,
             style: [ // the stylesheet for the graph
                 {
@@ -204,14 +204,17 @@ class GraphView extends NView {
                 });
 
                 setTimeout(() => {
+                    /* https://github.com/cytoscape/cytoscape.js-cola#api */
                     var options = {
                         name: 'cola',
-                        nodeSpacing: 30,
-                        edgeLengthVal: 10,
+                        nodeSpacing: 5,
+                        edgeLengthVal: 5,
                         animate: true,
+                        //flow: { axis: 'y', minSeparation: 30 }, //DAG
+                        //refresh: 2,
                         randomize: true,
                         fit: false,
-                        maxSimulationTime: 16000,
+                        //maxSimulationTime: 16000,
                         infinite: true
                     };
                     //cy.layout(options);

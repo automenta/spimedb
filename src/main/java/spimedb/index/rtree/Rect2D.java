@@ -63,7 +63,7 @@ public class Rect2D implements HyperRect<Rect2D> {
 
 
     @Override
-    public HyperRect getMbr(final HyperRect r) {
+    public HyperRect mbr(final HyperRect r) {
         final Rect2D r2 = (Rect2D) r;
         final double minX = Math.min(min.x, r2.min.x);
         final double minY = Math.min(min.y, r2.min.y);
@@ -97,12 +97,12 @@ public class Rect2D implements HyperRect<Rect2D> {
     }
 
         @Override
-    public HyperPoint getMin() {
+    public HyperPoint min() {
         return min;
     }
 
     @Override
-    public HyperPoint getMax() {
+    public HyperPoint max() {
         return max;
     }
 

@@ -35,7 +35,7 @@ public interface HyperRect<X> {
      * @param r - mbr to add
      * @return new HyperRect representing mbr of both HyperRects combined
      */
-    HyperRect<X> getMbr(HyperRect<X> r);
+    HyperRect<X> mbr(HyperRect<X> r);
 
     /**
      * Get number of dimensions used in creating the HyperRect
@@ -49,14 +49,14 @@ public interface HyperRect<X> {
      *
      * @return min HyperPoint
      */
-    HyperPoint getMin();
+    HyperPoint min();
 
     /**
      * Get the minimum HyperPoint of this HyperRect
      *
      * @return min HyperPoint
      */
-    HyperPoint getMax();
+    HyperPoint max();
 
     /**
      * Get the HyperPoint representing the center point in all dimensions of this HyperRect
@@ -122,17 +122,17 @@ public interface HyperRect<X> {
     }
 
 
-    @JsonIgnore  default double getRangeMin() {
-        int dim = dim();
-        double min = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < dim; i++) {
-            double r = getRange(i);
-            if (r < min) {
-                min = r;
-            }
-        }
-        return min;
-    }
+//    @JsonIgnore  default double getRangeMin() {
+//        int dim = dim();
+//        double min = Double.POSITIVE_INFINITY;
+//        for (int i = 0; i < dim; i++) {
+//            double r = getRange(i);
+//            if (r < min) {
+//                min = r;
+//            }
+//        }
+//        return min;
+//    }
 
     /** whether any of the dimensions are finite */
     @JsonIgnore  default boolean bounded() {

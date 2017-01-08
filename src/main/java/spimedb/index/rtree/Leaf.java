@@ -51,25 +51,11 @@ abstract class Leaf<T> implements Node<T> {
         this.splitType = splitType;
     }
 
-    static <R> Node<R> create(final RectBuilder<R> builder, final int mMin, final int M, final RTree.Split splitType) {
-
-        switch (splitType) {
-            case LINEAR:
-                return new LinearSplitLeaf<>(builder, mMin, M);
-            case QUADRATIC:
-                return new QuadraticSplitLeaf<>(builder, mMin, M);
-            case AXIAL:
-            default:
-                return new AxialSplitLeaf<>(builder, mMin, M);
-
-        }
-    }
-
     @Override
     public Node<T> add(final T t) {
         if (size < mMax) {
             final HyperRect tRect = builder.apply(t);
-            mbr = mbr != null ? mbr.getMbr(tRect) : tRect;
+            mbr = mbr != null ? mbr.mbr(tRect) : tRect;
 
             r[size] = tRect;
             entry[size++] = t;
@@ -78,7 +64,7 @@ abstract class Leaf<T> implements Node<T> {
                 if (entry[i] == null) {
                     entry[i] = t;
                     r[i] = builder.apply(t);
-                    mbr = mbr.getMbr(r[i]);
+                    mbr = mbr.mbr(r[i]);
                     return this;
                 }
             }
@@ -104,7 +90,7 @@ abstract class Leaf<T> implements Node<T> {
                 if (size > 0) {
                     mbr = r[0];
                     for (i = 1; i < size; i++) {
-                        mbr = mbr.getMbr(r[i]);
+                        mbr = mbr.mbr(r[i]);
                     }
                 }
                 return this;
@@ -211,13 +197,13 @@ abstract class Leaf<T> implements Node<T> {
     final void classify(final Node<T> l1Node, final Node<T> l2Node, final T t) {
 
         final HyperRect tRect = builder.apply(t);
-        final HyperRect l1Mbr = l1Node.bounds().getMbr(tRect);
+        final HyperRect l1Mbr = l1Node.bounds().mbr(tRect);
 
         double tCost = tRect.cost();
 
         double l1c = l1Mbr.cost();
         final double l1CostInc = Math.max(l1c - (l1Node.bounds().cost() + tCost), 0.0);
-        final HyperRect l2Mbr = l2Node.bounds().getMbr(tRect);
+        final HyperRect l2Mbr = l2Node.bounds().mbr(tRect);
         double l2c = l2Mbr.cost();
         final double l2CostInc = Math.max(l2c - (l2Node.bounds().cost() + tCost), 0.0);
         if (l2CostInc > l1CostInc) {

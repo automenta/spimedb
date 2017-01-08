@@ -19,15 +19,15 @@ import static io.undertow.Handlers.websocket;
 /**
  * Manages websocket i/o to a channel
  */
-abstract public class WebSocketCore extends AbstractReceiveListener implements WebSocketCallback<Void>, WebSocketConnectionCallback {
+abstract public class WebSocket extends AbstractReceiveListener implements WebSocketCallback<Void>, WebSocketConnectionCallback {
 
-    static final Logger logger = LoggerFactory.getLogger(WebSocketCore.class);
+    static final Logger logger = LoggerFactory.getLogger(WebSocket.class);
 
 
     @Override
     public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel socket) {
 
-        logger.info("{} connect", socket.getPeerAddress());
+        logger.info("{} connect {}", socket.getPeerAddress(), socket.getUrl() );
 
         socket.getReceiveSetter().set(this);
         socket.resumeReceives();
@@ -55,7 +55,7 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
     }
 
 
-    public void send(WebSocketChannel socket, String s) {
+    public static void send(WebSocketChannel socket, String s) {
 
         try {
             WebSockets.sendTextBlocking(s, socket);
@@ -65,7 +65,7 @@ abstract public class WebSocketCore extends AbstractReceiveListener implements W
 
     }
 
-    public void send(WebSocketChannel socket, Object object) {
+    public static void send(WebSocketChannel socket, Object object) {
 
 
         try {
