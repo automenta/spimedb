@@ -18,7 +18,7 @@ var DEBUG = false;
     proxy = l.P;
 */
 var layers = {
-    I: 'Climate-Viewer',
+    I: null,
     Live: { N: "Live",
         Report: {  N: "Climate Viewer Reports", icon: "bullhorn", '<': [
             { I: "cvr01", T: 'kml', M: true, MS: "2", G: "http://climateviewer.com/kml/cv-reports/cv-reports-0415.kml", S: "Climate Viewer Reports", U: "https://climateviewer.crowdmap.com/", N: "CV Reports - 2011 - 2015"}
@@ -290,6 +290,9 @@ var nfield = {
 var NObject = Java.type('spimedb.NObject');
 
 function nobject(x) {
+
+    if (!x.I) return;
+
     var y = new NObject(x.I, x.N);
 
 
@@ -334,8 +337,8 @@ function nobjectize(x, parent) {
     if (!x.I) {
         if (x.N)
             x.I = x.N;
-        else
-            x.I = '_' + parseInt(Math.random() * 10000000.0);  //TODO uuid
+        //else
+            //return {}; //x.I = '_' + parseInt(Math.random() * 10000000.0);  //TODO uuid
     }
 
     if (parent && parent.I) {

@@ -122,7 +122,7 @@ class GraphView extends NView {
     start(v, app, cb) {
 
         var degreeScale = function (node) { // returns numeric value for each node, placing higher nodes in levels towards the centre
-            return 10 + 10 * node.degree();
+            return 50 + 50 * node.degree();
         };
 
         var cy = this.s = cytoscape({
@@ -137,6 +137,7 @@ class GraphView extends NView {
                         'label': 'data(N)',
                         'width': degreeScale,
                         'height': degreeScale,
+                        'text-valign': 'center'
                     }
                 },
 
@@ -149,11 +150,7 @@ class GraphView extends NView {
                         'target-arrow-shape': 'triangle'
                     }
                 }
-            ],
-
-            layout: {
-                name: 'grid'
-            }
+            ]
         });
 
 
@@ -164,23 +161,28 @@ class GraphView extends NView {
 
                 cy.batch(() => {
 
+                    //add nodes
                     _.each(tagMap, function (i) {
 
-                        if (!i)
-                            return;
+                        if (!i) return;
 
                         i.id = i.I; //HACK
-
-
                         cy.add({
                             group: "nodes",
                             data: i
                         });
+                    });
+                });
+
+                cy.batch(() => {
+                    //add edges
+                    _.each(tagMap, function (i) {
+                        if (!i) return;
+
                         const supers = i['>'];
                         if (supers) {
                             _.each(supers, function (superTag) {
-                                var src = i.id;
-                                var tgt = superTag;
+                                const src = i.id, tgt = superTag;
                                 cy.add({
                                     group: 'edges',
                                     data: {
@@ -190,39 +192,47 @@ class GraphView extends NView {
                             });
                         }
 
-
-                        //if (i)
-                        ///that.updateTag(i);
                     });
 
                 });
 
-//              var options = {
-//                name: 'cose',
-//                idealEdgeLength: 100,
-//                nodeOverlap: 20
-//              };
-//              cy.layout( options );
+                setTimeout(() => {
+                    var options = {
+                        name: 'cola',
+                        nodeSpacing: 40,
+                        edgeLengthVal: 10,
+                        animate: true,
+                        randomize: true,
+                        fit: false,
+                        maxSimulationTime: 16000,
+                        infinite: true
+                    };
+                    //cy.layout(options);
+                    var ly = cy.makeLayout(options);
+                    console.log(ly);
+                    ly.run();
+                }, 0);
 
-                var options = {
-                    name: 'breadthfirst',
 
-                    fit: true, // whether to fit the viewport to the graph
-                    directed: true, // whether the tree is directed downwards (or edges can point in any direction if false)
-                    padding: 5, // padding on fit
-                    circle: true, // put depths in concentric circles if true, put depths top down if false
-                    spacingFactor: 1.25, // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
-                    boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-                    avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
-                    roots: undefined, // the roots of the trees
-                    maximalAdjustments: 5, // how many times to try to position the nodes in a maximal way (i.e. no backtracking)
-                    animate: false, // whether to transition the node positions
-                    animationDuration: 500, // duration of animation in ms if enabled
-                    animationEasing: undefined, // easing of animation if enabled
-                    ready: undefined, // callback on layoutready
-                    stop: undefined // callback on layoutstop
-                };
-                cy.layout(options);
+                // var options = {
+                //     name: 'breadthfirst',
+                //
+                //     fit: true, // whether to fit the viewport to the graph
+                //     directed: true, // whether the tree is directed downwards (or edges can point in any direction if false)
+                //     padding: 5, // padding on fit
+                //     circle: true, // put depths in concentric circles if true, put depths top down if false
+                //     spacingFactor: 1.25, // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
+                //     boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+                //     avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
+                //     roots: undefined, // the roots of the trees
+                //     maximalAdjustments: 5, // how many times to try to position the nodes in a maximal way (i.e. no backtracking)
+                //     animate: false, // whether to transition the node positions
+                //     animationDuration: 500, // duration of animation in ms if enabled
+                //     animationEasing: undefined, // easing of animation if enabled
+                //     ready: undefined, // callback on layoutready
+                //     stop: undefined // callback on layoutstop
+                // };
+                // cy.layout(options);
 
                 //add edges
                 /*var nn = that.tag.nodes();

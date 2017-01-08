@@ -4,9 +4,10 @@
     "dependencies": {
         "jquery": "latest",
         "jquery-ui": "latest",
-	    "msgpack-lite": "latest",
+	"msgpack-lite": "latest",
         "cytoscape": "latest",
         "cytoscape-edgehandles": "latest",
+	"cytoscape-cola": "latest",
         "cesiumjs": "latest",
         "leaflet": "latest",
         "leaflet-providers": "latest",
