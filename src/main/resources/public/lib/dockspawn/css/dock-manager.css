@@ -43,7 +43,7 @@
 }
 
 .panel-content * {
-    margin: 0px;
+    margin: 0;
 }
 
 /***************** Floating dialog box ****************/
@@ -178,7 +178,7 @@
 }
 
 .tab-content * {
-    margin: 0px;
+    margin: 0;
 }
 
 .tab-handle {
@@ -188,7 +188,7 @@
     height: 22px;
     float: left;
     overflow: hidden;        
-    box-shadow: 0px 5px 20px #000;
+    box-shadow: 0 5px 20px #000;
 }
 .tab-handle:hover {
     background-color: #F90;
@@ -231,7 +231,6 @@
 /*************************** Text Selection **************************/
 .disable-selection {
     -moz-user-select: none;
-    -khtml-user-select: none;
     -webkit-user-select: none;
     user-select: none;
     cursor: default;

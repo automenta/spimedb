@@ -112,6 +112,7 @@ class NClient extends EventEmitter {
 
         return d;
     }
+
     setFocus(tag, amount) {
         var prevFocus = this.focus[tag] || 0;
         if (prevFocus == amount) return;
@@ -128,8 +129,7 @@ class NClient extends EventEmitter {
             if (t.channel) {
                 //already open??? this shouldnt happen normally
                 console.error('newly focused tag', t, 'already has channel opened');
-            }
-            else if (t.newChannel) {
+            } else if (t.newChannel) {
                 var c = t.newChannel({
 
                     onOpen: function() {
@@ -198,9 +198,10 @@ class NClient extends EventEmitter {
          */
         var that = this;
 
-        var d = $('<div class="ui buttons inverted">');
+        var d = $('<SPAN/>')
         _.each(that.views, function(v, k) {
-            d.append($('<div class="ui icon button"></div>').append($('<i class="' + v.icon + ' icon"></i>'))
+            d.append($('<button>' + v.icon + '</button>')
+                //.append($('<i class="' + v.icon + ' icon"></i>'))
                 /*.attr('data-content', v.name)
                  .popup()*/
                 .click(function() {

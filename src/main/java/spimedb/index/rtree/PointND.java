@@ -58,7 +58,6 @@ public class PointND implements HyperPoint, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        //TODO use float epsilon tolerance
         if (this == obj) return true;
         PointND p = (PointND) obj;
         return RTree.equals(coord, p.coord, FPSILON);

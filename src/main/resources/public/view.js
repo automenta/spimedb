@@ -126,7 +126,7 @@ class GraphView extends NView {
         };
 
         var cy = this.s = cytoscape({
-            container: v,
+            container: v,textureOnViewport:true,pixelRatio:0.25,motionBlur:false,
             style: [ // the stylesheet for the graph
                 {
                     selector: 'node',
@@ -135,9 +135,12 @@ class GraphView extends NView {
                         'shape': 'hexagon',
                         'background-color': '#666',
                         'label': 'data(N)',
+                        'text-outline': null,
                         'width': degreeScale,
                         'height': degreeScale,
-                        'text-valign': 'center'
+                        'text-valign': 'center',
+
+                        'min-zoomed-font-size': 6
                     }
                 },
 
@@ -147,7 +150,8 @@ class GraphView extends NView {
                         'width': 3,
                         'line-color': '#ccc',
                         'target-arrow-color': '#ccc',
-                        'target-arrow-shape': 'triangle'
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'haystack'
                     }
                 }
             ]
@@ -172,9 +176,9 @@ class GraphView extends NView {
                             data: i
                         });
                     });
-                });
+                //});
 
-                cy.batch(() => {
+                //cy.batch(() => {
                     //add edges
                     _.each(tagMap, function (i) {
                         if (!i) return;
@@ -199,7 +203,7 @@ class GraphView extends NView {
                 setTimeout(() => {
                     var options = {
                         name: 'cola',
-                        nodeSpacing: 40,
+                        nodeSpacing: 30,
                         edgeLengthVal: 10,
                         animate: true,
                         randomize: true,
