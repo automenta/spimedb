@@ -56,7 +56,8 @@ Exploit hyperdimensional locality for efficient iterative access in display, ana
 
 projection models (choose a default or assign these id's for encoding type):
 
-### lat/lon/alt/unixtime
+### lon/lat/alt/unixtime
+ * __lon (X) first, then lat (Y).__ for consistency with usual X,Y vector ordering
  * requires modulo +/-180 degrees longitude which may require preprocessing certain queries
  * distortion at poles
 
