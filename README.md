@@ -1,10 +1,10 @@
 # SpimeDB - realtime spatiotemporal database
 
-![SpimeDB Logo](https://raw.githubusercontent.com/automenta/spimedb/master/data/spimedb_logo.png)
-
 SpimeDB unifies the semantic, spatial, and temporal dimensions of data in a common n-dimensional ranged vector space.
 
-Exploiting hyperdimensional locality enables efficient iterative access in display, analysis, and distributed computation applications.
+Exploit hyperdimensional locality for efficient iterative access in display, analysis, and distributed computation applications.
+
+![SpimeDB Logo](https://raw.githubusercontent.com/automenta/spimedb/master/data/spimedb_logo.png)
 
 ## NObject (json) specification v-0.00
 ```js
