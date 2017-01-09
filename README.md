@@ -18,7 +18,7 @@ Exploit hyperdimensional locality for efficient iterative access in display, ana
 	// Tags (array of strings, to the id's of tags from which this intensionally inherits)
 	'<': [ tag1, tag2, ... ],
 
-	// Description: string or a internationalized string table, ex:
+	// Description: free-form string, or a internationalized string table, ex:
 	'_': { _: "xx" /* optional 2 letter country code indicating the default language involved in this nobject, which may be blank to represent complete internationalization */,
 		  en: "english label",
 		  es: "etiqueta en español",
@@ -28,21 +28,21 @@ Exploit hyperdimensional locality for efficient iterative access in display, ana
 	// Author, origin, provenance: one or more nobject IDs. URL or email string works fine
 	A: 'http://url/id',
 
-	//Editing times.
-	//  A number, or an array of numbers in milliseconds.
-	//  First # is creation time, subsequent # indicate the delta offset to
-	//    the last edit time (to save digits).
-	//  Millisecond (ms) or lesser precision: hexadecimal long integer
-	//  Finer than millisecond (ex: nanosecond): floating point number
+	// Editing times.
+	//   A number, or an array of numbers in milliseconds.
+	//   First # is creation time, subsequent # indicate the delta offset to
+	//     the last edit time (to save digits).
+	//   Millisecond (ms) or lesser precision: hexadecimal long integer
+	//   Finer than millisecond (ex: nanosecond): floating point number
 	E: [ 238472389472, 23423432 ],
 
-	//Expiration time in unixtime milliseconds.  After this time point, the nobject permits its deletion.  If zero, the object is considered temporary and can be deleted at any point.
+	// Expiration time in unixtime milliseconds.  After this time point, the nobject permits its deletion.  If zero, the object is considered temporary and can be deleted at any point.
 	X: 23842738423,
 
-	//Privacy / visiblity directives and public keys
+	// Routing / privacy / visiblity directives and public keys
 	P: [ 'private', 'anonymous', ... ],
 
-    // Spacetime bounds 4 (four) dimensional vector of spatial (0, 1, 2) and temporal (3) ranged values.
+    // Spacetime bounds: 4 (four) dimensional vector of spatial (0, 1, 2) and temporal (3) ranged values.
 	'@': [
 	    1.3,                            //point, matches within a finite epsilon range determined by floating poitn precision
 	    [ -558.0, 2494.0 ],             //bounded range
@@ -63,7 +63,8 @@ projection models (choose a default or assign these id's for encoding type):
  * distortion at poles
 
 ### x/y/z/unixtime - WSG geographic projection to (flat) euclidean 3D absolute space
- * TODO which is the newest projection model
+ * TODO determine the newest projection model
+ * orthogonally-aligned bounding boxes will not have a common alignment with spheroid planet surface, which may impact efficiency
 
 ### other models
  * ?
