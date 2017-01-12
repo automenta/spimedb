@@ -7,6 +7,7 @@ import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.*;
 import io.undertow.websockets.extensions.PerMessageDeflateHandshake;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
+import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.util.JSON;
@@ -63,6 +64,20 @@ abstract public class WebSocket extends AbstractReceiveListener implements WebSo
             logger.error("err: {} {}", socket, e.toString());
         }
 
+    }
+
+    public static void send(WebSocketChannel socket, ObjectFloatMap<String> m) {
+        //TODO use MsgPack'd JSON object
+
+        StringBuilder sb = new StringBuilder(m.size() * 16).append('{');
+        m.forEachKeyValue((k,v) -> {
+            sb.append('\"').append(k).append("\":").append(v).append(',');
+        });
+        int cur = sb.length();
+        if (cur > 1) //remove trailing ',' if at least one element was printed
+            sb.setLength(cur-1);
+        sb.append('}');
+        send(socket, sb.toString());
     }
 
     public static void send(WebSocketChannel socket, Object object) {

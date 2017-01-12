@@ -152,7 +152,7 @@ public class JSON {
         try {
             return json.writeValueAsString(x);
         } catch (JsonProcessingException ex) {
-            System.out.println(ex.toString());
+            System.err.println(ex.toString());
             try {
                 return json.writeValueAsString( x.toString() );
             } catch (JsonProcessingException ex1) {

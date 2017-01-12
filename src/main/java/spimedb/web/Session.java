@@ -5,6 +5,7 @@ import io.undertow.util.AttachmentKey;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.util.bloom.UnBloomFilter;
 
@@ -40,8 +41,14 @@ public class Session {
     public static Session session(HttpServerExchange ex) {
         Session s = ex.getConnection().getAttachment(SESSION);
         if (s == null) {
-            ex.getConnection().putAttachment(SESSION, s = new Session(ex.getConnection().getPeerAddress()));
+            ex.getConnection().putAttachment(SESSION, s = newSession(ex.getConnection().getPeerAddress()));
         }
+        return s;
+    }
+
+    @NotNull
+    private static Session newSession(SocketAddress peerAddress) {
+        Session s = new Session(peerAddress);
         return s;
     }
 
@@ -51,7 +58,7 @@ public class Session {
         if (s == null) {
             if (c == null)
                 throw new NullPointerException();
-            ex.putAttachment(SESSION, s = new Session(c.getPeerAddress()));
+            ex.putAttachment(SESSION, s = newSession(c.getPeerAddress()));
             c.setAttribute("session", s);
         }
 

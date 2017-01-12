@@ -122,7 +122,11 @@ class GraphView extends NView {
     start(v, app, cb) {
 
         var degreeScale = function (node) { // returns numeric value for each node, placing higher nodes in levels towards the centre
-            return 50 + 50 * node.degree();
+
+            var p = node._private.data.I;
+            console.log(p, app.attn.pri.get(p));
+            return 10 + 50 * Math.sqrt(app.attn.pri.get(p) || 0);
+            //return 50 + 50;// * node.data('pri');
         };
 
         var cy = this.s = cytoscape({
@@ -166,6 +170,8 @@ class GraphView extends NView {
         });
 
         var that = this;
+
+
         $.getJSON('/tag')
             .done(function (tagMap) {
 
@@ -177,10 +183,12 @@ class GraphView extends NView {
 
                         if (!i) return;
 
-                        i.id = i.I; //HACK
+                        const ii = i.I;
+                        i.id = ii; //HACK
                         cy.add({
                             group: "nodes",
-                            data: i
+                            data: i,
+                            pri: app.attn.pri.get(ii) || 0
                         });
                     });
                 //});

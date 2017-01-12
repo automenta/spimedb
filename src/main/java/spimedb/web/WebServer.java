@@ -19,8 +19,10 @@ import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
+import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
+import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
 import spimedb.util.HTTP;
@@ -31,7 +33,6 @@ import java.nio.file.Paths;
 import java.util.Deque;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.stream.Collectors;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
@@ -73,7 +74,11 @@ public class WebServer extends PathHandler {
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
-            JSON.toJSON(db.schema.tags().map(db::get).collect(Collectors.toList()));
+            try {
+                o.write( JSON.toJSON(db.schema.tags().map(db::get).toArray(NObject[]::new)).getBytes() );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }));
 
         /* client attention management */
@@ -81,19 +86,30 @@ public class WebServer extends PathHandler {
 
             @Override
             protected void onMessage(WebSocketChannel socket, BufferedTextMessage message, Session session) {
-                //System.out.println(socket + " " + message + " " + session);
 
-                StringTokenizer t = new StringTokenizer(message.getData(), "\t");
-                String tag = t.nextToken();
-                String value = t.nextToken();
+                //if this is a new session, set default attention to the pagerank of tags
+                if (session.attention.isEmpty()) {
+                    ObjectFloatMap<String> rank = db.schema.rank();
+                    session.attention.putAll(rank);
+                }
 
-                logger.info("attn {} {}:{}", session, tag, value);
+                String messageData = message.getData();
+                if (messageData.isEmpty()) {
+                    WebSocket.send(socket, session.attention);
+                } else {
 
-                float fv = Float.valueOf(value);
-                if (fv!=fv) /* NaN */
-                    session.attention.remove(tag);
-                else
-                    session.attention.put(tag, fv);
+                    StringTokenizer t = new StringTokenizer(messageData, "\t");
+                    String tag = t.nextToken();
+                    String value = t.nextToken();
+
+                    logger.info("attn {} {}:{}", session, tag, value);
+
+                    float fv = Float.valueOf(value);
+                    if (fv != fv) /* NaN */
+                        session.attention.remove(tag);
+                    else
+                        session.attention.put(tag, fv);
+                }
 
             }
         }));

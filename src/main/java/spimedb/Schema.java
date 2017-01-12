@@ -2,10 +2,13 @@ package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.bytebuddy.ByteBuddy;
-import org.apache.tinkerpop.gremlin.structure.Element;
+import org.apache.tinkerpop.gremlin.process.computer.ComputerResult;
+import org.apache.tinkerpop.gremlin.process.computer.ranking.pagerank.PageRankVertexProgram;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
+import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +75,37 @@ public class Schema {
 
     }
 
+    public ObjectFloatMap<String> rank() {
+        ObjectFloatHashMap<String> hh = new ObjectFloatHashMap<>();
+        try {
+            ComputerResult x = inh.compute().program(PageRankVertexProgram.build().create(inh)).submit().get();
+            x.graph().traversal().V().
+                    forEachRemaining(pr -> {
+                        String id = (String) pr.id();
+                        float value = ((Number)pr.property("gremlin.pageRankVertexProgram.pageRank").value()).floatValue();
+                        hh.put(id, value);
+                    });
+                    //forEachRemaining(x1 -> System.out.println(x1.id() + " " + Joiner.on(" ").join(x1.properties())));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        /*float min = hh.min();
+        float max = hh.max();
+        if (min!=max) {
+
+        }*/
+
+        /*inh.traversal().V().pageRank().it by(outE("inh")).valueMap("id", "inh").forEachRemaining(m -> {
+                hh.put( m.get("id").toString() , ((Number)m.get("inh")).floatValue() );
+        });*/
+        return hh;
+    }
+
     private Vertex addVertex(String s) {
 //        Transaction t = inh.tx();
 //        try {
+
         Iterator<Vertex> ex = inh.vertices(s);
         if (ex.hasNext()) {
             return ex.next();
@@ -147,7 +178,7 @@ public class Schema {
     }
 
     public Stream<String> tags() {
-        return inh.traversal().V().toStream().map(Element::label);
+        return inh.traversal().V().toStream().map(x -> (String)x.id());
     }
 
 }

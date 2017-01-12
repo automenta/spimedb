@@ -63,19 +63,38 @@ class NClient extends EventEmitter {
         this.socket = {};
 
 
-        const attn = this.socket['attn'] = new ReconnectingWebSocket( ws + 'attn' );
-        attn.onopen = ((e)=>{
+        const attn = this.attn = this.socket['attn'] = new ReconnectingWebSocket( ws + 'attn' );
+        attn.pri = new Cache(undefined, 2048);
+
+
+        attn.update = () => {
+            //TODO debounce this
+
+            attn.send(''); //empty string
+        };
+
+        attn.onmessage = a => {
+            const aa = JSON.parse(a.data);
+            _.each(aa, (v,k) => {
+                attn.pri.set(k, v);
+            });
+        };
+
+        attn.onopen = e => {
+
+            attn.update();
             // attn.send("Earthquake\t1.0");
             // attn.send("Pollution\t0.5");
-        });
-        this.attn = (tag, value)=>{
+        };
+
+        /*this.attn.set = (tag, value)=>{
             try {
                 attn.send((tag + '\t') + value);
             } catch (x) {
                 //TODO if not connected, accept a buffer of finite # of commands in a wrapper extension of ReconnectingWebsocket
                 console.error(x);
             }
-        };
+        };*/
 
 
     }
@@ -122,8 +141,8 @@ class NClient extends EventEmitter {
 
         var graphPopup;
 
-        d.append(
-            $('<i class="fa fa-adjust"><input type="checkbox"/></i>').click(e => {
+        d.prepend(
+            $('<i class="fa fa-adjust">').append($('<input type="checkbox"/>').click(e => {
                 var checked = $(e.target).is(':checked');
                 if (checked) {
                     var target = $('<div id="graphpopup"/>').css({
@@ -143,7 +162,7 @@ class NClient extends EventEmitter {
                     }
                 }
             })
-        );
+        ));
 
         return d;
 
