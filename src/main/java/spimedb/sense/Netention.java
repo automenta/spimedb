@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * @author me
  */
-abstract public class ImportNetention {
+abstract public class Netention {
 
     public final static ObjectMapper jsonMapper = new ObjectMapper().
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).
@@ -66,11 +66,11 @@ abstract public class ImportNetention {
 //
 //    }
 
-    public ImportNetention() throws Exception {
+    public Netention() throws Exception {
         this(new File("./data/ontology.json"));
     }
 
-    public ImportNetention(File u) throws IOException {
+    public Netention(File u) throws IOException {
 
         Map<String, Object> wrapper
                 = jsonMapper.readValue(new FileInputStream(u), Map.class);
@@ -81,30 +81,26 @@ abstract public class ImportNetention {
 
     }
 
-    abstract public void onTag(LinkedHashMap id);
+    public void onTag(LinkedHashMap o) {
+        //System.out.println(o.getClass() + ": " + o);
+        String id = o.get("id").toString();
+        String name = o.get("name").toString();
+        List extend = (List) o.get("extend");
+
+//        if (o.containsKey("tileLayer")) {
+//
+//        }
+//        if (o.containsKey("wmsLayer")) {
+//
+//        }
+        //System.out.println(id + ' ' + name + ' ' + extend);
+        onTag(id, name, extend);
+    }
+
+    protected abstract void onTag(String id, String name, List<String> extend);
+
     //abstract public void onProperty(String id);
 
-    public static void main(String[] args) throws Exception {
-        new ImportNetention() {
-
-            @Override
-            public void onTag(LinkedHashMap o) {
-                //System.out.println(o.getClass() + ": " + o);
-                String id = o.get("id").toString();
-                String name = o.get("name").toString();
-                List extend = (List) o.get("extend");
-
-                if (o.containsKey("tileLayer")) {
-
-                }
-                if (o.containsKey("wmsLayer")) {
-
-                }
-                System.out.println(id + ' ' + name + ' ' + extend);
-            }
-
-        };
-    }
 
     /**
      * Generalization of a URL/URI, label, semantic predicate, type / class, or any kind of literalizable concept.

@@ -3,7 +3,7 @@ package spimedb.sense.kml;
 
 import org.junit.Test;
 import spimedb.SpimeDB;
-import spimedb.sense.ImportKML;
+import spimedb.sense.KML;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class TestKMZUnfucking {
         URL v = TestKMZUnfucking.class.getClassLoader().getResource("WeeklyVolcanoGE-Reports.kmz");
         //System.out.println(v);
 
-        new ImportKML(es).file("main",
+        new KML(es).file("main",
             new File(
                 v.getPath()
             )

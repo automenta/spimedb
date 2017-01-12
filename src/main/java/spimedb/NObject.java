@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
-import spimedb.sense.ImportKML;
+import spimedb.sense.KML;
 import spimedb.util.JSON;
 
 import java.io.IOException;
@@ -316,7 +316,7 @@ public class NObject extends RectND implements Serializable {
     public NObject where(Line l) {
 
         List<Point> lp = l.getPoints();
-        double[][] points = ImportKML.toArray(lp);
+        double[][] points = KML.toArray(lp);
 
         where(l.getBoundingBox());
         put("g" + NObject.LINESTRING, points);
@@ -324,7 +324,7 @@ public class NObject extends RectND implements Serializable {
     }
 
     public NObject where(Polygon p) {
-        double[][] outerRing = ImportKML.toArray(p.getOuterRing().getPoints());
+        double[][] outerRing = KML.toArray(p.getOuterRing().getPoints());
 
         //TODO handle inner rings
 

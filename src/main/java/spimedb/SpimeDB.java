@@ -28,7 +28,8 @@ public class SpimeDB implements Iterable<NObject>  {
 
     public static final String VERSION = "SpimeDB v-0.00";
 
-    @JsonIgnore final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
+    @JsonIgnore
+    public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     @JsonIgnore public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 

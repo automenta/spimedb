@@ -1,17 +1,18 @@
-package spimedb.run;
+package spimedb;
 
-import spimedb.SpimeDB;
 import spimedb.db.InfiniSpimeDB;
+import spimedb.sense.Netention;
 import spimedb.util.js.SpimeScript;
 import spimedb.web.WebServer;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by me on 6/14/15.
  */
 
-public class ClimateEditor  {
+public class Main {
 
 
     static {
@@ -23,16 +24,27 @@ public class ClimateEditor  {
         }
     }
 
-    public ClimateEditor(SpimeDB db) {
+    public Main(SpimeDB db) throws Exception {
 
         if (db.isEmpty()) {
-            System.out.println("Initializing database...");
+            db.logger.info("Initializing database...");
 
             try {
                 new SpimeScript(db).run(new File("data/climateviewer.js"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            new Netention() {
+
+                @Override
+                protected void onTag(String id, String name, List<String> extend) {
+                    NObject n = new NObject(id, name);
+                    if (extend!=null && !extend.isEmpty())
+                        n.setTag(extend.toArray(new String[extend.size()]));
+                    db.put(n);
+                }
+            };
 
             //ImportGeoJSON
 
@@ -69,14 +81,14 @@ public class ClimateEditor  {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         SpimeDB db =  InfiniSpimeDB.get(
                 //"/tmp/climate"
                 null
         );
 
-        new ClimateEditor(db);
+        new Main(db);
 
 
 

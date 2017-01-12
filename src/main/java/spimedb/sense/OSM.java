@@ -14,10 +14,10 @@ import java.util.Map;
 /**
  * PBF datasets: https://mapzen.com/data/metro-extracts/
  */
-public class ImportOSM implements Sink, EntityProcessor {
+public class OSM implements Sink, EntityProcessor {
 
 
-    public ImportOSM(String pbfFile) {
+    public OSM(String pbfFile) {
         PbfReader r = new PbfReader(new File(pbfFile), 1);
         r.setSink(this);
         r.run();
@@ -76,7 +76,7 @@ public class ImportOSM implements Sink, EntityProcessor {
 
     public static void main(String[] args) {
 
-        new ImportOSM("/home/me/d/p1.osm.pbf");
+        new OSM("/home/me/d/p1.osm.pbf");
 
     }
 

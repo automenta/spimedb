@@ -43,7 +43,7 @@ import static spimedb.sense.kml.KmlReader.logger;
  * see https://github.com/OpenSextant/giscore/wiki
  * @author me
  */
-public class ImportKML {
+public class KML {
 
     final int maxPathDepth = 3;
     private final Proxy proxy;
@@ -282,11 +282,11 @@ public class ImportKML {
         }
     }
 
-    public ImportKML(SpimeDB db) {
+    public KML(SpimeDB db) {
         this(db, null);
     }
 
-    public ImportKML(SpimeDB db, Proxy proxy) {
+    public KML(SpimeDB db, Proxy proxy) {
         this.db = db;
         this.proxy = proxy;
     }

@@ -16,14 +16,14 @@ import java.nio.file.Paths;
 /**
  * @author me
  */
-public abstract class ImportClimateViewer {
+public abstract class ClimateViewer {
 
     static final String basePath = "cache";
     static final String layersFile = "data/climateviewer.json";
 
     String currentSection = "Unknown";
 
-    public ImportClimateViewer() throws Exception {
+    public ClimateViewer() throws Exception {
 
 
         /*ExecutorService executor =

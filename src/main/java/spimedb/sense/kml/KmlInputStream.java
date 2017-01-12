@@ -46,7 +46,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static spimedb.sense.ImportKML.anchorHash;
+import static spimedb.sense.KML.anchorHash;
 
 
 /**

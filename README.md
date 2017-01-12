@@ -46,15 +46,15 @@ Exploit hyperdimensional locality for efficient iterative access in display, ana
 	'@': [
 	    1.3,                            //point, matches within a finite epsilon range determined by floating poitn precision
 	    [ -558.0, 2494.0 ],             //bounded range
-	    [ -Infinity, +Infinifty ],      //matches any
+	    [ -Infinity, +Infinity ],      //matches any
 	    NaN                             //matches any (shorter)
 	]
 
 ```
 
-## Spacetime vector space semantics
+## Spacetime Vector Semantics
 
-projection models (choose a default or assign these id's for encoding type):
+Spatial projection models resolve an internal spatial vector. The protocol must specify a default and assign these id's for specific encoding type:
 
 ### lon/lat/alt/unixtime
  * __longitude (X) first, then latitude (Y).__ for consistency with usual X,Y vector ordering
@@ -100,7 +100,7 @@ as a 32-bit float, but 64-bit float ('double')' is better but not as ideal as 64
 
 				"identified_source_nobject",
 
-				[ 0.85f, "another_identified_source_with_given_strength" ]
+				[ 0.85, "another_identified_source_with_given_strength" ]
 
 				{ /* inline object, with an effective ID prefixed by the outer object */ },
 

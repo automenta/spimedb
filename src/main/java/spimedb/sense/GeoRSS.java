@@ -6,9 +6,9 @@
 package spimedb.sense;
 
 /**
- *
+ * TODO
  * @author me
  */
-public class ImportGeoRSS {
+public class GeoRSS {
     
 }
