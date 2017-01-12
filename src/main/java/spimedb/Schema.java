@@ -1,25 +1,33 @@
 package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.graph.ElementOrder;
-import com.google.common.graph.GraphBuilder;
-import com.google.common.graph.MutableGraph;
 import net.bytebuddy.ByteBuddy;
+import org.apache.tinkerpop.gremlin.structure.Element;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
+
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 
 /**
  * Created by me on 1/8/17.
  */
 public class Schema {
 
+    final static Logger logger = LoggerFactory.getLogger(Schema.class);
 
-    @JsonIgnore
-    public final MutableGraph<String> inh = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
+//    @JsonIgnore
+//    public final MutableGraph<String> inh = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
+
+    final TinkerGraph inh = TinkerGraph.open();
 
 //    @JsonIgnore
 //    public final Map<String,Tag> tag = new ConcurrentHashMap<>();
@@ -42,10 +50,40 @@ public class Schema {
 //        }
 //    }
 
-    public void tag(String id, String[] parents) {
-        for (String parentTag : parents) {
-            inh.putEdge(parentTag, id);
+
+
+    public void tag(String X, String[] parents) {
+
+        int n = 0;
+        Vertex[] ps = new Vertex[parents.length];
+        for (String s : parents) {
+            if (s.isEmpty()) { //HACK
+                logger.warn("{} includes an empty string tag");
+                continue;
+            }
+            ps[n++] = addVertex(s);
         }
+
+        Vertex x = addVertex(X);
+        for (Vertex p : ps) {
+            if (p!=null) //HACK, for above condition
+                p.addEdge("inh", x);
+        }
+
+    }
+
+    private Vertex addVertex(String s) {
+//        Transaction t = inh.tx();
+//        try {
+        Iterator<Vertex> ex = inh.vertices(s);
+        if (ex.hasNext()) {
+            return ex.next();
+        } else {
+            return inh.addVertex(T.id, s);
+        }
+        //        } finally {
+//            t.close();
+//        }
     }
 
     /**
@@ -53,19 +91,25 @@ public class Schema {
      *
      * @param parentTags if empty, searches all tags; otherwise searches the specified tags and all their subtags
      */
-    public Set<String> tagsAndSubtags(@Nullable String... parentTags) {
+    public Stream<Vertex> tagsAndSubtags(@Nullable String... parentTags) {
 
         if (parentTags == null || parentTags.length == 0) {
-            return inh.nodes();
+            //return Iterators.transform(inh.vertices(), Element::label);
+            return inh.traversal().V().toStream();
+        } else {
+            return inh.traversal().V(parentTags).repeat(outE("inh").otherV().dedup()).emit().toStream();
+            //return inh.traversal().V(parentTags).outE("inh").otherV().tree().V().toStream();
         }
-
-        Set<String> s = new HashSet<>();
-        for (String x : parentTags) {
-            if (s.add(x)) {
-                s.addAll(inh.successors(x));
-            }
-        }
-        return s;
+//
+//
+//        Set<String> s = new HashSet<>();
+//        for (String x : parentTags) {
+//            if (s.add(x)) {
+//                inh.
+//                s.addAll(inh.successors(x));
+//            }
+//        }
+//        return s;
     }
 
     public Class[] resolve(String... tags) {
@@ -100,6 +144,10 @@ public class Schema {
                 /*.make()
                 .load(cl)
                 .getLoaded();*/
+    }
+
+    public Stream<String> tags() {
+        return inh.traversal().V().toStream().map(Element::label);
     }
 
 }

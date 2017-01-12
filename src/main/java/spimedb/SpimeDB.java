@@ -2,6 +2,7 @@ package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
@@ -116,7 +118,10 @@ public class SpimeDB implements Iterable<NObject>  {
         String[] tags = d.tag;
         if (tags!=null) {
             for (String t : tags) {
-                if (this.schema.inh.addNode(t)) {
+//                Tag tagJect = schema.tag(t, tt -> {
+//                    return new Tag(tt);
+//                });
+                //if (this.schema.inh.addNode(t)) {
                     //index the tag if it doesnt exist in the graph
                     NObject tagJect = get(t);
                     if (tagJect!=null) {
@@ -124,7 +129,7 @@ public class SpimeDB implements Iterable<NObject>  {
                         if (parents != null)
                             schema.tag(t, parents);
                     }
-                }
+                //}
             }
             schema.tag(id, tags);
 
@@ -172,31 +177,36 @@ public class SpimeDB implements Iterable<NObject>  {
 
         Predicate<NObject> each = q.each;
 
-        main:
-        for (String t : schema.tagsAndSubtags(q.include)) {
 
+        Stream<Vertex> tt = schema.tagsAndSubtags(q.include);
+        tt.allMatch(vt -> {
+            String t = (String) vt.id();
             SpatialSearch<NObject> s = spaceIfExists(t);
-            if (s == null || s.isEmpty())
-                continue;
-
-
-            if (q.bounds!=null && q.bounds.length > 0) {
-                for (RectND x : q.bounds) {
-                    switch (q.boundsCondition) {
-                        case Contain:
-                            if (!s.containing(x, each))
-                                break main;
-                            break;
-                        case Intersect:
-                            if (!s.intersecting(x, each))
-                                break main;
-                            break;
+            if (s != null && !s.isEmpty()) {
+                if (q.bounds != null && q.bounds.length > 0) {
+                    for (RectND x : q.bounds) {
+                        switch (q.boundsCondition) {
+                            case Contain:
+                                if (!s.containing(x, each))
+                                    return false;
+                                break;
+                            case Intersect:
+                                if (!s.intersecting(x, each))
+                                    return false;
+                                break;
+                        }
                     }
+                } else {
+                    if (!s.intersecting(RectND.ALL_4, each)) //iterate all items
+                        return false;
                 }
-            } else {
-                s.intersecting(RectND.ALL_4, each); //iterate all items
             }
-        }
+
+            return true;
+        });
+
+        main:
+
 
         q.onEnd();
         return q;
@@ -206,8 +216,7 @@ public class SpimeDB implements Iterable<NObject>  {
     /** computes the set of subtree (children) tags held by the extension of the input (parent) tags
      * @param parentTags if empty, searches all tags; otherwise searches the specified tags and all their subtags
      */
-    public Set<String> tagsAndSubtags(@Nullable String... parentTags) {
-
+    public Stream<Vertex> tagsAndSubtags(@Nullable String... parentTags) {
         return schema.tagsAndSubtags(parentTags);
     }
 

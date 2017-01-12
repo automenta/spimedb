@@ -142,6 +142,12 @@ public class NObject extends RectND implements Serializable {
         this(id, null);
     }
 
+    public NObject(NObject copy) {
+        this(copy.id, copy.name);
+        setTag(copy.tag);
+        data.putAll(copy.data);
+    }
+
     public NObject(String id, String name) {
         super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY));
 

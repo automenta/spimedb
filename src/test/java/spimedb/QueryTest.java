@@ -1,13 +1,15 @@
 package spimedb;
 
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
 import spimedb.query.Query;
 import spimedb.sense.ImportSchemaOrg;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by me on 6/13/15.
@@ -32,13 +34,18 @@ public class QueryTest {
         action.setTag("InteractAction");
         db.put(action);
 
-        System.out.println( db.tagsAndSubtags("Place") );
-        System.out.println( db.tagsAndSubtags("Action") );
+        Set<Vertex> placeSubtags = db.tagsAndSubtags("Place").collect(Collectors.toSet());
+        System.out.println(placeSubtags);
+        Set<Vertex> actionSubtags = db.tagsAndSubtags("Action").collect(Collectors.toSet());
+        System.out.println(actionSubtags);
+        assertNotEquals(0, placeSubtags.size());
+        assertNotEquals(0, actionSubtags.size());
+        assertNotEquals(placeSubtags, actionSubtags);
 
-        ArrayList found = new ArrayList();
+        ArrayList<NObject> found = new ArrayList();
         db.get(new Query(found::add).in("Place").where(new float[] { 0, 1}, new float[] { 0, 1}));
 
-        assertTrue(found.contains(place));
+        assertTrue(found + "", found.contains(place));
         assertFalse(found.contains(action));
 
     }

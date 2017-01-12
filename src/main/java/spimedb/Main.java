@@ -24,7 +24,14 @@ public class Main {
         }
     }
 
-    public Main(SpimeDB db) throws Exception {
+
+
+    public static void main(String[] args) throws Exception {
+
+        SpimeDB db =  InfiniSpimeDB.get(
+                //"/tmp/climate"
+                null
+        );
 
         if (db.isEmpty()) {
             db.logger.info("Initializing database...");
@@ -77,18 +84,6 @@ public class Main {
 
         }
 
-
-    }
-
-
-    public static void main(String[] args) throws Exception {
-
-        SpimeDB db =  InfiniSpimeDB.get(
-                //"/tmp/climate"
-                null
-        );
-
-        new Main(db);
 
 
 

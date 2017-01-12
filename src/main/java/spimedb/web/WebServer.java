@@ -7,8 +7,6 @@ package spimedb.web;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -33,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.Deque;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
@@ -73,8 +72,9 @@ public class WebServer extends PathHandler {
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
 
-        addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) ->
-                JSON.toJSON( Lists.newArrayList(Iterables.transform(db.schema.inh.nodes(), db::get)), o)));
+        addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
+            JSON.toJSON(db.schema.tags().map(db::get).collect(Collectors.toList()));
+        }));
 
         /* client attention management */
         addPrefixPath("/attn", websocket(new SessionSocket() {

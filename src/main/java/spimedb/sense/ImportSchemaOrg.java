@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static org.eclipse.collections.impl.collector.Collectors2.toList;
 
 /**
  * Schema.org and ActivityStreams Ontology import
@@ -124,7 +127,7 @@ abstract public class ImportSchemaOrg {
                 String label = line[1];
                 String comment = line[2];
                 //List<String> ancestors = Arrays.asList(line[3].split(" "));
-                List<String> supertypes = Arrays.asList(line[4].split(" "));
+                List<String> supertypes = Stream.of(line[4].split(" ")).filter(x -> x!=null && !x.isEmpty()).collect(toList());
                 //List<String> subtypes = Arrays.asList(line[5].split(" "));
                 //List<String> properties;
             /*if ((line.length >= 7) && (line[6].length() > 0))
@@ -134,9 +137,9 @@ abstract public class ImportSchemaOrg {
                 //System.out.println(id + " " + label);
                 //System.out.println("  " + supertypes);
                 //System.out.println("  " + properties);
-                if (id.equals("Action")) {
+                /*if (id.equals("Action")) {
                     supertypes = Collections.emptyList();
-                }
+                }*/
 
                 onClass(id, label, supertypes, comment);
             }
