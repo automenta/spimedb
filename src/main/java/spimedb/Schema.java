@@ -75,7 +75,12 @@ public class Schema {
 
     }
 
+    //cluster:
+    //System.out.println( inh.traversal().withComputer().V().peerPressure().by("cluster").valueMap().toList() );
+
     public ObjectFloatMap<String> rank() {
+
+
         ObjectFloatHashMap<String> hh = new ObjectFloatHashMap<>();
         try {
             ComputerResult x = inh.compute().program(PageRankVertexProgram.build().create(inh)).submit().get();
@@ -90,16 +95,20 @@ public class Schema {
             e.printStackTrace();
         }
 
-        /*float min = hh.min();
+        float min = hh.min();
         float max = hh.max();
         if (min!=max) {
+            //normalize
+            float range = max-min;
+            ObjectFloatHashMap<String> ii = new ObjectFloatHashMap<>();
+            hh.forEachKeyValue((k,v)->{
+                ii.put(k, (v - min)/range);
+            });
+            return ii;
+        } else {
+            return hh;
+        }
 
-        }*/
-
-        /*inh.traversal().V().pageRank().it by(outE("inh")).valueMap("id", "inh").forEachRemaining(m -> {
-                hh.put( m.get("id").toString() , ((Number)m.get("inh")).floatValue() );
-        });*/
-        return hh;
     }
 
     private Vertex addVertex(String s) {
