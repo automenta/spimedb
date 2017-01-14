@@ -39,7 +39,7 @@ public class HTTP {
 
     private final Path cachePath;
 
-    public HTTP() throws IOException {
+    public HTTP() {
         this(TMP_SPIMEDB_CACHE_PATH);
     }
 

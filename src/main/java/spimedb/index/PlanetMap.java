@@ -15,4 +15,8 @@ public class PlanetMap<K, V extends OctBox.IdBB> extends OctMap<K,V> {
     public PlanetMap(Map<K, V> items, Map<Long, OctBox<K>> boxes, Vec3D center, Vec3D radius, Vec3D resolution) {
         super(items, boxes, center, radius, resolution);
     }
+
+    public static float metersToDegrees(float radMeters) {
+        return radMeters / 110648f;
+    }
 }

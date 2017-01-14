@@ -17,7 +17,6 @@ import spimedb.util.geom.Vec3D;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
@@ -116,7 +115,7 @@ public class SpimeDB implements Iterable<NObject>  {
 
 
         String[] tags = d.tag;
-        if (tags!=null) {
+        if (tags!=null && tags.length > 0) {
             for (String t : tags) {
 //                Tag tagJect = schema.tag(t, tt -> {
 //                    return new Tag(tt);
@@ -221,28 +220,23 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
 
-    private static float metersToDegrees(float radMeters) {
-        return radMeters / 110648f;
-    }
-
-
-    static class MyOctBox extends OctBox {
-
-        public MyOctBox(Vec3D origin, Vec3D extents, Vec3D resolution) {
-            super(origin, extents, resolution);
-        }
-
-        @NotNull
-        @Override
-        protected OctBox newBox(OctBox parent, Vec3D off, Vec3D extent) {
-            return new MyOctBox(parent, off, extent);
-        }
-
-        @Override protected void onModified() {
-            System.out.println(this + " modified");
-        }
-
-    }
+    //    static class MyOctBox extends OctBox {
+//
+//        public MyOctBox(Vec3D origin, Vec3D extents, Vec3D resolution) {
+//            super(origin, extents, resolution);
+//        }
+//
+//        @NotNull
+//        @Override
+//        protected OctBox newBox(OctBox parent, Vec3D off, Vec3D extent) {
+//            return new MyOctBox(parent, off, extent);
+//        }
+//
+//        @Override protected void onModified() {
+//            System.out.println(this + " modified");
+//        }
+//
+//    }
 
 //    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
 //        return Tuples.pair(e, Tuples.twin(from, to));

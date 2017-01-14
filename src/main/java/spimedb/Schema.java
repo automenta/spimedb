@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Streams;
 import net.bytebuddy.ByteBuddy;
 import org.apache.tinkerpop.gremlin.process.computer.ComputerResult;
 import org.apache.tinkerpop.gremlin.process.computer.ranking.pagerank.PageRankVertexProgram;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
+
 
 /**
  * Created by me on 1/8/17.
@@ -137,8 +139,11 @@ public class Schema {
             //return Iterators.transform(inh.vertices(), Element::label);
             return inh.traversal().V().toStream();
         } else {
-            return inh.traversal().V(parentTags).repeat(outE("inh").otherV().dedup()).emit().toStream();
-            //return inh.traversal().V(parentTags).outE("inh").otherV().tree().V().toStream();
+            //awful but should work
+            return Streams.concat(
+                inh.traversal().V(parentTags).repeat(outE("inh").bothV().dedup()).emit().toStream(),
+                inh.traversal().V(parentTags).toStream()
+            );
         }
 //
 //

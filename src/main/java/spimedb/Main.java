@@ -2,8 +2,8 @@ package spimedb;
 
 import spimedb.db.Infinispan;
 import spimedb.sense.Netention;
-import spimedb.util.js.SpimeScript;
 import spimedb.server.WebServer;
+import spimedb.util.js.SpimeScript;
 
 import java.io.File;
 import java.util.List;
@@ -34,7 +34,7 @@ public class Main {
         );
 
         if (db.isEmpty()) {
-            db.logger.info("Initializing database...");
+            SpimeDB.logger.info("Initializing database...");
 
             try {
                 new SpimeScript(db).run(new File("data/climateviewer.js"));

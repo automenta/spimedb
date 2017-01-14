@@ -51,7 +51,7 @@ public class WebServer extends PathHandler {
     public static final String resourcePath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
     private final SpimeDB db;
 
-    final JavaToJavascript j2j;
+    final JavaToJavascript j2js;
 
     final ConcurrentWeakKeyHashMap<ServerConnection, Session> session = new ConcurrentWeakKeyHashMap<>();
 
@@ -75,7 +75,7 @@ public class WebServer extends PathHandler {
 
 
         //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
-        j2j = new JavaToJavascript();
+        j2js = JavaToJavascript.buildFilePersistant();
 
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
@@ -84,7 +84,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write(j2j.compileMain(Client.class).toString().getBytes());
+                o.write(j2js.compileMain(Client.class).toString().getBytes());
             } catch (IOException e) {
                 logger.warn("spimedb.js {}", e);
                 try {

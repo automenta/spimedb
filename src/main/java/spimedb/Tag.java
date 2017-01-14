@@ -10,8 +10,13 @@ public class Tag extends NObject {
 
     float priority = 0;
 
-    public Tag(NObject raw) {
-        super(raw);
+    public Tag(String id, String... supers) {
+        super(id);
+        setTag(supers);
+    }
+
+    public Tag(NObject rawSourceToCopyFrom) {
+        super(rawSourceToCopyFrom);
     }
 
     public float pri() {

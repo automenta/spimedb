@@ -22,6 +22,8 @@ public interface WebSocket extends JSObject {
         return Util.newSocket("ws://" + host + ":" + port + "/" + path);
     }
 
+    void close();
+
     void send(JSObject obj);
 
     void send(String text);
