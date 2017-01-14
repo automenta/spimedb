@@ -5,23 +5,19 @@ import org.teavm.jso.dom.html.HTMLElement;
 import org.teavm.jso.json.JSON;
 
 /**
- * Created by me on 1/13/17.
+ * SpimeDB Client UI - converted to JS with TeaVM, running in browser
  */
-public class XClient {
+public class Client {
 
 
-
-    public static void main(String[] args) {
-
+    public Client() {
         HTMLDocument document = HTMLDocument.current();
         HTMLElement div = document.createElement("div");
         div.appendChild(document.createTextNode("TeaVM generated element"));
 
-        WebSocket ws = WebSocket.newSocket("localhost", 8080, "attn");
-        ws.onData((msg)->{
+        WebSocket ws = WebSocket.newSocket("attn");
+        ws.setOnData((msg)->{
             System.out.println(JSON.stringify(msg));
-
-            //TLogger.getAnonymousLogger().info(TString.msg);
             document.getBody().appendChild(document.createTextNode(JSON.stringify(msg)));
         });
         ws.setOnOpen(()->{
@@ -31,6 +27,13 @@ public class XClient {
                     document.createTextNode(JSON.stringify(ws)));
 
         });
+    }
+
+    public static void main(String[] args) {
+
+        new Client();
+
+
 
 
 

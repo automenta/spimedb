@@ -24,7 +24,7 @@ import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.client.XClient;
+import spimedb.client.Client;
 import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
@@ -84,7 +84,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write(j2j.compileMain(XClient.class).toString().getBytes());
+                o.write(j2j.compileMain(Client.class).toString().getBytes());
             } catch (IOException e) {
                 logger.warn("spimedb.js {}", e);
                 try {

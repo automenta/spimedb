@@ -8,8 +8,8 @@ import org.teavm.jso.JSObject;
  */
 @JSFunctor
 @FunctionalInterface
-public interface JSConsumer<X> extends JSObject {
+public interface JSConsumer extends JSObject {
 
-    void accept(X x);
+    void accept(JSObject x);
 
 }
