@@ -22,11 +22,14 @@ import io.undertow.websockets.core.WebSocketChannel;
 import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
+import org.teavm.jso.dom.html.HTMLDocument;
+import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
+import spimedb.util.js.JavaToJavascript;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -49,8 +52,18 @@ public class WebServer extends PathHandler {
     public static final String resourcePath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
     private final SpimeDB db;
 
+    final JavaToJavascript j2j = new JavaToJavascript();
+
     final ConcurrentWeakKeyHashMap<ServerConnection, Session> session = new ConcurrentWeakKeyHashMap<>();
 
+    public static class Client {
+        public static void main(String[] args) {
+            HTMLDocument document = HTMLDocument.current();
+            HTMLElement div = document.createElement("div");
+            div.appendChild(document.createTextNode("TeaVM generated element"));
+            document.getBody().appendChild(div);
+        }
+    }
 
 //    private List<String> paths = new ArrayList();
 //    private final String host;
@@ -73,11 +86,19 @@ public class WebServer extends PathHandler {
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
 
+        addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
+            try {
+                o.write(j2j.compileMain(Client.class).toString().getBytes());
+            } catch (IOException e) {
+                logger.warn("spimedb.js {}", e);
+            }
+        }));
+
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
                 o.write( JSON.toJSON(db.schema.tags().map(db::get).toArray(NObject[]::new)).getBytes() );
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.warn("tag {}", e);
             }
         }));
 

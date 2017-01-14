@@ -181,7 +181,7 @@ input[type=range].tagSlider:focus::-ms-fill-upper {
 
 
 .windget {
-    background-color: #29e;
+    background-color: rgba(200,200,200,0.85);
     color: white;
 
 
@@ -193,7 +193,6 @@ input[type=range].tagSlider:focus::-ms-fill-upper {
     pointer-events: all;
 
     overflow: auto;
-    opacity: 0.85;
 }
 
 .windget .close_button {
