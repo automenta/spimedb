@@ -22,8 +22,7 @@ import io.undertow.websockets.core.WebSocketChannel;
 import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
-import org.teavm.jso.dom.html.HTMLDocument;
-import org.teavm.jso.dom.html.HTMLElement;
+import org.teavm.model.MethodReference;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
@@ -56,16 +55,7 @@ public class WebServer extends PathHandler {
 
     final ConcurrentWeakKeyHashMap<ServerConnection, Session> session = new ConcurrentWeakKeyHashMap<>();
 
-    public static class Client {
-        public static void main(String[] args) {
-            HTMLDocument document = HTMLDocument.current();
-            HTMLElement div = document.createElement("div");
-            div.appendChild(document.createTextNode("TeaVM generated element"));
-            document.getBody().appendChild(div);
-        }
-    }
-
-//    private List<String> paths = new ArrayList();
+    //    private List<String> paths = new ArrayList();
 //    private final String host;
 //    private final int port;
 
@@ -86,11 +76,23 @@ public class WebServer extends PathHandler {
         addPrefixPath("/",resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
 
+
+        MethodReference method = new MethodReference(XClient.class, "main", String[].class, void.class);
+
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write(j2j.compileMain(Client.class).toString().getBytes());
+
+                o.write(j2j
+                        //.compileMain(Client.class)
+                        .compile("main", method )
+                        .toString().getBytes());
             } catch (IOException e) {
                 logger.warn("spimedb.js {}", e);
+                try {
+                    o.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         }));
 

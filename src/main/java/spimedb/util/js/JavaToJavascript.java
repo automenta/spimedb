@@ -6,16 +6,14 @@ import org.teavm.javascript.MethodNodeCache;
 import org.teavm.javascript.ast.AsyncMethodNode;
 import org.teavm.javascript.ast.RegularMethodNode;
 import org.teavm.model.MethodReference;
-import org.teavm.model.PreOptimizingClassHolderSource;
 import org.teavm.model.Program;
 import org.teavm.model.ProgramCache;
 import org.teavm.parsing.ClasspathClassHolderSource;
-import org.teavm.vm.DirectoryBuildTarget;
 import org.teavm.vm.TeaVM;
 import org.teavm.vm.TeaVMBuilder;
 
-import java.io.File;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /** convenient wrapper for TeaVM compiler which produces client-side JS from Java src */
@@ -29,6 +27,7 @@ public class JavaToJavascript {
     final TeaVMBuilder builder;
     final MyMemoryProgramCache programCache = new MyMemoryProgramCache();
     final MyMemoryRegularMethodNodeCache astCache = new MyMemoryRegularMethodNodeCache();
+    private final Properties properties;
 
     public JavaToJavascript() {
         this(new ClasspathClassHolderSource());
@@ -38,25 +37,31 @@ public class JavaToJavascript {
         builder = new TeaVMBuilder()
             .setClassLoader(cl)
             .setClassSource(
-                new PreOptimizingClassHolderSource(chs)
+                /*new PreOptimizingClassHolderSource*/(chs)
             );
+        this.properties = new Properties();
     }
 
-    public StringBuilder compile(MethodReference method) {
+
+    public StringBuilder compile(String entryFunc, MethodReference method) {
 
         long startTime = System.currentTimeMillis();
 
         TeaVM t = builder.build();
 
 
-        //t.installPlugins();
+        t.installPlugins();
 
 
-        t.entryPoint(method);
-        t.setMinifying(true);
-        t.setIncremental(true);
         t.setProgramCache(programCache);
         t.setAstCache(astCache);
+
+        t.entryPoint(entryFunc, method);
+        t.setMinifying(true);
+        t.setIncremental(true);
+        t.setProperties(properties);
+
+
     /*t.setProgressListener(new TeaVMProgressListener() {
 
         @Override
@@ -73,18 +78,24 @@ public class JavaToJavascript {
     });*/
 
         StringBuilder sb = new StringBuilder(SOURCE_FILE_BUFFER_LENGTH);
-        t.build(sb, new DirectoryBuildTarget(new File("/tmp/a")));
+        t.build(sb, null);
+
+        //t.build(new File("/tmp/a"), "main.js");
 
         long endTime = System.currentTimeMillis();
         logger.info("compiled {} to {} bytes .JS in {} ms", method, sb.length(), endTime-startTime);
 
+//        System.out.println(t.getClasses());
+//        System.out.println(t.getDependencyInfo().getCallGraph());
+//        System.out.println(t.getDependencyInfo().getReachableMethods());
+//        System.out.println(t.getWrittenClasses().getClassNames());
 
         return sb;
     }
 
     /** compiles the main() method of a class */
     public StringBuilder compileMain(Class c) {
-        return compile(new MethodReference(c, "main", String[].class));
+        return compile(null, new MethodReference(c, "main", String[].class));
     }
 
     public static class MyMemoryProgramCache implements ProgramCache {
