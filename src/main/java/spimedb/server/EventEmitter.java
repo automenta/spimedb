@@ -1,5 +1,5 @@
 
-package spimedb.web;
+package spimedb.server;
 
 import java.util.*;
 

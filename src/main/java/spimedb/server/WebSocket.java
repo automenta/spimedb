@@ -1,4 +1,4 @@
-package spimedb.web;
+package spimedb.server;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;

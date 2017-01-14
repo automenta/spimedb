@@ -1,4 +1,4 @@
-package spimedb.web;
+package spimedb.server;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.websockets.core.BufferedTextMessage;

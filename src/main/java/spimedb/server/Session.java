@@ -1,4 +1,4 @@
-package spimedb.web;
+package spimedb.server;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;

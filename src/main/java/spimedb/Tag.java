@@ -1,7 +1,7 @@
 package spimedb;
 
 import org.apache.commons.math3.util.MathUtils;
-import spimedb.web.Session;
+import spimedb.server.Session;
 
 /**
  * Created by me on 1/12/17.

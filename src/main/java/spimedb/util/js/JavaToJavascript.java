@@ -2,16 +2,22 @@ package spimedb.util.js;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.teavm.cache.DiskProgramCache;
+import org.teavm.diagnostics.DefaultProblemTextConsumer;
+import org.teavm.diagnostics.Problem;
 import org.teavm.javascript.MethodNodeCache;
 import org.teavm.javascript.ast.AsyncMethodNode;
 import org.teavm.javascript.ast.RegularMethodNode;
 import org.teavm.model.MethodReference;
+import org.teavm.model.PreOptimizingClassHolderSource;
 import org.teavm.model.Program;
 import org.teavm.model.ProgramCache;
 import org.teavm.parsing.ClasspathClassHolderSource;
 import org.teavm.vm.TeaVM;
 import org.teavm.vm.TeaVMBuilder;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,21 +31,37 @@ public class JavaToJavascript {
     static final ClassLoader cl = JavaToJavascript.class.getClassLoader();
 
     final TeaVMBuilder builder;
-    final MyMemoryProgramCache programCache = new MyMemoryProgramCache();
+    final ProgramCache programCache;
     final MyMemoryRegularMethodNodeCache astCache = new MyMemoryRegularMethodNodeCache();
     private final Properties properties;
 
     public JavaToJavascript() {
-        this(new ClasspathClassHolderSource());
+        this(new MyMemoryProgramCache(new ConcurrentHashMap<>()));
     }
 
-    public JavaToJavascript(ClasspathClassHolderSource chs) {
+    public JavaToJavascript(Map<MethodReference, Program> cache) {
+        this(new MyMemoryProgramCache(cache));
+    }
+
+    public JavaToJavascript(ProgramCache programCache) {
+        this(new ClasspathClassHolderSource(), programCache );
+    }
+
+    public JavaToJavascript(ClasspathClassHolderSource chs, ProgramCache programCache) {
         builder = new TeaVMBuilder()
             .setClassLoader(cl)
             .setClassSource(
-                /*new PreOptimizingClassHolderSource*/(chs)
+                new PreOptimizingClassHolderSource(chs)
             );
         this.properties = new Properties();
+
+        this.programCache = programCache;
+                /*new DiskProgramCache(HTTP.tmpCacheDir().toFile(),
+                    new FileSymbolTable(HTTP.tmpCacheFile("sym")),
+                    new FileSymbolTable(HTTP.tmpCacheFile("file")),
+                    chs
+                    );*/
+
     }
 
 
@@ -62,6 +84,7 @@ public class JavaToJavascript {
         t.setProperties(properties);
 
 
+
     /*t.setProgressListener(new TeaVMProgressListener() {
 
         @Override
@@ -82,8 +105,34 @@ public class JavaToJavascript {
 
         //t.build(new File("/tmp/a"), "main.js");
 
+        List<Problem> problems = t.getProblemProvider().getProblems();
+        if (!problems.isEmpty()) {
+            DefaultProblemTextConsumer pc = new DefaultProblemTextConsumer();
+
+            problems.forEach(p -> {
+                p.render(pc);
+                logger.error("problem: {}", pc.getText());
+                pc.clear();
+            });
+        }
+
+        if (t.wasCancelled()) {
+            logger.error("cancelled: {}", problems);
+            return null;
+        }
+
+
         long endTime = System.currentTimeMillis();
         logger.info("compiled {} to {} bytes .JS in {} ms", method, sb.length(), endTime-startTime);
+
+
+        if (programCache instanceof DiskProgramCache) {
+            try {
+                ((DiskProgramCache) programCache).flush();
+            } catch (IOException e) {
+                logger.error("flush: {}", e);
+            }
+        }
 
 //        System.out.println(t.getClasses());
 //        System.out.println(t.getDependencyInfo().getCallGraph());
@@ -93,14 +142,22 @@ public class JavaToJavascript {
         return sb;
     }
 
-    /** compiles the main() method of a class */
+    /** compiles the static void main() method of a class */
     public StringBuilder compileMain(Class c) {
-        return compile(null, new MethodReference(c, "main", String[].class));
+        MethodReference method = new MethodReference(c, "main", String[].class, void.class);
+
+        //return compile(null, new MethodReference(c, "main", String[].class));
+
+        return compile("main", method );
     }
 
     public static class MyMemoryProgramCache implements ProgramCache {
 
-        private final Map<MethodReference, Program> cache = new ConcurrentHashMap<>(512);
+        private final Map<MethodReference, Program> cache;
+
+        public MyMemoryProgramCache(Map<MethodReference, Program> cache) {
+            this.cache = cache;
+        }
 
         @Override
         public Program get(MethodReference method) {

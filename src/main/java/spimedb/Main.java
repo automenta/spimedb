@@ -1,9 +1,9 @@
 package spimedb;
 
-import spimedb.db.InfiniSpimeDB;
+import spimedb.db.Infinispan;
 import spimedb.sense.Netention;
 import spimedb.util.js.SpimeScript;
-import spimedb.web.WebServer;
+import spimedb.server.WebServer;
 
 import java.io.File;
 import java.util.List;
@@ -28,7 +28,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        SpimeDB db =  InfiniSpimeDB.get(
+        SpimeDB db =  Infinispan.get(
                 //"/tmp/climate"
                 null
         );
