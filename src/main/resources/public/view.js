@@ -213,24 +213,47 @@ class GraphView extends NView {
 
                 });
 
-                setTimeout(() => {
+                var layoutUpdateMS = 100;
+                var layoutDutyMS = 10;
+
+                var curLayout = null;
+                function colaIteration(durationMaxMS) {
                     /* https://github.com/cytoscape/cytoscape.js-cola#api */
                     var options = {
                         name: 'cola',
-                        nodeSpacing: 5,
-                        edgeLengthVal: 5,
+                        nodeSpacing: 6,
+                        edgeLengthVal: 4,
                         animate: true,
                         //flow: { axis: 'y', minSeparation: 30 }, //DAG
-                        //refresh: 2,
-                        randomize: true,
+                        //refresh: 0.1,
+                        randomize: false,
                         fit: false,
-                        //maxSimulationTime: 16000,
-                        infinite: true
+                        maxSimulationTime: durationMaxMS,
+
+                        unconstrIter: 1, // unconstrained initial layout iterations
+                        userConstIter: 1, // initial layout iterations with user-specified constraints
+                        allConstIter: 1 //
                     };
-                    //cy.layout(options);
-                    that.layout = cy.makeLayout(options);
-                    that.layout.run();
-                }, 0);
+
+
+
+                    cy.batch(() => {
+
+                        if (curLayout) {
+                          curLayout.stop();
+                        }
+
+                        const layout = cy.makeLayout(options);
+                        curLayout = layout;
+                        layout.run();
+                    });
+
+                }
+
+                that.layoutAnimation = setInterval(()=>{
+                    colaIteration(layoutDutyMS);
+                }, layoutUpdateMS);
+                console.log('cola.js layout start');
 
 
                 // var options = {
@@ -294,10 +317,13 @@ class GraphView extends NView {
     }
 
     stop() {
-        if (this.layout) {
-            this.layout.stop();
-            delete this.layout;
+
+        if (this.layoutAnimation!==undefined) {
+            clearInterval(this.layoutAnimation);
+            delete this.layoutAnimation;
+            console.log('cola.js layout end');
         }
+
         if (this.s) {
             this.s.destroy();
             delete this.s;
