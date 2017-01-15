@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Streams;
 import net.bytebuddy.ByteBuddy;
 import org.apache.tinkerpop.gremlin.process.computer.ComputerResult;
@@ -23,6 +24,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 
 
 /**
+ * https://neo4j.com/developer/java/#_using_neo4j_s_embedded_java_api
  * Created by me on 1/8/17.
  */
 public class Schema {
@@ -56,23 +58,32 @@ public class Schema {
 //    }
 
 
+    @Override
+    public String toString() {
+        return Joiner.on('\n').join(inh.traversal().E().toStream().iterator());
+    }
 
     public void tag(String X, String[] parents) {
 
         int n = 0;
-        Vertex[] ps = new Vertex[parents.length];
+        Vertex[] pp = new Vertex[parents.length];
         for (String s : parents) {
             if (s.isEmpty()) { //HACK
                 logger.warn("{} includes an empty string tag");
                 continue;
             }
-            ps[n++] = addVertex(s);
+            pp[n++] = addVertex(s);
         }
 
         Vertex x = addVertex(X);
-        for (Vertex p : ps) {
-            if (p!=null) //HACK, for above condition
-                p.addEdge("inh", x);
+        String xs = x.id().toString() + " ";
+        for (Vertex y : pp) {
+            if (y!=null) { //HACK null-check for above condition
+                String xy = xs + y.id();
+                if (!inh.edges(xy).hasNext())
+                    y.addEdge("inh", x, T.id, xy);
+
+            }
         }
 
     }
@@ -143,7 +154,7 @@ public class Schema {
             return Streams.concat(
                 inh.traversal().V(parentTags).repeat(outE("inh").bothV().dedup()).emit().toStream(),
                 inh.traversal().V(parentTags).toStream()
-            );
+            ).distinct();
         }
 //
 //

@@ -11,12 +11,15 @@ import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.GeoJsonObject;
 import org.geojson.LngLatAlt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.NObject;
-import spimedb.SpimeDB;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
 /**
@@ -31,17 +34,13 @@ public class GeoJSON   {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 
+    static final Logger logger = LoggerFactory.getLogger(GeoJSON.class);
 
-    public static void fromGeoJSON(InputStream i, SpimeDB db, Function<Feature,NObject> builder) throws IOException {
+    public static Stream<NObject> get(InputStream i, Function<Feature, NObject> builder) throws IOException {
 
         FeatureCollection featureCollection = geojsonMapper.readValue(i, FeatureCollection.class);
-
-        featureCollection.forEach(f -> {
-            NObject n = builder.apply(f);
-            if (n!=null)
-                db.put(n);
-        });
-
+        logger.info("{} contained {} objects", i, featureCollection.getFeatures().size());
+        return featureCollection.getFeatures().stream().map(builder);
     }
 
     /** TODO remove Earthquake specific tags into an extended builder */

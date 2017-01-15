@@ -16,11 +16,14 @@ import static org.junit.Assert.assertTrue;
  */
 public class GeoJSONTest {
 
+    final SpimeDB db = new SpimeDB();
+
+    public final static InputStream eqGeoJson = GeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson");
+
     @Test
     public void test1() throws IOException {
-        InputStream resourceAsStream = GeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson");
-        SpimeDB db = new SpimeDB();
-        GeoJSON.fromGeoJSON(resourceAsStream, db, GeoJSON.baseGeoJSONBuilder);
+
+        db.put(GeoJSON.get(eqGeoJson, GeoJSON.baseGeoJSONBuilder));
 
         int all = db.size();
         assertTrue(all > 50);

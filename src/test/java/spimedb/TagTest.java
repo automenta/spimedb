@@ -1,66 +1,76 @@
 package spimedb;
 
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
+import spimedb.sense.GeoJSON;
 
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
+import static spimedb.sense.GeoJSONTest.eqGeoJson;
 
 /**
  * Created by me on 1/14/17.
  */
 public class TagTest {
 
+    final SpimeDB db = new SpimeDB();
+
     @Test
     public void testTagActivationTrigger() {
-        SpimeDB s = new SpimeDB();
 
-        AtomicInteger activations = new AtomicInteger(0);
-        AtomicInteger deactivations = new AtomicInteger(0);
+        Tag u = new Tag("Y", "Test");
+        Tag t = new Tag("X", "Test");
 
-        Tag t = new Tag("X", "Test") {
-
-            protected void activate() {
-                activations.incrementAndGet();
-            }
-
-            protected void deactivate() {
-                deactivations.incrementAndGet();
-            }
-
-            @Override
-            protected void reprioritize(float before, float after) {
-                float thresh = 0.5f;
-                if (before < thresh && after >= thresh) {
-                    activate();
-                } else if (before >= thresh && after < thresh) {
-                    deactivate();
-                }
-            }
-        };
-
-        s.put(t);
+        db.put(u);
+        db.put(t);
 
         assertEquals(0, t.pri(), 0.01f);
 
-        Set<Vertex> all = s.tagsAndSubtags().collect(Collectors.toSet());
-        assertEquals(2, all.size());
-        Set<Vertex> xOnly = s.tagsAndSubtags("X").collect(Collectors.toSet());
-        assertEquals(1, xOnly.size());
+        assertEquals(3, db.tagsAndSubtags().count());
+        assertEquals(1, db.tagsAndSubtags("X").count());
+        assertEquals(1, db.tagsAndSubtags("Y").count());
+        assertEquals(3, db.tagsAndSubtags("Test").count());
 
         t.pri(null, 0.75f); //activate
         assertEquals(0.75f, t.pri(), 0.01f);
 
-        assertEquals(1, activations.intValue());
-        assertEquals(0, deactivations.intValue());
+//        assertEquals(1, activations.intValue());
+//        assertEquals(0, deactivations.intValue());
 
         t.pri(null, -0.5f); //deactivate
         assertEquals(0.25f, t.pri(), 0.01f);
 
-        assertEquals(1, activations.intValue());
-        assertEquals(1, deactivations.intValue());
+//        assertEquals(1, activations.intValue());
+//        assertEquals(1, deactivations.intValue());
+    }
+
+    @Test
+    public void testExpandingTag() {
+
+        Consumer<Tag> onGeoJSONActivate = (t) -> {
+            try {
+                db.put(GeoJSON.get(eqGeoJson, GeoJSON.baseGeoJSONBuilder));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        };
+        Consumer<Tag> onDeact = (t) -> {
+
+        };
+
+        Tag u = new Tag.ExpandingTag("Earthquake", onGeoJSONActivate, onDeact, "Disaster");
+        db.put(u);
+
+        Tag t = new Tag("Hurricane", "Disaster");
+        db.put(t);
+
+
+        u.pri(null, 0.75f); //activate
+
+        SpimeDB.sync();
+
+        System.out.println(db.toString());
+        System.out.println(db.schema.toString());
     }
 }

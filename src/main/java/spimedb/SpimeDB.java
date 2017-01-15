@@ -3,21 +3,20 @@ package spimedb;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.index.oct.OctBox;
 import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
 import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
 import spimedb.query.Query;
-import spimedb.util.geom.Vec3D;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -31,6 +30,7 @@ public class SpimeDB implements Iterable<NObject>  {
 
     @JsonIgnore
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
+    public static final ForkJoinPool exe = ForkJoinPool.commonPool();
 
     @JsonIgnore public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
@@ -96,7 +96,9 @@ public class SpimeDB implements Iterable<NObject>  {
 
 
     /** returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics */
-    public NObject put(NObject d) {
+    public NObject put(@Nullable NObject d) {
+        if (d == null)
+            return null;
 
         //TODO use 'obj.merge' for correct un-indexing of prevoius value
         String id = d.getId();
@@ -217,6 +219,18 @@ public class SpimeDB implements Iterable<NObject>  {
      */
     public Stream<Vertex> tagsAndSubtags(@Nullable String... parentTags) {
         return schema.tagsAndSubtags(parentTags);
+    }
+
+    public static void runLater(Runnable r) {
+        exe.execute(r);
+    }
+
+    public void put(Stream<NObject> s) {
+        s.forEach(this::put);
+    }
+
+    public static synchronized void sync() {
+        exe.awaitQuiescence(60, TimeUnit.SECONDS);
     }
 
 
