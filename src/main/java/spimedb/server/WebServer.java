@@ -20,6 +20,7 @@ import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
 import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
 import org.infinispan.commons.util.concurrent.ConcurrentWeakKeyHashMap;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
@@ -97,7 +98,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write( JSON.toJSON(db.schema.tags().map(db::get).toArray(NObject[]::new)).getBytes() );
+                o.write( JSON.toJSON(db.schema.tags().stream().map(db::get).toArray(NObject[]::new)).getBytes() );
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }
@@ -111,7 +112,7 @@ public class WebServer extends PathHandler {
 
                 //if this is a new session, set default attention to the pagerank of tags
                 if (session.attention.isEmpty()) {
-                    ObjectFloatMap<String> rank = db.schema.rank();
+                    ObjectFloatMap<String> rank = new ObjectFloatHashMap<String>();
                     session.attention.putAll(rank);
                 }
 

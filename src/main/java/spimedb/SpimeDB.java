@@ -2,7 +2,6 @@ package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,9 +178,7 @@ public class SpimeDB implements Iterable<NObject>  {
         Predicate<NObject> each = q.each;
 
 
-        Stream<Vertex> tt = schema.tagsAndSubtags(q.include);
-        tt.allMatch(vt -> {
-            String t = (String) vt.id();
+        for (String t : tagsAndSubtags(q.include)) {
             SpatialSearch<NObject> s = spaceIfExists(t);
             if (s != null && !s.isEmpty()) {
                 if (q.bounds != null && q.bounds.length > 0) {
@@ -189,25 +186,21 @@ public class SpimeDB implements Iterable<NObject>  {
                         switch (q.boundsCondition) {
                             case Contain:
                                 if (!s.containing(x, each))
-                                    return false;
+                                    break;
                                 break;
                             case Intersect:
                                 if (!s.intersecting(x, each))
-                                    return false;
+                                    break;
                                 break;
                         }
                     }
                 } else {
                     if (!s.intersecting(RectND.ALL_4, each)) //iterate all items
-                        return false;
+                        break;
                 }
             }
 
-            return true;
-        });
-
-        main:
-
+        }
 
         q.onEnd();
         return q;
@@ -217,8 +210,11 @@ public class SpimeDB implements Iterable<NObject>  {
     /** computes the set of subtree (children) tags held by the extension of the input (parent) tags
      * @param parentTags if empty, searches all tags; otherwise searches the specified tags and all their subtags
      */
-    public Stream<Vertex> tagsAndSubtags(@Nullable String... parentTags) {
-        return schema.tagsAndSubtags(parentTags);
+    public Iterable<String> tagsAndSubtags(@Nullable String... parentTags) {
+        if (parentTags == null || parentTags.length==0)
+            return schema.tags(); //ALL
+        else
+            return schema.tagsAndSubtags(parentTags);
     }
 
     public static void runLater(Runnable r) {

@@ -1,26 +1,19 @@
 package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Streams;
 import net.bytebuddy.ByteBuddy;
-import org.apache.tinkerpop.gremlin.process.computer.ComputerResult;
-import org.apache.tinkerpop.gremlin.process.computer.ranking.pagerank.PageRankVertexProgram;
-import org.apache.tinkerpop.gremlin.structure.T;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
-import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
-import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
+import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.index.graph.MapGraph;
+import spimedb.index.graph.travel.BreadthFirstTravel;
+import spimedb.index.graph.travel.CrossComponentTravel;
+import spimedb.index.graph.travel.UnionTravel;
 
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
-
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 
 
 /**
@@ -34,7 +27,10 @@ public class Schema {
 //    @JsonIgnore
 //    public final MutableGraph<String> inh = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
 
-    final TinkerGraph inh = TinkerGraph.open();
+    final MapGraph<String,String> graph = new MapGraph<String,String>(new ConcurrentHashMap<>(),
+            ConcurrentHashSet::new);
+
+
 
 //    @JsonIgnore
 //    public final Map<String,Tag> tag = new ConcurrentHashMap<>();
@@ -60,102 +56,65 @@ public class Schema {
 
     @Override
     public String toString() {
-        return Joiner.on('\n').join(inh.traversal().E().toStream().iterator());
+        //return Joiner.on('\n').join(inh.traversal().E().toStream().iterator());
+        return graph.toString();
     }
 
-    public void tag(String X, String[] parents) {
+    public void tag(String x, String[] parents) {
 
-        int n = 0;
-        Vertex[] pp = new Vertex[parents.length];
-        for (String s : parents) {
-            if (s.isEmpty()) { //HACK
-                logger.warn("{} includes an empty string tag");
-                continue;
-            }
-            pp[n++] = addVertex(s);
-        }
-
-        Vertex x = addVertex(X);
-        String xs = x.id().toString() + " ";
-        for (Vertex y : pp) {
-            if (y!=null) { //HACK null-check for above condition
-                String xy = xs + y.id();
-                if (!inh.edges(xy).hasNext())
-                    y.addEdge("inh", x, T.id, xy);
-
+        synchronized (graph) {
+            graph.removeVertex(x);
+            graph.addVertex(x);
+            for (String y : parents) {
+                graph.addEdge(y, x, "inh");
             }
         }
 
-    }
-
-    //cluster:
-    //System.out.println( inh.traversal().withComputer().V().peerPressure().by("cluster").valueMap().toList() );
-
-    public ObjectFloatMap<String> rank() {
-
-
-        ObjectFloatHashMap<String> hh = new ObjectFloatHashMap<>();
-        try {
-            ComputerResult x = inh.compute().program(PageRankVertexProgram.build().create(inh)).submit().get();
-            x.graph().traversal().V().
-                    forEachRemaining(pr -> {
-                        String id = (String) pr.id();
-                        float value = ((Number)pr.property("gremlin.pageRankVertexProgram.pageRank").value()).floatValue();
-                        hh.put(id, value);
-                    });
-                    //forEachRemaining(x1 -> System.out.println(x1.id() + " " + Joiner.on(" ").join(x1.properties())));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        float min = hh.min();
-        float max = hh.max();
-        if (min!=max) {
-            //normalize
-            float range = max-min;
-            ObjectFloatHashMap<String> ii = new ObjectFloatHashMap<>();
-            hh.forEachKeyValue((k,v)->{
-                ii.put(k, (v - min)/range);
-            });
-            return ii;
-        } else {
-            return hh;
-        }
-
-    }
-
-    private Vertex addVertex(String s) {
-//        Transaction t = inh.tx();
-//        try {
-
-        Iterator<Vertex> ex = inh.vertices(s);
-        if (ex.hasNext()) {
-            return ex.next();
-        } else {
-            return inh.addVertex(T.id, s);
-        }
-        //        } finally {
-//            t.close();
+//        int n = 0;
+//        Vertex[] pp = new Vertex[parents.length];
+//        for (String s : parents) {
+//            if (s.isEmpty()) { //HACK
+//                logger.warn("{} includes an empty string tag");
+//                continue;
+//            }
+//            pp[n++] = addVertex(s);
 //        }
+//
+//        Vertex x = addVertex(X);
+//        String xs = x.id().toString() + " ";
+//        for (Vertex y : pp) {
+//            if (y!=null) { //HACK null-check for above condition
+//                String xy = xs + y.id();
+//                if (!inh.edges(xy).hasNext())
+//                    y.addEdge("inh", x, T.id, xy);
+//
+//            }
+//        }
+
     }
+
 
     /**
      * computes the set of subtree (children) tags held by the extension of the input (parent) tags
      *
      * @param parentTags if empty, searches all tags; otherwise searches the specified tags and all their subtags
      */
-    public Stream<Vertex> tagsAndSubtags(@Nullable String... parentTags) {
+    public Iterable<String> tagsAndSubtags(@Nullable String... parentTags) {
 
-        if (parentTags == null || parentTags.length == 0) {
-            //return Iterators.transform(inh.vertices(), Element::label);
-            return inh.traversal().V().toStream();
-        } else {
-            //awful but should work
-            return Streams.concat(
-                inh.traversal().V(parentTags).repeat(outE("inh").bothV().dedup()).emit().toStream(),
-                inh.traversal().V(parentTags).toStream()
-            ).distinct();
-        }
+        return new SubTags(graph, parentTags);
+
+//        if (parentTags == null || parentTags.length == 0) {
+//            //return Iterators.transform(inh.vertices(), Element::label);
+//            return inh.traversal().V().toStream();
+//        } else {
+//            //awful but should work
+//            return Streams.concat(
+//                inh.traversal().V(parentTags).repeat(outE("inh").bothV().dedup()).emit().toStream(),
+//                inh.traversal().V(parentTags).toStream()
+//            ).distinct();
+//        }
+
+
 //
 //
 //        Set<String> s = new HashSet<>();
@@ -202,8 +161,17 @@ public class Schema {
                 .getLoaded();*/
     }
 
-    public Stream<String> tags() {
-        return inh.traversal().V().toStream().map(x -> (String)x.id());
+    public Set<String> tags() {
+        return graph.vertexSet();
     }
 
+    private static class SubTags<V,E> extends UnionTravel<V,E,Object> {
+        public SubTags(MapGraph<V,E> graph, V... parentTags) {
+            super(graph, parentTags);
+        }
+
+        @Override protected CrossComponentTravel<V, E, Object> get(V start, MapGraph<V, E> graph, Map<V, Object> seen) {
+            return new BreadthFirstTravel<>(graph, start, seen);
+        }
+    }
 }

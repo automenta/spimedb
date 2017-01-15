@@ -5,9 +5,11 @@ import spimedb.SpimeDB;
 import spimedb.index.rtree.RectND;
 import spimedb.query.QueryCollection;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertTrue;
 
@@ -18,12 +20,12 @@ public class GeoJSONTest {
 
     final SpimeDB db = new SpimeDB();
 
-    public final static InputStream eqGeoJson = GeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson");
+    public final static Supplier<InputStream> eqGeoJson = ()->new BufferedInputStream(GeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson"), 1024);
 
     @Test
     public void test1() throws IOException {
 
-        db.put(GeoJSON.get(eqGeoJson, GeoJSON.baseGeoJSONBuilder));
+        db.put(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 
         int all = db.size();
         assertTrue(all > 50);

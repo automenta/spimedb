@@ -6,6 +6,7 @@ import spimedb.sense.GeoJSON;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+import static com.google.common.collect.Iterables.size;
 import static org.junit.Assert.assertEquals;
 import static spimedb.sense.GeoJSONTest.eqGeoJson;
 
@@ -27,10 +28,10 @@ public class TagTest {
 
         assertEquals(0, t.pri(), 0.01f);
 
-        assertEquals(3, db.tagsAndSubtags().count());
-        assertEquals(1, db.tagsAndSubtags("X").count());
-        assertEquals(1, db.tagsAndSubtags("Y").count());
-        assertEquals(3, db.tagsAndSubtags("Test").count());
+        assertEquals(3, size(db.tagsAndSubtags()));
+        assertEquals(1, size(db.tagsAndSubtags("X")));
+        assertEquals(1, size(db.tagsAndSubtags("Y")));
+        assertEquals(3, size(db.tagsAndSubtags("Test")));
 
         t.pri(null, 0.75f); //activate
         assertEquals(0.75f, t.pri(), 0.01f);
@@ -50,7 +51,7 @@ public class TagTest {
 
         Consumer<Tag> onGeoJSONActivate = (t) -> {
             try {
-                db.put(GeoJSON.get(eqGeoJson, GeoJSON.baseGeoJSONBuilder));
+                db.put(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
             } catch (IOException e) {
                 e.printStackTrace();
             }

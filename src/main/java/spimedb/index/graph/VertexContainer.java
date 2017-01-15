@@ -1,5 +1,9 @@
 package spimedb.index.graph;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 import java.util.Set;
 
@@ -12,36 +16,23 @@ import java.util.Set;
  *
  * @author Barak Naveh
  */
-public class VertexContainer<C, EE> implements Serializable
+public class VertexContainer<V,E> implements Serializable
 {
-    private static final long serialVersionUID = 7494242245729767106L;
-    final Set<EE> incoming;
-    final Set<EE> outgoing;
-    private C value;
+    final Set<Pair<V,E>> incoming;
 
+    final Set<Pair<E,V>> outgoing;
 
-    public VertexContainer(C value, Set<EE> incoming, Set<EE> outgoing) {
+    public VertexContainer(Set<Pair<V,E>> incoming, Set<Pair<E,V>> outgoing) {
         this.incoming = incoming;
         this.outgoing = outgoing;
-        this.value = value;
     }
 
-    public C value() {
-        return value;
-    }
-
-    public void setValue(C value) {
-        this.value = value;
-    }
-
-    /**
-     * .
-     *
-     * @param e
-     */
-    public void addIncomingEdge(EE e)
-    {
-        incoming.add(e);
+    @Override
+    public String toString() {
+        return "{" +
+                "i=" + incoming +
+                ",o=" + outgoing +
+                '}';
     }
 
     /**
@@ -49,9 +40,12 @@ public class VertexContainer<C, EE> implements Serializable
      *
      * @param e
      */
-    public void addOutgoingEdge(EE e)
-    {
-        outgoing.add(e);
+    public boolean addIncomingEdge(V s, E e) {
+        return incoming.add(pair(s, e));
+    }
+
+    @NotNull private Pair pair(Object x, Object y) {
+        return Tuples.pair(x, y);
     }
 
     /**
@@ -59,9 +53,8 @@ public class VertexContainer<C, EE> implements Serializable
      *
      * @param e
      */
-    public void removeIncomingEdge(EE e)
-    {
-        incoming.remove(e);
+    public boolean addOutgoingEdge(E e, V t) {
+        return outgoing.add(Tuples.pair(e, t));
     }
 
     /**
@@ -69,10 +62,21 @@ public class VertexContainer<C, EE> implements Serializable
      *
      * @param e
      */
-    public void removeOutgoingEdge(EE e)
-    {
-        outgoing.remove(e);
+    public boolean removeIncomingEdge(V s, E e) {
+        return incoming.remove(pair(s, e));
+    }
+
+    /**
+     * .
+     *
+     * @param e
+     */
+    public boolean removeOutgoingEdge(E e, V t)    {
+        return outgoing.remove(Tuples.pair(e, t));
     }
 
 
+    public boolean containsOutgoingEdge(E e, V t) {
+        return outgoing.contains(Tuples.pair(e, t));
+    }
 }
