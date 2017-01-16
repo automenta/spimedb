@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by me on 1/8/17.
  */
-public class SessionSocket extends WebSocket {
+public class SessionSocket extends ServerWebSocket {
 
     protected void onConnect(WebSocketHttpExchange ex, WebSocketChannel s, Session ss) {
 

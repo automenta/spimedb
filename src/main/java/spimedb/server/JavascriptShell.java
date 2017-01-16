@@ -3,24 +3,36 @@ package spimedb.server;
 import io.undertow.server.HttpHandler;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import javax.script.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
  * Created by me on 12/26/16.
  */
-class JavascriptShell extends WebSocket {
-    private final Logger logger = LoggerFactory.getLogger("/shell");
+class JavascriptShell extends ServerWebSocket {
+
+    private static final Logger logger = LoggerFactory.getLogger(JavascriptShell.class );
+
 
     final ScriptEngineManager engineManager = new ScriptEngineManager();
-    final ScriptEngine engine = engineManager.getEngineByName("nashorn");
+    final NashornScriptEngine engine = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
+
+    @Nullable
+    private final BiFunction<Session, WebSocketChannel, Object> context;
 
 
     public JavascriptShell() {
+        this(null);
+    }
+
+    public JavascriptShell(BiFunction<Session, WebSocketChannel, Object> s) {
+        this.context = s;
 
     }
 
@@ -65,21 +77,30 @@ class JavascriptShell extends WebSocket {
 
     @Override
     protected void onFullTextMessage(WebSocketChannel socket, BufferedTextMessage message) {
-        String i = message.getData().trim();
-        if (i.isEmpty())
+        String code = message.getData().trim();
+        if (code.isEmpty())
             return; //ignore
 
 
         Object o;
         long start = System.currentTimeMillis();
         try {
-            o = engine.eval(i);
+            if (context == null) {
+                o = engine.eval(code);
+            } else {
+
+
+                Bindings b = engine.createBindings();
+                b.put("s", context.apply(Session.session(socket), socket));
+
+                o = engine.eval("s." + code, b);
+            }
         } catch (Throwable e) {
             o = e;
         }
         long end = System.currentTimeMillis();
 
-        send(socket, new JSExec(i, o, start, end));
+        send(socket, new JSExec(code, o, start, end));
 
     }
 

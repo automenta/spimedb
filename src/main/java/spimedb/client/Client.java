@@ -1,15 +1,20 @@
 package spimedb.client;
 
+import org.teavm.jso.JSObject;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
-import org.teavm.jso.json.JSON;
 import spimedb.client.leaflet.*;
 import spimedb.index.BudgetMerge;
 import spimedb.index.PriBag;
 
+import java.util.Arrays;
 import java.util.HashMap;
+
+import static org.teavm.jso.json.JSON.stringify;
+import static spimedb.client.JS.get;
+import static spimedb.client.JS.getFloat;
 
 /**
  * SpimeDB Client UI - converted to JS with TeaVM, running in browser
@@ -25,51 +30,72 @@ public class Client {
     }
 
 
+    final PriBag<String> tag = new PriBag<>(16, BudgetMerge.add, new HashMap<>());
+    final PriBag<String> obj = new PriBag<>(128, BudgetMerge.add, new HashMap<>());
 
+
+    public final ClientWebSocket attn = ClientWebSocket.newSocket("attn");
+    public final ClientWebSocket shell = ClientWebSocket.newSocket("shell");
+
+
+    protected void init() {
+
+        shell.send("db");
+
+            /*document.getBody().appendChild(div).appendChild(
+                    document.createTextNode(JSON.stringify(ws)));*/
+    }
 
 
     public Client() {
 
-        HTMLDocument document = HTMLDocument.current();
+        attn.setOnData((x) -> {
+
+        });
+
+
+        shell.setOnOpen(this::init);
+        shell.setOnData((x) -> {
+            System.out.println(stringify(x));
+        });
+
+
+        HTMLDocument doc = HTMLDocument.current();
 //        HTMLElement div = document.createElement("div");
 //        div.appendChild(document.createTextNode("TeaVM generated element"));
 
-        WebSocket ws = WebSocket.newSocket("attn");
-        ws.setOnData((msg)->{
-            System.out.println(JSON.stringify(msg));
 
-
-            //document.getBody().appendChild(document.createTextNode(JSON.stringify(msg)));
-        });
-        ws.setOnOpen(()->{
-            ws.send("");
-
-            /*document.getBody().appendChild(div).appendChild(
-                    document.createTextNode(JSON.stringify(ws)));*/
-
-        });
-
-        HTMLElement mapContainer = document.createElement("div");
+        HTMLElement mapContainer = doc.createElement("div");
         mapContainer.setAttribute("id", "view");
-        document.getBody().appendChild(mapContainer);
+        doc.getBody().appendChild(mapContainer);
 
 
-        int cap = 8;
-        int vary = 64;
-        PriBag<String> attn = new PriBag(cap, BudgetMerge.add, new HashMap());
-        for (int i = 0; i < 32 * 64; i++) {
-            attn.put( "x" + (i % vary), 0.05f + (float)Math.random() );
-        }
+        newMap(mapContainer);
+    }
 
-        System.out.println(attn);
-        System.out.println(attn.priMax() + " " + attn.top() + " " + attn.bottom() + " " + attn.priMin());
-
-
-
-        LeafletMap map = LeafletMap.create(mapContainer, LeafletMapOptions.create());
+    private void newMap(HTMLElement container) {
+        LeafletMap map = LeafletMap.create(container, LeafletMapOptions.create());
         map.setView(LatLng.create(40, -80), 13);
+        JsConsumer mapChange = (e) -> {
+            JSObject bounds = map.getBounds();
+            //parse this noise
+            //{"_southWest":{"lat":39.932380403490875,"lng":-80.50094604492188},"_northEast":{"lat":40.082274490356966,"lng":-79.62203979492189}}
+            JSObject sw = get(bounds, "_southWest");
+            JSObject ne = get(bounds, "_northEast");
 
+            float[][] b = new float[][] {
+                new float[] { getFloat(sw, "lng"), getFloat(sw, "lat") },
+                new float[] { getFloat(ne, "lng"), getFloat(ne, "lat") }
+            };
 
+            System.out.println(Arrays.toString(b[0]) + Arrays.toString(b[1]));
+
+            attn.send("whereLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
+
+        };
+        map.onLoad(mapChange);
+        map.onZoomEnd(mapChange);
+        map.onMoveEnd(mapChange);
 
         TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create()
                 /*.attribution("&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> " +
@@ -81,9 +107,6 @@ public class Client {
     public static void main(String[] args) {
 
         new Client();
-
-
-
 
 
     }

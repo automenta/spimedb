@@ -54,18 +54,23 @@ public class Session {
 
     public static Session session(WebSocketHttpExchange ex, @Nullable WebSocketChannel c) {
 
-        Session s = ex.getAttachment(SESSION);
+        Session s = ex!=null ? ex.getAttachment(SESSION) : null;
         if (s == null) {
+
             if (c == null)
                 throw new NullPointerException();
-            ex.putAttachment(SESSION, s = newSession(c.getPeerAddress()));
+
+            s = newSession(c.getPeerAddress());
+
             c.setAttribute("session", s);
+            if (ex!=null)
+                ex.putAttachment(SESSION, s);
         }
 
         return s;
     }
 
     public static Session session(WebSocketChannel socket) {
-        return (Session) socket.getAttribute("session");
+        return session(null, socket);
     }
 }

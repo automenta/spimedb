@@ -41,9 +41,9 @@ import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static io.undertow.UndertowOptions.ENABLE_SPDY;
+import static spimedb.server.ServerWebSocket.send;
 
 /**
- *
  * @author me
  */
 public class WebServer extends PathHandler {
@@ -66,7 +66,7 @@ public class WebServer extends PathHandler {
 //        return this;
 //    }
 
-    public WebServer(SpimeDB db, int port)   {
+    public WebServer(SpimeDB db, int port) {
         this(db, "0.0.0.0", port);
     }
 
@@ -76,11 +76,10 @@ public class WebServer extends PathHandler {
 
 
         //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
-        j2js = JavaToJavascript.buildFilePersistant();
+        j2js = JavaToJavascript.build();
 
-        addPrefixPath("/",resource(new FileResourceManager(
+        addPrefixPath("/", resource(new FileResourceManager(
                 Paths.get(resourcePath).toFile(), 0, true, "/")));
-
 
 
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
@@ -98,7 +97,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write( JSON.toJSON(db.schema.tags().stream().map(db::get).toArray(NObject[]::new)).getBytes() );
+                o.write(JSON.toJSON(db.schema.tags().stream().map(db::get).toArray(NObject[]::new)).getBytes());
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }
@@ -118,7 +117,7 @@ public class WebServer extends PathHandler {
 
                 String messageData = message.getData();
                 if (messageData.isEmpty()) {
-                    WebSocket.send(socket, session.attention);
+                    send(socket, session.attention);
                 } else {
 
                     StringTokenizer t = new StringTokenizer(messageData, "\t");
@@ -138,11 +137,13 @@ public class WebServer extends PathHandler {
         }));
 
         //SECURITY RISK: DANGER
-        /*
-        addPrefixPath("/shell", new JavascriptShell().with((e)->{
+
+        addPrefixPath("/attn", new JavascriptShell((session, ws)->new Attention(db, session, ws)).get());
+
+        addPrefixPath("/shell", new JavascriptShell().with((e) -> {
             e.put("db", db);
         }));
-        */
+
 
         addPrefixPath("/earth/region2d/summary", new HttpHandler() {
 
@@ -164,9 +165,9 @@ public class WebServer extends PathHandler {
                 Deque<String> y2 = reqParams.get("y2");
 
                 //if (lats != null && lons != null && rads != null) {
-                if (x1!=null && x2!=null && y1!=null && y2!=null) {
-                    float[] lon = new float[] { Float.parseFloat(x1.getFirst()), Float.parseFloat(x2.getFirst()) };
-                    float[] lat = new float[] { Float.parseFloat(y1.getFirst()), Float.parseFloat(y2.getFirst()) };
+                if (x1 != null && x2 != null && y1 != null && y2 != null) {
+                    float[] lon = new float[]{Float.parseFloat(x1.getFirst()), Float.parseFloat(x2.getFirst())};
+                    float[] lat = new float[]{Float.parseFloat(y1.getFirst()), Float.parseFloat(y2.getFirst())};
 
                     ex.setPersistent(true);
 
@@ -183,7 +184,7 @@ public class WebServer extends PathHandler {
                             final int[] count = {0};
 
 
-                            String[] tags = new String[] {};
+                            String[] tags = new String[]{};
 
                             db.get(new Query((n) -> {
 
@@ -226,12 +227,10 @@ public class WebServer extends PathHandler {
                 }
 
 
-
             }
 
 
         });
-
 
 
         Undertow.Builder b = Undertow.builder()
@@ -245,9 +244,8 @@ public class WebServer extends PathHandler {
                 );
 
 
-
-                //.setDirectoryListingEnabled(true)
-                //.setHandler(path().addPrefixPath("/", ClientResources.handleClientResources())
+        //.setDirectoryListingEnabled(true)
+        //.setHandler(path().addPrefixPath("/", ClientResources.handleClientResources())
 
 //        addPrefixPath("/tag/meta", new HttpHandler() {
 //
@@ -379,7 +377,62 @@ public class WebServer extends PathHandler {
 
     }
 
+    public static class Attention {
+        private final Session session;
+        private final WebSocketChannel chan;
 
+        final int MAX_RESULTS = 1024;
+        final int MAX_RESPONSE_BYTES = 1024 * 1024;
+        public final SpimeDB db;
+
+        public Attention(SpimeDB db, Session s, WebSocketChannel chan) {
+            this.session = s;
+            this.db = db;
+            this.chan = chan;
+        }
+
+        public void whereLonLat(float[][] bounds) {
+
+
+            float[] lon = new float[]{bounds[0][0], bounds[1][0]};
+            float[] lat = new float[]{bounds[0][1], bounds[1][1]};
+
+
+
+            //JsonGenerator gen =
+            //      JSON.msgPackMapper.
+
+            //gen.writeStartArray();
+
+            final int[] count = {0};
+
+
+            String[] tags = new String[]{};
+
+            db.get(new Query((n) -> {
+
+                String i = n.id();
+                if (!session.sent.containsAndAdd(i)) {
+
+                    //gen.writeStartObject();
+                    send(chan, JSON.toJSON(n));
+                    if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
+                        return false;
+
+                    //gen.writeEndObject();
+
+                    //gen.writeRaw(',');
+
+
+                }
+
+                return true; //continue
+
+            }).where(lon, lat).in(tags));
+
+        }
+
+    }
 
 //    public void start() {
 //
@@ -390,6 +443,4 @@ public class WebServer extends PathHandler {
 //    }
 
 
-
-
-}
+    }

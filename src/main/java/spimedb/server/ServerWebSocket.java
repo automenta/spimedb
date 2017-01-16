@@ -20,9 +20,9 @@ import static io.undertow.Handlers.websocket;
 /**
  * Manages websocket i/o to a channel
  */
-abstract public class WebSocket extends AbstractReceiveListener implements WebSocketCallback<Void>, WebSocketConnectionCallback {
+abstract public class ServerWebSocket extends AbstractReceiveListener implements WebSocketCallback<Void>, WebSocketConnectionCallback {
 
-    static final Logger logger = LoggerFactory.getLogger(WebSocket.class);
+    static final Logger logger = LoggerFactory.getLogger(ServerWebSocket.class);
 
 
     @Override

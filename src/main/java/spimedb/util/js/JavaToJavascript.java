@@ -38,7 +38,7 @@ public class JavaToJavascript {
     final MethodNodeCache methodCache;
     private final Properties properties;
 
-    public static JavaToJavascript buildFilePersistant() {
+    public static JavaToJavascript build() {
 
         ClasspathClassHolderSource chs = new ClasspathClassHolderSource();
         MyFileSymbolTable sym = new MyFileSymbolTable(HTTP.tmpCacheFile("sym"));
