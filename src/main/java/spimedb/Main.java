@@ -1,12 +1,12 @@
 package spimedb;
 
 import spimedb.db.Infinispan;
-import spimedb.sense.Netention;
+import spimedb.sense.KML;
 import spimedb.server.WebServer;
 import spimedb.util.js.SpimeScript;
 
 import java.io.File;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by me on 6/14/15.
@@ -42,6 +42,7 @@ public class Main {
                 e.printStackTrace();
             }
 
+            /*
             new Netention() {
 
                 @Override
@@ -52,6 +53,7 @@ public class Main {
                     db.put(n);
                 }
             };
+            */
 
 
             //ImportGeoJSON
@@ -62,20 +64,19 @@ public class Main {
 
 
 
-//            String[] urls = new String[]{
-//                    "file:///home/me/kml/Indian-Lands.kmz",
+            String[] urls = new String[]{
+                    "file:///home/me/kml/Indian-Lands.kmz",
 //                    "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
 //                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
-//                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
-//                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
+                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
+                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
 //
 //                    //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
 //                    //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-//                    // http://climateviewer.org/layers/kml/3rdparty/places/submarine-cables-CV3D.kmz
 //                    //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
 //                    //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
-//            };
-//            Stream.of(urls).parallel().forEach(u -> new ImportKML(db).url(u).run());
+            };
+            Stream.of(urls).parallel().forEach(u -> new KML(db).url(u).run());
 
 
 //            db.forEach(x -> {

@@ -8,13 +8,11 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- * A container for vertex edges.
+ * TODO
+ *  change this to one Map<Pair<E,V>,Byte> where the integer's value bits mean:
+ *      0 = incoming (off/on)
+ *      1 = outgoing (off/on)
  *
- * <p>In this edge container we use array lists to minimize memory toll.
- * However, for high-degree vertices we replace the entire edge container
- * with a direct access subclass (to be implemented).</p>
- *
- * @author Barak Naveh
  */
 public class VertexContainer<V,E> implements Serializable
 {
