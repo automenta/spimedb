@@ -91,9 +91,10 @@ class JavascriptShell extends ServerWebSocket {
 
 
                 Bindings b = engine.createBindings();
-                b.put("s", context.apply(Session.session(socket), socket));
 
-                o = engine.eval("s." + code, b);
+                //TODO try b.put("this", ...
+                b.put("_s", context.apply(Session.session(socket), socket));
+                o = engine.eval("_s." + code, b);
             }
         } catch (Throwable e) {
             o = e;

@@ -1,10 +1,12 @@
 package spimedb.client;
 
 import org.teavm.jso.JSObject;
+import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
+import org.teavm.jso.json.JSON;
 import spimedb.client.leaflet.*;
 import spimedb.index.BudgetMerge;
 import spimedb.index.PriBag;
@@ -21,6 +23,8 @@ import static spimedb.client.JS.getFloat;
  */
 public class Client {
 
+    private final HTMLDocument doc;
+
     static void setVisible(ElementCSSInlineStyle element, boolean visible) {
         CSSStyleDeclaration es = element.getStyle();
         if (!visible)
@@ -30,8 +34,8 @@ public class Client {
     }
 
 
-    final PriBag<String> tag = new PriBag<>(16, BudgetMerge.add, new HashMap<>());
-    final PriBag<String> obj = new PriBag<>(128, BudgetMerge.add, new HashMap<>());
+    final PriBag<NObj> tag = new PriBag<>(16, BudgetMerge.max, new HashMap<>());
+    final PriBag<NObj> obj = new PriBag<>(128, BudgetMerge.add, new HashMap<>());
 
 
     public final ClientWebSocket attn = ClientWebSocket.newSocket("attn");
@@ -49,37 +53,37 @@ public class Client {
 
     public Client() {
 
-        attn.setOnData((x) -> {
+        this.doc = HTMLDocument.current();
 
+        attn.onTextJSON((x) -> {
+            NObj nx = NObj.fromJSON( x );
+            if (nx!=null) {
+                if (obj.put(nx, 0.5f) != null)
+                    System.out.println("#=" + obj.size() + ": " + nx);
+            }
         });
 
 
         shell.setOnOpen(this::init);
-        shell.setOnData((x) -> {
+        shell.onText((x) -> {
             System.out.println(stringify(x));
         });
 
-
-        HTMLDocument doc = HTMLDocument.current();
-//        HTMLElement div = document.createElement("div");
-//        div.appendChild(document.createTextNode("TeaVM generated element"));
-
-
-        HTMLElement mapContainer = doc.createElement("div");
-        mapContainer.setAttribute("id", "view");
-        doc.getBody().appendChild(mapContainer);
-
-
-        newMap(mapContainer);
+        newMap(doc.getBody());
     }
 
     private void newMap(HTMLElement container) {
+        HTMLElement mapContainer = doc.createElement("div");
+        mapContainer.setAttribute("id", "view");
+        container.appendChild(mapContainer);
+
         LeafletMap map = LeafletMap.create(container, LeafletMapOptions.create());
         map.setView(LatLng.create(40, -80), 13);
         JsConsumer mapChange = (e) -> {
             JSObject bounds = map.getBounds();
-            //parse this noise
-            //{"_southWest":{"lat":39.932380403490875,"lng":-80.50094604492188},"_northEast":{"lat":40.082274490356966,"lng":-79.62203979492189}}
+
+            //parse this kind of noise:
+            // {"_southWest":{"lat":39.932380403490875,"lng":-80.50094604492188},"_northEast":{"lat":40.082274490356966,"lng":-79.62203979492189}}
             JSObject sw = get(bounds, "_southWest");
             JSObject ne = get(bounds, "_northEast");
 
@@ -87,8 +91,6 @@ public class Client {
                 new float[] { getFloat(sw, "lng"), getFloat(sw, "lat") },
                 new float[] { getFloat(ne, "lng"), getFloat(ne, "lat") }
             };
-
-            System.out.println(Arrays.toString(b[0]) + Arrays.toString(b[1]));
 
             attn.send("whereLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
 
@@ -111,4 +113,39 @@ public class Client {
 
     }
 
+    /** wraps a JSON-encoded Nobject */
+    private static class NObj {
+
+        public final String id;
+        public final JSObject data;
+
+        public static NObj fromJSON(JSObject data) {
+            JSObject ID = get(data, "I");
+            if (ID!=null && JSString.isInstance(ID)) {
+                String id = ((JSString)ID).stringValue();
+                return new NObj(id, data);
+            }
+            return null;
+        }
+
+        NObj(String id, JSObject data) {
+            this.id = id;
+            this.data = data;
+        }
+
+        @Override
+        public String toString() {
+            return JSON.stringify(data);
+        }
+
+        @Override
+        public int hashCode() {
+            return id.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return this==obj || (obj instanceof NObj && id.equals(((NObj)obj).id));
+        }
+    }
 }

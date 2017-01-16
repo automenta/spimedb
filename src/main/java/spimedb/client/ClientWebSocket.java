@@ -28,8 +28,11 @@ public interface ClientWebSocket extends JSObject {
 
     void send(String text);
 
-    default void setOnData(JsConsumer each) {
-        Util.setMessageConsumer(this, each);
+    default void onText(JsConsumer each) {
+        Util.setMessageConsumerText(this, each);
+    }
+    default void onTextJSON(JsConsumer each) {
+        Util.setMessageConsumerTextJSON(this, each);
     }
 
     @JSProperty("onopen")
@@ -50,8 +53,12 @@ public interface ClientWebSocket extends JSObject {
         native static ClientWebSocket newSocket(String url);
 
         @JSBody(params = {"socket", "each"},
-                script = "socket.onmessage = function(m) {  each(m.data); };")
-        native static void setMessageConsumer(ClientWebSocket socket, JsConsumer each);
+                script = "socket.onmessage = function(m) { each(JSON.parse(m.data)); };")
+        native static void setMessageConsumerTextJSON(ClientWebSocket socket, JsConsumer each);
+
+        @JSBody(params = {"socket", "each"},
+                script = "socket.onmessage = function(m) { each(m.data); };")
+        native static void setMessageConsumerText(ClientWebSocket socket, JsConsumer each);
 
     }
 }
