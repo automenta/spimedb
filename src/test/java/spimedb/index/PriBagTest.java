@@ -19,10 +19,12 @@ public class PriBagTest {
 //        b.put("a", 0);
 
         PriBag<String> s = new PriBag(3, BudgetMerge.add, new HashMap());
-        s.put("a", 0.1f);
+        s.put("aa", 0.05f);
+        s.put("a", 0.05f); s.put("a", 0.05f);
         s.put("b", 0.3f);
-        s.put("c", 0.2f);
+        s.put("c", 0.1f);
         s.put("d", 0.4f);
+        s.put("c", 0.1f);
 
 
 

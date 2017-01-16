@@ -26,8 +26,10 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
      */
     public volatile float pressure = 0;
 
-    /** if you dont manually call commit at periodic times (ex: forgetting updates),
-     * then use autocommit to update the bag after each insertion */
+    /**
+     * if you dont manually call commit at periodic times (ex: forgetting updates),
+     * then use autocommit to update the bag after each insertion
+     */
     private static final boolean autocommit = true;
 
 
@@ -204,7 +206,9 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
     }
 
-    /** called on eviction */
+    /**
+     * called on eviction
+     */
     protected void onRemoved(Budget<V> w) {
 
     }
@@ -344,150 +348,68 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         pressure += pri;
 
 
+        Budget<V> existing = map.get(key);
 
-        final int r;
-        Budget<V> existing = map.get(key), next;
         if (existing != null) {
             //result=0
-            next = existing;
-            r = 0;
-        } else {
-            if (pri < minPri /* accept if pri == minPri  */) {
-                next = null;
-                r = -1;
-            } else {
-                //accepted for insert
-                next = existing = new Budget<>(key);
-                map.put(key, existing);
-                r = +1;
+            Budget vv = existing.clone();
+            if (vv == null) {
+                //it has been deleted.. TODO reinsert?
+                map.remove(key);
+                pressure -= pri;
+                return null;
             }
-        }
 
-        switch (r) {
-            case 0:
-                Budget vv = existing.clone();
-                if (vv == null) {
-                    //it has been deleted.. TODO reinsert?
-                    map.remove(key);
-                    pressure -= pri;
-                    return null;
-                }
 
-                float pBefore = vv.pri;
+            //re-rank
+            float o = mergeFunction.merge(vv, pri);
 
-                //re-rank
-                float o = mergeFunction.merge(vv, pri);
+            existing.pri(vv); //update in-place
 
-                float pAfter = vv.pri;
-                int direction;
-                float pDelta = pAfter - pBefore;
-//                if (pDelta > Param.BUDGET_EPSILON)
-//                    direction = +1;
-//                else if (pDelta < -Param.BUDGET_EPSILON)
-//                    direction = -1;
-//                else
-//                    direction = 0;
-//
-//                if (direction != 0) {
-//                    synchronized (items) {
-//
-////                        int p = items.indexOf(v, this);
-////                        if (p == -1) {
-////                            //removed before this completed
-////                            pressure -= bp;
-////                            return null;
-////                        }
-//
-////                        int s = items.size();
-////                        if (s > 1) {
-////                            BLink<V>[] x = items.array();
-////
-////
-////                            boolean rerank;
-////
-////                            if (direction > 0) {
-////                                float pAbove = p == 0 ? Float.POSITIVE_INFINITY : x[p - 1].priIfFiniteElseNeg1();
-////                                rerank = (pAbove < pAfter);
-////                            } else /*if (direction < 0)*/ {
-////                                float pBelow = p == (s - 1) ? Float.NEGATIVE_INFINITY : x[p + 1].priIfFiniteElseNeg1();
-////                                rerank = (pBelow > pAfter);
-////                            }
-////
-////                            if (rerank) {
-////
-////                                if (!items.remove(v, this)) {
-////                                    pressure -= bp;
-////                                    return null;
-////                                }
-////
-////                                v.setPriority(pAfter); //the remainder of the budget will be set below
-//                        if (!update(v)) {
-//                            //removed before this completed
-//                            if (overflow != null)
-//                                overflow.add(bp);
-//                            pressure -= bp;
-//                            return null;
-//                            //throw new RuntimeException("update fault");
-//                        }
-////                            }
-////                        }
-//                    }
-//                }
+            if (autocommit)
+                sort();
 
-                existing.pri(vv); //update in-place
 
-                if (autocommit)
-                    sort();
+            if (o > 0) {
+                if (overflow != null)
+                    overflow.add(o);
+                pressure -= o;
+            }
 
-                //release some pressure of how much priority existed already
-                //pressure-=pBefore;
+            return existing;
 
-                if (o > 0) {
-                    if (overflow != null)
-                        overflow.add(o);
-                    pressure -= o;
-                }
+        } else {
+            if (size() >= capacity && pri <= priMin() /* accept if pri == minPri  */) {
 
-//                float pAfter = v.pri;
-//
-//                //technically this should be in a synchronized block but ...
-//                if (Util.equals(minPri, pBefore, Param.BUDGET_EPSILON)) {
-//                    //in case the merged item determined the min priority
-//                    this.minPri = pAfter;
-//                }
-                break;
-
-            case +1:
-
-                existing.pri(pri);
-
-                synchronized (items) {
-                    if (updateItems(existing)) {
-                        //updateRange();
-                        next = existing;
-                    } else {
-                        next = null;
-                    }
-                }
-
-                if (next != null)
-                    onAdded(next); //success
-
-                break;
-
-            case -1:
                 //reject due to insufficient budget
                 if (overflow != null) {
                     overflow.add(pri);
                 }
                 pressure -= pri;
-                next = null;
 
-                break;
+                return null;
+
+            } else {
+
+                //accepted for fresh insert
+                Budget next = new Budget<>(key, pri);
+
+                map.put(key, next);
+
+                synchronized (items) {
+                    if (updateItems(next)) {
+                        //updateRange();
+                    } else {
+                        return null;
+                    }
+                }
+
+                onAdded(next); //success
+
+                return next;
+            }
         }
 
-
-        return next;
     }
 
     protected void onAdded(Budget<V> w) {
@@ -562,22 +484,20 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         if (each != null)
             this.pressure = 0; //reset pressure accumulator
 
-        synchronized (items) {
+        //synchronized (items) {
 
             if (size() > 0) {
                 if (updateItems(null)) {
 
-                    int lowestUnsorted = updateBudget(each);
+                    updateBudget(each);
 
-                    if (lowestUnsorted != -1) {
-                        sort(); //if not perfectly sorted already
-                    }
                 }
-            } else {
-                minPri = -1;
+
+                sort();
+
             }
 
-        }
+        //}
 
 
         return this;
@@ -598,11 +518,11 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 //            }
 //        });
 
-        this.minPri = (s > 0 && s >= capacity()) ? get(s - 1).priSafe(-1) : -1;
+        //this.minPri = (s > 0 && s >= capacity()) ? get(s - 1).priSafe(-1) : -1;
     }
 
 
-    public float minPri = -1;
+
 
 //    private final float minPriIfFull() {
 //        BLink<V>[] ii = items.last();
@@ -619,16 +539,14 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     /**
      * returns the index of the lowest unsorted item
      */
-    private int updateBudget(@Nullable Consumer<Budget> each) {
+    private void updateBudget(@Nullable Consumer<Budget> each) {
 //        int dirtyStart = -1;
-        int lowestUnsorted = -1;
+
 
 
         int s = size();
         Budget<V>[] l = items.array();
         int i = s - 1;
-        //@NotNull BLink<V> beneath = l[i]; //compares with self below to avoid a null check in subsequent iterations
-        float beneath = Float.POSITIVE_INFINITY;
         for (; i >= 0; ) {
             Budget<V> b = l[i];
 
@@ -640,17 +558,9 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
                     each.accept(b);
             }
 
-
-            if (lowestUnsorted == -1 && bCmp < beneath) {
-                lowestUnsorted = i + 1;
-            }
-
-            beneath = bCmp;
             i--;
         }
 
-
-        return lowestUnsorted;
     }
 
 
@@ -680,7 +590,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
             //map is possibly shared with another bag. only remove the items from it which are present in items
             items.forEach(x -> map.remove(x.id));
             items.clear();
-            minPri = -1;
+
         }
     }
 

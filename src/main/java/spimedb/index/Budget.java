@@ -1,5 +1,7 @@
 package spimedb.index;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Created by me on 1/15/17.
  */
@@ -16,8 +18,14 @@ public class Budget<X> {
         this.pri = pri;
     }
 
+
+    @Nullable
     public Budget<X> clone() {
-        return new Budget<X>(id, pri);
+        float p = pri;
+        if (p == p)
+            return new Budget<X>(id, p);
+        else
+            return null;
     }
 
     public void pri(float newPri) {

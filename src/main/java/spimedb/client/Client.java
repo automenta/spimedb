@@ -54,16 +54,16 @@ public class Client {
         document.getBody().appendChild(mapContainer);
 
 
-        PriBag<String> attn = new PriBag(3, BudgetMerge.add,
-            new HashMap()
-        );
-        attn.put("a", 0.1f);
-        attn.put("b", 0.3f);
-        attn.put("c", 0.2f);
-        attn.put("d", 0.4f);
-        attn.commit(null);
+        int cap = 8;
+        int vary = 64;
+        PriBag<String> attn = new PriBag(cap, BudgetMerge.add, new HashMap());
+        for (int i = 0; i < 32 * 64; i++) {
+            attn.put( "x" + (i % vary), 0.05f + (float)Math.random() );
+        }
+
         System.out.println(attn);
         System.out.println(attn.priMax() + " " + attn.top() + " " + attn.bottom() + " " + attn.priMin());
+
 
 
         LeafletMap map = LeafletMap.create(mapContainer, LeafletMapOptions.create());
