@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by me on 1/15/17.
@@ -12,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class PriBagTest {
 
     @Test
-    public void testPriBag() {
+    public void testPriBag1() {
 //        HashMap<Object,Float> pri = new HashMap();
 //        PriBag b = new PriBag(pri::get, 4);
 //        b.put("a", 0);
@@ -23,7 +24,7 @@ public class PriBagTest {
         s.put("c", 0.2f);
         s.put("d", 0.4f);
 
-        //s.commit();
+
 
         System.out.println(s);
 
@@ -37,4 +38,27 @@ public class PriBagTest {
 
 
     }
+    @Test
+    public void testPriBag2() {
+//        HashMap<Object,Float> pri = new HashMap();
+//        PriBag b = new PriBag(pri::get, 4);
+//        b.put("a", 0);
+
+        int cap = 8;
+        int vary = 64;
+        PriBag<String> s = new PriBag(cap, BudgetMerge.add, new HashMap());
+
+        for (int i = 0; i < 32 * 64; i++) {
+            s.put( "x" + (i % vary), 0.05f + (float)Math.random() );
+        }
+
+        System.out.println(s);
+
+        assertEquals(cap, s.size());
+
+        assertTrue(s.top().pri > s.bottom().pri);
+        //TODO fully test monotonically decreasing-ness
+
+    }
+
 }

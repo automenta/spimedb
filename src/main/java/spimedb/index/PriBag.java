@@ -4,12 +4,10 @@ import com.google.common.base.Joiner;
 import jcog.data.sorted.SortedArray;
 import jcog.table.SortedListTable;
 import org.apache.commons.lang3.mutable.MutableFloat;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -28,6 +26,9 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
      */
     public volatile float pressure = 0;
 
+    /** if you dont manually call commit at periodic times (ex: forgetting updates),
+     * then use autocommit to update the bag after each insertion */
+    private static final boolean autocommit = true;
 
 
     public PriBag(int cap, BudgetMerge mergeFunction, @NotNull Map<V, Budget<V>> map) {
@@ -79,7 +80,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
             int nextSize = s + additional;
             if (nextSize > c) {
-                pendingRemoval = new FastList(nextSize - c);
+                pendingRemoval = new ArrayList(nextSize - c);
                 s = clean(toAdd, s, nextSize - c, pendingRemoval);
                 if (s + additional > c) {
                     clean2(pendingRemoval);
@@ -342,15 +343,29 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
         pressure += pri;
 
-        Insertion ii = new Insertion(pri);
 
-        Budget<V> v = map.compute(key, ii);
 
-        Budget<V> w = v;
-        int r = ii.result;
+        final int r;
+        Budget<V> existing = map.get(key), next;
+        if (existing != null) {
+            //result=0
+            next = existing;
+            r = 0;
+        } else {
+            if (pri < minPri /* accept if pri == minPri  */) {
+                next = null;
+                r = -1;
+            } else {
+                //accepted for insert
+                next = existing = new Budget<>(key);
+                map.put(key, existing);
+                r = +1;
+            }
+        }
+
         switch (r) {
             case 0:
-                Budget vv = v.clone();
+                Budget vv = existing.clone();
                 if (vv == null) {
                     //it has been deleted.. TODO reinsert?
                     map.remove(key);
@@ -419,7 +434,10 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 //                    }
 //                }
 
-                v.pri(vv); //update in-place
+                existing.pri(vv); //update in-place
+
+                if (autocommit)
+                    sort();
 
                 //release some pressure of how much priority existed already
                 //pressure-=pBefore;
@@ -441,19 +459,19 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
             case +1:
 
-                v.pri(pri);
+                existing.pri(pri);
 
                 synchronized (items) {
-                    if (updateItems(v)) {
+                    if (updateItems(existing)) {
                         //updateRange();
-                        w = v;
+                        next = existing;
                     } else {
-                        w = null;
+                        next = null;
                     }
                 }
 
-                if (w != null)
-                    onAdded(w); //success
+                if (next != null)
+                    onAdded(next); //success
 
                 break;
 
@@ -463,13 +481,13 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
                     overflow.add(pri);
                 }
                 pressure -= pri;
-                w = null;
+                next = null;
 
                 break;
         }
 
 
-        return w;
+        return next;
     }
 
     protected void onAdded(Budget<V> w) {
@@ -569,7 +587,16 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         int s = size();
 
         qsort(new short[16 /* estimate */], items.array(), (short) 0 /*dirtyStart - 1*/, (short) (s - 1));
-        //Arrays.sort(items.array(), 0, s-1);
+//        Arrays.sort(items.array(), 0, s-1, new Comparator<Budget>() {
+//
+//            @Override
+//            public int compare(Budget o1, Budget o2) {
+//                float a = pCmp(o1);
+//                float b = pCmp(o2);
+//
+//                return Float.compare(a, b);
+//            }
+//        });
 
         this.minPri = (s > 0 && s >= capacity()) ? get(s - 1).priSafe(-1) : -1;
     }
@@ -810,6 +837,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     @NotNull
     //@Override
     public String toString() {
+        //return Iterables.toString(items);
         return Joiner.on(", ").join(items);// + '{' + items.getClass().getSimpleName() + '}';
     }
 
@@ -860,45 +888,6 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 //        }
 //    }
 
-    /**
-     * Created by me on 8/15/16.
-     */
-    final class Insertion<V> implements BiFunction<V, Budget, Budget> {
-
-
-        private final float pri;
-
-        /**
-         * TODO this field can be re-used for 'activated' return value
-         * -1 = deactivated, +1 = activated, 0 = no change
-         */
-        int result = 0;
-
-        public Insertion(float pri) {
-            this.pri = pri;
-        }
-
-
-        @Nullable
-        //@Override
-        public Budget apply(@NotNull Object key, @Nullable Budget existing) {
-
-
-            if (existing != null) {
-                //result=0
-                return existing;
-            } else {
-                if (pri < minPri /* accept if pri == minPri  */) {
-                    this.result = -1;
-                    return null;
-                } else {
-                    //accepted for insert
-                    this.result = +1;
-                    return new Budget(key);
-                }
-            }
-        }
-    }
 }
 
 

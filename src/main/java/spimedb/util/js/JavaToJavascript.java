@@ -9,6 +9,7 @@ import org.teavm.cache.ProgramIO;
 import org.teavm.cache.SymbolTable;
 import org.teavm.diagnostics.DefaultProblemTextConsumer;
 import org.teavm.diagnostics.Problem;
+import org.teavm.diagnostics.ProblemSeverity;
 import org.teavm.javascript.MethodNodeCache;
 import org.teavm.javascript.ast.AsyncMethodNode;
 import org.teavm.javascript.ast.RegularMethodNode;
@@ -99,6 +100,7 @@ public class JavaToJavascript {
         t.installPlugins();
 
 
+
         t.setProgramCache(programCache);
         t.setAstCache(methodCache);
 
@@ -127,15 +129,21 @@ public class JavaToJavascript {
         StringBuilder sb = new StringBuilder(FILE_BUFFER_SIZE);
         t.build(sb, null);
 
+
         //t.build(new File("/tmp/a"), "main.js");
 
-        List<Problem> problems = t.getProblemProvider().getProblems();
+        List<Problem> problems = t.getProblemProvider().getSevereProblems();
         if (!problems.isEmpty()) {
             DefaultProblemTextConsumer pc = new DefaultProblemTextConsumer();
 
             problems.forEach(p -> {
                 p.render(pc);
-                logger.error("problem: {}", pc.getText());
+
+                if (p.getSeverity() == ProblemSeverity.ERROR)
+                    logger.error("{}: {}", p.getLocation(), pc.getText());
+                else if (p.getSeverity() == ProblemSeverity.WARNING)
+                    logger.warn("{}: {}", p.getLocation(), pc.getText());
+
                 pc.clear();
             });
         }
