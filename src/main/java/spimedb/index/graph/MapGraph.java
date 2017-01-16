@@ -1,17 +1,19 @@
 package spimedb.index.graph;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jcog.list.ArrayUnenforcedSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graph;
-import org.jgrapht.util.ArrayUnenforcedSet;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+
+//import org.jgrapht.DirectedGraph;
+//import org.jgrapht.Graph;
+//import org.jgrapht.util.ArrayUnenforcedSet;
 
 /**
  * High-performance customizable JGraphT DirectedGraph impl
@@ -202,6 +204,6 @@ public class MapGraph<V, E> implements Serializable {
 
     public boolean containsEdge(V s, V t, E e) {
         VertexContainer<V, E> vs = vertex(s, false);
-        return vs == null ? false : vs.containsOutgoingEdge(e, t);
+        return vs != null && vs.containsOutgoingEdge(e, t);
     }
 }

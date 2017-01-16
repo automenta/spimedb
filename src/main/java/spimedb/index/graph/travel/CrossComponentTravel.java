@@ -33,7 +33,7 @@ public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V,E> 
     /**
      * Standard vertex visit state enumeration.
      */
-    protected static enum VisitColor {
+    protected enum VisitColor {
         /**
          * Vertex has not been returned via iterator yet.
          */

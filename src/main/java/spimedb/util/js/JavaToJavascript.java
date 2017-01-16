@@ -19,7 +19,6 @@ import org.teavm.parsing.ClassDateProvider;
 import org.teavm.parsing.ClasspathClassHolderSource;
 import org.teavm.vm.TeaVM;
 import org.teavm.vm.TeaVMBuilder;
-import spimedb.util.HTTP;
 
 import java.io.*;
 import java.util.*;
@@ -31,27 +30,26 @@ public class JavaToJavascript {
     static final Logger logger = LoggerFactory.getLogger(JavaToJavascript.class);
 
     static final ClassLoader cl = JavaToJavascript.class.getClassLoader();
-    public static final int FILE_BUFFER_SIZE = 32 * 1024;
+    static final int FILE_BUFFER_SIZE = 1024 * 1024;
 
     final TeaVMBuilder builder;
     final ProgramCache programCache;
     final MethodNodeCache methodCache;
-    private final Properties properties;
+    //private final Properties properties;
 
     public static JavaToJavascript build() {
 
         ClasspathClassHolderSource chs = new ClasspathClassHolderSource();
-        MyFileSymbolTable sym = new MyFileSymbolTable(HTTP.tmpCacheFile("sym"));
-        MyFileSymbolTable file = new MyFileSymbolTable(HTTP.tmpCacheFile("file"));
 
         return new JavaToJavascript(
                 chs,
-                new MyDiskProgramCache(HTTP.tmpCacheDir().toFile(),
-                        sym,
-                        file,
+                /*new MyDiskProgramCache(HTTP.tmpCacheDir().toFile(),
+                        new MyFileSymbolTable(HTTP.tmpCacheFile("sym")),
+                        new MyFileSymbolTable(HTTP.tmpCacheFile("file")),
                         chs
-                ),
-                new MyMemoryRegularMethodNodeCache()
+                ),*/
+                new MapProgramCache(new ConcurrentHashMap()),
+                new ConcurrentMapMethodNodeCache()
 
                 //doesnt work yet:
                 /*new DiskRegularMethodNodeCache(
@@ -64,7 +62,7 @@ public class JavaToJavascript {
     }
 
     public JavaToJavascript() {
-        this(new ClasspathClassHolderSource(), new MyMemoryProgramCache(new ConcurrentHashMap<>()), new MyMemoryRegularMethodNodeCache());
+        this(new ClasspathClassHolderSource(), new MapProgramCache(new ConcurrentHashMap<>()), new ConcurrentMapMethodNodeCache());
     }
 
 //    public JavaToJavascript(Map<MethodReference, Program> cache) {
@@ -81,7 +79,7 @@ public class JavaToJavascript {
             .setClassSource(
                 new PreOptimizingClassHolderSource(chs)
             );
-        this.properties = new Properties();
+        //this.properties = new Properties();
 
         this.methodCache = methodCache;
         this.programCache = programCache;
@@ -100,14 +98,13 @@ public class JavaToJavascript {
         t.installPlugins();
 
 
-
         t.setProgramCache(programCache);
         t.setAstCache(methodCache);
 
         t.entryPoint(entryFunc, method);
         t.setMinifying(false); //when true, mangles leaflet's L variable
         t.setIncremental(true);
-        t.setProperties(properties);
+        //t.setProperties(properties);
 
 
 
@@ -156,6 +153,7 @@ public class JavaToJavascript {
 
         long endTime = System.currentTimeMillis();
         logger.info("compiled {} to {} bytes .JS in {} ms", method, sb.length(), endTime-startTime);
+        logger.info("\tcache: {} {}", programCache, methodCache);
 
 
         if (programCache instanceof MyDiskProgramCache) {
@@ -190,11 +188,11 @@ public class JavaToJavascript {
         return compile("main", method );
     }
 
-    public static class MyMemoryProgramCache implements ProgramCache {
+    public static class MapProgramCache implements ProgramCache {
 
         private final Map<MethodReference, Program> cache;
 
-        public MyMemoryProgramCache(Map<MethodReference, Program> cache) {
+        public MapProgramCache(Map<MethodReference, Program> cache) {
             this.cache = cache;
         }
 
@@ -210,13 +208,13 @@ public class JavaToJavascript {
 
         @Override
         public String toString() {
-            return "MyMemoryProgramCache{" +
+            return "MapProgramCache{" +
                     "size=" + cache.size() +
                     '}';
         }
     }
 
-    public static class MyMemoryRegularMethodNodeCache implements MethodNodeCache {
+    public static class ConcurrentMapMethodNodeCache implements MethodNodeCache {
         private final Map<MethodReference, RegularMethodNode> cache = new ConcurrentHashMap<>(1024);
         private final Map<MethodReference, AsyncMethodNode> asyncCache = new ConcurrentHashMap<>(1024);
 
