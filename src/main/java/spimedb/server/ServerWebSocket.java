@@ -59,11 +59,11 @@ abstract public class ServerWebSocket extends AbstractReceiveListener implements
     public static void send(WebSocketChannel socket, String s) {
 
 
-        //try {
-            WebSockets.sendText(s, socket, null);
-        //} catch (IOException e) {
-          //  logger.error("err: {} {}", socket, e.toString());
-        //}
+        try {
+            WebSockets.sendTextBlocking(s, socket);
+        } catch (IOException e) {
+            logger.error("err: {} {}", socket, e.toString());
+        }
 
     }
 

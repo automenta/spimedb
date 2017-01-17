@@ -97,6 +97,14 @@ public class JavaToJavascript {
 
         t.installPlugins();
 
+//        t.add(new AbstractDependencyListener() {
+//
+//            @Override
+//            public void classReached(DependencyAgent agent, String className, CallLocation location) {
+//                System.out.println(className + " @ " + (location!=null ? location.getMethod() : ""));
+//            }
+//
+//        });
 
         t.setProgramCache(programCache);
         t.setAstCache(methodCache);
@@ -231,11 +239,12 @@ public class JavaToJavascript {
         @Override
         public AsyncMethodNode getAsync(MethodReference methodReference) {
             return null;
+            //return asyncCache.get(methodReference);
         }
 
         @Override
         public void storeAsync(MethodReference methodReference, AsyncMethodNode node) {
-            asyncCache.put(methodReference, node);
+            //asyncCache.put(methodReference, node);
         }
 
         @Override

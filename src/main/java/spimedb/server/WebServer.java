@@ -377,18 +377,24 @@ public class WebServer extends PathHandler {
 
     }
 
-    public static class Attention {
+    public static class Attention  {
         private final Session session;
         private final WebSocketChannel chan;
 
         final int MAX_RESULTS = 1024;
         final int MAX_RESPONSE_BYTES = 1024 * 1024;
         public final SpimeDB db;
+        boolean running;
 
         public Attention(SpimeDB db, Session s, WebSocketChannel chan) {
             this.session = s;
             this.db = db;
             this.chan = chan;
+            this.running = true;
+        }
+
+        public void stop() {
+            this.running = false;
         }
 
         public void whereLonLat(float[][] bounds) {
@@ -409,15 +415,22 @@ public class WebServer extends PathHandler {
 
             String[] tags = new String[]{};
 
+
             db.get(new Query((n) -> {
 
                 String i = n.id();
                 if (!session.sent.containsAndAdd(i)) {
 
                     //gen.writeStartObject();
-                    send(chan, JSON.toJSON(n));
+
+                    String json = JSON.toJSON(n);
+                    int size = json.length();
+
+                    send(chan, json);
                     if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
                         return false;
+
+                    session.outRate.acquire(size);
 
                     //gen.writeEndObject();
 
@@ -426,9 +439,10 @@ public class WebServer extends PathHandler {
 
                 }
 
-                return true; //continue
+                return running; //continue
 
             }).where(lon, lat).in(tags));
+
 
         }
 

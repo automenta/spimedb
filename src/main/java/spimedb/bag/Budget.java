@@ -1,4 +1,4 @@
-package spimedb.index;
+package spimedb.bag;
 
 import org.jetbrains.annotations.Nullable;
 

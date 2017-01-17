@@ -1,15 +1,13 @@
 package spimedb.client;
 
 import org.teavm.jso.JSObject;
-import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
-import org.teavm.jso.json.JSON;
+import spimedb.bag.BudgetMerge;
+import spimedb.bag.ObservablePriBag;
 import spimedb.client.leaflet.*;
-import spimedb.index.BudgetMerge;
-import spimedb.index.PriBag;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,8 +32,8 @@ public class Client {
     }
 
 
-    final PriBag<NObj> tag = new PriBag<>(16, BudgetMerge.max, new HashMap<>());
-    final PriBag<NObj> obj = new PriBag<>(128, BudgetMerge.add, new HashMap<>());
+    public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
+    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(128, BudgetMerge.add, new HashMap<>());
 
 
     public final ClientWebSocket attn = ClientWebSocket.newSocket("attn");
@@ -58,8 +56,11 @@ public class Client {
         attn.onTextJSON((x) -> {
             NObj nx = NObj.fromJSON( x );
             if (nx!=null) {
-                if (obj.put(nx, 0.5f) != null)
-                    System.out.println("#=" + obj.size() + ": " + nx);
+                obj.put(nx, 0.5f);
+                //Console.log(x);
+//                if (obj.put(nx, 0.5f) != null) {
+//                    //System.out.println("#=" + obj.size() + ": " + nx);
+//                }
             }
         });
 
@@ -69,16 +70,17 @@ public class Client {
             System.out.println(stringify(x));
         });
 
-        newMap(doc.getBody());
-    }
-
-    private void newMap(HTMLElement container) {
         HTMLElement mapContainer = doc.createElement("div");
         mapContainer.setAttribute("id", "view");
-        container.appendChild(mapContainer);
+        doc.getBody().appendChild(mapContainer);
+        newLeafletMap(mapContainer);
+    }
 
-        LeafletMap map = LeafletMap.create(container, LeafletMapOptions.create());
-        map.setView(LatLng.create(40, -80), 13);
+    private LeafletMap newLeafletMap(HTMLElement mapContainer) {
+
+        LeafletMap map = LeafletMap.create(mapContainer, LeafletMapOptions.create());
+
+        map.setView(LatLng.create(40, -80), 8);
         JsConsumer mapChange = (e) -> {
             JSObject bounds = map.getBounds();
 
@@ -98,12 +100,22 @@ public class Client {
         map.onLoad(mapChange);
         map.onZoomEnd(mapChange);
         map.onMoveEnd(mapChange);
+        //map.onShow(..)
+        //map.onHide(..)
 
-        TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create()
-                /*.attribution("&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> " +
-                        "contributors")*/)
+        //attach these events when the map shows and hides
+        obj.ADD.on(x -> {
+            Console.log("+",x.data);
+        });
+        obj.REMOVE.on(x -> {
+            Console.log("-",x.data);
+        });
+
+        TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create())
                 .addTo(map);
         //map.onClick((LeafletMouseEvent event) -> click(event.getLatlng()));
+
+        return map;
     }
 
     public static void main(String[] args) {
@@ -113,39 +125,4 @@ public class Client {
 
     }
 
-    /** wraps a JSON-encoded Nobject */
-    private static class NObj {
-
-        public final String id;
-        public final JSObject data;
-
-        public static NObj fromJSON(JSObject data) {
-            JSObject ID = get(data, "I");
-            if (ID!=null && JSString.isInstance(ID)) {
-                String id = ((JSString)ID).stringValue();
-                return new NObj(id, data);
-            }
-            return null;
-        }
-
-        NObj(String id, JSObject data) {
-            this.id = id;
-            this.data = data;
-        }
-
-        @Override
-        public String toString() {
-            return JSON.stringify(data);
-        }
-
-        @Override
-        public int hashCode() {
-            return id.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return this==obj || (obj instanceof NObj && id.equals(((NObj)obj).id));
-        }
-    }
 }

@@ -1,5 +1,6 @@
 package spimedb.server;
 
+import com.google.common.util.concurrent.RateLimiter;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
 import io.undertow.websockets.core.WebSocketChannel;
@@ -12,10 +13,13 @@ import spimedb.util.bloom.UnBloomFilter;
 import java.net.SocketAddress;
 
 /**
- * interactive session (ie, Client) model
+ * interactive session (ie, Client as seen from Server)
  * TODO: https://github.com/undertow-io/undertow/blob/master/examples/src/main/java/io/undertow/examples/sessionhandling/SessionServer.java
  */
 public class Session {
+
+    /** bandwidth throttle, in bytes per second */
+    final RateLimiter outRate = RateLimiter.create(1000);
 
     final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 

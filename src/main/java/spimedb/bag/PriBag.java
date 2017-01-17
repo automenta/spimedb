@@ -1,4 +1,4 @@
-package spimedb.index;
+package spimedb.bag;
 
 import com.google.common.base.Joiner;
 import jcog.data.sorted.SortedArray;
@@ -40,6 +40,16 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
         this.mergeFunction = mergeFunction;
         this.capacity = cap;
+    }
+
+    @Nullable
+    @Override
+    public Budget<V> remove(@NotNull V x) {
+        Budget<V> b = super.remove(x);
+        if (b!=null) {
+            onRemoved(b);
+        }
+        return b;
     }
 
     /**
@@ -590,7 +600,10 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     public void clear() {
         synchronized (items) {
             //map is possibly shared with another bag. only remove the items from it which are present in items
-            items.forEach(x -> map.remove(x.id));
+            items.forEach(x -> {
+                map.remove(x.id);
+                onRemoved(x);
+            });
             items.clear();
 
         }
