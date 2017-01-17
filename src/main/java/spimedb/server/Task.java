@@ -4,38 +4,39 @@ import io.undertow.websockets.core.WebSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
-import spimedb.query.Query;
-import spimedb.util.JSON;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static spimedb.server.ServerWebSocket.send;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 
 /**
  * a session-contextualized task
  */
-public class Task {
+abstract public class Task implements BiConsumer<SpimeDB, WebSocketChannel> {
 
     public static Logger logger = LoggerFactory.getLogger(Task.class);
 
     private final Session session;
-    private final WebSocketChannel chan;
 
     final int MAX_RESULTS = 1024;
-    final int MAX_RESPONSE_BYTES = 1024 * 1024;
-    public final SpimeDB db;
-    final AtomicBoolean running = new AtomicBoolean();
-    private final long whenStart;
-    private long whenStop;
+    //final int MAX_RESPONSE_BYTES = 1024 * 1024;
+
+    protected final AtomicBoolean running = new AtomicBoolean();
+
+    private final long whenCreated;
+    private long whenStarted /* TODO */, whenStopped;
+
+    /** bytes transferred out */
+    final AtomicLong outBytes = new AtomicLong(0);
+
+    //final int[] count = {0};
 
 
-    public Task(SpimeDB db, Session s, WebSocketChannel chan) {
+    public Task(Session s) {
         this.session = s;
-        this.db = db;
-        this.chan = chan;
 
-        this.whenStart = System.currentTimeMillis();
+        this.whenCreated = System.currentTimeMillis();
 
         this.running.set(true);
         s.active.add(this);
@@ -43,75 +44,30 @@ public class Task {
 
     public void stop() {
         if (running.compareAndSet(true, false)) {
-            this.whenStop = System.currentTimeMillis();
+            this.whenStopped = System.currentTimeMillis();
             if (session.active.remove(this))
-                logger.info("stop {} {}ms", this, (whenStop - whenStart));
+                logger.info("stop {} {}ms", this, (whenStopped - whenCreated));
             else
                 logger.error("already removed {}", this);
         }
     }
 
-    public void focusClear() {
-        //logger.info("start {} focusClear", this);
-        session.active.forEach(task -> { if (task!=this) task.stop(); } );
-    }
-
-    public void focusLonLat(float[][] bounds) {
-
-        focusClear();
-
-        logger.info("start {} focusLonLat {}", this, bounds);
-
-        float[] lon = new float[]{bounds[0][0], bounds[1][0]};
-        float[] lat = new float[]{bounds[0][1], bounds[1][1]};
+    protected boolean send(WebSocketChannel chan, byte[] data) {
+        int size = data.length;
 
 
-        //JsonGenerator gen =
-        //      JSON.msgPackMapper.
+        session.outRate.acquire(size);
 
-        //gen.writeStartArray();
+        /*if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
+            return false;*/
 
-        final int[] count = {0};
-
-
-        String[] tags = new String[]{};
-
-
-        db.get(new Query((n) -> {
-
-            String i = n.id();
-            if (!session.sent.containsAndAdd(i)) {
-
-                //gen.writeStartObject();
-
-                byte[] json = JSON.toJSON(n);
-
-                try {
-                    send(chan, json);
-
-                    if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
-                        return false;
-
-                    int size = json.length;
-                    session.outRate.acquire(size);
-
-                } catch (IOException e) {
-                    logger.info("send: {}", e.getMessage()); //probably remote disconnected
-                    return false;
-                }
-
-
-                //gen.writeEndObject();
-
-                //gen.writeRaw(',');
-
-
-            }
-
-            return running.get(); //continue
-
-        }).where(lon, lat).in(tags));
-
+        try {
+            ServerWebSocket.send(chan, data);
+            outBytes.addAndGet(size);
+            return true;
+        } catch (IOException e) {
+            return false; //probably remote disconnected
+        }
 
     }
 

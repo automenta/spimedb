@@ -2,6 +2,7 @@ package spimedb.server;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.*;
@@ -82,22 +83,24 @@ abstract public class ServerWebSocket extends AbstractReceiveListener implements
         send(socket, sb.toString());
     }
 
-    public static void send(WebSocketChannel socket, Object object) throws IOException {
+    public static void sendJSONText(WebSocketChannel socket, Object object) throws IOException {
+        sendJSONText(socket, JSON.jsonText, object);
+    }
 
+    public static void sendJSONBinary(WebSocketChannel socket, Object object) throws IOException {
+        sendJSONText(socket, JSON.msgPackMapper, object);
+    }
+
+    public static void sendJSONText(WebSocketChannel socket, ObjectMapper encoder, Object object) throws IOException {
 
         byte[] s;
         try {
-            s = JSON.jsonLoose.writeValueAsBytes(object);
+            s = encoder.writeValueAsBytes(object);
         } catch (JsonProcessingException t) {
             s = object.toString().getBytes(); //could not make json so just use toString()
         }
 
         send(socket, s);
-
-//        } catch (IOException e) {
-//            logger.error("err: {} {}", socket, e.toString());
-//        }
-
     }
 
     @Deprecated public static void send(WebSocketChannel socket, String s) throws IOException {

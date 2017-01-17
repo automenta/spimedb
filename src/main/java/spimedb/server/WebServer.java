@@ -13,10 +13,6 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
-import io.undertow.websockets.core.BufferedTextMessage;
-import io.undertow.websockets.core.WebSocketChannel;
-import org.eclipse.collections.api.map.primitive.ObjectFloatMap;
-import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
@@ -27,12 +23,10 @@ import spimedb.util.js.JavaToJavascript;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.StringTokenizer;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
-import static io.undertow.UndertowOptions.ENABLE_SPDY;
 
 /**
  * @author me
@@ -44,6 +38,9 @@ public class WebServer extends PathHandler {
     private final SpimeDB db;
 
     final JavaToJavascript j2js;
+
+
+
 
 
     //    private List<String> paths = new ArrayList();
@@ -94,50 +91,17 @@ public class WebServer extends PathHandler {
         }));
 
         /* client attention management */
-        addPrefixPath("/attn", websocket(new Session() {
+        addPrefixPath("/attn", websocket(new Session(db) {
 
-            @Override
-            protected void onFullTextMessage(WebSocketChannel socket, BufferedTextMessage message) {
 
-                //if this is a new session, set default attention to the pagerank of tags
-                if (attention.isEmpty()) {
-                    ObjectFloatMap<String> rank = new ObjectFloatHashMap<String>();
-                    attention.putAll(rank);
-                }
 
-                String command = message.getData();
-                //TODO parse command
-
-                if (command.isEmpty()) {
-                    try {
-                        send(socket, attention);
-                    } catch (IOException e) {
-                        logger.info("attn {} {}:{}", this, e);
-                    }
-                } else {
-
-                    StringTokenizer t = new StringTokenizer(command, "\t");
-                    String tag = t.nextToken();
-                    String value = t.nextToken();
-
-                    logger.info("attn {} {}:{}", this, tag, value);
-
-                    float fv = Float.valueOf(value);
-                    if (fv != fv) /* NaN */
-                        attention.remove(tag);
-                    else
-                        attention.put(tag, fv);
-                }
-
-            }
         }));
 
 
         Undertow.Builder b = Undertow.builder()
                 .addHttpListener(port, host)
                 .setServerOption(ENABLE_HTTP2, true)
-                .setServerOption(ENABLE_SPDY, true)
-                .setIoThreads(8)
+                //.setServerOption(ENABLE_SPDY, true)
                 .setHandler(new EncodingHandler(this, new ContentEncodingRepository()
                         .addEncodingHandler("gzip", new GzipEncodingProvider(), 100)
                         .addEncodingHandler("deflate", new DeflateEncodingProvider(), 50))
@@ -177,6 +141,7 @@ public class WebServer extends PathHandler {
 //        });
 //
         logger.info("Start @ {}:{}\n\tresources={}", host, port, resourcePath);
+
 
 
         b.build().start();
@@ -276,6 +241,7 @@ public class WebServer extends PathHandler {
 
 
     }
+
 
     //    public void start() {
 //

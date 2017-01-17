@@ -419,12 +419,4 @@ public class NObject extends RectND implements Serializable {
         return new long[] { (long)a, (long)b };
     }
 
-
-    static {
-
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.INFO);
-
-    }
-
 }

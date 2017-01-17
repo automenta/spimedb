@@ -1,5 +1,8 @@
 package spimedb;
 
+import ch.qos.logback.classic.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.db.Infinispan;
 import spimedb.sense.KML;
 import spimedb.server.WebServer;
@@ -13,33 +16,34 @@ import java.io.File;
 
 public class Main {
 
-
     static {
-        //HACK force programmatic logger settings
-        try {
-            Class.forName("spimedb.NObject");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.INFO);
     }
 
-
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args)  {
 
         SpimeDB db =  Infinispan.get(
-                //"/tmp/climate"
-                null
+            //"/tmp/climate"
+            null
         );
 
-        if (db.isEmpty()) {
-            SpimeDB.logger.info("Initializing database...");
+        new WebServer(db, 8080);
 
-            try {
-                new SpimeJS(db).run(new File("data/climateviewer.js"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (db.isEmpty())
+            addInitialData(db);
+
+    }
+
+    static void addInitialData(SpimeDB db) {
+
+        SpimeDB.logger.info("Initializing database...");
+
+        try {
+            new SpimeJS(db).with("db", db).run(new File("data/climateviewer.js"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
             /*
             new Netention() {
@@ -55,52 +59,34 @@ public class Main {
             */
 
 
-            //ImportGeoJSON
+        //ImportGeoJSON
 
-            //ImportSchemaOrg.load(db);
+        //ImportSchemaOrg.load(db);
 
-            //System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
+        //System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
 
 
-
-            String[] urls = new String[]{
-                    "file:///home/me/kml/Indian-Lands.kmz",
-                    "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
-                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
-                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
-                    "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
+        String[] urls = new String[]{
+                "file:///home/me/kml/Indian-Lands.kmz",
+                "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
+                "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
+                "file:///home/me/kml/submarine-cables-CV3D.kmz",
+                "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
 //
 //                    //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
 //                    //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
 //                    //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
 //                    //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
-            };
-            for (String u : urls) {
-                SpimeDB.runLater(new KML(db).url(u));
-            }
-
+        };
+        for (String u : urls) {
+            SpimeDB.runLater(new KML(db).url(u));
+        }
 
 
 //            db.forEach(x -> {
 //                System.out.println(x);
 //            });
-
-
-        }
-
-
-
-
-        new WebServer(db, 8080);
-//
-//                //.add("/proxy", new CachingProxyServer(es, cachePath))
-//                .add("/cache", resource(
-//                        new FileResourceManager(new File(cachePath), 64))
-//                        .setDirectoryListingEnabled(true).setMimeMappings(MimeMappings.DEFAULT))
-//                .start("localhost", 8080);
     }
-
-
 
 
 //    final static String cachePath = "cache";

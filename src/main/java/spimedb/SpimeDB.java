@@ -1,7 +1,9 @@
 package spimedb;
 
+import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
 import spimedb.query.Query;
 
+import javax.script.ScriptEngineManager;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +28,8 @@ import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 public class SpimeDB implements Iterable<NObject>  {
 
+
+
     public static final String VERSION = "SpimeDB v-0.00";
 
     @JsonIgnore
@@ -35,7 +40,11 @@ public class SpimeDB implements Iterable<NObject>  {
 
     @JsonIgnore public final Map<String, NObject> obj;
 
-    public final Schema schema = new Schema();
+    public final Tags schema = new Tags();
+
+    /** server-side javascript engine */
+    final ScriptEngineManager engineManager = new ScriptEngineManager();
+    public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
 
     /** in-memory, map-based */
     public SpimeDB() {
@@ -45,6 +54,7 @@ public class SpimeDB implements Iterable<NObject>  {
     public SpimeDB(Map<String, NObject> g) {
 
         this.obj = g;
+
 
     }
 
@@ -251,4 +261,8 @@ public class SpimeDB implements Iterable<NObject>  {
 //    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
 //        return Tuples.pair(e, Tuples.twin(from, to));
 //    }
+
+
+
+
 }

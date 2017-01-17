@@ -20,9 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * https://neo4j.com/developer/java/#_using_neo4j_s_embedded_java_api
  * Created by me on 1/8/17.
  */
-public class Schema {
+public class Tags {
 
-    final static Logger logger = LoggerFactory.getLogger(Schema.class);
+    final static Logger logger = LoggerFactory.getLogger(Tags.class);
 
 //    @JsonIgnore
 //    public final MutableGraph<String> inh = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
@@ -42,7 +42,7 @@ public class Schema {
     @JsonIgnore
     public final ByteBuddy tagProxyBuilder = new ByteBuddy();
 
-    public Schema() {
+    public Tags() {
     }
 
 //    public Tag get(String id, boolean createIfUnknown) {

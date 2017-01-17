@@ -16,6 +16,10 @@ import spimedb.SpimeDB;
  */
 public class Infinispan {
 
+    static {
+        SpimeDB.VERSION.length(); //HACK trigger the static logger settings in SpimeDB class
+    }
+
     public static SpimeDB get(@Nullable String path) {
 
         Cache<String, NObject> vertex = cache(path, "vertex");

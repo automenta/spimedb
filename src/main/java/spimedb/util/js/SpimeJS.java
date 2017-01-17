@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 
 /**
  * Provides a javascript context with a DB reference for querying, populating, and/or transforming it
+ * Should be considered admin-level
  */
 public class SpimeJS extends JSScript {
 
@@ -25,10 +26,8 @@ public class SpimeJS extends JSScript {
     private final SpimeDB db;
 
     public SpimeJS(SpimeDB db) {
-        super();
+        super(db.js);
         this.db = db;
-
-        engine.put("db", db);
     }
 
     @Override
@@ -43,6 +42,7 @@ public class SpimeJS extends JSScript {
     }
 
     public static void setImports(ScriptEngine js) throws Exception {
+
         js.eval("load('nashorn:mozilla_compat.js')");
 
         js.eval("importPackage('java.lang')");

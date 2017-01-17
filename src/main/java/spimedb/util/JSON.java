@@ -109,7 +109,7 @@ public class JSON {
 
 
 
-    final public static BatchObjectMapper jsonLoose = (BatchObjectMapper) new BatchObjectMapper()
+    final public static BatchObjectMapper jsonText = (BatchObjectMapper) new BatchObjectMapper()
             .disable(SerializationFeature.CLOSE_CLOSEABLE)
             .enable(SerializationFeature.WRAP_EXCEPTIONS)
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)

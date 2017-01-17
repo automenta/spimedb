@@ -37,13 +37,12 @@ public class Client {
     public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(1024, BudgetMerge.max, new HashMap<>());
 
 
-    public final ClientWebSocket attn = ClientWebSocket.newSocket("attn");
-    public final ClientWebSocket shell = ClientWebSocket.newSocket("shell");
+    public final ClientWebSocket io = ClientWebSocket.newSocket("attn");
 
 
     protected void init() {
 
-        shell.send("db");
+        io.send("db"); //get the database summary
 
             /*document.getBody().appendChild(div).appendChild(
                     document.createTextNode(JSON.stringify(ws)));*/
@@ -54,7 +53,7 @@ public class Client {
 
         this.doc = HTMLDocument.current();
 
-        attn.onTextJSON((x) -> {
+        io.onTextJSON((x) -> {
             NObj nx = NObj.fromJSON( x );
             if (nx!=null) {
                 obj.put(nx, 0.5f);
@@ -65,9 +64,8 @@ public class Client {
             }
         });
 
-
-        shell.setOnOpen(this::init);
-        shell.onText(Console::log);
+        io.setOnOpen(this::init);
+        io.onText(Console::log);
 
         HTMLElement mapContainer = doc.createElement("div");
         mapContainer.setAttribute("id", "view");
@@ -98,7 +96,7 @@ public class Client {
                 new float[] { getFloat(ne, "lng"), getFloat(ne, "lat") }
             };
 
-            attn.send("focusLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
+            io.send("me.focusLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
 
         };
 
