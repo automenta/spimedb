@@ -10,21 +10,13 @@ import org.teavm.jso.json.JSON;
  */
 public abstract class CircleMarker implements Layer {
 
-    /**
-        var options = {
-            data: f,
-            title: label,
-            color: "#ff7800",
-            weight: 1
-        };
-    */
-    @JSBody(params = {"latlng","options"}, script = "return L.circleMarker(latlng, options);")
-    public static native CircleMarker create(LatLng latlng, JSObject options);
+    @JSBody(params = {"lon", "lat", "options"}, script = "return L.circleMarker([lat, lon], options);")
+    public static native CircleMarker create(float lon, float lat, JSObject options);
 
-    public static CircleMarker create(float lon, float lat, String title, String color) {
+    public static CircleMarker create(float lon, float lat, float radius, String title, String color) {
         return CircleMarker.create(
-            LatLng.at(lon, lat),
-            JSON.parse("{\"title\":\"" + title + "\", \"color\":\"" + color + "\"}") //HACK
+            lon, lat,
+            JSON.parse("{\"radius\":\"" + radius+ "\",\"title\":\"" + title + "\",\"fillColor\":\"" + color + "\",\"weight\":1}") //HACK
         );
     }
 

@@ -1,6 +1,7 @@
 package spimedb.client;
 
 import org.teavm.jso.JSObject;
+import org.teavm.jso.core.JSArray;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
 import org.teavm.jso.dom.html.HTMLDocument;
@@ -33,7 +34,7 @@ public class Client {
 
 
     public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
-    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(4, BudgetMerge.max, new HashMap<>());
+    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(1024, BudgetMerge.max, new HashMap<>());
 
 
     public final ClientWebSocket attn = ClientWebSocket.newSocket("attn");
@@ -105,26 +106,54 @@ public class Client {
                 .addTo(map);
         //map.onClick((LeafletMouseEvent event) -> click(event.getLatlng()));
 
-        ClusterLayer l = ClusterLayer.create().addTo(map);
+
+        Icon defaultIcon = DivIcon.create("textIcon", "+");
+        //doc.createElement("button").withText("X")
+
+        ClusterLayer c = ClusterLayer.create().addTo(map);
 
         Map<String, Layer> shown = new HashMap();
 
         //attach these events when the map shows and hides
-        obj.ADD.on(x -> {
-            //Console.log("+", JSNumber.valueOf(obj.size()));
+        obj.ADD.on(N -> {
+            JSObject n = N.data;
 
-            float lon = ((float)Math.random() * 100f);
-            float lat = ((float)Math.random() * 100f);
+            JSArray bounds = JS.getArray(n, "@");
+            JSObject time = bounds.get(0);
+            JSObject x = bounds.get(1); //LON
+            JSObject y = bounds.get(2); //LAT
+            JSObject z = bounds.get(3);
 
-            CircleMarker m = CircleMarker.create(lon, lat, "x", "#0f3").addTo(l);
-            shown.put(x.id, m);
-            Console.log(m);
+            String nid = N.id;
+            String name = JS.getString(n, "N", nid);
+
+            if (JS.isNumber(x) && JS.isNumber(y)) {
+                //POINT
+                //shown.computeIfAbsent(N.id, id -> {
+                if (!shown.containsKey(nid)) {
+
+                    float lon = JS.toFloat(x);
+                    float lat = JS.toFloat(y);
+                    //System.out.println(lon + " " + lat);
+                    //System.out.println(shown.size() + " " + obj.size());
+
+                    //CircleMarker c = CircleMarker.create(lon, lat, 1, name, "#0f3");
+                    Marker m = Marker.create(lon, lat, name, "#0f3");
+                    m.setIcon(defaultIcon);
+
+                    c.addLayers(m);
+                    shown.put(nid, m);
+                }
+            }
+
+
         });
 
         obj.REMOVE.on(x -> {
             //Console.log("-", JSNumber.valueOf(obj.size()));
             Layer m = shown.remove(x.id);
-            m.remove();
+            if (m!=null)
+                c.removeLayers(m);
         });
 
         map.onZoomEnd(mapChange);

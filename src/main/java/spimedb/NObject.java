@@ -240,7 +240,7 @@ public class NObject extends RectND implements Serializable {
 
     @Override
     public String toString() {
-        return JSON.toJSON(this);
+        return new String(JSON.toJSON(this));
     }
 
 

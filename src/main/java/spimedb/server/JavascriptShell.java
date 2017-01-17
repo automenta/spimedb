@@ -13,6 +13,7 @@ import spimedb.SpimeDB;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
+import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -89,7 +90,13 @@ class JavascriptShell extends ServerWebSocket {
             eval(code,
                  contextBuilder!=null ? contextBuilder.apply(Session.session(socket), socket)
                          : null,
-                (result) -> send(socket, result),
+                    (result) -> {
+                        try {
+                            send(socket, result);
+                        } catch (IOException e) {
+                            logger.info("{} {}", socket, e.getMessage());
+                        }
+                    },
                 engine
             )
         );

@@ -96,7 +96,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write(JSON.toJSON(db.schema.tags().stream().map(db::get).toArray(NObject[]::new)).getBytes());
+                o.write(JSON.toJSON(db.schema.tags().stream().map(db::get).toArray(NObject[]::new)));
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }
@@ -116,7 +116,11 @@ public class WebServer extends PathHandler {
 
                 String messageData = message.getData();
                 if (messageData.isEmpty()) {
-                    send(socket, session.attention);
+                    try {
+                        send(socket, session.attention);
+                    } catch (IOException e) {
+                        logger.info("attn {} {}:{}", session, e);
+                    }
                 } else {
 
                     StringTokenizer t = new StringTokenizer(messageData, "\t");

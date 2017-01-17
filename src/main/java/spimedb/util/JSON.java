@@ -148,13 +148,13 @@ public class JSON {
 
     public static final org.slf4j.Logger logger = LoggerFactory.getLogger(JSON.class);
 
-    public static String toJSON(Object x) {
+    public static byte[] toJSON(Object x) {
         try {
-            return json.writeValueAsString(x);
+            return json.writeValueAsBytes(x);
         } catch (JsonProcessingException ex) {
             System.err.println(ex.toString());
             try {
-                return json.writeValueAsString( x.toString() );
+                return json.writeValueAsBytes( x.toString() );
             } catch (JsonProcessingException ex1) {
                 return null;
             }

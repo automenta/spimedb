@@ -7,6 +7,7 @@ import spimedb.SpimeDB;
 import spimedb.query.Query;
 import spimedb.util.JSON;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static spimedb.server.ServerWebSocket.send;
@@ -83,14 +84,22 @@ public class Task {
 
                 //gen.writeStartObject();
 
-                String json = JSON.toJSON(n);
-                int size = json.length();
+                byte[] json = JSON.toJSON(n);
 
-                send(chan, json);
-                if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
+                try {
+                    send(chan, json);
+
+                    if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
+                        return false;
+
+                    int size = json.length;
+                    session.outRate.acquire(size);
+
+                } catch (IOException e) {
+                    logger.info("send: {}", e.getMessage()); //probably remote disconnected
                     return false;
+                }
 
-                session.outRate.acquire(size);
 
                 //gen.writeEndObject();
 

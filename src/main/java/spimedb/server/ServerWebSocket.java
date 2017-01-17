@@ -56,18 +56,18 @@ abstract public class ServerWebSocket extends AbstractReceiveListener implements
     }
 
 
-    public static void send(WebSocketChannel socket, String s) {
+//    public static void send(WebSocketChannel socket, String s) {
+//
+//
+////        try {
+//            WebSockets.sendTextBlocking(s, socket);
+////        } catch (IOException e) {
+////            logger.error("err: {} {}", socket, e.toString());
+////        }
+//
+//    }
 
-
-        try {
-            WebSockets.sendTextBlocking(s, socket);
-        } catch (IOException e) {
-            logger.error("err: {} {}", socket, e.toString());
-        }
-
-    }
-
-    public static void send(WebSocketChannel socket, ObjectFloatMap<String> m) {
+    public static void send(WebSocketChannel socket, ObjectFloatMap<String> m) throws IOException {
         //TODO use MsgPack'd JSON object
 
         StringBuilder sb = new StringBuilder(m.size() * 16).append('{');
@@ -78,10 +78,11 @@ abstract public class ServerWebSocket extends AbstractReceiveListener implements
         if (cur > 1) //remove trailing ',' if at least one element was printed
             sb.setLength(cur-1);
         sb.append('}');
+
         send(socket, sb.toString());
     }
 
-    public static void send(WebSocketChannel socket, Object object) {
+    public static void send(WebSocketChannel socket, Object object) throws IOException {
 
 
         byte[] s;
@@ -91,15 +92,21 @@ abstract public class ServerWebSocket extends AbstractReceiveListener implements
             s = object.toString().getBytes(); //could not make json so just use toString()
         }
 
-        try {
-            WebSockets.sendTextBlocking(ByteBuffer.wrap(s), socket);
-        } catch (IOException e) {
-            logger.error("err: {} {}", socket, e.toString());
-        }
+        send(socket, s);
 
+//        } catch (IOException e) {
+//            logger.error("err: {} {}", socket, e.toString());
+//        }
 
     }
 
+    @Deprecated public static void send(WebSocketChannel socket, String s) throws IOException {
+        send(socket, s.getBytes());
+    }
+
+    public static void send(WebSocketChannel socket, byte[] s) throws IOException {
+        WebSockets.sendTextBlocking(ByteBuffer.wrap(s), socket);
+    }
 
     @Override
     public void onError(WebSocketChannel wsc, Void t, Throwable thrwbl) {

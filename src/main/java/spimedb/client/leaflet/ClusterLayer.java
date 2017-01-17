@@ -13,4 +13,8 @@ public abstract class ClusterLayer implements Layer {
 
     public abstract ClusterLayer addTo(LeafletMap map);
 
+    public abstract void addLayers(Layer... l);
+
+    public abstract void removeLayers(Layer... l);
+
 }

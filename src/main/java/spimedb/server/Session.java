@@ -20,15 +20,22 @@ import java.util.Set;
  */
 public class Session {
 
-    /** bandwidth throttle, in bytes per second */
-    final RateLimiter outRate = RateLimiter.create(1000);
+    /** bytes per second */
+    public static final int OUTPUT_throttle = 8 * 1024;
+
+    /** max # of items that can be remembered to have already been sent.
+     * this should not exceed the client's object bag capacity, which it should configure on
+     * connecting or changing its capacity */
+    final int ALREADY_SENT_MEMORY_CAPACITY = 16;
+
+    /** response bandwidth throttle */
+    final RateLimiter outRate = RateLimiter.create(OUTPUT_throttle);
 
     final Set<Task> active = new ConcurrentHashSet<>();
 
     final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
-    final int BLOOM_SIZE = 64 * 1024;
-    final UnBloomFilter<String> sent = new UnBloomFilter<>(BLOOM_SIZE, String::getBytes);
+    final UnBloomFilter<String> sent = new UnBloomFilter<>(ALREADY_SENT_MEMORY_CAPACITY, String::getBytes);
 
     private final SocketAddress peer;
 
