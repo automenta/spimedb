@@ -190,8 +190,8 @@ class NClient extends EventEmitter {
         oReq.onload = function (oEvent) {
             const arrayBuffer = oReq.response;
             if (arrayBuffer) {
-                const byteArray = new Uint8Array(arrayBuffer);
-                onFocus(msgpack.decode(byteArray));
+
+                onFocus(msgpack.decode(new Uint8Array(arrayBuffer)));
             }
         };
         oReq.send(null);

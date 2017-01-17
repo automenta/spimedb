@@ -148,7 +148,7 @@ public class JSON {
 
     public static final org.slf4j.Logger logger = LoggerFactory.getLogger(JSON.class);
 
-    public static byte[] toJSON(Object x) {
+    @Deprecated public static byte[] toJSON(Object x) {
         try {
             return json.writeValueAsBytes(x);
         } catch (JsonProcessingException ex) {

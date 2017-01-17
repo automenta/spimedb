@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -50,25 +49,6 @@ abstract public class Task implements BiConsumer<SpimeDB, WebSocketChannel> {
             else
                 logger.error("already removed {}", this);
         }
-    }
-
-    protected boolean send(WebSocketChannel chan, byte[] data) {
-        int size = data.length;
-
-
-        session.outRate.acquire(size);
-
-        /*if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
-            return false;*/
-
-        try {
-            ServerWebSocket.send(chan, data);
-            outBytes.addAndGet(size);
-            return true;
-        } catch (IOException e) {
-            return false; //probably remote disconnected
-        }
-
     }
 
 }

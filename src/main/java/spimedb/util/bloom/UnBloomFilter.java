@@ -63,7 +63,7 @@ public class UnBloomFilter<X> {
      * @param element The byte array that may have been previously seen.
      * @return Whether the element is contained in the OoaBFilter.
      */
-    public boolean containsAndAdd(@NotNull X element) {
+    public boolean containsOrAdd(@NotNull X element) {
         HashCode code = HASH_FUNC.hashBytes(asBytes.apply(element));
 
         Object prev = array.getAndSet(code.asInt() & sizeMask, element);

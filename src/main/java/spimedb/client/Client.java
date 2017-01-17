@@ -2,6 +2,7 @@ package spimedb.client;
 
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
+import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
 import org.teavm.jso.dom.html.HTMLDocument;
@@ -9,6 +10,7 @@ import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.bag.BudgetMerge;
 import spimedb.bag.ObservablePriBag;
 import spimedb.client.leaflet.*;
+import spimedb.client.websocket.WebSocket;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,7 +39,7 @@ public class Client {
     public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(1024, BudgetMerge.max, new HashMap<>());
 
 
-    public final ClientWebSocket io = ClientWebSocket.newSocket("attn");
+    public final WebSocket io = WebSocket.newSocket("attn");
 
 
     protected void init() {
@@ -53,19 +55,22 @@ public class Client {
 
         this.doc = HTMLDocument.current();
 
-        io.onTextJSON((x) -> {
-            NObj nx = NObj.fromJSON( x );
-            if (nx!=null) {
-                obj.put(nx, 0.5f);
-                //Console.log(x);
-//                if (obj.put(nx, 0.5f) != null) {
-//                    //System.out.println("#=" + obj.size() + ": " + nx);
-//                }
+        io.onJSONBinary((x) -> {
+            if (JSString.isInstance(x)) {
+                Console.log(x);
+            } else {
+                NObj nx = NObj.fromJSON(x);
+                if (nx != null) {
+                    obj.put(nx, 0.5f);
+                    //Console.log(x);
+                    //                if (obj.put(nx, 0.5f) != null) {
+                    //                    //System.out.println("#=" + obj.size() + ": " + nx);
+                    //                }
+                }
             }
         });
 
         io.setOnOpen(this::init);
-        io.onText(Console::log);
 
         HTMLElement mapContainer = doc.createElement("div");
         mapContainer.setAttribute("id", "view");
