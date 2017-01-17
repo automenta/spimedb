@@ -31,4 +31,8 @@ public abstract class LatLng implements JSObject {
 
     @JSBody(params = { "lat", "lng" }, script = "return L.latLng(lat, lng);")
     public static native LatLng create(double lat, double lng);
+
+    public static LatLng at(float lon, float lat) {
+        return LatLng.create(lat, lon);
+    }
 }

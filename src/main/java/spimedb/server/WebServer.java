@@ -275,7 +275,7 @@ public class WebServer extends PathHandler {
 //
 //        });
 //
-        logger.info("Start @ {}:{}\n\tdb={}\n\tresources={}", host, port, db, resourcePath);
+        logger.info("Start @ {}:{}\n\tresources={}", host, port, resourcePath);
 
 
         b.build().start();

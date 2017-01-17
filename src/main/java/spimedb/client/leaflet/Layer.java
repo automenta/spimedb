@@ -6,5 +6,7 @@ import org.teavm.jso.JSObject;
  *
  * @author Alexey Andreev
  */
-public interface Layer extends JSObject {
+public interface Layer extends JSObject, Layered {
+
+
 }

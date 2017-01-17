@@ -3,10 +3,9 @@ package spimedb;
 import spimedb.db.Infinispan;
 import spimedb.sense.KML;
 import spimedb.server.WebServer;
-import spimedb.util.js.SpimeScript;
+import spimedb.util.js.SpimeJS;
 
 import java.io.File;
-import java.util.stream.Stream;
 
 /**
  * Created by me on 6/14/15.
@@ -37,7 +36,7 @@ public class Main {
             SpimeDB.logger.info("Initializing database...");
 
             try {
-                new SpimeScript(db).run(new File("data/climateviewer.js"));
+                new SpimeJS(db).run(new File("data/climateviewer.js"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -68,7 +67,7 @@ public class Main {
                     "file:///home/me/kml/Indian-Lands.kmz",
 //                    "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
 //                    "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
-                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
+//                    "file:///home/me/kml/submarine-cables-CV3D.kmz",
                     "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
 //
 //                    //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
@@ -76,7 +75,10 @@ public class Main {
 //                    //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
 //                    //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
             };
-            Stream.of(urls).parallel().forEach(u -> new KML(db).url(u).run());
+            for (String u : urls) {
+                SpimeDB.runLater(new KML(db).url(u));
+            }
+
 
 
 //            db.forEach(x -> {

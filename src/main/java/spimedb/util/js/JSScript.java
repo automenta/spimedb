@@ -12,13 +12,8 @@ public class JSScript {
     protected final ScriptEngine engine;
 
     public JSScript() {
-
         this.engine = new ScriptEngineManager().getEngineByName("nashorn");
-
-
     }
-
-
 
     public void run(File file) throws ScriptException, FileNotFoundException {
         run(new FileReader(file));

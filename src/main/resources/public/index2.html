@@ -13,9 +13,10 @@
     <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.Default.css">
 
 
+    <script src="lib/jquery.min.js"></script>
     <script src="lib/leaflet/leaflet.js"></script> <!-- http://leafletjs.com/examples/quick-start.html -->
     <!--<script src="lib/leafletx/leaflet.osmgeocoder.js"></script>-->
-    <!--<script src="lib/leaflet.markercluster/leaflet.markercluster.js"></script>-->
+    <script src="lib/leaflet.markercluster/leaflet.markercluster.js"></script>
     <!--<script src="lib/leafletx/leaflet-providers.js"></script>-->
     <!--<script src="lib/leafletx/leaflet.geojsoncss.min.js"></script>-->
     <style>
@@ -48,7 +49,8 @@
 <body>
 </body>
 <script>
-    document.addEventListener( "DOMContentLoaded", ()=>{
+    $(document).ready(()=>{
+    //document.addEventListener( "DOMContentLoaded", ()=>{
         main();
     }, false );
 

@@ -5,6 +5,8 @@
  */
 package spimedb.util.js;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
 
 import javax.script.ScriptEngine;
@@ -16,17 +18,29 @@ import java.io.InputStreamReader;
 /**
  * Provides a javascript context with a DB reference for querying, populating, and/or transforming it
  */
-public class SpimeScript extends JSScript {
+public class SpimeJS extends JSScript {
+
+    public final static Logger logger = LoggerFactory.getLogger(SpimeJS.class);
 
     private final SpimeDB db;
 
-    public SpimeScript(SpimeDB db) {
+    public SpimeJS(SpimeDB db) {
         super();
         this.db = db;
 
         engine.put("db", db);
     }
 
+    @Override
+    public void run(String jsCode) {
+        SpimeDB.runLater(()->{
+            try {
+                super.run(jsCode);
+            } catch (ScriptException e) {
+                logger.error("{}: {}", jsCode, e);
+            }
+        });
+    }
 
     public static void setImports(ScriptEngine js) throws Exception {
         js.eval("load('nashorn:mozilla_compat.js')");
@@ -97,7 +111,7 @@ public class SpimeScript extends JSScript {
     }
 
     public static void main(String[] args) throws Exception {
-        repl(new SpimeScript(new SpimeDB()).engine);
+        repl(new SpimeJS(new SpimeDB()).engine);
     }
 
 }

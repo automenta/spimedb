@@ -11,6 +11,7 @@ import spimedb.client.leaflet.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import static spimedb.client.JS.get;
 import static spimedb.client.JS.getFloat;
@@ -32,7 +33,7 @@ public class Client {
 
 
     public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
-    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(128, BudgetMerge.add, new HashMap<>());
+    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(4, BudgetMerge.max, new HashMap<>());
 
 
     public final ClientWebSocket attn = ClientWebSocket.newSocket("attn");
@@ -75,6 +76,11 @@ public class Client {
 
     private LeafletMap newLeafletMap(HTMLElement mapContainer) {
 
+        /*
+         * TODO
+            continuousWorld: true,
+            worldCopyJump: true
+         */
         LeafletMap map = LeafletMap.create(mapContainer, LeafletMapOptions.create());
 
         map.setView(LatLng.create(40, -80), 8);
@@ -94,23 +100,40 @@ public class Client {
             attn.send("focusLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
 
         };
-        map.onLoad(mapChange);
-        map.onZoomEnd(mapChange);
-        map.onMoveEnd(mapChange);
-        //map.onShow(..)
-        //map.onHide(..)
+
+        TileLayer base = TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create())
+                .addTo(map);
+        //map.onClick((LeafletMouseEvent event) -> click(event.getLatlng()));
+
+        ClusterLayer l = ClusterLayer.create().addTo(map);
+
+        Map<String, Layer> shown = new HashMap();
 
         //attach these events when the map shows and hides
         obj.ADD.on(x -> {
-            Console.log("+",x.data);
-        });
-        obj.REMOVE.on(x -> {
-            Console.log("-",x.data);
+            //Console.log("+", JSNumber.valueOf(obj.size()));
+
+            float lon = ((float)Math.random() * 100f);
+            float lat = ((float)Math.random() * 100f);
+
+            CircleMarker m = CircleMarker.create(lon, lat, "x", "#0f3").addTo(l);
+            shown.put(x.id, m);
+            Console.log(m);
         });
 
-        TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create())
-                .addTo(map);
-        //map.onClick((LeafletMouseEvent event) -> click(event.getLatlng()));
+        obj.REMOVE.on(x -> {
+            //Console.log("-", JSNumber.valueOf(obj.size()));
+            Layer m = shown.remove(x.id);
+            m.remove();
+        });
+
+        map.onZoomEnd(mapChange);
+        map.onMoveEnd(mapChange);
+
+        //mapChange.accept(null); //<- call this after websockets init
+
+        //map.onShow(..)
+        //map.onHide(..)
 
         return map;
     }

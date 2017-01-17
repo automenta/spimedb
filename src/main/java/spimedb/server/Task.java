@@ -52,7 +52,7 @@ public class Task {
 
     public void focusClear() {
         //logger.info("start {} focusClear", this);
-        session.active.forEach(Task::stop);
+        session.active.forEach(task -> { if (task!=this) task.stop(); } );
     }
 
     public void focusLonLat(float[][] bounds) {
