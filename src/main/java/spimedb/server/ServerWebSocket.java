@@ -84,11 +84,15 @@ abstract public class ServerWebSocket extends AbstractReceiveListener implements
     public static void send(WebSocketChannel socket, Object object) {
 
 
+        byte[] s;
         try {
-            ByteBuffer data = ByteBuffer.wrap(JSON.jsonLoose.writeValueAsBytes(object));
-            WebSockets.sendTextBlocking(data, socket);
+            s = JSON.jsonLoose.writeValueAsBytes(object);
         } catch (JsonProcessingException t) {
-            send(socket, object.toString()); //could not make json so just use toString()
+            s = object.toString().getBytes(); //could not make json so just use toString()
+        }
+
+        try {
+            WebSockets.sendTextBlocking(ByteBuffer.wrap(s), socket);
         } catch (IOException e) {
             logger.error("err: {} {}", socket, e.toString());
         }

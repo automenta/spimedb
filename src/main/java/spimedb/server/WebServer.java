@@ -41,7 +41,6 @@ import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static io.undertow.UndertowOptions.ENABLE_SPDY;
-import static spimedb.server.ServerWebSocket.send;
 
 /**
  * @author me
@@ -138,7 +137,7 @@ public class WebServer extends PathHandler {
 
         //SECURITY RISK: DANGER
 
-        addPrefixPath("/attn", new JavascriptShell((session, ws)->new Attention(db, session, ws)).get());
+        addPrefixPath("/attn", new JavascriptShell((session, ws)->new Task(db, session, ws)).get());
 
         addPrefixPath("/shell", new JavascriptShell().with((e) -> {
             e.put("db", db);
@@ -377,78 +376,7 @@ public class WebServer extends PathHandler {
 
     }
 
-    public static class Attention  {
-        private final Session session;
-        private final WebSocketChannel chan;
-
-        final int MAX_RESULTS = 1024;
-        final int MAX_RESPONSE_BYTES = 1024 * 1024;
-        public final SpimeDB db;
-        boolean running;
-
-        public Attention(SpimeDB db, Session s, WebSocketChannel chan) {
-            this.session = s;
-            this.db = db;
-            this.chan = chan;
-            this.running = true;
-        }
-
-        public void stop() {
-            this.running = false;
-        }
-
-        public void whereLonLat(float[][] bounds) {
-
-
-            float[] lon = new float[]{bounds[0][0], bounds[1][0]};
-            float[] lat = new float[]{bounds[0][1], bounds[1][1]};
-
-
-
-            //JsonGenerator gen =
-            //      JSON.msgPackMapper.
-
-            //gen.writeStartArray();
-
-            final int[] count = {0};
-
-
-            String[] tags = new String[]{};
-
-
-            db.get(new Query((n) -> {
-
-                String i = n.id();
-                if (!session.sent.containsAndAdd(i)) {
-
-                    //gen.writeStartObject();
-
-                    String json = JSON.toJSON(n);
-                    int size = json.length();
-
-                    send(chan, json);
-                    if (count[0]++ >= MAX_RESULTS)// || ex.getResponseBytesSent() >= MAX_RESPONSE_BYTES)
-                        return false;
-
-                    session.outRate.acquire(size);
-
-                    //gen.writeEndObject();
-
-                    //gen.writeRaw(',');
-
-
-                }
-
-                return running; //continue
-
-            }).where(lon, lat).in(tags));
-
-
-        }
-
-    }
-
-//    public void start() {
+    //    public void start() {
 //
 //        logger.info("Starting web server @ " + host + ":" + port + "\n  " + paths);
 //

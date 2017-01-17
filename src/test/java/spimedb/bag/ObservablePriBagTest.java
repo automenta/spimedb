@@ -14,9 +14,9 @@ public class ObservablePriBagTest {
     @Test
     public void testObserveAddRemove() {
 
-        StringBuilder seq = new StringBuilder(1024);
 
         ObservablePriBag<String> b = new ObservablePriBag<>(3, BudgetMerge.add, new HashMap<>());
+        StringBuilder seq = new StringBuilder(1024);
         b.ADD.on(v -> seq.append('+').append(v).append(' '));
         b.REMOVE.on(v -> seq.append('-').append(v).append(' '));
 

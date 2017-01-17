@@ -62,5 +62,21 @@ public class PriBagTest {
         //TODO fully test monotonically decreasing-ness
 
     }
+    @Test
+    public void testPriBagFlat() {
 
+        //should behave as a FIFO queue if priority is flat:
+        ObservablePriBag<String> b = new ObservablePriBag<>(3, BudgetMerge.max, new HashMap());
+
+        StringBuilder seq = new StringBuilder(1024);
+        b.ADD.on(v -> seq.append('+').append(v).append(' '));
+        b.REMOVE.on(v -> seq.append('-').append(v).append(' '));
+
+        for (int i = 0; i < 5; i++) {
+            b.put( "x" + i, 0.5f );
+        }
+
+        assertEquals("x4=0.5, x3=0.5, x2=0.5", b.toString());
+        assertEquals("+x0 +x1 +x2 -x0 +x3 -x1 +x4 ", seq.toString());
+    }
 }

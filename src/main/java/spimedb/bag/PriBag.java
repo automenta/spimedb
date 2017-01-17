@@ -391,7 +391,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
             return existing;
 
         } else {
-            if (size() >= capacity && pri <= priMin() /* accept if pri == minPri  */) {
+            if (size() >= capacity && pri < priMin() /* < here rather than <= allows flat FIFO replacement */ ) {
 
                 //reject due to insufficient budget
                 if (overflow != null) {

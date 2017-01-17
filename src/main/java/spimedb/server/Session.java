@@ -6,11 +6,13 @@ import io.undertow.util.AttachmentKey;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
+import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.util.bloom.UnBloomFilter;
 
 import java.net.SocketAddress;
+import java.util.Set;
 
 /**
  * interactive session (ie, Client as seen from Server)
@@ -20,6 +22,8 @@ public class Session {
 
     /** bandwidth throttle, in bytes per second */
     final RateLimiter outRate = RateLimiter.create(1000);
+
+    final Set<Task> active = new ConcurrentHashSet<>();
 
     final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
@@ -40,7 +44,7 @@ public class Session {
         return peer.toString();
     }
 
-    static AttachmentKey<Session> SESSION = AttachmentKey.create(Session.class);
+    static final AttachmentKey<Session> SESSION = AttachmentKey.create(Session.class);
 
     public static Session session(HttpServerExchange ex) {
         Session s = ex.getConnection().getAttachment(SESSION);

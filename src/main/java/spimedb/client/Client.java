@@ -12,7 +12,6 @@ import spimedb.client.leaflet.*;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.teavm.jso.json.JSON.stringify;
 import static spimedb.client.JS.get;
 import static spimedb.client.JS.getFloat;
 
@@ -66,9 +65,7 @@ public class Client {
 
 
         shell.setOnOpen(this::init);
-        shell.onText((x) -> {
-            System.out.println(stringify(x));
-        });
+        shell.onText(Console::log);
 
         HTMLElement mapContainer = doc.createElement("div");
         mapContainer.setAttribute("id", "view");
@@ -94,7 +91,7 @@ public class Client {
                 new float[] { getFloat(ne, "lng"), getFloat(ne, "lat") }
             };
 
-            attn.send("whereLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
+            attn.send("focusLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
 
         };
         map.onLoad(mapChange);

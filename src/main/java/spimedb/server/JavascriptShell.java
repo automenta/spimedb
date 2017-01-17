@@ -4,13 +4,15 @@ import io.undertow.server.HttpHandler;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.SpimeDB;
 
-import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.SimpleBindings;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -26,7 +28,7 @@ class JavascriptShell extends ServerWebSocket {
     final NashornScriptEngine engine = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
 
     @Nullable
-    private final BiFunction<Session, WebSocketChannel, Object> context;
+    private final BiFunction<Session, WebSocketChannel, Object> contextBuilder;
 
 
     public JavascriptShell() {
@@ -34,7 +36,7 @@ class JavascriptShell extends ServerWebSocket {
     }
 
     public JavascriptShell(BiFunction<Session, WebSocketChannel, Object> s) {
-        this.context = s;
+        this.contextBuilder = s;
 
     }
 
@@ -83,28 +85,48 @@ class JavascriptShell extends ServerWebSocket {
         if (code.isEmpty())
             return; //ignore
 
+        SpimeDB.runLater( ()->
+            eval(code,
+                 contextBuilder!=null ? contextBuilder.apply(Session.session(socket), socket)
+                         : null,
+                (result) -> send(socket, result),
+                engine
+            )
+        );
 
+    }
+
+    static public void eval(String code, Object context, Consumer<JSExec> onResult, NashornScriptEngine engine) {
         Object o;
         long start = System.currentTimeMillis();
         try {
             if (context == null) {
+
                 o = engine.eval(code);
+
             } else {
 
+                try {
+                    //TODO try b.put("this", ...
+                    o = engine.eval("_s." + code,
+                            new SimpleBindings(Maps.mutable.of("_s", context))
+                    );
 
-                Bindings b = engine.createBindings();
-
-                //TODO try b.put("this", ...
-                b.put("_s", context.apply(Session.session(socket), socket));
-                o = engine.eval("_s." + code, b);
+                } catch (Throwable t) {
+                    o = t;
+                } finally {
+                    if (context instanceof Task) {
+                        ((Task) context).stop();
+                    }
+                }
             }
         } catch (Throwable e) {
             o = e;
         }
+
         long end = System.currentTimeMillis();
 
-        send(socket, new JSExec(code, o, start, end));
-
+        onResult.accept( new JSExec(code, o, start, end) );
     }
 
 }
