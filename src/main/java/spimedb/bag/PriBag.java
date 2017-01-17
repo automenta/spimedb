@@ -46,7 +46,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     @Override
     public Budget<V> remove(@NotNull V x) {
         Budget<V> b = super.remove(x);
-        if (b!=null) {
+        if (b != null) {
             onRemoved(b);
         }
         return b;
@@ -84,7 +84,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         SortedArray<Budget<V>> items = this.items;
 
         //List<BLink<V>> pendingRemoval;
-        List<Budget<V>> pendingRemoval;
+        List<Budget> pendingRemoval;
         boolean result;
         synchronized (items) {
             int additional = (toAdd != null) ? 1 : 0;
@@ -162,7 +162,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
     }
 
-    private int clean(@Nullable Budget<V> toAdd, int s, int minRemoved, List<Budget<V>> trash) {
+    private int clean(@Nullable Budget<V> toAdd, int s, int minRemoved, List<Budget> trash) {
 
         final int s0 = s;
 
@@ -188,17 +188,13 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         return false;
     }
 
-    private void clean2(List<Budget<V>> trash) {
+    private void clean2(List<Budget> trash) {
         int toRemoveSize = trash.size();
         if (toRemoveSize > 0) {
 
             for (int i = 0; i < toRemoveSize; i++) {
-                Budget<V> w = trash.get(i);
-
-                V k = w.id;
-
-
-                map.remove(k);
+                Budget w = trash.get(i);
+                map.remove(w.id);
 
 //                    if (k2 != w && k2 != null) {
 //                        //throw new RuntimeException(
@@ -208,6 +204,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 //                    }
 
                 //pressure -= w.priIfFiniteElseZero(); //release pressure
+
                 onRemoved(w);
                 w.delete();
 
@@ -225,7 +222,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
     }
 
-    private int removeWeakestUntilUnderCapacity(int s, @NotNull List<Budget<V>> toRemove, boolean pendingAddition) {
+    private int removeWeakestUntilUnderCapacity(int s, @NotNull List<Budget> toRemove, boolean pendingAddition) {
         SortedArray<Budget<V>> items = this.items;
         final int c = capacity;
         while (!isEmpty() && ((s - c) + (pendingAddition ? 1 : 0)) > 0) {
@@ -391,7 +388,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
             return existing;
 
         } else {
-            if (size() >= capacity && pri < priMin() /* < here rather than <= allows flat FIFO replacement */ ) {
+            if (size() >= capacity && pri < priMin() /* < here rather than <= allows flat FIFO replacement */) {
 
                 //reject due to insufficient budget
                 if (overflow != null) {
@@ -451,15 +448,10 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
     @Nullable
     //@Override
-    protected Budget<V> addItem(Budget<V> i) {
+    protected final Budget<V> addItem(Budget<V> i) {
         throw new UnsupportedOperationException();
     }
 
-
-//    @NotNull
-//    public final PriBag<V> commit() {
-//        return commit(null);
-//    }
 
     @NotNull
     public final PriBag<V> commit(@Nullable Function<PriBag, Consumer<Budget>> update) {
@@ -493,10 +485,11 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     @NotNull
     protected PriBag<V> update(@Nullable Consumer<Budget> each) {
 
-        if (each != null)
-            this.pressure = 0; //reset pressure accumulator
 
-        //synchronized (items) {
+        synchronized (items) {
+
+            if (each != null)
+                this.pressure = 0; //reset pressure accumulator
 
             if (size() > 0) {
                 if (updateItems(null)) {
@@ -509,51 +502,23 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
             }
 
-        //}
+        }
 
 
         return this;
     }
 
     public void sort() {
-        int s = size();
-
-        qsort(new short[16 /* estimate */], items.array(), (short) 0 /*dirtyStart - 1*/, (short) (s - 1));
-//        Arrays.sort(items.array(), 0, s-1, new Comparator<Budget>() {
-//
-//            @Override
-//            public int compare(Budget o1, Budget o2) {
-//                float a = pCmp(o1);
-//                float b = pCmp(o2);
-//
-//                return Float.compare(a, b);
-//            }
-//        });
-
-        //this.minPri = (s > 0 && s >= capacity()) ? get(s - 1).priSafe(-1) : -1;
+        int size = size();
+        if (size > 1)
+            qsort(new short[16 /* estimate */], items.array(), (short) 0 /*dirtyStart - 1*/, (short) (size - 1));
     }
-
-
-
-
-//    private final float minPriIfFull() {
-//        BLink<V>[] ii = items.last();
-//        BLink<V> b = ii[ii.length - 1];
-//        if (b!=null) {
-//            return b.priIfFiniteElseNeg1();
-//        }
-//        return -1f;
-//
-//        //int s = size();
-//        //return (s == capacity()) ? itempriMin() : -1f;
-//    }
 
     /**
      * returns the index of the lowest unsorted item
      */
     private void updateBudget(@Nullable Consumer<Budget> each) {
 //        int dirtyStart = -1;
-
 
 
         int s = size();
@@ -576,7 +541,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     }
 
 
-    private int removeDeleted(@NotNull List<Budget<V>> removed, int minRemoved) {
+    private int removeDeleted(@NotNull List<Budget> removed, int minRemoved) {
 
         SortedArray<Budget<V>> items = this.items;
         final Object[] l = items.array();
@@ -584,7 +549,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
         //iterate in reverse since null entries should be more likely to gather at the end
         for (int s = size() - 1; removedFromMap < minRemoved && s >= 0; s--) {
-            Budget<V> x = (Budget<V>) l[s];
+            Budget x = (Budget) l[s];
             if (x == null || x.isDeleted()) {
                 items.removeFast(s);
                 if (x != null)
@@ -640,7 +605,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
      * http://kosbie.net/cmu/summer-08/15-100/handouts/IterativeQuickSort.java
      */
 
-    public static void qsort(short[] stack, Budget[] c, short left, short right) {
+    static void qsort(short[] stack, Budget[] c, short left, short right) {
         int stack_pointer = -1;
         int cLenMin1 = c.length - 1;
         while (true) {
@@ -717,134 +682,33 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         }
     }
 
-    public static void swap(Budget[] c, short x, short y) {
+    static void swap(Budget[] c, short x, short y) {
         Budget swap;
         swap = c[y];
         c[y] = c[x];
         c[x] = swap;
     }
 
-    //    final Comparator<? super BLink<V>> comparator = (a, b) -> {
-//        return Float.compare(items.score(b), items.score(a));
-//    };
-
-
-//        if (!v.hasDelta()) {
-//            return;
-//        }
-//
-////
-////        int size = ii.size();
-////        if (size == 1) {
-////            //its the only item
-////            v.commit();
-////            return;
-////        }
-//
-//        SortedIndex ii = this.items;
-//
-//        int currentIndex = ii.locate(v);
-//
-//        v.commit(); //after finding where it was, apply its updates to find where it will be next
-//
-//        if (currentIndex == -1) {
-//            //an update for an item which has been removed already. must be re-inserted
-//            put(v.id, v);
-//        } else if (ii.scoreBetween(currentIndex, ii.size(), v)) { //has position changed?
-//            ii.reinsert(currentIndex, v);
-//        }
-//        /*} else {
-//            //otherwise, it remains in the same position and a move is unnecessary
-//        }*/
-//    }
-
 
     @NotNull
-    //@Override
+    @Override
     public String toString() {
-        //return Iterables.toString(items);
         return Joiner.on(", ").join(items);// + '{' + items.getClass().getSimpleName() + '}';
     }
 
 
+    static float itemOrZeroIfNull(Budget x) {
+        return x != null ? x.pri : 0f;
+    }
+
     //@Override
     public float priMax() {
-        Budget<V> x = items.first();
-        return x != null ? x.pri : 0f;
+        return itemOrZeroIfNull(items.first());
     }
 
     //@Override
     public float priMin() {
-        Budget<V> x = items.last();
-        return x != null ? x.pri : 0f;
+        return itemOrZeroIfNull(items.last());
     }
 
-
-//    public final void popAll(@NotNull Consumer<BLink<V>> receiver) {
-//        forEach(receiver);
-//        clear();
-//    }
-
-//    public void pop(@NotNull Consumer<BLink<V>> receiver, int n) {
-//        if (n == size()) {
-//            //special case where size <= inputPerCycle, the entire bag can be flushed in one operation
-//            popAll(receiver);
-//        } else {
-//            for (int i = 0; i < n; i++) {
-//                receiver.accept(pop());
-//            }
-//        }
-//    }
-
-//    public final float priAt(int cap) {
-//        return size() <= cap ? 1f : item(cap).pri;
-//    }
-//
-
-//    public final static class BudgetedArraySortedIndex<X extends Budgeted> extends ArraySortedIndex<X> {
-//        public BudgetedArraySortedIndex(int capacity) {
-//            super(1, capacity);
-//        }
-//
-//
-//        //@Override
-//        public float score(@NotNull X v) {
-//            return v.pri;
-//        }
-//    }
-
 }
-
-
-//        if (dirtyStart != -1) {
-//            //Needs sorted
-//
-//            int dirtyRange = 1 + dirtyEnd - dirtyStart;
-//
-//            if (dirtyRange == 1) {
-//                //Special case: only one unordered item; remove and reinsert
-//                BLink<V> x = items.remove(dirtyStart); //remove directly from the decorated list
-//                items.add(x); //add using the sorted list
-//
-//            } else if ( dirtyRange < Math.max(1, reinsertionThreshold * s) ) {
-//                //Special case: a limited number of unordered items
-//                BLink<V>[] tmp = new BLink[dirtyRange];
-//
-//                for (int k = 0; k < dirtyRange; k++) {
-//                    tmp[k] = items.remove( dirtyStart /* removal position remains at the same index as items get removed */);
-//                }
-//
-//                //TODO items.get(i) and
-//                //   ((FasterList) items.list).removeRange(dirtyStart+1, dirtyEnd);
-//
-//                for (BLink i : tmp) {
-//                    if (i.isDeleted()) {
-//                        removeKeyForValue(i);
-//                    } else {
-//                        items.add(i);
-//                    }
-//                }
-//
-//            } else {
-//            }
-//        }
