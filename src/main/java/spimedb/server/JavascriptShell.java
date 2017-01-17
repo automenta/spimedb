@@ -5,7 +5,6 @@ import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.eclipse.collections.impl.factory.Maps;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
@@ -14,7 +13,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 import java.io.IOException;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -28,18 +26,16 @@ class JavascriptShell extends ServerWebSocket {
     final ScriptEngineManager engineManager = new ScriptEngineManager();
     final NashornScriptEngine engine = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
 
-    @Nullable
-    private final BiFunction<Session, WebSocketChannel, Object> contextBuilder;
-
+    private final Object context;
 
     public JavascriptShell() {
         this(null);
     }
 
-    public JavascriptShell(BiFunction<Session, WebSocketChannel, Object> s) {
-        this.contextBuilder = s;
-
+    JavascriptShell(Object context) {
+        this.context = context;
     }
+
 
     public HttpHandler with(Consumer<ScriptEngine> e) {
         e.accept(engine);
@@ -88,8 +84,9 @@ class JavascriptShell extends ServerWebSocket {
 
         SpimeDB.runLater( ()->
             eval(code,
-                 contextBuilder!=null ? contextBuilder.apply(Session.session(socket), socket)
-                         : null,
+                 //contextBuilder!=null ? contextBuilder.apply(Session.session(socket), socket)
+                         //: null,
+                    context,
                     (result) -> {
                         try {
                             send(socket, result);
