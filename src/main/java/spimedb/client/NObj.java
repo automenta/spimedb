@@ -7,7 +7,7 @@ import org.teavm.jso.json.JSON;
 import static spimedb.client.JS.get;
 
 /** client-side: wraps a JSON-encoded Nobject */
-public class NObj {
+public class NObj  {
 
     public final String id;
     public final JSObject data;
