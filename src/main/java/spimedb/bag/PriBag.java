@@ -249,6 +249,13 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         return null;
     }
 
+    public void mul(float factor) {
+        forEach(b->b.priMult(factor));
+    }
+    public void add(float inc) {
+        forEach(b->b.priAdd(inc));
+    }
+
     //@Override
     public V mul(Object key, float factor) {
         Budget<V> c = map.get(key);

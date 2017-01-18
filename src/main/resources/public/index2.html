@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.Default.css">
 
 
+    <script src="lib/lodash.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/leaflet/leaflet.js"></script> <!-- http://leafletjs.com/examples/quick-start.html -->
     <!--<script src="lib/leafletx/leaflet.osmgeocoder.js"></script>-->
@@ -23,44 +24,22 @@
     <!--<script src="lib/leafletx/leaflet.geojsoncss.min.js"></script>-->
     <style>
 
-/*
-    .map2d_status {
-        position: fixed;
-        bottom: 0.25em;
-        left: 0.25em;
-        font-size: 170%;
-        opacity: 0.8;
-        max-width: 25%;
-        pointer-events: none;
-    }
 
-    .leaflet-container {
-        font: inherit !important;
-    }
-
-
-    .leaflet-shadow-pane { display: none }
-
-    .leaflet-container {
-    overflow: hidden !important;
-    }
-*/
     .textIcon {
         text-align: center;
-
         font-size: 300%;
         font-family: monospace;
-        color: black;
-        /*height: 1em !important;
-        width: 1em !important;*/
         display: inline-flex;
         align-items: center;
         justify-content: center;
+    }
 
-        /* background-color: red; */
+    .textIcon a {
+        color: black;
+    }
 
-        /* offset-x | offset-y | blur-radius | color */
-        /*text-shadow: 1px 1px 0px white;*/
+    .textIcon a:hover {
+        color: #f83;
     }
 
     </style>
@@ -72,6 +51,7 @@
     //document.addEventListener( "DOMContentLoaded", ()=>{
         main();
     }, false );
+
 
 </script>
 </html>

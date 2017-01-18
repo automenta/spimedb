@@ -2,6 +2,8 @@ package spimedb.client;
 
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
+import org.teavm.jso.core.JSFunction;
+import org.teavm.jso.core.JSNumber;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
@@ -10,11 +12,10 @@ import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.bag.BudgetMerge;
 import spimedb.bag.ObservablePriBag;
 import spimedb.client.leaflet.*;
+import spimedb.client.lodash.Lodash;
 import spimedb.client.websocket.WebSocket;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static spimedb.client.JS.get;
 import static spimedb.client.JS.getFloat;
@@ -36,7 +37,7 @@ public class Client {
 
 
     public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
-    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(1024, BudgetMerge.max, new HashMap<>());
+    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(64, BudgetMerge.max, new HashMap<>());
 
 
     public final WebSocket io = WebSocket.newSocket("attn");
@@ -78,6 +79,9 @@ public class Client {
         newLeafletMap(mapContainer);
     }
 
+
+
+
     private LeafletMap newLeafletMap(HTMLElement mapContainer) {
 
         /*
@@ -110,12 +114,26 @@ public class Client {
         //map.onClick((LeafletMouseEvent event) -> click(event.getLatlng()));
 
 
-        Icon defaultIcon = DivIcon.create("textIcon", "+");
+        Icon defaultIcon = DivIcon.create("textIcon", "<a>+</a>");
         //doc.createElement("button").withText("X")
 
         ClusterLayer c = ClusterLayer.create().addTo(map);
 
         Map<String, Layer> shown = new HashMap();
+
+        List<Layer> toAdd = new ArrayList();
+        List<Layer> toRemove = new ArrayList();
+
+        JSFunction updater = Lodash.throttle(()-> {
+
+            c.removeLayers(toRemove.toArray(new Layer[toRemove.size()]));
+            toRemove.clear();
+            c.addLayers(toAdd.toArray(new Layer[toAdd.size()]));
+            toAdd.clear();
+
+            obj.mul(0.95f); //forgetting
+
+        }, 50);
 
         //attach these events when the map shows and hides
         obj.ADD.on(N -> {
@@ -141,22 +159,29 @@ public class Client {
                     //System.out.println(shown.size() + " " + obj.size());
 
                     //CircleMarker c = CircleMarker.create(lon, lat, 1, name, "#0f3");
+
+
                     Marker m = Marker.create(lon, lat, name, "#0f3");
                     m.setIcon(defaultIcon);
 
-                    c.addLayers(m);
-                    shown.put(nid, m);
+                    Layer alreadyShown = shown.put(nid, m);
+                    if (alreadyShown!=null) {
+                        Console.log("already visible: ", N.data);
+                    }
+
+                    toAdd.add(m); updater.call(null);
                 }
             }
-
 
         });
 
         obj.REMOVE.on(x -> {
-            //Console.log("-", JSNumber.valueOf(obj.size()));
             Layer m = shown.remove(x.id);
-            if (m!=null)
-                c.removeLayers(m);
+            if (m!=null) {
+                Console.log(JSNumber.valueOf(shown.size()), JSNumber.valueOf(obj.size()));
+                toRemove.add(m); updater.call(null);
+            }
+            //for now, it is ok if remove was called on something not shown
         });
 
         map.onZoomEnd(mapChange);

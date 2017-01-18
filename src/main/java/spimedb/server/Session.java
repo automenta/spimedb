@@ -7,7 +7,6 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
 import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
-import spimedb.util.bloom.UnBloomFilter;
 
 import javax.script.SimpleBindings;
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class Session extends AbstractServerWebSocket {
 
     final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
-    final UnBloomFilter<String> sent = new UnBloomFilter<>(ALREADY_SENT_MEMORY_CAPACITY, String::getBytes);
+    //final UnBloomFilter<String> sent = new UnBloomFilter<>(ALREADY_SENT_MEMORY_CAPACITY, String::getBytes);
 
     final SpimeDB db;
     final SimpleBindings scope;
@@ -76,14 +75,14 @@ public class Session extends AbstractServerWebSocket {
                             return false;
 
                         String i = n.id();
-                        if (!sent.containsOrAdd(i)) {
+                        //if (!sent.containsOrAdd(i)) {
 
                             try {
                                 AbstractServerWebSocket.sendJSONBinary(chan, n);
                             } catch (IOException e) {
                                 return false; //likely a disconnect
                             }
-                        }
+                        //}
 
                         return running.get(); //continue
 
