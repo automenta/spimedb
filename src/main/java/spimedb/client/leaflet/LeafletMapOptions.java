@@ -65,6 +65,15 @@ public abstract class LeafletMapOptions implements JSObject {
         return this;
     }
 
+    public final LeafletMapOptions worldCopyJump(boolean b) {
+        setWorldCopyJump(b);
+        return this;
+    }
+    public final LeafletMapOptions continuousWorld(boolean b) {
+        setContinuousWorld(b);
+        return this;
+    }
+
     @JSProperty
     abstract void setCenter(LatLng latlng);
 
@@ -94,4 +103,11 @@ public abstract class LeafletMapOptions implements JSObject {
 
     @JSProperty
     abstract void setDoubleClickZoom(boolean doubleClickZoom);
+
+    @JSProperty
+    abstract void setContinuousWorld(boolean b);
+
+    @JSProperty
+    abstract void setWorldCopyJump(boolean b);
+
 }

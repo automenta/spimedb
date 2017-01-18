@@ -4,7 +4,7 @@ import org.teavm.jso.JSBody;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.JSProperty;
 import org.teavm.jso.dom.html.HTMLElement;
-import spimedb.client.JsConsumer;
+import spimedb.client.util.JsConsumer;
 
 /**
  *
@@ -58,7 +58,7 @@ public abstract class LeafletMap implements JSObject {
      * http://leafletjs.com/reference-1.0.2.html#map-getbounds
      */
     @JSBody(params={}, script = "return this.getBounds();")
-    public native final JSObject getBounds();
+    public native final LatLngBounds getBounds();
 
 
     public abstract LeafletMap setView(LatLng latlng, int zoom);

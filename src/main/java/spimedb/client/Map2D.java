@@ -3,58 +3,55 @@ package spimedb.client;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
 import org.teavm.jso.dom.html.HTMLElement;
+import spimedb.bag.ChangeBatcher;
 import spimedb.client.leaflet.*;
+import spimedb.client.util.JS;
+import spimedb.client.util.JsConsumer;
 
 import java.util.Arrays;
 
-import static spimedb.client.JS.get;
-import static spimedb.client.JS.getFloat;
 
-
-public class MyLeafletMap {
+public class Map2D {
 
     private final Client client;
     private final ChangeBatcher<NObj, Layer> differ;
     private final LeafletMap map;
     private final JsConsumer mapChanged;
+    private final TileLayer base;
 
-    public MyLeafletMap(Client client, HTMLElement mapContainer) {
+    /** display update perid (milliseconds). changes that arrive in between updates are batched with ChangeBatcher */
+    public static final int UPDATE_MS = 40;
+
+    public Map2D(Client client, HTMLElement mapContainer) {
         this.client = client;
-    /*
-     * TODO
-        continuousWorld: true,
-        worldCopyJump: true
-     */
-        map = LeafletMap.create(mapContainer, LeafletMapOptions.create());
 
+        map = LeafletMap.create(mapContainer, LeafletMapOptions.create().continuousWorld(true).worldCopyJump(true));
         map.setView(LatLng.create(40, -80), 8);
+
         mapChanged = (e) -> {
-            JSObject bounds = map.getBounds();
+            LatLngBounds bounds = map.getBounds();
 
             //parse this kind of noise:
             // {"_southWest":{"lat":39.932380403490875,"lng":-80.50094604492188},"_northEast":{"lat":40.082274490356966,"lng":-79.62203979492189}}
-            JSObject sw = get(bounds, "_southWest");
-            JSObject ne = get(bounds, "_northEast");
+            LatLng sw = bounds.getSouthWest();
+            LatLng ne = bounds.getNorthEast();
 
             float[][] b = new float[][]{
-                    new float[]{getFloat(sw, "lng"), getFloat(sw, "lat")},
-                    new float[]{getFloat(ne, "lng"), getFloat(ne, "lat")}
+                    new float[]{ (float)sw.getLng(), (float)sw.getLat() },
+                    new float[]{ (float)ne.getLng(), (float)ne.getLat() }
             };
 
-            client.io.send("me.focusLonLat(" + "[" + Arrays.toString(b[0]) + "," + Arrays.toString(b[1]) + "])");
+            client.io.send("me.focusLonLat(" + '[' + Arrays.toString(b[0]) + ',' + Arrays.toString(b[1]) + "])");
         };
 
-        TileLayer base = TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create())
+        base = TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create())
                 .addTo(map);
-        //map.onClick((LeafletMouseEvent event) -> click(event.getLatlng()));
-
 
         Icon defaultIcon = DivIcon.create("textIcon", "<a>+</a>");
-        //doc.createElement("button").withText("X")
 
         ClusterLayer c = ClusterLayer.create().addTo(map);
 
-        differ = new ChangeBatcher<NObj, Layer>(50, Layer[]::new) {
+        differ = new ChangeBatcher<NObj, Layer>(UPDATE_MS, Layer[]::new) {
 
             @Override
             public void update(Layer[] added, Layer[] removed) {
@@ -114,7 +111,6 @@ public class MyLeafletMap {
 
         //map.onShow(..)
         //map.onHide(..)
-
 
     }
 }

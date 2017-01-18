@@ -1,4 +1,4 @@
-package spimedb.client;
+package spimedb.client.util;
 
 import org.teavm.javascript.spi.Sync;
 

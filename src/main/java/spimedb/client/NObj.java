@@ -4,7 +4,7 @@ import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.json.JSON;
 
-import static spimedb.client.JS.get;
+import static spimedb.client.util.JS.get;
 
 /** client-side: wraps a JSON-encoded Nobject */
 public class NObj  {

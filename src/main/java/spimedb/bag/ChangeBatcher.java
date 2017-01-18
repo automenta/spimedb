@@ -1,7 +1,8 @@
-package spimedb.client;
+package spimedb.bag;
 
 import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.core.JSFunction;
+import spimedb.client.util.Console;
 import spimedb.client.lodash.Lodash;
 
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import static java.lang.Boolean.TRUE;
 /**
  * batches and notifies listeners about bag changes
  * @param X the input key
- * @param the output value, lazily constructed
+ * @param Y the output value, lazily constructed
  */
 abstract public class ChangeBatcher<X, Y> {
 

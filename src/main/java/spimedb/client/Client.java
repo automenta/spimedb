@@ -7,6 +7,7 @@ import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.bag.BudgetMerge;
 import spimedb.bag.ObservablePriBag;
+import spimedb.client.util.Console;
 import spimedb.client.websocket.WebSocket;
 
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public class Client {
         mapContainer.setAttribute("id", "view");
         doc.getBody().appendChild(mapContainer);
 
-        new MyLeafletMap(this, mapContainer);
+        new Map2D(this, mapContainer);
 
         io.setOnOpen(this::init);
     }

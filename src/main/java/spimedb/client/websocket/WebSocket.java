@@ -5,8 +5,8 @@ import org.teavm.jso.JSObject;
 import org.teavm.jso.JSProperty;
 import org.teavm.jso.browser.Location;
 import org.teavm.jso.browser.Window;
-import spimedb.client.JSRunnable;
-import spimedb.client.JsConsumer;
+import spimedb.client.util.JSRunnable;
+import spimedb.client.util.JsConsumer;
 
 /**
  * Created by me on 1/13/17.

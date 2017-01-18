@@ -1,4 +1,4 @@
-package spimedb.client;
+package spimedb.client.util;
 
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSObject;
