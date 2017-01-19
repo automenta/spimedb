@@ -36,7 +36,8 @@ public class Client {
 
     protected void init() {
 
-        io.send("status()"); //get the database summary
+        io.send("me.status()"); //get the database summary
+        io.send("me.tagRoots()");
 
             /*document.getBody().appendChild(div).appendChild(
                     document.createTextNode(JSON.stringify(ws)));*/
@@ -58,6 +59,8 @@ public class Client {
                     //                if (obj.put(nx, 0.5f) != null) {
                     //                    //System.out.println("#=" + obj.size() + ": " + nx);
                     //                }
+                } else {
+                    Console.log(x);
                 }
             }
         });
@@ -68,7 +71,7 @@ public class Client {
 
         new Map2D(this, mapContainer);
 
-        io.setOnOpen(this::init);
+        io.onOpen(this::init);
     }
 
 

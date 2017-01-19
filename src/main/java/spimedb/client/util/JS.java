@@ -12,10 +12,10 @@ public class JS {
     @JSBody(params = { "instance", "index" }, script = "return instance[index];")
     public static native float getFloat(JSObject instance, String index);
 
-    @JSBody(params = { "instance", "index" }, script = "return instance[index];")
+    @JSBody(params = { "instance", "index" }, script = "return instance[index] || null;")
     public static native JSArray getArray(JSObject instance, String index);
 
-    @JSBody(params = { "instance", "index" }, script = "return instance[index];")
+    @JSBody(params = { "instance", "index" }, script = "return instance[index] || null;")
     public static native String getString(JSObject instance, String index);
 
     @JSBody(params = { "instance", "index", "defaultVal" }, script = "return instance[index] || defaultVal;")

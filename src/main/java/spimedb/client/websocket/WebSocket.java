@@ -42,6 +42,25 @@ public interface WebSocket extends JSObject {
         Util.setMessageConsumerJSONBinary(this, each);
     }
 
+
+    default void onOpen(JSRunnable r) {
+        setOnOpen(r);
+
+        if (getReadyState() == OPEN) {
+            //run if already opened by the time this has been called
+            r.run();
+        }
+    }
+
+    final static int CONNECTING = 0;
+    final static int OPEN = 1;
+    final static int CLOSING = 2;
+    final static int CLOSED = 3;
+
+    @JSProperty("readyState")
+    int getReadyState();
+
+    //dont use directly
     @JSProperty("onopen")
     void setOnOpen(JSRunnable r);
 

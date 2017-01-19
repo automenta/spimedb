@@ -69,6 +69,9 @@ public class Map2D {
                 JSObject n = N.data;
 
                 JSArray bounds = JS.getArray(n, "@");
+                if (bounds == null)
+                    return null;
+
                 JSObject time = bounds.get(0);
                 JSObject x = bounds.get(1); //LON
                 JSObject y = bounds.get(2); //LAT
