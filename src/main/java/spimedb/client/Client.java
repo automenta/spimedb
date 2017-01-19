@@ -1,5 +1,8 @@
 package spimedb.client;
 
+import org.jetbrains.annotations.Nullable;
+import org.teavm.jso.JSObject;
+import org.teavm.jso.core.JSArray;
 import org.teavm.jso.core.JSFunction;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
@@ -8,6 +11,7 @@ import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.bag.BudgetMerge;
 import spimedb.bag.ObservablePriBag;
+import spimedb.client.leaflet.Layer;
 import spimedb.client.lodash.Lodash;
 import spimedb.client.util.Console;
 import spimedb.client.websocket.WebSocket;
@@ -35,7 +39,7 @@ public class Client {
 
 
     //public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
-    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(64, BudgetMerge.max, new HashMap<>());
+    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(512, BudgetMerge.max, new HashMap<>());
 
 
     public final WebSocket io = WebSocket.newSocket("attn");
@@ -60,7 +64,7 @@ public class Client {
             } else {
                 NObj nx = NObj.fromJSON(x);
                 if (nx != null) {
-                    obj.put(nx, 0.5f);
+                    obj.put(nx, nx.isLeaf() ? 0.25f : 0.75f);
                     //Console.log(x);
                     //                if (obj.put(nx, 0.5f) != null) {
                     //                    //System.out.println("#=" + obj.size() + ": " + nx);
@@ -75,7 +79,17 @@ public class Client {
         mapContainer.setAttribute("id", "view");
         doc.getBody().appendChild(mapContainer);
 
-        new Map2D(this, mapContainer);
+        new Map2D(this, mapContainer) {
+            @Nullable
+            @Override
+            protected Layer build(NObj N, JSObject n, JSArray bounds) {
+                Layer l = super.build(N, n, bounds);
+                if (l!=null) {
+                    obj.put(N, 0.1f); //boost for visibility
+                }
+                return l;
+            }
+        };
         new ObjTable(this, doc.getBody());
 
         io.onOpen(this::init);
@@ -104,7 +118,7 @@ public class Client {
         private final int invalidationPeriodMS = 100;
 
         public InvalidationNotifier() {
-            sendInvalidations = Lodash.throttle(this::flush, invalidationPeriodMS);
+            sendInvalidations = Lodash.throttle(this::_flush, invalidationPeriodMS);
             obj.REMOVE.on(this);
         }
 
@@ -114,6 +128,11 @@ public class Client {
                 invalidated = new StringBuilder(DEFAULT_BUFFER_SIZE).append("me.forgot([");
             invalidated.append('\"').append(n.id).append("\",");
             sendInvalidations.call(null);
+        }
+
+        //HACK for TeaVM it has trouble fitting the boolean return value to the void lambda return
+        void _flush() {
+            flush();
         }
 
         public boolean flush() {

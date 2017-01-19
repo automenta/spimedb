@@ -38,7 +38,7 @@ public interface NObject extends Serializable {
 
     default boolean bounded() {
         PointND min = min();
-        return (min != null && !min.isNegativeInfinity() && !max().isPositiveInfinity());
+        return (min != null && !min.isInfNeg() && !max().isInfPos());
     }
 
     static boolean equalsDeep(NObject a, NObject b) {
@@ -69,12 +69,15 @@ public interface NObject extends Serializable {
 
                 jsonGenerator.writeStringField(ID, o.id());
 
-                String name = o.name();
-                if (name != null)
-                    jsonGenerator.writeStringField(NAME, name);
-
-
-                writeOtherFields(o, jsonGenerator);
+                o.forEach((fieldName, pojo) -> {
+                    if (pojo == null)
+                        return;
+                    try {
+                        jsonGenerator.writeObjectField(fieldName, pojo);
+                    } catch (IOException e) {
+                        //e.printStackTrace();
+                    }
+                });
 
                 writeBounds(o, jsonGenerator);
 
@@ -119,18 +122,6 @@ public interface NObject extends Serializable {
                 }
 
             }
-        }
-
-        protected void writeOtherFields(NObject o, JsonGenerator jsonGenerator) {
-            o.forEach((fieldName, pojo) -> {
-                if (pojo == null)
-                    return;
-                try {
-                    jsonGenerator.writeObjectField(fieldName, pojo);
-                } catch (IOException e) {
-                    //e.printStackTrace();
-                }
-            });
         }
 
     }

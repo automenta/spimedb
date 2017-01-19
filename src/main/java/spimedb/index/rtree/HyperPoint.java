@@ -62,22 +62,21 @@ public interface HyperPoint {
      */
     double distance(HyperPoint p, int d);
 
-    default boolean isNegativeInfinity() {
+    default boolean isEntirely(float value) {
         int d = dim();
         for (int i = 0; i < d; i++) {
             float c = coord(i);
-            if (c!=Float.NEGATIVE_INFINITY)
+            if (c!=value)
                 return false;
         }
         return true;
     }
-    default boolean isPositiveInfinity() {
-        int d = dim();
-        for (int i = 0; i < d; i++) {
-            float c = coord(i);
-            if (c!=Float.NEGATIVE_INFINITY)
-                return false;
-        }
-        return true;
+
+    default boolean isInfNeg() {
+        return isEntirely(Float.NEGATIVE_INFINITY);
+    }
+
+    default boolean isInfPos() {
+        return isEntirely(Float.POSITIVE_INFINITY);
     }
 }

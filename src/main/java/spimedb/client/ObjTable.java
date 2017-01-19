@@ -44,10 +44,28 @@ public class ObjTable {
 
     protected Node render(NObj n) {
 
+
+        String[] in = n.inh(true);
+        String[] out = n.inh(false);
+        if (in == null && out == null) {
+            //leaf node, hide
+            return null;
+        }
+
         HTMLElement link = doc.createElement("a").withText(n.name());
         HTMLElement d = doc.createElement("div");
+
+        if (in!=null)
+            d.appendChild( doc.createElement("a").withText("<-- (" + in.length + ") ") ) ;
+                //Arrays.toString(in)
+
         d.appendChild(link);
+
+        if (out!=null)
+            d.appendChild( doc.createElement("a").withText(" (" + out.length  + ") -->") );
+
         return d;
     }
+
 
 }

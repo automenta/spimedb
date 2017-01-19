@@ -1,5 +1,6 @@
 package spimedb.client;
 
+import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
 import org.teavm.jso.core.JSFunction;
@@ -31,6 +32,8 @@ public class Map2D {
 
     private final JSFunction refresh;
 
+    protected Icon defaultIcon = DivIcon.create("textIcon", "<a>+</a>");
+
     public Map2D(Client client, HTMLElement mapContainer) {
         this.client = client;
 
@@ -46,7 +49,6 @@ public class Map2D {
         base = TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create())
                 .addTo(map);
 
-        Icon defaultIcon = DivIcon.create("textIcon", "<a>+</a>");
 
         ClusterLayer c = ClusterLayer.create().addTo(map);
 
@@ -68,38 +70,7 @@ public class Map2D {
                 if (bounds == null)
                     return null;
 
-                JSObject time = bounds.get(0);
-                JSObject x = bounds.get(1); //LON
-                JSObject y = bounds.get(2); //LAT
-                JSObject z = bounds.get(3);
-
-                String nid = N.id;
-                String name = JS.getString(n, "N", nid);
-
-                if (JS.isNumber(x) && JS.isNumber(y)) {
-                    //POINT
-
-                    //shown.computeIfAbsent(N.id, id -> {
-
-
-                    float lon = JS.toFloat(x);
-                    float lat = JS.toFloat(y);
-
-                    if ((lon==lon && lat==lat)) {
-                        //System.out.println(lon + " " + lat);
-                        //System.out.println(shown.size() + " " + obj.size());
-
-                        //CircleMarker c = CircleMarker.create(lon, lat, 1, name, "#0f3");
-                        Marker m = Marker.create(lon, lat, name, "#0f3");
-                        m.setIcon(defaultIcon);
-
-                        return m;
-                    } else {
-                        return null;
-                    }
-                }
-
-                return null;
+                return Map2D.this.build(N, n, bounds);
             }
         };
 
@@ -116,6 +87,42 @@ public class Map2D {
         //map.onShow(..)
         //map.onHide(..)
 
+    }
+
+    @Nullable
+    protected Layer build(NObj N, JSObject n, JSArray bounds) {
+        JSObject time = bounds.get(0);
+        JSObject x = bounds.get(1); //LON
+        JSObject y = bounds.get(2); //LAT
+        JSObject z = bounds.get(3);
+
+        String nid = N.id;
+        String name = JS.getString(n, "N", nid);
+
+        if (JS.isNumber(x) && JS.isNumber(y)) {
+            //POINT
+
+            //shown.computeIfAbsent(N.id, id -> {
+
+
+            float lon = JS.toFloat(x);
+            float lat = JS.toFloat(y);
+
+            if ((lon==lon && lat==lat)) {
+                //System.out.println(lon + " " + lat);
+                //System.out.println(shown.size() + " " + obj.size());
+
+                //CircleMarker c = CircleMarker.create(lon, lat, 1, name, "#0f3");
+                Marker m = Marker.create(lon, lat, name, "#0f3");
+                m.setIcon(defaultIcon);
+
+                return m;
+            } else {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     protected void refresh() {

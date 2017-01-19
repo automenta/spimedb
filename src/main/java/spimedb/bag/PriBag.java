@@ -367,8 +367,8 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
         if (existing != null) {
             //result=0
-            Budget vv = existing.clone();
-            if (vv == null) {
+            //Budget vv = existing.clone();
+            if (existing.isDeleted()) {
                 //it has been deleted.. TODO reinsert?
                 map.remove(key);
                 pressure -= pri;
@@ -377,9 +377,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
 
             //re-rank
-            float o = mergeFunction.merge(vv, pri);
-
-            existing.pri(vv); //update in-place
+            float o = mergeFunction.merge(existing, pri);
 
             if (autocommit)
                 sort();

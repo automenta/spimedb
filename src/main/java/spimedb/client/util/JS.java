@@ -3,6 +3,7 @@ package spimedb.client.util;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
+import org.teavm.jso.core.JSString;
 
 /**
  * Created by me on 1/16/17.
@@ -28,10 +29,10 @@ public class JS {
     public static native boolean isNumber(JSObject obj);
 
 
-    @JSBody(params = { "instance", "index" }, script = "return instance[index];")
+    @JSBody(params = { "instance", "index" }, script = "return instance[index] || null;")
     public static native JSObject get(JSObject instance, String index);
 
-    @JSBody(params = { "instance", "index" }, script = "return instance[index];")
+    @JSBody(params = { "instance", "index" }, script = "return instance[index] || null;")
     public static native JSObject get(JSObject instance, JSObject index);
 
     @JSBody(params = { "instance", "index", "obj" }, script = "instance[index] = obj;")
@@ -40,4 +41,13 @@ public class JS {
     @JSBody(params = { "instance" }, script = "return parseFloat(instance);")
     public static native float toFloat(JSObject instance);
 
+    public static String[] getStrings(JSArray<JSString> e) {
+
+        int l = e.getLength();
+        String[] ss = new String[l];
+        for (int i = 0; i < l; i++) {
+            ss[i] = e.get(i).stringValue();
+        }
+        return ss;
+    }
 }

@@ -35,6 +35,10 @@ public abstract class ImmutableNObject extends RectND implements NObject {
     @Override
     public void forEach(BiConsumer<String, Object> each) {
 
+        String name = name();
+        if (name != null)
+            each.accept(NAME, name);
+
         String[] tag = tags();
         if (tag != null && tag.length > 0) {
             each.accept(TAG, tag);

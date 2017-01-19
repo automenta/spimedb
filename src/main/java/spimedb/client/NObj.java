@@ -1,6 +1,8 @@
 package spimedb.client;
 
+import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.JSObject;
+import org.teavm.jso.core.JSArray;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.json.JSON;
 import spimedb.client.util.JS;
@@ -44,6 +46,29 @@ public class NObj  {
 
     public String name() {
         return JS.getString(data, "N", id);
+    }
+
+    @Nullable
+    String[] inh(boolean in) {
+        JSObject inh = JS.get(data, "inh");
+        if (inh == null)
+            return null;
+
+        //Console.log(inh, JS.getArray(inh, in ? "<" : ">"));
+
+        JSArray<JSString> e = JS.getArray(inh, in ? "<" : ">");
+        if (e==null)
+            return null;
+
+        return JS.getStrings(e);
+    }
+
+    public boolean isLeaf() {
+        String[] in = inh(true);
+        if (in!=null)
+            return false;
+        String[] out = inh(false);
+        return out==null;
     }
 
 }

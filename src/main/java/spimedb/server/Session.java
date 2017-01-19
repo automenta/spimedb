@@ -35,7 +35,7 @@ public class Session extends AbstractServerWebSocket {
 
     final Set<Task> active = new ConcurrentHashSet<>();
 
-    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 4096, 3, 0.0005f, new StringHashProvider());
+    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 512, 3, 0.05f, new StringHashProvider());
 
     ///final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
@@ -81,7 +81,7 @@ public class Session extends AbstractServerWebSocket {
                     Iterator<String> r = db.tags.roots();
                     try {
                         while (r.hasNext()) {
-                            NObject t = db.get(r.next());
+                            NObject t = db.graphed(r.next());
                             sendJSON(chan, t);
                             remoteMemory.add(t.id());
                         }
@@ -104,11 +104,6 @@ public class Session extends AbstractServerWebSocket {
 
         public Task focusLonLat(float[][] bounds) {
 
-            if (currentFocus != null) {
-                currentFocus.stop();
-                currentFocus = null;
-            }
-
             logger.info("start {} focusLonLat {}", this, bounds);
 
             float[] lon = new float[]{bounds[0][0], bounds[1][0]};
@@ -116,10 +111,17 @@ public class Session extends AbstractServerWebSocket {
 
             String[] tags = new String[]{};
 
-            return this.currentFocus = new Task(Session.this) {
+            return new Task(Session.this) {
 
                 @Override
                 public void run() {
+
+                    if (currentFocus != null) {
+                        currentFocus.stop();
+                        currentFocus = null;
+                    }
+
+                    currentFocus = this;
 
                     Set<NObject> lowPriority = new HashSet<>(1024);
 
@@ -129,14 +131,8 @@ public class Session extends AbstractServerWebSocket {
                             return false;
 
                         try {
-
-                            int[] idHash = remoteMemory.hash(n.id());
-                            if (!remoteMemory.contains(idHash)) {
-                                sendJSON(chan, n);
-                                remoteMemory.add(idHash);
-                            } else {
+                            if (!trySend(this, n))
                                 lowPriority.add(n); //buffer it for sending later (low-priority)
-                            }
                         } catch (IOException e) {
                             stop();
                             return false; //likely a disconnect
@@ -149,8 +145,7 @@ public class Session extends AbstractServerWebSocket {
                     if (running.get()) {
                         for (NObject n : lowPriority) {
                             try {
-                                sendJSON(chan, n);
-                                remoteMemory.add(n.id());
+                                trySend(this, n);
                             } catch (IOException e) {
                                 break;
                             }
@@ -159,6 +154,16 @@ public class Session extends AbstractServerWebSocket {
                 }
             };
 
+        }
+
+        private boolean trySend(Task t, NObject n) throws IOException {
+            int[] idHash = remoteMemory.hash(n.id());
+            if (!remoteMemory.contains(idHash)) {
+                t.sendJSON(chan, n);
+                remoteMemory.add(idHash);
+                return true;
+            }
+            return false;
         }
 
     }
