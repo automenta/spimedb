@@ -42,7 +42,7 @@ public class QueryTest {
         assertNotEquals(0, actionSubtags.size());
         assertNotEquals(placeSubtags, actionSubtags);
 
-        ArrayList<AbstractNObject> found = new ArrayList();
+        ArrayList<NObject> found = new ArrayList();
         db.get(new Query(found::add).in("InteractAction").where(new float[] { 0, 1}, new float[] { 0, 1}));
 
         assertFalse(found.isEmpty());

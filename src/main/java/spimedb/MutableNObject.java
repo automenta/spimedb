@@ -1,6 +1,5 @@
 package spimedb;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
@@ -28,8 +27,8 @@ import java.util.function.BiConsumer;
  *
  */
 
-@JsonSerialize(using= AbstractNObject.NObjectSerializer.class)
-public class MutableNObject extends RectND implements AbstractNObject {
+@JsonSerialize(using= NObject.NObjectSerializer.class)
+public class MutableNObject extends RectND implements NObject {
 
 
     @Override
@@ -44,26 +43,17 @@ public class MutableNObject extends RectND implements AbstractNObject {
         return tag;
     }
 
-    @JsonProperty("I") final String id;
+    final String id;
 
-    @JsonProperty("N") String name;
+    String name;
 
-
-
-
-
-    //TODO use a ObjectDouble primitive map structure
-    @JsonProperty("^") Map<String, Object> data = null;
+    Map<String, Object> data = null;
 
 
     /** extensional inheritance: what this nobject is "inside" of (its container)
      *  by default, use the root node. but try not to pollute it
      */
-    @JsonProperty(">") public String[] tag = Tags.ROOT;
-
-//    /** extensional inheritance: what this nobject is "outside" of (its contents) */
-//    @Field(name = "outside") @JsonProperty("<") private Set<String> outside = new HashSet();
-
+    public String[] tag = Tags.ROOT;
 
     public MutableNObject(String id) {
         this(id, null);
@@ -110,9 +100,9 @@ public class MutableNObject extends RectND implements AbstractNObject {
     }
 
 
-    public AbstractNObject put(String key, Object value) {
+    public NObject put(String key, Object value) {
         switch (key) {
-            case ">":
+            case TAGS:
                 if (value instanceof String[])
                     setTag((String[])value);
                 else if (value instanceof String)
@@ -126,13 +116,13 @@ public class MutableNObject extends RectND implements AbstractNObject {
 //                setOutside(Sets.newHashSet((String[])value));
 //                return this;
 
-            case "I":
+            case ID:
                 if ((value instanceof String) && (value.equals(id))) {
                     //already being set to same ID
                     return this;
                 }
                 throw new RuntimeException(this + " can not change ID");
-            case "N":
+            case NAME:
                 name(value.toString());
                 return this;
         }
@@ -145,7 +135,7 @@ public class MutableNObject extends RectND implements AbstractNObject {
     public void description(String d) {
         if (d.isEmpty()) {
             if (data!=null)
-                data.remove("_");
+                data.remove(DESC);
             return;
         }
 
@@ -163,7 +153,7 @@ public class MutableNObject extends RectND implements AbstractNObject {
 
 
 
-    public AbstractNObject name(String name) {
+    public NObject name(String name) {
         this.name = name;
         return this;
     }
@@ -173,7 +163,7 @@ public class MutableNObject extends RectND implements AbstractNObject {
     public final static String POLYGON = "*";
 
 
-    public AbstractNObject where(Geodetic2DPoint c) {
+    public NObject where(Geodetic2DPoint c) {
 
         float lon = (float) c.getLongitudeAsDegrees();
         min.coord[1] = max.coord[1] = lon;
@@ -195,7 +185,7 @@ public class MutableNObject extends RectND implements AbstractNObject {
         return this;
     }
 
-    public AbstractNObject where(Longitude AX, Longitude BX, Latitude AY, Latitude BY) {
+    public NObject where(Longitude AX, Longitude BX, Latitude AY, Latitude BY) {
 
 
         {
@@ -236,7 +226,7 @@ public class MutableNObject extends RectND implements AbstractNObject {
     }
 
 
-    public AbstractNObject where(Line l) {
+    public NObject where(Line l) {
 
         List<Point> lp = l.getPoints();
         double[][] points = KML.toArray(lp);
@@ -246,7 +236,7 @@ public class MutableNObject extends RectND implements AbstractNObject {
         return this;
     }
 
-    public AbstractNObject where(Polygon p) {
+    public NObject where(Polygon p) {
         double[][] outerRing = KML.toArray(p.getOuterRing().getPoints());
 
         //TODO handle inner rings
@@ -257,7 +247,7 @@ public class MutableNObject extends RectND implements AbstractNObject {
     }
 
     /** sets the inside property */
-    public AbstractNObject setTag(String... tags) {
+    public NObject setTag(String... tags) {
 
         if (tags.length > 1) {
             //TODO remove any duplicates

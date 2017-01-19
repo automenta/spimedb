@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB implements Iterable<AbstractNObject>  {
+public class SpimeDB implements Iterable<NObject>  {
 
 
 
@@ -35,9 +35,9 @@ public class SpimeDB implements Iterable<AbstractNObject>  {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
     public static final ForkJoinPool exe = ForkJoinPool.commonPool();
 
-    @JsonIgnore public final Map<String, SpatialSearch<AbstractNObject>> spacetime = new ConcurrentHashMap<>();
+    @JsonIgnore public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
-    @JsonIgnore public final Map<String, AbstractNObject> obj;
+    @JsonIgnore public final Map<String, NObject> obj;
 
     public final Tags tags = new Tags();
 
@@ -53,19 +53,19 @@ public class SpimeDB implements Iterable<AbstractNObject>  {
         this(new ConcurrentHashMap());
     }
 
-    public SpimeDB(Map<String, AbstractNObject> g) {
+    public SpimeDB(Map<String, NObject> g) {
 
         this.obj = g;
 
     }
 
-    public SpatialSearch<AbstractNObject> spaceIfExists(String tag) {
+    public SpatialSearch<NObject> spaceIfExists(String tag) {
         return spacetime.get(tag);
     }
 
-    public SpatialSearch<AbstractNObject> space(String tag) {
+    public SpatialSearch<NObject> space(String tag) {
         return spacetime.computeIfAbsent(tag, (t) -> {
-            return new LockingRTree<AbstractNObject>(new RTree<AbstractNObject>(new RectND.Builder(),
+            return new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
                     2, 8, DEFAULT_SPLIT_TYPE),
                     new ReentrantReadWriteLock());
         });
@@ -106,14 +106,14 @@ public class SpimeDB implements Iterable<AbstractNObject>  {
 
 
     /** returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics */
-    public AbstractNObject put(@Nullable AbstractNObject d) {
+    public NObject put(@Nullable NObject d) {
         if (d == null)
             return null;
 
         //TODO use 'obj.merge' for correct un-indexing of prevoius value
         String id = d.id();
 
-        AbstractNObject previous = obj.put(id, d);
+        NObject previous = obj.put(id, d);
 
         boolean changed = false;
 
@@ -164,7 +164,7 @@ public class SpimeDB implements Iterable<AbstractNObject>  {
 
 
 
-    public Iterator<AbstractNObject> iterator() {
+    public Iterator<NObject> iterator() {
         return obj.values().iterator();
     }
 
@@ -179,7 +179,7 @@ public class SpimeDB implements Iterable<AbstractNObject>  {
     }
 
 
-    public AbstractNObject get(String nobjectID) {
+    public NObject get(String nobjectID) {
         return obj.get(nobjectID);
     }
 
@@ -187,12 +187,12 @@ public class SpimeDB implements Iterable<AbstractNObject>  {
     public Query get(Query q) {
         q.onStart();
 
-        Predicate<AbstractNObject> each = q.each;
+        Predicate<NObject> each = q.each;
 
 
         Iterable<String> include = tagsAndSubtags(q.include);
         for (String t : include) {
-            SpatialSearch<AbstractNObject> s = spaceIfExists(t);
+            SpatialSearch<NObject> s = spaceIfExists(t);
             if (s != null && !s.isEmpty()) {
                 if (q.bounds != null && q.bounds.length > 0) {
                     for (RectND x : q.bounds) {
@@ -234,7 +234,7 @@ public class SpimeDB implements Iterable<AbstractNObject>  {
         exe.execute(r);
     }
 
-    public void put(Stream<? extends AbstractNObject> s) {
+    public void put(Stream<? extends NObject> s) {
         s.forEach(this::put);
     }
 

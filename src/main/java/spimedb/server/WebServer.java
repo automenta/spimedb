@@ -14,7 +14,7 @@ import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import org.slf4j.LoggerFactory;
-import spimedb.AbstractNObject;
+import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.client.Client;
 import spimedb.util.HTTP;
@@ -84,7 +84,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write(JSON.toJSON(db.tags.tags().stream().map(db::get).toArray(AbstractNObject[]::new)));
+                o.write(JSON.toJSON(db.tags.tags().stream().map(db::get).toArray(NObject[]::new)));
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }

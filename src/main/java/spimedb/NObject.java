@@ -1,0 +1,122 @@
+package spimedb;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import spimedb.index.rtree.PointND;
+import spimedb.util.JSON;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.function.BiConsumer;
+
+/**
+ * Created by me on 1/18/17.
+ */
+@JsonSerialize(using= NObject.NObjectSerializer.class)
+public interface NObject extends Serializable {
+
+
+    String id();
+    String name();
+    String[] tags();
+
+    void forEach(BiConsumer<String, Object> each);
+
+    default String description() {
+        Object d = get("_");
+        return d == null ? "" : d.toString();
+    }
+
+    <X> X get(String tag);
+
+    PointND min();
+
+    PointND max();
+
+    boolean bounded();
+
+    String ID = "I";
+    String NAME = "N";
+    String TAGS = ">";
+    String BOUNDS = "@";
+    String DESC = "_";
+
+    class NObjectSerializer extends JsonSerializer<NObject> {
+
+        @Override
+        public void serialize(NObject o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeStartObject();
+            {
+
+                jsonGenerator.writeStringField(ID, o.id());
+
+                String name = o.name();
+                if (name != null)
+                    jsonGenerator.writeStringField(NAME, name);
+
+                String[] tag = o.tags();
+                if (tag != null && tag.length > 0) {
+                    jsonGenerator.writeObjectField(TAGS, tag);
+                }
+
+                writeOtherFields(o, jsonGenerator);
+
+                writeBounds(o, jsonGenerator);
+
+            }
+            jsonGenerator.writeEndObject();
+        }
+
+        protected void writeBounds(NObject o, JsonGenerator jsonGenerator) throws IOException {
+            //zip the min/max bounds
+            PointND min = o.min();
+            if (min!=null) {
+
+                PointND max = o.max();
+                boolean point = max==null || min.equals(max);
+                if (!point || !min.isNaN()) {
+                    jsonGenerator.writeFieldName(BOUNDS);
+                    jsonGenerator.writeStartArray();
+
+                    if (!max.equals(min)) {
+                        int dim = min.dim();
+                        for (int i = 0; i < dim; i++) {
+                            float a = min.coord[i];
+                            float b = max.coord[i];
+                            if (a == b) {
+                                jsonGenerator.writeNumber(a);
+                            } else {
+                                if (a == Float.NEGATIVE_INFINITY && b == Float.POSITIVE_INFINITY) {
+                                    jsonGenerator.writeNumber(Float.NaN);
+                                } else {
+                                    jsonGenerator.writeStartArray();
+                                    jsonGenerator.writeNumber(a);
+                                    jsonGenerator.writeNumber(b);
+                                    jsonGenerator.writeEndArray();
+                                }
+                            }
+                        }
+                    } else {
+                        JSON.writeArrayValues(min.coord, jsonGenerator);
+                    }
+                    jsonGenerator.writeEndArray();
+                }
+            }
+        }
+
+        protected void writeOtherFields(NObject o, JsonGenerator jsonGenerator) {
+            o.forEach((fieldName, pojo) -> {
+                if (pojo==null)
+                    return;
+                try {
+                    jsonGenerator.writeObjectField(fieldName, pojo);
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            });
+        }
+
+    }
+}

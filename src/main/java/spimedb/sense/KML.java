@@ -17,7 +17,7 @@ import org.opensextant.giscore.events.SimpleField.Type;
 import org.opensextant.giscore.geometry.Geometry;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.utils.Color;
-import spimedb.AbstractNObject;
+import spimedb.NObject;
 import spimedb.MutableNObject;
 import spimedb.SpimeDB;
 import spimedb.sense.kml.KmlReader;
@@ -442,7 +442,7 @@ public class KML {
 //    }
 
 
-    static AbstractNObject styleJson(MutableNObject fb, Style s) {
+    static NObject styleJson(MutableNObject fb, Style s) {
 
         //System.out.println("Applying style: " + s);
         String iconUrl = s.getIconUrl();

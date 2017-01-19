@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
 import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
-import spimedb.AbstractNObject;
+import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
 
@@ -69,7 +69,7 @@ public class Session extends AbstractServerWebSocket {
                     Iterator<String> r = db.tags.roots();
                     try {
                         while (r.hasNext()) {
-                            AbstractNObject t = db.get(r.next());
+                            NObject t = db.get(r.next());
                             sendJSON(chan, t);
                         }
                     } catch(IOException e){
