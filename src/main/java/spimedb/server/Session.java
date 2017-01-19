@@ -3,13 +3,14 @@ package spimedb.server;
 import com.google.common.util.concurrent.RateLimiter;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
-import org.eclipse.collections.impl.map.mutable.primitive.ObjectFloatHashMap;
 import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
+import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
 
 import javax.script.SimpleBindings;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -20,43 +21,70 @@ public class Session extends AbstractServerWebSocket {
     /**
      * bytes per second
      */
-    public static final int OUTPUT_throttle = 8 * 1024;
+    public static final int defaultOutRateBytesPerSecond = 8 * 1024;
 
-    /**
-     * max # of items that can be remembered to have already been sent.
-     * this should not exceed the client's object bag capacity, which it should configure on
-     * connecting or changing its capacity
-     */
-    final int ALREADY_SENT_MEMORY_CAPACITY = 16;
+//    /**
+//     * max # of items that can be remembered to have already been sent.
+//     * this should not exceed the client's object bag capacity, which it should configure on
+//     * connecting or changing its capacity
+//     */
+//    final int ALREADY_SENT_MEMORY_CAPACITY = 16;
 
     /**
      * response bandwidth throttle
      */
-    final RateLimiter outRate = RateLimiter.create(OUTPUT_throttle);
-
+    final RateLimiter defaultOutRate = RateLimiter.create(defaultOutRateBytesPerSecond);
 
     final Set<Task> active = new ConcurrentHashSet<>();
 
-    final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
+    ///final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
     //final UnBloomFilter<String> sent = new UnBloomFilter<>(ALREADY_SENT_MEMORY_CAPACITY, String::getBytes);
 
     final SpimeDB db;
+
     final SimpleBindings scope;
 
     public Session(SpimeDB db) {
         this.db = db;
         scope = new SimpleBindings();
-        scope.put("db", db);
         scope.put("me", new API());
     }
 
     /** API accessible by clients */
     public class API {
 
+        private Task currentFocus;
+
+        public String status() {
+            return db.toString();
+        }
+
+        /** provides root-level startup tags */
+        public Task tagRoots() {
+            return this.currentFocus = new Task(Session.this) {
+
+                @Override
+                public void accept(SpimeDB db, WebSocketChannel chan) {
+                    Iterator<String> r = db.tags.roots();
+                    try {
+                        while (r.hasNext()) {
+                            NObject t = db.get(r.next());
+                            sendJSON(chan, t);
+                        }
+                    } catch(IOException e){
+                        return;
+                    }
+                }
+            };
+        }
+
         public Task focusLonLat(float[][] bounds) {
 
-            stopAll();
+            if (currentFocus!=null) {
+                currentFocus.stop();
+                currentFocus = null;
+            }
 
             logger.info("start {} focusLonLat {}", this, bounds);
 
@@ -65,7 +93,7 @@ public class Session extends AbstractServerWebSocket {
 
             String[] tags = new String[]{};
 
-            return new Task(Session.this) {
+            return this.currentFocus = new Task(Session.this) {
 
                 @Override
                 public void accept(SpimeDB db, WebSocketChannel chan) {
@@ -74,11 +102,11 @@ public class Session extends AbstractServerWebSocket {
                         if (!running.get()) //early exit test
                             return false;
 
-                        String i = n.id();
+                        //String i = n.id();
                         //if (!sent.containsOrAdd(i)) {
 
                             try {
-                                AbstractServerWebSocket.sendJSONBinary(chan, n);
+                                sendJSON(chan, n);
                             } catch (IOException e) {
                                 return false; //likely a disconnect
                             }
@@ -109,11 +137,11 @@ public class Session extends AbstractServerWebSocket {
 
                 if (resultObj instanceof Task) {
                     //if the result of the evaluation is a Task, queue it
-                    start(socket, (Task) resultObj, db);
+                    start(socket, (Task) resultObj);
                 } else {
                     //else send the immediate result
                     try {
-                        sendJSONBinary(socket, result);
+                        sendJSONBinary(socket, result, defaultOutRate, null);
                     } catch (IOException e) {
                         logger.info("{} {}", socket, e.getMessage());
                     }
@@ -124,7 +152,7 @@ public class Session extends AbstractServerWebSocket {
     }
 
 
-    protected void start(WebSocketChannel socket, Task t, SpimeDB db2) {
+    protected void start(WebSocketChannel socket, Task t) {
         SpimeDB.runLater(() -> {
             t.accept(db, socket);
             t.stop();

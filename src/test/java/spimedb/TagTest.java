@@ -1,5 +1,6 @@
 package spimedb;
 
+import com.google.common.collect.Iterators;
 import org.junit.Test;
 import spimedb.sense.GeoJSON;
 
@@ -20,15 +21,27 @@ public class TagTest {
     @Test
     public void testTagActivationTrigger() {
 
-        Tag u = new Tag("Y", "Test");
-        Tag t = new Tag("X", "Test");
+        Tag v = new Tag("Test");
+        db.put(v);
 
+        System.out.println(db.tags.graph);
+
+        Tag u = new Tag("Y", "Test");
         db.put(u);
+
+        System.out.println(db.tags.graph);
+
+        Tag t = new Tag("X", "Test");
         db.put(t);
+
+        System.out.println(db.tags.graph);
 
         assertEquals(0, t.pri(), 0.01f);
 
-        assertEquals(3, size(db.tagsAndSubtags()));
+
+        //+1 for the root tag, ""
+        assertEquals(3+1, size(db.tagsAndSubtags()));
+        assertEquals(1, Iterators.size(db.tags.roots()));
         assertEquals(1, size(db.tagsAndSubtags("X")));
         assertEquals(1, size(db.tagsAndSubtags("Y")));
         assertEquals(3, size(db.tagsAndSubtags("Test")));
@@ -72,6 +85,6 @@ public class TagTest {
         SpimeDB.sync();
 
         System.out.println(db.toString());
-        System.out.println(db.schema.toString());
+        System.out.println(db.tags.toString());
     }
 }

@@ -118,10 +118,10 @@ public class MapGraph<V, E> implements Serializable {
 
 
     /** if vertex exists, still return true */
-    public void addVertex(V id) {
+    public VertexContainer<V, E> addVertex(V id) {
         // add with a lazy edge container entry
         //return vertices.putIfAbsent(v, null) == null;
-        vertex(id, true);
+        return vertex(id, true);
     }
 
 
@@ -192,7 +192,7 @@ public class MapGraph<V, E> implements Serializable {
      * @param vertex a vertex in this graph.
      * @return EdgeContainer
      */
-    private VertexContainer<V,E> vertex(V vertex, boolean createIfMissing) {
+    public VertexContainer<V,E> vertex(V vertex, boolean createIfMissing) {
         if (createIfMissing) {
             return vertices.computeIfAbsent(vertex, v ->
                     new VertexContainer<>(edgeSetBuilder.get(), edgeSetBuilder.get()));

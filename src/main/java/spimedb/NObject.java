@@ -1,6 +1,5 @@
 package spimedb;
 
-import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -11,8 +10,6 @@ import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
 import spimedb.sense.KML;
@@ -127,9 +124,11 @@ public class NObject extends RectND implements Serializable {
     @JsonProperty("^") Map<String, Object> data = null;
 
 
-    /** extensional inheritance: what this nobject is "inside" of (its container) */
-    /*@Field(name = "inside")*/ @JsonProperty(">")
-    public String[] tag = null;
+    /** extensional inheritance: what this nobject is "inside" of (its container)
+     *  by default, use the root node. but try not to pollute it
+     */
+    @JsonProperty(">")
+    public String[] tag = Tags.ROOT;
 
 //    /** extensional inheritance: what this nobject is "outside" of (its contents) */
 //    @Field(name = "outside") @JsonProperty("<") private Set<String> outside = new HashSet();
@@ -342,17 +341,19 @@ public class NObject extends RectND implements Serializable {
     /** sets the inside property */
     public NObject setTag(String... tags) {
 
+        if (tags.length > 1) {
+            //TODO remove any duplicates
+        }
+
         for (String t : tags) {
             if (t.equals(getId()))
                 throw new RuntimeException("object can not be inside itself");
         }
 
-        if (tags.length > 1) {
-            //TODO remove any duplicates
-        }
+        if (tags.length == 0)
+            tags = Tags.ROOT;
 
         this.tag = tags;
-
 
         return this;
     }

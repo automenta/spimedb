@@ -26,7 +26,7 @@ public class QueryTest {
 
         NObject place = new NObject("civicstructure");
         place.where(0.5f, 0.5f);
-        place.setTag("CivicStructure");
+        place.setTag("Place");
         db.put(place);
 
         NObject action = new NObject("action");
@@ -43,10 +43,11 @@ public class QueryTest {
         assertNotEquals(placeSubtags, actionSubtags);
 
         ArrayList<NObject> found = new ArrayList();
-        db.get(new Query(found::add).in("Place").where(new float[] { 0, 1}, new float[] { 0, 1}));
+        db.get(new Query(found::add).in("InteractAction").where(new float[] { 0, 1}, new float[] { 0, 1}));
 
-        assertTrue(found + "", found.contains(place));
-        assertFalse(found.contains(action));
+        assertFalse(found.isEmpty());
+        assertTrue(found + "", found.contains(action));
+        assertFalse(found.contains(place));
 
     }
 

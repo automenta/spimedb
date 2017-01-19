@@ -1,6 +1,5 @@
 package spimedb;
 
-import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
@@ -40,11 +39,14 @@ public class SpimeDB implements Iterable<NObject>  {
 
     @JsonIgnore public final Map<String, NObject> obj;
 
-    public final Tags schema = new Tags();
+    public final Tags tags = new Tags();
 
     /** server-side javascript engine */
     final ScriptEngineManager engineManager = new ScriptEngineManager();
     public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
+
+    /** whether the root node has a spatial index, which would store everything */
+    private boolean rootSpace = false;
 
     /** in-memory, map-based */
     public SpimeDB() {
@@ -71,7 +73,7 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
     Class[] resolve(String... tags) {
-        return schema.resolve(tags);
+        return this.tags.resolve(tags);
     }
 
     public Class the(String tagID, String... supertags) {
@@ -84,7 +86,7 @@ public class SpimeDB implements Iterable<NObject>  {
                     /*.make()
                     .load(cl)
                     .getLoaded();*/
-        return schema.the(tagID, supertags);
+        return tags.the(tagID, supertags);
     }
 
 //    @Override
@@ -133,19 +135,20 @@ public class SpimeDB implements Iterable<NObject>  {
 //                });
                 //if (this.schema.inh.addNode(t)) {
                     //index the tag if it doesnt exist in the graph
-                    NObject tagJect = get(t);
-                    if (tagJect!=null) {
-                        String[] parents = tagJect.tag;
-                        if (parents != null)
-                            schema.tag(t, parents);
-                    }
+//                    NObject tagJect = get(t);
+//                    if (tagJect!=null) {
+//                        String[] parents = tagJect.tag;
+//                        if (parents != null)
+//                            this.tags.tag(t, parents);
+//                    }
                 //}
             }
-            schema.tag(id, tags);
+            this.tags.tag(id, tags);
 
             if (d.bounded()) {
                 for (String t : tags)
-                    space(t).add(d);
+                    if (rootSpace || !t.isEmpty()) //dont store in root
+                        space(t).add(d);
             }
         }
 
@@ -157,7 +160,7 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
     private void tag(String id, String[] parents) {
-        schema.tag(id, parents);
+        tags.tag(id, parents);
     }
 
 
@@ -188,7 +191,8 @@ public class SpimeDB implements Iterable<NObject>  {
         Predicate<NObject> each = q.each;
 
 
-        for (String t : tagsAndSubtags(q.include)) {
+        Iterable<String> include = tagsAndSubtags(q.include);
+        for (String t : include) {
             SpatialSearch<NObject> s = spaceIfExists(t);
             if (s != null && !s.isEmpty()) {
                 if (q.bounds != null && q.bounds.length > 0) {
@@ -222,9 +226,9 @@ public class SpimeDB implements Iterable<NObject>  {
      */
     public Iterable<String> tagsAndSubtags(@Nullable String... parentTags) {
         if (parentTags == null || parentTags.length==0)
-            return schema.tags(); //ALL
+            return tags.tags(); //ALL
         else
-            return schema.tagsAndSubtags(parentTags);
+            return tags.tagsAndSubtags(parentTags);
     }
 
     public static void runLater(Runnable r) {

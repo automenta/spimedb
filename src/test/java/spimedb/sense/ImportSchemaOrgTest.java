@@ -3,6 +3,7 @@ package spimedb.sense;
 import org.junit.Test;
 import spimedb.SpimeDB;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -13,15 +14,25 @@ public class ImportSchemaOrgTest {
 
     @Test
     public void test1() {
-        SpimeDB r = new SpimeDB();
-        ImportSchemaOrg.load(r);
+        SpimeDB db = new SpimeDB();
+        ImportSchemaOrg.load(db);
 //        r.graph.vertexSet().forEach(v -> {
 //            System.out.println(v);
 //            System.out.println("\t" + r.graph.edgesOf(v));
 //        });
 
-        assertTrue(r.obj.size() > 500);
+        assertTrue(db.obj.size() > 500);
 
+        assertEquals(1, db.tags.graph.inDegreeOf("Action"));
+        assertTrue(db.tags.graph.outDegreeOf("Action") > 1);
+
+        //System.out.println(db.tags.graph.vertex("Action", false).outVset());
+        //System.out.println(db.get("replace"));
+
+        assertEquals(1, db.tags.graph.inDegreeOf("Place"));
+        assertTrue(db.tags.graph.outDegreeOf("Place") > 1);
+
+        //TODO: assertTrue(r.tags.isConnected)
 
 //        System.out.println(r.graph.vertexSet().size() + " " + r.graph.edgeSet().size());
 //        assertTrue(r.graph.edgeSet().size() > 1000);

@@ -84,7 +84,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write(JSON.toJSON(db.schema.tags().stream().map(db::get).toArray(NObject[]::new)));
+                o.write(JSON.toJSON(db.tags.tags().stream().map(db::get).toArray(NObject[]::new)));
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }

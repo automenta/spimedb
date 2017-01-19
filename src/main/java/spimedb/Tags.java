@@ -7,18 +7,19 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.index.graph.MapGraph;
+import spimedb.index.graph.VertexContainer;
 import spimedb.index.graph.travel.BreadthFirstTravel;
 import spimedb.index.graph.travel.CrossComponentTravel;
 import spimedb.index.graph.travel.UnionTravel;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * https://neo4j.com/developer/java/#_using_neo4j_s_embedded_java_api
- * Created by me on 1/8/17.
+ * the root tag is ""
  */
 public class Tags {
 
@@ -27,7 +28,7 @@ public class Tags {
 //    @JsonIgnore
 //    public final MutableGraph<String> inh = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
 
-    final MapGraph<String,String> graph = new MapGraph<String,String>(new ConcurrentHashMap<>(),
+    public final MapGraph<String,String> graph = new MapGraph<String,String>(new ConcurrentHashMap<>(),
             ConcurrentHashSet::new);
 
 
@@ -42,7 +43,10 @@ public class Tags {
     @JsonIgnore
     public final ByteBuddy tagProxyBuilder = new ByteBuddy();
 
+    private final VertexContainer<String, String> rootNode;
+
     public Tags() {
+        rootNode = graph.addVertex("");
     }
 
 //    public Tag get(String id, boolean createIfUnknown) {
@@ -60,10 +64,18 @@ public class Tags {
         return graph.toString();
     }
 
+    final static String[] ROOT = new String[] { "" };
+
     public void tag(String x, String[] parents) {
 
+        if (parents.length == 0)
+            parents = ROOT;
+
+        boolean reset = false; //TODO decide when to reset, like when a NObject changes
+
         synchronized (graph) {
-            graph.removeVertex(x);
+            if (reset)
+                graph.removeVertex(x);
             graph.addVertex(x);
             for (String y : parents) {
                 graph.addEdge(y, x, "inh");
@@ -163,6 +175,10 @@ public class Tags {
 
     public Set<String> tags() {
         return graph.vertexSet();
+    }
+
+    public Iterator<String> roots() {
+        return rootNode.outV();
     }
 
     private static class SubTags<V,E> extends UnionTravel<V,E,Object> {

@@ -58,10 +58,14 @@ abstract public class AbstractServerWebSocket extends AbstractReceiveListener im
     public static void sendJSON(WebSocketChannel socket, Object object, ObjectMapper encoder, @Nullable RateLimiter r, @Nullable AtomicLong outBytes) throws IOException {
 
         byte[] s;
-        try {
-            s = encoder.writeValueAsBytes(object);
-        } catch (JsonProcessingException t) {
-            s = object.toString().getBytes(); //could not make json so just use toString()
+        if (object instanceof byte[]) {
+            s = (byte[])object;
+        } else {
+            try {
+                s = encoder.writeValueAsBytes(object);
+            } catch (JsonProcessingException t) {
+                s = object.toString().getBytes(); //could not make json so just use toString()
+            }
         }
 
         int size = s.length;
@@ -77,10 +81,6 @@ abstract public class AbstractServerWebSocket extends AbstractReceiveListener im
     }
 
 
-
-    public static void send(WebSocketChannel socket, byte[] s) throws IOException {
-        WebSockets.sendBinaryBlocking(ByteBuffer.wrap(s), socket);
-    }
 
     @Override
     public void onError(WebSocketChannel wsc, Void t, Throwable thrwbl) {

@@ -10,8 +10,10 @@ import spimedb.client.util.JsConsumer;
 
 import java.util.Arrays;
 
-
+/** Leaflet map widget */
 public class Map2D {
+
+    //TODO add element resize handler
 
     private final Client client;
     private final ChangeBatcher<NObj, Layer> differ;

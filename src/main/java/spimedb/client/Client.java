@@ -36,7 +36,7 @@ public class Client {
 
     protected void init() {
 
-        io.send("db"); //get the database summary
+        io.send("status()"); //get the database summary
 
             /*document.getBody().appendChild(div).appendChild(
                     document.createTextNode(JSON.stringify(ws)));*/

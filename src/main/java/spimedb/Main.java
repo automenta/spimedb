@@ -28,7 +28,12 @@ public class Main {
             null
         );
 
-        new WebServer(db, 8080);
+        try {
+            new WebServer(db, 8080);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return;
+        }
 
         if (db.isEmpty())
             addInitialData(db);

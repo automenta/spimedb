@@ -2,8 +2,8 @@ package spimedb.bag;
 
 import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.core.JSFunction;
-import spimedb.client.util.Console;
 import spimedb.client.lodash.Lodash;
+import spimedb.client.util.Console;
 
 import java.util.HashMap;
 import java.util.LinkedList;

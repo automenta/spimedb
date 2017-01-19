@@ -1,10 +1,13 @@
 package spimedb.index.graph;
 
+import com.google.common.collect.Iterators;
+import jcog.list.ArrayUnenforcedSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -77,4 +80,30 @@ public class VertexContainer<V,E> implements Serializable
     public boolean containsOutgoingEdge(E e, V t) {
         return outgoing.contains(Tuples.pair(e, t));
     }
+
+    public Iterator<V> inV() {
+        return Iterators.transform(incoming.iterator(), Pair::getOne);
+    }
+    public Iterator<E> inE() {
+        return Iterators.transform(incoming.iterator(), Pair::getTwo);
+    }
+    public Iterator<V> outV() {
+        return Iterators.transform(outgoing.iterator(), Pair::getTwo);
+    }
+    public Iterator<E> outE() {
+        return Iterators.transform(outgoing.iterator(), Pair::getOne);
+    }
+
+    public Set<V> inVset() {
+        ArrayUnenforcedSet<V> a = new ArrayUnenforcedSet<>();
+        Iterators.addAll(a, inV());
+        return a;
+    }
+
+    public Set<V> outVset() {
+        ArrayUnenforcedSet<V> a = new ArrayUnenforcedSet<>();
+        Iterators.addAll(a, outV());
+        return a;
+    }
+
 }
