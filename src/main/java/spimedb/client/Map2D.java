@@ -88,16 +88,19 @@ public class Map2D {
 
                     float lon = JS.toFloat(x);
                     float lat = JS.toFloat(y);
-                    //System.out.println(lon + " " + lat);
-                    //System.out.println(shown.size() + " " + obj.size());
 
-                    //CircleMarker c = CircleMarker.create(lon, lat, 1, name, "#0f3");
-                    Marker m = Marker.create(lon, lat, name, "#0f3");
-                    m.setIcon(defaultIcon);
+                    if ((lon==lon && lat==lat)) {
+                        //System.out.println(lon + " " + lat);
+                        //System.out.println(shown.size() + " " + obj.size());
 
-                    return m;
+                        //CircleMarker c = CircleMarker.create(lon, lat, 1, name, "#0f3");
+                        Marker m = Marker.create(lon, lat, name, "#0f3");
+                        m.setIcon(defaultIcon);
 
-
+                        return m;
+                    } else {
+                        return null;
+                    }
                 }
 
                 return null;

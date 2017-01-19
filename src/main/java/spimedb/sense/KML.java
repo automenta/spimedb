@@ -596,7 +596,7 @@ public class KML {
                 }
             }
             else {
-                d = new MutableNObject(JSON.uuid());
+                d = new MutableNObject(JSON.uuid64());
                 d.setTag(pathString);
             }
 

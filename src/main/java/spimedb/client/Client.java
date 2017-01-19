@@ -1,5 +1,6 @@
 package spimedb.client;
 
+import org.teavm.jso.core.JSFunction;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
@@ -7,6 +8,7 @@ import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.bag.BudgetMerge;
 import spimedb.bag.ObservablePriBag;
+import spimedb.client.lodash.Lodash;
 import spimedb.client.util.Console;
 import spimedb.client.websocket.WebSocket;
 
@@ -18,6 +20,9 @@ import java.util.HashMap;
 public class Client {
 
     private final HTMLDocument doc;
+
+    /** min period between sending invalidation batches */
+    private final int invalidationPeriodMS = 100;
 
     static void setVisible(ElementCSSInlineStyle element, boolean visible) {
         CSSStyleDeclaration es = element.getStyle();
@@ -73,13 +78,49 @@ public class Client {
         new ObjTable(this, doc.getBody());
 
         io.onOpen(this::init);
+
+
+
+        new InvalidationNotifier();
+
     }
 
+    class InvalidationNotifier {
+
+        //TODO buffer bytes directly, dont involve String
+        StringBuilder invalidated = null;
+
+        public InvalidationNotifier() {
+
+            JSFunction sendInvalidations = Lodash.throttle(() -> {
+
+                StringBuilder b = invalidated;
+                if (b == null)
+                    return;
+
+                invalidated = null;
+
+                b.setLength(b.length() - 1); //remove trailing comma
+                b.append("])");
+                String bs = b.toString();
+                System.out.println(bs);
+                b.setLength(0); //clear
+                io.send(bs);
+
+            }, invalidationPeriodMS);
+
+            obj.REMOVE.on(n -> {
+                if (invalidated == null)
+                    invalidated = new StringBuilder(1024).append("me.forgot([");
+                invalidated.append('\"').append(n.id).append("\",");
+                sendInvalidations.call(null);
+            });
+        }
+    }
 
     public static void main(String[] args) {
 
         new Client();
-
 
     }
 

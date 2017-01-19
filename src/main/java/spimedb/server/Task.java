@@ -4,17 +4,15 @@ import com.google.common.util.concurrent.RateLimiter;
 import io.undertow.websockets.core.WebSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.SpimeDB;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiConsumer;
 
 /**
  * a session-contextualized task
  */
-abstract public class Task implements BiConsumer<SpimeDB, WebSocketChannel> {
+abstract public class Task implements Runnable {
 
     public static Logger logger = LoggerFactory.getLogger(Task.class);
 

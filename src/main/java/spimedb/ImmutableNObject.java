@@ -28,7 +28,7 @@ public abstract class ImmutableNObject extends RectND implements NObject {
 
     public ImmutableNObject(PointND a, PointND b, String id, String name) {
         super(a, b);
-        this.id = id!=null ? id : JSON.uuid();
+        this.id = id!=null ? id : JSON.uuid64();
         this.name = name;
     }
 

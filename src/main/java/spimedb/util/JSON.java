@@ -1,21 +1,21 @@
 package spimedb.util;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
+import com.google.common.primitives.Longs;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Base64;
 import java.util.Iterator;
+import java.util.Random;
 
 public class JSON {
 
@@ -200,13 +200,11 @@ public class JSON {
 
 
 
-    public static String uuid() {
-        return (String)jcog.Util.uuid128();
+    static final Random uuidRandom = new Random();
 
-//        byte[] bytes = new byte[16]; /** 16*8 = 128 bits = UUID */
-//        for (int i = 0; i < bytes.length; i++)
-//            bytes[i] = (byte)(Math.random() * 256); //TODO use better RNG
-//
-//        return Base64.getEncoder().encodeToString(bytes);
+    public static String uuid64() {
+        //return (String)jcog.Util.uuid128(); //escaped unicode results in long JSON strings, bad
+        //return (String)jcog.Util.uuid64();
+        return Base64.getEncoder().encodeToString(Longs.toByteArray(uuidRandom.nextLong()));
     }
 }
