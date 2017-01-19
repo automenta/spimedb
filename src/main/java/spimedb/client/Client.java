@@ -1,14 +1,14 @@
 package spimedb.client;
 
 import org.jetbrains.annotations.Nullable;
-import org.teavm.jso.JSObject;
+import org.teavm.jso.browser.Window;
 import org.teavm.jso.core.JSArray;
 import org.teavm.jso.core.JSFunction;
-import org.teavm.jso.core.JSString;
 import org.teavm.jso.dom.css.CSSStyleDeclaration;
 import org.teavm.jso.dom.css.ElementCSSInlineStyle;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
+import org.teavm.jso.dom.xml.Node;
 import spimedb.bag.BudgetMerge;
 import spimedb.bag.ObservablePriBag;
 import spimedb.client.leaflet.Layer;
@@ -26,8 +26,10 @@ public class Client {
 
     private final HTMLDocument doc;
 
-
     private final InvalidationNotifier invalidation;
+
+    final static int minForgetPeriodMS = 100;
+    private final JSFunction forgetting;
 
     static void setVisible(ElementCSSInlineStyle element, boolean visible) {
         CSSStyleDeclaration es = element.getStyle();
@@ -38,8 +40,7 @@ public class Client {
     }
 
 
-    //public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
-    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(512, BudgetMerge.max, new HashMap<>());
+    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(512, BudgetMerge.or, new HashMap<>());
 
 
     public final WebSocket io = WebSocket.newSocket("attn");
@@ -56,23 +57,28 @@ public class Client {
 
     public Client() {
 
+        forgetting = Lodash.throttle(()->{
+            obj.mul(0.99f); //forgetting
+        }, minForgetPeriodMS);
+
         this.doc = HTMLDocument.current();
 
         io.onJSONBinary((x) -> {
-            if (JSString.isInstance(x)) {
-                Console.log(x);
+
+            NObj nx = NObj.fromJSON(x);
+            if (nx != null) {
+                obj.put(nx, nx.isLeaf() ? 0.5f : 1f);
+
+                forgetting.call(null);
+
+                //Console.log(x);
+                //                if (obj.put(nx, 0.5f) != null) {
+                //                    //System.out.println("#=" + obj.size() + ": " + nx);
+                //                }
             } else {
-                NObj nx = NObj.fromJSON(x);
-                if (nx != null) {
-                    obj.put(nx, nx.isLeaf() ? 0.25f : 0.75f);
-                    //Console.log(x);
-                    //                if (obj.put(nx, 0.5f) != null) {
-                    //                    //System.out.println("#=" + obj.size() + ": " + nx);
-                    //                }
-                } else {
-                    Console.log(x);
-                }
+                Console.log(x);
             }
+
         });
 
         HTMLElement mapContainer = doc.createElement("div");
@@ -82,15 +88,38 @@ public class Client {
         new Map2D(this, mapContainer) {
             @Nullable
             @Override
-            protected Layer build(NObj N, JSObject n, JSArray bounds) {
-                Layer l = super.build(N, n, bounds);
+            protected Layer build(NObj N, JSArray bounds) {
+                Layer l = super.build(N, bounds);
                 if (l!=null) {
                     obj.put(N, 0.1f); //boost for visibility
                 }
                 return l;
             }
         };
-        new ObjTable(this, doc.getBody());
+
+        new ObjTable(this, doc.getBody()) {
+
+            {
+                Window.setInterval(()->{
+
+                    //System.out.println(obj.map.keySet());
+
+                    forEach((n, m) -> {
+                        float p = obj.pri(n, 0);
+                        ((HTMLElement)m).setAttribute("style", "opacity: " +
+                                Math.round(100.0 * (0.5f * 0.5f * p)) + "%");
+                    });
+
+
+                }, 500);
+            }
+
+            @Override
+            protected Node build(NObj n) {
+                Node m = super.build(n);
+                return m;
+            }
+        };
 
         io.onOpen(this::init);
 
@@ -101,7 +130,6 @@ public class Client {
     /** call this to prepare communications which may change our memory */
     public void sync() {
         if (invalidation.flush()) {
-            obj.mul(0.95f); //forgetting
         }
     }
 

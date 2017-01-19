@@ -7,6 +7,8 @@ import org.teavm.jso.dom.html.HTMLElement;
 import org.teavm.jso.dom.xml.Node;
 import spimedb.bag.ChangeBatcher;
 
+import java.util.function.BiConsumer;
+
 /**
  * Created by me on 1/18/17.
  */
@@ -28,7 +30,7 @@ public class ObjTable {
             @Nullable
             @Override
             public Node build(NObj n) {
-                return render(n);
+                return ObjTable.this.build(n);
             }
 
             @Override
@@ -42,7 +44,11 @@ public class ObjTable {
         };
     }
 
-    protected Node render(NObj n) {
+    public void forEach(BiConsumer<NObj, Node> each) {
+        updater.forEach(each);
+    }
+
+    protected Node build(NObj n) {
 
 
         String[] in = n.inh(true);
@@ -52,8 +58,9 @@ public class ObjTable {
             return null;
         }
 
-        HTMLElement link = doc.createElement("a").withText(n.name());
         HTMLElement d = doc.createElement("div");
+
+        HTMLElement link = doc.createElement("a").withText(n.name());
 
         if (in!=null)
             d.appendChild( doc.createElement("a").withText("<-- (" + in.length + ") ") ) ;

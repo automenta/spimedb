@@ -6,6 +6,7 @@ import spimedb.client.lodash.Lodash;
 import spimedb.client.util.Console;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.IntFunction;
 
 import static java.lang.Boolean.FALSE;
@@ -114,5 +115,15 @@ abstract public class ChangeBatcher<X, Y> {
 
     public void remove(X x) {
         setNext(x, FALSE);
+    }
+
+    public void forEach(BiConsumer<X, Y> each) {
+
+        //built.forEach(each); //TeaVM doesnt have it
+
+        for (Map.Entry<X,Y> e : built.entrySet()) {
+            each.accept(e.getKey(), e.getValue());
+        }
+
     }
 }

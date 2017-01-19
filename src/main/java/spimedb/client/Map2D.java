@@ -70,7 +70,7 @@ public class Map2D {
                 if (bounds == null)
                     return null;
 
-                return Map2D.this.build(N, n, bounds);
+                return Map2D.this.build(N, bounds);
             }
         };
 
@@ -90,14 +90,14 @@ public class Map2D {
     }
 
     @Nullable
-    protected Layer build(NObj N, JSObject n, JSArray bounds) {
+    protected Layer build(NObj N,  JSArray bounds) {
         JSObject time = bounds.get(0);
         JSObject x = bounds.get(1); //LON
         JSObject y = bounds.get(2); //LAT
         JSObject z = bounds.get(3);
 
         String nid = N.id;
-        String name = JS.getString(n, "N", nid);
+        String name = JS.getString(N.data, "N", nid);
 
         if (JS.isNumber(x) && JS.isNumber(y)) {
             //POINT

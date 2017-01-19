@@ -357,6 +357,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
 
         if (pri < 0) { //already deleted
+            onRemoved(new Budget<>(key, pri)); //HACK maybe use a separate handler, for onRejected
             return null;
         }
 
@@ -372,6 +373,8 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
                 //it has been deleted.. TODO reinsert?
                 map.remove(key);
                 pressure -= pri;
+
+                onRemoved(existing);
                 return null;
             }
 
@@ -400,6 +403,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
                 }
                 pressure -= pri;
 
+                onRemoved(new Budget<>(key, pri));
                 return null;
 
             } else {
@@ -411,15 +415,14 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
                 synchronized (items) {
                     if (updateItems(next)) {
-                        //updateRange();
+                        onAdded(next); //success
+                        return next;
                     } else {
+                        onRemoved(next);
                         return null;
                     }
                 }
 
-                onAdded(next); //success
-
-                return next;
             }
         }
 
@@ -715,4 +718,11 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         return itemOrZeroIfNull(items.last());
     }
 
+    public float pri(V id, float valueIfAbsent) {
+        Budget<V> b = map.get(id);
+        if (b == null) {
+            return valueIfAbsent;
+        }
+        return b.pri;
+    }
 }

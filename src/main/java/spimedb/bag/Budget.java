@@ -29,6 +29,7 @@ public class Budget<X> {
     }
 
     public void pri(float newPri) {
+        //System.out.println(id + " " + pri + " -> " + newPri);
         this.pri = newPri;
     }
 

@@ -49,14 +49,14 @@ public class NObj  {
     }
 
     @Nullable
-    String[] inh(boolean in) {
+    String[] inh(boolean inOrOut) {
         JSObject inh = JS.get(data, "inh");
         if (inh == null)
             return null;
 
         //Console.log(inh, JS.getArray(inh, in ? "<" : ">"));
 
-        JSArray<JSString> e = JS.getArray(inh, in ? "<" : ">");
+        JSArray<JSString> e = JS.getArray(inh, inOrOut ? "<" : ">");
         if (e==null)
             return null;
 
@@ -67,8 +67,9 @@ public class NObj  {
         String[] in = inh(true);
         if (in!=null)
             return false;
-        String[] out = inh(false);
-        return out==null;
+        //String[] out = inh(false);
+        //return out==null;
+        return true;
     }
 
 }

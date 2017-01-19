@@ -17,4 +17,12 @@ public interface BudgetMerge {
         e.pri(Math.max(e.pri, i));
         return 0; //TODO calculate overflow
     };
+    BudgetMerge and = (e, i) -> {
+        e.pri( e.pri * i );
+        return 0; //TODO calculate overflow
+    };
+    BudgetMerge or = (e, i) -> {
+        e.pri( 1f - ((1f - e.pri) * (1f - i)) );
+        return 0; //TODO calculate overflow
+    };
 }
