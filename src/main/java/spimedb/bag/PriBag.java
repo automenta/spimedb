@@ -344,8 +344,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     @Nullable
     @Override
     public Budget<V> put(@NotNull V v, @NotNull Budget<V> b) {
-        if (!b.id.equals(v))
-            throw new RuntimeException("mismatch");
+        assert(b.id.equals(v)); //must match
         return put(v, b.pri, null);
     }
 

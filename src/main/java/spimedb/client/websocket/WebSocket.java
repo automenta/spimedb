@@ -52,10 +52,10 @@ public interface WebSocket extends JSObject {
         }
     }
 
-    final static int CONNECTING = 0;
-    final static int OPEN = 1;
-    final static int CLOSING = 2;
-    final static int CLOSED = 3;
+    int CONNECTING = 0;
+    int OPEN = 1;
+    int CLOSING = 2;
+    int CLOSED = 3;
 
     @JSProperty("readyState")
     int getReadyState();

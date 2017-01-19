@@ -13,8 +13,8 @@ import org.geojson.GeoJsonObject;
 import org.geojson.LngLatAlt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.NObject;
 import spimedb.MutableNObject;
+import spimedb.NObject;
 
 import java.io.IOException;
 import java.io.InputStream;

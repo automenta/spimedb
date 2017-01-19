@@ -29,7 +29,7 @@ public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V, E>
     /**
      * true = in, false = out
      */
-    private boolean inOrOut = true;
+    private final boolean inOrOut = true;
 
     public CrossComponentTravel(MapGraph<V, E> g, Map<V, D> seen) {
         this(g, null, seen);

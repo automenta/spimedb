@@ -89,18 +89,7 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.6.2</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -120,11 +109,7 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
-            <version>1.6.3</version>
-        </dependency>
+
 
         <!--<dependency>-->
         <!--<artifactId>opennars</artifactId>-->
@@ -322,11 +307,11 @@
             <version>1.5.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.jvnet.ogc</groupId>
-            <artifactId>sensorml-common</artifactId>
-            <version>1.1.0</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.jvnet.ogc</groupId>-->
+            <!--<artifactId>sensorml-common</artifactId>-->
+            <!--<version>1.1.0</version>-->
+        <!--</dependency>-->
 
         <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
         <dependency>
@@ -341,17 +326,17 @@
             <version>0.5</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-            <version>1.13</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.vividsolutions</groupId>-->
+            <!--<artifactId>jts</artifactId>-->
+            <!--<version>1.13</version>-->
+            <!--<exclusions>-->
+                <!--<exclusion>-->
+                    <!--<groupId>xerces</groupId>-->
+                    <!--<artifactId>xercesImpl</artifactId>-->
+                <!--</exclusion>-->
+            <!--</exclusions>-->
+        <!--</dependency>-->
 
 
         <!--<dependency>-->
