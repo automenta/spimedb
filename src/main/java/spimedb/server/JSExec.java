@@ -42,9 +42,14 @@ public final class JSExec {
             o = t;
         }
 
-        long end = System.currentTimeMillis();
+        if (o == null) {
+            //return null to avoid sending the execution summary
+            onResult.accept(null);
+        } else {
+            long end = System.currentTimeMillis();
 
-        onResult.accept(new JSExec(code, o, start, end));
+            onResult.accept(new JSExec(code, o, start, end));
+        }
     }
 
     @Override

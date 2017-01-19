@@ -259,9 +259,6 @@ public class SpimeDB implements Iterable<NObject> {
     @JsonSerialize(using = NObject.NObjectSerializer.class)
     public static class GraphedNObject extends ProxyNObject {
 
-
-        final Map<String,VertexIncidence> boundary = new UnifiedMap();
-
         private final MapGraph<String, String> graph;
 
         GraphedNObject(MapGraph<String,String> graph) {
@@ -283,9 +280,7 @@ public class SpimeDB implements Iterable<NObject> {
             VertexContainer<String, String> v = graph.vertex(id(), false);
             if (v != null) {
                 Map<String,VertexIncidence<String>> boundary = v.incidence();
-                boundary.forEach((e,vv) -> {
-                   each.accept(e, vv );
-                });
+                boundary.forEach(each);
             }
         }
 

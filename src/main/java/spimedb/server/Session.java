@@ -35,7 +35,7 @@ public class Session extends AbstractServerWebSocket {
 
     final Set<Task> active = new ConcurrentHashSet<>();
 
-    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 512, 3, 0.05f, new StringHashProvider());
+    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 64 * 1024, 3, 0.005f, new StringHashProvider());
 
     ///final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
@@ -65,9 +65,26 @@ public class Session extends AbstractServerWebSocket {
 
         private Task currentFocus;
 
+        /** send predicted-to-be-known items after sending predicted-to-be-unknown-by-client */
+        private boolean ensureSent = false;
+
 
         public String status() {
             return db.toString();
+        }
+
+        public Task get(String[] id) {
+            return new Task(Session.this) {
+                @Override public void run() {
+                    for (String x : id) {
+                        try {
+                            trySend(this, x);
+                        } catch (IOException e) {
+                            break;
+                        }
+                    }
+                }
+            };
         }
 
         /**
@@ -95,11 +112,10 @@ public class Session extends AbstractServerWebSocket {
         /**
          * allows client to inform server of invalidations
          */
-        public boolean forgot(String... ids) {
+        public void forgot(String... ids) {
             for (String id : ids) {
                 remoteMemory.remove(id);
             }
-            return true;
         }
 
         public Task focusLonLat(float[][] bounds) {
@@ -127,11 +143,13 @@ public class Session extends AbstractServerWebSocket {
 
                     db.get(new Query((n) -> {
 
+                        n = db.graphed(n);
+
                         if (!running.get()) //early exit test
                             return false;
 
                         try {
-                            if (!trySend(this, n))
+                            if (!trySend(this, n) && ensureSent)
                                 lowPriority.add(n); //buffer it for sending later (low-priority)
                         } catch (IOException e) {
                             stop();
@@ -154,6 +172,21 @@ public class Session extends AbstractServerWebSocket {
                 }
             };
 
+        }
+
+        private boolean trySend(Task t, String id) throws IOException {
+            int[] idHash = remoteMemory.hash(id);
+            if (!remoteMemory.contains(idHash)) {
+                SpimeDB.GraphedNObject n = db.graphed(id);
+                if (n!=null) {
+                    t.sendJSON(chan, n);
+                    remoteMemory.add(idHash);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return false;
         }
 
         private boolean trySend(Task t, NObject n) throws IOException {
@@ -186,6 +219,9 @@ public class Session extends AbstractServerWebSocket {
 
         SpimeDB.runLater(() -> {
             JSExec.eval(code, scope, db.js, result -> {
+                if (result == null)
+                    return;
+
                 Object resultObj = result.o;
 
                 if (resultObj instanceof Task) {

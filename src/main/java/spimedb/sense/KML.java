@@ -38,11 +38,11 @@ import java.util.function.Supplier;
 import static spimedb.sense.kml.KmlReader.logger;
 
 /**
- *
  * TODO - remove null descriptions - store HTML content separately so it does
  * not get indexed - max token size
- *
+ * <p>
  * see https://github.com/OpenSextant/giscore/wiki
+ *
  * @author me
  */
 public class KML {
@@ -66,8 +66,8 @@ public class KML {
         //return Base64.getEncoder().withoutPadding().encodeToString(Longs.toByteArray(serial));
         //return Base64.getEncoder().withoutPadding().encodeToString(Longs.toByteArray(serial));
         //return Base64.getEncoder().withoutPadding().encodeToString(BigInteger.valueOf(serial).toByteArray());
-                //.add(BigInteger.valueOf(layer.hashCode()).shiftRight(32)
-                //.toByteArray();
+        //.add(BigInteger.valueOf(layer.hashCode()).shiftRight(32)
+        //.toByteArray();
     }
 
     public static String[] pathArray(Deque<String> p) {
@@ -152,7 +152,6 @@ public class KML {
                 }
 
 
-
             } catch (Throwable t) {
                 //System.err.println(t);
                 exceptions.incrementAndGet();
@@ -180,7 +179,7 @@ public class KML {
                     new KmlReader.ImportEventHandler() {
                         public boolean kmlEvent(UrlRef ref, IGISObject gisObj) {
 
-            // if gisObj instanceOf Feature, GroundOverlay, etc.
+                            // if gisObj instanceOf Feature, GroundOverlay, etc.
                             // do something with the gisObj
                             // return false to abort the recursive network link parsing
                             /*if (visited.contains(ref))
@@ -235,10 +234,9 @@ public class KML {
 
     void updatePath() {
         int ps = path.size();
-        if (ps > 0 ) {
-            parentPathString = String.join("/",  new ArrayList(path).subList(0, path.size()-1));
-        }
-        else {
+        if (ps > 0) {
+            parentPathString = String.join("/", new ArrayList(path).subList(0, path.size() - 1));
+        } else {
             parentPathString = null;
         }
 
@@ -294,11 +292,11 @@ public class KML {
     }
 
 
-    public Runnable url(String url)  {
+    public Runnable url(String url) {
         try {
             return url(new URL(url).getFile(), url);
         } catch (IOException e) {
-            return ()->{
+            return () -> {
                 logger.error("invalid url \"{}\": {}", e);
             };
         }
@@ -322,6 +320,7 @@ public class KML {
             }
         });
     }
+
     public Runnable file(String id, File f) {
         return task(id, () -> {
             try {
@@ -482,7 +481,7 @@ public class KML {
 
     }
 
-//    /*
+    //    /*
 //    private synchronized boolean processStyle(Style s) throws IOException {
 //        String id = s.getId();
 //
@@ -520,7 +519,7 @@ public class KML {
      */
     public static double[][] toArray(List<Point> lp) {
         double[][] points = new double[lp.size()][2];
-        
+
         for (int i = 0; i < points.length; i++) {
             Geodetic2DPoint c = lp.get(i).getCenter();
             double[] pi = points[i];
@@ -566,8 +565,7 @@ public class KML {
                     rootFound = true;
                     //name the top level folder
                     d = new MutableNObject(id);
-                }
-                else {
+                } else {
                     d = new MutableNObject(pathString);
                     d.setTag(parentPathString);
                 }
@@ -594,19 +592,17 @@ public class KML {
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 d = new MutableNObject(JSON.uuid64());
                 d.setTag(pathString);
             }
 
             if (go instanceof Common) {
-                Common cm = (Common)go;
-                if (cm.getStartTime()!=null) {
+                Common cm = (Common) go;
+                if (cm.getStartTime() != null) {
                     if (cm.getEndTime() != null) {
                         d.when(cm.getStartTime().getTime(), cm.getEndTime().getTime());
-                    }
-                    else {
+                    } else {
                         d.when(cm.getStartTime().getTime());
                     }
                 }
@@ -630,7 +626,7 @@ public class KML {
                 }
 
                 if (f.getSnippet() != null) {
-                    if (f.getSnippet().length() > 0) {
+                    if (!f.getSnippet().isEmpty()) {
                         d.put("snippet", f.getSnippet());
                     }
                 }
@@ -643,38 +639,40 @@ public class KML {
                     /*if (g instanceof Circle) {
 
                     }
-                    else */if (g instanceof Point) {
+                    else */
+                    if (g instanceof Point) {
                         Point pp = (Point) g;
                         d.where(pp.getCenter());
 
                     } else if (g instanceof org.opensextant.giscore.geometry.LinearRing) {
-                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g );
+                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
 
                     } else if (g instanceof org.opensextant.giscore.geometry.Line) {
                         org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;
-                        d.where( l );
+                        d.where(l);
                     } else if (g instanceof org.opensextant.giscore.geometry.MultiLinearRings) {
-                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g );
+                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
                     } else if (g instanceof org.opensextant.giscore.geometry.Polygon) {
                         org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) g;
                         d.where(p);
                     } else {
-                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g );
+                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
                     }
 
                     //TODO other types
                 }
 
                 Style styleInline = null;
-                if (f.getStyle() != null) {
+                StyleSelector fstyle = f.getStyle();
+                if (fstyle != null) {
 
-                    if (f.getStyle() instanceof Style) {
+                    if (fstyle instanceof Style) {
 
-                        Style ss = (Style) f.getStyle();
+                        Style ss = (Style) fstyle;
                         styleInline = ss;
 
-                    } else if (f.getStyle() instanceof StyleMap) {
-                        StyleMap ss = (StyleMap) f.getStyle();
+                    } else if (fstyle instanceof StyleMap) {
+                        StyleMap ss = (StyleMap) fstyle;
                         styleInline = styles.get(ss.getId());
                         if (styleInline == null) {
                             logger.warn("Missing style: {}", ss.getId());
@@ -706,7 +704,6 @@ public class KML {
                     }
 
 
-
                 }
 
             }
@@ -715,14 +712,14 @@ public class KML {
                 //..
             }
 
-            /*if (d!=null)*/ {
+            /*if (d!=null)*/
 
                 /*if (d.getName() == null)  {
                     System.err.println("Un-NObjectized: " + go);
                     return false;
                 }*/
-                db.put(d);
-            }
+            db.put(d);
+
 
             return true;
         }

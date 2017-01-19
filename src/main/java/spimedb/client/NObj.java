@@ -64,7 +64,7 @@ public class NObj  {
     }
 
     public boolean isLeaf() {
-        String[] in = inh(true);
+        String[] in = inh(false);
         if (in!=null)
             return false;
         //String[] out = inh(false);
@@ -72,4 +72,10 @@ public class NObj  {
         return true;
     }
 
+    public String[] tags() {
+        return inh(true);
+    }
+    public String[] subs() {
+        return inh(false);
+    }
 }

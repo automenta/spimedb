@@ -50,6 +50,8 @@ public class ObjTable {
 
     protected Node build(NObj n) {
 
+        if (n.isLeaf())
+            return null;
 
         String[] in = n.inh(true);
         String[] out = n.inh(false);

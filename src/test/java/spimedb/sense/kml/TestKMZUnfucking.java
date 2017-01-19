@@ -28,5 +28,7 @@ public class TestKMZUnfucking {
         es.forEach( x -> System.out.println(x) );
 
         assertEquals(24, es.size());
+
+        System.out.println(es.tags.graph);
     }
 }

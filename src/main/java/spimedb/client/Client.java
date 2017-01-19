@@ -1,5 +1,6 @@
 package spimedb.client;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.browser.Window;
 import org.teavm.jso.core.JSArray;
@@ -16,8 +17,10 @@ import spimedb.client.lodash.Lodash;
 import spimedb.client.util.Console;
 import spimedb.client.websocket.WebSocket;
 
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.function.Consumer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * SpimeDB Client UI - converted to JS with TeaVM, running in browser
@@ -26,7 +29,7 @@ public class Client {
 
     private final HTMLDocument doc;
 
-    private final InvalidationNotifier invalidation;
+    private final Refresher refresh;
 
     final static int minForgetPeriodMS = 100;
     private final JSFunction forgetting;
@@ -67,7 +70,14 @@ public class Client {
 
             NObj nx = NObj.fromJSON(x);
             if (nx != null) {
-                obj.put(nx, nx.isLeaf() ? 0.5f : 1f);
+                if (obj.put(nx, nx.isLeaf() ? 0.5f : 1f)!=null) {
+                    //acquire supertags
+                    for (String s : nx.tags()) {
+                        if (!obj.containsKey(s)) {
+                            request(s);
+                        }
+                    }
+                }
 
                 forgetting.call(null);
 
@@ -123,60 +133,83 @@ public class Client {
 
         io.onOpen(this::init);
 
-        invalidation = new InvalidationNotifier();
+        refresh = new Refresher();
+    }
+
+    public void request(String s) {
+        if (!s.isEmpty()) //ignore the root
+            refresh.request(s);
     }
 
 
     /** call this to prepare communications which may change our memory */
     public void sync() {
-        if (invalidation.flush()) {
-        }
+        refresh.flush();
     }
 
-    class InvalidationNotifier implements Consumer<NObj> {
+    class Refresher {
 
         public static final int DEFAULT_BUFFER_SIZE = 256;
 
-        private final JSFunction sendInvalidations;
+        private final JSFunction ready;
+
+        final Set<String> requested = new HashSet();
 
         //TODO buffer bytes directly, dont involve String
-        StringBuilder invalidated = null;
+        StringBuilder forgotten = null;
 
         /** min period between sending invalidation batches */
         private final int invalidationPeriodMS = 100;
 
-        public InvalidationNotifier() {
-            sendInvalidations = Lodash.throttle(this::_flush, invalidationPeriodMS);
-            obj.REMOVE.on(this);
+        public Refresher() {
+            ready = Lodash.throttle(this::flush, invalidationPeriodMS);
+            obj.REMOVE.on(x -> {
+                this.forgotten = append(x.id, "me.forgot(", this.forgotten);
+                ready();
+            });
         }
 
-        @Override
-        public void accept(NObj n) {
-            if (invalidated == null)
-                invalidated = new StringBuilder(DEFAULT_BUFFER_SIZE).append("me.forgot([");
-            invalidated.append('\"').append(n.id).append("\",");
-            sendInvalidations.call(null);
+        private void ready() {
+            ready.call(null);
         }
+
+        public void request(String id) {
+            if (requested.add('\"' + id + '\"'))
+                ready();
+        }
+
+        @NotNull
+        private StringBuilder append(String id, String prefix, StringBuilder f) {
+            if (f == null)
+                f = new StringBuilder(DEFAULT_BUFFER_SIZE).append(prefix + "[");
+            f.append('\"').append(id).append("\",");
+            return f;
+        }
+
 
         //HACK for TeaVM it has trouble fitting the boolean return value to the void lambda return
-        void _flush() {
-            flush();
+
+        public void flush() {
+            StringBuilder b = forgotten;
+            if (b != null) {
+                forgotten = null;
+
+                b.setLength(b.length() - 1); //remove trailing comma
+                b.append("])");
+                String bs = b.toString();
+                b.setLength(0); //clear
+                io.send(bs);
+            }
+
+
+            if (!requested.isEmpty()) {
+                String[] r = requested.toArray(new String[requested.size()]);
+                requested.clear();
+                io.send("me.get(" + Arrays.toString(r) + ")");
+            }
         }
 
-        public boolean flush() {
-            StringBuilder b = invalidated;
-            if (b == null)
-                return false;
 
-            invalidated = null;
-
-            b.setLength(b.length() - 1); //remove trailing comma
-            b.append("])");
-            String bs = b.toString();
-            b.setLength(0); //clear
-            io.send(bs);
-            return true;
-        }
     }
 
     public static void main(String[] args) {
