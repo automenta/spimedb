@@ -28,7 +28,7 @@ public class Client {
     }
 
 
-    public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
+    //public final ObservablePriBag<NObj> tag = new ObservablePriBag<>(16, BudgetMerge.max, new HashMap<>());
     public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(64, BudgetMerge.max, new HashMap<>());
 
 
@@ -70,6 +70,7 @@ public class Client {
         doc.getBody().appendChild(mapContainer);
 
         new Map2D(this, mapContainer);
+        new ObjTable(this, doc.getBody());
 
         io.onOpen(this::init);
     }

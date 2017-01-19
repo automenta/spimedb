@@ -5,10 +5,7 @@ import org.teavm.jso.core.JSFunction;
 import spimedb.client.lodash.Lodash;
 import spimedb.client.util.Console;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.IntFunction;
 
 import static java.lang.Boolean.FALSE;
@@ -30,6 +27,12 @@ abstract public class ChangeBatcher<X, Y> {
     /** to obey an existing remove command when trying to add */
     private static final boolean RemoveOverrides = true;
 
+    public ChangeBatcher(int updateMS, IntFunction<Y[]> arrayBuilder, ObservablePriBag<X> bag) {
+        this(updateMS, arrayBuilder);
+
+        bag.ADD.on(this::add);
+        bag.REMOVE.on(this::remove);
+    }
 
     public ChangeBatcher(int updateMS, IntFunction<Y[]> arrayBuilder) {
 
@@ -40,10 +43,14 @@ abstract public class ChangeBatcher<X, Y> {
             List<Y> REM = new LinkedList();
             int addC = 0, remC = 0; //since linkedlist size() is slow
 
-            for (Map.Entry<X, Boolean> e : changed.entrySet()) {
+
+            for (Iterator<Map.Entry<X, Boolean>> iterator = changed.entrySet().iterator(); iterator.hasNext(); ) {
+                Map.Entry<X, Boolean> e = iterator.next();
 
                 X x = e.getKey();
                 Boolean s = e.getValue();
+
+                iterator.remove();
 
                 if (s == TRUE) {
                     Y y = build(x);
@@ -51,17 +58,19 @@ abstract public class ChangeBatcher<X, Y> {
                         continue;
 
                     Y existed = built.put(x, y);
-                    assert(existed==null); if (existed!=null) Console.log("previous exist");
+                    assert (existed == null);
+                    if (existed != null) Console.log("previous exist");
                     ADD.add(y);
                     addC++;
-                } else if (s == FALSE){
+                } else if (s == FALSE) {
                     Y removed = built.remove(x);
-                    assert(removed!=null); if (removed==null) Console.log("didnt exist");
+                    assert (removed != null);
+                    if (removed == null) Console.log("didnt exist");
                     REM.add(removed);
                     remC++;
                 } else {
                     Console.log("unknown value");
-                    assert(false);
+                    assert (false);
                 }
             }
 
@@ -70,14 +79,10 @@ abstract public class ChangeBatcher<X, Y> {
                         REM.toArray(remC > 0 ? arrayBuilder.apply(remC) : (Y[]) empty));
             }
 
-            changed.clear();
-
-
         }, updateMS);
     }
 
-    @Nullable
-    abstract public Y build(X x);
+    @Nullable abstract public Y build(X x);
 
     abstract public void update(Y[] added, Y[] removed);
 

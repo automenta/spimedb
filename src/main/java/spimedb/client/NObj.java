@@ -3,6 +3,7 @@ package spimedb.client;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.json.JSON;
+import spimedb.client.util.JS;
 
 import static spimedb.client.util.JS.get;
 
@@ -40,4 +41,9 @@ public class NObj  {
     public boolean equals(Object obj) {
         return this==obj || (obj instanceof NObj && id.equals(((NObj)obj).id));
     }
+
+    public String name() {
+        return JS.getString(data, "N", id);
+    }
+
 }
