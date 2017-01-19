@@ -1,8 +1,8 @@
-package spimedb.index.graph.travel;
+package spimedb.graph.travel;
 
 import com.google.common.collect.Iterables;
 import org.jetbrains.annotations.NotNull;
-import spimedb.index.graph.MapGraph;
+import spimedb.graph.MapGraph;
 
 import java.util.Arrays;
 import java.util.Iterator;

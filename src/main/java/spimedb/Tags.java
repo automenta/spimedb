@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.index.graph.MapGraph;
-import spimedb.index.graph.VertexContainer;
-import spimedb.index.graph.travel.BreadthFirstTravel;
-import spimedb.index.graph.travel.CrossComponentTravel;
-import spimedb.index.graph.travel.UnionTravel;
+import spimedb.graph.MapGraph;
+import spimedb.graph.VertexContainer;
+import spimedb.graph.travel.BreadthFirstTravel;
+import spimedb.graph.travel.CrossComponentTravel;
+import spimedb.graph.travel.UnionTravel;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -88,12 +88,12 @@ public class Tags {
             if (prevTags!=null) {
                 //TODO use Set intersection to determine the difference in tags that actually need to be removed because some may just get added again below
                 for (String y : prevTags) {
-                    graph.removeEdge(src, x, y, NObject.TAG);
+                    graph.removeEdge(src, x, y, NObject.INH);
                 }
             }
 
             for (String y : nextTags) {
-                graph.addEdge(src, x, y, NObject.TAG);
+                graph.addEdge(src, x, y, NObject.INH);
             }
         }
 

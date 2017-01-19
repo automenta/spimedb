@@ -1,4 +1,4 @@
-package spimedb.index.graph;
+package spimedb.graph;
 
 import com.google.common.collect.Iterators;
 import jcog.list.ArrayUnenforcedSet;
@@ -7,7 +7,9 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -19,9 +21,9 @@ import java.util.Set;
  */
 public class VertexContainer<V,E> implements Serializable
 {
-    final Set<Pair<V,E>> incoming;
+    public final Set<Pair<V,E>> incoming;
 
-    final Set<Pair<E,V>> outgoing;
+    public final Set<Pair<E,V>> outgoing;
 
     public VertexContainer(Set<Pair<V,E>> incoming, Set<Pair<E,V>> outgoing) {
         this.incoming = incoming;
@@ -101,6 +103,14 @@ public class VertexContainer<V,E> implements Serializable
         ArrayUnenforcedSet<V> a = new ArrayUnenforcedSet<>();
         Iterators.addAll(a, outV());
         return a;
+    }
+
+    /** collates the edges by edge type, then direction, then vertex */
+    public Map<E, VertexIncidence<V>> incidence() {
+        Map<E, VertexIncidence<V>> m = new HashMap();
+        incoming.forEach(ve -> m.computeIfAbsent(ve.getTwo(), ee -> new VertexIncidence<>()).in.add(ve.getOne()));
+        outgoing.forEach(ev -> m.computeIfAbsent(ev.getOne(), ee -> new VertexIncidence<>()).out.add(ev.getTwo()));
+        return m;
     }
 
 }

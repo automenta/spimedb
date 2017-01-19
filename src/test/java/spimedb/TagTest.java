@@ -87,4 +87,14 @@ public class TagTest {
         System.out.println(db.toString());
         System.out.println(db.tags.toString());
     }
+
+    @Test public void testGraphDecoration() {
+
+        db.put(new Tag("Disaster"));
+        db.put(new Tag("Hurricane", "Disaster"));
+
+        System.out.println( db.graphed("") );
+        System.out.println( db.graphed("Disaster") );
+        System.out.println( db.graphed("Hurricane") );
+    }
 }

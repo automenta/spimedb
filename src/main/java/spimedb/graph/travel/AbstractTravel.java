@@ -1,4 +1,4 @@
-package spimedb.index.graph.travel;
+package spimedb.graph.travel;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.primitive.ObjectIntPair;

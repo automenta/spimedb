@@ -1,4 +1,4 @@
-package spimedb.index.graph;
+package spimedb.graph;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jcog.list.ArrayUnenforcedSet;

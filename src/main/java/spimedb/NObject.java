@@ -32,6 +32,10 @@ public interface NObject extends Serializable {
 
     PointND max();
 
+    default String stringify() {
+        return new String(JSON.toJSON(this));
+    }
+
     default boolean bounded() {
         PointND min = min();
         return (min != null && !min.isNegativeInfinity() && !max().isPositiveInfinity());
@@ -53,6 +57,9 @@ public interface NObject extends Serializable {
     String BOUND = "@";
     String DESC = "_";
 
+    /** intensional inheritance */
+    String INH = "inh";
+
     class NObjectSerializer extends JsonSerializer<NObject> {
 
         @Override
@@ -66,10 +73,6 @@ public interface NObject extends Serializable {
                 if (name != null)
                     jsonGenerator.writeStringField(NAME, name);
 
-                String[] tag = o.tags();
-                if (tag != null && tag.length > 0) {
-                    jsonGenerator.writeObjectField(TAG, tag);
-                }
 
                 writeOtherFields(o, jsonGenerator);
 

@@ -1,10 +1,10 @@
-package spimedb.index.graph.travel;
+package spimedb.graph.travel;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.api.tuple.primitive.ObjectIntPair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import spimedb.index.graph.MapGraph;
+import spimedb.graph.MapGraph;
 
 import java.util.Iterator;
 import java.util.Map;

@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-import spimedb.index.graph.MapGraph;
-import spimedb.index.graph.travel.BreadthFirstTravel;
+import spimedb.graph.MapGraph;
+import spimedb.graph.travel.BreadthFirstTravel;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

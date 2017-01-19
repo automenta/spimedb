@@ -34,6 +34,12 @@ public abstract class ImmutableNObject extends RectND implements NObject {
 
     @Override
     public void forEach(BiConsumer<String, Object> each) {
+
+        String[] tag = tags();
+        if (tag != null && tag.length > 0) {
+            each.accept(TAG, tag);
+        }
+
         if (data!=null)
             data.forEach(each);
     }
@@ -67,7 +73,7 @@ public abstract class ImmutableNObject extends RectND implements NObject {
 
     @Override
     public String toString() {
-        return new String(JSON.toJSON(this));
+        return stringify();
     }
 
     @Override

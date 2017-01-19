@@ -2,11 +2,19 @@ package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.index.rtree.*;
+import spimedb.graph.MapGraph;
+import spimedb.graph.VertexContainer;
+import spimedb.graph.VertexIncidence;
+import spimedb.index.rtree.LockingRTree;
+import spimedb.index.rtree.RTree;
+import spimedb.index.rtree.RectND;
+import spimedb.index.rtree.SpatialSearch;
 import spimedb.query.Query;
 
 import javax.script.ScriptEngineManager;
@@ -16,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -236,15 +245,48 @@ public class SpimeDB implements Iterable<NObject> {
     }
 
 
-    public class GraphView extends ProxyNObject {
+    public GraphedNObject graphed(String id) {
+        NObject n = get(id);
+        if (n!=null)
+            return graphed(n);
+        return null;
+    }
+
+    public GraphedNObject graphed(NObject n) {
+        return new GraphedNObject(tags.graph, n);
+    }
+
+    @JsonSerialize(using = NObject.NObjectSerializer.class)
+    public static class GraphedNObject extends ProxyNObject {
 
 
-        GraphView() {
+        final Map<String,VertexIncidence> boundary = new UnifiedMap();
 
+        private final MapGraph<String, String> graph;
+
+        GraphedNObject(MapGraph<String,String> graph) {
+            this.graph = graph;
         }
 
-        GraphView(NObject n) {
+        GraphedNObject(MapGraph<String,String> graph, NObject n) {
+            this(graph);
             set(n);
+        }
+
+        @Override
+        public void forEach(BiConsumer<String, Object> each) {
+            n.forEach((k,v) -> {
+                if (!k.equals(TAG)) //HACK filter out tag field because the information will be present in the graph
+                    each.accept(k, v);
+            });
+
+            VertexContainer<String, String> v = graph.vertex(id(), false);
+            if (v != null) {
+                Map<String,VertexIncidence<String>> boundary = v.incidence();
+                boundary.forEach((e,vv) -> {
+                   each.accept(e, vv );
+                });
+            }
         }
 
     }

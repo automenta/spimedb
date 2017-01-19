@@ -1,6 +1,6 @@
-package spimedb.index.graph.travel;
+package spimedb.graph.travel;
 
-import spimedb.index.graph.MapGraph;
+import spimedb.graph.MapGraph;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

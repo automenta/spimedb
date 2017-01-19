@@ -1,17 +1,16 @@
 package spimedb;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import spimedb.index.rtree.PointND;
 
 import java.util.function.BiConsumer;
 
-/**
- * Created by me on 1/19/17.
- */
+@JsonSerialize(using = NObject.NObjectSerializer.class)
 public class ProxyNObject implements NObject {
     /**
      * current object
      */
-    private NObject n;
+    protected NObject n;
 
     public void set(NObject n) {
         this.n = n;
@@ -50,5 +49,10 @@ public class ProxyNObject implements NObject {
     @Override
     public PointND max() {
         return n.max();
+    }
+
+    @Override
+    public String toString() {
+        return stringify();
     }
 }
