@@ -1,10 +1,6 @@
 package spimedb;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
@@ -15,12 +11,10 @@ import spimedb.index.rtree.RectND;
 import spimedb.sense.KML;
 import spimedb.util.JSON;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.function.BiConsumer;
 
 
 /**
@@ -34,89 +28,27 @@ import java.util.Map;
  *
  */
 
-@JsonSerialize(using=NObject.NObjectSerializer.class)
-//@JsonAutoDetect(fieldVisibility= JsonAutoDetect.Visibility.NON_PRIVATE)
-//@JsonInclude(value= JsonInclude.Include.NON_EMPTY, content = JsonInclude.Include.NON_EMPTY)
-//@Indexed
-public class NObject extends RectND implements Serializable {
+@JsonSerialize(using= AbstractNObject.NObjectSerializer.class)
+public class MutableNObject extends RectND implements AbstractNObject {
 
 
-    static final class NObjectSerializer extends JsonSerializer<NObject> {
-
-        @Override
-        public void serialize(NObject o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeStartObject();
-            {
-                jsonGenerator.writeStringField("I", o.id);
-                if (o.name!=null)
-                    jsonGenerator.writeStringField("N", o.name);
-
-                if (o.tag!=null && o.tag.length > 0) {
-                    jsonGenerator.writeObjectField(">", o.tag);
-                }
-
-                if (o.data!=null) {
-                    //inline the map data
-                    o.data.forEach((k,v)->{
-                        try {
-                            jsonGenerator.writeObjectField(k, v);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-
-                //zip the min/max bounds
-                if (o.bounded()) {
-                    jsonGenerator.writeFieldName("@");
-                    jsonGenerator.writeStartArray();
-                    if (!o.max.equals(o.min)) {
-                        int dim = o.min.dim();
-                        for (int i = 0; i < dim; i++) {
-                            float a = o.min.coord[i];
-                            float b = o.max.coord[i];
-                            if (a == b) {
-                                jsonGenerator.writeNumber(a);
-                            } else {
-                                if (a == Float.NEGATIVE_INFINITY && b == Float.POSITIVE_INFINITY) {
-                                    jsonGenerator.writeNumber(Float.NaN);
-                                } else {
-                                    jsonGenerator.writeStartArray();
-                                    jsonGenerator.writeNumber(a);
-                                    jsonGenerator.writeNumber(b);
-                                    jsonGenerator.writeEndArray();
-                                }
-                            }
-                        }
-                    } else {
-                        writeArrayValues(o.min.coord, jsonGenerator);
-                    }
-                    jsonGenerator.writeEndArray();
-                }
-
-            }
-            jsonGenerator.writeEndObject();
-        }
-
-        private static void writeArrayValues(float[] xx, JsonGenerator jsonGenerator) throws IOException {
-            for (float x : xx) {
-                float y;
-                if (x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY)
-                    y = Float.NaN; //as string, "NaN" is shorter than "Infinity"
-                else
-                    y = x;
-
-                jsonGenerator.writeNumber(y);
-            }
-        }
-
+    @Override
+    public void forEach(BiConsumer<String, Object> each) {
+        if (data!=null)
+            data.forEach(each);
     }
 
-    /*@Field(store = Store.YES)*/ @JsonProperty("I") final String id;
 
-    /*@Field(store = Store.YES)*/ @JsonProperty("N") String name;
+    @Override
+    public String[] tags() {
+        return tag;
+    }
 
-    //@JsonProperty("T") long[] time = null;
+    @JsonProperty("I") final String id;
+
+    @JsonProperty("N") String name;
+
+
 
 
 
@@ -127,50 +59,41 @@ public class NObject extends RectND implements Serializable {
     /** extensional inheritance: what this nobject is "inside" of (its container)
      *  by default, use the root node. but try not to pollute it
      */
-    @JsonProperty(">")
-    public String[] tag = Tags.ROOT;
+    @JsonProperty(">") public String[] tag = Tags.ROOT;
 
 //    /** extensional inheritance: what this nobject is "outside" of (its contents) */
 //    @Field(name = "outside") @JsonProperty("<") private Set<String> outside = new HashSet();
 
-    public NObject() {
-        this(JSON.uuid());
-    }
 
-    public NObject(String id) {
+    public MutableNObject(String id) {
         this(id, null);
     }
 
-    public NObject(NObject copy) {
+    public MutableNObject(MutableNObject copy) {
         this(copy.id, copy.name);
         setTag(copy.tag);
         data.putAll(copy.data);
     }
 
-    public NObject(String id, String name) {
+    public MutableNObject(String id, String name) {
         super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY));
 
         this.id = id!=null ? id : JSON.uuid();
         this.name = name;
     }
 
-    public String getId() {
-        return id;
-    }
 
-    public String getName() {
+
+    @Override
+    public String name() {
         return name;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
     }
 
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        NObject no =(NObject)o;
+        MutableNObject no =(MutableNObject)o;
         return id.equals(no.id);// && super.equals(o);
     }
 
@@ -181,16 +104,14 @@ public class NObject extends RectND implements Serializable {
 
 
 
+    @Override
     public <X> X get(String tag) {
         return (X) data.get(tag);
     }
 
-    public NObject put(String tag) {
-        return put(tag, 1.0f);
-    }
 
-    public NObject put(String tag, Object value) {
-        switch (tag) {
+    public AbstractNObject put(String key, Object value) {
+        switch (key) {
             case ">":
                 if (value instanceof String[])
                     setTag((String[])value);
@@ -217,7 +138,7 @@ public class NObject extends RectND implements Serializable {
         }
 
         if (data == null) data = new HashMap<>();
-        data.put(tag, value);
+        data.put(key, value);
         return this;
     }
 
@@ -231,10 +152,7 @@ public class NObject extends RectND implements Serializable {
         put("_", d);
     }
 
-    public String description() {
-        Object d = get("_");
-        return d == null ? "" : d.toString();
-    }
+
 
 
     @Override
@@ -245,7 +163,7 @@ public class NObject extends RectND implements Serializable {
 
 
 
-    public NObject name(String name) {
+    public AbstractNObject name(String name) {
         this.name = name;
         return this;
     }
@@ -255,7 +173,7 @@ public class NObject extends RectND implements Serializable {
     public final static String POLYGON = "*";
 
 
-    public NObject where(Geodetic2DPoint c) {
+    public AbstractNObject where(Geodetic2DPoint c) {
 
         float lon = (float) c.getLongitudeAsDegrees();
         min.coord[1] = max.coord[1] = lon;
@@ -277,7 +195,7 @@ public class NObject extends RectND implements Serializable {
         return this;
     }
 
-    public NObject where(Longitude AX, Longitude BX, Latitude AY, Latitude BY) {
+    public AbstractNObject where(Longitude AX, Longitude BX, Latitude AY, Latitude BY) {
 
 
         {
@@ -318,35 +236,35 @@ public class NObject extends RectND implements Serializable {
     }
 
 
-    public NObject where(Line l) {
+    public AbstractNObject where(Line l) {
 
         List<Point> lp = l.getPoints();
         double[][] points = KML.toArray(lp);
 
         where(l.getBoundingBox());
-        put("g" + NObject.LINESTRING, points);
+        put('g' + MutableNObject.LINESTRING, points);
         return this;
     }
 
-    public NObject where(Polygon p) {
+    public AbstractNObject where(Polygon p) {
         double[][] outerRing = KML.toArray(p.getOuterRing().getPoints());
 
         //TODO handle inner rings
 
         where(p.getBoundingBox());
-        put("g" + NObject.POLYGON, outerRing);
+        put('g' + MutableNObject.POLYGON, outerRing);
         return this;
     }
 
     /** sets the inside property */
-    public NObject setTag(String... tags) {
+    public AbstractNObject setTag(String... tags) {
 
         if (tags.length > 1) {
             //TODO remove any duplicates
         }
 
         for (String t : tags) {
-            if (t.equals(getId()))
+            if (t.equals(id()))
                 throw new RuntimeException("object can not be inside itself");
         }
 
@@ -360,29 +278,7 @@ public class NObject extends RectND implements Serializable {
 
 
 
-    /** produces a "1-line" summar JSON object as a string */
-    @JsonIgnore public String summary(StringBuilder sb) {
-        sb.setLength(0);
-
-        sb.append("{\"I\":\"").append(getId()).append('"');
-
-        String name = getName();
-        if (name!=null) {
-            //TODO use nars Utf8
-            sb.append(",\"N\":\"").append(name).append('"');
-        }
-
-//        if (isSpatial())
-//            sb.append(",\"S\":").append(Arrays.toString(spacetime)); //TODO append
-//        if (isTemporal())
-//            sb.append(",\"T\":").append(Arrays.toString(time)); //TODO append
-
-        sb.append('}');
-
-        return sb.toString();
-    }
-
-
+    @Override
     public final String id() {
         return id;
     }
@@ -396,7 +292,7 @@ public class NObject extends RectND implements Serializable {
         max.coord[0] = when;
     }
 
-    public void eternal() {
+    public void setEternal() {
         min.coord[0] = Float.NEGATIVE_INFINITY;
         max.coord[0] = Float.POSITIVE_INFINITY;
     }
@@ -420,4 +316,31 @@ public class NObject extends RectND implements Serializable {
         return new long[] { (long)a, (long)b };
     }
 
+//    /** produces a "1-line" summar JSON object as a string */
+//    @JsonIgnore public String summary(StringBuilder sb) {
+//        sb.setLength(0);
+//
+//        sb.append("{\"I\":\"").append(getId()).append('"');
+//
+//        String name = getName();
+//        if (name!=null) {
+//            //TODO use nars Utf8
+//            sb.append(",\"N\":\"").append(name).append('"');
+//        }
+//
+////        if (isSpatial())
+////            sb.append(",\"S\":").append(Arrays.toString(spacetime)); //TODO append
+////        if (isTemporal())
+////            sb.append(",\"T\":").append(Arrays.toString(time)); //TODO append
+//
+//        sb.append('}');
+//
+//        return sb.toString();
+//    }
+
+
+    @Override
+    public boolean bounded() {
+        return super.bounded();
+    }
 }

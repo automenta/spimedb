@@ -24,12 +24,12 @@ public class QueryTest {
 
         //System.out.println(db.tag);
 
-        NObject place = new NObject("civicstructure");
+        MutableNObject place = new MutableNObject("civicstructure");
         place.where(0.5f, 0.5f);
         place.setTag("Place");
         db.put(place);
 
-        NObject action = new NObject("action");
+        MutableNObject action = new MutableNObject("action");
         action.where(0.5f, 0.5f);
         action.setTag("InteractAction");
         db.put(action);
@@ -42,7 +42,7 @@ public class QueryTest {
         assertNotEquals(0, actionSubtags.size());
         assertNotEquals(placeSubtags, actionSubtags);
 
-        ArrayList<NObject> found = new ArrayList();
+        ArrayList<AbstractNObject> found = new ArrayList();
         db.get(new Query(found::add).in("InteractAction").where(new float[] { 0, 1}, new float[] { 0, 1}));
 
         assertFalse(found.isEmpty());

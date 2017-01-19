@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 /**
  * Created by me on 1/12/17.
  */
-public class Tag extends NObject {
+public class Tag extends MutableNObject {
 
     float priority = 0;
 
@@ -17,7 +17,7 @@ public class Tag extends NObject {
         setTag(supers);
     }
 
-    public Tag(NObject rawSourceToCopyFrom) {
+    public Tag(MutableNObject rawSourceToCopyFrom) {
         super(rawSourceToCopyFrom);
     }
 

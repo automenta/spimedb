@@ -2,7 +2,7 @@ package spimedb.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import spimedb.NObject;
+import spimedb.AbstractNObject;
 import spimedb.index.rtree.RectND;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class Query {
     /**
      * for each result; if returns false, the query terminates
      */
-    public final Predicate<NObject> each;
+    public final Predicate<AbstractNObject> each;
 
     /**
      * time the query was created
@@ -47,7 +47,7 @@ public class Query {
      *
      * @param each if null, attempts to use this instance as the predicate (as it can be implemented in subclasses)
      */
-    public Query(@Nullable Predicate<NObject> each) {
+    public Query(@Nullable Predicate<AbstractNObject> each) {
         this.whenCreated = System.currentTimeMillis();
         this.each = each != null ? each : (Predicate)this;
     }

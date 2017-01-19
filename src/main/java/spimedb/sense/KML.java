@@ -17,11 +17,13 @@ import org.opensextant.giscore.events.SimpleField.Type;
 import org.opensextant.giscore.geometry.Geometry;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.utils.Color;
-import spimedb.NObject;
+import spimedb.AbstractNObject;
+import spimedb.MutableNObject;
 import spimedb.SpimeDB;
 import spimedb.sense.kml.KmlReader;
 import spimedb.sense.kml.UrlRef;
 import spimedb.util.HTMLFilter;
+import spimedb.util.JSON;
 
 import java.io.File;
 import java.io.IOException;
@@ -440,7 +442,7 @@ public class KML {
 //    }
 
 
-    static NObject styleJson(NObject fb, Style s) {
+    static AbstractNObject styleJson(MutableNObject fb, Style s) {
 
         //System.out.println("Applying style: " + s);
         String iconUrl = s.getIconUrl();
@@ -550,7 +552,7 @@ public class KML {
                 throw new RuntimeException("null GISObject: " + Arrays.toString(path));
             }
 
-            NObject d;
+            MutableNObject d;
 
             if (go instanceof ContainerStart) {
                 ContainerStart cs = (ContainerStart) go;
@@ -563,10 +565,10 @@ public class KML {
                     }
                     rootFound = true;
                     //name the top level folder
-                    d = new NObject(id);
+                    d = new MutableNObject(id);
                 }
                 else {
-                    d = new NObject(pathString);
+                    d = new MutableNObject(pathString);
                     d.setTag(parentPathString);
                 }
 
@@ -594,7 +596,7 @@ public class KML {
                 }
             }
             else {
-                d = new NObject();
+                d = new MutableNObject(JSON.uuid());
                 d.setTag(pathString);
             }
 

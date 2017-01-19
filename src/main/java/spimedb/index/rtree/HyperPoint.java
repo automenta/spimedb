@@ -62,4 +62,14 @@ public interface HyperPoint {
      */
     double distance(HyperPoint p, int d);
 
+    default boolean isNaN() {
+        int d = dim();
+        for (int i = 0; i < d; i++) {
+            float c = coord(i);
+            if (c==c)
+                return false;
+        }
+        return true;
+    }
+
 }

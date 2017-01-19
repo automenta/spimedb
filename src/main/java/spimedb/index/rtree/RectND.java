@@ -177,12 +177,12 @@ public class RectND implements HyperRect<PointND>, Serializable {
     }
 
     @Override
-    public HyperPoint min() {
+    public PointND min() {
         return min;
     }
 
     @Override
-    public HyperPoint max() {
+    public PointND max() {
         return max;
     }
 

@@ -30,10 +30,7 @@ public class VertexContainer<V,E> implements Serializable
 
     @Override
     public String toString() {
-        return "{" +
-                "i=" + incoming +
-                ",o=" + outgoing +
-                '}';
+        return "{" + incoming + " | " + outgoing + '}';
     }
 
     /**

@@ -21,6 +21,18 @@ import java.util.Iterator;
 public class JSON {
 
 
+    public static void writeArrayValues(float[] xx, JsonGenerator jsonGenerator) throws IOException {
+        for (float x : xx) {
+            float y;
+            if (x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY)
+                y = Float.NaN; //as string, "NaN" is shorter than "Infinity"
+            else
+                y = x;
+
+            jsonGenerator.writeNumber(y);
+        }
+    }
+
     public static class BatchObjectMapper extends ObjectMapper {
 
         /**
@@ -148,7 +160,7 @@ public class JSON {
 
     public static final org.slf4j.Logger logger = LoggerFactory.getLogger(JSON.class);
 
-    @Deprecated public static byte[] toJSON(Object x) {
+    public static byte[] toJSON(Object x) {
         try {
             return json.writeValueAsBytes(x);
         } catch (JsonProcessingException ex) {

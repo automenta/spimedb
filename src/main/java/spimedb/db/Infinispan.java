@@ -7,7 +7,7 @@ import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.stats.Stats;
 import org.jetbrains.annotations.Nullable;
-import spimedb.NObject;
+import spimedb.AbstractNObject;
 import spimedb.SpimeDB;
 
 /**
@@ -22,7 +22,7 @@ public class Infinispan {
 
     public static SpimeDB get(@Nullable String path) {
 
-        Cache<String, NObject> vertex = cache(path, "vertex");
+        Cache<String, AbstractNObject> vertex = cache(path, "vertex");
 
         enableStats(vertex);
 

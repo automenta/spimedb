@@ -57,7 +57,7 @@ public class MapGraphTest {
         assertEquals(ImmutableSet.of("x"), g.getAllEdges(v1, v2));
 
         assertEquals(
-                "{v1={i=[v2:x, v3:x],o=[x:v2]}, v2={i=[v1:x],o=[x:v1, x:v3]}, v3={i=[v2:x],o=[x:v1]}}",
+                "{v1={[v2:x, v3:x] | [x:v2]}, v2={[v1:x] | [x:v1, x:v3]}, v3={[v2:x] | [x:v1]}}",
                 g.toString());
 
         //test multigraph ability by creating a different kind of edge between v1 and v2

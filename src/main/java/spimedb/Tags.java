@@ -74,11 +74,13 @@ public class Tags {
         boolean reset = false; //TODO decide when to reset, like when a NObject changes
 
         synchronized (graph) {
+
             if (reset)
                 graph.removeVertex(x);
+
             graph.addVertex(x);
             for (String y : parents) {
-                graph.addEdge(y, x, "inh");
+                graph.addEdge(y, x, ">");
             }
         }
 
@@ -98,7 +100,7 @@ public class Tags {
 //            if (y!=null) { //HACK null-check for above condition
 //                String xy = xs + y.id();
 //                if (!inh.edges(xy).hasNext())
-//                    y.addEdge("inh", x, T.id, xy);
+//                    y.addEdge(">", x, T.id, xy);
 //
 //            }
 //        }
@@ -121,7 +123,7 @@ public class Tags {
 //        } else {
 //            //awful but should work
 //            return Streams.concat(
-//                inh.traversal().V(parentTags).repeat(outE("inh").bothV().dedup()).emit().toStream(),
+//                inh.traversal().V(parentTags).repeat(outE(">").bothV().dedup()).emit().toStream(),
 //                inh.traversal().V(parentTags).toStream()
 //            ).distinct();
 //        }

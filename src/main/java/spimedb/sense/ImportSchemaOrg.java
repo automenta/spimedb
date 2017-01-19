@@ -4,7 +4,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.NObject;
+import spimedb.MutableNObject;
 import spimedb.SpimeDB;
 
 import java.io.FileReader;
@@ -41,7 +41,7 @@ abstract public class ImportSchemaOrg {
 
                     //id = escape(id);
 
-                    NObject t = new NObject(id, label);
+                    MutableNObject t = new MutableNObject(id, label);
                     t.description(comment);
                     t.put(">", supertypes.toArray(new String[supertypes.size()]));
 

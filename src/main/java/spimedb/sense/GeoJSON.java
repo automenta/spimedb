@@ -13,7 +13,8 @@ import org.geojson.GeoJsonObject;
 import org.geojson.LngLatAlt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.NObject;
+import spimedb.AbstractNObject;
+import spimedb.MutableNObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,7 @@ public class GeoJSON   {
 
     static final Logger logger = LoggerFactory.getLogger(GeoJSON.class);
 
-    public static Stream<NObject> get(InputStream i, Function<Feature, NObject> builder) throws IOException {
+    public static Stream<AbstractNObject> get(InputStream i, Function<Feature, AbstractNObject> builder) throws IOException {
 
         FeatureCollection featureCollection = geojsonMapper.readValue(i, FeatureCollection.class);
         logger.info("{} contained {} objects", i, featureCollection.getFeatures().size());
@@ -43,8 +44,8 @@ public class GeoJSON   {
     }
 
     /** TODO remove Earthquake specific tags into an extended builder */
-    public static final Function<Feature,NObject> baseGeoJSONBuilder = (f) -> {
-        NObject d = new NObject(f.getId());
+    public static final Function<Feature, AbstractNObject> baseGeoJSONBuilder = (f) -> {
+        MutableNObject d = new MutableNObject(f.getId());
 
 
         GeoJsonObject g = f.getGeometry();
