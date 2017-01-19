@@ -2,9 +2,11 @@ package spimedb.client;
 
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
+import org.teavm.jso.core.JSFunction;
 import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.bag.ChangeBatcher;
 import spimedb.client.leaflet.*;
+import spimedb.client.lodash.Lodash;
 import spimedb.client.util.JS;
 import spimedb.client.util.JsConsumer;
 
@@ -22,7 +24,12 @@ public class Map2D {
     private final TileLayer base;
 
     /** display update perid (milliseconds). changes that arrive in between updates are batched with ChangeBatcher */
-    public static final int UPDATE_MS = 40;
+    public static final int REDRAW_MS = 25;
+
+    /** refresh update period */
+    public static final int UPDATE_MS = 50;
+
+    private final JSFunction refresh;
 
     public Map2D(Client client, HTMLElement mapContainer) {
         this.client = client;
@@ -30,20 +37,10 @@ public class Map2D {
         map = LeafletMap.create(mapContainer, LeafletMapOptions.create().continuousWorld(true).worldCopyJump(true));
         map.setView(LatLng.create(40, -80), 8);
 
+        refresh = Lodash.throttle(this::refresh, UPDATE_MS);
+
         mapChanged = (e) -> {
-            LatLngBounds bounds = map.getBounds();
-
-            //parse this kind of noise:
-            // {"_southWest":{"lat":39.932380403490875,"lng":-80.50094604492188},"_northEast":{"lat":40.082274490356966,"lng":-79.62203979492189}}
-            LatLng sw = bounds.getSouthWest();
-            LatLng ne = bounds.getNorthEast();
-
-            float[][] b = new float[][]{
-                    new float[]{ (float)sw.getLng(), (float)sw.getLat() },
-                    new float[]{ (float)ne.getLng(), (float)ne.getLat() }
-            };
-
-            client.io.send("me.focusLonLat(" + '[' + Arrays.toString(b[0]) + ',' + Arrays.toString(b[1]) + "])");
+            refresh.call(null);
         };
 
         base = TileLayer.create("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", TileLayerOptions.create())
@@ -53,7 +50,7 @@ public class Map2D {
 
         ClusterLayer c = ClusterLayer.create().addTo(map);
 
-        differ = new ChangeBatcher<NObj, Layer>(UPDATE_MS, Layer[]::new) {
+        differ = new ChangeBatcher<NObj, Layer>(REDRAW_MS, Layer[]::new) {
 
             @Override
             public void update(Layer[] added, Layer[] removed) {
@@ -61,7 +58,6 @@ public class Map2D {
                 c.removeLayers(removed);
                 c.addLayers(added);
                 //System.out.println(differ.built.size() + " " + obj.size());
-                client.obj.mul(0.95f); //forgetting
             }
 
             @Override
@@ -121,4 +117,22 @@ public class Map2D {
         //map.onHide(..)
 
     }
+
+    protected void refresh() {
+        LatLngBounds bounds = map.getBounds();
+
+        //parse this kind of noise:
+        // {"_southWest":{"lat":39.932380403490875,"lng":-80.50094604492188},"_northEast":{"lat":40.082274490356966,"lng":-79.62203979492189}}
+        LatLng sw = bounds.getSouthWest();
+        LatLng ne = bounds.getNorthEast();
+
+        float[][] b = new float[][]{
+                new float[]{ (float)sw.getLng(), (float)sw.getLat() },
+                new float[]{ (float)ne.getLng(), (float)ne.getLat() }
+        };
+
+        client.sync();
+        client.io.send("me.focusLonLat(" + '[' + Arrays.toString(b[0]) + ',' + Arrays.toString(b[1]) + "])");
+    }
+
 }

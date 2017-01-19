@@ -75,8 +75,5 @@ public abstract class ImmutableNObject extends RectND implements NObject {
         return id;
     }
 
-    @Override
-    public boolean bounded() {
-        return super.bounded();
-    }
+
 }

@@ -134,15 +134,15 @@ public interface HyperRect<X> {
 //        return min;
 //    }
 
-    /** whether any of the dimensions are finite */
-    @JsonIgnore  default boolean bounded() {
-        int dim = dim();
-        for (int i = 0; i < dim; i++) {
-            double r = getRange(i);
-            if (Double.isFinite(r))
-                return true;
-        }
-        return false;
-    }
+//    /** whether any of the dimensions are finite */
+//    @JsonIgnore  default boolean bounded() {
+//        int dim = dim();
+//        for (int i = 0; i < dim; i++) {
+//            double r = getRange(i);
+//            if (Double.isFinite(r))
+//                return true;
+//        }
+//        return false;
+//    }
 
 }

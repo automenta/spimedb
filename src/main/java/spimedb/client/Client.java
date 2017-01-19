@@ -13,6 +13,7 @@ import spimedb.client.util.Console;
 import spimedb.client.websocket.WebSocket;
 
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * SpimeDB Client UI - converted to JS with TeaVM, running in browser
@@ -21,8 +22,8 @@ public class Client {
 
     private final HTMLDocument doc;
 
-    /** min period between sending invalidation batches */
-    private final int invalidationPeriodMS = 100;
+
+    private final InvalidationNotifier invalidation;
 
     static void setVisible(ElementCSSInlineStyle element, boolean visible) {
         CSSStyleDeclaration es = element.getStyle();
@@ -79,42 +80,55 @@ public class Client {
 
         io.onOpen(this::init);
 
-
-
-        new InvalidationNotifier();
-
+        invalidation = new InvalidationNotifier();
     }
 
-    class InvalidationNotifier {
+
+    /** call this to prepare communications which may change our memory */
+    public void sync() {
+        if (invalidation.flush()) {
+            obj.mul(0.95f); //forgetting
+        }
+    }
+
+    class InvalidationNotifier implements Consumer<NObj> {
+
+        public static final int DEFAULT_BUFFER_SIZE = 256;
+
+        private final JSFunction sendInvalidations;
 
         //TODO buffer bytes directly, dont involve String
         StringBuilder invalidated = null;
 
+        /** min period between sending invalidation batches */
+        private final int invalidationPeriodMS = 100;
+
         public InvalidationNotifier() {
+            sendInvalidations = Lodash.throttle(this::flush, invalidationPeriodMS);
+            obj.REMOVE.on(this);
+        }
 
-            JSFunction sendInvalidations = Lodash.throttle(() -> {
+        @Override
+        public void accept(NObj n) {
+            if (invalidated == null)
+                invalidated = new StringBuilder(DEFAULT_BUFFER_SIZE).append("me.forgot([");
+            invalidated.append('\"').append(n.id).append("\",");
+            sendInvalidations.call(null);
+        }
 
-                StringBuilder b = invalidated;
-                if (b == null)
-                    return;
+        public boolean flush() {
+            StringBuilder b = invalidated;
+            if (b == null)
+                return false;
 
-                invalidated = null;
+            invalidated = null;
 
-                b.setLength(b.length() - 1); //remove trailing comma
-                b.append("])");
-                String bs = b.toString();
-                System.out.println(bs);
-                b.setLength(0); //clear
-                io.send(bs);
-
-            }, invalidationPeriodMS);
-
-            obj.REMOVE.on(n -> {
-                if (invalidated == null)
-                    invalidated = new StringBuilder(1024).append("me.forgot([");
-                invalidated.append('\"').append(n.id).append("\",");
-                sendInvalidations.call(null);
-            });
+            b.setLength(b.length() - 1); //remove trailing comma
+            b.append("])");
+            String bs = b.toString();
+            b.setLength(0); //clear
+            io.send(bs);
+            return true;
         }
     }
 

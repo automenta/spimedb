@@ -25,14 +25,8 @@ public class Session extends AbstractServerWebSocket {
     /**
      * bytes per second
      */
-    public static final int defaultOutRateBytesPerSecond = 8 * 1024;
+    public static final int defaultOutRateBytesPerSecond = 32 * 1024;
 
-//    /**
-//     * max # of items that can be remembered to have already been sent.
-//     * this should not exceed the client's object bag capacity, which it should configure on
-//     * connecting or changing its capacity
-//     */
-//    final int ALREADY_SENT_MEMORY_CAPACITY = 16;
 
     /**
      * response bandwidth throttle
@@ -127,7 +121,7 @@ public class Session extends AbstractServerWebSocket {
                 @Override
                 public void run() {
 
-                    Set<NObject> lowPriority = new HashSet(1024);
+                    Set<NObject> lowPriority = new HashSet<>(1024);
 
                     db.get(new Query((n) -> {
 

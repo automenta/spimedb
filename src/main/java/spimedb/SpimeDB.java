@@ -6,10 +6,7 @@ import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.index.rtree.LockingRTree;
-import spimedb.index.rtree.RTree;
-import spimedb.index.rtree.RectND;
-import spimedb.index.rtree.SpatialSearch;
+import spimedb.index.rtree.*;
 import spimedb.query.Query;
 
 import javax.script.ScriptEngineManager;
@@ -238,6 +235,19 @@ public class SpimeDB implements Iterable<NObject> {
         exe.awaitQuiescence(60, TimeUnit.SECONDS);
     }
 
+
+    public class GraphView extends ProxyNObject {
+
+
+        GraphView() {
+
+        }
+
+        GraphView(NObject n) {
+            set(n);
+        }
+
+    }
 
     //    static class MyOctBox extends OctBox {
 //

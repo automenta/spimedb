@@ -14,13 +14,14 @@ import java.util.function.BiConsumer;
 /**
  * Created by me on 1/18/17.
  */
-@JsonSerialize(using= NObject.NObjectSerializer.class)
+@JsonSerialize(using = NObject.NObjectSerializer.class)
 public interface NObject extends Serializable {
 
 
-
     String id();
+
     String name();
+
     String[] tags();
 
     void forEach(BiConsumer<String, Object> each);
@@ -31,7 +32,10 @@ public interface NObject extends Serializable {
 
     PointND max();
 
-    boolean bounded();
+    default boolean bounded() {
+        PointND min = min();
+        return (min != null && !min.isNegativeInfinity() && !max().isPositiveInfinity());
+    }
 
     static boolean equalsDeep(NObject a, NObject b) {
         return a.toString().equals(b.toString());
@@ -77,12 +81,13 @@ public interface NObject extends Serializable {
 
         protected void writeBounds(NObject o, JsonGenerator jsonGenerator) throws IOException {
             //zip the min/max bounds
-            PointND min = o.min();
-            if (min!=null) {
+            if (o.bounded()) {
+                PointND min = o.min();
+
 
                 PointND max = o.max();
-                boolean point = max==null || min.equals(max);
-                if (!point || !min.isNaN()) {
+                boolean point = max == null || min.equals(max);
+                if (!point) {
                     jsonGenerator.writeFieldName(BOUND);
                     jsonGenerator.writeStartArray();
 
@@ -109,12 +114,13 @@ public interface NObject extends Serializable {
                     }
                     jsonGenerator.writeEndArray();
                 }
+
             }
         }
 
         protected void writeOtherFields(NObject o, JsonGenerator jsonGenerator) {
             o.forEach((fieldName, pojo) -> {
-                if (pojo==null)
+                if (pojo == null)
                     return;
                 try {
                     jsonGenerator.writeObjectField(fieldName, pojo);
