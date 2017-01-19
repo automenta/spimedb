@@ -54,23 +54,31 @@ public class MapGraph<V, E> implements Serializable {
             throw new IllegalArgumentException("loops not allowed");
         }
 
-        /*if (!isAllowingMultipleEdges() && containsEdge(sourceVertex, targetVertex)) {
-            return false;
-        }*/
+        VertexContainer<V, E> src = vertex(sourceVertex, true);
 
-        //if (edges.computeIfAbsent(e, ee -> new ImmutableTriple<>(sourceVertex, targetVertex))==null) {
+        return addEdge(src, sourceVertex, targetVertex, e);
 
-        if (vertex(sourceVertex, true).addOutgoingEdge(e, targetVertex)) {
+    }
+
+    public boolean addEdge(VertexContainer<V, E> src, @NotNull V sourceVertex, @NotNull V targetVertex, @NotNull E e) {
+        if (src.addOutgoingEdge(e, targetVertex)) {
             if (!vertex(targetVertex, true).addIncomingEdge(sourceVertex, e)) {
                 throw new RuntimeException("incidence fault");
             }
             return true;
         }
         return false; //already added
-
     }
+    public boolean removeEdge(VertexContainer<V, E> srcC, @NotNull V src, @NotNull V tgt, @NotNull E e) {
+        if (srcC.removeOutgoingEdge(e, tgt)) {
+            if (!vertex(tgt, false).removeIncomingEdge(src, e)) {
+                throw new RuntimeException("incidence fault");
+            }
+            return true;
+        }
 
-
+        return false; //already added
+    }
 
     public boolean removeEdge(V src, V tgt, E e) {
         VertexContainer<V, E> s = vertex(src, false);

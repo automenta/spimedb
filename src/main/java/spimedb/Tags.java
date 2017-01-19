@@ -2,7 +2,10 @@ package spimedb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.bytebuddy.ByteBuddy;
+import org.eclipse.collections.api.set.ImmutableSet;
+import org.eclipse.collections.impl.factory.Sets;
 import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,21 +69,31 @@ public class Tags {
 
     final static String[] ROOT = new String[] { "" };
 
-    public void tag(String x, String[] parents) {
+    public void tag(@NotNull String x, @NotNull String[] nextTags, @Nullable String[] prevTags) {
 
-        if (parents.length == 0)
-            parents = ROOT;
+        if (nextTags.length == 0)
+            nextTags = ROOT;
 
-        boolean reset = false; //TODO decide when to reset, like when a NObject changes
+        if (prevTags!=null) {
+            ImmutableSet<String> ns = Sets.immutable.of(nextTags);
+            ImmutableSet<String> ps = Sets.immutable.of(prevTags);
+            if (ns.equals(ps))
+                return; //no change
+        }
 
         synchronized (graph) {
 
-            if (reset)
-                graph.removeVertex(x);
+            VertexContainer<String, String> src = graph.addVertex(x);
 
-            graph.addVertex(x);
-            for (String y : parents) {
-                graph.addEdge(y, x, ">");
+            if (prevTags!=null) {
+                //TODO use Set intersection to determine the difference in tags that actually need to be removed because some may just get added again below
+                for (String y : prevTags) {
+                    graph.removeEdge(src, x, y, NObject.TAG);
+                }
+            }
+
+            for (String y : nextTags) {
+                graph.addEdge(src, x, y, NObject.TAG);
             }
         }
 
@@ -180,7 +193,7 @@ public class Tags {
     }
 
     public Iterator<String> roots() {
-        return rootNode.outV();
+        return rootNode.inV();
     }
 
     private static class SubTags<V,E> extends UnionTravel<V,E,Object> {

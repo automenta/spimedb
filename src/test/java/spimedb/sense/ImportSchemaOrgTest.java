@@ -23,14 +23,14 @@ public class ImportSchemaOrgTest {
 
         assertTrue(db.obj.size() > 500);
 
-        assertEquals(1, db.tags.graph.inDegreeOf("Action"));
-        assertTrue(db.tags.graph.outDegreeOf("Action") > 1);
+        assertEquals(1, db.tags.graph.outDegreeOf("Action"));
+        assertTrue(db.tags.graph.inDegreeOf("Action") > 1);
 
         //System.out.println(db.tags.graph.vertex("Action", false).outVset());
         //System.out.println(db.get("replace"));
 
-        assertEquals(1, db.tags.graph.inDegreeOf("Place"));
-        assertTrue(db.tags.graph.outDegreeOf("Place") > 1);
+        assertEquals(1, db.tags.graph.outDegreeOf("Place"));
+        assertTrue(db.tags.graph.inDegreeOf("Place") > 1);
 
         //TODO: assertTrue(r.tags.isConnected)
 

@@ -21,10 +21,15 @@ import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
  * @author Barak Naveh
  * @since Jan 31, 2004
  */
-public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V,E> {
+public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V, E> {
     private static final int CCS_BEFORE_COMPONENT = 1;
     private static final int CCS_WITHIN_COMPONENT = 2;
     private static final int CCS_AFTER_COMPONENT = 3;
+
+    /**
+     * true = in, false = out
+     */
+    private boolean inOrOut = true;
 
     public CrossComponentTravel(MapGraph<V, E> g, Map<V, D> seen) {
         this(g, null, seen);
@@ -86,7 +91,6 @@ public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V,E> 
      * Creates a new iterator for the specified graph. Iteration will start at the specified start
      * vertex. If the specified start vertex is <code>
      * null</code>, Iteration will start at an arbitrary graph vertex.
-     *
      *
      * @param g           the graph to be iterated.
      * @param startVertex the vertex iteration to be started.
@@ -179,7 +183,7 @@ public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V,E> 
             //Pair<V, E> incoming = Tuples.pair(currentVertex, );
             fireVertexEnter(null, nextVertex);
 
-            addEdgesOutOf(nextVertex);
+            addIncidentEdges(nextVertex);
 
             return nextVertex;
         } else {
@@ -268,29 +272,36 @@ public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V,E> 
         fireVertexFinished(vertex);
     }
 
-    private void addEdgesOutOf(V s) {
+    private void addIncidentEdges(V s) {
 
         boolean firesEdges = wantsEdges();
 
-        for (Pair<E,V> p : edgesOut(s)) {
-
-            V t = p.getTwo();
-            E edge = p.getOne();
-
-            if (firesEdges)
-                fireEdgeTraversed(s, edge, t);
-
-            if (isSeenVertex(t)) {
-                encounterVertexAgain(t, edge);
-            } else {
-                encounterVertex(t, edge);
+        if (inOrOut) {
+            for (Pair<V, E> p : graph.incomingEdgesOf(s)) {
+                go(s, firesEdges, p.getOne(), p.getTwo());
             }
+        } else {
+            for (Pair<E, V> p : graph.outgoingEdgesOf(s)) {
+                go(s, firesEdges, p.getTwo(), p.getOne());
+            }
+        }
+
+    }
+
+    private void go(V s, boolean firesEdges, V t, E edge) {
+        if (firesEdges)
+            fireEdgeTraversed(s, edge, t);
+
+        if (isSeenVertex(t)) {
+            encounterVertexAgain(t, edge);
+        } else {
+            encounterVertex(t, edge);
         }
     }
 
 
-
-    @Override public Iterable<Pair<E, V>> edgesOut(V vertex) {
+    @Override
+    public Iterable<Pair<E, V>> edgesOut(V vertex) {
         return graph.outgoingEdgesOf(vertex);
     }
 

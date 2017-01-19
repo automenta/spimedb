@@ -287,7 +287,7 @@ var nfield = {
     }
 };
 
-var NObject = Java.type('spimedb.NObject');
+var NObject = Java.type('spimedb.MutableNObject');
 
 function nobject(x) {
 

@@ -18,16 +18,12 @@ import java.util.function.BiConsumer;
 public interface NObject extends Serializable {
 
 
+
     String id();
     String name();
     String[] tags();
 
     void forEach(BiConsumer<String, Object> each);
-
-    default String description() {
-        Object d = get("_");
-        return d == null ? "" : d.toString();
-    }
 
     <X> X get(String tag);
 
@@ -37,10 +33,20 @@ public interface NObject extends Serializable {
 
     boolean bounded();
 
+    static boolean equalsDeep(NObject a, NObject b) {
+        return a.toString().equals(b.toString());
+    }
+
+    default String description() {
+        Object d = get("_");
+        return d == null ? "" : d.toString();
+    }
+
+
     String ID = "I";
     String NAME = "N";
-    String TAGS = ">";
-    String BOUNDS = "@";
+    String TAG = ">";
+    String BOUND = "@";
     String DESC = "_";
 
     class NObjectSerializer extends JsonSerializer<NObject> {
@@ -58,7 +64,7 @@ public interface NObject extends Serializable {
 
                 String[] tag = o.tags();
                 if (tag != null && tag.length > 0) {
-                    jsonGenerator.writeObjectField(TAGS, tag);
+                    jsonGenerator.writeObjectField(TAG, tag);
                 }
 
                 writeOtherFields(o, jsonGenerator);
@@ -77,7 +83,7 @@ public interface NObject extends Serializable {
                 PointND max = o.max();
                 boolean point = max==null || min.equals(max);
                 if (!point || !min.isNaN()) {
-                    jsonGenerator.writeFieldName(BOUNDS);
+                    jsonGenerator.writeFieldName(BOUND);
                     jsonGenerator.writeStartArray();
 
                     if (!max.equals(min)) {

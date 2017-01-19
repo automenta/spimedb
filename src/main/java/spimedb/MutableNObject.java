@@ -6,14 +6,10 @@ import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
 import spimedb.index.rtree.PointND;
-import spimedb.index.rtree.RectND;
 import spimedb.sense.KML;
-import spimedb.util.JSON;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 
 /**
@@ -28,32 +24,8 @@ import java.util.function.BiConsumer;
  */
 
 @JsonSerialize(using= NObject.NObjectSerializer.class)
-public class MutableNObject extends RectND implements NObject {
+public class MutableNObject extends ImmutableNObject {
 
-
-    @Override
-    public void forEach(BiConsumer<String, Object> each) {
-        if (data!=null)
-            data.forEach(each);
-    }
-
-
-    @Override
-    public String[] tags() {
-        return tag;
-    }
-
-    final String id;
-
-    String name;
-
-    Map<String, Object> data = null;
-
-
-    /** extensional inheritance: what this nobject is "inside" of (its container)
-     *  by default, use the root node. but try not to pollute it
-     */
-    public String[] tag = Tags.ROOT;
 
     public MutableNObject(String id) {
         this(id, null);
@@ -66,43 +38,14 @@ public class MutableNObject extends RectND implements NObject {
     }
 
     public MutableNObject(String id, String name) {
-        super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY));
+        super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY), id, name);
 
-        this.id = id!=null ? id : JSON.uuid();
-        this.name = name;
-    }
-
-
-
-    @Override
-    public String name() {
-        return name;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        MutableNObject no =(MutableNObject)o;
-        return id.equals(no.id);// && super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return id.hashCode(); //super.hashCode();
-    }
-
-
-
-    @Override
-    public <X> X get(String tag) {
-        return (X) data.get(tag);
     }
 
 
     public NObject put(String key, Object value) {
         switch (key) {
-            case TAGS:
+            case TAG:
                 if (value instanceof String[])
                     setTag((String[])value);
                 else if (value instanceof String)
@@ -143,24 +86,10 @@ public class MutableNObject extends RectND implements NObject {
     }
 
 
-
-
-    @Override
-    public String toString() {
-        return new String(JSON.toJSON(this));
-    }
-
-
-
-
     public NObject name(String name) {
         this.name = name;
         return this;
     }
-
-    //public final static String POINT = ".";
-    public final static String LINESTRING = "-";
-    public final static String POLYGON = "*";
 
 
     public NObject where(Geodetic2DPoint c) {
@@ -267,12 +196,6 @@ public class MutableNObject extends RectND implements NObject {
     }
 
 
-
-    @Override
-    public final String id() {
-        return id;
-    }
-
     public void when(long start, long end) {
         min.coord[0] = start;
         max.coord[0] = end;
@@ -329,8 +252,4 @@ public class MutableNObject extends RectND implements NObject {
 //    }
 
 
-    @Override
-    public boolean bounded() {
-        return super.bounded();
-    }
 }

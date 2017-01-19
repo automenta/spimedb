@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Base64;
 import java.util.Iterator;
 
 public class JSON {
@@ -202,11 +201,12 @@ public class JSON {
 
 
     public static String uuid() {
+        return (String)jcog.Util.uuid128();
 
-        byte[] bytes = new byte[16]; /** 16*8 = 128 bits = UUID */
-        for (int i = 0; i < bytes.length; i++)
-            bytes[i] = (byte)(Math.random() * 256); //TODO use better RNG
-
-        return Base64.getEncoder().encodeToString(bytes);
+//        byte[] bytes = new byte[16]; /** 16*8 = 128 bits = UUID */
+//        for (int i = 0; i < bytes.length; i++)
+//            bytes[i] = (byte)(Math.random() * 256); //TODO use better RNG
+//
+//        return Base64.getEncoder().encodeToString(bytes);
     }
 }

@@ -25,8 +25,7 @@ import java.util.stream.Stream;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB implements Iterable<NObject>  {
-
+public class SpimeDB implements Iterable<NObject> {
 
 
     public static final String VERSION = "SpimeDB v-0.00";
@@ -35,20 +34,25 @@ public class SpimeDB implements Iterable<NObject>  {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
     public static final ForkJoinPool exe = ForkJoinPool.commonPool();
 
-    @JsonIgnore public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
+    @JsonIgnore
+    public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
-    @JsonIgnore public final Map<String, NObject> obj;
+    @JsonIgnore
+    public final Map<String, NObject> obj;
 
     public final Tags tags = new Tags();
 
-    /** server-side javascript engine */
+    /**
+     * server-side javascript engine
+     */
     final ScriptEngineManager engineManager = new ScriptEngineManager();
     public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
 
-    /** whether the root node has a spatial index, which would store everything */
-    private boolean rootSpace = false;
 
-    /** in-memory, map-based */
+
+    /**
+     * in-memory, map-based
+     */
     public SpimeDB() {
         this(new ConcurrentHashMap());
     }
@@ -93,7 +97,8 @@ public class SpimeDB implements Iterable<NObject>  {
 //        return null;
 //    }
 
-    @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/ @Override
+    @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/
+    @Override
     public String toString() {
         return "{\"" + getClass().getSimpleName() + "\":{\"size\":" + size() +
                 ",\"spacetime\":\"" + spacetime + "\"}}";
@@ -105,63 +110,52 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
 
-    /** returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics */
-    public NObject put(@Nullable NObject d) {
-        if (d == null)
+    /**
+     * returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics
+     */
+    public NObject put(@Nullable NObject next) {
+        if (next == null)
             return null;
 
-        //TODO use 'obj.merge' for correct un-indexing of prevoius value
-        String id = d.id();
+        return obj.compute(next.id(), (i, previous) -> {
 
-        NObject previous = obj.put(id, d);
+            boolean changed, neww;
 
-        boolean changed = false;
+            if (previous != null) {
+                if (NObject.equalsDeep(previous, next))
+                    return previous;
 
-        if (previous!=null) {
-             if (previous.equals(d))
-                 return previous;
-             else {
-                 changed = true;
-             }
-        }
-
-
-        String[] tags = d.tags();
-        if (tags!=null && tags.length > 0) {
-            for (String t : tags) {
-//                Tag tagJect = schema.tag(t, tt -> {
-//                    return new Tag(tt);
-//                });
-                //if (this.schema.inh.addNode(t)) {
-                    //index the tag if it doesnt exist in the graph
-//                    NObject tagJect = get(t);
-//                    if (tagJect!=null) {
-//                        String[] parents = tagJect.tag;
-//                        if (parents != null)
-//                            this.tags.tag(t, parents);
-//                    }
-                //}
+                changed = true;
+                neww = false;
+            } else {
+                changed = false;
+                neww = true;
             }
-            this.tags.tag(id, tags);
 
-            if (d.bounded()) {
-                for (String t : tags)
-                    if (rootSpace || !t.isEmpty()) //dont store in root
-                        space(t).add(d);
+            NObject nextI = internal(next);
+
+            String[] tags = nextI.tags();
+
+            this.tags.tag(nextI.id(), tags, previous!=null ? previous.tags() : null);
+
+            if (nextI.bounded()) {
+                for (String t : tags) {
+                    if (!t.isEmpty()) { //dont store in root
+                        SpatialSearch<NObject> s = space(t);
+                        if (previous != null)
+                            s.remove(previous);
+                        s.add(nextI);
+                    }
+                }
             }
-        }
 
-        if (changed) {
-            //TODO emit notification
-        }
-
-        return d;
+            return nextI;
+        });
     }
 
-    private void tag(String id, String[] parents) {
-        tags.tag(id, parents);
+    protected NObject internal(NObject next) {
+        return next;
     }
-
 
 
     public Iterator<NObject> iterator() {
@@ -220,11 +214,13 @@ public class SpimeDB implements Iterable<NObject>  {
     }
 
 
-    /** computes the set of subtree (children) tags held by the extension of the input (parent) tags
+    /**
+     * computes the set of subtree (children) tags held by the extension of the input (parent) tags
+     *
      * @param parentTags if empty, searches all tags; otherwise searches the specified tags and all their subtags
      */
     public Iterable<String> tagsAndSubtags(@Nullable String... parentTags) {
-        if (parentTags == null || parentTags.length==0)
+        if (parentTags == null || parentTags.length == 0)
             return tags.tags(); //ALL
         else
             return tags.tagsAndSubtags(parentTags);
@@ -264,8 +260,6 @@ public class SpimeDB implements Iterable<NObject>  {
 //    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
 //        return Tuples.pair(e, Tuples.twin(from, to));
 //    }
-
-
 
 
 }

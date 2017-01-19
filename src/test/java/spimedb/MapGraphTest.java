@@ -94,7 +94,7 @@ public class MapGraphTest {
         ArrayList<String> from2 = Lists.newArrayList(new BreadthFirstTravel<>(g, v2));
         assertEquals("[v2, v1, v3]", from2.toString());
         ArrayList<String> from3 = Lists.newArrayList(new BreadthFirstTravel<>(g, v3));
-        assertEquals("[v3, v1, v2]", from3.toString());
+        assertEquals("[v3, v2, v1]", from3.toString());
 
 
     }
