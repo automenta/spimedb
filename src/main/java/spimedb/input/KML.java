@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spimedb.sense;
+package spimedb.input;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -20,8 +20,8 @@ import org.opensextant.giscore.utils.Color;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.sense.kml.KmlReader;
-import spimedb.sense.kml.UrlRef;
+import spimedb.input.kml.KmlReader;
+import spimedb.input.kml.UrlRef;
 import spimedb.util.HTMLFilter;
 import spimedb.util.JSON;
 
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import static spimedb.sense.kml.KmlReader.logger;
+import static spimedb.input.kml.KmlReader.logger;
 
 /**
  * TODO - remove null descriptions - store HTML content separately so it does

@@ -246,20 +246,20 @@ public class Session extends AbstractServerWebSocket {
         });
     }
 
-    public void stopAll() {
-        active.forEach(Task::stop);
-    }
-
-    /**
-     * returns the input task
-     */
-    public Task stopAllExcept(Task t) {
-        active.forEach(x -> {
-            if (t != x)
-                x.stop();
-        });
-        return t;
-    }
+//    public void stopAll() {
+//        active.forEach(Task::stop);
+//    }
+//
+//    /**
+//     * returns the input task
+//     */
+//    public Task stopAllExcept(Task t) {
+//        active.forEach(x -> {
+//            if (t != x)
+//                x.stop();
+//        });
+//        return t;
+//    }
 
 
 }

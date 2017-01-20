@@ -6,7 +6,7 @@ import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
 import spimedb.index.rtree.PointND;
-import spimedb.sense.KML;
+import spimedb.input.KML;
 
 import java.util.HashMap;
 import java.util.List;

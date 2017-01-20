@@ -16,7 +16,7 @@
  *
  **************************************************************************************
  */
-package spimedb.sense.kml;
+package spimedb.input.kml;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -46,7 +46,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static spimedb.sense.KML.anchorHash;
+import static spimedb.input.KML.anchorHash;
 
 
 /**

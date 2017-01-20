@@ -1,4 +1,4 @@
-package spimedb.sense;
+package spimedb.input;
 
 import org.junit.Test;
 import spimedb.SpimeDB;

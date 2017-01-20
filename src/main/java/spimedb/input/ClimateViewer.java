@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spimedb.sense;
+package spimedb.input;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import spimedb.util.JSON;

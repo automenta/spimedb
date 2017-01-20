@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.db.Infinispan;
-import spimedb.sense.KML;
+import spimedb.input.KML;
 import spimedb.server.WebServer;
 import spimedb.util.js.SpimeJS;
 

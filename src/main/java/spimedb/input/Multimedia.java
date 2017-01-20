@@ -1,9 +1,5 @@
-package spimedb.sense.fs;
+package spimedb.input;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.ImageType;
-import org.apache.pdfbox.rendering.PDFRenderer;
-import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -12,38 +8,31 @@ import org.apache.tika.parser.RecursiveParserWrapper;
 import org.apache.tika.sax.BasicContentHandlerFactory;
 import org.apache.tika.sax.ContentHandlerFactory;
 import org.jetbrains.annotations.Nullable;
-import org.jpedal.jbig2.jai.JBIG2ImageReaderSpi;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.helpers.DefaultHandler;
+import spimedb.util.HTTP;
 import spimedb.util.JSON;
 
-import javax.imageio.spi.IIORegistry;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * https://svn.apache.org/repos/asf/tika/trunk/tika-example/src/main/java/org/apache/tika/example/LuceneIndexerExtended.java
  * https://svn.apache.org/repos/asf/tika/trunk/tika-example/src/main/java/org/apache/tika/example/SimpleTextExtractor.java
  * https://github.com/apache/pdfbox/tree/trunk/examples/src/main/java/org/apache/pdfbox/examples
  */
-public class MediaFile {
+public class Multimedia {
 
-    static {
-        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
-    }
 
-    final File file;
     final Map<String, Object> meta;
-    public final static Logger logger = LoggerFactory.getLogger(MediaFile.class);
+    public final static Logger logger = LoggerFactory.getLogger(Multimedia.class);
 
     //"Title" -> "N"
     //"X-TIKA:content" -> "_"
@@ -64,8 +53,14 @@ public class MediaFile {
         return m;
     }
 
-    public MediaFile(String path) {
-        file = new File(path);
+    public static void fromURL(String url, Consumer<Multimedia> with) throws IOException {
+        //this(url, new URL(url).openStream());
+        new HTTP().asStream(url, s -> {
+            with.accept( new Multimedia(url, s) );
+        });
+    }
+
+    public Multimedia(String id, InputStream stream) {
 
         Parser p = new AutoDetectParser();
         ContentHandlerFactory factory = new BasicContentHandlerFactory(
@@ -79,7 +74,6 @@ public class MediaFile {
         meta = new HashMap();
 
         try {
-            InputStream stream = new FileInputStream(file);
             wrapper.parse(stream, new DefaultHandler(), metadata, context);
 
             List<Metadata> m = wrapper.getMetadata();
@@ -88,7 +82,7 @@ public class MediaFile {
                     String[] v = d.getValues(k);
 
                     String kk = meta(k);
-                    if (kk!=null)
+                    if (kk != null)
                         this.meta.put(kk, v.length > 1 ? v : v[0]);
                 }
             });
@@ -97,7 +91,7 @@ public class MediaFile {
             meta.put("ParseException", e);
         }
 
-        System.out.println( JSON.toJSONString(meta) );
+        System.out.println(JSON.toJSONString(meta));
         try {
             //new XML(meta.get("_").toString());
             Element body = Jsoup.parse(meta.get("_").toString()).body();
@@ -109,31 +103,12 @@ public class MediaFile {
         }
 
         if ("application/pdf".equals(meta.get("Content-Type"))) {
-            //PDFToImage
-            try {
-                PDDocument document = PDDocument.load(file);
-                PDFRenderer renderer = new PDFRenderer(document);
-
-
-                int page = 0;
-                int dpi = 32;
-
-                BufferedImage img = renderer.renderImageWithDPI(page, (float)dpi, ImageType.RGB);
-                String filename = "/tmp/page" + page + "." + dpi + ".jpg";
-                boolean result = ImageIOUtil.writeImage(img, filename, dpi);
-                System.out.println(filename + " " + result);
-
-            } catch (IOException e) {
-                logger.error("pdf to image: {}", e);
-            }
-
+            //spawn PDF expand
         }
-
-
     }
 
     public static void main(String[] args) {
-        new MediaFile("/tmp/pdf.pdf");
+        //new Multimedia("/tmp/pdf.pdf");
     }
 
     /*

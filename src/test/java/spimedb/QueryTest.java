@@ -3,7 +3,7 @@ package spimedb;
 import com.google.common.collect.Iterables;
 import org.junit.Test;
 import spimedb.query.Query;
-import spimedb.sense.ImportSchemaOrg;
+import spimedb.input.ImportSchemaOrg;
 
 import java.util.ArrayList;
 import java.util.HashSet;

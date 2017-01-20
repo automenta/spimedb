@@ -18,7 +18,7 @@
  *
  **************************************************************************************
  */
-package spimedb.sense.kml;
+package spimedb.input.kml;
 
 /**
  * Container for element and attribute names used in KML

@@ -1,4 +1,4 @@
-package spimedb.sense;
+package spimedb.input;
 
 
 import org.jsoup.Jsoup;

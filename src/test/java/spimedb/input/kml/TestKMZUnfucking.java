@@ -1,9 +1,9 @@
-package spimedb.sense.kml;
+package spimedb.input.kml;
 
 
 import org.junit.Test;
 import spimedb.SpimeDB;
-import spimedb.sense.KML;
+import spimedb.input.KML;
 
 import java.io.File;
 import java.io.IOException;

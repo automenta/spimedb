@@ -1,4 +1,4 @@
-package spimedb.sense.kml;
+package spimedb.input.kml;
 
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.evt.EventReaderImpl;

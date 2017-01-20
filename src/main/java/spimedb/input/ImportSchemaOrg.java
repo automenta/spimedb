@@ -1,4 +1,4 @@
-package spimedb.sense;
+package spimedb.input;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;
