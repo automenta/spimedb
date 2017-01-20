@@ -11,7 +11,10 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.RecursiveParserWrapper;
 import org.apache.tika.sax.BasicContentHandlerFactory;
 import org.apache.tika.sax.ContentHandlerFactory;
+import org.jetbrains.annotations.Nullable;
 import org.jpedal.jbig2.jai.JBIG2ImageReaderSpi;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.helpers.DefaultHandler;
@@ -42,6 +45,25 @@ public class MediaFile {
     final Map<String, Object> meta;
     public final static Logger logger = LoggerFactory.getLogger(MediaFile.class);
 
+    //"Title" -> "N"
+    //"X-TIKA:content" -> "_"
+
+    @Nullable
+    static String meta(String k) {
+
+        String m;
+        switch (k) {
+            case "Title": m = "N"; break;
+            case "X-TIKA:content": m = "_"; break;
+
+            case "pdf:docinfo:title": m = null; break; //duplicates "Title"
+            //TODO other duplcates
+
+            default: m = k; break;
+        }
+        return m;
+    }
+
     public MediaFile(String path) {
         file = new File(path);
 
@@ -65,7 +87,9 @@ public class MediaFile {
                 for (String k : d.names()) {
                     String[] v = d.getValues(k);
 
-                    meta.put(k, v.length > 1 ? v : v[0]);
+                    String kk = meta(k);
+                    if (kk!=null)
+                        this.meta.put(kk, v.length > 1 ? v : v[0]);
                 }
             });
 
@@ -74,6 +98,15 @@ public class MediaFile {
         }
 
         System.out.println( JSON.toJSONString(meta) );
+        try {
+            //new XML(meta.get("_").toString());
+            Element body = Jsoup.parse(meta.get("_").toString()).body();
+            System.out.println(
+                    body.toString()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if ("application/pdf".equals(meta.get("Content-Type"))) {
             //PDFToImage

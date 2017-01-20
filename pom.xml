@@ -107,6 +107,16 @@
         </dependency>
 
 
+
+        <!-- https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-distr -->
+        <dependency>
+            <groupId>org.apache.opennlp</groupId>
+            <artifactId>opennlp-distr</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+
+
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
