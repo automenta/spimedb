@@ -69,6 +69,7 @@ public class MapGraph<V, E> implements Serializable {
         }
         return false; //already added
     }
+
     public boolean removeEdge(VertexContainer<V, E> srcC, @NotNull V src, @NotNull V tgt, @NotNull E e) {
         if (srcC.removeOutgoingEdge(e, tgt)) {
             if (!vertex(tgt, false).removeIncomingEdge(src, e)) {

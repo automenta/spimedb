@@ -21,4 +21,20 @@ public abstract class Goal<A extends Agent> implements Serializable {
 //
 //    }
 
+
+    @Override
+    public final String toString() {
+        return id();
+    }
+
+    @Override
+    public int hashCode() {
+        return id().hashCode();
+    }
+
+    /** shallow equivalency here */
+    @Override public boolean equals(Object obj) {
+        return this == obj || obj instanceof Goal && id().equals( ((Goal)obj).id());
+    }
+
 }

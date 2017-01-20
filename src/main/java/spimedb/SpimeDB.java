@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
 import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
+import spimedb.plan.Agent;
 import spimedb.query.Query;
 
 import javax.script.ScriptEngineManager;
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB implements Iterable<NObject> {
+public class SpimeDB extends Agent implements Iterable<NObject> {
 
 
     public static final String VERSION = "SpimeDB v-0.00";
@@ -64,6 +64,7 @@ public class SpimeDB implements Iterable<NObject> {
     }
 
     public SpimeDB(Map<String, NObject> g) {
+        super(ForkJoinPool.commonPool());
 
         this.obj = g;
 

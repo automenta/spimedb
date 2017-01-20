@@ -7,32 +7,123 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.RecursiveParserWrapper;
 import org.apache.tika.sax.BasicContentHandlerFactory;
 import org.apache.tika.sax.ContentHandlerFactory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.helpers.DefaultHandler;
-import spimedb.util.HTTP;
+import spimedb.MutableNObject;
+import spimedb.SpimeDB;
+import spimedb.plan.AbstractGoal;
+import spimedb.plan.Goal;
 import spimedb.util.JSON;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
+import java.io.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
+ *
+ * Detects document and multimedia metadata, and schedules further processing
+ *
  * https://svn.apache.org/repos/asf/tika/trunk/tika-example/src/main/java/org/apache/tika/example/LuceneIndexerExtended.java
  * https://svn.apache.org/repos/asf/tika/trunk/tika-example/src/main/java/org/apache/tika/example/SimpleTextExtractor.java
  * https://github.com/apache/pdfbox/tree/trunk/examples/src/main/java/org/apache/pdfbox/examples
  */
-public class Multimedia {
+public class Multimedia extends AbstractGoal<SpimeDB> {
 
 
-    final Map<String, Object> meta;
     public final static Logger logger = LoggerFactory.getLogger(Multimedia.class);
+
+    private static final int BUFFER_SIZE = 1024 * 128;
+
+
+    static final Parser p = new AutoDetectParser();
+    static final ContentHandlerFactory factory = new BasicContentHandlerFactory(
+            BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
+
+    private final Supplier<InputStream> stream;
+    private final String uri;
+
+    public Multimedia(File f) {
+        this(f.toURI().toString(), () -> {
+            try {
+                return new FileInputStream(f);
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        });
+    }
+
+    public Multimedia(String uri, Supplier<InputStream> stream) {
+        super(uri);
+        this.uri = uri;
+        this.stream = stream;
+    }
+
+    //    public static void fromURL(String url, Consumer<Multimedia> with) throws IOException {
+//        //this(url, new URL(url).openStream());
+//        new HTTP().asStream(url, s -> {
+//            with.accept( new Multimedia(url, s) );
+//        });
+//    }
+
+
+    @NotNull
+    @Override
+    public void DO(@NotNull SpimeDB db, Consumer<Iterable<Goal<? super SpimeDB>>> next) throws RuntimeException {
+
+
+        RecursiveParserWrapper wrapper = new RecursiveParserWrapper(p, factory);
+        Metadata metadata = new Metadata();
+        //metadata.set(Metadata.RESOURCE_NAME_KEY, "test_recursive_embedded.docx");
+        ParseContext context = new ParseContext();
+
+        final MutableNObject resource = new MutableNObject(uri);
+
+        try {
+            InputStream stream = this.stream.get();
+            if (stream == null) {
+                throw new FileNotFoundException();
+            }
+
+            wrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
+
+            List<Metadata> m = wrapper.getMetadata();
+            m.forEach(d -> {
+                for (String k : d.names()) {
+                    String[] v = d.getValues(k);
+
+                    String kk = meta(k);
+                    if (kk != null)
+                        resource.put(kk, v.length > 1 ? v : v[0]);
+                }
+            });
+
+        } catch (Exception e) {
+            resource.put("ParseException", e);
+        }
+
+        System.out.println(JSON.toJSONString(resource));
+        try {
+            //new XML(meta.get("_").toString());
+            Element body = Jsoup.parse(resource.get("_").toString()).body();
+            System.out.println(
+                    body.toString()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        db.put(resource);
+
+        if ("application/pdf".equals(resource.get("Content-Type"))) {
+            //spawn PDF expand
+        }
+    }
 
     //"Title" -> "N"
     //"X-TIKA:content" -> "_"
@@ -53,62 +144,16 @@ public class Multimedia {
         return m;
     }
 
-    public static void fromURL(String url, Consumer<Multimedia> with) throws IOException {
-        //this(url, new URL(url).openStream());
-        new HTTP().asStream(url, s -> {
-            with.accept( new Multimedia(url, s) );
-        });
-    }
-
-    public Multimedia(String id, InputStream stream) {
-
-        Parser p = new AutoDetectParser();
-        ContentHandlerFactory factory = new BasicContentHandlerFactory(
-                BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
-
-        RecursiveParserWrapper wrapper = new RecursiveParserWrapper(p, factory);
-        Metadata metadata = new Metadata();
-        //metadata.set(Metadata.RESOURCE_NAME_KEY, "test_recursive_embedded.docx");
-        ParseContext context = new ParseContext();
-
-        meta = new HashMap();
-
-        try {
-            wrapper.parse(stream, new DefaultHandler(), metadata, context);
-
-            List<Metadata> m = wrapper.getMetadata();
-            m.forEach(d -> {
-                for (String k : d.names()) {
-                    String[] v = d.getValues(k);
-
-                    String kk = meta(k);
-                    if (kk != null)
-                        this.meta.put(kk, v.length > 1 ? v : v[0]);
-                }
-            });
-
-        } catch (Exception e) {
-            meta.put("ParseException", e);
-        }
-
-        System.out.println(JSON.toJSONString(meta));
-        try {
-            //new XML(meta.get("_").toString());
-            Element body = Jsoup.parse(meta.get("_").toString()).body();
-            System.out.println(
-                    body.toString()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if ("application/pdf".equals(meta.get("Content-Type"))) {
-            //spawn PDF expand
-        }
-    }
-
     public static void main(String[] args) {
-        //new Multimedia("/tmp/pdf.pdf");
+        SpimeDB db = new SpimeDB();
+        db.goal(
+            new FileDirectory("/home/me/d/eadoc", Multimedia::new)
+        );
+
+        db.sync(1000 * 60);
+
+        db.printState(System.out);
+        db.obj.forEach((k,v)->System.out.println(v));
     }
 
     /*

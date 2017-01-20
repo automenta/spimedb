@@ -9,7 +9,7 @@ import java.util.function.Consumer;
  */
 abstract public class SynchronousGoal<A extends Agent> extends AbstractGoal<A> {
 
-    public SynchronousGoal(String id) {
+    public SynchronousGoal(Object... id) {
         super(id);
     }
 

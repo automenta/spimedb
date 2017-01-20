@@ -1,12 +1,13 @@
 package spimedb.plan;
 
+import com.google.common.collect.Lists;
 import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.graph.MapGraph;
 
-import java.util.Date;
+import java.io.PrintStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -17,8 +18,8 @@ public class Agent {
 
     final static Logger logger = LoggerFactory.getLogger(Agent.class);
 
-    final MapGraph<Goal,String> plan = new MapGraph(new ConcurrentHashMap(), ConcurrentHashSet::new);
-    final Map<String, GoalState> state = new ConcurrentHashMap();
+    public final MapGraph<Goal,String> plan = new MapGraph(new ConcurrentHashMap(), ConcurrentHashSet::new);
+    public final Map<String, GoalState> state = new ConcurrentHashMap();
 
     final ExecutorService exe;
 
@@ -26,35 +27,43 @@ public class Agent {
         this.exe = exe;
     }
 
+
     public <A extends Agent> GoalState goal(Goal<A> t) {
+        return subgoal(new InvokedGoal<>(t));
+    }
+
+    <A extends Agent> GoalState subgoal(Goal<A> t) {
+
         String tid = t.id();
         return state.compute(tid, (tiid, prevState) -> {
             if (prevState == null) {
                 plan.addVertex(t);
                 GoalState s =  new GoalState(t);
-                Logger tlog = s.logger;
-                tlog.info("plan");
                 exe.execute(()->{
+                    s.setState(State.Running);
+                    long start = System.currentTimeMillis();
                     try {
-                        s.setState(State.Running);
                         t.DO((A) Agent.this, (next) -> {
-                            s.setState(State.OK);
                             for (Goal n : next) {
+
+                                if (n == null) continue;
+
                                 plan.addEdge(t, n, "=>");
-                                goal(n);
+                                subgoal(n);
                             }
                         });
+                        s.setState(State.OK);
                     } catch (RuntimeException e) {
-                        tlog.error("error {}", new Date(), e);
                         s.setState(State.Error);
                     }
+                    long end = System.currentTimeMillis();
+                    s.addTime( (end - start) );
                 });
                 return s;
             } else {
                 switch (prevState.getState()) {
                     default:
                         break;
-
                 }
                 return prevState;
             }
@@ -68,6 +77,13 @@ public class Agent {
         } catch (InterruptedException e) {
             logger.error("awaitTermination: {}", e);
         }
+    }
+
+    public void printState(PrintStream out) {
+        state.forEach( (t,s) -> {
+            out.println(s + "\t" + s.time() + "ms");
+            out.println("\t" + plan.vertex(s.goal, false));
+        });
     }
 
     enum State {
@@ -89,12 +105,16 @@ public class Agent {
 
     }
 
-    static class GoalState {
+    public static class GoalState {
 
         public final Logger logger;
+        public final Goal goal;
+
+        long wallTime = 0;
 
         public GoalState(Goal goal) {
-            logger = LoggerFactory.getLogger(goal.id());
+            this.goal = goal;
+            this.logger = LoggerFactory.getLogger(goal.id());
         }
 
         private State state = State.Ready;
@@ -109,6 +129,32 @@ public class Agent {
             logger.info(state.toString());
         }
 
+        @Override
+        public String toString() {
+            return goal.toString() + ": " + state.toString();
+        }
+
+        void addTime(long t) {
+            wallTime += t;
+        }
+
+        /** the sum of wall time during which the goal executed, in milliseconds */
+        public long time() {
+            return wallTime;
+        }
     }
 
+    private static class InvokedGoal<A extends Agent> extends SynchronousGoal<A> {
+        private final Goal<A> root;
+
+        public InvokedGoal(Goal<A> root) {
+            super(root.id(), System.currentTimeMillis());
+            this.root = root;
+        }
+
+        @Override
+        protected Iterable<Goal<? super A>> run(A context) throws RuntimeException {
+            return Lists.newArrayList(root);
+        }
+    }
 }
