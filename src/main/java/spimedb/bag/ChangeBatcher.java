@@ -37,7 +37,7 @@ abstract public class ChangeBatcher<X, Y> {
 
     public ChangeBatcher(int updateMS, IntFunction<Y[]> arrayBuilder) {
 
-        onChange = Lodash.throttle(() -> {
+        onChange = Lodash.debounce(() -> {
 
 
             List<Y> ADD = new LinkedList();

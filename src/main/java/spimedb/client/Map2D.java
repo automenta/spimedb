@@ -5,6 +5,7 @@ import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
 import org.teavm.jso.core.JSFunction;
 import org.teavm.jso.dom.html.HTMLElement;
+import spimedb.MutableNObject;
 import spimedb.bag.ChangeBatcher;
 import spimedb.client.leaflet.*;
 import spimedb.client.lodash.Lodash;
@@ -40,7 +41,7 @@ public class Map2D {
         map = LeafletMap.create(mapContainer, LeafletMapOptions.create().continuousWorld(true).worldCopyJump(true));
         map.setView(LatLng.create(40, -80), 8);
 
-        refresh = Lodash.throttle(this::refresh, UPDATE_MS);
+        refresh = Lodash.debounce(this::refresh, UPDATE_MS);
 
         mapChanged = (e) -> {
             refresh.call(null);
@@ -98,6 +99,22 @@ public class Map2D {
 
         String nid = N.id;
         String name = JS.getString(N.data, "N", nid);
+
+        JSObject lineString = JS.get(N.data, 'g' + MutableNObject.LINESTRING);
+        if (lineString!=null) {
+            JSArray points = lineString.cast();
+            int l = points.getLength();
+            LatLng[] pp = new LatLng[l];
+            for (int i = 0; i < l; i++) {
+                JSArray np = points.get(i).cast();
+                pp[i] = LatLng.create(JS.getFloat(np, 0), JS.getFloat(np, 1));
+            }
+
+            //Console.log(lineString);
+            //System.out.println(Arrays.toString(pp));
+            return Polyline.create(pp);
+        }
+
 
         if (JS.isNumber(x) && JS.isNumber(y)) {
             //POINT

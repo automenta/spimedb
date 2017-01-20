@@ -25,7 +25,7 @@ public class Session extends AbstractServerWebSocket {
     /**
      * bytes per second
      */
-    public static final int defaultOutRateBytesPerSecond = 32 * 1024;
+    public static final int defaultOutRateBytesPerSecond = 128 * 1024;
 
 
     /**

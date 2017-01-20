@@ -9,6 +9,8 @@ import org.teavm.jso.core.JSString;
  * Created by me on 1/16/17.
  */
 public class JS {
+    @JSBody(params = { "instance", "index" }, script = "return instance[index];")
+    public static native float getFloat(JSObject instance, int index);
 
     @JSBody(params = { "instance", "index" }, script = "return instance[index];")
     public static native float getFloat(JSObject instance, String index);

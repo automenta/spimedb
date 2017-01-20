@@ -60,7 +60,7 @@ public class Client {
 
     public Client() {
 
-        forgetting = Lodash.throttle(()->{
+        forgetting = Lodash.debounce(()->{
             obj.mul(0.99f); //forgetting
         }, minForgetPeriodMS);
 
@@ -162,7 +162,7 @@ public class Client {
         private final int invalidationPeriodMS = 100;
 
         public Refresher() {
-            ready = Lodash.throttle(this::flush, invalidationPeriodMS);
+            ready = Lodash.debounce(this::flush, invalidationPeriodMS);
             obj.REMOVE.on(x -> {
                 this.forgotten = append(x.id, "me.forgot(", this.forgotten);
                 ready();

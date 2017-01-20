@@ -74,7 +74,8 @@ abstract public class AbstractServerWebSocket extends AbstractReceiveListener im
             r.acquire(size);
         }
 
-        WebSockets.sendBinaryBlocking(ByteBuffer.wrap(s), socket);
+        WebSockets.sendBinary(ByteBuffer.wrap(s), socket, null);
+        //WebSockets.sendBinaryBlocking(ByteBuffer.wrap(s), socket);
 
         if (outBytes!=null)
             outBytes.addAndGet(size);
