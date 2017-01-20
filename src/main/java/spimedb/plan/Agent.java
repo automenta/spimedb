@@ -53,8 +53,8 @@ public class Agent {
                             }
                         });
                         s.setState(State.OK);
-                    } catch (RuntimeException e) {
-                        s.setState(State.Error);
+                    } catch (Exception e) {
+                        s.setState(State.Error, e);
                     }
                     long end = System.currentTimeMillis();
                     s.addTime( (end - start) );
@@ -124,9 +124,9 @@ public class Agent {
             return state;
         }
 
-        public void setState(@NotNull State state) {
+        public void setState(@NotNull State state, Object... logged) {
             this.state = state;
-            logger.info(state.toString());
+            logger.info("{} {}", state.toString(), logged);
         }
 
         @Override

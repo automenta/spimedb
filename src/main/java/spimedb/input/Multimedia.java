@@ -18,12 +18,13 @@ import spimedb.MutableNObject;
 import spimedb.SpimeDB;
 import spimedb.plan.AbstractGoal;
 import spimedb.plan.Goal;
-import spimedb.util.JSON;
 
 import java.io.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -92,6 +93,7 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
 
             wrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
 
+
             List<Metadata> m = wrapper.getMetadata();
             m.forEach(d -> {
                 for (String k : d.names()) {
@@ -107,7 +109,13 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
             resource.put("ParseException", e);
         }
 
-        System.out.println(JSON.toJSONString(resource));
+        int pages = Integer.parseInt(resource.getOr("pages", "-1"));
+        if ( pages > 0) {
+
+        }
+
+        //System.out.println(JSON.toJSONString(resource));
+
         try {
             //new XML(meta.get("_").toString());
             Element body = Jsoup.parse(resource.get("_").toString()).body();
@@ -121,7 +129,10 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
         db.put(resource);
 
         if ("application/pdf".equals(resource.get("Content-Type"))) {
-            //spawn PDF expand
+            //spawn PDF thumbnail generation
+            next.accept( IntStream.range(0, pages-1).mapToObj( page ->
+                new PDF.ToImage( uri, stream, page )
+            ).collect(Collectors.toList()) );
         }
     }
 
@@ -136,6 +147,8 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
             case "Title": m = "N"; break;
             case "X-TIKA:content": m = "_"; break;
 
+            case "xmpTPg:NPages": m = "pages"; break;
+
             case "pdf:docinfo:title": m = null; break; //duplicates "Title"
             //TODO other duplcates
 
@@ -145,7 +158,8 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
     }
 
     public static void main(String[] args) {
-        SpimeDB db = new SpimeDB();
+        SpimeDB db = new SpimeDB().resources("/tmp/eadoc");
+
         db.goal(
             new FileDirectory("/home/me/d/eadoc", Multimedia::new)
         );

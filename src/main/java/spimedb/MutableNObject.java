@@ -229,6 +229,7 @@ public class MutableNObject extends ImmutableNObject {
         return new long[] { (long)a, (long)b };
     }
 
+
 //    /** produces a "1-line" summar JSON object as a string */
 //    @JsonIgnore public String summary(StringBuilder sb) {
 //        sb.setLength(0);

@@ -9,16 +9,16 @@ import java.util.function.Consumer;
  */
 abstract public class AtomicGoal<A extends Agent> extends AbstractGoal<A> {
 
-    public AtomicGoal(String id) {
+    public AtomicGoal(Object... id) {
         super(id);
     }
 
     @NotNull
     @Override
-    public void DO(@NotNull A context, Consumer<Iterable<Goal<? super A>>> next) throws RuntimeException {
+    public void DO(@NotNull A context, Consumer<Iterable<Goal<? super A>>> next) throws Exception {
         run(context);
     }
 
-    protected abstract void run(A context) throws RuntimeException;
+    protected abstract void run(A context) throws Exception;
 
 }

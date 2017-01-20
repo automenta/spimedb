@@ -15,7 +15,7 @@ public abstract class Goal<A extends Agent> implements Serializable {
     @NotNull abstract public String id();
 
     @NotNull
-    abstract public void DO(@NotNull A context, Consumer<Iterable<Goal<? super A>>> next) throws RuntimeException;
+    abstract public void DO(@NotNull A context, Consumer<Iterable<Goal<? super A>>> next) throws Exception;
 
 //    public void UNDO(A context) {
 //

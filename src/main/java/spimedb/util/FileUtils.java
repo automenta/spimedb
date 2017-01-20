@@ -27,8 +27,13 @@
 
 package spimedb.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.awt.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -455,6 +460,16 @@ public class FileUtils {
             fileID = fd.getDirectory() + fileID;
         }
         return fileID;
+    }
+
+    @Nullable
+    public static Path pathOrCreate(String cachePath)  {
+        try {
+            return Files.createDirectories(Paths.get(cachePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

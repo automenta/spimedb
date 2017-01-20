@@ -46,6 +46,7 @@ public class Infinispan {
             .unsafe()
             .storeAsBinary().storeKeysAsBinary(true).storeValuesAsBinary(true)
             .jmxStatistics().disable()
+            .persistence().passivation(true)
         ;
 
 

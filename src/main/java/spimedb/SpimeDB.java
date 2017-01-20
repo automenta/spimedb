@@ -16,8 +16,10 @@ import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
 import spimedb.plan.Agent;
 import spimedb.query.Query;
+import spimedb.util.FileUtils;
 
 import javax.script.ScriptEngineManager;
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,20 +42,24 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
     public static final ForkJoinPool exe = ForkJoinPool.commonPool();
 
+    /** default location of file resources if unspecified */
+    public static final String TMP_SPIMEDB_CACHE_PATH = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
+
     @JsonIgnore
     public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
     @JsonIgnore
     public final Map<String, NObject> obj;
 
-    public final Tags tags = new Tags();
+    transient public final Tags tags = new Tags();
 
     /**
      * server-side javascript engine
      */
-    final ScriptEngineManager engineManager = new ScriptEngineManager();
-    public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
+    transient final ScriptEngineManager engineManager = new ScriptEngineManager();
+    transient public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
 
+    private File resources;
 
 
     /**
@@ -67,7 +73,12 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
         super(ForkJoinPool.commonPool());
 
         this.obj = g;
+        resources(TMP_SPIMEDB_CACHE_PATH);
+    }
 
+    public SpimeDB resources(String path) {
+        this.resources = FileUtils.pathOrCreate(path).toFile();
+        return this;
     }
 
     public SpatialSearch<NObject> spaceIfExists(String tag) {

@@ -11,13 +11,13 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.SpimeDB;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Deque;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -34,21 +34,19 @@ public class HTTP {
     static final String defaultClientPath = "./src/main/resources/public";
     private static final Logger logger = LoggerFactory.getLogger(HTTP.class);
 
-    public static final String TMP_SPIMEDB_CACHE_PATH = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
-
 
     private final Path cachePath;
 
     public HTTP() {
-        this(TMP_SPIMEDB_CACHE_PATH);
+        this(SpimeDB.TMP_SPIMEDB_CACHE_PATH);
     }
 
     public HTTP(String cachePath) {
-        this.cachePath = pathOrCreate(cachePath);
+        this.cachePath = FileUtils.pathOrCreate(cachePath);
     }
 
     @Nullable public static Path tmpCacheDir() {
-        return pathOrCreate(TMP_SPIMEDB_CACHE_PATH);
+        return FileUtils.pathOrCreate(SpimeDB.TMP_SPIMEDB_CACHE_PATH);
     }
     @Nullable public static File tmpCacheFile(String path) {
         File f = tmpCacheDir().resolve(path).toFile();
@@ -61,15 +59,6 @@ public class HTTP {
             }
         }
         return f;
-    }
-
-    @Nullable public static Path pathOrCreate(String cachePath)  {
-        try {
-            return Files.createDirectories(Paths.get(cachePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public static void send(String s, HttpServerExchange ex) {

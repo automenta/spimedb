@@ -28,6 +28,13 @@ public interface NObject extends Serializable {
 
     <X> X get(String tag);
 
+    default <X> X getOr(String key, X ifMissing) {
+        Object val = get(key);
+        if (val == null)
+            return ifMissing;
+        return (X)val;
+    }
+
     PointND min();
 
     PointND max();
