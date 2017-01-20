@@ -40,11 +40,16 @@ public class Infinispan {
                 .globalJmxStatistics().cacheManagerName(path + "/" + cacheID).disable()
                 .build();
 
+
         ConfigurationBuilder cfg = new ConfigurationBuilder();
         cfg
             .unsafe()
             .storeAsBinary().storeKeysAsBinary(true).storeValuesAsBinary(true)
-            .jmxStatistics().disable();
+            .jmxStatistics().disable()
+        ;
+
+
+
         //.versioning().disable()
         //.passivation(true)
         //cb.locking().concurrencyLevel(1);

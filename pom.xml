@@ -68,6 +68,44 @@
             <version>1.10.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>6.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>6.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-memory</artifactId>
+            <version>6.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-codecs</artifactId>
+            <version>6.3.0</version>
+        </dependency>
+
+
+
+        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>1.14</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/de.intarsys.opensource/jbig2 -->
+        <dependency>
+            <groupId>de.intarsys.opensource</groupId>
+            <artifactId>jbig2</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -177,6 +215,7 @@
             </exclusions>
         </dependency>
 
+
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/io.baratine/baratine &ndash;&gt;-->
         <!--<dependency>-->
         <!--<groupId>io.baratine</groupId>-->
@@ -185,11 +224,7 @@
         <!--</dependency>-->
 
 
-        <!--<dependency>-->
-        <!--<groupId>org.infinispan</groupId>-->
-        <!--<artifactId>infinispan-query</artifactId>-->
-        <!--<version>9.0.0.Alpha4</version>-->
-        <!--</dependency>-->
+
 
         <!--<dependency>-->
         <!--<groupId>org.infinispan</groupId>-->

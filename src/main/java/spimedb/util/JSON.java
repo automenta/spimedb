@@ -1,3 +1,4 @@
+
 package spimedb.util;
 
 import com.fasterxml.jackson.core.*;
@@ -30,6 +31,10 @@ public class JSON {
 
             jsonGenerator.writeNumber(y);
         }
+    }
+
+    public static String toJSONString(Object x) {
+        return new String(toJSON(x));
     }
 
     public static class BatchObjectMapper extends ObjectMapper {

@@ -98,9 +98,7 @@ public class Session extends AbstractServerWebSocket {
                     Iterator<String> r = db.tags.roots();
                     try {
                         while (r.hasNext()) {
-                            NObject t = db.graphed(r.next());
-                            sendJSON(chan, t);
-                            remoteMemory.add(t.id());
+                            trySend(this, r.next());
                         }
                     } catch (IOException e) {
                         return;
@@ -110,7 +108,7 @@ public class Session extends AbstractServerWebSocket {
         }
 
         /**
-         * allows client to inform server of invalidations
+         * allows client to inform server of its forgotten items
          */
         public void forgot(String... ids) {
             for (String id : ids) {
