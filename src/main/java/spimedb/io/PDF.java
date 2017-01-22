@@ -1,4 +1,4 @@
-package spimedb.input;
+package spimedb.io;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;

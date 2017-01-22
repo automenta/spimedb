@@ -6,7 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Whitelist;
 
-import static spimedb.input.kml.KmlReader.logger;
+import static spimedb.io.kml.KmlReader.logger;
 
 /**
  * Created by me on 12/26/16.

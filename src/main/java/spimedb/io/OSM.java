@@ -1,4 +1,4 @@
-package spimedb.input;
+package spimedb.io;
 
 import com.google.common.base.Joiner;
 import org.openstreetmap.osmosis.core.container.v0_6.*;

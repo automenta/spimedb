@@ -33,7 +33,7 @@ public class TeaVMTest {
     @Test
     public void test1() {
 
-        String s = new JavaToJavascript().compileMain(Client.class).toString();
+        String s = JavaToJavascript.build().compileMain(Client.class).toString();
         assertTrue(s.length() > 1000);
 
     }

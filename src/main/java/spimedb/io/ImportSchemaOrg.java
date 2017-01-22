@@ -1,4 +1,4 @@
-package spimedb.input;
+package spimedb.io;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;

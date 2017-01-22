@@ -1,4 +1,4 @@
-package spimedb.input;
+package spimedb.io;
 
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;

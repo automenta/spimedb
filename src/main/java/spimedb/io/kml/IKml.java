@@ -18,7 +18,7 @@
  *
  **************************************************************************************
  */
-package spimedb.input.kml;
+package spimedb.io.kml;
 
 /**
  * Container for element and attribute names used in KML

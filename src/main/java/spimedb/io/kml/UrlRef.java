@@ -75,7 +75,7 @@
  on the JDOM Project, please see <http://www.jdom.org/>.
 
  */
-package spimedb.input.kml;
+package spimedb.io.kml;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;

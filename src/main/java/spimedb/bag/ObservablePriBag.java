@@ -2,7 +2,6 @@ package spimedb.bag;
 
 import jcog.event.ListTopic;
 import jcog.event.Topic;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -15,7 +14,7 @@ public class ObservablePriBag<X> extends PriBag<X> {
     public final Topic<X> REMOVE = new ListTopic<>();
     //TODO: public final Topic<ObjectFloatPair<X>> CHANGE = new ArrayTopic<>(); //object and its new value
 
-    public ObservablePriBag(int cap, BudgetMerge mergeFunction, @NotNull Map map) {
+    public ObservablePriBag(int cap, BudgetMerge mergeFunction, /*@NotNull*/ Map map) {
         super(cap, mergeFunction, map);
     }
 

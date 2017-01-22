@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import jcog.data.sorted.SortedArray;
 import jcog.table.SortedListTable;
 import org.apache.commons.lang3.mutable.MutableFloat;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     private static final boolean autocommit = true;
 
 
-    public PriBag(int cap, BudgetMerge mergeFunction, @NotNull Map<V, Budget<V>> map) {
+    public PriBag(int cap, BudgetMerge mergeFunction, /*@NotNull*/ Map<V, Budget<V>> map) {
         super(Budget[]::new, map);
 
         this.mergeFunction = mergeFunction;
@@ -48,7 +47,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
     @Nullable
     @Override
-    public Budget<V> remove(@NotNull V x) {
+    public Budget<V> remove(/*@NotNull*/ V x) {
         Budget<V> b = super.remove(x);
         if (b != null) {
             onRemoved(b);
@@ -226,7 +225,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
     }
 
-    private int removeWeakestUntilUnderCapacity(int s, @NotNull List<Budget> toRemove, boolean pendingAddition) {
+    private int removeWeakestUntilUnderCapacity(int s, /*@NotNull*/ List<Budget> toRemove, boolean pendingAddition) {
         SortedArray<Budget<V>> items = this.items;
         final int c = capacity;
         while (!isEmpty() && ((s - c) + (pendingAddition ? 1 : 0)) > 0) {
@@ -340,24 +339,24 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
 
     //@Override
-    public final V key(@NotNull Budget<V> l) {
+    public final V key(/*@NotNull*/ Budget<V> l) {
         return l.id;
     }
 
 
     @Nullable
     @Override
-    public Budget<V> put(@NotNull V v, @NotNull Budget<V> b) {
+    public Budget<V> put(/*@NotNull*/ V v, /*@NotNull*/ Budget<V> b) {
         assert(b.id.equals(v)); //must match
         return put(v, b.pri, null);
     }
 
-    public final Budget<V> put(@NotNull V key, float pri) {
+    public final Budget<V> put(/*@NotNull*/ V key, float pri) {
         return put(key, pri, null);
     }
 
     //@Override
-    public final Budget<V> put(@NotNull V key, float pri, @Nullable MutableFloat overflow) {
+    public final Budget<V> put(/*@NotNull*/ V key, float pri, @Nullable MutableFloat overflow) {
 
 
         if (pri < 0) { //already deleted
@@ -439,20 +438,20 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 //    /**
 //     * the applied budget will not become effective until commit()
 //     */
-//    @NotNull
-//    protected final void putExists(@NotNull Budgeted b, float scale, @NotNull BLink<V> existing, @Nullable MutableFloat overflow) {
+//    /*@NotNull*/
+//    protected final void putExists(/*@NotNull*/ Budgeted b, float scale, /*@NotNull*/ BLink<V> existing, @Nullable MutableFloat overflow) {
 //
 //
 //
 //    }
 
-//    @NotNull
-//    protected final BLink<V> newLink(@NotNull V i, @NotNull Budgeted b) {
+//    /*@NotNull*/
+//    protected final BLink<V> newLink(/*@NotNull*/ V i, /*@NotNull*/ Budgeted b) {
 //        return newLink(i, b, 1f);
 //    }
 
-//    @NotNull
-//    protected final BLink<V> newLink(@NotNull V i, @NotNull Budgeted b, float scale) {
+//    /*@NotNull*/
+//    protected final BLink<V> newLink(/*@NotNull*/ V i, /*@NotNull*/ Budgeted b, float scale) {
 //        return newLink(i, scale * b.pri, b.dur(), b.qua());
 //    }
 
@@ -464,7 +463,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     }
 
 
-    @NotNull
+    /*@NotNull*/
     public final PriBag<V> commit(@Nullable Function<PriBag, Consumer<Budget>> update) {
 
         synchronized (items) {
@@ -493,7 +492,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     /**
      * applies the 'each' consumer and commit simultaneously, noting the range of items that will need sorted
      */
-    @NotNull
+    /*@NotNull*/
     protected PriBag<V> update(@Nullable Consumer<Budget> each) {
 
 
@@ -552,7 +551,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     }
 
 
-    private int removeDeleted(@NotNull List<Budget> removed, int minRemoved) {
+    private int removeDeleted(/*@NotNull*/ List<Budget> removed, int minRemoved) {
 
         SortedArray<Budget<V>> items = this.items;
         final Object[] l = items.array();
@@ -701,7 +700,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     }
 
 
-    @NotNull
+    /*@NotNull*/
     @Override
     public String toString() {
         return Joiner.on(", ").join(items);// + '{' + items.getClass().getSimpleName() + '}';

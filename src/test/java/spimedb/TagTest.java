@@ -2,14 +2,14 @@ package spimedb;
 
 import com.google.common.collect.Iterators;
 import org.junit.Test;
-import spimedb.input.GeoJSON;
+import spimedb.io.GeoJSON;
 
 import java.io.IOException;
 import java.util.function.Consumer;
 
 import static com.google.common.collect.Iterables.size;
 import static org.junit.Assert.assertEquals;
-import static spimedb.input.GeoJSONTest.eqGeoJson;
+import static spimedb.io.GeoJSONTest.eqGeoJson;
 
 /**
  * Created by me on 1/14/17.

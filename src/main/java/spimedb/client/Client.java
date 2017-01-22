@@ -178,10 +178,9 @@ public class Client {
                 ready();
         }
 
-        @NotNull
         private StringBuilder append(String id, String prefix, StringBuilder f) {
             if (f == null)
-                f = new StringBuilder(DEFAULT_BUFFER_SIZE).append(prefix + "[");
+                f = new StringBuilder(DEFAULT_BUFFER_SIZE).append(prefix).append("[");
             f.append('\"').append(id).append("\",");
             return f;
         }

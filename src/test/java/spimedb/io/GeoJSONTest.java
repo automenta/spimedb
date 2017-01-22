@@ -1,4 +1,4 @@
-package spimedb.input;
+package spimedb.io;
 
 import org.junit.Test;
 import spimedb.SpimeDB;

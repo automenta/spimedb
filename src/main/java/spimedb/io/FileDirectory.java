@@ -1,4 +1,4 @@
-package spimedb.input;
+package spimedb.io;
 
 import com.google.common.collect.Iterators;
 import org.jetbrains.annotations.NotNull;
