@@ -3,7 +3,6 @@ package spimedb;
 import ch.qos.logback.classic.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.db.Infinispan;
 import spimedb.io.KML;
 import spimedb.server.WebServer;
 import spimedb.util.js.SpimeJS;
@@ -23,10 +22,10 @@ public class Main {
 
     public static void main(String[] args)  {
 
-        SpimeDB db =  Infinispan.get(
+        SpimeDB db =  /*Infinispan.db(
             //"/tmp/climate"
             null
-        );
+        );*/ new SpimeDB();
 
         try {
             new WebServer(db, 8080);

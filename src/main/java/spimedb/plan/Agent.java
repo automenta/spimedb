@@ -1,13 +1,13 @@
 package spimedb.plan;
 
 import com.google.common.collect.Lists;
-import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.graph.MapGraph;
 
 import java.io.PrintStream;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -18,8 +18,11 @@ public class Agent {
 
     final static Logger logger = LoggerFactory.getLogger(Agent.class);
 
-    public final MapGraph<Goal,String> plan = new MapGraph(new ConcurrentHashMap(), ConcurrentHashSet::new);
-    public final Map<String, GoalState> state = new ConcurrentHashMap();
+    public transient final MapGraph<Goal,String> plan =
+            new MapGraph(new ConcurrentHashMap(), HashSet::new);
+
+
+    public transient final Map<String, GoalState> state = new ConcurrentHashMap();
 
     final ExecutorService exe;
 

@@ -189,8 +189,7 @@
         <dependency>
             <groupId>org.teavm</groupId>
             <artifactId>teavm-classlib</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <!--<version>0.4.3</version>-->
+            <version>0.4.3</version>
         </dependency>
 
         <dependency>
@@ -515,7 +514,7 @@
 
         <testResources>
             <testResource>
-                <directory>${basedir}/src/test/java/spimedb/sense/kml</directory>
+                <directory>${basedir}/src/test/java/spimedb/io/kml</directory>
                 <includes>
                     <include>*.kmz</include>
                     <include>*.kml</include>
@@ -525,7 +524,7 @@
                 <filtering>false</filtering>
             </testResource>
             <testResource>
-                <directory>${basedir}/src/test/java/spimedb/sense</directory>
+                <directory>${basedir}/src/test/java/spimedb/io</directory>
                 <includes>
                     <include>*.json</include>
                     <include>*.geojson</include>

@@ -6,7 +6,6 @@ import de.jjedele.sbf.hashing.StringHashProvider;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
-import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.query.Query;
@@ -33,7 +32,7 @@ public class Session extends AbstractServerWebSocket {
      */
     final RateLimiter defaultOutRate = RateLimiter.create(defaultOutRateBytesPerSecond);
 
-    final Set<Task> active = new ConcurrentHashSet<>();
+    final Set<Task> active = new HashSet<>();
 
     final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 64 * 1024, 3, 0.005f, new StringHashProvider());
 

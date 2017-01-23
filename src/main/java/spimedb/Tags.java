@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.bytebuddy.ByteBuddy;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
-import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import spimedb.graph.travel.BreadthFirstTravel;
 import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +32,7 @@ public class Tags {
 //    public final MutableGraph<String> inh = GraphBuilder.directed().allowsSelfLoops(false).expectedNodeCount(512).nodeOrder(ElementOrder.unordered()).build();
 
     public final MapGraph<String,String> graph = new MapGraph<String,String>(new ConcurrentHashMap<>(),
-            ConcurrentHashSet::new);
+            HashSet::new);
 
 
 

@@ -53,6 +53,6 @@ public class AgentTest {
         a.goal(new SuperGoal("1"));
         a.sync(1000 * 10);
         System.out.println(a.log.toString());
-        assertEquals("SuperGoal.1 SubGoal.x SubGoal.y ", a.log.toString());
+        assertEquals("SuperGoal(\"1\") SubGoal(\"x\") SubGoal(\"y\") ", a.log.toString());
     }
 }

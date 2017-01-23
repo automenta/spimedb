@@ -18,6 +18,8 @@ pushd .
 	mvn install -DskipTests=true
 popd
 
+
+
 echo 'Build SpimeDB'
 mvn install -DskipTests=true
 
