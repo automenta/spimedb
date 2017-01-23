@@ -3,8 +3,8 @@ package spimedb.io;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
-import com.rometools.rome.io.impl.Base64;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -103,8 +103,10 @@ public class Multimedia  {
                 m = k;
                 break;
         }
+
         return m;
     }
+
 
     public static void main(String[] args)  {
 
@@ -180,7 +182,8 @@ public class Multimedia  {
 
                     Document pd = Document.createShell("");
                     pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
-                    String[] pdb = cleaner.clean(pd).body().children().stream()
+                    Elements cc = cleaner.clean(pd).body().children();
+                    String[] pdb = cc.stream()
                             .filter(xx -> !xx.children().isEmpty() || xx.hasText())
                             .map(xx -> xx.tagName().equals("p") ? xx.text() : xx ) //just use <p> contents
                             .map(Object::toString).toArray(String[]::new);
@@ -192,13 +195,17 @@ public class Multimedia  {
 //                        jdb.add(html2json(e));
 //                    });
 
+                    String allText = Joiner.on('\n').join(pdb);
+
+
                     d.add(
                         new MutableNObject(x.id() + "#" + page)
                             .withTags(x.id())
-                            .put("url", x.get("url") + "#" + page)
+                            .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
                             .put("contentType", "page/pdf")
                             .put("page", page)
                             .put("body", pdb.length > 0 ? pdb : null)
+                            .put("bodyParse", !allText.isEmpty() ? NLP.toString(NLP.parse(allText)) : null)
                     );
                 }
 
@@ -230,7 +237,7 @@ public class Multimedia  {
                         BufferedImage img = renderer.renderImageWithDPI(page, (float) dpi, ImageType.RGB);
 
 
-                        String resourceURL = Base64.encode(n.id()) + ".page" + page + "." + img.getWidth() + "x" + img.getHeight() + ".jpg"; //relative
+                        String resourceURL = (n.id()) + ".page" + page + "." + img.getWidth() + "x" + img.getHeight() + ".jpg"; //relative
                         String filename = "/tmp/eadoc/" + resourceURL;
                         boolean result = ImageIOUtil.writeImage(img, filename, dpi);
 

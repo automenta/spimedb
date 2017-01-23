@@ -2,7 +2,6 @@ package spimedb.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.rometools.rome.io.impl.Base64;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.resource.FileResourceManager;
@@ -12,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
+import spimedb.io.FileDirectory;
 
 import java.io.*;
 import java.net.URL;
@@ -194,7 +194,7 @@ public class HTTP {
         URL u = new URL(url);
         //u.openConnection().... <- properly check cache conditions via the response headers or something
 
-        Path targetPath = cachePath.resolve(Base64.encode(u.toString()));
+        Path targetPath = cachePath.resolve(FileDirectory.filenameable(u.toString()));
         File target = targetPath.toFile();
 
         if (!target.exists()) {
