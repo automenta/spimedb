@@ -31,7 +31,7 @@ public class FileDirectory {
 
                     URL u = x.toURL();
                     String us = u.toString();
-                    db.add(new MutableNObject(filenameable(us)).put("url", us));
+                    db.add(new MutableNObject(filenameable(us), x.getName()).put("url", us));
 
                 } catch (MalformedURLException e) {
                     e.printStackTrace();

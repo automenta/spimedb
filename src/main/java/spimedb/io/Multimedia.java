@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 /**
  * Detects document and multimedia metadata, and schedules further processing
@@ -78,11 +79,55 @@ public class Multimedia  {
 
         String m;
         switch (k) {
+
+            case "dc:title":  return null;  //duplicates
+            case "Last-Modified":  return null; //duplicates
+            case "pdf:docinfo:created":  return null; //duplicates
+            case "Creation-Date":  return null; //duplicates
+            case "created":  return null; //duplicates
+
+            case "creator": return null;
+            case "meta:author": return null;
+            case "meta:creation-date": return null;
+            case "pdf:PDFVersion": return null;
+            case "access_permission:can_modify": return null;
+            case "access_permission:extract_for_accessibility": return null;
+            case "access_permission:assemble_document": return null;
+            case "access_permission:extract_content": return null;
+            case "access_permission:fill_in_form": return null;
+
+            case "producer": return "generator";
+
+            case "pdf:docinfo:producer": return null;
+            case "modified": return null;
+            case "Last-Save-Date": return null;
+            case "pdf:docinfo:modified": return null;
+            case "meta:save-date": return null;
+            case "meta:keyword": return null;
+            case "cp:subject": return null;
+            case "dc:creator": return null;
+
+            case "dc:description": return null;
+            case "dc:subject": return null;
+
+            case "pdf:docinfo:creator": return null;
+            case "pdf:docinfo:subject": return null;
+            case "X-Parsed-By": return null;
+            case "pdf:encrypted": return null;
+            case "access_permission:modify_annotations": return null;
+            case "access_permission:can_print_degraded": return null;
+            case "access_permission:can_print": return null;
+            case "pdf:docinfo:keywords": return null;
+
+            case "Keywords": return "keywords";
+
             case "Title":
                 m = "N";
                 break;
+
+
             case "X-TIKA:content":
-                m = "body";
+                m = "text";
                 break;
             case "Author":
                 m = "author";
@@ -127,13 +172,15 @@ public class Multimedia  {
 
                 MutableNObject y = new MutableNObject(x);
                 try {
-                    InputStream stream = new URL(url).openStream();
+                    URL uu = new URL(url);
+                    InputStream stream = uu.openStream();
                     if (stream == null) {
                         throw new FileNotFoundException();
                     }
 
                     tikaWrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
 
+                    stream.close();
 
                     List<Metadata> m = tikaWrapper.getMetadata();
                     m.forEach(md -> {
@@ -156,37 +203,44 @@ public class Multimedia  {
                         }
                     });
 
-                    stream.close();
+
+
+                    db.add(y);
+
                 } catch (Exception e) {
                     //resource.put("ParseException", e);
                     e.printStackTrace();
                 }
 
 
-                db.add(y);
             }
         });
 
         Cleaner cleaner = new Cleaner(Whitelist.basic());
         db.on((NObject x, SpimeDB d) -> {
 
-            if ("application/pdf".equals(x.get("contentType")) && (d.graph.inDegreeOf(x.id())==0)) {
+            if ("application/pdf".equals(x.get("contentType")) && (d.graph.isLeaf(x.id())) /* leaf */) {
 
-                String parentContent = x.get("body");
+                String parentContent = x.get("text");
                 Document parentDOM = Jsoup.parse(parentContent);
 
                 Elements pagesHTML = parentDOM.select(".page");
 
                 int pageCount = x.get("pageCount");
-                for (int page = 0; page < pageCount; page++) {
+                for (int _page = 0; _page < pageCount; _page++) {
 
-                    Document pd = Document.createShell("");
-                    pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
-                    Elements cc = cleaner.clean(pd).body().children();
-                    String[] pdb = cc.stream()
-                            .filter(xx -> !xx.children().isEmpty() || xx.hasText())
-                            .map(xx -> xx.tagName().equals("p") ? xx.text() : xx ) //just use <p> contents
-                            .map(Object::toString).toArray(String[]::new);
+                    final int page = _page;
+                    d.runLater(()->{
+
+                        Document pd = Document.createShell("");
+                        pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
+                        Elements cc = cleaner.clean(pd).body().children();
+                        String[] pdb = cc.stream()
+                                .filter(xx -> !xx.children().isEmpty() || xx.hasText())
+                                .map(xx -> xx.tagName().equals("p") ? xx.text() : xx ) //just use <p> contents
+                                .map(Object::toString).toArray(String[]::new);
+                        if (pdb.length == 0)
+                            pdb = null;
 
 //                    List<JsonNode> jdb = new ArrayList(pdb.size());
 //                    pdb.forEach(e -> {
@@ -195,23 +249,37 @@ public class Multimedia  {
 //                        jdb.add(html2json(e));
 //                    });
 
-                    String allText = Joiner.on('\n').join(pdb);
+                        String docTitle = x.name();
 
 
-                    d.add(
-                        new MutableNObject(x.id() + "#" + page)
-                            .withTags(x.id())
-                            .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
-                            .put("contentType", "page/pdf")
-                            .put("page", page)
-                            .put("body", pdb.length > 0 ? pdb : null)
-                            .put("bodyParse", !allText.isEmpty() ? NLP.toString(NLP.parse(allText)) : null)
-                    );
+                        d.add(
+                            new MutableNObject(x.id() + "#" + page)
+                                .name(docTitle + " - (page " + (page+1) + ")")
+                                .withTags(x.id())
+                                .put("author", x.get("author"))
+                                .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
+                                .put("contentType", "page/pdf")
+                                .put("page", page)
+                                .put("text", pdb.length > 0 ? pdb : null)
+                                .put("textParse",
+                                        (pdb!=null)  ? Stream.of(pdb).map(
+                                            t -> NLP.toString(NLP.parse(t))
+                                        ).toArray(String[]::new) : null)
+                        );
+                    });
                 }
 
-
                 //clean and update parent DOM
-                d.add(new MutableNObject(x).put("body", null));
+                d.runLater(()-> {
+                    d.add(new MutableNObject(x)
+                            //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
+                            .put("text", null)
+                            .put("textParse", x.name() != null ? NLP.toString(NLP.parse(
+                                    Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
+                            )) : null) //parse the title + description
+                    );
+                });
+
             }
         });
 

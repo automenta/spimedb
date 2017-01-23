@@ -13,17 +13,15 @@ import java.util.List;
 
 
 /**
- *
  * dimensions: time (t), lon (x), lat (y), alt (z), ...
- *
+ * <p>
  * https://github.com/FasterXML/jackson-annotations/
- *
+ * <p>
  * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/test/Person.java
  * https://github.com/infinispan/infinispan/blob/master/query/src/test/java/org/infinispan/query/queries/spatial/QuerySpatialTest.java#L78
- *
  */
 
-@JsonSerialize(using= NObject.NObjectSerializer.class)
+@JsonSerialize(using = NObject.NObjectSerializer.class)
 public class MutableNObject extends ImmutableNObject {
 
 
@@ -44,12 +42,13 @@ public class MutableNObject extends ImmutableNObject {
 
 
     public MutableNObject put(String key, Object value) {
+
         switch (key) {
             case TAG:
                 if (value instanceof String[])
-                    withTags((String[])value);
+                    withTags((String[]) value);
                 else if (value instanceof String)
-                    withTags((String)value);
+                    withTags((String) value);
                 else
                     throw new RuntimeException("invalid tag property");
                 return this;
@@ -71,14 +70,18 @@ public class MutableNObject extends ImmutableNObject {
         }
 
         synchronized (data) {
-            data.put(key, value);
+            if (value == null) {
+                data.remove(key);
+            } else {
+                data.put(key, value);
+            }
         }
         return this;
     }
 
     public void description(String d) {
         if (d.isEmpty()) {
-            if (data!=null)
+            if (data != null)
                 data.remove(DESC);
             return;
         }
@@ -87,7 +90,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
 
-    public NObject name(String name) {
+    public MutableNObject name(String name) {
         this.name = name;
         return this;
     }
@@ -121,7 +124,11 @@ public class MutableNObject extends ImmutableNObject {
         {
             float a = (float) AX.inDegrees();
             float b = (float) BX.inDegrees();
-            if (a > b) { float t = a; a = b; b = t; } //swap
+            if (a > b) {
+                float t = a;
+                a = b;
+                b = t;
+            } //swap
             min.coord[1] = a;
             max.coord[1] = b;
             assert (a <= b);
@@ -130,7 +137,11 @@ public class MutableNObject extends ImmutableNObject {
         {
             float a = (float) AY.inDegrees();
             float b = (float) BY.inDegrees();
-            if (a > b) { float t = a; a = b; b = t; } //swap
+            if (a > b) {
+                float t = a;
+                a = b;
+                b = t;
+            } //swap
             min.coord[2] = a;
             max.coord[2] = b;
             assert (a <= b);
@@ -176,7 +187,9 @@ public class MutableNObject extends ImmutableNObject {
         return this;
     }
 
-    /** sets the inside property */
+    /**
+     * sets the inside property
+     */
     public MutableNObject withTags(String... tags) {
 
         if (tags.length > 1) {
@@ -201,6 +214,7 @@ public class MutableNObject extends ImmutableNObject {
         min.coord[0] = start;
         max.coord[0] = end;
     }
+
     public void when(float when) {
         min.coord[0] = when;
         max.coord[0] = when;
@@ -224,17 +238,23 @@ public class MutableNObject extends ImmutableNObject {
         max.coord[3] = z;
     }
 
-    @Deprecated public long[] whenLong() {
+    @Deprecated
+    public long[] whenLong() {
         float a = min.coord[0];
         float b = max.coord[0];
-        return new long[] { (long)a, (long)b };
+        return new long[]{(long) a, (long) b};
     }
 
     @Nullable
     public <X> X remove(String key) {
-        if (data!=null)
-            return (X)data.remove(key);
+        if (data != null)
+            return (X) data.remove(key);
         return null;
+    }
+
+
+    public Object /* previous */ putIfAbsent(String key, Object value) {
+        return data.putIfAbsent(key, value);
     }
 
 

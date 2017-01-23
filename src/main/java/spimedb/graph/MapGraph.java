@@ -215,4 +215,8 @@ public class MapGraph<V, E> implements Serializable {
         VertexContainer<V, E> vs = vertex(s, false);
         return vs != null && vs.containsOutgoingEdge(e, t);
     }
+
+    public boolean isLeaf(V id) {
+        return inDegreeOf(id)==0;
+    }
 }

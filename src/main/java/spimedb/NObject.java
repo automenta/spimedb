@@ -77,6 +77,9 @@ public interface NObject extends Serializable {
     }
 
 
+
+
+
     class NObjectSerializer extends JsonSerializer<NObject> {
 
         @Override
