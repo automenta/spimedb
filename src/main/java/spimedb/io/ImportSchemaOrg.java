@@ -46,7 +46,7 @@ abstract public class ImportSchemaOrg {
                     t.put(">", supertypes.toArray(new String[supertypes.size()]));
 
 
-                    db.put(t);
+                    db.add(t);
 
 
 //                    types.addNode(id);

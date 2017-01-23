@@ -21,8 +21,10 @@ import spimedb.util.FileUtils;
 import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -128,10 +130,23 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
     }
 
 
+    final List<BiConsumer<NObject,SpimeDB>> onChange = new CopyOnWriteArrayList<>();
+
+    public void on(BiConsumer<NObject, SpimeDB> changed) {
+        onChange.add(changed);
+    }
+
+
+    //TODO
+    /*public void on(BiConsumer<NObject,NObject> changedFromTo) {
+
+    }*/
+
+
     /**
      * returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics
      */
-    public NObject put(@Nullable NObject next) {
+    public NObject add(@Nullable NObject next) {
         if (next == null)
             return null;
 
@@ -150,25 +165,34 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
                 neww = true;
             }
 
-            NObject nextI = internal(next);
+            NObject current = internal(next);
 
-            String[] tags = nextI.tags();
-
-            this.tags.tag(nextI.id(), tags, previous!=null ? previous.tags() : null);
-
-            if (nextI.bounded()) {
-                for (String t : tags) {
-                    if (!t.isEmpty()) { //dont store in root
-                        SpatialSearch<NObject> s = space(t);
-                        if (previous != null)
-                            s.remove(previous);
-                        s.add(nextI);
-                    }
-                }
+            for (BiConsumer<NObject, SpimeDB> c : onChange) {
+                exe.execute(()->c.accept(current, this));
             }
 
-            return nextI;
+            reindex(previous, current);
+
+            return current;
         });
+    }
+
+    private void reindex(NObject previous, NObject current) {
+
+        String[] tags = current.tags();
+
+        this.tags.tag(current.id(), tags, previous!=null ? previous.tags() : null);
+
+        if (current.bounded()) {
+            for (String t : tags) {
+                if (!t.isEmpty()) { //dont store in root
+                    SpatialSearch<NObject> s = space(t);
+                    if (previous != null)
+                        s.remove(previous);
+                    s.add(current);
+                }
+            }
+        }
     }
 
     protected NObject internal(NObject next) {
@@ -248,8 +272,8 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
         exe.execute(r);
     }
 
-    public void put(Stream<? extends NObject> s) {
-        s.forEach(this::put);
+    public void add(Stream<? extends NObject> s) {
+        s.forEach(this::add);
     }
 
     public static synchronized void sync() {

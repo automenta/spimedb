@@ -1,15 +1,16 @@
 package spimedb.io;
 
-import com.google.common.collect.Iterators;
 import org.jetbrains.annotations.NotNull;
+import spimedb.MutableNObject;
 import spimedb.SpimeDB;
 import spimedb.plan.AbstractGoal;
 import spimedb.plan.Goal;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by me on 1/19/17.
@@ -18,12 +19,10 @@ public class FileDirectory extends AbstractGoal<SpimeDB> {
 
 
     private final String pathStr;
-    private final Function<File, Goal<? super SpimeDB>> eachFile;
 
-    public FileDirectory(String path, Function<File, Goal<? super SpimeDB>> eachFile) {
+    public FileDirectory(String path) {
         super(path);
         this.pathStr = path;
-        this.eachFile = eachFile;
     }
 
     @NotNull
@@ -35,9 +34,23 @@ public class FileDirectory extends AbstractGoal<SpimeDB> {
         }
 
         if (path.isDirectory()) {
-            next.accept(
-                () -> Iterators.transform( Iterators.forArray( path.listFiles() ), eachFile::apply)
-            );
+//            next.accept(
+//                () -> Iterators.transform( Iterators.forArray( path.listFiles() ), eachFile::apply)
+//            );
+
+            for (File x : path.listFiles()) {
+                try {
+
+                    URL u = x.toURL();
+                    String us = u.toString();
+                    context.add(new MutableNObject(us).put("url", us));
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
             return;
         }
         /* else {

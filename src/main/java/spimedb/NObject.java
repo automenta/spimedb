@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.apache.commons.lang3.ArrayUtils;
 import spimedb.index.rtree.PointND;
 import spimedb.util.JSON;
 
@@ -66,6 +67,15 @@ public interface NObject extends Serializable {
 
     /** intensional inheritance */
     String INH = "inh";
+
+    default boolean hasTag(String tag) {
+        return ArrayUtils.contains(tags(), tag);
+    }
+
+    default boolean has(String key) {
+        return get(key)!=null;
+    }
+
 
     class NObjectSerializer extends JsonSerializer<NObject> {
 

@@ -567,7 +567,7 @@ public class KML {
                     d = new MutableNObject(id);
                 } else {
                     d = new MutableNObject(pathString);
-                    d.setTag(parentPathString);
+                    d.withTags(parentPathString);
                 }
 
                 d.name(cs.getName());
@@ -594,7 +594,7 @@ public class KML {
                 }
             } else {
                 d = new MutableNObject(JSON.uuid64());
-                d.setTag(pathString);
+                d.withTags(pathString);
             }
 
             if (go instanceof Common) {
@@ -718,7 +718,7 @@ public class KML {
                     System.err.println("Un-NObjectized: " + go);
                     return false;
                 }*/
-            db.put(d);
+            db.add(d);
 
 
             return true;

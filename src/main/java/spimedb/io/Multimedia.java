@@ -1,5 +1,10 @@
 package spimedb.io;
 
+import com.rometools.rome.io.impl.Base64;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -10,21 +15,23 @@ import org.apache.tika.sax.ContentHandlerFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.helpers.DefaultHandler;
 import spimedb.MutableNObject;
+import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.plan.AbstractGoal;
 import spimedb.plan.Goal;
 
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URL;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  *
@@ -78,76 +85,23 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
     public void DO(@NotNull SpimeDB db, Consumer<Iterable<Goal<? super SpimeDB>>> next) throws RuntimeException {
 
 
-        RecursiveParserWrapper wrapper = new RecursiveParserWrapper(p, factory);
-        Metadata metadata = new Metadata();
-        //metadata.set(Metadata.RESOURCE_NAME_KEY, "test_recursive_embedded.docx");
-        ParseContext context = new ParseContext();
-
-        final MutableNObject resource = new MutableNObject(uri);
-
-        try {
-            InputStream stream = this.stream.get();
-            if (stream == null) {
-                throw new FileNotFoundException();
-            }
-
-            wrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
 
 
-            List<Metadata> m = wrapper.getMetadata();
-            m.forEach(d -> {
-                for (String k : d.names()) {
-                    String[] v = d.getValues(k);
-
-                    String kk = meta(k);
-                    if (kk != null)
-                        resource.put(kk, v.length > 1 ? v : v[0]);
-                }
-            });
-
-        } catch (Exception e) {
-            resource.put("ParseException", e);
-        }
-
-        int pages = Integer.parseInt(resource.getOr("pages", "-1"));
-        if ( pages > 0) {
-
-        }
-
-        //System.out.println(JSON.toJSONString(resource));
-
-        try {
-            //new XML(meta.get("_").toString());
-            Element body = Jsoup.parse(resource.get("_").toString()).body();
-            System.out.println(
-                    body.toString()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        db.put(resource);
-
-        if ("application/pdf".equals(resource.get("Content-Type"))) {
-            //spawn PDF thumbnail generation
-            next.accept( IntStream.range(0, pages-1).mapToObj( page ->
-                new PDF.ToImage( uri, stream, page )
-            ).collect(Collectors.toList()) );
-        }
     }
 
     //"Title" -> "N"
     //"X-TIKA:content" -> "_"
 
     @Nullable
-    static String meta(String k) {
+    static String tikiToField(String k) {
 
         String m;
         switch (k) {
             case "Title": m = "N"; break;
-            case "X-TIKA:content": m = "_"; break;
-
-            case "xmpTPg:NPages": m = "pages"; break;
+            case "X-TIKA:content": m = "body"; break;
+            case "Author": m = "author"; break;
+            case "Content-Type": m = "contentType"; break;
+            case "xmpTPg:NPages": m = "pageCount"; break;
 
             case "pdf:docinfo:title": m = null; break; //duplicates "Title"
             //TODO other duplcates
@@ -160,8 +114,123 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
     public static void main(String[] args) {
         SpimeDB db = new SpimeDB().resources("/tmp/eadoc");
 
+
+        db.on( (NObject x, SpimeDB d) -> {
+
+            String url = x.get("url");
+            if (url.startsWith("file:/") && !x.has("contentType")) {
+
+
+                RecursiveParserWrapper wrapper = new RecursiveParserWrapper(p, factory);
+                Metadata metadata = new Metadata();
+                ParseContext context = new ParseContext();
+
+                MutableNObject y = new MutableNObject(x);
+                try {
+                    InputStream stream = new URL(url).openStream();
+                    if (stream == null) {
+                        throw new FileNotFoundException();
+                    }
+
+                    wrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
+
+
+                    List<Metadata> m = wrapper.getMetadata();
+                    m.forEach(md -> {
+                        for (String k : md.names()) {
+                            String[] v = md.getValues(k);
+
+                            String kk = tikiToField(k);
+                            if (kk != null) {
+                                Object vv = v.length > 1 ? v : v[0];
+                                if (vv instanceof String) {
+                                    try {
+                                        int ivv = Integer.parseInt((String)vv);
+                                        vv = ivv;
+                                    } catch (Exception e) {
+                                        //not an int
+                                    }
+                                }
+                                y.put(kk, vv);
+                            }
+                        }
+                    });
+
+                    stream.close();
+                } catch (Exception e) {
+                    //resource.put("ParseException", e);
+                    e.printStackTrace();
+                }
+
+
+                db.add(y);
+            }
+        });
+
+        db.on( (NObject x, SpimeDB d) -> {
+            if ("application/pdf".equals(x.get("contentType"))) {
+
+                String parentContent = x.get("body");
+                Document parentDOM = Jsoup.parse(parentContent);
+                System.out.println(parentDOM);
+
+                Elements pages = parentDOM.select(".page" );
+
+
+                //spawn PDF thumbnail generation
+                int pageCount = x.get("pageCount");
+                for (int p = 0; p < pageCount; p++) {
+                    MutableNObject page = new MutableNObject(x.id() + "#" + p);
+                    page.withTags(x.id());
+                    page.put("url", x.get("url") + "#" + p);
+                    page.put("contentType", "page/pdf");
+                    page.put("page", p);
+
+                    try {
+                        page.put("body", pages.get(p).toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    d.add(page);
+
+                }
+
+            }
+        });
+
+        db.on( (NObject n, SpimeDB d) -> {
+            int dpi = 32;
+
+            if ("page/pdf".equals(n.get("contentType")) && !n.has("image")) {
+
+                PDDocument document = null;
+                try {
+                    document = PDDocument.load(new URL(n.get("url")).openStream());
+                    PDFRenderer renderer = new PDFRenderer(document);
+
+                    int page = n.get("page");
+
+                    BufferedImage img = renderer.renderImageWithDPI(page, (float) dpi, ImageType.RGB);
+                    String resourceURL = Base64.encode(n.id()) + ".page" + page + "." + img.getWidth() + "x" + img.getHeight() +".jpg"; //relative
+                    String filename = "/tmp/eadoc/" + resourceURL;
+                    boolean result = ImageIOUtil.writeImage(img, filename, dpi);
+                    System.out.println(filename + " " + result);
+
+                    d.add(new MutableNObject(n).put("image", resourceURL));
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        db.on((x, d) ->{
+           logger.info("change: {}", x);
+        });
+
         db.goal(
-            new FileDirectory("/home/me/d/eadoc", Multimedia::new)
+            new FileDirectory("/home/me/d/eadocsmall")
         );
 
         db.sync(1000 * 60);

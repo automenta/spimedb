@@ -25,7 +25,7 @@ public class GeoJSONTest {
     @Test
     public void test1() throws IOException {
 
-        db.put(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
+        db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 
         int all = db.size();
         assertTrue(all > 50);

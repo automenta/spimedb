@@ -14,7 +14,7 @@ public class Tag extends MutableNObject {
 
     public Tag(String id, String... supers) {
         super(id);
-        setTag(supers);
+        withTags(supers);
     }
 
     public Tag(MutableNObject rawSourceToCopyFrom) {

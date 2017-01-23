@@ -31,10 +31,11 @@ public class MutableNObject extends ImmutableNObject {
         this(id, null);
     }
 
-    public MutableNObject(MutableNObject copy) {
-        this(copy.id, copy.name);
-        setTag(copy.tag);
-        data.putAll(copy.data);
+    public MutableNObject(NObject copy) {
+        this(copy.id(), copy.name());
+        withTags(copy.tags());
+        data = new HashMap();
+        copy.forEach(data::put);
     }
 
     public MutableNObject(String id, String name) {
@@ -47,9 +48,9 @@ public class MutableNObject extends ImmutableNObject {
         switch (key) {
             case TAG:
                 if (value instanceof String[])
-                    setTag((String[])value);
+                    withTags((String[])value);
                 else if (value instanceof String)
-                    setTag((String)value);
+                    withTags((String)value);
                 else
                     throw new RuntimeException("invalid tag property");
                 return this;
@@ -176,7 +177,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     /** sets the inside property */
-    public NObject setTag(String... tags) {
+    public NObject withTags(String... tags) {
 
         if (tags.length > 1) {
             //TODO remove any duplicates

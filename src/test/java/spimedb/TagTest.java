@@ -22,17 +22,17 @@ public class TagTest {
     public void testTagActivationTrigger() {
 
         Tag v = new Tag("Test");
-        db.put(v);
+        db.add(v);
 
         System.out.println(db.tags.graph);
 
         Tag u = new Tag("Y", "Test");
-        db.put(u);
+        db.add(u);
 
         System.out.println(db.tags.graph);
 
         Tag t = new Tag("X", "Test");
-        db.put(t);
+        db.add(t);
 
         System.out.println(db.tags.graph);
 
@@ -64,7 +64,7 @@ public class TagTest {
 
         Consumer<Tag> onGeoJSONActivate = (t) -> {
             try {
-                db.put(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
+                db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,10 +74,10 @@ public class TagTest {
         };
 
         Tag u = new Tag.ExpandingTag("Earthquake", onGeoJSONActivate, onDeact, "Disaster");
-        db.put(u);
+        db.add(u);
 
         Tag t = new Tag("Hurricane", "Disaster");
-        db.put(t);
+        db.add(t);
 
 
         u.pri(null, 0.75f); //activate
@@ -90,8 +90,8 @@ public class TagTest {
 
     @Test public void testGraphDecoration() {
 
-        db.put(new Tag("Disaster"));
-        db.put(new Tag("Hurricane", "Disaster"));
+        db.add(new Tag("Disaster"));
+        db.add(new Tag("Hurricane", "Disaster"));
 
         assertEquals(null, db.graphed(""));
         assertEquals("{\"I\":\"Disaster\",\"inh\":{\">\":[\"Hurricane\"],\"<\":[\"\"]}}", db.graphed("Disaster").toString() );

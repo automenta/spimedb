@@ -26,13 +26,13 @@ public class QueryTest {
 
         MutableNObject place = new MutableNObject("civicstructure");
         place.where(0.5f, 0.5f);
-        place.setTag("Place");
-        db.put(place);
+        place.withTags("Place");
+        db.add(place);
 
         MutableNObject action = new MutableNObject("action");
         action.where(0.5f, 0.5f);
-        action.setTag("InteractAction");
-        db.put(action);
+        action.withTags("InteractAction");
+        db.add(action);
 
         Set<String> placeSubtags = set( db.tagsAndSubtags("Place") );
         System.out.println(placeSubtags);
