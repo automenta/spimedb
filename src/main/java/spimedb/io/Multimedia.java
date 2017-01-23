@@ -1,6 +1,8 @@
 package spimedb.io;
 
 import ch.qos.logback.classic.Level;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Iterables;
 import com.rometools.rome.io.impl.Base64;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,6 +21,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jpedal.jbig2.jai.JBIG2ImageReaderSpi;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.safety.Cleaner;
+import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,6 +165,7 @@ public class Multimedia  {
             }
         });
 
+        Cleaner cleaner = new Cleaner(Whitelist.basic());
         db.on((NObject x, SpimeDB d) -> {
 
             if ("application/pdf".equals(x.get("contentType")) && (d.graph.inDegreeOf(x.id())==0)) {
@@ -171,20 +177,34 @@ public class Multimedia  {
 
                 int pageCount = x.get("pageCount");
                 for (int page = 0; page < pageCount; page++) {
+
+                    Document pd = Document.createShell("");
+                    pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
+                    String[] pdb = cleaner.clean(pd).body().children().stream()
+                            .filter(xx -> !xx.children().isEmpty() || xx.hasText())
+                            .map(xx -> xx.tagName().equals("p") ? xx.text() : xx ) //just use <p> contents
+                            .map(Object::toString).toArray(String[]::new);
+
+//                    List<JsonNode> jdb = new ArrayList(pdb.size());
+//                    pdb.forEach(e -> {
+//                        if (e.children().isEmpty() && e.text().isEmpty())
+//                            return;
+//                        jdb.add(html2json(e));
+//                    });
+
                     d.add(
                         new MutableNObject(x.id() + "#" + page)
                             .withTags(x.id())
                             .put("url", x.get("url") + "#" + page)
                             .put("contentType", "page/pdf")
                             .put("page", page)
-                            .put("body", pagesHTML.get(page).removeClass("page").toString())
+                            .put("body", pdb.length > 0 ? pdb : null)
                     );
                 }
 
+
                 //clean and update parent DOM
-                pagesHTML.remove();
-                parentDOM.select("meta").remove();
-                d.add(new MutableNObject(x).put("body", parentDOM.toString()));
+                d.add(new MutableNObject(x).put("body", null));
             }
         });
 
@@ -241,6 +261,18 @@ public class Multimedia  {
         t.forEach(x -> System.out.println(JSON.toJSONString(x, true)));
 
 
+    }
+
+    private static JsonNode html2json(Element e) {
+
+        ObjectNode n = JSON.json.createObjectNode();
+        boolean hasChildren = e.children().isEmpty();
+        if (hasChildren)
+            n.set(e.tagName(), JSON.json.valueToTree(e.children().stream().map(Multimedia::html2json).toArray(x -> new JsonNode[x])));
+        if (e.hasText()) {
+            n.set(hasChildren ? "_" : e.tagName(), JSON.json.valueToTree(e.textNodes().stream().map(x -> x.text()).toArray(x -> new String[x])));
+        }
+        return n;
     }
 
     /*

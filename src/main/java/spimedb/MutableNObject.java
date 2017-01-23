@@ -9,7 +9,6 @@ import org.opensextant.giscore.geometry.Polygon;
 import spimedb.index.rtree.PointND;
 import spimedb.io.KML;
 
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -35,7 +34,6 @@ public class MutableNObject extends ImmutableNObject {
     public MutableNObject(NObject copy) {
         this(copy.id(), copy.name());
         withTags(copy.tags());
-        data = new HashMap();
         copy.forEach(data::put);
     }
 
@@ -72,8 +70,9 @@ public class MutableNObject extends ImmutableNObject {
                 return this;
         }
 
-        if (data == null) data = new HashMap<>();
-        data.put(key, value);
+        synchronized (data) {
+            data.put(key, value);
+        }
         return this;
     }
 

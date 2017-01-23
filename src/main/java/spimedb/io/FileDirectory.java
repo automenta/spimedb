@@ -8,9 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 
-/**
- * Created by me on 1/19/17.
- */
+
 public class FileDirectory {
 
 

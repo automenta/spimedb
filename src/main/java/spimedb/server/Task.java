@@ -45,18 +45,16 @@ abstract public class Task implements Runnable {
         this.whenCreated = System.currentTimeMillis();
 
         this.running.set(true);
-        s.active.add(this);
+        //s.active.add(this);
     }
 
     public void stop() {
         if (running.compareAndSet(true, false)) {
             this.whenStopped = System.currentTimeMillis();
-            if (session.active.remove(this)) {
-                long dms = whenStopped - whenCreated;
-                float kb = outBytes.get()/1024f;
-                logger.info("stop {} {}ms, sent {}Kb ({} Kb/sec)", this, dms, kb, (kb/(dms/1000f)) );
-            } else
-                logger.error("already removed {}", this);
+
+            long dms = whenStopped - whenCreated;
+            float kb = outBytes.get()/1024f;
+            logger.info("stop {} {}ms, sent {}Kb ({} Kb/sec)", this, dms, kb, (kb/(dms/1000f)) );
         }
     }
 

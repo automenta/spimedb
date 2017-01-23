@@ -12,6 +12,7 @@ import spimedb.query.Query;
 
 import javax.script.SimpleBindings;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -32,9 +33,9 @@ public class Session extends AbstractServerWebSocket {
      */
     final RateLimiter defaultOutRate = RateLimiter.create(defaultOutRateBytesPerSecond);
 
-    final Set<Task> active = new HashSet<>();
 
-    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 64 * 1024, 3, 0.005f, new StringHashProvider());
+
+    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 64 * 1024, 3, 0.001f, new StringHashProvider());
 
     ///final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 

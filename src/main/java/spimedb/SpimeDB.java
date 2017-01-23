@@ -8,6 +8,7 @@ import com.google.common.collect.Iterators;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -34,7 +35,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -71,8 +71,10 @@ public class SpimeDB implements Iterable<NObject> {
 
     private File resources;
 
-    public final MapGraph<String, String> graph = new MapGraph<String, String>(new ConcurrentHashMap<>(),
-            HashSet::new);
+    public final MapGraph<String, String> graph = new MapGraph<String, String>(
+            new ConcurrentHashMap<>(),
+            () -> Collections.synchronizedSet(new UnifiedSet()));
+
     final static String[] ROOT = new String[]{""};
     private final VertexContainer<String, String> rootNode;
 

@@ -6,6 +6,7 @@ import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
 import spimedb.util.JSON;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -24,7 +25,7 @@ public abstract class ImmutableNObject extends RectND implements NObject {
     protected String[] tag = ArrayUtils.EMPTY_STRING_ARRAY;
 
     protected String name;
-    protected Map<String, Object> data = null;
+    protected final Map<String, Object> data = new HashMap();
 
     public ImmutableNObject(PointND a, PointND b, String id, String name) {
         super(a, b);
