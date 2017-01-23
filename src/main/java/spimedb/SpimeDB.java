@@ -1,41 +1,47 @@
 package spimedb;
 
+import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.Iterators;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.eclipse.collections.api.set.ImmutableSet;
+import org.eclipse.collections.impl.factory.Sets;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.graph.MapGraph;
 import spimedb.graph.VertexContainer;
 import spimedb.graph.VertexIncidence;
+import spimedb.graph.travel.BreadthFirstTravel;
+import spimedb.graph.travel.CrossComponentTravel;
+import spimedb.graph.travel.UnionTravel;
 import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
 import spimedb.index.rtree.RectND;
 import spimedb.index.rtree.SpatialSearch;
-import spimedb.plan.Agent;
 import spimedb.query.Query;
 import spimedb.util.FileUtils;
 
 import javax.script.ScriptEngineManager;
 import java.io.File;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB extends Agent implements Iterable<NObject> {
+public class SpimeDB implements Iterable<NObject> {
 
 
     public static final String VERSION = "SpimeDB v-0.00";
@@ -44,16 +50,18 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
     public static final ForkJoinPool exe = ForkJoinPool.commonPool();
 
-    /** default location of file resources if unspecified */
+    /**
+     * default location of file resources if unspecified
+     */
     public static final String TMP_SPIMEDB_CACHE_PATH = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
 
     @JsonIgnore
     public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
     @JsonIgnore
-    public final Map<String, NObject> obj;
+    @Deprecated
+    public final Map<String, NObject> objMap;
 
-    transient public final Tags tags = new Tags();
 
     /**
      * server-side javascript engine
@@ -63,6 +71,10 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
 
     private File resources;
 
+    public final MapGraph<String, String> graph = new MapGraph<String, String>(new ConcurrentHashMap<>(),
+            HashSet::new);
+    final static String[] ROOT = new String[]{""};
+    private final VertexContainer<String, String> rootNode;
 
     /**
      * in-memory, map-based
@@ -72,10 +84,65 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
     }
 
     public SpimeDB(Map<String, NObject> g) {
-        super(ForkJoinPool.commonPool());
-
-        this.obj = g;
+        super();
+        rootNode = graph.addVertex(ROOT[0]);
+        this.objMap = g;
         resources(TMP_SPIMEDB_CACHE_PATH);
+    }
+
+    public static void LOG(String l, Level ll) {
+        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
+    }
+
+
+    public void tag(@NotNull String x, @NotNull String[] nextTags, @Nullable String[] prevTags) {
+
+        if (nextTags.length == 0)
+            nextTags = ROOT;
+
+        if (prevTags != null) {
+            ImmutableSet<String> ns = Sets.immutable.of(nextTags);
+            ImmutableSet<String> ps = Sets.immutable.of(prevTags);
+            if (ns.equals(ps))
+                return; //no change
+        }
+
+        synchronized (graph) {
+
+            VertexContainer<String, String> src = graph.addVertex(x);
+
+            if (prevTags != null) {
+                //TODO use Set intersection to determine the difference in tags that actually need to be removed because some may just get added again below
+                for (String y : prevTags) {
+                    graph.removeEdge(src, x, y, NObject.INH);
+                }
+            }
+
+            for (String y : nextTags) {
+                graph.addEdge(src, x, y, NObject.INH);
+            }
+        }
+
+    }
+
+
+    public Set<String> tags() {
+        return graph.vertexSet();
+    }
+
+    public Iterator<String> roots() {
+        return rootNode.inV();
+    }
+
+    private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
+        public SubTags(MapGraph<V, E> graph, V... parentTags) {
+            super(graph, parentTags);
+        }
+
+        @Override
+        protected CrossComponentTravel<V, E, Object> get(V start, MapGraph<V, E> graph, Map<V, Object> seen) {
+            return new BreadthFirstTravel<>(graph, start, seen);
+        }
     }
 
     public SpimeDB resources(String path) {
@@ -95,22 +162,6 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
         });
     }
 
-    Class[] resolve(String... tags) {
-        return this.tags.resolve(tags);
-    }
-
-    public Class the(String tagID, String... supertags) {
-
-        //.subclass(NObject.class).implement(s)
-                    /*.method(any())
-                    .intercept(MethodDelegation.to(MyInterceptor.class)
-                            .andThen(SuperMethodCall.INSTANCE)
-                            .defineField("myCustomField", Object.class, Visibility.PUBLIC)*/
-                    /*.make()
-                    .load(cl)
-                    .getLoaded();*/
-        return tags.the(tagID, supertags);
-    }
 
 //    @Override
 //    public NObject a(String id, String... tags) {
@@ -130,7 +181,7 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
     }
 
 
-    final List<BiConsumer<NObject,SpimeDB>> onChange = new CopyOnWriteArrayList<>();
+    final List<BiConsumer<NObject, SpimeDB>> onChange = new CopyOnWriteArrayList<>();
 
     public void on(BiConsumer<NObject, SpimeDB> changed) {
         onChange.add(changed);
@@ -150,12 +201,12 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
         if (next == null)
             return null;
 
-        return obj.compute(next.id(), (i, previous) -> {
+        return objMap.compute(next.id(), (i, previous) -> {
 
             boolean changed, neww;
 
             if (previous != null) {
-                if (NObject.equalsDeep(previous, next))
+                if (NObject.equalsDeep(graphed(previous), graphed(next)))
                     return previous;
 
                 changed = true;
@@ -165,32 +216,48 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
                 neww = true;
             }
 
-            NObject current = internal(next);
+            NObject current = reindex(previous, next);
 
-            for (BiConsumer<NObject, SpimeDB> c : onChange) {
-                exe.execute(()->c.accept(current, this));
+            if (!onChange.isEmpty()) {
+                exe.submit(() -> {
+                    for (BiConsumer<NObject, SpimeDB> c : onChange) {
+                        c.accept(current, this);
+                    }
+                });
             }
-
-            reindex(previous, current);
 
             return current;
         });
     }
 
-    private void reindex(NObject previous, NObject current) {
+    private NObject reindex(NObject previous, NObject current) {
 
         String[] tags = current.tags();
 
-        this.tags.tag(current.id(), tags, previous!=null ? previous.tags() : null);
+        this.tag(current.id(), tags, previous != null ? previous.tags() : null);
+
+
+        if (current instanceof GraphedNObject)
+            current = new MutableNObject(current); //store as un-graphed immutable
+
+        //HACK remove tag field now that it is indexed in the graph
+        if (current instanceof MutableNObject)
+            ((MutableNObject) current).remove(">");
 
         if (current.bounded()) {
-            for (String t : tags) {
-                if (!t.isEmpty()) { //dont store in root
-                    SpatialSearch<NObject> s = space(t);
-                    if (previous != null)
-                        s.remove(previous);
-                    s.add(current);
-                }
+            reindexSpatial(previous, current, tags);
+        }
+
+        return current;
+    }
+
+    private void reindexSpatial(NObject previous, NObject current, String[] tags) {
+        for (String t : tags) {
+            if (!t.isEmpty()) { //dont store in root
+                SpatialSearch<NObject> s = space(t);
+                if (previous != null)
+                    s.remove(previous);
+                s.add(current);
             }
         }
     }
@@ -201,7 +268,13 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
 
 
     public Iterator<NObject> iterator() {
-        return obj.values().iterator();
+        GraphedNObject reusedWrapper = new GraphedNObject(graph);
+        return Iterators.transform(
+            objMap.values().iterator(), x -> {
+                reusedWrapper.set(x);
+                return new MutableNObject( reusedWrapper );
+            }
+        );
     }
 
     @JsonIgnore
@@ -211,12 +284,14 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
 
     @JsonIgnore
     public int size() {
-        return obj.size();
+        return objMap.size();
     }
 
 
     public NObject get(String nobjectID) {
-        return obj.get(nobjectID);
+
+
+        return objMap.get(nobjectID);
     }
 
 
@@ -263,9 +338,10 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
      */
     public Iterable<String> tagsAndSubtags(@Nullable String... parentTags) {
         if (parentTags == null || parentTags.length == 0)
-            return tags.tags(); //ALL
-        else
-            return tags.tagsAndSubtags(parentTags);
+            return this.tags(); //ALL
+        else {
+            return new SubTags(graph, parentTags);
+        }
     }
 
     public static void runLater(Runnable r) {
@@ -276,20 +352,28 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
         s.forEach(this::add);
     }
 
+    @Deprecated
     public static synchronized void sync() {
-        exe.awaitQuiescence(60, TimeUnit.SECONDS);
+        sync(60);
+    }
+
+    public static synchronized void sync(float seconds) {
+        exe.awaitQuiescence(Math.round(seconds * 1000f), TimeUnit.MILLISECONDS);
     }
 
 
     public GraphedNObject graphed(String id) {
         NObject n = get(id);
-        if (n!=null)
+        if (n != null)
             return graphed(n);
         return null;
     }
 
     public GraphedNObject graphed(NObject n) {
-        return new GraphedNObject(tags.graph, n);
+        if ((n instanceof GraphedNObject) && (((GraphedNObject) n).graph == graph))
+            return (GraphedNObject) n; //already wrapped
+
+        return new GraphedNObject(this.graph, n);
     }
 
     @JsonSerialize(using = NObject.NObjectSerializer.class)
@@ -297,25 +381,26 @@ public class SpimeDB extends Agent implements Iterable<NObject> {
 
         private final MapGraph<String, String> graph;
 
-        GraphedNObject(MapGraph<String,String> graph) {
+
+        GraphedNObject(MapGraph<String, String> graph) {
             this.graph = graph;
         }
 
-        GraphedNObject(MapGraph<String,String> graph, NObject n) {
+        GraphedNObject(MapGraph<String, String> graph, NObject n) {
             this(graph);
             set(n);
         }
 
         @Override
         public void forEach(BiConsumer<String, Object> each) {
-            n.forEach((k,v) -> {
+            n.forEach((k, v) -> {
                 if (!k.equals(TAG)) //HACK filter out tag field because the information will be present in the graph
                     each.accept(k, v);
             });
 
             VertexContainer<String, String> v = graph.vertex(id(), false);
             if (v != null) {
-                Map<String,VertexIncidence<String>> boundary = v.incidence();
+                Map<String, VertexIncidence<String>> boundary = v.incidence();
                 boundary.forEach(each);
             }
         }

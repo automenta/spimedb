@@ -44,7 +44,7 @@ abstract public class AbstractServerWebSocket extends AbstractReceiveListener im
     }
 
     public static void sendJSONText(WebSocketChannel socket, Object object) throws IOException {
-        sendJSON(socket, object, JSON.jsonText, null, null);
+        sendJSON(socket, object, JSON.jsonSafe, null, null);
     }
 
     public static void sendJSONBinary(WebSocketChannel socket, Object object) throws IOException {

@@ -331,7 +331,7 @@ nobjectTree(layers, function(v) {
     var x = nobject(v);
     if (DEBUG)
         print('vertex:', v);
-    db.put(x);
+    db.add(x);
 }, function(s, p, o) {
     if (DEBUG)
         print('edge:', JSON.stringify(s), p, JSON.stringify(o) );

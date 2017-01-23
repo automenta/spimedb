@@ -1,6 +1,5 @@
 package spimedb.util.js;
 
-import org.infinispan.commons.util.concurrent.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teavm.cache.DiskRegularMethodNodeCache;
@@ -329,7 +328,7 @@ public class JavaToJavascript {
         private final File directory;
         private final ProgramIO programIO;
         private final Map<MethodReference, Item> cache = new ConcurrentHashMap<>();
-        private final Set<MethodReference> newMethods = new ConcurrentHashSet();
+        private final Set<MethodReference> newMethods = new HashSet();
         private final ClassDateProvider classDateProvider;
         private final MyFileSymbolTable fileTable, symbolTable;
 
@@ -444,7 +443,7 @@ public class JavaToJavascript {
         }
 
         static class ProgramDependencyAnalyzer implements InstructionVisitor {
-            final Set<String> dependencies = new ConcurrentHashSet<>();
+            final Set<String> dependencies = new HashSet<>();
 
             public void clear() {
                 dependencies.clear();

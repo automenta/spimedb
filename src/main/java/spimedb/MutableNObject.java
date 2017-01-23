@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.jetbrains.annotations.Nullable;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
@@ -44,7 +45,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
 
-    public NObject put(String key, Object value) {
+    public MutableNObject put(String key, Object value) {
         switch (key) {
             case TAG:
                 if (value instanceof String[])
@@ -177,7 +178,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     /** sets the inside property */
-    public NObject withTags(String... tags) {
+    public MutableNObject withTags(String... tags) {
 
         if (tags.length > 1) {
             //TODO remove any duplicates
@@ -189,7 +190,7 @@ public class MutableNObject extends ImmutableNObject {
         }
 
         if (tags.length == 0)
-            tags = Tags.ROOT;
+            tags = SpimeDB.ROOT;
 
         this.tag = tags;
 
@@ -228,6 +229,13 @@ public class MutableNObject extends ImmutableNObject {
         float a = min.coord[0];
         float b = max.coord[0];
         return new long[] { (long)a, (long)b };
+    }
+
+    @Nullable
+    public <X> X remove(String key) {
+        if (data!=null)
+            return (X)data.remove(key);
+        return null;
     }
 
 

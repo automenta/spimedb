@@ -94,7 +94,7 @@ public class Session extends AbstractServerWebSocket {
 
                 @Override
                 public void run() {
-                    Iterator<String> r = db.tags.roots();
+                    Iterator<String> r = db.roots();
                     try {
                         while (r.hasNext()) {
                             trySend(this, r.next());

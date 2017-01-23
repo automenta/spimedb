@@ -20,32 +20,5 @@ import java.net.URL;
 public class PDF {
 
 
-    public static class ToImage extends AtomicGoal<SpimeDB> {
-
-        public final static Logger logger = LoggerFactory.getLogger(ToImage.class);
-
-        static {
-            IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
-        }
-
-        private final String id;
-
-        int dpi = 32;
-
-        public ToImage(String id) {
-            super(id);
-            this.id = id;
-        }
-
-
-        @Override
-        protected void run(SpimeDB context) throws IOException {
-            //PDFToImage
-
-
-
-        }
-    }
-
 
 }

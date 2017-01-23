@@ -1,5 +1,7 @@
 package spimedb.io;
 
+import ch.qos.logback.classic.Level;
+import com.google.common.collect.Iterables;
 import com.rometools.rome.io.impl.Base64;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
@@ -12,8 +14,9 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.RecursiveParserWrapper;
 import org.apache.tika.sax.BasicContentHandlerFactory;
 import org.apache.tika.sax.ContentHandlerFactory;
-import org.jetbrains.annotations.NotNull;
+import org.eclipse.collections.impl.block.factory.Comparators;
 import org.jetbrains.annotations.Nullable;
+import org.jpedal.jbig2.jai.JBIG2ImageReaderSpi;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -23,25 +26,26 @@ import org.xml.sax.helpers.DefaultHandler;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.plan.AbstractGoal;
-import spimedb.plan.Goal;
+import spimedb.util.JSON;
 
+import javax.imageio.spi.IIORegistry;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.TreeSet;
 
 /**
- *
  * Detects document and multimedia metadata, and schedules further processing
- *
+ * <p>
  * https://svn.apache.org/repos/asf/tika/trunk/tika-example/src/main/java/org/apache/tika/example/LuceneIndexerExtended.java
  * https://svn.apache.org/repos/asf/tika/trunk/tika-example/src/main/java/org/apache/tika/example/SimpleTextExtractor.java
  * https://github.com/apache/pdfbox/tree/trunk/examples/src/main/java/org/apache/pdfbox/examples
  */
-public class Multimedia extends AbstractGoal<SpimeDB> {
+public class Multimedia  {
 
 
     public final static Logger logger = LoggerFactory.getLogger(Multimedia.class);
@@ -49,28 +53,8 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
     private static final int BUFFER_SIZE = 1024 * 128;
 
 
-    static final Parser p = new AutoDetectParser();
-    static final ContentHandlerFactory factory = new BasicContentHandlerFactory(
-            BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
 
-    private final Supplier<InputStream> stream;
-    private final String uri;
 
-    public Multimedia(File f) {
-        this(f.toURI().toString(), () -> {
-            try {
-                return new FileInputStream(f);
-            } catch (FileNotFoundException e) {
-                return null;
-            }
-        });
-    }
-
-    public Multimedia(String uri, Supplier<InputStream> stream) {
-        super(uri);
-        this.uri = uri;
-        this.stream = stream;
-    }
 
     //    public static void fromURL(String url, Consumer<Multimedia> with) throws IOException {
 //        //this(url, new URL(url).openStream());
@@ -80,14 +64,6 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
 //    }
 
 
-    @NotNull
-    @Override
-    public void DO(@NotNull SpimeDB db, Consumer<Iterable<Goal<? super SpimeDB>>> next) throws RuntimeException {
-
-
-
-
-    }
 
     //"Title" -> "N"
     //"X-TIKA:content" -> "_"
@@ -97,31 +73,48 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
 
         String m;
         switch (k) {
-            case "Title": m = "N"; break;
-            case "X-TIKA:content": m = "body"; break;
-            case "Author": m = "author"; break;
-            case "Content-Type": m = "contentType"; break;
-            case "xmpTPg:NPages": m = "pageCount"; break;
+            case "Title":
+                m = "N";
+                break;
+            case "X-TIKA:content":
+                m = "body";
+                break;
+            case "Author":
+                m = "author";
+                break;
+            case "Content-Type":
+                m = "contentType";
+                break;
+            case "xmpTPg:NPages":
+                m = "pageCount";
+                break;
 
-            case "pdf:docinfo:title": m = null; break; //duplicates "Title"
+            case "pdf:docinfo:title":
+                m = null;
+                break; //duplicates "Title"
             //TODO other duplcates
 
-            default: m = k; break;
+            default:
+                m = k;
+                break;
         }
         return m;
     }
 
-    public static void main(String[] args) {
-        SpimeDB db = new SpimeDB().resources("/tmp/eadoc");
+    public static void main(String[] args)  {
+
+        SpimeDB db = new SpimeDB();;
 
 
-        db.on( (NObject x, SpimeDB d) -> {
+        final Parser tika = new AutoDetectParser();
+        final ContentHandlerFactory tikaFactory = new BasicContentHandlerFactory( BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
+        final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
+        db.on((NObject x, SpimeDB d) -> {
 
             String url = x.get("url");
             if (url.startsWith("file:/") && !x.has("contentType")) {
 
 
-                RecursiveParserWrapper wrapper = new RecursiveParserWrapper(p, factory);
                 Metadata metadata = new Metadata();
                 ParseContext context = new ParseContext();
 
@@ -132,10 +125,10 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
                         throw new FileNotFoundException();
                     }
 
-                    wrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
+                    tikaWrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
 
 
-                    List<Metadata> m = wrapper.getMetadata();
+                    List<Metadata> m = tikaWrapper.getMetadata();
                     m.forEach(md -> {
                         for (String k : md.names()) {
                             String[] v = md.getValues(k);
@@ -145,7 +138,7 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
                                 Object vv = v.length > 1 ? v : v[0];
                                 if (vv instanceof String) {
                                     try {
-                                        int ivv = Integer.parseInt((String)vv);
+                                        int ivv = Integer.parseInt((String) vv);
                                         vv = ivv;
                                     } catch (Exception e) {
                                         //not an int
@@ -167,76 +160,87 @@ public class Multimedia extends AbstractGoal<SpimeDB> {
             }
         });
 
-        db.on( (NObject x, SpimeDB d) -> {
-            if ("application/pdf".equals(x.get("contentType"))) {
+        db.on((NObject x, SpimeDB d) -> {
+
+            if ("application/pdf".equals(x.get("contentType")) && (d.graph.inDegreeOf(x.id())==0)) {
 
                 String parentContent = x.get("body");
                 Document parentDOM = Jsoup.parse(parentContent);
-                System.out.println(parentDOM);
 
-                Elements pages = parentDOM.select(".page" );
+                Elements pagesHTML = parentDOM.select(".page");
 
-
-                //spawn PDF thumbnail generation
                 int pageCount = x.get("pageCount");
-                for (int p = 0; p < pageCount; p++) {
-                    MutableNObject page = new MutableNObject(x.id() + "#" + p);
-                    page.withTags(x.id());
-                    page.put("url", x.get("url") + "#" + p);
-                    page.put("contentType", "page/pdf");
-                    page.put("page", p);
-
-                    try {
-                        page.put("body", pages.get(p).toString());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    d.add(page);
-
+                for (int page = 0; page < pageCount; page++) {
+                    d.add(
+                        new MutableNObject(x.id() + "#" + page)
+                            .withTags(x.id())
+                            .put("url", x.get("url") + "#" + page)
+                            .put("contentType", "page/pdf")
+                            .put("page", page)
+                            .put("body", pagesHTML.get(page).removeClass("page").toString())
+                    );
                 }
 
+                //clean and update parent DOM
+                pagesHTML.remove();
+                parentDOM.select("meta").remove();
+                d.add(new MutableNObject(x).put("body", parentDOM.toString()));
             }
         });
 
-        db.on( (NObject n, SpimeDB d) -> {
+
+        SpimeDB.LOG("org.apache.pdfbox.rendering.CIDType0Glyph2D", Level.ERROR);
+        SpimeDB.LOG("org.apache.pdfbox", Level.ERROR);
+        java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
+        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
+        db.on((NObject n, SpimeDB d) -> {
             int dpi = 32;
 
             if ("page/pdf".equals(n.get("contentType")) && !n.has("image")) {
 
-                PDDocument document = null;
                 try {
-                    document = PDDocument.load(new URL(n.get("url")).openStream());
-                    PDFRenderer renderer = new PDFRenderer(document);
+                    PDDocument document = PDDocument.load(new URL(n.get("url")).openStream());
 
-                    int page = n.get("page");
+                    try {
 
-                    BufferedImage img = renderer.renderImageWithDPI(page, (float) dpi, ImageType.RGB);
-                    String resourceURL = Base64.encode(n.id()) + ".page" + page + "." + img.getWidth() + "x" + img.getHeight() +".jpg"; //relative
-                    String filename = "/tmp/eadoc/" + resourceURL;
-                    boolean result = ImageIOUtil.writeImage(img, filename, dpi);
-                    System.out.println(filename + " " + result);
+                        PDFRenderer renderer = new PDFRenderer(document);
 
-                    d.add(new MutableNObject(n).put("image", resourceURL));
+                        int page = n.get("page");
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        BufferedImage img = renderer.renderImageWithDPI(page, (float) dpi, ImageType.RGB);
+
+
+                        String resourceURL = Base64.encode(n.id()) + ".page" + page + "." + img.getWidth() + "x" + img.getHeight() + ".jpg"; //relative
+                        String filename = "/tmp/eadoc/" + resourceURL;
+                        boolean result = ImageIOUtil.writeImage(img, filename, dpi);
+
+                        d.add(new MutableNObject(n).put("image", resourceURL));
+
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    document.close();
+                } catch (IOException f) {
+                    f.printStackTrace();
                 }
+
             }
         });
 
-        db.on((x, d) ->{
-           logger.info("change: {}", x);
-        });
 
-        db.goal(
-            new FileDirectory("/home/me/d/eadocsmall")
-        );
+        FileDirectory.createFileNodes("/home/me/d/eadocsmall", db);
+
 
         db.sync(1000 * 60);
 
-        db.printState(System.out);
-        db.obj.forEach((k,v)->System.out.println(v));
+        TreeSet<NObject> t = new TreeSet(Comparators.byFunction((NObject d) -> d.id()));
+        Iterables.addAll(t, db);
+
+        t.forEach(x -> System.out.println(JSON.toJSONString(x, true)));
+
+
     }
 
     /*

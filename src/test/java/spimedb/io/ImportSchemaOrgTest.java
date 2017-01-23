@@ -21,16 +21,16 @@ public class ImportSchemaOrgTest {
 //            System.out.println("\t" + r.graph.edgesOf(v));
 //        });
 
-        assertTrue(db.obj.size() > 500);
+        assertTrue(db.objMap.size() > 500);
 
-        assertEquals(1, db.tags.graph.outDegreeOf("Action"));
-        assertTrue(db.tags.graph.inDegreeOf("Action") > 1);
+        assertEquals(1, db.graph.outDegreeOf("Action"));
+        assertTrue(db.graph.inDegreeOf("Action") > 1);
 
         //System.out.println(db.tags.graph.vertex("Action", false).outVset());
         //System.out.println(db.get("replace"));
 
-        assertEquals(1, db.tags.graph.outDegreeOf("Place"));
-        assertTrue(db.tags.graph.inDegreeOf("Place") > 1);
+        assertEquals(1, db.graph.outDegreeOf("Place"));
+        assertTrue(db.graph.inDegreeOf("Place") > 1);
 
         //TODO: assertTrue(r.tags.isConnected)
 

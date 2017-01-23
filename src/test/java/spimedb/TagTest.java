@@ -24,24 +24,24 @@ public class TagTest {
         Tag v = new Tag("Test");
         db.add(v);
 
-        System.out.println(db.tags.graph);
+        System.out.println(db.graph);
 
         Tag u = new Tag("Y", "Test");
         db.add(u);
 
-        System.out.println(db.tags.graph);
+        System.out.println(db.graph);
 
         Tag t = new Tag("X", "Test");
         db.add(t);
 
-        System.out.println(db.tags.graph);
+        System.out.println(db.graph);
 
         assertEquals(0, t.pri(), 0.01f);
 
 
         //+1 for the root tag, ""
         assertEquals(3+1, size(db.tagsAndSubtags()));
-        assertEquals(1, Iterators.size(db.tags.roots()));
+        assertEquals(1, Iterators.size(db.roots()));
         assertEquals(1, size(db.tagsAndSubtags("X")));
         assertEquals(1, size(db.tagsAndSubtags("Y")));
         assertEquals(3, size(db.tagsAndSubtags("Test")));
@@ -85,7 +85,6 @@ public class TagTest {
         SpimeDB.sync();
 
         System.out.println(db.toString());
-        System.out.println(db.tags.toString());
     }
 
     @Test public void testGraphDecoration() {
