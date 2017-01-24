@@ -325,6 +325,14 @@ public class Multimedia  {
         });
 
 
+        db.on((x, d) -> {
+            try {
+                Solr.solrUpdate("http://ea:8983/solr/x/update", x);
+            } catch (IOException e) {
+                logger.error("solr update: {}", e);
+            }
+        });
+
         FileDirectory.createFileNodes("/home/me/d/eadocsmall", db);
 
 
