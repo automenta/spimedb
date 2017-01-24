@@ -38,6 +38,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -149,10 +151,13 @@ public class Multimedia  {
         return m;
     }
 
+    static final String pdfPageImageOutputPath = "/home/me/ea/res";
+    static final int pdfPageImageDPI = 32;
+    static final String solrURL = "http://ea:8983/solr/collection1";
 
     public static void main(String[] args)  {
 
-        SpimeDB db = new SpimeDB();;
+        SpimeDB db = new SpimeDB();
 
 
         final Parser tika = new AutoDetectParser();
@@ -203,7 +208,7 @@ public class Multimedia  {
 
 
 
-                    db.add(y);
+                    db.addAsync(y);
 
                 } catch (Exception e) {
                     //resource.put("ParseException", e);
@@ -217,7 +222,7 @@ public class Multimedia  {
         Cleaner cleaner = new Cleaner(Whitelist.basic());
         db.on((NObject x, SpimeDB d) -> {
 
-            if ("application/pdf".equals(x.get("contentType")) && (d.graph.isLeaf(x.id())) /* leaf */) {
+            if ("application/pdf".equals(x.get("contentType")) && x.has("pageCount") && x.has("text") && (d.graph.isLeaf(x.id())) /* leaf */) {
 
                 String parentContent = x.get("text");
                 Document parentDOM = Jsoup.parse(parentContent);
@@ -250,14 +255,14 @@ public class Multimedia  {
                         String docTitle = x.name();
 
 
-                        d.add(
+                        d.addAsync(
                             new MutableNObject(x.id() + "#" + page)
                                 .name(docTitle + " - (page " + (page+1) + ")")
                                 .withTags(x.id())
                                 .put("author", x.get("author"))
                                 .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
                                 .put("url_in", x.get("url_in"))
-                                .put("contentType", "page/pdf")
+                                .put("contentType", "application/pdf")
                                 .put("page", page)
                                 .put("text", pdb.length > 0 ? pdb : null)
                                 .put("textParse",
@@ -269,15 +274,15 @@ public class Multimedia  {
                 }
 
                 //clean and update parent DOM
-                d.runLater(()-> {
-                    d.add(new MutableNObject(x)
-                            //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
-                            .put("text", null)
-                            .put("textParse", x.name() != null ? NLP.toString(NLP.parse(
-                                    Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
-                            )) : null) //parse the title + description
-                    );
-                });
+
+                d.addAsync(new MutableNObject(x)
+                        //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
+                        .put("text", null)
+                        .put("textParse", x.name() != null ? NLP.toString(NLP.parse(
+                                Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
+                        )) : null) //parse the title + description
+                );
+
 
             }
         });
@@ -288,37 +293,43 @@ public class Multimedia  {
         java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
         db.on((NObject n, SpimeDB d) -> {
-            int dpi = 32;
 
-            if ("page/pdf".equals(n.get("contentType")) && !n.has("image")) {
+            if (n.has("page") && !n.has("pageCount") && "application/pdf".equals(n.get("contentType")) && !n.has("image")) {
 
-                try {
-                    PDDocument document = PDDocument.load(new URL(n.get("url_in")).openStream());
+                int page = n.get("page");
+                String pageFile = (n.id()) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
+                        //img.getWidth() + "x" + img.getHeight() +
 
+                String outputFile = pdfPageImageOutputPath + "/" + pageFile;
+
+                if (!Files.exists(Paths.get(outputFile))) {
                     try {
+                        PDDocument document = PDDocument.load(new URL(n.get("url_in")).openStream());
 
-                        PDFRenderer renderer = new PDFRenderer(document);
+                        try {
 
-                        int page = n.get("page");
-
-                        BufferedImage img = renderer.renderImageWithDPI(page, (float) dpi, ImageType.RGB);
-
-
-                        String resourceURL = (n.id()) + ".page" + page + "." + img.getWidth() + "x" + img.getHeight() + ".jpg"; //relative
-                        String filename = "/tmp/eadoc/" + resourceURL;
-                        boolean result = ImageIOUtil.writeImage(img, filename, dpi);
-
-                        d.add(new MutableNObject(n).put("image", resourceURL));
+                            PDFRenderer renderer = new PDFRenderer(document);
 
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                            BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
+
+
+                            boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+
+
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        document.close();
+                    } catch (IOException f) {
+                        f.printStackTrace();
                     }
 
-                    document.close();
-                } catch (IOException f) {
-                    f.printStackTrace();
                 }
+
+                d.addAsync(new MutableNObject(n).put("image", pageFile));
 
             }
         });
@@ -339,7 +350,7 @@ public class Multimedia  {
 //
 //                if (!l.isEmpty()) {
                     try {
-                        Solr.solrUpdate("http://ea:8983/solr/x/update", x); //l.toArray(new NObject[l.size()]));
+                        Solr.solrUpdate(solrURL + "/update", x); //l.toArray(new NObject[l.size()]));
                     } catch (IOException e) {
                         logger.error("solr update: {}", e);
                     }

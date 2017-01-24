@@ -31,9 +31,10 @@ public class FileDirectory {
 
                     URL u = x.toURL();
                     String us = u.toString();
-                    db.add(new MutableNObject(filenameable(u.getFile()), x.getName())
+                    String uf = fileName(u.getFile());
+                    db.addAsync(new MutableNObject(filenameable(uf))
                         .put("url_in", us)
-                        .put("url", u.getFile())
+                        .put("url", uf)
                     );
 
                 } catch (MalformedURLException e) {
@@ -44,5 +45,16 @@ public class FileDirectory {
 
             return;
         }
+    }
+
+    public static String fileName(String url) {
+        if (url.endsWith("/"))
+            throw new RuntimeException("not a file?");
+
+        int slash = url.lastIndexOf('/');
+        if (slash==-1)
+            return url;
+        else
+            return url.substring(slash+1);
     }
 }

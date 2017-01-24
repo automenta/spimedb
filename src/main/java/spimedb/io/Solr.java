@@ -38,7 +38,7 @@ public class Solr {
             y.put("id", x.id());
             y.put("name", x.name());
             x.forEach((k,v)->{
-                if ((k.equals("I")) || (k.equals("N")) || k.equals("inh") || (k.equals(">")))
+                if ((k.equals("I")) || (k.equals("N")) || k.equals("inh") || (k.equals(">") || (k.equals("url_in"))))
                     return;
                 if (v instanceof String)
                     y.put(k,(String)v);
@@ -50,6 +50,8 @@ public class Solr {
                     for (String s : vv) {
                         va.add(s);
                     }
+                } else {
+                    logger.error("{} has unhandled field type: {}, value={}", k, v.getClass(), v);
                 }
             });
 
@@ -60,7 +62,7 @@ public class Solr {
 
         a.with("commit");
 
-        //System.out.println(JSON.toJSONString(a, true));
+        System.out.println(JSON.toJSONString(a, true));
         return a;
     }
 

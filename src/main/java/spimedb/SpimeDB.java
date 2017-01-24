@@ -29,13 +29,12 @@ import spimedb.util.FileUtils;
 import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
@@ -190,11 +189,47 @@ public class SpimeDB implements Iterable<NObject> {
     }
 
 
-    //TODO
-    /*public void on(BiConsumer<NObject,NObject> changedFromTo) {
+    public final ConcurrentHashMap<String,ReentrantLock> lock = new ConcurrentHashMap<>();
 
-    }*/
 
+    private <X> X run(String id, Supplier<X> r)  {
+        ReentrantLock l = lock.computeIfAbsent(id, x -> {
+            ReentrantLock ll = new ReentrantLock(true) {
+                @Override
+                public synchronized void unlock() {
+                    if (!hasQueuedThreads()) {
+                        lock.remove(id);
+                    }
+                    super.unlock();
+                }
+            };
+            return ll;
+        });
+
+        l.lock();
+
+        Throwable thrown = null;
+        X result = null;
+        try {
+            result = r.get();
+        } catch (Throwable t) {
+            thrown = t;
+        }
+
+        l.unlock();
+
+        if (thrown!=null) {
+            throw new RuntimeException(thrown);
+        }
+
+        return result;
+    }
+
+    public Future<NObject> addAsync(@Nullable NObject next) {
+        return exe.submit(()->{
+           return add(next);
+        });
+    }
 
     /**
      * returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics
@@ -203,33 +238,37 @@ public class SpimeDB implements Iterable<NObject> {
         if (next == null)
             return null;
 
-        return objMap.compute(next.id(), (i, previous) -> {
+        String id = next.id();
+        return run(id, () -> {
+            NObject current = objMap.compute(id, (i, previous) -> {
 
-            boolean changed, neww;
+                boolean changed, neww;
 
-            if (previous != null) {
-                if (NObject.equalsDeep(graphed(previous), graphed(next)))
-                    return previous;
+                if (previous != null) {
+                    if (NObject.equalsDeep(graphed(previous), graphed(next)))
+                        return previous;
 
-                changed = true;
-                neww = false;
-            } else {
-                changed = false;
-                neww = true;
-            }
+                    changed = true;
+                    neww = false;
+                } else {
+                    changed = false;
+                    neww = true;
+                }
 
-            NObject current = reindex(previous, next);
+                return reindex(previous, next);
+            });
 
             if (!onChange.isEmpty()) {
-                exe.submit(() -> {
-                    for (BiConsumer<NObject, SpimeDB> c : onChange) {
-                        c.accept(current, this);
-                    }
-                });
+                for (BiConsumer<NObject, SpimeDB> c : onChange) {
+                    c.accept(current, this);
+                }
             }
 
             return current;
         });
+
+
+
     }
 
     private NObject reindex(NObject previous, NObject current) {
@@ -291,8 +330,6 @@ public class SpimeDB implements Iterable<NObject> {
 
 
     public NObject get(String nobjectID) {
-
-
         return objMap.get(nobjectID);
     }
 
@@ -301,7 +338,6 @@ public class SpimeDB implements Iterable<NObject> {
         q.onStart();
 
         Predicate<NObject> each = q.each;
-
 
         Iterable<String> include = tagsAndSubtags(q.include);
         for (String t : include) {
