@@ -1,5 +1,7 @@
 package spimedb.io;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
@@ -21,15 +23,44 @@ public class Solr {
 
     public final static Logger logger = LoggerFactory.getLogger(Solr.class);
 
-    public static ArrayNode nobject2solrUpdate(NObject... xx) {
-        ArrayNode a = JSON.json.createArrayNode();
+    public static JsonNode nobject2solrUpdate(NObject... xx) {
+        ObjectMapper j = JSON.json;
+        ObjectNode a = j.createObjectNode();
+
+        ArrayNode da = a.withArray("delete");
         for (NObject x : xx) {
-            ObjectNode y = JSON.json.createObjectNode();
-            y.put("id", x.id());
-            y.put("_text_", x.name());
-            //y.put("_text_", y.remove("text"));
-            a.add(y);
+            da.add(x.id());
         }
+        a.with("commit");
+
+        for (NObject x : xx) {
+            ObjectNode y = j.createObjectNode();
+            y.put("id", x.id());
+            y.put("name", x.name());
+            x.forEach((k,v)->{
+                if ((k.equals("I")) || (k.equals("N")) || k.equals("inh") || (k.equals(">")))
+                    return;
+                if (v instanceof String)
+                    y.put(k,(String)v);
+                else if (v instanceof Integer)
+                    y.put(k,(Integer)v);
+                else if (v instanceof String[]) {
+                    String[] vv = (String[])v;
+                    ArrayNode va = y.putArray(k);
+                    for (String s : vv) {
+                        va.add(s);
+                    }
+                }
+            });
+
+            a.with("add")
+                    .put("overwrite", true)
+                    .put("doc",y);
+        }
+
+        a.with("commit");
+
+        //System.out.println(JSON.toJSONString(a, true));
         return a;
     }
 
@@ -42,7 +73,7 @@ public class Solr {
 //            "Content-type:", "application/json"
 //        ), u);
 
-        //System.out.println(url);
+        //System.out.println(data);
 
         URL uu = new URL(url);
         HttpURLConnection conn = (HttpURLConnection) uu.openConnection();

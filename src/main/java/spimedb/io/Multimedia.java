@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -16,7 +15,6 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.RecursiveParserWrapper;
 import org.apache.tika.sax.BasicContentHandlerFactory;
 import org.apache.tika.sax.ContentHandlerFactory;
-import org.eclipse.collections.impl.block.factory.Comparators;
 import org.jetbrains.annotations.Nullable;
 import org.jpedal.jbig2.jai.JBIG2ImageReaderSpi;
 import org.jsoup.Jsoup;
@@ -41,7 +39,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.stream.Stream;
 
 /**
@@ -160,11 +157,10 @@ public class Multimedia  {
 
         final Parser tika = new AutoDetectParser();
         final ContentHandlerFactory tikaFactory = new BasicContentHandlerFactory( BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
-        final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
         db.on((NObject x, SpimeDB d) -> {
 
-            String url = x.get("url");
-            if (url.startsWith("file:/") && !x.has("contentType")) {
+            String url = x.get("url_in");
+            if (url != null && !x.has("contentType")) {
 
 
                 Metadata metadata = new Metadata();
@@ -177,6 +173,8 @@ public class Multimedia  {
                     if (stream == null) {
                         throw new FileNotFoundException();
                     }
+
+                    final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
 
                     tikaWrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
 
@@ -258,6 +256,7 @@ public class Multimedia  {
                                 .withTags(x.id())
                                 .put("author", x.get("author"))
                                 .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
+                                .put("url_in", x.get("url_in"))
                                 .put("contentType", "page/pdf")
                                 .put("page", page)
                                 .put("text", pdb.length > 0 ? pdb : null)
@@ -294,7 +293,7 @@ public class Multimedia  {
             if ("page/pdf".equals(n.get("contentType")) && !n.has("image")) {
 
                 try {
-                    PDDocument document = PDDocument.load(new URL(n.get("url")).openStream());
+                    PDDocument document = PDDocument.load(new URL(n.get("url_in")).openStream());
 
                     try {
 
@@ -325,23 +324,37 @@ public class Multimedia  {
         });
 
 
+//        Map<String,String> pending = new ConcurrentHashMap();
+//        final AtomicBoolean busy = new AtomicBoolean(false);
         db.on((x, d) -> {
-            try {
-                Solr.solrUpdate("http://ea:8983/solr/x/update", x);
-            } catch (IOException e) {
-                logger.error("solr update: {}", e);
-            }
+//            if (busy.compareAndSet(false, true)) {
+//                List<NObject> l = new ArrayList();
+//                Iterator<Map.Entry<String, String>> ii = pending.entrySet().iterator();
+//                while (ii.hasNext()) {
+//                    NObject n = d.get(ii.next().getKey());
+//                    ii.remove();
+//                    l.add(n);
+//                }
+//                busy.set(false);
+//
+//                if (!l.isEmpty()) {
+                    try {
+                        Solr.solrUpdate("http://ea:8983/solr/x/update", x); //l.toArray(new NObject[l.size()]));
+                    } catch (IOException e) {
+                        logger.error("solr update: {}", e);
+                    }
+//                }
+//            } else {
+//                pending.put(x.id(), x.id());
+//            }
         });
 
-        FileDirectory.createFileNodes("/home/me/d/eadocsmall", db);
+        FileDirectory.createFileNodes("/home/me/d/eadoc", db);
 
 
         db.sync(1000 * 60);
 
-        TreeSet<NObject> t = new TreeSet(Comparators.byFunction((NObject d) -> d.id()));
-        Iterables.addAll(t, db);
-
-        t.forEach(x -> System.out.println(JSON.toJSONString(x, true)));
+        //db.forEach(x -> System.out.println(JSON.toJSONString(x, true)));
 
 
     }
