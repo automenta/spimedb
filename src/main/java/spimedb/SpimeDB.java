@@ -192,7 +192,14 @@ public class SpimeDB implements Iterable<NObject> {
     public final ConcurrentHashMap<String,ReentrantLock> lock = new ConcurrentHashMap<>();
 
 
-    private <X> X run(String id, Supplier<X> r)  {
+    public void run(String id, Runnable r)  {
+        run(id, ()->{
+            r.run();
+            return null;
+        });
+    }
+
+    public <X> X run(String id, Supplier<X> r)  {
         ReentrantLock l = lock.computeIfAbsent(id, x -> {
             ReentrantLock ll = new ReentrantLock(true) {
                 @Override

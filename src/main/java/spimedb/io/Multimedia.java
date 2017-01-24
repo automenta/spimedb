@@ -120,7 +120,7 @@ public class Multimedia  {
 
             case "Keywords": return "keywords";
 
-            case "Title":
+            case "title":
                 m = "N";
                 break;
 
@@ -297,7 +297,8 @@ public class Multimedia  {
             if (n.has("page") && !n.has("pageCount") && "application/pdf".equals(n.get("contentType")) && !n.has("image")) {
 
                 int page = n.get("page");
-                String pageFile = (n.id()) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
+                String id = n.id();
+                String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
                         //img.getWidth() + "x" + img.getHeight() +
 
                 String outputFile = pdfPageImageOutputPath + "/" + pageFile;
@@ -349,11 +350,14 @@ public class Multimedia  {
 //                busy.set(false);
 //
 //                if (!l.isEmpty()) {
-                    try {
-                        Solr.solrUpdate(solrURL + "/update", x); //l.toArray(new NObject[l.size()]));
-                    } catch (IOException e) {
-                        logger.error("solr update: {}", e);
-                    }
+
+            d.run(x.id(), ()-> {
+                try {
+                    Solr.solrUpdate(solrURL + "/update", x); //l.toArray(new NObject[l.size()]));
+                } catch (IOException e) {
+                    logger.error("solr update: {}", e);
+                }
+            });
 //                }
 //            } else {
 //                pending.put(x.id(), x.id());
