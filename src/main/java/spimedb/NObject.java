@@ -49,9 +49,6 @@ public interface NObject extends Serializable {
         return (min != null && !min.isInfNeg() && !max().isInfPos());
     }
 
-    static boolean equalsDeep(NObject a, NObject b) {
-        return a.toString().equals(b.toString());
-    }
 
     default String description() {
         Object d = get("_");
@@ -76,8 +73,10 @@ public interface NObject extends Serializable {
         return get(key)!=null;
     }
 
-
-
+    default boolean equalsDeep(NObject n) {
+        //TODO more efficient comparison
+        return toString().equals(n.toString());
+    }
 
 
     class NObjectSerializer extends JsonSerializer<NObject> {

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import spimedb.io.FileDirectory;
 import spimedb.io.GeoJSON;
 import spimedb.io.KML;
+import spimedb.io.Search;
 import spimedb.server.WebServer;
 import spimedb.util.js.SpimeJS;
 
@@ -26,6 +27,8 @@ public class Main {
             //"/tmp/climate"
             null
         );*/ new SpimeDB();
+
+        new Search(db);
 
         try {
             new WebServer(db, 8080);
@@ -66,7 +69,6 @@ public class Main {
         //ImportGeoJSON
 
         //ImportSchemaOrg.load(db);
-
 
 
         db.on((n,d)->{

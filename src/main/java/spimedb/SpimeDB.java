@@ -247,35 +247,32 @@ public class SpimeDB implements Iterable<NObject> {
 
         String id = next.id();
         return run(id, () -> {
+
+            final boolean[] changed = {true};
+
             NObject current = objMap.compute(id, (i, previous) -> {
 
-                boolean changed, neww;
 
                 if (previous != null) {
-                    if (NObject.equalsDeep(graphed(previous), graphed(next)))
+                    if (graphed(previous).equalsDeep(graphed(next))) {
+                        changed[0] = false;
                         return previous;
-
-                    changed = true;
-                    neww = false;
-                } else {
-                    changed = false;
-                    neww = true;
+                    }
                 }
 
                 return reindex(previous, next);
             });
 
-            if (!onChange.isEmpty()) {
-                for (BiConsumer<NObject, SpimeDB> c : onChange) {
-                    c.accept(current, this);
+            if (changed[0]) {
+                if (!onChange.isEmpty()) {
+                    for (BiConsumer<NObject, SpimeDB> c : onChange) {
+                        c.accept(current, this);
+                    }
                 }
             }
 
             return current;
         });
-
-
-
     }
 
     private NObject reindex(NObject previous, NObject current) {
