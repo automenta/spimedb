@@ -92,6 +92,8 @@ public class TagTest {
         db.add(new Tag("Disaster"));
         db.add(new Tag("Hurricane", "Disaster"));
 
+        db.sync();
+
         assertEquals(null, db.graphed(""));
         assertEquals("{\"I\":\"Disaster\",\"inh\":{\">\":[\"Hurricane\"],\"<\":[\"\"]}}", db.graphed("Disaster").toString() );
         assertEquals("{\"I\":\"Hurricane\",\"inh\":{\"<\":[\"Disaster\"]}}", db.graphed("Hurricane").toString() );

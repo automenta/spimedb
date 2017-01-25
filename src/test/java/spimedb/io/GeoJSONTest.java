@@ -27,6 +27,9 @@ public class GeoJSONTest {
 
         db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 
+        db.sync();
+
+
         int all = db.size();
         assertTrue(all > 50);
 

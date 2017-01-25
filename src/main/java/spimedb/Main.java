@@ -1,9 +1,8 @@
 package spimedb;
 
 import ch.qos.logback.classic.Level;
+import org.apache.lucene.document.Document;
 import org.slf4j.Logger;
-import spimedb.index.Search;
-import spimedb.index.lucene.DocumentNObject;
 import spimedb.io.FileDirectory;
 import spimedb.io.GeoJSON;
 import spimedb.io.KML;
@@ -28,9 +27,7 @@ public class Main {
         SpimeDB db =  /*Infinispan.db(
             //"/tmp/climate"
             null
-        );*/ new SpimeDB();
-
-        Search search = new Search(db, "/tmp/spimedb/index");
+        );*/ new SpimeDB("/tmp/spimedb/index");
 
         try {
             new WebServer(db, 8080);
@@ -39,11 +36,15 @@ public class Main {
             return;
         }
 
-        if (db.isEmpty())
+        //if (db.isEmpty())
             addInitialData(db);
 
-        search.find("s*").docs().forEachRemaining(d -> {
-           System.out.println(DocumentNObject.get(d));
+            //db.find("s*", 32).docs().forEachRemaining(d -> {
+        db.forEach((n) -> {
+            System.out.println(n);
+
+            Document dd = db.the(n.id());
+            System.out.println("\t" + dd);
         });
     }
 

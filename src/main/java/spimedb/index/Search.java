@@ -5,80 +5,60 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
-import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.NRTCachingDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 
 /**
  * Lucene free-text search plugin
  */
-public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Document> {
+public class Search  {
 
     public final static Logger logger = LoggerFactory.getLogger(Search.class);
 
-    private final Directory dir;
+    protected final Directory dir;
 
-    private final Set<String> out = Collections.newSetFromMap(new ConcurrentHashMap<>(1024));
+    private final Map<String,NObject> out = new ConcurrentHashMap<>(1024);
 
     private final AtomicBoolean writing = new AtomicBoolean(false);
-    private final SpimeDB db;
-    private final StandardAnalyzer analyzer;
+    private final StandardAnalyzer analyzer = new StandardAnalyzer();
     private final Directory dirBase;
 
-    public Search(SpimeDB db)  {
-        this(db, new RAMDirectory());
+    public Search() {
+        this(new RAMDirectory());
     }
 
-    public Search(SpimeDB db, String path) throws IOException {
-        this(db, FSDirectory.open(new File(path).toPath()));
-    }
 
-    public Search(SpimeDB db, Directory directory) {
-        this.db = db;
+    public Search(Directory directory) {
 
         //this.dir = new RAMDirectory();
         dirBase = directory;
 
-        //this.dir = directory;
-        this.dir = new NRTCachingDirectory(dirBase, 5.0, 60.0);
+        this.dir = directory;
+        //this.dir = new NRTCachingDirectory(dirBase, 5.0, 60.0);
 
-        analyzer = new StandardAnalyzer();
 
-        db.on(this);
     }
 
-    private void commit(String id) {
-        if (out.add(id)) {
-            commit();
-        }
-    }
 
-    static <X> Iterable<X> drain(Iterable<X> x) {
-        return () -> new Iterator<X>() {
+    static Iterable<NObject> drain(Iterable<Map.Entry<String,NObject>> x) {
+        return () -> new Iterator<NObject>() {
 
-            final Iterator<X> ii = x.iterator();
+            final Iterator<Map.Entry<String,NObject>> ii = x.iterator();
 
             @Override
             public boolean hasNext() {
@@ -86,8 +66,8 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
             }
 
             @Override
-            public X next() {
-                X n = ii.next();
+            public NObject next() {
+                NObject n = ii.next().getValue();
                 ii.remove();
                 return n;
             }
@@ -95,10 +75,9 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
     }
 
 
-
     private void commit() {
         if (writing.compareAndSet(false, true)) {
-            db.exe.execute( () -> {
+            SpimeDB.exe.execute(() -> {
                 try {
 
                     IndexWriterConfig writerConf = new IndexWriterConfig(analyzer);
@@ -113,7 +92,7 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
 
                     while ((s = out.size()) > 0) {
 
-                        long seq = writer.addDocuments(Iterables.transform(drain(out), this));
+                        long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
 
 //                        Iterator<String> ii = out.iterator();
 //                        while (ii.hasNext()) {
@@ -137,21 +116,23 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
 
     }
 
-    @Override
-    public void accept(NObject x, SpimeDB db) {
-        commit(x.id());
+
+
+    protected void commit(NObject x) {
+        out.put(x.id(), x);
+        commit();
     }
 
-    @Override
-    public Document apply(String nid) {
-        NObject n = db.get(nid);
+    final static Function<NObject,Document> documenter = (n) -> {
+
+        String nid = n.id();
 
         Document d = new Document();
 
         d.add(string(NObject.ID, nid));
 
         String name = n.name();
-        if (name!=null && !name.equals(nid))
+        if (name != null && !name.equals(nid))
             d.add(text(NObject.NAME, name));
 
         for (String t : n.tags())
@@ -184,13 +165,14 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
 //
 //        });
         return d;
-    }
+    };
 
 
-    public static StringField string(String key, String value) {
+    static StringField string(String key, String value) {
         return new StringField(key, value, Field.Store.YES);
     }
-    public static TextField text(String key, String value) {
+
+    static TextField text(String key, String value) {
         return new TextField(key, value, Field.Store.YES);
     }
 
@@ -198,11 +180,13 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
 
         private final TopDocs docs;
         private final IndexSearcher searcher;
+        private final Query query;
 
-        public SearchResult(IndexSearcher searcher, TopDocs docs) {
+        public SearchResult(Query q, IndexSearcher searcher, TopDocs docs) {
+            this.query = q;
             this.searcher = searcher;
             this.docs = docs;
-            logger.info("query: {}", docs.scoreDocs);
+            logger.info("query({})={}", query, docs.scoreDocs);
         }
 
         public Iterator<Document> docs() {
@@ -211,7 +195,7 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
 
             IndexReader reader = searcher.getIndexReader();
 
-            return Iterators.transform(Iterators.forArray(docs.scoreDocs), sd->{
+            return Iterators.transform(Iterators.forArray(docs.scoreDocs), sd -> {
                 try {
                     visitor.getDocument().clear();
                     reader.document(sd.doc, visitor);
@@ -225,23 +209,23 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
 
     }
 
-    public SearchResult find(String query) {
-        int hitsPerPage = 10;
-        try {
-            Query q = new QueryParser(NObject.NAME, analyzer).parse(query);
-            DirectoryReader reader = DirectoryReader.open(dir);
-            IndexSearcher searcher = new IndexSearcher(reader);
-            TopDocs docs = searcher.search(q, hitsPerPage);
-
-            if (docs.totalHits == 0) {
-                //TODO: return EmptySearchResult;
-            }
-
-            return new SearchResult(searcher, docs);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    protected final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
+        @Override
+        public TopScoreDocCollector newCollector() throws IOException {
+            return TopScoreDocCollector.create(1);
         }
-    }
+
+        @Override
+        public TopDocs reduce(Collection<TopScoreDocCollector> collectors) throws IOException {
+            Iterator<TopScoreDocCollector> ii = collectors.iterator();
+            if (ii.hasNext()) {
+                TopScoreDocCollector l = ii.next();
+                return l.topDocs();
+            }
+            return null;
+        }
+    };
+
 }
 
 ///*

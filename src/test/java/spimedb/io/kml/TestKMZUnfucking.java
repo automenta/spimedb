@@ -24,10 +24,11 @@ public class TestKMZUnfucking {
             )
         ).run();
 
+        db.sync();
 
         db.forEach( x -> System.out.println(x) );
 
-        assertEquals(24, db.size());
+        assertEquals(23, db.size());
 
         System.out.println(db.graph);
     }

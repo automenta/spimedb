@@ -4,8 +4,19 @@ import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.Iterators;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.*;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.RAMDirectory;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
@@ -19,6 +30,8 @@ import spimedb.graph.VertexIncidence;
 import spimedb.graph.travel.BreadthFirstTravel;
 import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
+import spimedb.index.Search;
+import spimedb.index.lucene.DocumentNObject;
 import spimedb.index.rtree.LockingRTree;
 import spimedb.index.rtree.RTree;
 import spimedb.index.rtree.RectND;
@@ -28,11 +41,13 @@ import spimedb.util.FileUtils;
 
 import javax.script.ScriptEngineManager;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -40,7 +55,7 @@ import java.util.stream.Stream;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB implements Iterable<NObject> {
+public class SpimeDB extends Search  {
 
 
     public static final String VERSION = "SpimeDB v-0.00";
@@ -57,9 +72,9 @@ public class SpimeDB implements Iterable<NObject> {
     @JsonIgnore
     public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
 
-    @JsonIgnore
-    @Deprecated
-    public final Map<String, NObject> objMap;
+//    @JsonIgnore
+//    @Deprecated
+//    public final Map<String, NObject> objMap;
 
 
     /**
@@ -67,6 +82,7 @@ public class SpimeDB implements Iterable<NObject> {
      */
     transient final ScriptEngineManager engineManager = new ScriptEngineManager();
     transient public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
+    private final StandardAnalyzer analyzer;
 
     private File resources;
 
@@ -77,19 +93,87 @@ public class SpimeDB implements Iterable<NObject> {
     final static String[] ROOT = new String[]{""};
     private final VertexContainer<String, String> rootNode;
 
+
+
     /**
      * in-memory, map-based
      */
     public SpimeDB() {
-        this(new ConcurrentHashMap());
+        this(new RAMDirectory());
     }
 
-    public SpimeDB(Map<String, NObject> g) {
-        super();
+    public SpimeDB(String path) throws IOException {
+        this(FSDirectory.open(new File(path).toPath()));
+    }
+
+    public SpimeDB(Directory dir) {
+        super(dir);
+
+        this.analyzer = new StandardAnalyzer();
+
+
+
+
         rootNode = graph.addVertex(ROOT[0]);
-        this.objMap = g;
         resources(TMP_SPIMEDB_CACHE_PATH);
     }
+
+
+        /*public Iterable<Document> all() {
+
+    }*/
+
+    public Document the(String id) {
+
+
+        try {
+            IndexSearcher searcher = searcher();
+            if (searcher == null)
+                return null;
+
+            TermQuery x = new TermQuery(new Term(NObject.ID, id));
+            TopDocs y = searcher.search(x, firstResultOnly);
+            int hits = y.totalHits;
+            if (hits > 0) {
+                if (hits > 1) {
+                    logger.warn("multiple documents with id={} exist: {}", id, y);
+                }
+                return searcher.doc(y.scoreDocs[0].doc);
+            }
+
+        } catch (IOException e) {
+            logger.warn("query: {}", e);
+        }
+        return null;
+    }
+
+    @Nullable
+    private IndexSearcher searcher() throws IOException {
+        try {
+            return new IndexSearcher(DirectoryReader.open(dir));
+        } catch (IndexNotFoundException e) {
+            return null;
+        }
+    }
+
+    public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
+        org.apache.lucene.search.Query q = new QueryParser(NObject.NAME, analyzer).parse(query);
+        return find(q, hitsPerPage);
+    }
+
+    @NotNull
+    private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
+
+        IndexSearcher searcher = searcher();
+        TopDocs docs = searcher.search(q, hitsPerPage);
+
+        if (docs.totalHits == 0) {
+            //TODO: return EmptySearchResult;
+        }
+
+        return new SearchResult(q, searcher, docs);
+    }
+
 
     public static void LOG(String l, Level ll) {
         ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
@@ -135,6 +219,12 @@ public class SpimeDB implements Iterable<NObject> {
         return rootNode.inV();
     }
 
+    public int size() {
+        int[] size = new int[1];
+        forEach(x -> size[0]++); //HACK
+        return size[0];
+    }
+
     private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
         public SubTags(MapGraph<V, E> graph, V... parentTags) {
             super(graph, parentTags);
@@ -172,7 +262,7 @@ public class SpimeDB implements Iterable<NObject> {
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/
     @Override
     public String toString() {
-        return "{\"" + getClass().getSimpleName() + "\":{\"size\":" + size() +
+        return "{\"" + getClass().getSimpleName() + "\":{" +
                 ",\"spacetime\":\"" + spacetime + "\"}}";
     }
 
@@ -248,34 +338,29 @@ public class SpimeDB implements Iterable<NObject> {
         String id = next.id();
         return run(id, () -> {
 
-            final boolean[] changed = {true};
-
-            NObject current = objMap.compute(id, (i, previous) -> {
-
-
-                if (previous != null) {
-                    if (graphed(previous).equalsDeep(graphed(next))) {
-                        changed[0] = false;
-                        return previous;
-                    }
-                }
-
-                return reindex(previous, next);
-            });
-
-            if (changed[0]) {
-                if (!onChange.isEmpty()) {
-                    for (BiConsumer<NObject, SpimeDB> c : onChange) {
-                        c.accept(current, this);
-                    }
+            NObject previous = get(id);
+            if (previous != null) {
+                if (graphed(previous).equalsDeep(graphed(next))) {
+                    return previous;
                 }
             }
+
+            NObject current = reindex(previous, next);
+
+            if (!onChange.isEmpty()) {
+                for (BiConsumer<NObject, SpimeDB> c : onChange) {
+                    c.accept(current, this);
+                }
+            }
+
 
             return current;
         });
     }
 
     private NObject reindex(NObject previous, NObject current) {
+
+        commit(current);
 
         String[] tags = current.tags();
 
@@ -312,29 +397,51 @@ public class SpimeDB implements Iterable<NObject> {
     }
 
 
-    public Iterator<NObject> iterator() {
-        GraphedNObject reusedWrapper = new GraphedNObject(graph);
-        return Iterators.transform(
-            objMap.values().iterator(), x -> {
-                reusedWrapper.set(x);
-                return new MutableNObject( reusedWrapper );
+//    public Iterator<NObject> iterator() {
+//        GraphedNObject reusedWrapper = new GraphedNObject(graph);
+//        return Iterators.transform(
+//            objMap.values().iterator(), x -> {
+//                reusedWrapper.set(x);
+//                return new MutableNObject( reusedWrapper );
+//            }
+//        );
+//    }
+    public void forEach(Consumer<NObject> each)  {
+
+
+
+        //long startTime = System.currentTimeMillis();
+        //create the term query object
+        MatchAllDocsQuery query = new MatchAllDocsQuery();
+        //do the search
+        TopDocs hits = null;
+        try {
+            IndexSearcher searcher = searcher();
+            if (searcher == null)
+                return;
+
+            hits = searcher.search(query, Integer.MAX_VALUE);
+            //long endTime = System.currentTimeMillis();
+
+//            System.out.println(hits.totalHits +
+//                    " documents found. Time :" + (endTime - startTime) + "ms");
+            for (ScoreDoc scoreDoc : hits.scoreDocs) {
+                Document doc = searcher.doc(scoreDoc.doc);
+                if (doc!=null) {
+                    each.accept(DocumentNObject.get(doc));
+                }
             }
-        );
-    }
-
-    @JsonIgnore
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
-    @JsonIgnore
-    public int size() {
-        return objMap.size();
+        } catch (IOException e) {
+            logger.error("{}",e);
+        }
     }
 
 
-    public NObject get(String nobjectID) {
-        return objMap.get(nobjectID);
+    public NObject get(String id) {
+        Document d = the(id);
+        if (d!=null)
+            return DocumentNObject.get(d);
+        return null;
     }
 
 
