@@ -45,7 +45,7 @@ public class RectND implements HyperRect<PointND>, Serializable {
     protected final PointND max;
 
 
-    private static final PointND unbounded = new PointND() {
+    public static final PointND unbounded = new PointND() {
         @Override
         public String toString() {
             return "*";

@@ -4,11 +4,14 @@ package spimedb.util;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Longs;
+import org.jetbrains.annotations.NotNull;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.slf4j.LoggerFactory;
 
@@ -119,6 +122,16 @@ public class JSON {
         //return (String)jcog.Util.uuid128(); //escaped unicode results in long JSON strings, bad
         //return (String)jcog.Util.uuid64();
         return Base64.getEncoder().encodeToString(Longs.toByteArray(uuidRandom.nextLong()));
+    }
+
+    @NotNull
+    public static String[] toStrings(ArrayNode a) {
+        String[] ids = new String[a.size()];
+        int j = 0;
+        for (JsonNode x : a) {
+            ids[j++] = x.textValue();
+        }
+        return ids;
     }
 }
 

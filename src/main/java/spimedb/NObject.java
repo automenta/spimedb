@@ -1,9 +1,11 @@
 package spimedb;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.ArrayUtils;
 import spimedb.index.rtree.PointND;
 import spimedb.util.JSON;
@@ -17,6 +19,7 @@ import java.util.function.BiConsumer;
  */
 @JsonSerialize(using = NObject.NObjectSerializer.class)
 public interface NObject extends Serializable {
+
 
 
     String id();
@@ -40,7 +43,7 @@ public interface NObject extends Serializable {
 
     PointND max();
 
-    default String stringify() {
+    default String toJSONString() {
         return new String(JSON.toJSON(this));
     }
 
@@ -58,9 +61,14 @@ public interface NObject extends Serializable {
 
     String ID = "I";
     String NAME = "N";
+
     String TAG = ">";
+    String CONTENT = "<";
+
     String BOUND = "@";
     String DESC = "_";
+
+    String BLOB = "&";
 
     /** intensional inheritance */
     String INH = "inh";
@@ -78,6 +86,34 @@ public interface NObject extends Serializable {
         return toString().equals(n.toString());
     }
 
+
+    public static MutableNObject fromJSON(String json) {
+        ObjectNode x = JSON.fromJSON(json);
+        JsonNode idNode = x.get(ID);
+        if (idNode == null)
+            throw new RuntimeException("invalid nobject JSON: " +  json);
+
+        MutableNObject y = new MutableNObject(idNode.textValue().toString());
+        x.fields().forEachRemaining(e -> {
+            String k = e.getKey();
+
+            switch (k) {
+                case ID: return; //ID already processed
+            }
+
+            JsonNode v = e.getValue();
+            Object w = v;
+            if (v.isTextual())
+                w = v.textValue();
+            else if (v.isNumber())
+                w = v.numberValue();
+            //TODO else ...
+
+            y.put(k, w);
+        });
+
+        return y;
+    }
 
     class NObjectSerializer extends JsonSerializer<NObject> {
 

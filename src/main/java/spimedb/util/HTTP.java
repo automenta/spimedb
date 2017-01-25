@@ -117,11 +117,7 @@ public class HTTP {
 
         ArrayNode a = JSON.json.readValue(idArray.getFirst(), ArrayNode.class);
 
-        String[] ids = new String[a.size()];
-        int j = 0;
-        for (JsonNode x : a) {
-            ids[j++] = x.textValue();
-        }
+        String[] ids = JSON.toStrings(a);
 
         return ids;
     }

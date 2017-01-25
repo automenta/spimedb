@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.jetbrains.annotations.Nullable;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
@@ -8,6 +9,7 @@ import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
 import spimedb.index.rtree.PointND;
 import spimedb.io.KML;
+import spimedb.util.JSON;
 
 import java.util.List;
 
@@ -45,12 +47,17 @@ public class MutableNObject extends ImmutableNObject {
 
         switch (key) {
             case TAG:
+                String[] tt;
                 if (value instanceof String[])
-                    withTags((String[]) value);
+                    tt = (String[]) value;
                 else if (value instanceof String)
-                    withTags((String) value);
-                else
+                    tt = new String[] { (String) value };
+                else if (value instanceof ArrayNode) {
+                    tt = JSON.toStrings((ArrayNode)value);
+                } else
                     throw new RuntimeException("invalid tag property");
+
+                withTags(tt);
                 return this;
 
 //            case "<":

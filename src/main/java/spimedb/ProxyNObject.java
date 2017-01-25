@@ -53,6 +53,6 @@ public class ProxyNObject implements NObject {
 
     @Override
     public String toString() {
-        return stringify();
+        return toJSONString();
     }
 }

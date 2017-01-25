@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.primitives.Ints;
 import org.opensextant.geodesy.Geodetic2DPoint;
 import org.opensextant.giscore.events.*;
 import org.opensextant.giscore.events.SimpleField.Type;
@@ -23,7 +24,6 @@ import spimedb.SpimeDB;
 import spimedb.io.kml.KmlReader;
 import spimedb.io.kml.UrlRef;
 import spimedb.util.HTMLFilter;
-import spimedb.util.JSON;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +59,12 @@ public class KML {
     private String pathString;
     private String parentPathString;
 
+    final private AtomicInteger elementCounter = new AtomicInteger(0);
+
+    public String nextID() {
+        int c = elementCounter.incrementAndGet();
+        return layer + "_" + Base64.getEncoder().encodeToString(Ints.toByteArray(c));
+    }
 
     public static String getSerial(long serial) {
 
@@ -593,7 +599,7 @@ public class KML {
                     }
                 }
             } else {
-                d = new MutableNObject(JSON.uuid64());
+                d = new MutableNObject(nextID());
                 d.withTags(pathString);
             }
 

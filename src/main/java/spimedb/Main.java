@@ -2,14 +2,16 @@ package spimedb;
 
 import ch.qos.logback.classic.Level;
 import org.slf4j.Logger;
+import spimedb.index.Search;
+import spimedb.index.lucene.DocumentNObject;
 import spimedb.io.FileDirectory;
 import spimedb.io.GeoJSON;
 import spimedb.io.KML;
-import spimedb.io.Search;
 import spimedb.server.WebServer;
 import spimedb.util.js.SpimeJS;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by me on 6/14/15.
@@ -21,14 +23,14 @@ public class Main {
         SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
     }
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws IOException {
 
         SpimeDB db =  /*Infinispan.db(
             //"/tmp/climate"
             null
         );*/ new SpimeDB();
 
-        new Search(db);
+        Search search = new Search(db, "/tmp/spimedb/index");
 
         try {
             new WebServer(db, 8080);
@@ -40,6 +42,9 @@ public class Main {
         if (db.isEmpty())
             addInitialData(db);
 
+        search.find("s*").docs().forEachRemaining(d -> {
+           System.out.println(DocumentNObject.get(d));
+        });
     }
 
     static void addInitialData(SpimeDB db) {

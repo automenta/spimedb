@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.ArrayUtils;
 import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
@@ -26,6 +27,7 @@ public abstract class ImmutableNObject extends RectND implements NObject {
 
     protected String name;
     protected final Map<String, Object> data = new HashMap();
+
 
     public ImmutableNObject(PointND a, PointND b, String id, String name) {
         super(a, b);
@@ -78,7 +80,7 @@ public abstract class ImmutableNObject extends RectND implements NObject {
 
     @Override
     public String toString() {
-        return stringify();
+        return toJSONString();
     }
 
     @Override
