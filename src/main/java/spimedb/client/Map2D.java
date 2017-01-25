@@ -1,5 +1,6 @@
 package spimedb.client;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
@@ -14,7 +15,9 @@ import spimedb.client.util.JsConsumer;
 
 import java.util.Arrays;
 
-/** Leaflet map widget */
+/**
+ * Leaflet map widget
+ */
 public class Map2D {
 
     //TODO add element resize handler
@@ -25,10 +28,14 @@ public class Map2D {
     private final JsConsumer mapChanged;
     private final TileLayer base;
 
-    /** display update perid (milliseconds). changes that arrive in between updates are batched with ChangeBatcher */
+    /**
+     * display update perid (milliseconds). changes that arrive in between updates are batched with ChangeBatcher
+     */
     public static final int REDRAW_MS = 25;
 
-    /** refresh update period */
+    /**
+     * refresh update period
+     */
     public static final int UPDATE_MS = 50;
 
     private final JSFunction refresh;
@@ -91,7 +98,7 @@ public class Map2D {
     }
 
     @Nullable
-    protected Layer build(NObj N,  JSArray bounds) {
+    protected Layer build(NObj N, JSArray bounds) {
         JSObject time = bounds.get(0);
         JSObject x = bounds.get(1); //LON
         JSObject y = bounds.get(2); //LAT
@@ -100,38 +107,18 @@ public class Map2D {
         String nid = N.id;
         String name = JS.getString(N.data, "N", nid);
 
-        {
-            JSObject lineString = JS.get(N.data, 'g' + MutableNObject.LINESTRING);
-            if (lineString != null) {
-                JSArray points = lineString.cast();
-                int l = points.getLength();
-                LatLng[] pp = new LatLng[l];
-                for (int i = 0; i < l; i++) {
-                    JSArray np = points.get(i).cast();
-                    pp[i] = LatLng.create(JS.getFloat(np, 0), JS.getFloat(np, 1));
-                }
 
-                //Console.log(lineString);
-                //System.out.println(Arrays.toString(pp));
-                return Polyline.create(pp);
-            }
+        JSObject lineString = JS.get(N.data, 'g' + MutableNObject.LINESTRING);
+        if (lineString != null) {
+            return Polyline.create(points(lineString));
         }
-        {
-            JSObject gonString = JS.get(N.data, 'g' + MutableNObject.POLYGON);
-            if (gonString != null) {
-                JSArray points = gonString.cast();
-                int l = points.getLength();
-                LatLng[] pp = new LatLng[l];
-                for (int i = 0; i < l; i++) {
-                    JSArray np = points.get(i).cast();
-                    pp[i] = LatLng.create(JS.getFloat(np, 0), JS.getFloat(np, 1));
-                }
 
-                //Console.log(lineString);
-                //System.out.println(Arrays.toString(pp));
-                return Polygon.create(pp);
-            }
+
+        JSObject gonString = JS.get(N.data, 'g' + MutableNObject.POLYGON);
+        if (gonString != null) {
+            return Polygon.create(points(gonString));
         }
+
 
         if (JS.isNumber(x) && JS.isNumber(y)) {
             //POINT
@@ -142,7 +129,7 @@ public class Map2D {
             float lon = JS.toFloat(x);
             float lat = JS.toFloat(y);
 
-            if ((lon==lon && lat==lat)) {
+            if ((lon == lon && lat == lat)) {
                 //System.out.println(lon + " " + lat);
                 //System.out.println(shown.size() + " " + obj.size());
 
@@ -159,6 +146,18 @@ public class Map2D {
         return null;
     }
 
+    @NotNull
+    private static LatLng[] points(JSObject lineString) {
+        JSArray points = lineString.cast();
+        int l = points.getLength();
+        LatLng[] pp = new LatLng[l];
+        for (int i = 0; i < l; i++) {
+            JSArray np = points.get(i).cast();
+            pp[i] = LatLng.create(JS.getFloat(np, 0), JS.getFloat(np, 1));
+        }
+        return pp;
+    }
+
     protected void refresh() {
         LatLngBounds bounds = map.getBounds();
 
@@ -168,8 +167,8 @@ public class Map2D {
         LatLng ne = bounds.getNorthEast();
 
         float[][] b = new float[][]{
-                new float[]{ (float)sw.getLng(), (float)sw.getLat() },
-                new float[]{ (float)ne.getLng(), (float)ne.getLat() }
+                new float[]{(float) sw.getLng(), (float) sw.getLat()},
+                new float[]{(float) ne.getLng(), (float) ne.getLat()}
         };
 
         client.sync();

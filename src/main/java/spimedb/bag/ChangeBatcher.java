@@ -20,8 +20,8 @@ import static java.lang.Boolean.TRUE;
 abstract public class ChangeBatcher<X, Y> {
 
     private final JSFunction onChange;
-    final Map<X, Boolean> changed = new HashMap();
-    final Map<X, Y> built = new HashMap();
+    protected final Map<X, Boolean> changed = new HashMap();
+    protected final Map<X, Y> built = new HashMap();
 
     static final Object[] empty = new Object[0];
 

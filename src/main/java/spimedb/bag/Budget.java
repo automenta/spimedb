@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
  * Created by me on 1/15/17.
  */
 public class Budget<X> {
-    final X id;
+    public final X id;
     public float pri;
 
     public Budget(X x) {
@@ -18,6 +18,21 @@ public class Budget<X> {
         this.pri = pri;
     }
 
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (obj instanceof Budget)
+            return id.equals(((Budget)obj).id);
+        else
+            return id.equals(obj);
+    }
 
     @Nullable
     public Budget<X> clone() {

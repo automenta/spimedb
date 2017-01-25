@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.dom.html.HTMLBodyElement;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
+import org.teavm.jso.dom.xml.Element;
 import org.teavm.jso.dom.xml.Node;
 import spimedb.bag.ChangeBatcher;
 
@@ -13,6 +14,8 @@ import java.util.function.BiConsumer;
  * Created by me on 1/18/17.
  */
 public class ObjTable {
+
+    final static String eleID = "_ot";
 
     private final ChangeBatcher<NObj, Node> updater;
     private final HTMLDocument doc;
@@ -35,10 +38,24 @@ public class ObjTable {
 
             @Override
             public void update(Node[] added, Node[] removed) {
+
                 for (Node h : removed)
-                    content.removeChild(h);
-                for (Node h : added)
-                    content.appendChild(h);
+                    h.delete();
+
+                for (Node h : added) {
+
+                    Node parent = content; //default
+
+                    String pid = ((Element) h).getAttribute("P");
+                    if (pid!=null) {
+
+                        parent = content.getOwnerDocument().getElementById(eleID + pid);
+                        if (parent == null)
+                            parent = content;
+                    }
+
+                    parent.appendChild(h);
+                }
             }
 
         };
@@ -72,6 +89,12 @@ public class ObjTable {
 
         if (out!=null)
             d.appendChild( doc.createElement("a").withText(" (" + out.length  + ") -->") );
+
+        d.setAttribute("id", eleID + n.id);
+        String[] tags = n.tags();
+        if (tags!=null) {
+            d.setAttribute("P", tags[0]);
+        }
 
         return d;
     }
