@@ -15,8 +15,11 @@ Exploit hyperdimensional locality for efficient iterative access in display, ana
 	// Default name, label, title.  If missing, the ID is used
 	N: "name",
 
-	// Tags (array of strings, to the id's of tags from which this intensionally inherits)
-	'<': [ tag1, tag2, ... ],
+	// Super-tags aka: contexts, containers, folders, parent nodes
+	'<': [ ... ],
+
+	// Sub-tags aka: contents, contained, children, leaf nodes
+	'>': [ ... ],
 
 	// Description: free-form string, or a internationalized string table, ex:
 	'_': { _: "xx" /* optional 2 letter country code indicating the default language involved in this nobject, which may be blank to represent complete internationalization */,
@@ -84,11 +87,6 @@ as a 32-bit float, but 64-bit float ('double')' is better but not as ideal as 64
 
 ##Graph (draft, essentially macros for node-centric graph declarative extensions)
 ```js
-	//contents, contained, children, hyperedge internal adjacencies
-	C: { /* one or more nobjects */ }
-
-	//containers, parents, hyperedge external adjacencies
-	P: { /* one or more nobjects */ }
 
 	//incoming source directed edge ("link")
 	//   the strength value can be used to indicate
