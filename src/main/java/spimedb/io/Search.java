@@ -1,7 +1,7 @@
 package spimedb.io;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -49,18 +49,20 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
         }
     }
 
-    static <X> Iterator<X> drain(Iterator<X> x) {
-        return new Iterator<X>() {
+    static <X> Iterable<X> drain(Iterable<X> x) {
+        return () -> new Iterator<X>() {
+
+            final Iterator<X> ii = x.iterator();
 
             @Override
             public boolean hasNext() {
-                return x.hasNext();
+                return ii.hasNext();
             }
 
             @Override
             public X next() {
-                X n = x.next();
-                x.remove();
+                X n = ii.next();
+                ii.remove();
                 return n;
             }
         };
@@ -76,13 +78,13 @@ public class Search implements BiConsumer<NObject, SpimeDB>, Function<String, Do
 
                     int s = out.size();
                     IndexWriter writer = new IndexWriter(dir, writerConf);
-                    long seq = writer.addDocuments(() -> Iterators.transform(drain(out.iterator()), this));
-                    logger.info("{} sequenced", s);
+                    long seq = writer.addDocuments(Iterables.transform(drain(out), this));
                     writer.commit();
                     writer.close();
+                    logger.info("{} indexed", s);
 
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("indexing error: {}", e);
                 }
                 writing.set(false);
             });
