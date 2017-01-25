@@ -32,7 +32,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import static spimedb.io.kml.KmlReader.logger;
@@ -50,7 +49,6 @@ public class KML {
     final int maxPathDepth = 3;
     private final Proxy proxy;
     private final SpimeDB db;
-    final AtomicLong serial = new AtomicLong();
 
     private String layer;
     final Deque<String> path = new ArrayDeque();
@@ -59,22 +57,14 @@ public class KML {
     private String pathString;
     private String parentPathString;
 
-    final private AtomicInteger elementCounter = new AtomicInteger(0);
+    final private AtomicInteger serial = new AtomicInteger(0);
 
     public String nextID() {
-        int c = elementCounter.incrementAndGet();
+        int c = serial.incrementAndGet();
         return layer + "_" + Base64.getEncoder().encodeToString(Ints.toByteArray(c));
     }
 
-    public static String getSerial(long serial) {
 
-        return Long.toString(serial, Character.MAX_RADIX);
-        //return Base64.getEncoder().withoutPadding().encodeToString(Longs.toByteArray(serial));
-        //return Base64.getEncoder().withoutPadding().encodeToString(Longs.toByteArray(serial));
-        //return Base64.getEncoder().withoutPadding().encodeToString(BigInteger.valueOf(serial).toByteArray());
-        //.add(BigInteger.valueOf(layer.hashCode()).shiftRight(32)
-        //.toByteArray();
-    }
 
     public static String[] pathArray(Deque<String> p) {
         return p.toArray(new String[p.size()]);
@@ -90,7 +80,7 @@ public class KML {
     }
 
 
-    public void transformKML(Supplier<KmlReader> source, String layer, SpimeDB st, final GISVisitor visitor) {
+    public void transformKML(Supplier<KmlReader> source, String layer, final GISVisitor visitor) {
 
         this.layer = layer;
 
@@ -145,7 +135,7 @@ public class KML {
                     if (path.isEmpty())
                         i = layer;
                     else {
-                        i = getSerial(serial.getAndIncrement());
+                        i = nextID();
                     }
 
                     //System.out.println(cs + " " + cs.getId());
@@ -300,7 +290,7 @@ public class KML {
 
     public Runnable url(String url) {
         try {
-            return url(new URL(url).getFile(), url);
+            return url(FileDirectory.fileName( new URL(url).getFile() ), url);
         } catch (IOException e) {
             return () -> {
                 logger.error("invalid url \"{}\": {}", e);
@@ -349,7 +339,7 @@ public class KML {
 
 
                 //1. pre-process: collect style information
-                transformKML(reader, id, db, new GISVisitor() {
+                transformKML(reader, id, new GISVisitor() {
 
                     final Map<String, String> styleMap = new LinkedHashMap();
 
@@ -424,7 +414,7 @@ public class KML {
 
 
                 //2. process features
-                transformKML(reader, id, db, new MyGISVisitor(id, styles));
+                transformKML(reader, id, new MyGISVisitor(id, styles));
 
                 long end = System.currentTimeMillis();
                 logger.warn("{} loaded: {}(ms)", id, end - start);

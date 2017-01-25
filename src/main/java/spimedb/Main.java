@@ -1,7 +1,6 @@
 package spimedb;
 
 import ch.qos.logback.classic.Level;
-import org.apache.lucene.document.Document;
 import org.slf4j.Logger;
 import spimedb.io.FileDirectory;
 import spimedb.io.GeoJSON;
@@ -36,21 +35,20 @@ public class Main {
             return;
         }
 
+
         //if (db.isEmpty())
             addInitialData(db);
 
             //db.find("s*", 32).docs().forEachRemaining(d -> {
-        db.forEach((n) -> {
-            System.out.println(n);
-
-            Document dd = db.the(n.id());
-            System.out.println("\t" + dd);
-        });
+//        db.forEach((n) -> {
+//            System.out.println(n);
+//
+//            Document dd = db.the(n.id());
+//            System.out.println("\t" + dd);
+//        });
     }
 
     static void addInitialData(SpimeDB db) {
-
-        SpimeDB.logger.info("Initializing database...");
 
         try {
             new SpimeJS(db).with("db", db).run(new File("data/climateviewer.js"));

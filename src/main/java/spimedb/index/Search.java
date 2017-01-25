@@ -1,13 +1,13 @@
 package spimedb.index;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
@@ -82,7 +82,7 @@ public class Search  {
 
                     IndexWriterConfig writerConf = new IndexWriterConfig(analyzer);
                     writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-                    //writerConf.setRAMBufferSizeMB(s * 1024 /* estimate */);
+                    writerConf.setRAMBufferSizeMB(1);
 
                     IndexWriter writer = new IndexWriter(dir, writerConf);
 
@@ -92,15 +92,15 @@ public class Search  {
 
                     while ((s = out.size()) > 0) {
 
-                        long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
+                        //long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
 
-//                        Iterator<String> ii = out.iterator();
-//                        while (ii.hasNext()) {
-//                            String nid = ii.next();
-//                            ii.remove();
-//                            Document d = apply(nid);
-//                            writer.updateDocument(new Term(NObject.ID, nid), d);
-//                        }
+                        Iterator<Map.Entry<String, NObject>> ii = out.entrySet().iterator();
+                        while (ii.hasNext()) {
+                            Map.Entry<String, NObject> nid = ii.next();
+                            ii.remove();
+                            Document d = documenter.apply(nid.getValue());
+                            writer.updateDocument(new Term(NObject.ID, nid.getKey()), d);
+                        }
                         writer.commit();
                         written += s;
                     }

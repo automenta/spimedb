@@ -111,11 +111,16 @@ public class SpimeDB extends Search  {
 
         this.analyzer = new StandardAnalyzer();
 
-
-
-
         rootNode = graph.addVertex(ROOT[0]);
         resources(TMP_SPIMEDB_CACHE_PATH);
+
+        int preloaded[] = new int[1];
+        forEach(x -> {
+            reindex(x);
+            preloaded[0]++;
+        });
+        logger.info("{} objects loaded", preloaded[0]);
+
     }
 
 
@@ -290,18 +295,7 @@ public class SpimeDB extends Search  {
     }
 
     public <X> X run(String id, Supplier<X> r)  {
-        ReentrantLock l = lock.computeIfAbsent(id, x -> {
-            ReentrantLock ll = new ReentrantLock(true) {
-                @Override
-                public synchronized void unlock() {
-                    if (!hasQueuedThreads()) {
-                        lock.remove(id);
-                    }
-                    super.unlock();
-                }
-            };
-            return ll;
-        });
+        ReentrantLock l = lock.computeIfAbsent(id, MyReentrantLock::new);
 
         l.lock();
 
@@ -345,22 +339,26 @@ public class SpimeDB extends Search  {
                 }
             }
 
-            NObject current = reindex(previous, next);
+            commit(next);
+
+            reindex(previous, next);
 
             if (!onChange.isEmpty()) {
                 for (BiConsumer<NObject, SpimeDB> c : onChange) {
-                    c.accept(current, this);
+                    c.accept(next, this);
                 }
             }
 
-
-            return current;
+            return next;
         });
     }
 
-    private NObject reindex(NObject previous, NObject current) {
+    private void reindex(NObject current) {
+        reindex(null, current);
+    }
 
-        commit(current);
+    private void reindex(NObject previous, NObject current) {
+
 
         String[] tags = current.tags();
 
@@ -378,7 +376,6 @@ public class SpimeDB extends Search  {
             reindexSpatial(previous, current, tags);
         }
 
-        return current;
     }
 
     private void reindexSpatial(NObject previous, NObject current, String[] tags) {
@@ -407,8 +404,6 @@ public class SpimeDB extends Search  {
 //        );
 //    }
     public void forEach(Consumer<NObject> each)  {
-
-
 
         //long startTime = System.currentTimeMillis();
         //create the term query object
@@ -554,6 +549,23 @@ public class SpimeDB extends Search  {
             }
         }
 
+    }
+
+    private final class MyReentrantLock extends ReentrantLock {
+        private final String id;
+
+        public MyReentrantLock(String id) {
+            super(true);
+            this.id = id;
+        }
+
+        @Override
+        public synchronized void unlock() {
+            if (!hasQueuedThreads()) {
+                lock.remove(id);
+            }
+            super.unlock();
+        }
     }
 
     //    static class MyOctBox extends OctBox {
