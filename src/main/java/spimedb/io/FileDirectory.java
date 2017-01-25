@@ -15,7 +15,7 @@ public class FileDirectory {
         return inputName.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
     }
 
-    public static void createFileNodes(String pathStr, SpimeDB db) {
+    public static void load(String pathStr, SpimeDB db) {
         File path = Paths.get(pathStr).toFile();
         if (path == null) {
             throw new RuntimeException("not found: " + path);

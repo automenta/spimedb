@@ -364,7 +364,7 @@ public class Multimedia  {
 //            }
         });
 
-        FileDirectory.createFileNodes("/home/me/d/eadoc", db);
+        FileDirectory.load("/home/me/d/eadoc", db);
 
 
         db.sync(1000 * 60);

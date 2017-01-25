@@ -15,9 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.MutableNObject;
 import spimedb.NObject;
+import spimedb.SpimeDB;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -36,8 +38,16 @@ public class GeoJSON   {
 
     static final Logger logger = LoggerFactory.getLogger(GeoJSON.class);
 
-    public static Stream<NObject> get(InputStream i, Function<Feature, NObject> builder) throws IOException {
 
+    public static void load(String url, Function<Feature, NObject> builder, SpimeDB db) {
+        try {
+            db.add(get(new URL(url).openStream(), baseGeoJSONBuilder));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Stream<NObject> get(InputStream i, Function<Feature, NObject> builder) throws IOException {
         FeatureCollection featureCollection = geojsonMapper.readValue(i, FeatureCollection.class);
         logger.info("{} contained {} objects", i, featureCollection.getFeatures().size());
         return featureCollection.getFeatures().stream().map(builder);

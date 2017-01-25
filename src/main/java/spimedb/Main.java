@@ -2,6 +2,8 @@ package spimedb;
 
 import ch.qos.logback.classic.Level;
 import org.slf4j.Logger;
+import spimedb.io.FileDirectory;
+import spimedb.io.GeoJSON;
 import spimedb.io.KML;
 import spimedb.server.WebServer;
 import spimedb.util.js.SpimeJS;
@@ -65,24 +67,23 @@ public class Main {
 
         //ImportSchemaOrg.load(db);
 
-        //System.out.println(db.tag.nodes().size() + " nodes, " + db.tag.edges().size() + " edges");
 
 
-        String[] urls = new String[]{
-                "file:///home/me/kml/Indian-Lands.kmz",
-                "file:///home/me/kml/Ten-Most-Radioactive-Locations-On-Earth-CV3D.kmz",
-                "file:///home/me/kml/Restored-Renewable-Recreational-and-Residential-Toxic-Trash-Dumps.kml",
-                "file:///home/me/kml/submarine-cables-CV3D.kmz",
-                "file:///home/me/kml/DHS-Fusion-Centers-CV3D.kmz"
-//
-//                    //"file:///home/me/kml/EOL-Field-Projects-CV3D.kmz",
-//                    //"file:///home/me/kml/GVPWorldVolcanoes-List.kmz",
-//                    //"file:///home/me/kml/fusion-landing-points-CV3D.kmz",
-//                    //"file:///home/me/kml/CV-Reports-October-2014-Climate-Viewer-3D.kmz"
-        };
-        for (String u : urls) {
-            SpimeDB.runLater(new KML(db).url(u));
-        }
+        db.on((n,d)->{
+            String url = n.get("url_in");
+            if (url!=null) {
+                if ((url.endsWith(".kml") || url.endsWith(".kmz"))) {
+                    SpimeDB.runLater(new KML(db).url(url));
+                } else if (url.endsWith(".geojson")) {
+                    GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
+                }
+            }
+        });
+
+        //db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
+
+        FileDirectory.load("/home/me/kml", db);
+
 
 
 //            db.forEach(x -> {

@@ -100,21 +100,38 @@ public class Map2D {
         String nid = N.id;
         String name = JS.getString(N.data, "N", nid);
 
-        JSObject lineString = JS.get(N.data, 'g' + MutableNObject.LINESTRING);
-        if (lineString!=null) {
-            JSArray points = lineString.cast();
-            int l = points.getLength();
-            LatLng[] pp = new LatLng[l];
-            for (int i = 0; i < l; i++) {
-                JSArray np = points.get(i).cast();
-                pp[i] = LatLng.create(JS.getFloat(np, 0), JS.getFloat(np, 1));
+        {
+            JSObject lineString = JS.get(N.data, 'g' + MutableNObject.LINESTRING);
+            if (lineString != null) {
+                JSArray points = lineString.cast();
+                int l = points.getLength();
+                LatLng[] pp = new LatLng[l];
+                for (int i = 0; i < l; i++) {
+                    JSArray np = points.get(i).cast();
+                    pp[i] = LatLng.create(JS.getFloat(np, 0), JS.getFloat(np, 1));
+                }
+
+                //Console.log(lineString);
+                //System.out.println(Arrays.toString(pp));
+                return Polyline.create(pp);
             }
-
-            //Console.log(lineString);
-            //System.out.println(Arrays.toString(pp));
-            return Polyline.create(pp);
         }
+        {
+            JSObject gonString = JS.get(N.data, 'g' + MutableNObject.POLYGON);
+            if (gonString != null) {
+                JSArray points = gonString.cast();
+                int l = points.getLength();
+                LatLng[] pp = new LatLng[l];
+                for (int i = 0; i < l; i++) {
+                    JSArray np = points.get(i).cast();
+                    pp[i] = LatLng.create(JS.getFloat(np, 0), JS.getFloat(np, 1));
+                }
 
+                //Console.log(lineString);
+                //System.out.println(Arrays.toString(pp));
+                return Polygon.create(pp);
+            }
+        }
 
         if (JS.isNumber(x) && JS.isNumber(y)) {
             //POINT
