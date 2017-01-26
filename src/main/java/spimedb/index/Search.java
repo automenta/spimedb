@@ -1,6 +1,5 @@
 package spimedb.index;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
@@ -15,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.lucene.DocumentNObject;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -96,10 +96,10 @@ public class Search  {
 
                         Iterator<Map.Entry<String, NObject>> ii = out.entrySet().iterator();
                         while (ii.hasNext()) {
-                            Map.Entry<String, NObject> nid = ii.next();
+                            Map.Entry<String, NObject> nn = ii.next();
                             ii.remove();
-                            Document d = documenter.apply(nid.getValue());
-                            writer.updateDocument(new Term(NObject.ID, nid.getKey()), d);
+                            Document d = DocumentNObject.toDocument(nn.getValue());;
+                            writer.updateDocument(new Term(NObject.ID, nn.getKey()), d);
                         }
                         writer.commit();
                         written += s;
@@ -123,56 +123,11 @@ public class Search  {
         commit();
     }
 
-    final static Function<NObject,Document> documenter = (n) -> {
-
-        String nid = n.id();
-
-        Document d = new Document();
-
-        d.add(string(NObject.ID, nid));
-
-        String name = n.name();
-        if (name != null && !name.equals(nid))
-            d.add(text(NObject.NAME, name));
-
-        for (String t : n.tags())
-            d.add(string(NObject.TAG, t));
-
-        d.add(text(NObject.BLOB, n.toJSONString())); //HACK store the JSON as a text blob
-
-//        n.forEach((k,v)->{
-//
-//            //special handling
-//            switch (k) {
-//                case NObject.NAME:
-//
-//                    return;
-//
-//                case NObject.TAG:
-//                case NObject.CONTENT:
-//                    return;
-//            }
-//
-//            Class c = v.getClass();
-//            switch (c.getSimpleName()) {
-//                case "String":
-//                    d.add(new TextField(k, v.toString(), Field.Store.YES));
-//                    break;
-//                case "String[]":
-//                    d.add(new StringField(k, v.toString(), Field.Store.YES));
-//                    break;
-//            }
-//
-//        });
-        return d;
-    };
-
-
-    static StringField string(String key, String value) {
+    public static StringField string(String key, String value) {
         return new StringField(key, value, Field.Store.YES);
     }
 
-    static TextField text(String key, String value) {
+    public static TextField text(String key, String value) {
         return new TextField(key, value, Field.Store.YES);
     }
 

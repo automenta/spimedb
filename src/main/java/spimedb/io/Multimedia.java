@@ -41,6 +41,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -253,6 +254,9 @@ public class Multimedia  {
 //                    });
 
                         String docTitle = x.name();
+                        if (docTitle == null) {
+                            docTitle = x.id();
+                        }
 
 
                         d.addAsync(
@@ -264,11 +268,11 @@ public class Multimedia  {
                                 .put("url_in", x.get("url_in"))
                                 .put("contentType", "application/pdf")
                                 .put("page", page)
-                                .put("text", pdb.length > 0 ? pdb : null)
+                                .put("text", pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
                                 .put("textParse",
                                         (pdb!=null)  ? Stream.of(pdb).map(
                                             t -> NLP.toString(NLP.parse(t))
-                                        ).toArray(String[]::new) : null)
+                                        ).collect( Collectors.joining("\n")) : null)
                         );
                     });
                 }
@@ -336,40 +340,22 @@ public class Multimedia  {
         });
 
 
-//        Map<String,String> pending = new ConcurrentHashMap();
-//        final AtomicBoolean busy = new AtomicBoolean(false);
-        db.on((x, d) -> {
-//            if (busy.compareAndSet(false, true)) {
-//                List<NObject> l = new ArrayList();
-//                Iterator<Map.Entry<String, String>> ii = pending.entrySet().iterator();
-//                while (ii.hasNext()) {
-//                    NObject n = d.get(ii.next().getKey());
-//                    ii.remove();
-//                    l.add(n);
+//        db.on((x, d) -> {
+//            d.run(x.id(), ()-> {
+//                try {
+//                    Solr.solrUpdate(solrURL + "/update", x); //l.toArray(new NObject[l.size()]));
+//                } catch (IOException e) {
+//                    logger.error("solr update: {}", e);
 //                }
-//                busy.set(false);
-//
-//                if (!l.isEmpty()) {
+//            });
+//        });
 
-            d.run(x.id(), ()-> {
-                try {
-                    Solr.solrUpdate(solrURL + "/update", x); //l.toArray(new NObject[l.size()]));
-                } catch (IOException e) {
-                    logger.error("solr update: {}", e);
-                }
-            });
-//                }
-//            } else {
-//                pending.put(x.id(), x.id());
-//            }
-        });
-
-        FileDirectory.load("/home/me/d/eadoc", db);
+        FileDirectory.load("/home/me/d/eadocsmall", db);
 
 
         db.sync(1000 * 60);
 
-        //db.forEach(x -> System.out.println(JSON.toJSONString(x, true)));
+        db.forEach(x -> System.out.println(x.toJSONString(true)));
 
 
     }

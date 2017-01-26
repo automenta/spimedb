@@ -332,6 +332,8 @@ public class SpimeDB extends Search  {
         String id = next.id();
         return run(id, () -> {
 
+            logger.info("add {}", id);
+
             NObject previous = get(id);
             if (previous != null) {
                 if (graphed(previous).equalsDeep(graphed(next))) {

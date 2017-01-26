@@ -44,7 +44,11 @@ public interface NObject extends Serializable {
     PointND max();
 
     default String toJSONString() {
-        return new String(JSON.toJSON(this));
+        return toJSONString(false);
+    }
+
+    default String toJSONString(boolean pretty) {
+        return new String(JSON.toJSON(this, pretty));
     }
 
     default boolean bounded() {
@@ -68,7 +72,7 @@ public interface NObject extends Serializable {
     String BOUND = "@";
     String DESC = "_";
 
-    String BLOB = "&";
+
 
     /** intensional inheritance */
     String INH = "inh";
