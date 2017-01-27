@@ -87,6 +87,17 @@ public class LockingRTree<T> implements SpatialSearch<T> {
         }
     }
 
+//    @Override
+//    public void change(T x, T y) {
+//        writeLock.lock();
+//        try {
+//            rTree.remove(x);
+//            rTree.add(y);
+//        } finally {
+//            writeLock.unlock();
+//        }
+//    }
+
     /**
      * Blocking locked update
      *

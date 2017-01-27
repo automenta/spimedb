@@ -11,6 +11,7 @@ import spimedb.index.rtree.PointND;
 import spimedb.io.KML;
 import spimedb.util.JSON;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -49,9 +50,9 @@ public class MutableNObject extends ImmutableNObject {
             case TAG:
                 String[] tt;
                 if (value instanceof String[])
-                    tt = (String[]) value;
+                    tt = ((String[]) value).clone();
                 else if (value instanceof String)
-                    tt = new String[] { (String) value };
+                    tt = ((String)value).split(" "); //new String[] { (String) value };
                 else if (value instanceof ArrayNode) {
                     tt = JSON.toStrings((ArrayNode)value);
                 } else
@@ -199,17 +200,17 @@ public class MutableNObject extends ImmutableNObject {
      */
     public MutableNObject withTags(String... tags) {
 
-        if (tags.length > 1) {
-            //TODO remove any duplicates
-        }
-
         for (String t : tags) {
             if (t.equals(id()))
                 throw new RuntimeException("object can not be inside itself");
         }
 
-        if (tags.length == 0)
+        if (tags.length == 0) {
             tags = SpimeDB.ROOT;
+        } else {
+            Arrays.sort(tags);
+            //TODO remove any duplicates
+        }
 
         this.tag = tags;
 

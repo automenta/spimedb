@@ -32,10 +32,7 @@ import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
 import spimedb.index.Search;
 import spimedb.index.lucene.DocumentNObject;
-import spimedb.index.rtree.LockingRTree;
-import spimedb.index.rtree.RTree;
-import spimedb.index.rtree.RectND;
-import spimedb.index.rtree.SpatialSearch;
+import spimedb.index.rtree.*;
 import spimedb.query.Query;
 import spimedb.util.FileUtils;
 
@@ -93,6 +90,14 @@ public class SpimeDB extends Search  {
     final static String[] ROOT = new String[]{""};
     private final VertexContainer<String, String> rootNode;
 
+    private final static RectBuilder<NObject> rectBuilder = (n) -> {
+        PointND min = n.min();
+        PointND max = n.max();
+        if (min.equals(max))
+            return new RectND(min); //share min/max point
+        else
+            return new RectND(min.coord, max.coord);
+    };
 
 
     /**
@@ -252,7 +257,7 @@ public class SpimeDB extends Search  {
 
     public SpatialSearch<NObject> space(String tag) {
         return spacetime.computeIfAbsent(tag, (t) -> {
-            return new LockingRTree<NObject>(new RTree<NObject>(new RectND.Builder(),
+            return new LockingRTree<NObject>(new RTree<NObject>(rectBuilder,
                     2, 8, DEFAULT_SPLIT_TYPE),
                     new ReentrantReadWriteLock());
         });
@@ -374,7 +379,7 @@ public class SpimeDB extends Search  {
         if (current instanceof MutableNObject)
             ((MutableNObject) current).remove(">");
 
-        if (current.bounded()) {
+        if ((previous!=null && previous.bounded()) || (current!=null && current.bounded())) {
             reindexSpatial(previous, current, tags);
         }
 
@@ -384,9 +389,10 @@ public class SpimeDB extends Search  {
         for (String t : tags) {
             if (!t.isEmpty()) { //dont store in root
                 SpatialSearch<NObject> s = space(t);
-                if (previous != null)
+                if (previous != null && previous.bounded())
                     s.remove(previous);
-                s.add(current);
+                if (current != null && current.bounded())
+                    s.add(current);
             }
         }
     }

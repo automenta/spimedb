@@ -53,7 +53,7 @@ public interface NObject extends Serializable {
 
     default boolean bounded() {
         PointND min = min();
-        return (min != null && !min.isInfNeg() && !max().isInfPos());
+        return (min != null && min.dim() > 0 && !min.isInfNeg() && !max().isInfPos());
     }
 
 

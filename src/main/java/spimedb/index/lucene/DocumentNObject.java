@@ -3,6 +3,8 @@ package spimedb.index.lucene;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.FloatRangeField;
+import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.index.IndexableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,9 @@ public class DocumentNObject implements NObject {
 
     public final static Logger logger = LoggerFactory.getLogger(DocumentNObject.class);
 
+    final String id;
     final Document document;
+    private PointND min, max;
 
     public static NObject get(Document d) {
         return new DocumentNObject(d);
@@ -32,7 +36,6 @@ public class DocumentNObject implements NObject {
 
         if (n instanceof DocumentNObject)
             return ((DocumentNObject)n).document;
-
 
         String nid = n.id();
 
@@ -48,7 +51,14 @@ public class DocumentNObject implements NObject {
         if (t.length > 0)
             d.add(string(NObject.TAG, Joiner.on(' ').join(t)));
 
-        n.forEach((k,v)->{
+        PointND minP = n.min();
+        if (minP != unbounded) {
+            float[] min = minP.coord;
+            float[] max = n.max().coord;
+            d.add(new FloatRangeField(NObject.BOUND, min, max));
+        }
+
+        n.forEach((k,v)-> {
 
             //special handling
             switch (k) {
@@ -60,26 +70,52 @@ public class DocumentNObject implements NObject {
 
             Class c = v.getClass();
             if (c == String.class) {
-                d.add(text(k, ((String)v)));
+                d.add(text(k, ((String) v)));
             } else if (c == String[].class) {
-                String[] ss = (String[])v;
+                String[] ss = (String[]) v;
                 for (String s : ss) {
                     d.add(text(k, s));
                 }
+            } else if (c == Integer.class) {
+                d.add(new IntPoint(k, ((Integer) v).intValue()));
+            //else if (c == Boolean.class) {
+            //HACK ignore
+            //d.add(new BinaryPoint(k, ((Boolean)v).booleanValue() ));
             } else {
-                logger.warn("field un-documentable: {} {} {}", k, c, v);
+                d.add(string(k, v.toString()));
+                //logger.warn("field un-documentable: {} {} {}", k, c, v);
             }
 
         });
 
         return d;
-
-
     }
 
 
     DocumentNObject(Document d) {
+
         this.document = d;
+        this.id = d.get(NObject.ID);
+
+        Object b = d.get(NObject.BOUND);
+        if (b!=null) {
+            FloatRangeField f = (FloatRangeField)b;
+            //HACK make faster
+            min = new PointND(f.getMin(0),f.getMin(1),f.getMin(2),f.getMin(3));
+            max = new PointND(f.getMax(0),f.getMax(1),f.getMax(2),f.getMax(3));
+        } else {
+            min = max = unbounded;
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj || id.equals(((NObject)obj).id());
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 
     @Override
@@ -127,12 +163,12 @@ public class DocumentNObject implements NObject {
 
     @Override
     public PointND min() {
-        return unbounded; //TODO
+        return min;
     }
 
     @Override
     public PointND max() {
-        return unbounded; //TODO
+        return max;
     }
 
 
@@ -140,6 +176,7 @@ public class DocumentNObject implements NObject {
     public String toString() {
         return toJSONString();
     }
+
 
 
 }

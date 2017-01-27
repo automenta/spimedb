@@ -1,7 +1,6 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.ArrayUtils;
 import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
@@ -64,8 +63,8 @@ public abstract class ImmutableNObject extends RectND implements NObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        MutableNObject no =(MutableNObject)o;
-        return id.equals(no.id);
+        NObject no =(NObject)o;
+        return id.equals(no.id());
     }
 
     @Override

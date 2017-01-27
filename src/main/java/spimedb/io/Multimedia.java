@@ -156,9 +156,9 @@ public class Multimedia  {
     static final int pdfPageImageDPI = 32;
     static final String solrURL = "http://ea:8983/solr/collection1";
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws IOException {
 
-        SpimeDB db = new SpimeDB();
+        SpimeDB db = new SpimeDB("/tmp/eadoc");
 
 
         final Parser tika = new AutoDetectParser();
