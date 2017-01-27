@@ -78,7 +78,9 @@ public class GeoJSON   {
         //Feature{properties={mag=6.2, place=33km S of Tolotangga, Indonesia, time=1483050618360, updated=1483052912295, tz=480, url=http://earthquake.usgs.gov/earthquakes/eventpage/us10007nl0, detail=http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us10007nl0.geojson, felt=73, cdi=7, mmi=4.81, alert=green, status=reviewed, tsunami=1, sig=642, net=us, code=10007nl0, ids=,us10007nl0,, sources=,us,, types=,dyfi,geoserve,losspager,origin,phase-data,shakemap,, nst=null, dmin=3.611, rms=1.52, gap=26, magType=mwp, type=earthquake, title=M 6.2 - 33km S of Tolotangga, Indonesia}, geometry=Point{coordinates=LngLatAlt{longitude=118.6088, latitude=-9.0665, altitude=72.27}} GeoJsonObject{}, id='us10007nl0'}
         d.name( f.getProperty("place") );
         d.withTags("Earthquake");
-        d.put( "eqMag", f.getProperty("mag") );
+        Object mag = f.getProperty("mag");
+        if (mag!=null)
+            d.put( "eqMag", mag);
 
 
 //                    /*if (g instanceof Circle) {

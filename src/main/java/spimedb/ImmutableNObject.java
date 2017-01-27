@@ -6,8 +6,8 @@ import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
 import spimedb.util.JSON;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 @JsonSerialize(using= NObject.NObjectSerializer.class)
@@ -21,7 +21,9 @@ public abstract class ImmutableNObject extends RectND implements NObject {
     protected String[] tag = ArrayUtils.EMPTY_STRING_ARRAY;
 
     protected String name;
-    protected final Map<String, Object> data = new HashMap();
+
+    /** use sorted map so that document field generation will be in a predictable order */
+    protected final Map<String, Object> data = new TreeMap();
 
 
     public ImmutableNObject(PointND a, PointND b, String id, String name) {

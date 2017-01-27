@@ -77,11 +77,7 @@ public class JSON {
             return writer.writeValueAsBytes(x);
         } catch (JsonProcessingException ex) {
             System.err.println(ex.toString());
-            try {
-                return writer.writeValueAsBytes( x.toString() );
-            } catch (JsonProcessingException ex1) {
-                return null;
-            }
+            return x.toString().getBytes();
         }
     }
     public static byte[] toMsgPackBytes(Object x) {

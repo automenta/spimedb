@@ -32,7 +32,7 @@ public class Search  {
 
     protected final Directory dir;
 
-    private final Map<String,NObject> out = new ConcurrentHashMap<>(1024);
+    private final Map<String,DocumentNObject> out = new ConcurrentHashMap<>(1024);
 
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer = new StandardAnalyzer();
@@ -95,12 +95,11 @@ public class Search  {
 
                         //long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
 
-                        Iterator<Map.Entry<String, NObject>> ii = out.entrySet().iterator();
+                        Iterator<Map.Entry<String, DocumentNObject>> ii = out.entrySet().iterator();
                         while (ii.hasNext()) {
-                            Map.Entry<String, NObject> nn = ii.next();
+                            Map.Entry<String, DocumentNObject> nn = ii.next();
                             ii.remove();
-                            Document d = DocumentNObject.toDocument(nn.getValue());
-                            writer.updateDocument(new Term(NObject.ID, nn.getKey()), d);
+                            writer.updateDocument(new Term(NObject.ID, nn.getKey()), nn.getValue().document);
                         }
                         writer.commit();
                         lastCommit = now();
@@ -120,8 +119,8 @@ public class Search  {
 
 
 
-    protected void commit(NObject x) {
-        out.put(x.id(), x);
+    protected void commit(DocumentNObject d) {
+        out.put(d.id(), d);
         commit();
     }
 

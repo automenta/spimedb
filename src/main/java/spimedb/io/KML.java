@@ -566,7 +566,6 @@ public class KML {
                     d.withTags(parentPathString);
                 }
 
-                d.name(cs.getName());
 
                 /*String styleUrl = cs.getStyleUrl();
                  if (styleUrl != null) {
@@ -591,6 +590,7 @@ public class KML {
             } else {
                 d = new MutableNObject(nextID());
                 d.withTags(pathString);
+
             }
 
             if (go instanceof Common) {
@@ -603,12 +603,11 @@ public class KML {
                     }
                 }
 
+                d.name(cm.getName());
             }
 
             if (go instanceof Feature) {
                 Feature f = (Feature) go;
-
-                d.name(f.getName());
 
                 if (enableDescriptions) {
                     String desc = f.getDescription();

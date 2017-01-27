@@ -2,6 +2,7 @@ package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
@@ -33,16 +34,13 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     public MutableNObject(NObject copy) {
-        this(copy.id(), copy.name());
-        withTags(copy.tags());
-        copy.forEach(data::put);
+        super(copy.bounded() ? copy.min() : unbounded, copy.bounded() ? copy.max() : unbounded, copy.id(), copy.name());
+        copy.forEach(this::put);
     }
 
     public MutableNObject(String id, String name) {
         super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY), id, name);
-
     }
-
 
     public MutableNObject put(String key, Object value) {
 
@@ -266,7 +264,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
 
-    public Object /* previous */ putIfAbsent(String key, Object value) {
+    public Object /* previous */ putIfAbsent(String key, @NotNull Object value) {
         return data.putIfAbsent(key, value);
     }
 

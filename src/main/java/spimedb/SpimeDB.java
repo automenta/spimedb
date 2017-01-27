@@ -4,12 +4,14 @@ import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jcog.Util;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -378,20 +380,26 @@ public class SpimeDB extends Search  {
     /**
      * returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics
      */
-    public NObject add(@Nullable NObject next) {
-        if (next == null)
+    public NObject add(@Nullable NObject _next) {
+        if (_next == null)
             return null;
 
-        String id = next.id();
+        String id = _next.id();
+        DocumentNObject next = DocumentNObject.get(_next);
+
         return run(id, () -> {
 
             logger.debug("add {}", id);
 
-            NObject previous = get(id);
+            DocumentNObject previous = get(id);
             if (previous != null) {
-                if (graphed(previous).equalsDeep(graphed(next))) {
+
+
+                if (deepEquals(previous.document, next.document))
                     return previous;
-                }
+                //if (graphed(previous).equalsDeep(graphed(next))) {
+                    //return previous;
+                //}
             }
 
             commit(next);
@@ -406,6 +414,36 @@ public class SpimeDB extends Search  {
 
             return next;
         });
+    }
+
+    private boolean deepEquals(Document a, Document b) {
+        List<IndexableField> af = (a.getFields());
+        List<IndexableField> bf = (b.getFields());
+        int size = af.size();
+        if (bf.size()!=size)
+            return false;
+
+        for (int i = 0; i < size; i++) {
+
+            if (!af.get(i).name().equals(bf.get(i).name()))
+                return false;
+
+            IndexableField afi = af.get(i);
+            IndexableField bfi = bf.get(i);
+
+            String as = afi.toString();
+            String bs = bfi.toString();
+
+
+            //HACK
+            as = as.substring(as.indexOf('<'));
+            bs = bs.substring(bs.indexOf('<'));
+            if (!as.equals(bs))
+                return false;
+
+
+        }
+        return true;
     }
 
     private void reindex(NObject current) {
@@ -488,7 +526,7 @@ public class SpimeDB extends Search  {
     }
 
 
-    public NObject get(String id) {
+    public DocumentNObject get(String id) {
         Document d = the(id);
         if (d!=null)
             return DocumentNObject.get(d);

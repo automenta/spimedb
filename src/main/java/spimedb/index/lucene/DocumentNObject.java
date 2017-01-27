@@ -6,6 +6,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.IndexableFieldType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
@@ -26,12 +27,17 @@ public class DocumentNObject implements NObject {
     public final static Logger logger = LoggerFactory.getLogger(DocumentNObject.class);
 
     final String id;
-    final Document document;
+    public final Document document;
     private final PointND min;
     private final PointND max;
 
-    public static NObject get(Document d) {
+    public static DocumentNObject get(Document d) {
         return new DocumentNObject(d);
+    }
+    public static DocumentNObject get(NObject n) {
+        if (n instanceof DocumentNObject)
+            return ((DocumentNObject)n);
+        return new DocumentNObject(toDocument(n));
     }
 
     public static Document toDocument(NObject n) {
@@ -53,18 +59,25 @@ public class DocumentNObject implements NObject {
         if (t.length > 0)
             d.add(string(NObject.TAG, Joiner.on(' ').join(t)));
 
-        PointND minP = n.min();
-        if (minP != unbounded) {
-            float[] min = minP.coord;
-            float[] max = n.max().coord;
-            try {
-                d.add(new FloatRangeField(NObject.BOUND, min, max));
-            } catch (IllegalArgumentException e) {
-                logger.warn("{}", e);
+        if (n.bounded()) {
+            PointND minP = n.min();
+            if (minP != unbounded) {
+                float[] min = minP.coord;
+
+                float[] max = n.max().coord;
+                try {
+                    d.add(new FloatRangeField(NObject.BOUND, min, max));
+                } catch (IllegalArgumentException e) {
+                    logger.warn("{}", e);
+                }
+
             }
         }
 
         n.forEach((k,v)-> {
+
+            if (v == null)
+                throw new NullPointerException();
 
             //special handling
             switch (k) {
@@ -85,8 +98,8 @@ public class DocumentNObject implements NObject {
             } else if (c == Integer.class) {
                 d.add(new IntPoint(k, ((Integer) v).intValue()));
             } else if (c == Boolean.class) {
-                //HACK ignore
-//                d.add(new BinaryPoint(k, ((Boolean)v).booleanValue() ));
+                //HACK
+                d.add(new BinaryPoint(k, new byte[] { (byte)(((Boolean)v).booleanValue() ? 0 : 1) } ));
             } else if (c == Double.class) {
                 d.add(new DoublePoint(k, ((Double) v).doubleValue()));
             }  else if (v instanceof ScriptObjectMirror) {
@@ -111,7 +124,7 @@ public class DocumentNObject implements NObject {
         this.document = d;
         this.id = d.get(NObject.ID);
 
-        Object b = d.get(NObject.BOUND);
+        IndexableField b = d.getField(NObject.BOUND);
         if (b!=null) {
             FloatRangeField f = (FloatRangeField)b;
 
@@ -159,6 +172,7 @@ public class DocumentNObject implements NObject {
             String k = f.name();
             switch (k) {
                 case NObject.ID: break; //filtered
+                case NObject.BOUND: break; //filtered
                 default:
                     each.accept(k, value(f));
                     break;
@@ -168,9 +182,14 @@ public class DocumentNObject implements NObject {
 
     @Override
     public <X> X get(String tag) {
-        return (X) value(document.getField(tag));
+        IndexableField f = document.getField(tag);
+        if (f == null)
+            return null;
+        else
+            return (X) value(f);
     }
 
+    @NotNull
     private Object value(IndexableField f) {
         switch (f.name()) {
             case NObject.LINESTRING:
@@ -179,12 +198,37 @@ public class DocumentNObject implements NObject {
                 //return JSON.fromMsgPackBytes(f.binaryValue().bytes);
         }
 
+        if (f instanceof BinaryPoint) {
+            //HACK convert to boolean
+            return ((BinaryPoint)f).binaryValue().bytes[0] == 0 ? false : true;
+        } else if (f instanceof DoublePoint) {
+            DoublePoint dp = (DoublePoint) f;
+            byte[] b = dp.binaryValue().bytes;
+
+            double[] dd = new double[b.length / Double.BYTES];
+            for (int i = 0;i < dd.length; i++)
+                dd[i] = DoublePoint.decodeDimension(b, i);
+            if (dd.length == 1)
+                return dd[0];
+            return dd;
+
+        } else if (f instanceof FloatRangeField) {
+            throw new UnsupportedOperationException();
+        } else if (f instanceof IntPoint) {
+            IntPoint ff = (IntPoint)f;
+            return ff.numericValue().intValue(); //HACK assumes dim=1
+        }
+
         IndexableFieldType type = f.fieldType();
+
         if (type == StoredField.TYPE) {
             byte[] b = f.binaryValue().bytes;
             return b;
         } else {
             Object v = f.stringValue(); //TODO adapt based on field type
+            if (v == null) {
+                throw new NullPointerException();
+            }
             return v;
         }
     }
