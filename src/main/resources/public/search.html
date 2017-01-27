@@ -3,6 +3,7 @@
 
     <script src="lib/lodash.js"></script>
     <script src="lib/jquery.min.js"></script>
+    <script src="lib/tempo.js"></script>
 
 </head>
 <body>
@@ -16,19 +17,37 @@
 <div id="query_status">
 </div>
 <div id="query_results">
+    <ul data-template>
+        <h3>{{N}}</h3>
+        <pre>{{I}}</pre>
+        <p>{{text}}</p>
+    </ul>
+    <li data-template-fallback>JavaScript required</li>
 </div>
 
+
+
 </body>
+
+
 <script>
 
-    function update(qText) {
-        $('#query_status').append($('<p>').text('Query: ' + qText));
-        $.get('/search', { text: qText }, function(result) {
-            $('#query_results').text(result);
-        });
-    }
-
     $(document).ready(()=>{
+
+        const resultsTemplate = Tempo.prepare("query_results");
+
+        function update(qText) {
+
+            $('#query_status').html('').append($('<p>').text('Query: ' + qText));
+
+            $.get('/search', { text: qText }, function(result) {
+
+                const rr = JSON.parse(result);
+                resultsTemplate.render(rr);
+
+            });
+        }
+
         $('#query_update').click(function() {
             var t = $('#query_text').val();
             update(t);
@@ -36,4 +55,7 @@
 
     }, false );
 </script>
+
+
+
 </html>

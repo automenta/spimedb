@@ -21,6 +21,7 @@
     "es6-shim": "latest",
     "jquery.atwho": "ichord/At.js",
     "fullcalendar": "latest",
-    "interact": "latest"
+    "interact": "latest",
+    "tempojs": "latest"
   }
 }
