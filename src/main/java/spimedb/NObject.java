@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.ArrayUtils;
 import spimedb.index.rtree.PointND;
 import spimedb.util.JSON;
@@ -21,6 +20,7 @@ import java.util.function.BiConsumer;
 public interface NObject extends Serializable {
 
 
+    //public final static String POINT = ".";
 
     String id();
 
@@ -48,7 +48,7 @@ public interface NObject extends Serializable {
     }
 
     default String toJSONString(boolean pretty) {
-        return new String(JSON.toJSON(this, pretty));
+        return new String(JSON.toJSONBytes(this, pretty));
     }
 
     default boolean bounded() {
@@ -72,6 +72,8 @@ public interface NObject extends Serializable {
     String BOUND = "@";
     String DESC = "_";
 
+    String LINESTRING = "g-";
+    String POLYGON = "g*";
 
 
     /** intensional inheritance */
@@ -92,7 +94,7 @@ public interface NObject extends Serializable {
 
 
     public static MutableNObject fromJSON(String json) {
-        ObjectNode x = JSON.fromJSON(json);
+        JsonNode x = JSON.fromJSON(json);
         JsonNode idNode = x.get(ID);
         if (idNode == null)
             throw new RuntimeException("invalid nobject JSON: " +  json);

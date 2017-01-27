@@ -6,7 +6,7 @@ import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSArray;
 import org.teavm.jso.core.JSFunction;
 import org.teavm.jso.dom.html.HTMLElement;
-import spimedb.MutableNObject;
+import spimedb.NObject;
 import spimedb.bag.ChangeBatcher;
 import spimedb.client.leaflet.*;
 import spimedb.client.lodash.Lodash;
@@ -108,13 +108,13 @@ public class Map2D {
         String name = JS.getString(N.data, "N", nid);
 
 
-        JSObject lineString = JS.get(N.data, 'g' + MutableNObject.LINESTRING);
+        JSObject lineString = JS.get(N.data, NObject.LINESTRING);
         if (lineString != null) {
             return Polyline.create(points(lineString));
         }
 
 
-        JSObject gonString = JS.get(N.data, 'g' + MutableNObject.POLYGON);
+        JSObject gonString = JS.get(N.data, NObject.POLYGON);
         if (gonString != null) {
             return Polygon.create(points(gonString));
         }

@@ -99,7 +99,7 @@ public class Search  {
                         while (ii.hasNext()) {
                             Map.Entry<String, NObject> nn = ii.next();
                             ii.remove();
-                            Document d = DocumentNObject.toDocument(nn.getValue());;
+                            Document d = DocumentNObject.toDocument(nn.getValue());
                             writer.updateDocument(new Term(NObject.ID, nn.getKey()), d);
                         }
                         writer.commit();
@@ -134,7 +134,7 @@ public class Search  {
     }
 
 
-    public final class SearchResult {
+    public final static class SearchResult {
 
         private final TopDocs docs;
         private final IndexSearcher searcher;
@@ -144,7 +144,7 @@ public class Search  {
             this.query = q;
             this.searcher = searcher;
             this.docs = docs;
-            logger.info("query({})={}", query, docs.scoreDocs);
+            logger.info("query({}) hits={}", query, docs.totalHits);
         }
 
         public Iterator<Document> docs() {
@@ -152,16 +152,16 @@ public class Search  {
             final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
 
             IndexReader reader = searcher.getIndexReader();
+            Document d = visitor.getDocument();
 
             return Iterators.transform(Iterators.forArray(docs.scoreDocs), sd -> {
+                d.clear();
                 try {
-                    visitor.getDocument().clear();
                     reader.document(sd.doc, visitor);
-                    return visitor.getDocument();
                 } catch (IOException e) {
                     logger.error("{} {}", sd, e);
-                    return null;
                 }
+                return d;
             });
         }
 
@@ -169,12 +169,12 @@ public class Search  {
 
     protected final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
         @Override
-        public TopScoreDocCollector newCollector() throws IOException {
+        public TopScoreDocCollector newCollector() {
             return TopScoreDocCollector.create(1);
         }
 
         @Override
-        public TopDocs reduce(Collection<TopScoreDocCollector> collectors) throws IOException {
+        public TopDocs reduce(Collection<TopScoreDocCollector> collectors) {
             Iterator<TopScoreDocCollector> ii = collectors.iterator();
             if (ii.hasNext()) {
                 TopScoreDocCollector l = ii.next();

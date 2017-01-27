@@ -5,17 +5,40 @@
     <script src="lib/jquery.min.js"></script>
     <script src="lib/tempo.js"></script>
 
+    <style>
+        #query_suggestions div {
+            padding: 2px;
+            margin: 5px;
+            border: 1px solid gray;
+            display: inline-flex;
+        }
+        #query_suggestions div a {
+            cursor: hand;
+            text-decoration: underline;
+        }
+        #query_suggestions div a:hover {
+            color: orange;
+        }
+        #query_status {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-<div id="query_edit">
-    <span>
-        <input id="query_text" type="text" placeholder="Search"/>
-        <button id="query_update">Search</button>
-    </span>
+<div id="query">
+    <div id="query_edit">
+        <span>
+            <input id="query_text" type="text" placeholder="Search"/>
+            <button id="query_update">Search</button>
+        </span>
+    </div>
+    <div id="query_status">
+    </div>
+    <div id="query_suggestions">
+    </div>
 </div>
-<div id="query_status">
-</div>
+
 <div id="query_results">
     <ul data-template>
         <h3>{{N}}</h3>
@@ -43,10 +66,25 @@
             const qText = queryText.val();
             $('#query_status').html('Suggesting: ' + qText);
             $.get('/suggest', { q: qText }, function(result) {
-                $('#query_status').html('').append($('<p>').text(result));
+
+                $('#query_suggestions').html(_.map(JSON.parse(result), (x) =>
+                    $(document.createElement('div')).append(
+                        $(document.createElement('a')).text(x).click((e)=>{ queryText.val(x); update(x);  } )
+                    )
+                ));
             });
         }, 100, true, true);
+
+        const querySubmit = () => {
+            update(queryText.val());
+        };
+
         queryText.on('input', onQueryTextChanged);
+        queryText.on('keypress', (e) => {
+            if (e.keyCode === 13)
+                querySubmit();
+        });
+        $('#query_update').click(querySubmit);
 
         function update(qText) {
 
@@ -60,10 +98,8 @@
             });
         }
 
-        $('#query_update').click(function() {
-            var t = queryText.val();
-            update(t);
-        });
+
+
 
     }, false );
 </script>

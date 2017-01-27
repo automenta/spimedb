@@ -82,11 +82,12 @@ public class SpimeDB extends Search  {
      */
     transient final ScriptEngineManager engineManager = new ScriptEngineManager();
     transient public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
-    private final StandardAnalyzer analyzer;
-    private Lookup suggester;
-    private final DocumentDictionary nameDict;
 
-    private File resources;
+    private final StandardAnalyzer analyzer;
+
+    private Lookup suggester;
+    private DocumentDictionary nameDict;
+
 
     public final MapGraph<String, String> graph = new MapGraph<String, String>(
             new ConcurrentHashMap<>(),
@@ -122,7 +123,6 @@ public class SpimeDB extends Search  {
         this.analyzer = new StandardAnalyzer();
 
         rootNode = graph.addVertex(ROOT[0]);
-        resources(TMP_SPIMEDB_CACHE_PATH);
 
         int preloaded[] = new int[1];
         forEach(x -> {
@@ -131,28 +131,27 @@ public class SpimeDB extends Search  {
         });
         logger.info("{} objects loaded", preloaded[0]);
 
-
-        nameDict = new DocumentDictionary(reader(), NObject.NAME, NObject.NAME);
-
     }
 
     long lastSuggesterCreated = 0;
     long minSuggesterUpdatePeriod = 1000 * 2;
 
     @Nullable private Lookup suggester() {
-        synchronized (nameDict) {
+        synchronized (dir) {
             if (lastCommit - lastSuggesterCreated > minSuggesterUpdatePeriod ) {
                 suggester = null; //re-create since it is invalidated
             }
 
             if (suggester == null) {
-                suggester = new FreeTextSuggester(new SimpleAnalyzer());
+                nameDict = new DocumentDictionary(reader(), NObject.NAME, NObject.NAME);
+                FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
                 try {
-                    suggester.build(nameDict);
+                    nextSuggester.build(nameDict);
+                    suggester = nextSuggester;
                     lastSuggesterCreated = now();
                     logger.info("suggester updated, count={}", suggester.getCount());
                 } catch (IOException e) {
-                    logger.error("suggester creation: {}", e);
+                    logger.error("suggester update: {}", e);
                     return null;
                 }
             }
@@ -191,16 +190,25 @@ public class SpimeDB extends Search  {
     }
 
     @Nullable
-    private IndexSearcher searcher() throws IOException {
-        try {
-            return new IndexSearcher(reader());
-        } catch (IndexNotFoundException e) {
+    private IndexSearcher searcher()  {
+        DirectoryReader r = reader();
+        if (r != null) {
+            return new IndexSearcher(r);
+        } else {
             return null;
         }
     }
 
-    private DirectoryReader reader() throws IOException {
-        return DirectoryReader.open(dir);
+    @Nullable private DirectoryReader reader()  {
+        try {
+            if (DirectoryReader.indexExists(dir))
+                return DirectoryReader.open(dir);
+            else
+                return null;
+        } catch (IOException e) {
+            logger.error("index reader: {}", e);
+            return null;
+        }
     }
 
     public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
@@ -212,13 +220,14 @@ public class SpimeDB extends Search  {
     private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
 
         IndexSearcher searcher = searcher();
-        TopDocs docs = searcher.search(q, hitsPerPage);
-
-        if (docs.totalHits == 0) {
-            //TODO: return EmptySearchResult;
+        if (searcher != null) {
+            TopDocs docs = searcher.search(q, hitsPerPage);
+            if (docs.totalHits > 0) {
+                return new SearchResult(q, searcher, docs);
+            }
         }
 
-        return new SearchResult(q, searcher, docs);
+        return new SearchResult(q, null, null); //TODO: return EmptySearchResult;
     }
 
 
@@ -288,10 +297,7 @@ public class SpimeDB extends Search  {
         }
     }
 
-    public SpimeDB resources(String path) {
-        this.resources = FileUtils.pathOrCreate(path).toFile();
-        return this;
-    }
+
 
     public SpatialSearch<NObject> spaceIfExists(String tag) {
         return spacetime.get(tag);
@@ -379,7 +385,7 @@ public class SpimeDB extends Search  {
         String id = next.id();
         return run(id, () -> {
 
-            logger.info("add {}", id);
+            logger.debug("add {}", id);
 
             NObject previous = get(id);
             if (previous != null) {

@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Longs;
 import org.jetbrains.annotations.NotNull;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
@@ -50,9 +49,9 @@ public class JSON {
     public static void writeArrayValues(float[] xx, JsonGenerator jsonGenerator) throws IOException {
         for (float x : xx) {
             float y;
-            if (x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY)
+            /*if (x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY)
                 y = Float.NaN; //as string, "NaN" is shorter than "Infinity"
-            else
+            else*/
                 y = x;
 
             jsonGenerator.writeNumber(y);
@@ -63,13 +62,13 @@ public class JSON {
         return toJSONString(x, false);
     }
     public static String toJSONString(Object x, boolean pretty) {
-        return new String(toJSON(x, pretty));
+        return new String(toJSONBytes(x, pretty));
     }
 
-    public static byte[] toJSON(Object x) {
-        return toJSON(x, false);
+    public static byte[] toJSONBytes(Object x) {
+        return toJSONBytes(x, false);
     }
-    public static byte[] toJSON(Object x, boolean pretty) {
+    public static byte[] toJSONBytes(Object x, boolean pretty) {
         return toJSONBytes(x, pretty ? jsonWritersPretty.get() : jsonWritersCondensed.get());
     }
 
@@ -83,6 +82,22 @@ public class JSON {
             } catch (JsonProcessingException ex1) {
                 return null;
             }
+        }
+    }
+    public static byte[] toMsgPackBytes(Object x) {
+        try {
+            return msgPackMapper.writer().writeValueAsBytes(x);
+        } catch (JsonProcessingException e) {
+            logger.error("{}", e);
+            return null;
+        }
+    }
+    public static JsonNode fromMsgPackBytes(byte[] msgPacked) {
+        try {
+            return msgPackMapper.reader().readValue(msgPacked);
+        } catch (IOException e) {
+            logger.error("{}", e);
+            return null;
         }
     }
 
@@ -102,10 +117,21 @@ public class JSON {
         }
     }
 
-    public static ObjectNode fromJSON(String x) {
-        try {
+    public static JsonNode fromJSON(String x) {
+        return fromJSON(x, JsonNode.class);
+    }
 
-            return json.readValue(x, ObjectNode.class);
+    public static <X> X fromJSON(String x, Class<? extends X> type) {
+        try {
+            return json.readValue(x, type);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    public static <X> X fromJSON(byte[] j, Class<? extends X> type) {
+        try {
+            return json.readValue(j, type);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;

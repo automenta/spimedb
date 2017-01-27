@@ -181,7 +181,7 @@ public class MutableNObject extends ImmutableNObject {
         double[][] points = KML.toArray(lp);
 
         where(l.getBoundingBox());
-        put('g' + MutableNObject.LINESTRING, points);
+        put(NObject.LINESTRING, points);
         return this;
     }
 
@@ -191,7 +191,7 @@ public class MutableNObject extends ImmutableNObject {
         //TODO handle inner rings
 
         where(p.getBoundingBox());
-        put('g' + MutableNObject.POLYGON, outerRing);
+        put(NObject.POLYGON, outerRing);
         return this;
     }
 
@@ -242,8 +242,13 @@ public class MutableNObject extends ImmutableNObject {
 
     public void where(float x, float y, float z) {
         where(x, y);
-        min.coord[3] = z;
-        max.coord[3] = z;
+        if (z!=z) { //avoid NaN
+            min.coord[3] = Float.NEGATIVE_INFINITY;
+            max.coord[3] = Float.POSITIVE_INFINITY;
+        } else {
+            min.coord[3] = z;
+            max.coord[3] = z;
+        }
     }
 
     @Deprecated
@@ -263,6 +268,11 @@ public class MutableNObject extends ImmutableNObject {
 
     public Object /* previous */ putIfAbsent(String key, Object value) {
         return data.putIfAbsent(key, value);
+    }
+
+    public NObject without(String k) {
+        remove(k);
+        return this;
     }
 
 

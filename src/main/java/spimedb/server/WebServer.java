@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static io.undertow.Handlers.resource;
+import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static spimedb.util.HTTP.getStringParameter;
 
@@ -91,7 +92,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
-                o.write(JSON.toJSON(db.tags().stream().map(db::get).toArray(NObject[]::new)));
+                o.write(JSON.toJSONBytes(db.tags().stream().map(db::get).toArray(NObject[]::new)));
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }
@@ -106,7 +107,8 @@ public class WebServer extends PathHandler {
                 List<Lookup.LookupResult> x = db.suggest(qText, 16);
                 JSON.toJSON( Lists.transform(x, y -> y.key), o );
             } catch (Exception e) {
-                try { o.write(JSON.toJSON(e)); } catch (IOException e1) { }
+                logger.warn("suggest: {}", e);
+                try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
             }
         }));
 
@@ -128,18 +130,14 @@ public class WebServer extends PathHandler {
 
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e);
-                try { o.write(JSON.toJSON(e)); } catch (IOException e1) { }
+                try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
             }
 
         }));
 
 
-//        /* client attention management */
-//        addPrefixPath("/attn", websocket(new Session(db) {
-//
-//
-//
-//        }));
+        /* client attention management */
+        addPrefixPath("/attn", websocket(new Session(db)));
 
 
         Undertow.Builder b = Undertow.builder()

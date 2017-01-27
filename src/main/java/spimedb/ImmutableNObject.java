@@ -13,10 +13,6 @@ import java.util.function.BiConsumer;
 @JsonSerialize(using= NObject.NObjectSerializer.class)
 public abstract class ImmutableNObject extends RectND implements NObject {
 
-    //public final static String POINT = ".";
-    public final static String LINESTRING = "-";
-    public final static String POLYGON = "*";
-
     protected final String id;
 
     /** extensional inheritance: what this nobject is "inside" of (its container)

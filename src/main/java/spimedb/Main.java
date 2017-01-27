@@ -3,8 +3,7 @@ package spimedb;
 import ch.qos.logback.classic.Level;
 import org.slf4j.Logger;
 import spimedb.io.FileDirectory;
-import spimedb.io.GeoJSON;
-import spimedb.io.KML;
+import spimedb.io.Multimedia;
 import spimedb.server.WebServer;
 import spimedb.util.js.SpimeJS;
 
@@ -28,6 +27,9 @@ public class Main {
             null
         );*/ new SpimeDB("/tmp/spimedb/index");
 
+        new Multimedia(db);
+
+
         try {
             new WebServer(db, 8080);
         } catch (RuntimeException e) {
@@ -35,20 +37,6 @@ public class Main {
             return;
         }
 
-
-        //if (db.isEmpty())
-            addInitialData(db);
-
-            //db.find("s*", 32).docs().forEachRemaining(d -> {
-//        db.forEach((n) -> {
-//            System.out.println(n);
-//
-//            Document dd = db.the(n.id());
-//            System.out.println("\t" + dd);
-//        });
-    }
-
-    static void addInitialData(SpimeDB db) {
 
         try {
             new SpimeJS(db).with("db", db).run(new File("data/climateviewer.js"));
@@ -75,26 +63,22 @@ public class Main {
         //ImportSchemaOrg.load(db);
 
 
-        db.on((n,d)->{
-            String url = n.get("url_in");
-            if (url!=null) {
-                if ((url.endsWith(".kml") || url.endsWith(".kmz"))) {
-                    SpimeDB.runLater(new KML(db).url(url));
-                } else if (url.endsWith(".geojson")) {
-                    GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
-                }
-            }
-        });
-
         //db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 
         FileDirectory.load("/home/me/kml", db);
 
 
-
 //            db.forEach(x -> {
 //                System.out.println(x);
 //            });
+
+        //db.find("s*", 32).docs().forEachRemaining(d -> {
+//        db.forEach((n) -> {
+//            System.out.println(n);
+//
+//            Document dd = db.the(n.id());
+//            System.out.println("\t" + dd);
+//        });
     }
 
 
