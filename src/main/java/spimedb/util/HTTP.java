@@ -110,16 +110,24 @@ public class HTTP {
         ex.getResponseSender().close();
     }
 
-    static String[] getStringArrayParameter(HttpServerExchange ex, String param) throws IOException {
-        Map<String, Deque<String>> reqParams = ex.getQueryParameters();
+    public static String[] getStringArrayParameter(HttpServerExchange ex, String param) throws IOException {
+        String s = getStringParameter(ex, param);
 
-        Deque<String> idArray = reqParams.get(param);
-
-        ArrayNode a = JSON.json.readValue(idArray.getFirst(), ArrayNode.class);
+        ArrayNode a = JSON.json.readValue(s, ArrayNode.class);
 
         String[] ids = JSON.toStrings(a);
 
         return ids;
+    }
+
+    @Nullable public static String getStringParameter(HttpServerExchange ex, String param) {
+        Map<String, Deque<String>> reqParams = ex.getQueryParameters();
+
+        Deque<String> idArray = reqParams.get(param);
+        if (idArray==null)
+            return null;
+
+        return idArray.getFirst();
     }
 
     public static HttpHandler handleClientResources() {

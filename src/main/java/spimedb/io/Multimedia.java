@@ -29,6 +29,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.server.WebServer;
 import spimedb.util.JSON;
 
 import javax.imageio.spi.IIORegistry;
@@ -159,6 +160,7 @@ public class Multimedia  {
     public static void main(String[] args) throws IOException {
 
         SpimeDB db = new SpimeDB("/tmp/eadoc");
+        new WebServer(db, 8080);
 
 
         final Parser tika = new AutoDetectParser();

@@ -13,20 +13,24 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
+import org.apache.lucene.document.Document;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.client.Client;
+import spimedb.index.Search;
+import spimedb.index.lucene.DocumentNObject;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 import static io.undertow.Handlers.resource;
-import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
+import static spimedb.util.HTTP.getStringParameter;
 
 /**
  * @author me
@@ -90,12 +94,41 @@ public class WebServer extends PathHandler {
             }
         }));
 
-        /* client attention management */
-        addPrefixPath("/attn", websocket(new Session(db) {
+        addPrefixPath("/search", ex -> HTTP.stream(ex, (o) -> {
+            String qText = getStringParameter(ex, "text");
+            if (qText==null || (qText=qText.trim()).isEmpty())
+                return;
 
+            try {
 
+                Search.SearchResult x = db.find(qText, 10);
+
+                o.write('[');
+                Iterator<Document> ii = x.docs();
+                while (ii.hasNext()) {
+                    JSON.toJSON( DocumentNObject.get(ii.next()), o );
+                    o.write(',');
+                }
+                o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
+
+            } catch (Exception e) {
+
+                logger.warn("{} -> {}", qText, e);
+
+                try {
+                    o.write(JSON.toJSON(e));
+                } catch (IOException e1) { }
+            }
 
         }));
+
+
+//        /* client attention management */
+//        addPrefixPath("/attn", websocket(new Session(db) {
+//
+//
+//
+//        }));
 
 
         Undertow.Builder b = Undertow.builder()

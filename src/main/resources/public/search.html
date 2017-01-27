@@ -1,0 +1,39 @@
+<html>
+<head>
+
+    <script src="lib/lodash.js"></script>
+    <script src="lib/jquery.min.js"></script>
+
+</head>
+<body>
+
+<div id="query_edit">
+    <span>
+        <input id="query_text" type="text" placeholder="Search"/>
+        <button id="query_update">Search</button>
+    </span>
+</div>
+<div id="query_status">
+</div>
+<div id="query_results">
+</div>
+
+</body>
+<script>
+
+    function update(qText) {
+        $('#query_status').append($('<p>').text('Query: ' + qText));
+        $.get('/search', { text: qText }, function(result) {
+            $('#query_results').text(result);
+        });
+    }
+
+    $(document).ready(()=>{
+        $('#query_update').click(function() {
+            var t = $('#query_text').val();
+            update(t);
+        });
+
+    }, false );
+</script>
+</html>
