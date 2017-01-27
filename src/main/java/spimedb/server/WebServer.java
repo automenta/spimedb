@@ -6,6 +6,7 @@
 package spimedb.server;
 
 
+import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
@@ -14,6 +15,7 @@ import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.search.suggest.Lookup;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
@@ -27,6 +29,7 @@ import spimedb.util.js.JavaToJavascript;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.List;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
@@ -94,8 +97,21 @@ public class WebServer extends PathHandler {
             }
         }));
 
+        addPrefixPath("/suggest", ex -> HTTP.stream(ex, (o) -> {
+            String qText = getStringParameter(ex, "q");
+            if (qText==null || (qText=qText.trim()).isEmpty())
+                return;
+
+            try {
+                List<Lookup.LookupResult> x = db.suggest(qText, 16);
+                JSON.toJSON( Lists.transform(x, y -> y.key), o );
+            } catch (Exception e) {
+                try { o.write(JSON.toJSON(e)); } catch (IOException e1) { }
+            }
+        }));
+
         addPrefixPath("/search", ex -> HTTP.stream(ex, (o) -> {
-            String qText = getStringParameter(ex, "text");
+            String qText = getStringParameter(ex, "q");
             if (qText==null || (qText=qText.trim()).isEmpty())
                 return;
 
@@ -106,18 +122,13 @@ public class WebServer extends PathHandler {
                 o.write('[');
                 Iterator<Document> ii = x.docs();
                 while (ii.hasNext()) {
-                    JSON.toJSON( DocumentNObject.get(ii.next()), o );
-                    o.write(',');
+                    JSON.toJSON( DocumentNObject.get(ii.next()), o, ',' );
                 }
                 o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
 
             } catch (Exception e) {
-
                 logger.warn("{} -> {}", qText, e);
-
-                try {
-                    o.write(JSON.toJSON(e));
-                } catch (IOException e1) { }
+                try { o.write(JSON.toJSON(e)); } catch (IOException e1) { }
             }
 
         }));

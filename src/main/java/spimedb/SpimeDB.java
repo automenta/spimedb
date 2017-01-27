@@ -5,15 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.suggest.DocumentDictionary;
+import org.apache.lucene.search.suggest.Lookup;
+import org.apache.lucene.search.suggest.analyzing.FreeTextSuggester;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
@@ -80,6 +83,8 @@ public class SpimeDB extends Search  {
     transient final ScriptEngineManager engineManager = new ScriptEngineManager();
     transient public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
     private final StandardAnalyzer analyzer;
+    private Lookup suggester;
+    private final DocumentDictionary nameDict;
 
     private File resources;
 
@@ -103,7 +108,7 @@ public class SpimeDB extends Search  {
     /**
      * in-memory, map-based
      */
-    public SpimeDB() {
+    public SpimeDB() throws IOException {
         this(new RAMDirectory());
     }
 
@@ -111,7 +116,7 @@ public class SpimeDB extends Search  {
         this(FSDirectory.open(new File(path).toPath()));
     }
 
-    public SpimeDB(Directory dir) {
+    public SpimeDB(Directory dir) throws IOException {
         super(dir);
 
         this.analyzer = new StandardAnalyzer();
@@ -126,7 +131,35 @@ public class SpimeDB extends Search  {
         });
         logger.info("{} objects loaded", preloaded[0]);
 
+
+        nameDict = new DocumentDictionary(reader(), NObject.NAME, NObject.NAME);
+
     }
+
+    long lastSuggesterCreated = 0;
+    long minSuggesterUpdatePeriod = 1000 * 2;
+
+    @Nullable private Lookup suggester() {
+        synchronized (nameDict) {
+            if (lastCommit - lastSuggesterCreated > minSuggesterUpdatePeriod ) {
+                suggester = null; //re-create since it is invalidated
+            }
+
+            if (suggester == null) {
+                suggester = new FreeTextSuggester(new SimpleAnalyzer());
+                try {
+                    suggester.build(nameDict);
+                    lastSuggesterCreated = now();
+                    logger.info("suggester updated, count={}", suggester.getCount());
+                } catch (IOException e) {
+                    logger.error("suggester creation: {}", e);
+                    return null;
+                }
+            }
+        }
+        return suggester;
+    }
+
 
 
         /*public Iterable<Document> all() {
@@ -160,10 +193,14 @@ public class SpimeDB extends Search  {
     @Nullable
     private IndexSearcher searcher() throws IOException {
         try {
-            return new IndexSearcher(DirectoryReader.open(dir));
+            return new IndexSearcher(reader());
         } catch (IndexNotFoundException e) {
             return null;
         }
+    }
+
+    private DirectoryReader reader() throws IOException {
+        return DirectoryReader.open(dir);
     }
 
     public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
@@ -182,6 +219,11 @@ public class SpimeDB extends Search  {
         }
 
         return new SearchResult(q, searcher, docs);
+    }
+
+
+    public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
+        return suggester().lookup(qText, false, count);
     }
 
 

@@ -16,10 +16,12 @@ import static spimedb.io.GeoJSONTest.eqGeoJson;
  */
 public class TagTest {
 
-    final SpimeDB db = new SpimeDB();
+
 
     @Test
-    public void testTagActivationTrigger() {
+    public void testTagActivationTrigger() throws IOException {
+
+        final SpimeDB db = new SpimeDB();
 
         Tag v = new Tag("Test");
         db.add(v);
@@ -60,7 +62,9 @@ public class TagTest {
     }
 
     @Test
-    public void testExpandingTag() {
+    public void testExpandingTag() throws IOException {
+
+        final SpimeDB db = new SpimeDB();
 
         Consumer<Tag> onGeoJSONActivate = (t) -> {
             try {
@@ -87,7 +91,9 @@ public class TagTest {
         System.out.println(db.toString());
     }
 
-    @Test public void testGraphDecoration() {
+    @Test public void testGraphDecoration() throws IOException {
+
+        final SpimeDB db = new SpimeDB();
 
         db.add(new Tag("Disaster"));
         db.add(new Tag("Hurricane", "Disaster"));

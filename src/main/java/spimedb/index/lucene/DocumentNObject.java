@@ -82,8 +82,9 @@ public class DocumentNObject implements NObject {
             //HACK ignore
             //d.add(new BinaryPoint(k, ((Boolean)v).booleanValue() ));
             } else {
+                logger.warn("field un-documentable: {} {} {}", k, c, v);
                 d.add(string(k, v.toString()));
-                //logger.warn("field un-documentable: {} {} {}", k, c, v);
+
             }
 
         });

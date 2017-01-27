@@ -5,6 +5,7 @@ import org.junit.Test;
 import spimedb.query.Query;
 import spimedb.io.ImportSchemaOrg;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,7 +18,7 @@ import static org.junit.Assert.*;
 public class QueryTest {
 
     @Test
-    public void testDAGActivation() {
+    public void testDAGActivation() throws IOException {
         SpimeDB db = new SpimeDB();
 
         ImportSchemaOrg.load(db);

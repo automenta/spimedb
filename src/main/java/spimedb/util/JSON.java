@@ -66,16 +66,12 @@ public class JSON {
         return new String(toJSON(x, pretty));
     }
 
-
-
-
     public static byte[] toJSON(Object x) {
         return toJSON(x, false);
     }
     public static byte[] toJSON(Object x, boolean pretty) {
         return toJSONBytes(x, pretty ? jsonWritersPretty.get() : jsonWritersCondensed.get());
     }
-
 
     public static byte[] toJSONBytes(Object x, ObjectWriter writer) {
         try {
@@ -115,9 +111,6 @@ public class JSON {
             return null;
         }
     }
-
-
-
 
     public static String uuid64() {
         //return (String)jcog.Util.uuid128(); //escaped unicode results in long JSON strings, bad

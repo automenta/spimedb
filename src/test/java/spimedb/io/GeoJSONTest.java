@@ -18,12 +18,14 @@ import static org.junit.Assert.assertTrue;
  */
 public class GeoJSONTest {
 
-    final SpimeDB db = new SpimeDB();
+
 
     public final static Supplier<InputStream> eqGeoJson = ()->new BufferedInputStream(GeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson"), 1024);
 
     @Test
     public void test1() throws IOException {
+
+        final SpimeDB db = new SpimeDB();
 
         db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 

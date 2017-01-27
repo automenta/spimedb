@@ -3,6 +3,8 @@ package spimedb.io;
 import org.junit.Test;
 import spimedb.SpimeDB;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -13,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 public class ImportSchemaOrgTest {
 
     @Test
-    public void test1() {
+    public void test1() throws IOException {
         SpimeDB db = new SpimeDB();
         ImportSchemaOrg.load(db);
 //        r.graph.vertexSet().forEach(v -> {

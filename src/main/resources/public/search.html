@@ -36,11 +36,23 @@
 
         const resultsTemplate = Tempo.prepare("query_results");
 
+        const queryText = $('#query_text');
+
+
+        const onQueryTextChanged = _.throttle(()=>{
+            const qText = queryText.val();
+            $('#query_status').html('Suggesting: ' + qText);
+            $.get('/suggest', { q: qText }, function(result) {
+                $('#query_status').html('').append($('<p>').text(result));
+            });
+        }, 100, true, true);
+        queryText.on('input', onQueryTextChanged);
+
         function update(qText) {
 
-            $('#query_status').html('').append($('<p>').text('Query: ' + qText));
+            //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
 
-            $.get('/search', { text: qText }, function(result) {
+            $.get('/search', { q: qText }, function(result) {
 
                 const rr = JSON.parse(result);
                 resultsTemplate.render(rr);
@@ -49,7 +61,7 @@
         }
 
         $('#query_update').click(function() {
-            var t = $('#query_text').val();
+            var t = queryText.val();
             update(t);
         });
 

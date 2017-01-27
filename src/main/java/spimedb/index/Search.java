@@ -36,7 +36,11 @@ public class Search  {
 
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer = new StandardAnalyzer();
-    private final Directory dirBase;
+
+    protected long lastCommit = 0;
+
+    public long now() { return System.currentTimeMillis(); }
+
 
     public Search() {
         this(new RAMDirectory());
@@ -45,8 +49,6 @@ public class Search  {
 
     public Search(Directory directory) {
 
-        //this.dir = new RAMDirectory();
-        dirBase = directory;
 
         this.dir = directory;
         //this.dir = new NRTCachingDirectory(dirBase, 5.0, 60.0);
@@ -55,25 +57,24 @@ public class Search  {
     }
 
 
-    static Iterable<NObject> drain(Iterable<Map.Entry<String,NObject>> x) {
-        return () -> new Iterator<NObject>() {
-
-            final Iterator<Map.Entry<String,NObject>> ii = x.iterator();
-
-            @Override
-            public boolean hasNext() {
-                return ii.hasNext();
-            }
-
-            @Override
-            public NObject next() {
-                NObject n = ii.next().getValue();
-                ii.remove();
-                return n;
-            }
-        };
-    }
-
+//    static Iterable<NObject> drain(Iterable<Map.Entry<String,NObject>> x) {
+//        return () -> new Iterator<NObject>() {
+//
+//            final Iterator<Map.Entry<String,NObject>> ii = x.iterator();
+//
+//            @Override
+//            public boolean hasNext() {
+//                return ii.hasNext();
+//            }
+//
+//            @Override
+//            public NObject next() {
+//                NObject n = ii.next().getValue();
+//                ii.remove();
+//                return n;
+//            }
+//        };
+//    }
 
     private void commit() {
         if (writing.compareAndSet(false, true)) {
@@ -102,6 +103,7 @@ public class Search  {
                             writer.updateDocument(new Term(NObject.ID, nn.getKey()), d);
                         }
                         writer.commit();
+                        lastCommit = now();
                         written += s;
                     }
                     writer.close();
@@ -130,6 +132,7 @@ public class Search  {
     public static TextField text(String key, String value) {
         return new TextField(key, value, Field.Store.YES);
     }
+
 
     public final class SearchResult {
 
