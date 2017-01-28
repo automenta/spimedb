@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Requirements:
 #	git
@@ -28,6 +28,7 @@ echo 'Generate Web App'
 pushd .
 	cd src/main/resources/public/
 	bower install
+	bower update
 popd
 
 echo 'Finished'

@@ -106,6 +106,7 @@ public class SpimeDB extends Search  {
         else
             return new RectND(min.coord, max.coord);
     };
+    public String indexPath;
 
 
     /**
@@ -113,13 +114,16 @@ public class SpimeDB extends Search  {
      */
     public SpimeDB() throws IOException {
         this(new RAMDirectory());
+        this.indexPath = null;
     }
 
     public SpimeDB(String path) throws IOException {
         this(FSDirectory.open(new File(path).toPath()));
+        this.indexPath = new File(path).getAbsolutePath();
+        logger.info("index: {}", indexPath);
     }
 
-    public SpimeDB(Directory dir) throws IOException {
+    SpimeDB(Directory dir) throws IOException {
         super(dir);
 
         this.analyzer = new StandardAnalyzer();

@@ -1,6 +1,7 @@
 package spimedb;
 
 import ch.qos.logback.classic.Level;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import spimedb.io.FileDirectory;
 import spimedb.io.Multimedia;
@@ -22,16 +23,41 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
+        if (args.length == 0) {
+            System.out.println("usage: spime \"<JSON configuration>\"");
+            System.out.println("\texample configuration:");
+            System.out.println("\t'{port:8080,path:\"/doc\"}'");
+            System.out.println();
+            return;
+        }
+
+        String cfgString = args[0];
+        JsonNode config = spimedb.util.JSON.fromJSON(cfgString);
+        JsonNode portNode = config.get("port");
+        if (portNode==null) {
+            System.err.println("configuration missing 'port' field");
+            return;
+        }
+        int port = portNode.intValue();
+
+        JsonNode pathNode = config.get("path");
+        if (pathNode==null) {
+            System.err.println("configuration missing 'path' field");
+            return;
+        }
+
+        String path = pathNode.asText();
+
         SpimeDB db =  /*Infinispan.db(
             //"/tmp/climate"
             null
-        );*/ new SpimeDB("/tmp/spimedb/index");
+        );*/ new SpimeDB(path + "/index");
 
         new Multimedia(db);
 
 
         try {
-            new WebServer(db, 8080);
+            new WebServer(db, port);
         } catch (RuntimeException e) {
             e.printStackTrace();
             return;
@@ -65,7 +91,7 @@ public class Main {
 
         //db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 
-        FileDirectory.load("/home/me/kml", db);
+        FileDirectory.load(path, db);
 
 
 //            db.forEach(x -> {

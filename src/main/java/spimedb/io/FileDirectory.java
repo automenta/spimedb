@@ -27,7 +27,11 @@ public class FileDirectory {
 //            );
 
             for (File x : path.listFiles()) {
+                if (db.indexPath!=null && x.getAbsolutePath().equals(db.indexPath)) //exclude the index folder
+                    continue;
+
                 try {
+
 
                     URL u = x.toURL();
                     String us = u.toString();
