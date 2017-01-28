@@ -1,10 +1,52 @@
-# SpimeDB - realtime spatiotemporal database
+# SpimeDB - Realtime Spatio-Temporal Database
 
 SpimeDB unifies the semantic, spatial, and temporal dimensions of data in a common n-dimensional ranged vector space.
 
 Exploit hyperdimensional locality for efficient iterative access in display, analysis, and distributed computation applications.
 
 ![SpimeDB Logo](https://raw.githubusercontent.com/automenta/spimedb/master/data/spimedb_logo.png)
+
+## Inputs
+ * Multimedia Formats (via Apache Tika https://tika.apache.org/1.0/formats.html)
+   * HyperText Markup Language (html)
+   * XML and derived
+   * Microsoft Office document
+   * OpenDocument
+   * Portable Document (pdf)
+   * Electronic Publication (epub)
+   * Rich Text (rtf)
+   * Compression (.zip, .gz, etc)
+   * Text
+   * Audio
+   * Image
+   * Video
+   * Java class files and archives
+ * JSON
+ * RSS
+ * KML/KMZ
+ * GeoJSON
+
+## Tools
+ * Search Web UI
+   * Tags, Metadata, Full-text
+   * Thumbnails
+   * Natural language processing
+     * Parse tree
+     * Named entities
+   * Faceted keywords and values
+ * Map 2D/3D Web UI
+ * Timeline Web UI
+ * Integrated Spacetime Web UI
+ * JSON HTTP API
+ * JSON MsgPack WebSocket API
+ * Javascript Server-side control and configuration
+
+## Requirements
+ * OpenJDK9
+ * Maven 3.3+
+ * git
+ * bower
+ * ```update.sh``` for basic installation and update
 
 ## NObject (json) specification v-0.00
 ```js
@@ -59,15 +101,16 @@ Exploit hyperdimensional locality for efficient iterative access in display, ana
 
 Spatial projection models resolve an internal spatial vector. The protocol must specify a default and assign these id's for specific encoding type:
 
-### lon/lat/alt/unixtime
+### Geodetic Lon/Lat/Alt + Unixtime
  * __longitude (X) first, then latitude (Y).__ for consistency with usual X,Y vector ordering
  * altitude measured in meters relative to some sea level constant.
  * requires modulo +/-180 degrees longitude which may require preprocessing certain queries
  * distortion at poles
 
-### x/y/z/unixtime - WSG geographic projection to (flat) euclidean 3D absolute space
- * TODO determine the newest projection model
- * orthogonally-aligned bounding boxes will not have a common alignment with spheroid planet surface, which may impact efficiency
+### Earth Centered Earth Fixed (ECEF) X, Y, Z + Unixtime: Flat euclidean 3D coordinates
+ * Note: Orthogonally-aligned bounding boxes will not have a common alignment with spheroid planet surface, which may impact efficiency
+ * https://en.wikipedia.org/wiki/ECEF
+ * https://www.orekit.org/static/apidocs/org/orekit/models/earth/Geoid.html#transform-org.orekit.bodies.GeodeticPoint-
 
 ### other models
  * ?

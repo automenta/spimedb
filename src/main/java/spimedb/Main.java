@@ -24,7 +24,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         if (args.length == 0) {
-            System.out.println("usage: spime \"<JSON configuration>\"");
+            System.out.println("usage: spime '{...JSON configuration...}'");
             System.out.println("\texample configuration:");
             System.out.println("\t'{port:8080,path:\"/doc\"}'");
             System.out.println();

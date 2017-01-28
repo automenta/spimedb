@@ -10,7 +10,6 @@
     "cytoscape-cola": "latest",
     "cesiumjs": "latest",
     "leaflet": "latest",
-    "leaflet-providers": "latest",
     "leaflet.markercluster": "latest",
     "d3": "latest",
     "graphlib": "latest",
