@@ -15,8 +15,8 @@ import spimedb.util.JSON;
 
 import java.util.function.BiConsumer;
 
-import static spimedb.index.Search.string;
-import static spimedb.index.Search.text;
+import static spimedb.SpimeDB.string;
+import static spimedb.SpimeDB.text;
 import static spimedb.index.rtree.RectND.unbounded;
 
 /**
@@ -66,7 +66,10 @@ public class DocumentNObject implements NObject {
 
                 float[] max = n.max().coord;
                 try {
-                    d.add(new FloatRangeField(NObject.BOUND, min, max));
+                    //d.add(new FloatRangeField(NObject.BOUND, min, max));
+                    //float[] aa = ArrayUtils.addAll(min, max);
+                    //d.add(new FloatPoint(NObject.BOUND, aa));
+                    d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
                 } catch (IllegalArgumentException e) {
                     logger.warn("{}", e);
                 }
@@ -102,7 +105,10 @@ public class DocumentNObject implements NObject {
                 d.add(new BinaryPoint(k, new byte[] { (byte)(((Boolean)v).booleanValue() ? 0 : 1) } ));
             } else if (c == Double.class) {
                 d.add(new DoublePoint(k, ((Double) v).doubleValue()));
-            }  else if (v instanceof ScriptObjectMirror) {
+            } else if (c == Long.class) {
+                throw new UnsupportedOperationException();
+                //d.add(new LongPoint(k, ((Long) v).longValue()));
+            } else if (v instanceof ScriptObjectMirror) {
                 //HACK ignore
             } else if (c == double[][].class) {
                 //d.add(new StoredField(k, new BytesRef(JSON.toMsgPackBytes(v))));
@@ -126,11 +132,13 @@ public class DocumentNObject implements NObject {
 
         IndexableField b = d.getField(NObject.BOUND);
         if (b!=null) {
-            FloatRangeField f = (FloatRangeField)b;
+            //FloatRangeField f = (FloatRangeField)b;
 
             //HACK make faster
-            min = new PointND(f.getMin(0),f.getMin(1),f.getMin(2),f.getMin(3));
-            max = new PointND(f.getMax(0),f.getMax(1),f.getMax(2),f.getMax(3));
+            StoredField f = (StoredField)b;
+            float[][] dd = JSON.fromJSON(f.stringValue(), float[][].class);
+            min = new PointND(dd[0]);
+            max = new PointND(dd[1]);
         } else {
             min = max = unbounded;
         }
@@ -212,6 +220,16 @@ public class DocumentNObject implements NObject {
                 return dd[0];
             return dd;
 
+        } else if (f instanceof LongPoint) {
+            throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
+//            LongPoint lp = (LongPoint)f;
+//            byte[] b = lp.binaryValue().bytes;
+//            long[] dd = new long[b.length / Long.BYTES];
+//            for (int i = 0;i < dd.length; i++)
+//                dd[i] = LongPoint.decodeDimension(b, i);
+//            if (dd.length == 1)
+//                return dd[0];
+//            return dd;
         } else if (f instanceof FloatRangeField) {
             throw new UnsupportedOperationException();
         } else if (f instanceof IntPoint) {

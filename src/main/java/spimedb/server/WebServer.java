@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.client.Client;
-import spimedb.index.Search;
 import spimedb.index.lucene.DocumentNObject;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
@@ -118,7 +117,7 @@ public class WebServer extends PathHandler {
 
             try {
 
-                Search.SearchResult x = db.find(qText, 10);
+                SpimeDB.SearchResult x = db.find(qText, 10);
 
                 o.write('[');
                 Iterator<Document> ii = x.docs();

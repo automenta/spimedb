@@ -34,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -62,145 +63,48 @@ public class Multimedia {
 
     public Multimedia(SpimeDB db) {
 
-        db.on((NObject x, SpimeDB d) -> {
-
-            if ("application/pdf".equals(x.get("contentType")) && x.has("pageCount") && x.has("text") && (d.graph.isLeaf(x.id())) /* leaf */) {
-
-                String parentContent = x.get("text");
-                Document parentDOM = Jsoup.parse(parentContent);
-
-                Elements pagesHTML = parentDOM.select(".page");
-
-                int pageCount = x.get("pageCount");
-                for (int _page = 0; _page < pageCount; _page++) {
-
-                    final int page = _page;
-                    d.runLater(() -> {
-
-                        Document pd = Document.createShell("");
-                        pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
-                        Elements cc = cleaner.clean(pd).body().children();
-                        String[] pdb = cc.stream()
-                                .filter(xx -> !xx.children().isEmpty() || xx.hasText())
-                                .map(xx -> xx.tagName().equals("p") ? xx.text() : xx) //just use <p> contents
-                                .map(Object::toString).toArray(String[]::new);
-                        if (pdb.length == 0)
-                            pdb = null;
-
-//                    List<JsonNode> jdb = new ArrayList(pdb.size());
-//                    pdb.forEach(e -> {
-//                        if (e.children().isEmpty() && e.text().isEmpty())
-//                            return;
-//                        jdb.add(html2json(e));
-//                    });
-
-                        String docTitle = x.name();
-                        if (docTitle == null) {
-                            docTitle = x.id();
-                        }
-
-
-                        d.addAsync(
-                                new MutableNObject(x.id() + "#" + page)
-                                        .name(docTitle + " - (page " + (page + 1) + ")")
-                                        .withTags(x.id())
-                                        .put("author", x.get("author"))
-                                        .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
-                                        .put("url_in", x.get("url_in"))
-                                        .put("contentType", "application/pdf")
-                                        .put("page", page)
-                                        .put("text", pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
-                                        .put("textParse",
-                                                (pdb != null) ? Stream.of(pdb).map(
-                                                        t -> NLP.toString(NLP.parse(t))
-                                                ).collect(Collectors.joining("\n")) : null)
-                        );
-                    });
-                }
-
-                //clean and update parent DOM
-
-                d.addAsync(new MutableNObject(x)
-                        //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
-                        .put("text", null)
-                        .put("textParse", x.name() != null ? NLP.toString(NLP.parse(
-                                Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
-                        )) : null) //parse the title + description
-                );
-
-
-            }
-        });
-
-
-        SpimeDB.LOG("org.apache.pdfbox.rendering.CIDType0Glyph2D", Level.ERROR);
-        SpimeDB.LOG("org.apache.pdfbox", Level.ERROR);
-        java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
-        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
-        db.on((NObject n, SpimeDB d) -> {
-
-            if (n.has("page") && !n.has("pageCount") && "application/pdf".equals(n.get("contentType")) && !n.has("image")) {
-
-                int page = n.get("page");
-                String id = n.id();
-                String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
-                //img.getWidth() + "x" + img.getHeight() +
-
-                String outputFile = pdfPageImageOutputPath + "/" + pageFile;
-
-                if (!Files.exists(Paths.get(outputFile))) {
-                    try {
-                        PDDocument document = PDDocument.load(new URL(n.get("url_in")).openStream());
-
-                        try {
-
-                            PDFRenderer renderer = new PDFRenderer(document);
-
-
-                            BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
-
-
-                            boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
-
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        document.close();
-                    } catch (IOException f) {
-                        f.printStackTrace();
-                    }
-
-                }
-
-                d.addAsync(new MutableNObject(n).put("image", pageFile));
-
-            }
-        });
-
-
-        db.on((x, d) -> {
+        db.on((NObject p, NObject x) -> {
             String url = x.get("url_in");
 
             if (url != null) {
-                try {
-                    x = d.addAsync(new MutableNObject(x).without("url_in")).get();
 
-                    if ((url.endsWith(".kml") || url.endsWith(".kmz"))) {
-                        SpimeDB.runLater(new KML(db).url(url));
-                    } else if (url.endsWith(".geojson")) {
-                        GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
+
+                try {
+                    URL uu = new URL(url);
+                    URLConnection con = uu.openConnection();
+                    long exp = con.getExpiration();
+                    if (exp== 0)
+                        exp = con.getLastModified();
+
+                    //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
+
+                    if (p!=null) {
+                        //long whenCached = p.getOr("url_cached", -1L);
+//                        if (!(whenCached == -1 || whenCached < exp))
+//                            return p; //still valid
+                        String whenCached = p.get("url_cached");
+                        if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
+                            logger.info("cached: {}", url);
+                            return p; //still valid
+                        } else {
+                            logger.info("wtf: {}\n\t{}\n\t{}", url, p, x);
+                        }
+
                     }
+
+                    logger.info("load: {}", url);
+
+                    MutableNObject y = new MutableNObject(x);
+
+                    y.put("url_cached", Long.toString(exp));
 
 
                     Metadata metadata = new Metadata();
                     ParseContext context = new ParseContext();
 
-                    MutableNObject y = new MutableNObject(x);
 
-                    URL uu = new URL(url);
-                    InputStream stream = uu.openStream();
+
+                    InputStream stream = con.getInputStream();
                     if (stream == null) {
                         throw new FileNotFoundException();
                     }
@@ -233,14 +137,147 @@ public class Multimedia {
                     });
 
 
-                    db.addAsync(y);
+                    //db.addAsync(y).get();
+
+                    //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
+
+                    if ((url.endsWith(".kml") || url.endsWith(".kmz"))) {
+                        new KML(db,y).url(url).run();
+                    } else if (url.endsWith(".geojson")) {
+                        GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
+                    }
+
+
+                    return y;
 
                 } catch (Exception e) {
                     logger.error("url_in removal: {}", e);
                 }
 
             }
+
+            return x;
+
         });
+
+        db.on((NObject p, NObject x) -> {
+
+            if ("application/pdf".equals(x.get("contentType")) && x.has("pageCount") && x.has("text") && (db.graph.isLeaf(x.id())) /* leaf */) {
+
+                String parentContent = x.get("text");
+                Document parentDOM = Jsoup.parse(parentContent);
+
+                Elements pagesHTML = parentDOM.select(".page");
+
+                int pageCount = x.get("pageCount");
+                for (int _page = 0; _page < pageCount; _page++) {
+
+                    final int page = _page;
+                    db.runLater(() -> {
+
+                        Document pd = Document.createShell("");
+                        pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
+                        Elements cc = cleaner.clean(pd).body().children();
+                        String[] pdb = cc.stream()
+                                .filter(xx -> !xx.children().isEmpty() || xx.hasText())
+                                .map(xx -> xx.tagName().equals("p") ? xx.text() : xx) //just use <p> contents
+                                .map(Object::toString).toArray(String[]::new);
+                        if (pdb.length == 0)
+                            pdb = null;
+
+//                    List<JsonNode> jdb = new ArrayList(pdb.size());
+//                    pdb.forEach(e -> {
+//                        if (e.children().isEmpty() && e.text().isEmpty())
+//                            return;
+//                        jdb.add(html2json(e));
+//                    });
+
+                        String docTitle = x.name();
+                        if (docTitle == null) {
+                            docTitle = x.id();
+                        }
+
+
+                        db.addAsync(
+                                new MutableNObject(x.id() + "#" + page)
+                                        .name(docTitle + " - (page " + (page + 1) + ")")
+                                        .withTags(x.id())
+                                        .put("author", x.get("author"))
+                                        .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
+                                        .put("contentType", "application/pdf")
+                                        .put("page", page)
+                                        .put("text", pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
+                                        .put("textParse",
+                                                (pdb != null) ? Stream.of(pdb).map(
+                                                        t -> NLP.toString(NLP.parse(t))
+                                                ).collect(Collectors.joining("\n")) : null)
+                        );
+                    });
+                }
+
+                //clean and update parent DOM
+
+                return new MutableNObject(x)
+                        //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
+                        .put("text", null)
+                        .put("textParse", x.name() != null ? NLP.toString(NLP.parse(
+                                Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
+                        )) : null) //parse the title + description
+                ;
+            } else {
+                return x;
+            }
+        });
+
+
+        SpimeDB.LOG("org.apache.pdfbox.rendering.CIDType0Glyph2D", Level.ERROR);
+        SpimeDB.LOG("org.apache.pdfbox", Level.ERROR);
+        java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
+        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
+        db.on((NObject p, NObject x) -> {
+
+            if (x.has("page") && !x.has("pageCount") && "application/pdf".equals(x.get("contentType")) && !x.has("image")) {
+
+                int page = x.get("page");
+                String id = x.id();
+                String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
+                //img.getWidth() + "x" + img.getHeight() +
+
+                String outputFile = pdfPageImageOutputPath + "/" + pageFile;
+
+                if (!Files.exists(Paths.get(outputFile))) {
+                    try {
+                        PDDocument document = PDDocument.load(new URL(x.get("url_in")).openStream());
+
+                        try {
+
+                            PDFRenderer renderer = new PDFRenderer(document);
+
+
+                            BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
+
+
+                            boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        document.close();
+                    } catch (IOException f) {
+                        f.printStackTrace();
+                    }
+
+                }
+
+                return new MutableNObject(x).put("image", pageFile);
+            } else {
+                return x;
+            }
+        });
+
+
 
     }
 

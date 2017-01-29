@@ -6,9 +6,7 @@ import org.slf4j.Logger;
 import spimedb.io.FileDirectory;
 import spimedb.io.Multimedia;
 import spimedb.server.WebServer;
-import spimedb.util.js.SpimeJS;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -53,8 +51,8 @@ public class Main {
             null
         );*/ new SpimeDB(path + "/index");
 
-        new Multimedia(db);
 
+        new Multimedia(db);
 
         try {
             new WebServer(db, port);
@@ -64,11 +62,16 @@ public class Main {
         }
 
 
+        FileDirectory.load(path, db);
+
+        /*
         try {
             new SpimeJS(db).with("db", db).run(new File("data/climateviewer.js"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
+
 
             /*
             new Netention() {
@@ -91,7 +94,6 @@ public class Main {
 
         //db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 
-        FileDirectory.load(path, db);
 
 
 //            db.forEach(x -> {

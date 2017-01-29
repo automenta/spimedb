@@ -47,8 +47,9 @@ import static spimedb.io.kml.KmlReader.logger;
 public class KML {
 
     final int maxPathDepth = 3;
-    private final Proxy proxy;
+    //private final Proxy proxy;
     private final SpimeDB db;
+    private final MutableNObject root;
 
     private String layer;
     final Deque<String> path = new ArrayDeque();
@@ -58,6 +59,7 @@ public class KML {
     private String parentPathString;
 
     final private AtomicInteger serial = new AtomicInteger(0);
+
 
     public String nextID() {
         int c = serial.incrementAndGet();
@@ -278,13 +280,9 @@ public class KML {
         }
     }
 
-    public KML(SpimeDB db) {
-        this(db, null);
-    }
-
-    public KML(SpimeDB db, Proxy proxy) {
+    public KML(SpimeDB db, MutableNObject root) {
         this.db = db;
-        this.proxy = proxy;
+        this.root = root;
     }
 
 
@@ -531,6 +529,7 @@ public class KML {
         private final Map<String, Style> styles;
         public boolean rootFound;
 
+
         public MyGISVisitor(String id, Map<String, Style> styles) {
             this.id = id;
             this.styles = styles;
@@ -560,7 +559,7 @@ public class KML {
                     }
                     rootFound = true;
                     //name the top level folder
-                    d = new MutableNObject(id);
+                    d = root;
                 } else {
                     d = new MutableNObject(pathString);
                     d.withTags(parentPathString);
@@ -713,7 +712,8 @@ public class KML {
                     System.err.println("Un-NObjectized: " + go);
                     return false;
                 }*/
-            db.add(d);
+            if (d!=root)
+                db.add(d);
 
 
             return true;
