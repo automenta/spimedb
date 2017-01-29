@@ -29,14 +29,9 @@ import spimedb.SpimeDB;
 
 import javax.imageio.spi.IIORegistry;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,17 +74,11 @@ public class Multimedia {
                     //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
 
                     if (p!=null) {
-                        //long whenCached = p.getOr("url_cached", -1L);
-//                        if (!(whenCached == -1 || whenCached < exp))
-//                            return p; //still valid
                         String whenCached = p.get("url_cached");
                         if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
                             logger.info("cached: {}", url);
                             return p; //still valid
-                        } else {
-                            logger.info("wtf: {}\n\t{}\n\t{}", url, p, x);
                         }
-
                     }
 
                     logger.info("load: {}", url);
@@ -101,8 +90,6 @@ public class Multimedia {
 
                     Metadata metadata = new Metadata();
                     ParseContext context = new ParseContext();
-
-
 
                     InputStream stream = con.getInputStream();
                     if (stream == null) {
@@ -175,6 +162,8 @@ public class Multimedia {
                     final int page = _page;
                     db.runLater(() -> {
 
+                        logger.info("load: {} page {}", x.id(), page);
+
                         Document pd = Document.createShell("");
                         pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
                         Elements cc = cleaner.clean(pd).body().children();
@@ -199,11 +188,11 @@ public class Multimedia {
 
 
                         db.addAsync(
-                                new MutableNObject(x.id() + "#" + page)
-                                        .name(docTitle + " - (page " + (page + 1) + ")")
+                                new MutableNObject(x.id() + "." + page)
+                                        .name(docTitle + " - (" + (page + 1) + " of " + (pageCount+1) + ")")
                                         .withTags(x.id())
                                         .put("author", x.get("author"))
-                                        .put("url", x.get("url") + "#" + page) //browser loads the specific page when using the '#' anchor
+                                        .put("url", x.get("url_in")) //HACK browser loads the specific page when using the '#' anchor
                                         .put("contentType", "application/pdf")
                                         .put("page", page)
                                         .put("text", pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
@@ -232,22 +221,24 @@ public class Multimedia {
 
         SpimeDB.LOG("org.apache.pdfbox.rendering.CIDType0Glyph2D", Level.ERROR);
         SpimeDB.LOG("org.apache.pdfbox", Level.ERROR);
-        java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
+        //java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
         db.on((NObject p, NObject x) -> {
 
             if (x.has("page") && !x.has("pageCount") && "application/pdf".equals(x.get("contentType")) && !x.has("image")) {
 
-                int page = x.get("page");
                 String id = x.id();
-                String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
+                //String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
                 //img.getWidth() + "x" + img.getHeight() +
 
-                String outputFile = pdfPageImageOutputPath + "/" + pageFile;
+                //String outputFile = pdfPageImageOutputPath + "/" + pageFile;
 
-                if (!Files.exists(Paths.get(outputFile))) {
+                MutableNObject y = new MutableNObject(x);
+                int page = y.get("page");
+
+                if (y.get("thumbnail") == null) {
                     try {
-                        PDDocument document = PDDocument.load(new URL(x.get("url_in")).openStream());
+                        PDDocument document = PDDocument.load(new URL(y.get("url")).openStream());
 
                         try {
 
@@ -257,24 +248,31 @@ public class Multimedia {
                             BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
 
 
-                            boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+                            //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+                            ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
+                            boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI);
 
+                            y.put("thumbnail", os.toByteArray());
+
+
+                            return y;
 
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } finally {
+                            document.close();
                         }
 
-                        document.close();
                     } catch (IOException f) {
                         f.printStackTrace();
                     }
 
                 }
 
-                return new MutableNObject(x).put("image", pageFile);
-            } else {
-                return x;
+
             }
+
+            return x;
         });
 
 

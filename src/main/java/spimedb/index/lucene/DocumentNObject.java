@@ -113,10 +113,11 @@ public class DocumentNObject implements NObject {
             } else if (c == double[][].class) {
                 //d.add(new StoredField(k, new BytesRef(JSON.toMsgPackBytes(v))));
                 d.add(new StoredField(k, JSON.toJSONBytes(v)));
+            } else if (c == byte[].class) {
+                d.add(new StoredField(k, (byte[])v));
             } else {
                 logger.warn("field un-documentable: {} {} {}", k, c, v);
                 d.add(string(k, v.toString()));
-
             }
 
         });
@@ -135,7 +136,7 @@ public class DocumentNObject implements NObject {
             //FloatRangeField f = (FloatRangeField)b;
 
             //HACK make faster
-            StoredField f = (StoredField)b;
+            Field f = (Field)b;
             float[][] dd = JSON.fromJSON(f.stringValue(), float[][].class);
             min = new PointND(dd[0]);
             max = new PointND(dd[1]);

@@ -31,6 +31,9 @@ public class FileDirectory {
                 if (db.indexPath != null && x.getAbsolutePath().equals(db.indexPath)) //exclude the index folder
                     continue;
 
+                if (x.isDirectory())
+                    continue; //dont recurse for now
+
                 try {
 
 

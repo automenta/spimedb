@@ -14,6 +14,7 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.util.HttpString;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.suggest.Lookup;
 import org.slf4j.LoggerFactory;
@@ -107,6 +108,22 @@ public class WebServer extends PathHandler {
             } catch (Exception e) {
                 logger.warn("suggest: {}", e);
                 try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
+            }
+        }));
+
+        addPrefixPath("/thumbnail", ex -> HTTP.stream(ex, (o) -> {
+            String id = getStringParameter(ex, "I");
+            if (id == null)
+                return;
+            DocumentNObject d = db.get(id);
+            if (d!=null) {
+                byte[] b = d.get("thumbnail");
+                if (b!=null) {
+                    try {
+                        ex.getResponseHeaders().add(HttpString.tryFromString("Content-type"), "image/jpg");
+                        o.write(b);
+                    } catch (IOException e) { }
+                }
             }
         }));
 

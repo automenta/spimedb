@@ -766,10 +766,12 @@ public class SpimeDB  {
             this.query = q;
             this.searcher = searcher;
             this.docs = docs;
-            logger.info("query({}) hits={}", query, docs.totalHits);
+            logger.info("query({}) hits={}", query, docs!=null ? docs.totalHits : 0);
         }
 
         public Iterator<Document> docs() {
+            if (docs == null)
+                return Collections.emptyIterator();
 
             final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
 

@@ -39,7 +39,7 @@ public class Session extends AbstractServerWebSocket {
 
 
     final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>(
-            /* size */ 32 * 1024, 3, 0.001f, new StringHashProvider());
+            /* size */ 32 * 1024, 3, 0.01f, new StringHashProvider());
 
     ///final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
@@ -71,7 +71,7 @@ public class Session extends AbstractServerWebSocket {
         private Task currentFocus;
 
         /** send predicted-to-be-known items after sending predicted-to-be-unknown-by-client */
-        private boolean ensureSent = true;
+        private boolean ensureSent = false;
 
 
         public String status() {

@@ -80,7 +80,7 @@ public class GeoJSON   {
         d.withTags("Earthquake");
         Object mag = f.getProperty("mag");
         if (mag!=null)
-            d.put( "eqMag", mag);
+            d.put( "eqMag", mag.toString());
 
 
 //                    /*if (g instanceof Circle) {
