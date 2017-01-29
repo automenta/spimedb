@@ -1,6 +1,5 @@
 package spimedb.client;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.browser.Window;
 import org.teavm.jso.core.JSArray;
@@ -31,7 +30,9 @@ public class Client {
 
     private final Refresher refresh;
 
-    final static int minForgetPeriodMS = 100;
+    final static float forgetRate = 0.98f;
+    final static int minForgetPeriodMS = 5;
+
     private final JSFunction forgetting;
 
     static void setVisible(ElementCSSInlineStyle element, boolean visible) {
@@ -43,7 +44,7 @@ public class Client {
     }
 
 
-    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(512, BudgetMerge.or, new HashMap<>());
+    public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(1024, BudgetMerge.or, new HashMap<>());
 
 
     public final WebSocket io = WebSocket.newSocket("attn");
@@ -61,7 +62,7 @@ public class Client {
     public Client() {
 
         forgetting = Lodash.debounce(()->{
-            obj.mul(0.99f); //forgetting
+            obj.mul(forgetRate); //forgetting
         }, minForgetPeriodMS);
 
         this.doc = HTMLDocument.current();

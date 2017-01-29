@@ -66,6 +66,9 @@ public class Map2D {
             public void update(Layer[] added, Layer[] removed) {
                 //System.out.println(Arrays.toString(added) + " - " + Arrays.toString(removed));
                 c.removeLayers(removed);
+
+                forget();
+
                 c.addLayers(added);
                 //System.out.println(differ.built.size() + " " + obj.size());
             }
@@ -158,8 +161,13 @@ public class Map2D {
         return pp;
     }
 
+    final float invisibleForget = 0.9f;
+
     protected void refresh() {
         LatLngBounds bounds = map.getBounds();
+
+        forget();
+
 
         //parse this kind of noise:
         // {"_southWest":{"lat":39.932380403490875,"lng":-80.50094604492188},"_northEast":{"lat":40.082274490356966,"lng":-79.62203979492189}}
@@ -173,6 +181,26 @@ public class Map2D {
 
         client.sync();
         client.io.send("me.focusLonLat(" + '[' + Arrays.toString(b[0]) + ',' + Arrays.toString(b[1]) + "])");
+    }
+
+    private void forget() {
+        LatLngBounds bounds = map.getBounds();
+        this.differ.forEach((k,v)->{
+            boolean forget = false;
+            if (v instanceof Marker) {
+                if (!bounds.contains(((Marker)v).getLatLng()))
+                    forget = true;
+            } else if (v instanceof Polyline) {
+                if (!bounds.intersects(((Polyline)v).getBounds()))
+                    forget = true;
+            } else if (v instanceof Polygon) {
+                if (!bounds.intersects(((Polygon)v).getBounds()))
+                    forget = true;
+            }
+            if (forget)
+                client.obj.mul(k, invisibleForget);
+        });
+        client.obj.sort();
     }
 
 }

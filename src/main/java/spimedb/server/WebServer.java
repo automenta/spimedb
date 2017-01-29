@@ -47,8 +47,7 @@ public class WebServer extends PathHandler {
 
     final JavaToJavascript j2js;
 
-
-
+    private final double websocketOutputRateLimitBytesPerSecond = 1024 * 1024;
 
 
     //    private List<String> paths = new ArrayList();
@@ -137,7 +136,7 @@ public class WebServer extends PathHandler {
 
 
         /* client attention management */
-        addPrefixPath("/attn", websocket(new Session(db)));
+        addPrefixPath("/attn", websocket(new Session(db, websocketOutputRateLimitBytesPerSecond)));
 
 
         Undertow.Builder b = Undertow.builder()

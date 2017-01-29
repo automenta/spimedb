@@ -6,13 +6,17 @@ import de.jjedele.sbf.hashing.StringHashProvider;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
+import org.eclipse.collections.api.set.ImmutableSet;
+import org.eclipse.collections.impl.factory.Sets;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.lucene.DocumentNObject;
 import spimedb.query.Query;
 
 import javax.script.SimpleBindings;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -22,20 +26,20 @@ import java.util.Set;
  * TODO: https://github.com/undertow-io/undertow/blob/master/examples/src/main/java/io/undertow/examples/sessionhandling/SessionServer.java
  */
 public class Session extends AbstractServerWebSocket {
-    /**
-     * bytes per second
-     */
-    public static final int defaultOutRateBytesPerSecond = 128 * 1024;
 
+    static final ImmutableSet<String> mapIncludesFields = Sets.immutable.with(
+            NObject.POLYGON, NObject.LINESTRING, NObject.NAME, NObject.TAG, NObject.INH
+    );
 
     /**
      * response bandwidth throttle
      */
-    final RateLimiter defaultOutRate = RateLimiter.create(defaultOutRateBytesPerSecond);
+    final RateLimiter defaultOutRate;
 
 
 
-    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>( /* size */ 64 * 1024, 3, 0.001f, new StringHashProvider());
+    final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>(
+            /* size */ 32 * 1024, 3, 0.001f, new StringHashProvider());
 
     ///final ObjectFloatHashMap<String> attention = new ObjectFloatHashMap<>();
 
@@ -46,8 +50,9 @@ public class Session extends AbstractServerWebSocket {
     final SimpleBindings scope;
     private WebSocketChannel chan;
 
-    public Session(SpimeDB db) {
+    public Session(SpimeDB db, double outputRateLimitBytesPerSecond) {
         this.db = db;
+        this.defaultOutRate = RateLimiter.create(outputRateLimitBytesPerSecond);
         scope = new SimpleBindings();
         scope.put("me", new API());
     }
@@ -66,7 +71,7 @@ public class Session extends AbstractServerWebSocket {
         private Task currentFocus;
 
         /** send predicted-to-be-known items after sending predicted-to-be-unknown-by-client */
-        private boolean ensureSent = false;
+        private boolean ensureSent = true;
 
 
         public String status() {
@@ -78,7 +83,7 @@ public class Session extends AbstractServerWebSocket {
                 @Override public void run() {
                     for (String x : id) {
                         try {
-                            trySend(this, x);
+                            trySend(this, x, true);
                         } catch (IOException e) {
                             break;
                         }
@@ -98,7 +103,7 @@ public class Session extends AbstractServerWebSocket {
                     Iterator<String> r = db.roots();
                     try {
                         while (r.hasNext()) {
-                            trySend(this, r.next());
+                            trySend(this, r.next(), true);
                         }
                     } catch (IOException e) {
                         return;
@@ -116,6 +121,8 @@ public class Session extends AbstractServerWebSocket {
             }
         }
 
+
+
         public Task focusLonLat(float[][] bounds) {
 
             logger.info("start {} focusLonLat {}", this, bounds);
@@ -126,6 +133,8 @@ public class Session extends AbstractServerWebSocket {
             String[] tags = new String[]{};
 
             return new Task(Session.this) {
+
+
 
                 @Override
                 public void run() {
@@ -141,13 +150,13 @@ public class Session extends AbstractServerWebSocket {
 
                     db.get(new Query((n) -> {
 
-                        n = db.graphed(n);
+                        n = transmittable(n);
 
                         if (!running.get()) //early exit test
                             return false;
 
                         try {
-                            if (!trySend(this, n) && ensureSent)
+                            if (!trySend(this, n, false) && ensureSent)
                                 lowPriority.add(n); //buffer it for sending later (low-priority)
                         } catch (IOException e) {
                             stop();
@@ -161,35 +170,47 @@ public class Session extends AbstractServerWebSocket {
                     if (running.get()) {
                         for (NObject n : lowPriority) {
                             try {
-                                trySend(this, n);
+                                trySend(this, n, true);
                             } catch (IOException e) {
                                 break;
                             }
                         }
                     }
                 }
+
+                @NotNull
+                private SpimeDB.FilteredNObject transmittable(NObject n) {
+                    return new SpimeDB.FilteredNObject( db.graphed(n), mapIncludesFields);
+                }
             };
 
         }
 
-        private boolean trySend(Task t, String id) throws IOException {
+        private boolean trySend(Task t, String id, boolean force) throws IOException {
+            return trySend(t, id, force, null);
+        }
+
+        private boolean trySend(Task t, String id, boolean force, @Nullable ImmutableSet<String> includeKeys) throws IOException {
             int[] idHash = remoteMemory.hash(id);
-            if (!remoteMemory.contains(idHash)) {
-                SpimeDB.GraphedNObject n = db.graphed(id);
-                if (n!=null) {
-                    t.sendJSON(chan, n);
-                    remoteMemory.add(idHash);
-                    return true;
-                } else {
-                    return false;
+            if (force || !remoteMemory.contains(idHash)) {
+                DocumentNObject d = db.get(id);
+                if (d!=null) {
+                    SpimeDB.GraphedNObject n = db.graphed(includeKeys!=null ? new SpimeDB.FilteredNObject(d, includeKeys) : d);
+                    if (n != null) {
+                        t.sendJSON(chan, n);
+                        remoteMemory.add(idHash);
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             }
             return false;
         }
 
-        private boolean trySend(Task t, NObject n) throws IOException {
+        private boolean trySend(Task t, NObject n, boolean force) throws IOException {
             int[] idHash = remoteMemory.hash(n.id());
-            if (!remoteMemory.contains(idHash)) {
+            if (force || !remoteMemory.contains(idHash)) {
                 t.sendJSON(chan, n);
                 remoteMemory.add(idHash);
                 return true;

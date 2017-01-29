@@ -24,4 +24,6 @@ public abstract class Polyline implements LeafletPath {
 
     @Override
     public abstract Polyline addTo(LeafletMap map);
+
+    public abstract LatLngBounds getBounds();
 }

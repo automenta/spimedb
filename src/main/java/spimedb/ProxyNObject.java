@@ -12,6 +12,13 @@ public class ProxyNObject implements NObject {
      */
     protected NObject n;
 
+    public ProxyNObject() {
+
+    }
+    public ProxyNObject(NObject n) {
+        set(n);
+    }
+
     public void set(NObject n) {
         this.n = n;
     }

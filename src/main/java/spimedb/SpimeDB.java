@@ -618,6 +618,28 @@ public class SpimeDB extends Search  {
         return new GraphedNObject(this.graph, n);
     }
 
+    public static class FilteredNObject extends ProxyNObject {
+
+        private final ImmutableSet<String> keysInclude;
+
+        public FilteredNObject(NObject n, ImmutableSet<String> keysInclude) {
+            super(n);
+            this.keysInclude = keysInclude;
+        }
+
+        protected boolean includeKey(String key) {
+            return keysInclude.contains(key);
+        }
+
+        @Override
+        public void forEach(BiConsumer<String, Object> each) {
+            n.forEach((k,v)->{
+                if (includeKey(k)) //HACK filter out tag field because the information will be present in the graph
+                    each.accept(k, v);
+            });
+        }
+    }
+
     @JsonSerialize(using = NObject.NObjectSerializer.class)
     public static class GraphedNObject extends ProxyNObject {
 
@@ -633,10 +655,14 @@ public class SpimeDB extends Search  {
             set(n);
         }
 
+        protected boolean includeKey(String key) {
+            return !key.equals(TAG);
+        }
+
         @Override
         public void forEach(BiConsumer<String, Object> each) {
             n.forEach((k, v) -> {
-                if (!k.equals(TAG)) //HACK filter out tag field because the information will be present in the graph
+                if (includeKey(k)) //HACK filter out tag field because the information will be present in the graph
                     each.accept(k, v);
             });
 

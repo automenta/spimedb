@@ -26,4 +26,7 @@ public abstract class Polygon implements LeafletPath {
 
     @Override
     public abstract Polygon addTo(LeafletMap map);
+
+    public abstract LatLngBounds getBounds();
+
 }
