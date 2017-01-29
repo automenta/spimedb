@@ -92,7 +92,7 @@ public class MutableNObject extends ImmutableNObject {
             return;
         }
 
-        put("_", d);
+        put(DESC, d);
     }
 
 

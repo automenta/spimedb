@@ -17,6 +17,8 @@ import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.HttpString;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.suggest.Lookup;
+import org.eclipse.collections.api.set.ImmutableSet;
+import org.eclipse.collections.impl.factory.Sets;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
@@ -139,7 +141,11 @@ public class WebServer extends PathHandler {
                 o.write('[');
                 Iterator<Document> ii = x.docs();
                 while (ii.hasNext()) {
-                    JSON.toJSON( DocumentNObject.get(ii.next()), o, ',' );
+                    JSON.toJSON( searchResult(
+
+                        DocumentNObject.get(ii.next())
+
+                    ), o, ',' );
                 }
                 o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
 
@@ -297,6 +303,26 @@ public class WebServer extends PathHandler {
         //addPrefixPath("/wikipedia", new Wikipedia());
 
 
+    }
+
+    static final ImmutableSet<String> searchResultKeys =
+        Sets.immutable.of(
+        NObject.ID, NObject.NAME,NObject.DESC, NObject.INH, NObject.TAG, NObject.BOUND,
+                "thumbnail"
+        );
+
+    private SpimeDB.FilteredNObject searchResult(NObject d) {
+        return new SpimeDB.FilteredNObject( db.graphed(d), searchResultKeys) {
+            @Override
+            protected Object value(String key, Object v) {
+                switch (key) {
+                    case "thumbnail":
+                        //rewrite the thumbnail blob byte[] as a String URL
+                        return "/thumbnail?I=" + d.id();
+                }
+                return v;
+            }
+        };
     }
 
 

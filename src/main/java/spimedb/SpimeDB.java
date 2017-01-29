@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Iterators;
-import jcog.TriConsumer;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
@@ -23,6 +23,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.eclipse.collections.api.set.ImmutableSet;
+import org.eclipse.collections.impl.factory.Maps;
 import org.eclipse.collections.impl.factory.Sets;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.jetbrains.annotations.NotNull;
@@ -130,6 +131,8 @@ public class SpimeDB  {
     };
     public String indexPath;
 
+    final QueryParser defaultFindQueryParser;
+
 
     /**
      * in-memory, map-based
@@ -150,14 +153,24 @@ public class SpimeDB  {
         this.dir = dir;
         this.analyzer = new StandardAnalyzer();
 
+
+        final String[] defaultFindFields = new String[] { NObject.NAME, NObject.DESC };
+        final Map<String,Float> defaultFindFieldStrengths = Maps.mutable.with(
+            NObject.NAME,1f,
+            NObject.DESC,0.5f
+        );
+        this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, defaultFindFieldStrengths);
+
         rootNode = graph.addVertex(ROOT[0]);
 
         int preloaded[] = new int[1];
         forEach(x -> {
+            //System.out.println(x.toJSONString(true));
             reindex(x);
             preloaded[0]++;
         });
         logger.info("{} objects loaded", preloaded[0]);
+
 
     }
 
@@ -186,6 +199,8 @@ public class SpimeDB  {
                     suggester = nextSuggester;
                     lastSuggesterCreated = now();
                     logger.info("suggester updated, count={}", suggester.getCount());
+                } catch (IllegalArgumentException f) {
+                    return null;
                 } catch (IOException e) {
                     logger.error("suggester update: {}", e);
                     return null;
@@ -243,8 +258,11 @@ public class SpimeDB  {
         }
     }
 
+
+
+
     public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
-        org.apache.lucene.search.Query q = new QueryParser(NObject.NAME, analyzer).parse(query);
+        org.apache.lucene.search.Query q = defaultFindQueryParser.parse(query);
         return find(q, hitsPerPage);
     }
 
@@ -350,7 +368,7 @@ public class SpimeDB  {
                         written += s;
                     }
                     writer.close();
-                    logger.info("{} indexed", written);
+                    logger.debug("{} indexed", written);
 
                 } catch (IOException e) {
                     logger.error("indexing error: {}", e);
@@ -361,7 +379,7 @@ public class SpimeDB  {
 
     }
 
-    protected void commit(DocumentNObject d) {
+    void commit(DocumentNObject d) {
         String id = d.id();
         out.put(id, d);
         cache.put(id, d);
@@ -381,11 +399,11 @@ public class SpimeDB  {
 
 
 
-    public SpatialSearch<NObject> spaceIfExists(String tag) {
+    SpatialSearch<NObject> spaceIfExists(String tag) {
         return spacetime.get(tag);
     }
 
-    public SpatialSearch<NObject> space(String tag) {
+    SpatialSearch<NObject> space(String tag) {
         return spacetime.computeIfAbsent(tag, (t) -> {
             return new LockingRTree<NObject>(new RTree<NObject>(rectBuilder,
                     2, 8, DEFAULT_SPLIT_TYPE),
@@ -394,21 +412,11 @@ public class SpimeDB  {
     }
 
 
-//    @Override
-//    public NObject a(String id, String... tags) {
-//        return null;
-//    }
-
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/
     @Override
     public String toString() {
         return "{\"" + getClass().getSimpleName() + "\":{" +
                 ",\"spacetime\":\"" + spacetime + "\"}}";
-    }
-
-
-    public void close() {
-
     }
 
 
@@ -452,9 +460,12 @@ public class SpimeDB  {
     }
 
     public Future<NObject> addAsync(@Nullable NObject next) {
-        return exe.submit(()->{
-           return add(next);
-        });
+        if (next!=null) {
+            return exe.submit(() -> {
+                return add(next);
+            });
+        } else
+            return null;
     }
 
     /**
@@ -464,10 +475,16 @@ public class SpimeDB  {
         if (_next == null)
             return null;
 
-        String id = _next.id();
-        DocumentNObject next = DocumentNObject.get(_next);
+        return run(_next.id(), addProcedure(_next));
+    }
 
-        return run(id, () -> {
+
+    @NotNull
+    private Supplier<DocumentNObject> addProcedure(@Nullable NObject _next) {
+        return () -> {
+
+            String id = _next.id();
+            DocumentNObject next = DocumentNObject.get(_next);
 
             logger.debug("add {}", id);
 
@@ -496,7 +513,7 @@ public class SpimeDB  {
             reindex(previous, dn);
 
             return dn;
-        });
+        };
     }
 
     private boolean deepEquals(Document a, Document b) {
@@ -715,9 +732,16 @@ public class SpimeDB  {
         @Override
         public void forEach(BiConsumer<String, Object> each) {
             n.forEach((k,v)->{
-                if (includeKey(k)) //HACK filter out tag field because the information will be present in the graph
-                    each.accept(k, v);
+                if (includeKey(k)) { //HACK filter out tag field because the information will be present in the graph
+                    Object vv = value(k, v);
+                    if (vv!=null)
+                        each.accept(k, vv);
+                }
             });
+        }
+
+        protected Object value(String k, Object v) {
+            return v;
         }
     }
 

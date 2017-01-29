@@ -41,10 +41,12 @@
 
 <div id="query_results">
     <ul data-template>
-        <h3>{{N}}</h3>
-        <img src="/thumbnail?I={{I}}"/>
-        <pre>{{I}}</pre>
-        <p>{{text}}</p>
+        <h3 data-template>{{N}}</h3>
+        <img data-template src="" data-src="{{thumbnail}}"/>
+        <pre data-template>{{I}}</pre>
+
+        <pre data-template data-has="inh">{{inh}}</pre>
+        <p data-template data-has="_">{{ _ | replace '\n', '<br>' }}</p>
     </ul>
     <li data-template-fallback>JavaScript required</li>
 </div>
@@ -58,7 +60,7 @@
 
     $(document).ready(()=>{
 
-        const resultsTemplate = Tempo.prepare("query_results");
+        const resultsTemplate = Tempo.prepare("query_results", {'escape': false});
 
         const queryText = $('#query_text');
 
@@ -67,6 +69,8 @@
             const qText = queryText.val();
             $('#query_status').html('Suggesting: ' + qText);
             $.get('/suggest', { q: qText }, function(result) {
+
+                if (result.length == 0) return;
 
                 $('#query_suggestions').html(_.map(JSON.parse(result), (x) =>
                     $(document.createElement('div')).append(

@@ -58,7 +58,7 @@ public interface NObject extends Serializable {
 
 
     default String description() {
-        Object d = get("_");
+        Object d = get(NObject.DESC);
         return d == null ? "" : d.toString();
     }
 

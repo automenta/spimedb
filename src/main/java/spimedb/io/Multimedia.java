@@ -149,9 +149,9 @@ public class Multimedia {
 
         db.on((NObject p, NObject x) -> {
 
-            if ("application/pdf".equals(x.get("contentType")) && x.has("pageCount") && x.has("text") && (db.graph.isLeaf(x.id())) /* leaf */) {
+            if ("application/pdf".equals(x.get("contentType")) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
 
-                String parentContent = x.get("text");
+                String parentContent = x.get(NObject.DESC);
                 Document parentDOM = Jsoup.parse(parentContent);
 
                 Elements pagesHTML = parentDOM.select(".page");
@@ -181,9 +181,9 @@ public class Multimedia {
 //                        jdb.add(html2json(e));
 //                    });
 
-                        String docTitle = x.name();
-                        if (docTitle == null) {
-                            docTitle = x.id();
+                        String docTitle = parentDOM.title(); //x.name();
+                        if (docTitle == null || docTitle.isEmpty()) {
+                            docTitle = titleify(x.id());
                         }
 
 
@@ -195,7 +195,7 @@ public class Multimedia {
                                         .put("url", x.get("url_in")) //HACK browser loads the specific page when using the '#' anchor
                                         .put("contentType", "application/pdf")
                                         .put("page", page)
-                                        .put("text", pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
+                                        .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
                                         .put("textParse",
                                                 (pdb != null) ? Stream.of(pdb).map(
                                                         t -> NLP.toString(NLP.parse(t))
@@ -208,7 +208,7 @@ public class Multimedia {
 
                 return new MutableNObject(x)
                         //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
-                        .put("text", null)
+                        .put(NObject.DESC, null)
                         .put("textParse", x.name() != null ? NLP.toString(NLP.parse(
                                 Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
                         )) : null) //parse the title + description
@@ -227,7 +227,7 @@ public class Multimedia {
 
             if (x.has("page") && !x.has("pageCount") && "application/pdf".equals(x.get("contentType")) && !x.has("image")) {
 
-                String id = x.id();
+                //String id = x.id();
                 //String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
                 //img.getWidth() + "x" + img.getHeight() +
 
@@ -275,8 +275,10 @@ public class Multimedia {
             return x;
         });
 
+    }
 
-
+    private String titleify(String id) {
+        return id.replace("_", " ").trim();
     }
 
     @Nullable
@@ -366,7 +368,7 @@ public class Multimedia {
 
 
             case "X-TIKA:content":
-                m = "text";
+                m = NObject.DESC;
                 break;
             case "Author":
                 m = "author";
