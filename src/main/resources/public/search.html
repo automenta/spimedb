@@ -4,25 +4,7 @@
     <script src="lib/lodash.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/tempo.js"></script>
-
-    <style>
-        #query_suggestions div {
-            padding: 2px;
-            margin: 5px;
-            border: 1px solid gray;
-            display: inline-flex;
-        }
-        #query_suggestions div a {
-            cursor: hand;
-            text-decoration: underline;
-        }
-        #query_suggestions div a:hover {
-            color: orange;
-        }
-        #query_status {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="search.css">
 </head>
 <body>
 
@@ -40,13 +22,21 @@
 </div>
 
 <div id="query_results">
-    <ul data-template>
-        <h3 data-template>{{N}}</h3>
-        <img data-template src="" data-src="{{thumbnail}}"/>
-        <pre data-template>{{I}}</pre>
+    <ul data-template class="result">
 
-        <pre data-template data-has="inh">{{inh}}</pre>
-        <p data-template data-has="_">{{ _ | replace '\n', '<br>' }}</p>
+        <h2 data-template>{{N}}</h2>
+
+        <div class="meta">
+            <span data-template data-has="in">+: {{in}}</span>
+            <span data-template data-has="I">{{I}}</span>
+            <span data-template data-has="out">-: {{out}}</span>
+        </div>
+
+        <div class="preview">
+            <img data-template data-has="thumbnail" src="" data-src="{{thumbnail}}"/>
+            <p data-template data-has="_">{{ _ | replace '\n', '<br>' }}</p>
+        </div>
+
     </ul>
     <li data-template-fallback>JavaScript required</li>
 </div>
@@ -70,7 +60,7 @@
             $('#query_status').html('Suggesting: ' + qText);
             $.get('/suggest', { q: qText }, function(result) {
 
-                if (result.length == 0) return;
+                if (result.length === 0) return;
 
                 $('#query_suggestions').html(_.map(JSON.parse(result), (x) =>
                     $(document.createElement('div')).append(
@@ -98,6 +88,16 @@
             $.get('/search', { q: qText }, function(result) {
 
                 const rr = JSON.parse(result);
+
+                _.each(rr, (v,k)=>{
+                    if (v.inh) {
+                        v.out = v.inh['<'];
+
+                        const vin = v.inh['>'];
+                        if (vin && !(vin.length === 1 && vin[0].length === 0)) //exclude root tag
+                            v.in = vin;
+                    }
+                });
                 resultsTemplate.render(rr);
 
             });

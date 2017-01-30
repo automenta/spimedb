@@ -4,14 +4,21 @@ import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import opennlp.tools.cmdline.parser.ParserTool;
+import opennlp.tools.namefind.NameFinderME;
+import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.parser.Parse;
 import opennlp.tools.parser.Parser;
 import opennlp.tools.parser.ParserFactory;
 import opennlp.tools.parser.ParserModel;
+import opennlp.tools.tokenize.TokenizerME;
+import opennlp.tools.tokenize.TokenizerModel;
+import opennlp.tools.util.Span;
 import org.jetbrains.annotations.Nullable;
 import spimedb.util.HTTP;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * http://opennlp.sourceforge.net/models-1.5/
@@ -21,7 +28,7 @@ public class NLP {
     static final HTTP http = new HTTP();
 
 
-    public static final LoadingCache<Class,Object> model = Caffeine.newBuilder().build(new CacheLoader<Class,Object>(){
+    public static final LoadingCache<Class,Object> models = Caffeine.newBuilder().build(new CacheLoader<Class,Object>(){
         @Override
         public Object load(Class k) throws Exception {
 
@@ -33,35 +40,79 @@ public class NLP {
             //http://opennlp.sourceforge.net/models-1.5/en-ner-person.bin
             //http://opennlp.sourceforge.net/models-1.5/en-ner-percentage.bin
 
+            String base = "http://opennlp.sourceforge.net/models-1.5/";
+
+            if (k == TokenizerModel.class) {
+                InputStream s = stream(base + "en-token.bin");
+                TokenizerModel model = new TokenizerModel(s);
+                s.close();
+                return new TokenizerME(model);
+            }
             if (k == ParserModel.class) {
-                final InputStream[] stream = new InputStream[1];
-                http.asStream("http://opennlp.sourceforge.net/models-1.5/en-parser-chunking.bin", (modelIn) -> stream[0] = modelIn);
-                ParserModel model = new ParserModel(stream[0]);
-                stream[0].close();
+                InputStream s = stream(base + "en-parser-chunking.bin");
+                ParserModel model = new ParserModel(s);
+                s.close();
                 return model;
+            } else if (k == TokenNameFinderModel.class) {
+                TokenNameFinderModel person, location;
+                {
+                    InputStream s = stream(base + "en-ner-person.bin");
+                    person = new TokenNameFinderModel(s);
+                    s.close();
+                }
+                {
+                    InputStream s = stream(base + "en-ner-location.bin");
+                    location = new TokenNameFinderModel(s);
+                    s.close();
+                }
+                return new NameFinderME[] { new NameFinderME(person), new NameFinderME(location) };
             }
 
             throw new RuntimeException("unsupported key: " + k);
         }
     });
 
-    public static ParserModel parser() {
-        return (ParserModel) model.get(ParserModel.class);
+
+    public static TokenizerME tokenizer() {
+        return (TokenizerME)models.get(TokenizerModel.class);
     }
 
-    public static Parse parse(String input) {
+    private static InputStream stream(String url) throws IOException {
+        final InputStream[] stream = new InputStream[1];
+        http.asStream(url, (modelIn) -> stream[0] = modelIn);
+        return stream[0];
+    }
 
-        ParserModel model = parser();
+
+    public static Parse parse(String input) {
+        ParserModel model = (ParserModel) models.get(ParserModel.class);
         Parser parser = ParserFactory.create(model);
-        Parse topParses[] = ParserTool.parseLine(input, parser, 1);
+        Parse topParses[] = ParserTool.parseLine(input, parser, tokenizer(), 1);
         return topParses[0];
 
     }
 
+    public static String[] names(String input) {
+
+        NameFinderME[] finders = (NameFinderME[]) models.get(TokenNameFinderModel.class);
+        String[] tokens = tokenizer().tokenize(input);
+
+        for (NameFinderME m : finders) {
+            Span[] ss = m.find(tokens);
+            System.out.println(Arrays.toString(ss));
+        }
+
+        //return Span.spansToStrings(ss, tokens);
+        return new String[] { };
+    }
+
     public static void main(String[] args) {
-        Parse parse = NLP.parse("what the fuck?");
+        String t = "John Smith said that to Jane Smith in New York.";
+        Parse parse = NLP.parse(t);
         String res = toString(parse);
         System.out.println(res);
+
+        System.out.println(Arrays.toString(names(t)));
 
 
     }

@@ -87,52 +87,59 @@ public class Multimedia {
 
                     y.put("url_cached", Long.toString(exp));
 
+                    boolean isKMLorKMZ = url.endsWith(".kml") || url.endsWith(".kmz");
+                    boolean isGeoJSON = url.endsWith(".geojson");
 
-                    Metadata metadata = new Metadata();
-                    ParseContext context = new ParseContext();
+                    if (!isKMLorKMZ && !isGeoJSON  /* handled separately below */) {
 
-                    InputStream stream = con.getInputStream();
-                    if (stream == null) {
-                        throw new FileNotFoundException();
-                    }
+                        Metadata metadata = new Metadata();
+                        ParseContext context = new ParseContext();
 
-                    final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
-
-                    tikaWrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
-
-                    stream.close();
-
-                    List<Metadata> m = tikaWrapper.getMetadata();
-                    m.forEach(md -> {
-                        for (String k : md.names()) {
-                            String[] v = md.getValues(k);
-
-                            String kk = tikiToField(k);
-                            if (kk != null) {
-                                Object vv = v.length > 1 ? v : v[0];
-                                if (vv instanceof String) {
-                                    try {
-                                        int ivv = Integer.parseInt((String) vv);
-                                        vv = ivv;
-                                    } catch (Exception e) {
-                                        //not an int
-                                    }
-                                }
-                                y.put(kk, vv);
-                            }
+                        InputStream stream = con.getInputStream();
+                        if (stream == null) {
+                            throw new FileNotFoundException();
                         }
-                    });
+
+                        final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
+
+                        tikaWrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
+
+                        stream.close();
+
+                        List<Metadata> m = tikaWrapper.getMetadata();
+                        m.forEach(md -> {
+                            for (String k : md.names()) {
+                                String[] v = md.getValues(k);
+
+                                String kk = tikiToField(k);
+                                if (kk != null) {
+                                    Object vv = v.length > 1 ? v : v[0];
+                                    if (vv instanceof String) {
+                                        try {
+                                            int ivv = Integer.parseInt((String) vv);
+                                            vv = ivv;
+                                        } catch (Exception e) {
+                                            //not an int
+                                        }
+                                    }
+                                    y.put(kk, vv);
+                                }
+                            }
+                        });
+
+                    }
 
 
                     //db.addAsync(y).get();
 
                     //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
 
-                    if ((url.endsWith(".kml") || url.endsWith(".kmz"))) {
+                    if (isKMLorKMZ) {
                         new KML(db,y).url(url).run();
-                    } else if (url.endsWith(".geojson")) {
+                    } else if (isGeoJSON) {
                         GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
                     }
+
 
 
                     return y;
