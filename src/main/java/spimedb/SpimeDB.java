@@ -11,6 +11,8 @@ import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
+import org.apache.lucene.facet.taxonomy.FacetLabel;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -36,7 +38,7 @@ import spimedb.graph.VertexIncidence;
 import spimedb.graph.travel.BreadthFirstTravel;
 import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
-import spimedb.index.lucene.DocumentNObject;
+import spimedb.index.lucene.DObject;
 import spimedb.index.rtree.*;
 import spimedb.query.Query;
 
@@ -102,8 +104,8 @@ public class SpimeDB  {
 
     static final int NObjectCacheSize = 64 * 1024;
 
-    private final Map<String,DocumentNObject> out = new ConcurrentHashMap<>(1024);
-    private final Cache<String, DocumentNObject> cache =
+    private final Map<String,DObject> out = new ConcurrentHashMap<>(1024);
+    private final Cache<String, DObject> cache =
             Caffeine.newBuilder().maximumSize(NObjectCacheSize).build();
 
     private final AtomicBoolean writing = new AtomicBoolean(false);
@@ -152,6 +154,12 @@ public class SpimeDB  {
 
         this.dir = dir;
         this.analyzer = new StandardAnalyzer();
+
+
+//        DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(dir);
+//        taxoWriter.addCategory(new FacetLabel(NObject.TYPE));
+//        taxoWriter.commit();
+//        taxoWriter.close();
 
 
         final String[] defaultFindFields = new String[] { NObject.NAME, NObject.DESC };
@@ -357,9 +365,9 @@ public class SpimeDB  {
 
                         //long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
 
-                        Iterator<Map.Entry<String, DocumentNObject>> ii = out.entrySet().iterator();
+                        Iterator<Map.Entry<String, DObject>> ii = out.entrySet().iterator();
                         while (ii.hasNext()) {
-                            Map.Entry<String, DocumentNObject> nn = ii.next();
+                            Map.Entry<String, DObject> nn = ii.next();
                             ii.remove();
                             writer.updateDocument(new Term(NObject.ID, nn.getKey()), nn.getValue().document);
                         }
@@ -379,7 +387,7 @@ public class SpimeDB  {
 
     }
 
-    void commit(DocumentNObject d) {
+    void commit(DObject d) {
         String id = d.id();
         out.put(id, d);
         cache.put(id, d);
@@ -480,15 +488,15 @@ public class SpimeDB  {
 
 
     @NotNull
-    private Supplier<DocumentNObject> addProcedure(@Nullable NObject _next) {
+    private Supplier<DObject> addProcedure(@Nullable NObject _next) {
         return () -> {
 
             String id = _next.id();
-            DocumentNObject next = DocumentNObject.get(_next);
+            DObject next = DObject.get(_next);
 
             logger.debug("add {}", id);
 
-            DocumentNObject previous = get(id);
+            DObject previous = get(id);
             if (previous != null) {
 
 
@@ -506,7 +514,7 @@ public class SpimeDB  {
                 }
             }
 
-            DocumentNObject dn = DocumentNObject.get(n);
+            DObject dn = DObject.get(n);
 
             commit(dn);
 
@@ -617,7 +625,7 @@ public class SpimeDB  {
             for (ScoreDoc scoreDoc : hits.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
                 if (doc!=null) {
-                    each.accept(DocumentNObject.get(doc));
+                    each.accept(DObject.get(doc));
                 }
             }
         } catch (IOException e) {
@@ -626,11 +634,11 @@ public class SpimeDB  {
     }
 
 
-    public DocumentNObject get(String id) {
+    public DObject get(String id) {
         return cache.get(id, (i) -> {
             Document d = the(i);
             if (d!=null)
-                return DocumentNObject.get(d);
+                return DObject.get(d);
             return null;
         });
     }

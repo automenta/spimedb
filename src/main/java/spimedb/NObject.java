@@ -20,6 +20,7 @@ import java.util.function.BiConsumer;
 public interface NObject extends Serializable {
 
 
+
     //public final static String POINT = ".";
 
     String id();
@@ -75,6 +76,8 @@ public interface NObject extends Serializable {
     String LINESTRING = "g-";
     String POLYGON = "g*";
 
+    /** content-type, like MIME */
+    String TYPE = "T";
 
     /** intensional inheritance */
     String INH = "inh";

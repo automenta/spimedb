@@ -156,7 +156,7 @@ public class Multimedia {
 
         db.on((NObject p, NObject x) -> {
 
-            if ("application/pdf".equals(x.get("contentType")) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
+            if ("application/pdf".equals(x.get(NObject.TYPE)) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
 
                 String parentContent = x.get(NObject.DESC);
                 Document parentDOM = Jsoup.parse(parentContent);
@@ -200,7 +200,7 @@ public class Multimedia {
                                         .withTags(x.id())
                                         .put("author", x.get("author"))
                                         .put("url", x.get("url_in")) //HACK browser loads the specific page when using the '#' anchor
-                                        .put("contentType", "application/pdf")
+                                        .put(NObject.TYPE, "application/pdf")
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
                                         .put("textParse",
@@ -232,7 +232,7 @@ public class Multimedia {
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
         db.on((NObject p, NObject x) -> {
 
-            if (x.has("page") && !x.has("pageCount") && "application/pdf".equals(x.get("contentType")) && !x.has("image")) {
+            if (x.has("page") && !x.has("pageCount") && "application/pdf".equals(x.get(NObject.TYPE)) && !x.has("image")) {
 
                 //String id = x.id();
                 //String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
@@ -381,7 +381,7 @@ public class Multimedia {
                 m = "author";
                 break;
             case "Content-Type":
-                m = "contentType";
+                m = NObject.TYPE;
                 break;
             case "xmpTPg:NPages":
                 m = "pageCount";

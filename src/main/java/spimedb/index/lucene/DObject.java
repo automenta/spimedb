@@ -20,30 +20,30 @@ import static spimedb.SpimeDB.text;
 import static spimedb.index.rtree.RectND.unbounded;
 
 /**
- * Created by me on 1/25/17.
+ * (Lucene) Document-based NObject
  */
-public class DocumentNObject implements NObject {
+public class DObject implements NObject {
 
-    public final static Logger logger = LoggerFactory.getLogger(DocumentNObject.class);
+    public final static Logger logger = LoggerFactory.getLogger(DObject.class);
 
     final String id;
     public final Document document;
     private final PointND min;
     private final PointND max;
 
-    public static DocumentNObject get(Document d) {
-        return new DocumentNObject(d);
+    public static DObject get(Document d) {
+        return new DObject(d);
     }
-    public static DocumentNObject get(NObject n) {
-        if (n instanceof DocumentNObject)
-            return ((DocumentNObject)n);
-        return new DocumentNObject(toDocument(n));
+    public static DObject get(NObject n) {
+        if (n instanceof DObject)
+            return ((DObject)n);
+        return new DObject(toDocument(n));
     }
 
     public static Document toDocument(NObject n) {
 
-        if (n instanceof DocumentNObject)
-            return ((DocumentNObject)n).document;
+        if (n instanceof DObject)
+            return ((DObject)n).document;
 
         String nid = n.id();
 
@@ -88,6 +88,11 @@ public class DocumentNObject implements NObject {
                 case NObject.TAG:
                 case NObject.CONTENT:
                     return;
+
+//                case NObject.TYPE:
+//                    d.add(new FacetField(NObject.TYPE, v.toString()));
+//                    //FacetField f = new FacetField();
+//                    return;
             }
 
             Class c = v.getClass();
@@ -126,7 +131,7 @@ public class DocumentNObject implements NObject {
     }
 
 
-    DocumentNObject(Document d) {
+    DObject(Document d) {
 
         this.document = d;
         this.id = d.get(NObject.ID);

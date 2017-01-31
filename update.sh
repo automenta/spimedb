@@ -11,13 +11,21 @@ echo 'Building SpimeDB...'
 echo '-------------------'
 echo
 
-echo 'Build JCog'
-git clone --depth 1 https://github.com/automenta/narchy/
+echo 'Updating from git'
+git pull
+
+echo 'Update dependency: JCog'
+git clone --depth 1 https://github.com/automenta/narchy/ 2> /dev/null # just to be sure
+pushd .
+    cd narchy
+    git pull
+popd
+
+echo 'Build dependency: JCog'
 pushd .
 	cd narchy/util
 	mvn install -DskipTests=true
 popd
-
 
 
 echo 'Build SpimeDB'

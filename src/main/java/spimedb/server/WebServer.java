@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.client.Client;
-import spimedb.index.lucene.DocumentNObject;
+import spimedb.index.lucene.DObject;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
@@ -117,7 +117,7 @@ public class WebServer extends PathHandler {
             String id = getStringParameter(ex, "I");
             if (id == null)
                 return;
-            DocumentNObject d = db.get(id);
+            DObject d = db.get(id);
             if (d!=null) {
                 byte[] b = d.get("thumbnail");
                 if (b!=null) {
@@ -143,7 +143,7 @@ public class WebServer extends PathHandler {
                 while (ii.hasNext()) {
                     JSON.toJSON( searchResult(
 
-                        DocumentNObject.get(ii.next())
+                        DObject.get(ii.next())
 
                     ), o, ',' );
                 }

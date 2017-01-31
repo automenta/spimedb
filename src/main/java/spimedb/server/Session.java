@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.index.lucene.DocumentNObject;
+import spimedb.index.lucene.DObject;
 import spimedb.query.Query;
 
 import javax.script.SimpleBindings;
@@ -193,7 +193,7 @@ public class Session extends AbstractServerWebSocket {
         private boolean trySend(Task t, String id, boolean force, @Nullable ImmutableSet<String> includeKeys) throws IOException {
             int[] idHash = remoteMemory.hash(id);
             if (force || !remoteMemory.contains(idHash)) {
-                DocumentNObject d = db.get(id);
+                DObject d = db.get(id);
                 if (d!=null) {
                     SpimeDB.GraphedNObject n = db.graphed(includeKeys!=null ? new SpimeDB.FilteredNObject(d, includeKeys) : d);
                     if (n != null) {

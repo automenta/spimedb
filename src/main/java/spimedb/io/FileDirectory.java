@@ -2,7 +2,7 @@ package spimedb.io;
 
 import spimedb.MutableNObject;
 import spimedb.SpimeDB;
-import spimedb.index.lucene.DocumentNObject;
+import spimedb.index.lucene.DObject;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -44,7 +44,7 @@ public class FileDirectory {
 
                     String id = filenameable(uf);
 
-                    DocumentNObject p = db.get(id);
+                    DObject p = db.get(id);
                     String whenCached = p != null ? p.get("url_cached") : null;
                     if (whenCached == null || Long.valueOf(whenCached) < x.lastModified()) {
                         db.addAsync(new MutableNObject(id)

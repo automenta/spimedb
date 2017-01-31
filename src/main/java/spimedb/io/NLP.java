@@ -18,7 +18,8 @@ import spimedb.util.HTTP;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * http://opennlp.sourceforge.net/models-1.5/
@@ -46,7 +47,7 @@ public class NLP {
                 InputStream s = stream(base + "en-token.bin");
                 TokenizerModel model = new TokenizerModel(s);
                 s.close();
-                return new TokenizerME(model);
+                return (model);
             }
             if (k == ParserModel.class) {
                 InputStream s = stream(base + "en-parser-chunking.bin");
@@ -74,7 +75,7 @@ public class NLP {
 
 
     public static TokenizerME tokenizer() {
-        return (TokenizerME)models.get(TokenizerModel.class);
+        return new TokenizerME((TokenizerModel)models.get(TokenizerModel.class));
     }
 
     private static InputStream stream(String url) throws IOException {
@@ -92,18 +93,23 @@ public class NLP {
 
     }
 
-    public static String[] names(String input) {
+    @Nullable public static Map<String,String[]> names(String input) {
 
         NameFinderME[] finders = (NameFinderME[]) models.get(TokenNameFinderModel.class);
         String[] tokens = tokenizer().tokenize(input);
 
+        Map<String,String[]> x = new HashMap(finders.length);
         for (NameFinderME m : finders) {
             Span[] ss = m.find(tokens);
-            System.out.println(Arrays.toString(ss));
+            if (ss.length > 0)
+                x.put(ss[0].getType(), Span.spansToStrings(ss, tokens));
         }
 
-        //return Span.spansToStrings(ss, tokens);
-        return new String[] { };
+        if (!x.isEmpty()) {
+            return x;
+        } else {
+            return null;
+        }
     }
 
     public static void main(String[] args) {
@@ -112,7 +118,7 @@ public class NLP {
         String res = toString(parse);
         System.out.println(res);
 
-        System.out.println(Arrays.toString(names(t)));
+        System.out.println(names(t));
 
 
     }
