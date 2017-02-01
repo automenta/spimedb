@@ -149,6 +149,8 @@ public class WebServer extends PathHandler {
                 }
                 o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
 
+                x.close();
+
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e);
                 try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }

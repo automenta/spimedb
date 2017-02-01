@@ -11,8 +11,6 @@ import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
-import org.apache.lucene.facet.taxonomy.FacetLabel;
-import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -48,6 +46,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.*;
@@ -113,7 +112,9 @@ public class SpimeDB  {
     protected long lastCommit = 0;
 
     private Lookup suggester;
+
     private DocumentDictionary nameDict;
+    private DirectoryReader nameDictReader;
 
 
     public final MapGraph<String, String> graph = new MapGraph<String, String>(
@@ -179,7 +180,6 @@ public class SpimeDB  {
         });
         logger.info("{} objects loaded", preloaded[0]);
 
-
     }
 
     long lastSuggesterCreated = 0;
@@ -200,7 +200,10 @@ public class SpimeDB  {
             }
 
             if (suggester == null) {
-                nameDict = new DocumentDictionary(reader(), NObject.NAME, NObject.NAME);
+                if (nameDict==null) {
+                    nameDictReader = reader();
+                }
+                nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
                 FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
                 try {
                     nextSuggester.build(nameDict);
@@ -222,7 +225,6 @@ public class SpimeDB  {
 
     private Document the(String id) {
 
-
         try {
             IndexSearcher searcher = searcher();
             if (searcher == null)
@@ -238,6 +240,7 @@ public class SpimeDB  {
                 return searcher.doc(y.scoreDocs[0].doc);
             }
 
+            searcher.getIndexReader().close();
         } catch (IOException e) {
             logger.warn("query: {}", e);
         }
@@ -247,27 +250,18 @@ public class SpimeDB  {
     @Nullable
     private IndexSearcher searcher()  {
         DirectoryReader r = reader();
-        if (r != null) {
-            return new IndexSearcher(r);
-        } else {
-            return null;
-        }
+        return r != null ? new IndexSearcher(r) : null;
     }
 
     @Nullable private DirectoryReader reader()  {
         try {
-            if (DirectoryReader.indexExists(dir))
-                return DirectoryReader.open(dir);
-            else
-                return null;
+            return DirectoryReader.indexExists(dir) ? DirectoryReader.open(dir) : null;
         } catch (IOException e) {
             logger.error("index reader: {}", e);
-            return null;
+            throw new RuntimeException(e);
+            //return null;
         }
     }
-
-
-
 
     public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
         org.apache.lucene.search.Query q = defaultFindQueryParser.parse(query);
@@ -387,12 +381,25 @@ public class SpimeDB  {
 
     }
 
-    void commit(DObject d) {
+    DObject commit(NObject previous, NObject _next) {
+
+        NObject next = _next;
+        if (!onChange.isEmpty()) {
+            for (BiFunction<NObject, NObject, NObject> c : onChange) {
+                next = c.apply(previous, next);
+            }
+        }
+
+        DObject d = DObject.get(next, this);
         String id = d.id();
         out.put(id, d);
         cache.put(id, d);
         commit();
+        reindex(previous, d);
+        return d;
     }
+
+
 
     private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
         public SubTags(MapGraph<V, E> graph, V... parentTags) {
@@ -435,7 +442,7 @@ public class SpimeDB  {
     }
 
 
-    public final ConcurrentHashMap<String,ReentrantLock> lock = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<String,Lock> lock = new ConcurrentHashMap<>();
 
 
     public void run(String id, Runnable r)  {
@@ -446,19 +453,21 @@ public class SpimeDB  {
     }
 
     public <X> X run(String id, Supplier<X> r)  {
-        ReentrantLock l = lock.computeIfAbsent(id, MyReentrantLock::new);
-
-        l.lock();
+        Lock l = lock.computeIfAbsent(id, DBLock::new);
 
         Throwable thrown = null;
         X result = null;
-        try {
-            result = r.get();
-        } catch (Throwable t) {
-            thrown = t;
-        }
 
-        l.unlock();
+        l.lock();
+        try {
+            try {
+                result = r.get();
+            } catch (Throwable t) {
+                thrown = t;
+            }
+        } finally {
+            l.unlock();
+        }
 
         if (thrown!=null) {
             throw new RuntimeException(thrown);
@@ -479,48 +488,62 @@ public class SpimeDB  {
     /**
      * returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics
      */
-    public NObject add(@Nullable NObject _next) {
-        if (_next == null)
+    public NObject add(@Nullable NObject n) {
+        if (n == null)
             return null;
 
-        return run(_next.id(), addProcedure(_next));
+        return run(n.id(), addProcedure(n));
     }
 
+    public NObject merge(@NotNull MutableNObject n) {
+        return run(n.id(), mergeProcedure(n));
+    }
+
+    public Supplier<DObject> mergeProcedure(MutableNObject _next) {
+        return () -> {
+
+            String id = _next.id();
+
+            DObject previous = get(id);
+            if (previous == null) {
+                logger.error("{} does not pre-exist for merge with {}", id, _next);
+            }
+            MutableNObject merged  = new MutableNObject(previous);
+
+            final boolean[] changed = {false};
+            _next.forEach((k,v)->{
+                Object v0 = merged.get(k);
+                if (v0 == null || !v0.equals(v)) {
+                    merged.put(k, v);
+                    changed[0] = true;
+                }
+            });
+
+            if (!changed[0])
+                return previous; //no-change
+
+            logger.info("merge {}", id);
+
+            return commit(previous, merged);
+        };
+    }
 
     @NotNull
     private Supplier<DObject> addProcedure(@Nullable NObject _next) {
         return () -> {
 
             String id = _next.id();
-            DObject next = DObject.get(_next);
-
-            logger.debug("add {}", id);
+            DObject next = DObject.get(_next, this);
 
             DObject previous = get(id);
             if (previous != null) {
-
-
                 if (deepEquals(previous.document, next.document))
                     return previous;
-                //if (graphed(previous).equalsDeep(graphed(next))) {
-                    //return previous;
-                //}
             }
 
-            NObject n = next;
-            if (!onChange.isEmpty()) {
-                for (BiFunction<NObject, NObject, NObject> c : onChange) {
-                    n = c.apply(previous, n);
-                }
-            }
+            logger.debug("add {}", id);
 
-            DObject dn = DObject.get(n);
-
-            commit(dn);
-
-            reindex(previous, dn);
-
-            return dn;
+            return commit(previous, next);
         };
     }
 
@@ -628,6 +651,8 @@ public class SpimeDB  {
                     each.accept(DObject.get(doc));
                 }
             }
+
+            searcher.getIndexReader().close();
         } catch (IOException e) {
             logger.error("{}",e);
         }
@@ -821,12 +846,20 @@ public class SpimeDB  {
             });
         }
 
+        public void close() {
+            try {
+                searcher.getIndexReader().close();
+            } catch (IOException e) {
+                logger.error("{}", e);
+            }
+        }
+
     }
 
-    private final class MyReentrantLock extends ReentrantLock {
+    private final class DBLock extends ReentrantLock {
         private final String id;
 
-        public MyReentrantLock(String id) {
+        public DBLock(String id) {
             super(true);
             this.id = id;
         }

@@ -154,6 +154,12 @@ public class Multimedia {
 
         });
 
+
+        SpimeDB.LOG("org.apache.pdfbox.rendering.CIDType0Glyph2D", Level.ERROR);
+        SpimeDB.LOG("org.apache.pdfbox", Level.ERROR);
+        //java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
+        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
+
         db.on((NObject p, NObject x) -> {
 
             if ("application/pdf".equals(x.get(NObject.TYPE)) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
@@ -178,8 +184,7 @@ public class Multimedia {
                                 .filter(xx -> !xx.children().isEmpty() || xx.hasText())
                                 .map(xx -> xx.tagName().equals("p") ? xx.text() : xx) //just use <p> contents
                                 .map(Object::toString).toArray(String[]::new);
-                        if (pdb.length == 0)
-                            pdb = null;
+
 
 //                    List<JsonNode> jdb = new ArrayList(pdb.size());
 //                    pdb.forEach(e -> {
@@ -203,10 +208,43 @@ public class Multimedia {
                                         .put(NObject.TYPE, "application/pdf")
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
-                                        .put("textParse",
-                                                (pdb != null) ? Stream.of(pdb).map(
-                                                        t -> NLP.toString(NLP.parse(t))
-                                                ).collect(Collectors.joining("\n")) : null)
+                                        .putLater("textParse", ()-> {
+                                            return (pdb.length > 0) ? Stream.of(pdb).map(
+                                                    t -> NLP.toString(NLP.parse(t))
+                                            ).collect(Collectors.joining("\n")) : null;
+                                        })
+                                        .putLater("thumbnail", ()->{
+                                            try {
+                                                PDDocument document = PDDocument.load(new URL(x.get("url_in")).openStream());
+
+                                                try {
+
+                                                    PDFRenderer renderer = new PDFRenderer(document);
+
+
+                                                    BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
+
+
+                                                    //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+                                                    ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
+                                                    boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI);
+
+                                                    return os.toByteArray();
+
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                } finally {
+                                                    document.close();
+                                                }
+
+                                            } catch (IOException f) {
+                                                f.printStackTrace();
+                                            }
+
+                                            return null;
+
+                                        })
+
                         );
                     });
                 }
@@ -216,7 +254,7 @@ public class Multimedia {
                 return new MutableNObject(x)
                         //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
                         .put(NObject.DESC, null)
-                        .put("textParse", x.name() != null ? NLP.toString(NLP.parse(
+                        .putLater("textParse", () -> x.name() != null ? NLP.toString(NLP.parse(
                                 Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
                         )) : null) //parse the title + description
                 ;
@@ -226,61 +264,7 @@ public class Multimedia {
         });
 
 
-        SpimeDB.LOG("org.apache.pdfbox.rendering.CIDType0Glyph2D", Level.ERROR);
-        SpimeDB.LOG("org.apache.pdfbox", Level.ERROR);
-        //java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
-        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
-        db.on((NObject p, NObject x) -> {
 
-            if (x.has("page") && !x.has("pageCount") && "application/pdf".equals(x.get(NObject.TYPE)) && !x.has("image")) {
-
-                //String id = x.id();
-                //String pageFile = (id.substring(0, id.lastIndexOf('#'))) + ".page" + page + "." + pdfPageImageDPI + ".jpg";
-                //img.getWidth() + "x" + img.getHeight() +
-
-                //String outputFile = pdfPageImageOutputPath + "/" + pageFile;
-
-                MutableNObject y = new MutableNObject(x);
-                int page = y.get("page");
-
-                if (y.get("thumbnail") == null) {
-                    try {
-                        PDDocument document = PDDocument.load(new URL(y.get("url")).openStream());
-
-                        try {
-
-                            PDFRenderer renderer = new PDFRenderer(document);
-
-
-                            BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
-
-
-                            //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
-                            ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
-                            boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI);
-
-                            y.put("thumbnail", os.toByteArray());
-
-
-                            return y;
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            document.close();
-                        }
-
-                    } catch (IOException f) {
-                        f.printStackTrace();
-                    }
-
-                }
-
-
-            }
-
-            return x;
-        });
 
     }
 

@@ -14,6 +14,7 @@ import spimedb.util.JSON;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -40,6 +41,14 @@ public class MutableNObject extends ImmutableNObject {
 
     public MutableNObject(String id, String name) {
         super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY), id, name);
+    }
+
+    public MutableNObject putLater(String key, Supplier lazy) {
+        return putLater(key, null, lazy);
+    }
+
+    public MutableNObject putLater(String key, Object intermediate, Supplier lazy) {
+        return put(key, new LazyValue(key, intermediate, lazy));
     }
 
     public MutableNObject put(String key, Object value) {

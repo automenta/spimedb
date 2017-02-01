@@ -9,7 +9,10 @@ import org.apache.lucene.index.IndexableFieldType;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.LazyValue;
+import spimedb.MutableNObject;
 import spimedb.NObject;
+import spimedb.SpimeDB;
 import spimedb.index.rtree.PointND;
 import spimedb.util.JSON;
 
@@ -34,13 +37,14 @@ public class DObject implements NObject {
     public static DObject get(Document d) {
         return new DObject(d);
     }
-    public static DObject get(NObject n) {
+
+    public static DObject get(NObject n, SpimeDB db) {
         if (n instanceof DObject)
             return ((DObject)n);
-        return new DObject(toDocument(n));
+        return new DObject(toDocument(n, db));
     }
 
-    public static Document toDocument(NObject n) {
+    public static Document toDocument(NObject n, SpimeDB db) {
 
         if (n instanceof DObject)
             return ((DObject)n).document;
@@ -81,6 +85,21 @@ public class DObject implements NObject {
 
             if (v == null)
                 throw new NullPointerException();
+
+            if (v instanceof LazyValue) {
+                LazyValue l = (LazyValue)v;
+                v = l.pendingValue;
+                db.runLater(()->{
+                   Object lv = l.value.get();
+                   if (lv!=null) {
+                       MutableNObject nv = new MutableNObject(nid);
+                       nv.put(l.key, lv);
+                       db.merge(nv);
+                   }
+                });
+                if (v == null)
+                    return; //dont write null pending value
+            }
 
             //special handling
             switch (k) {
