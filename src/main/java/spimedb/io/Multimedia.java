@@ -1,7 +1,8 @@
 package spimedb.io;
 
-import ch.qos.logback.classic.Level;
 import com.google.common.base.Joiner;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.impl.Jdk14Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -33,6 +34,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,8 +60,17 @@ public class Multimedia {
 
     public Multimedia(SpimeDB db) {
 
+        for (String s : new String[] { "org.apache.pdfbox.rendering.CIDType0Glyph2D", "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
+            ((Jdk14Logger)LogFactory.getLog(s)).getLogger().setLevel(Level.SEVERE);
+        }
+
+        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
+
         db.on((NObject p, NObject x) -> {
-            String url = x.get("url_in");
+            String url_in = x.get("url_in");
+            String url = url_in;
+
+            String xid = x.id();
 
             if (url != null) {
 
@@ -142,25 +153,13 @@ public class Multimedia {
 
 
 
-                    return y;
+                    x = y;
 
                 } catch (Exception e) {
                     logger.error("url_in removal: {}", e);
                 }
 
             }
-
-            return x;
-
-        });
-
-
-        SpimeDB.LOG("org.apache.pdfbox.rendering.CIDType0Glyph2D", Level.ERROR);
-        SpimeDB.LOG("org.apache.pdfbox", Level.ERROR);
-        //java.util.logging.Logger.getLogger("org.apache.pdfbox.rendering.CIDType0Glyph2D").setLevel(java.util.logging.Level.SEVERE);
-        IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
-
-        db.on((NObject p, NObject x) -> {
 
             if ("application/pdf".equals(x.get(NObject.TYPE)) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
 
@@ -169,13 +168,15 @@ public class Multimedia {
 
                 Elements pagesHTML = parentDOM.select(".page");
 
+                String author = x.get("author");
+
                 int pageCount = x.get("pageCount");
                 for (int _page = 0; _page < pageCount; _page++) {
 
                     final int page = _page;
                     db.runLater(() -> {
 
-                        logger.info("load: {} page {}", x.id(), page);
+                        logger.info("load: {} page {}", xid, page);
 
                         Document pd = Document.createShell("");
                         pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
@@ -195,16 +196,16 @@ public class Multimedia {
 
                         String docTitle = parentDOM.title(); //x.name();
                         if (docTitle == null || docTitle.isEmpty()) {
-                            docTitle = titleify(x.id());
+                            docTitle = titleify(xid);
                         }
 
 
                         db.addAsync(
-                                new MutableNObject(x.id() + "." + page)
+                                new MutableNObject(xid + "." + page)
                                         .name(docTitle + " - (" + (page + 1) + " of " + (pageCount+1) + ")")
-                                        .withTags(x.id())
-                                        .put("author", x.get("author"))
-                                        .put("url", x.get("url_in")) //HACK browser loads the specific page when using the '#' anchor
+                                        .withTags(xid)
+                                        .put("author", author)
+                                        .put("url", url_in) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
@@ -215,7 +216,7 @@ public class Multimedia {
                                         })
                                         .putLater("thumbnail", ()->{
                                             try {
-                                                PDDocument document = PDDocument.load(new URL(x.get("url_in")).openStream());
+                                                PDDocument document = PDDocument.load(new URL(url_in).openStream());
 
                                                 try {
 
@@ -251,17 +252,23 @@ public class Multimedia {
 
                 //clean and update parent DOM
 
-                return new MutableNObject(x)
-                        //.put("subject", x.get("subject")!=null && !x.get("subject").equals(x.get("description") ?  x.get("subject") : null))
+                String xname = x.name();
+                String desc = x.get(NObject.DESC);
+                x = new MutableNObject(x)
                         .put(NObject.DESC, null)
-                        .putLater("textParse", () -> x.name() != null ? NLP.toString(NLP.parse(
-                                Joiner.on("\n").skipNulls().join(x.name(), x.get("description"))
-                        )) : null) //parse the title + description
-                ;
-            } else {
-                return x;
+                        .putLater("textParse", () -> {
+                            return xname != null ? NLP.toString(NLP.parse(
+                                    Joiner.on("\n").skipNulls().join(xname, desc)
+                            )) : null;
+                        }) //parse the title + description
+                        ;
             }
+
+            return x;
+
         });
+
+
 
 
 

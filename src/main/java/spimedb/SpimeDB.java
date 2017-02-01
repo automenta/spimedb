@@ -522,7 +522,7 @@ public class SpimeDB  {
             if (!changed[0])
                 return previous; //no-change
 
-            logger.info("merge {}", id);
+            logger.debug("merge {}", id);
 
             return commit(previous, merged);
         };
