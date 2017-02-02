@@ -1,13 +1,7 @@
 package spimedb;
 
-import opennlp.tools.cmdline.parser.ParserTool;
-import opennlp.tools.parser.Parse;
-import opennlp.tools.parser.Parser;
-import opennlp.tools.parser.ParserFactory;
-import opennlp.tools.parser.ParserModel;
 import org.junit.Ignore;
 import org.junit.Test;
-import spimedb.util.HTTP;
 
 import java.io.IOException;
 

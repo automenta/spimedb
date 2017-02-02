@@ -2,8 +2,8 @@ package spimedb;
 
 import com.google.common.collect.Iterables;
 import org.junit.Test;
-import spimedb.query.Query;
 import spimedb.io.ImportSchemaOrg;
+import spimedb.query.Query;
 
 import java.io.IOException;
 import java.util.ArrayList;
