@@ -9,10 +9,7 @@ import com.google.common.base.Stopwatch;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.facet.Facets;
 import org.apache.lucene.facet.FacetsCollector;
@@ -224,6 +221,19 @@ public class SpimeDB  {
 
     public static StringField string(String key, String value) {
         return new StringField(key, value, Field.Store.YES);
+    }
+
+    public static final FieldType tokenizedString = new FieldType();
+    static {
+        tokenizedString.setOmitNorms(false);
+        tokenizedString.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+        tokenizedString.setStored(true);
+        tokenizedString.setTokenized(true);
+        tokenizedString.freeze();
+    }
+
+    public static Field stringTokenized(String key, String value) {
+        return new Field(key, value, tokenizedString);
     }
 
     public static TextField text(String key, String value) {
