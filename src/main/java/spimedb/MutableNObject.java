@@ -48,7 +48,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     public MutableNObject putLater(String key, float pri, Object intermediate, Supplier lazy) {
-        return put(key, new LazyValue(key, intermediate, lazy));
+        return put(key, new LazyValue(key, intermediate, pri, lazy));
     }
 
     public MutableNObject put(String key, Object value) {

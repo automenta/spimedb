@@ -55,7 +55,7 @@ public class DObject implements NObject {
 
         Document d = new Document();
 
-        d.add(text(NObject.ID, nid));
+        d.add(string(NObject.ID, nid));
 
         String name = n.name();
         if (name != null && !name.equals(nid))
@@ -180,7 +180,8 @@ public class DObject implements NObject {
 
         if (id.contains("/")) {
             String[] path = id.split("/");
-            d.add(new FacetField(NObject.ID, path));
+            if (path.length > 0)
+                d.add(new FacetField(NObject.ID, path));
         }
 
         for (String t : tags()) {

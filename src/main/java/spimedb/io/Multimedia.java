@@ -87,7 +87,7 @@ public class Multimedia {
                     if (p!=null) {
                         String whenCached = p.get("url_cached");
                         if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
-                            logger.info("cached: {}", url);
+                            logger.debug("cached: {}", url);
                             return p; //still valid
                         }
                     }
@@ -206,7 +206,7 @@ public class Multimedia {
                         }
 
 
-                        db.addAsync(0.6f,
+                        db.add(
                                 new MutableNObject(xid + "/" + page)
                                         .name(docTitle + " - (" + (page + 1) + " of " + (pageCount+1) + ")")
                                         .withTags(xid)
@@ -258,15 +258,16 @@ public class Multimedia {
 
                 //clean and update parent DOM
 
-                String xname = x.name();
-                String desc = x.get(NObject.DESC);
+                //String xname = x.name();
+                //String desc = x.get(NObject.DESC);
                 x = new MutableNObject(x)
                         .put(NObject.DESC, null)
-                        .putLater("textParse", 0.1f, () -> {
+                        /*.putLater("textParse", 0.15f, () -> {
                             return xname != null ? NLP.toString(NLP.parse(
                                     Joiner.on("\n").skipNulls().join(xname, desc)
                             )) : null;
                         }) //parse the title + description
+                        */
                         ;
             }
 

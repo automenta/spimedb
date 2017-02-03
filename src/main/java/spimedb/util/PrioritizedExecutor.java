@@ -16,7 +16,7 @@ public class PrioritizedExecutor  {
     final Executor exe;
 
     public PrioritizedExecutor(int threads) {
-         this.exe = new ThreadPoolExecutor(threads, threads, 10, TimeUnit.SECONDS, pq);
+         this.exe = new ThreadPoolExecutor(threads, threads, 1, TimeUnit.SECONDS, pq);
     }
 
     public void run(float pri, Runnable r) {

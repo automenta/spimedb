@@ -560,7 +560,11 @@ public class KML {
                     //name the top level folder
                     d = root;
                 } else {
-                    d = new MutableNObject(pathString);
+                    if (pathString.equals(root.id()))
+                        d = new MutableNObject(root);
+                    else
+                        d = new MutableNObject(pathString);
+
                     d.withTags(parentPathString);
                 }
 

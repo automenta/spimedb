@@ -82,7 +82,10 @@ public class SpimeDB  {
 
     @JsonIgnore
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
-    public final PrioritizedExecutor exe = new PrioritizedExecutor(Runtime.getRuntime().availableProcessors()-1);//ForkJoinPool.commonPool();
+
+    public final PrioritizedExecutor exe = new PrioritizedExecutor(
+        Math.max(2, Runtime.getRuntime().availableProcessors()-1)
+    );
 
     /**
      * default location of file resources if unspecified

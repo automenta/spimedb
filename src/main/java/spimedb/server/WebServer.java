@@ -87,21 +87,15 @@ public class WebServer extends PathHandler {
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
             try {
                 o.write(j2js.compileMain(Client.class).toString().getBytes());
-                o.close();
             } catch (IOException e) {
                 logger.warn("spimedb.js {}", e);
-                try {
-                    o.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
+
             }
         }));
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
                 o.write(JSON.toJSONBytes(db.tags().stream().map(db::get).toArray(NObject[]::new)));
-                o.close();
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }
@@ -118,8 +112,6 @@ public class WebServer extends PathHandler {
                     return;
                 }
                 JSON.toJSON( Lists.transform(x, y -> y.key), o );
-
-                o.close();
 
             } catch (Exception e) {
                 logger.warn("suggest: {}", e);
@@ -142,8 +134,6 @@ public class WebServer extends PathHandler {
                         Stream.of(x.labelValues).map(y -> new Object[] { y.label, y.value }).toArray(Object[]::new)
                         /*Stream.of(x.labelValues).collect(
                         Collectors.toMap(y->y.label, y->y.value ))*/, o);
-
-                o.close();
 
             } catch (Exception e) {
                 logger.warn("suggest: {}", e);
