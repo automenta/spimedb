@@ -2,14 +2,11 @@ package spimedb;
 
 import com.google.common.collect.Iterators;
 import org.junit.Test;
-import spimedb.io.GeoJSON;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 import static com.google.common.collect.Iterables.size;
 import static org.junit.Assert.assertEquals;
-import static spimedb.io.GeoJSONTest.eqGeoJson;
 
 /**
  * Created by me on 1/14/17.
@@ -61,35 +58,35 @@ public class TagTest {
 //        assertEquals(1, deactivations.intValue());
     }
 
-    @Test
-    public void testExpandingTag() throws IOException {
-
-        final SpimeDB db = new SpimeDB();
-
-        Consumer<Tag> onGeoJSONActivate = (t) -> {
-            try {
-                db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
-        Consumer<Tag> onDeact = (t) -> {
-
-        };
-
-        Tag u = new Tag.ExpandingTag("Earthquake", onGeoJSONActivate, onDeact, "Disaster");
-        db.add(u);
-
-        Tag t = new Tag("Hurricane", "Disaster");
-        db.add(t);
-
-
-        u.pri(null, 0.75f); //activate
-
-        SpimeDB.sync();
-
-        System.out.println(db.toString());
-    }
+//    @Test
+//    public void testExpandingTag() throws IOException {
+//
+//        final SpimeDB db = new SpimeDB();
+//
+//        Consumer<Tag> onGeoJSONActivate = (t) -> {
+//            try {
+//                db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        };
+//        Consumer<Tag> onDeact = (t) -> {
+//
+//        };
+//
+//        Tag u = new Tag.ExpandingTag("Earthquake", onGeoJSONActivate, onDeact, "Disaster");
+//        db.add(u);
+//
+//        Tag t = new Tag("Hurricane", "Disaster");
+//        db.add(t);
+//
+//
+//        u.pri(null, 0.75f); //activate
+//
+//        db.sync();
+//
+//        System.out.println(db.toString());
+//    }
 
     @Test public void testGraphDecoration() throws IOException {
 

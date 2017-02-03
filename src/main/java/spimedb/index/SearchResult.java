@@ -49,7 +49,11 @@ public final class SearchResult {
     }
 
     public void close() {
+        if (searcher == null)
+            return;
+
         try {
+
             searcher.getIndexReader().close();
         } catch (IOException e) {
             SpimeDB.logger.error("{}", e);

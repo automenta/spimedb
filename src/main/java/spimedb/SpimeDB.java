@@ -50,6 +50,7 @@ import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.index.rtree.*;
 import spimedb.query.Query;
+import spimedb.util.PrioritizedExecutor;
 
 import javax.script.ScriptEngineManager;
 import java.io.File;
@@ -81,7 +82,7 @@ public class SpimeDB  {
 
     @JsonIgnore
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
-    public static final ForkJoinPool exe = ForkJoinPool.commonPool();
+    public final PrioritizedExecutor exe = new PrioritizedExecutor(Runtime.getRuntime().availableProcessors()-1);//ForkJoinPool.commonPool();
 
     /**
      * default location of file resources if unspecified
@@ -197,7 +198,9 @@ public class SpimeDB  {
         final String[] defaultFindFields = new String[] { NObject.NAME, NObject.DESC };
         final Map<String,Float> defaultFindFieldStrengths = Maps.mutable.with(
             NObject.NAME,1f,
-            NObject.DESC,0.5f
+            NObject.ID,0.75f,
+            NObject.DESC,0.5f,
+            NObject.TAG,0.25f
         );
         this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, defaultFindFieldStrengths);
 
@@ -422,7 +425,7 @@ public class SpimeDB  {
 
     private void commit() {
         if (writing.compareAndSet(false, true)) {
-            SpimeDB.exe.execute(() -> {
+            exe.run(1f, () -> {
                 try {
 
                     IndexWriterConfig writerConf = new IndexWriterConfig(analyzer);
@@ -564,13 +567,13 @@ public class SpimeDB  {
         return result;
     }
 
-    public Future<NObject> addAsync(@Nullable NObject next) {
+    public void addAsync(float pri, @Nullable NObject next) {
         if (next!=null) {
-            return exe.submit(() -> {
-                return add(next);
+            /*return */exe.run(pri, () -> {
+                /*return */add(next);
             });
-        } else
-            return null;
+        } /*else
+            return null;*/
     }
 
     /**
@@ -839,8 +842,12 @@ public class SpimeDB  {
         }
     }
 
-    public static void runLater(Runnable r) {
-        exe.execute(r);
+    public void runLater(Runnable r) {
+        runLater(0.5f, r);
+    }
+
+    public void runLater(float pri, Runnable r) {
+        exe.run(pri, r);
     }
 
     public void add(Stream<? extends NObject> s) {
@@ -848,13 +855,21 @@ public class SpimeDB  {
     }
 
     @Deprecated
-    public static synchronized void sync() {
-        sync(60);
+    public synchronized void sync() {
+        int waitDelayMS = 50;
+        while (!exe.pq.isEmpty()) {
+            try {
+                Thread.sleep(waitDelayMS);
+            } catch (InterruptedException e) {
+                logger.warn("{}", e);
+            }
+        }
     }
 
-    public static synchronized void sync(float seconds) {
-        exe.awaitQuiescence(Math.round(seconds * 1000f), MILLISECONDS);
-    }
+//    public synchronized void sync(float seconds) {
+//        //exe.awaitQuiescence(Math.round(seconds * 1000f), MILLISECONDS);
+//
+//    }
 
 
     public GraphedNObject graphed(String id) {

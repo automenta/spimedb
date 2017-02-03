@@ -84,6 +84,7 @@
         });
         $('#query_update').click(querySubmit);
 
+
         function update(qText) {
 
             //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
@@ -106,27 +107,38 @@
             });
         }
 
-        function updateFacet(dimension) {
-            $('#facets.' + dimension).remove();
+        function d(eleID) {
+            return document.createElement(eleID);
+        }
 
-            const f = $('<div>').attr('class', dimension);
-            f.html(dimension + ' (loading...)');
-            $('#facets').append(f);
+        function updateFacet(dimension, label) {
+
+            const klass = label;
+
+            $('#facets.' + klass).remove();
+
+            const f = $('<div>').attr('class', klass).html(label + '...');
+            $('#facets').append( f );
 
             $.get('/facet', { q: dimension }, function(result) {
                 result = JSON.parse(result);
                 f.html($('<div>').append(
-                    $('<h3>').text(dimension),
-                    $('<ul>').append(
+                    $(d('h3')).text(label),
+                    $(d('ul')).append(
                         _.map(result, (v) => {
-                            return $('<li>').text(v);
+                            const id = v[0];
+                            const score = v[1];
+                            return $(d('li')).append(d('a')).click(()=>{
+                                queryText.val(queryText.val() + ' ' + dimension + ':' + id);
+                                querySubmit();
+                            }).text(id);
                         }))
                 ));
             });
         }
 
-        updateFacet('I');
-        //updateFacet('>');
+        updateFacet('I', 'Category');
+        updateFacet('>', 'Tag');
 
     }, false );
 </script>

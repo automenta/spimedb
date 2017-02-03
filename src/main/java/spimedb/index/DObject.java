@@ -55,7 +55,7 @@ public class DObject implements NObject {
 
         Document d = new Document();
 
-        d.add(string(NObject.ID, nid));
+        d.add(text(NObject.ID, nid));
 
         String name = n.name();
         if (name != null && !name.equals(nid))
@@ -92,7 +92,7 @@ public class DObject implements NObject {
             if (v instanceof LazyValue) {
                 LazyValue l = (LazyValue)v;
                 v = l.pendingValue;
-                SpimeDB.runLater(()->{
+                db.runLater(l.priority, ()->{
                    Object lv = l.value.get();
                    if (lv!=null) {
                        MutableNObject nv = new MutableNObject(nid);

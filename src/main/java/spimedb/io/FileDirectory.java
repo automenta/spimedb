@@ -47,7 +47,7 @@ public class FileDirectory {
                     DObject p = db.get(id);
                     String whenCached = p != null ? p.get("url_cached") : null;
                     if (whenCached == null || Long.valueOf(whenCached) < x.lastModified()) {
-                        db.addAsync(new MutableNObject(id)
+                        db.addAsync(0.8f, new MutableNObject(id)
                                 .put("url_in", us)
                                 .put("url", uf)
                         );

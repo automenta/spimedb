@@ -43,11 +43,11 @@ public class MutableNObject extends ImmutableNObject {
         super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY), id, name);
     }
 
-    public MutableNObject putLater(String key, Supplier lazy) {
-        return putLater(key, null, lazy);
+    public MutableNObject putLater(String key, float pri, Supplier lazy) {
+        return putLater(key, pri, null, lazy);
     }
 
-    public MutableNObject putLater(String key, Object intermediate, Supplier lazy) {
+    public MutableNObject putLater(String key, float pri, Object intermediate, Supplier lazy) {
         return put(key, new LazyValue(key, intermediate, lazy));
     }
 

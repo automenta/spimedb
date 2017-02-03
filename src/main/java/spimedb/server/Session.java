@@ -238,7 +238,7 @@ public class Session extends AbstractServerWebSocket {
         if (code.isEmpty())
             return; //ignore
 
-        SpimeDB.runLater(() -> {
+        db.runLater(1f, () -> {
             JSExec.eval(code, scope, db.js, result -> {
                 if (result == null)
                     return;
@@ -263,7 +263,7 @@ public class Session extends AbstractServerWebSocket {
 
 
     protected void start(Task t) {
-        SpimeDB.runLater(() -> {
+        db.runLater(1f, () -> {
             t.run();
             t.stop();
         });

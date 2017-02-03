@@ -32,7 +32,7 @@ public class SpimeJS extends JSScript {
 
     @Override
     public void run(String jsCode) {
-        SpimeDB.runLater(()->{
+        db.runLater(1f, ()->{
             try {
                 super.run(jsCode);
             } catch (ScriptException e) {

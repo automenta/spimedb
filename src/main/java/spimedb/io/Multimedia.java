@@ -180,7 +180,7 @@ public class Multimedia {
                 for (int _page = 0; _page < pageCount; _page++) {
 
                     final int page = _page;
-                    SpimeDB.runLater(() -> {
+                    db.runLater(0.75f, () -> {
 
                         logger.info("load: {} page {}", xid, page);
 
@@ -206,7 +206,7 @@ public class Multimedia {
                         }
 
 
-                        db.addAsync(
+                        db.addAsync(0.6f,
                                 new MutableNObject(xid + "/" + page)
                                         .name(docTitle + " - (" + (page + 1) + " of " + (pageCount+1) + ")")
                                         .withTags(xid)
@@ -215,12 +215,12 @@ public class Multimedia {
                                         .put(NObject.TYPE, "application/pdf")
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
-                                        .putLater("textParse", ()-> {
+                                        .putLater("textParse", 0.1f, ()-> {
                                             return (pdb.length > 0) ? Stream.of(pdb).map(
                                                     t -> NLP.toString(NLP.parse(t))
                                             ).collect(Collectors.joining("\n")) : null;
                                         })
-                                        .putLater("thumbnail", ()->{
+                                        .putLater("thumbnail", 0.5f, ()->{
                                             try {
                                                 PDDocument document = PDDocument.load(new URL(url_in).openStream());
 
@@ -262,7 +262,7 @@ public class Multimedia {
                 String desc = x.get(NObject.DESC);
                 x = new MutableNObject(x)
                         .put(NObject.DESC, null)
-                        .putLater("textParse", () -> {
+                        .putLater("textParse", 0.1f, () -> {
                             return xname != null ? NLP.toString(NLP.parse(
                                     Joiner.on("\n").skipNulls().join(xname, desc)
                             )) : null;
