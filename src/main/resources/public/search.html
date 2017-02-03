@@ -21,6 +21,9 @@
     </div>
 </div>
 
+<div id="facets">
+</div>
+
 <div id="query_results">
     <ul data-template class="result">
 
@@ -103,8 +106,27 @@
             });
         }
 
+        function updateFacet(dimension) {
+            $('#facets.' + dimension).remove();
 
+            const f = $('<div>').attr('class', dimension);
+            f.html(dimension + ' (loading...)');
+            $('#facets').append(f);
 
+            $.get('/facet', { q: dimension }, function(result) {
+                result = JSON.parse(result);
+                f.html($('<div>').append(
+                    $('<h3>').text(dimension),
+                    $('<ul>').append(
+                        _.map(result, (v) => {
+                            return $('<li>').text(v);
+                        }))
+                ));
+            });
+        }
+
+        updateFacet('I');
+        //updateFacet('>');
 
     }, false );
 </script>

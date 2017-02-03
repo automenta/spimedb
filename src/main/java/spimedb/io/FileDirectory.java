@@ -2,7 +2,7 @@ package spimedb.io;
 
 import spimedb.MutableNObject;
 import spimedb.SpimeDB;
-import spimedb.index.lucene.DObject;
+import spimedb.index.DObject;
 
 import java.io.File;
 import java.net.MalformedURLException;

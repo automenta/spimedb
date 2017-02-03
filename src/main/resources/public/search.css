@@ -10,9 +10,11 @@ body {
     height: 3em;
     padding: 0.5em;
 }
-#query_results {   
+
+#facets, #query_results {
     padding-top: 3em;
 }
+
 #query_suggestions div {
     padding: 2px;
     margin: 5px;

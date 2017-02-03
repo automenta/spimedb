@@ -16,14 +16,17 @@ import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.util.HttpString;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.suggest.Lookup;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.slf4j.LoggerFactory;
+import spimedb.FilteredNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.client.Client;
-import spimedb.index.lucene.DObject;
+import spimedb.index.DObject;
+import spimedb.index.SearchResult;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
@@ -32,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
@@ -71,6 +75,8 @@ public class WebServer extends PathHandler {
         this.db = db;
 
 
+
+
         //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
         j2js = JavaToJavascript.build();
 
@@ -81,6 +87,7 @@ public class WebServer extends PathHandler {
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
             try {
                 o.write(j2js.compileMain(Client.class).toString().getBytes());
+                o.close();
             } catch (IOException e) {
                 logger.warn("spimedb.js {}", e);
                 try {
@@ -94,6 +101,7 @@ public class WebServer extends PathHandler {
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
                 o.write(JSON.toJSONBytes(db.tags().stream().map(db::get).toArray(NObject[]::new)));
+                o.close();
             } catch (IOException e) {
                 logger.warn("tag {}", e);
             }
@@ -106,7 +114,37 @@ public class WebServer extends PathHandler {
 
             try {
                 List<Lookup.LookupResult> x = db.suggest(qText, 16);
+                if (x == null) {
+                    return;
+                }
                 JSON.toJSON( Lists.transform(x, y -> y.key), o );
+
+                o.close();
+
+            } catch (Exception e) {
+                logger.warn("suggest: {}", e);
+                try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
+            }
+        }));
+
+        addPrefixPath("/facet", ex -> HTTP.stream(ex, (o) -> {
+            String dimension = getStringParameter(ex, "q");
+            if (dimension==null || (dimension=dimension.trim()).isEmpty())
+                return;
+
+            try {
+                FacetResult x = db.facets(dimension, 32);
+                if (x == null) {
+                    return;
+                }
+
+                JSON.toJSON(
+                        Stream.of(x.labelValues).map(y -> new Object[] { y.label, y.value }).toArray(Object[]::new)
+                        /*Stream.of(x.labelValues).collect(
+                        Collectors.toMap(y->y.label, y->y.value ))*/, o);
+
+                o.close();
+
             } catch (Exception e) {
                 logger.warn("suggest: {}", e);
                 try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
@@ -136,7 +174,7 @@ public class WebServer extends PathHandler {
 
             try {
 
-                SpimeDB.SearchResult x = db.find(qText, 10);
+                SearchResult x = db.find(qText, 10);
 
                 o.write('[');
                 Iterator<Document> ii = x.docs();
@@ -313,8 +351,8 @@ public class WebServer extends PathHandler {
                 "thumbnail"
         );
 
-    private SpimeDB.FilteredNObject searchResult(NObject d) {
-        return new SpimeDB.FilteredNObject( db.graphed(d), searchResultKeys) {
+    private FilteredNObject searchResult(NObject d) {
+        return new FilteredNObject( db.graphed(d), searchResultKeys) {
             @Override
             protected Object value(String key, Object v) {
                 switch (key) {

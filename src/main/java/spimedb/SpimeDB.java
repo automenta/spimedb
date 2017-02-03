@@ -3,14 +3,25 @@ package spimedb;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.collect.Iterators;
+import com.google.common.base.Stopwatch;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.facet.FacetResult;
+import org.apache.lucene.facet.Facets;
+import org.apache.lucene.facet.FacetsCollector;
+import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
+import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -32,11 +43,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.graph.MapGraph;
 import spimedb.graph.VertexContainer;
-import spimedb.graph.VertexIncidence;
 import spimedb.graph.travel.BreadthFirstTravel;
 import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
-import spimedb.index.lucene.DObject;
+import spimedb.index.DObject;
+import spimedb.index.SearchResult;
 import spimedb.index.rtree.*;
 import spimedb.query.Query;
 
@@ -44,15 +55,22 @@ import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
@@ -112,6 +130,7 @@ public class SpimeDB  {
 
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer;
+
     protected long lastCommit = 0;
 
     private Lookup suggester;
@@ -126,6 +145,10 @@ public class SpimeDB  {
 
     final static String[] ROOT = new String[]{""};
     private final VertexContainer<String, String> rootNode;
+
+
+    private /* final */ Directory taxoDir;
+    private final FacetsConfig facetsConfig = new FacetsConfig();
 
     private final static RectBuilder<NObject> rectBuilder = (n) -> {
         PointND min = n.min();
@@ -146,19 +169,24 @@ public class SpimeDB  {
     public SpimeDB() throws IOException {
         this(new RAMDirectory());
         this.indexPath = null;
+        this.taxoDir = new RAMDirectory();
     }
 
     public SpimeDB(String path) throws IOException {
         this(FSDirectory.open(new File(path).toPath()));
         this.indexPath = new File(path).getAbsolutePath();
+        this.taxoDir = FSDirectory.open(new File(path).toPath().resolve("taxo"));
         logger.info("index: {}", indexPath);
     }
 
     SpimeDB(Directory dir) throws IOException {
 
+
         this.dir = dir;
         this.analyzer = new StandardAnalyzer();
 
+        this.facetsConfig.setHierarchical(NObject.ID, true);
+        this.facetsConfig.setMultiValued(NObject.TAG, true);
 
 //        DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(dir);
 //        taxoWriter.addCategory(new FacetLabel(NObject.TYPE));
@@ -196,6 +224,36 @@ public class SpimeDB  {
         return new TextField(key, value, Field.Store.YES);
     }
 
+
+    public FacetResult facets(String dimension, int count) throws IOException {
+
+        IndexSearcher searcher = searcher();
+        if (searcher==null)
+            return null;
+
+        TaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
+
+
+        FacetsCollector fc = new FacetsCollector();
+
+        // MatchAllDocsQuery is for "browsing" (counts facets
+        // for all non-deleted docs in the index); normally
+        // you'd use a "normal" query:
+        searcher.search(new MatchAllDocsQuery(), fc);
+
+        // Retrieve results
+        List<FacetResult> results = new ArrayList<>();
+
+        Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
+
+        FacetResult result = facets.getTopChildren(count, dimension);
+
+        searcher.getIndexReader().close();
+        taxoReader.close();
+
+        return result;
+    }
+
     @Nullable private Lookup suggester() {
         synchronized (dir) {
             if (lastCommit - lastSuggesterCreated > minSuggesterUpdatePeriod ) {
@@ -205,14 +263,30 @@ public class SpimeDB  {
             if (suggester == null) {
                 if (nameDict==null) {
                     nameDictReader = reader();
+                    if (nameDictReader == null)
+                        return null;
                 }
+
                 nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
                 FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
+
                 try {
+
+                    Stopwatch time = Stopwatch.createStarted();
+
                     nextSuggester.build(nameDict);
                     suggester = nextSuggester;
                     lastSuggesterCreated = now();
-                    logger.info("suggester updated, count={}", suggester.getCount());
+                    logger.info("suggester updated, count={} {}ms", suggester.getCount(), time.elapsed(MILLISECONDS));
+
+                    time.reset();
+
+//                    FacetsCollector fc = new FacetsCollector();
+//                    FacetsCollector.search(new IndexSearcher(nameDictReader), new MatchAllDocsQuery(), Integer.MAX_VALUE,
+//                            fc
+//                    );
+//                    logger.info("facets updated, count={} {}ms", fc., time.elapsed(MILLISECONDS));
+
                 } catch (IllegalArgumentException f) {
                     return null;
                 } catch (IOException e) {
@@ -248,12 +322,13 @@ public class SpimeDB  {
             return result;
         } catch (IOException e) {
             logger.warn("query: {}", e);
+            return null;
         }
-        return null;
+
     }
 
     @Nullable
-    private IndexSearcher searcher()  {
+    protected IndexSearcher searcher()  {
         DirectoryReader r = reader();
         return r != null ? new IndexSearcher(r) : null;
     }
@@ -356,6 +431,8 @@ public class SpimeDB  {
 
                     IndexWriter writer = new IndexWriter(dir, writerConf);
 
+                    DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
+
                     int written = 0;
                     int s;
 
@@ -368,13 +445,19 @@ public class SpimeDB  {
                         while (ii.hasNext()) {
                             Map.Entry<String, DObject> nn = ii.next();
                             ii.remove();
-                            writer.updateDocument(new Term(NObject.ID, nn.getKey()), nn.getValue().document);
+                            writer.updateDocument(new Term(NObject.ID, nn.getKey()),
+                                    facetsConfig.build(taxoWriter, nn.getValue().document)
+                                    //nn.getValue().document
+                            );
+
                         }
                         writer.commit();
                         lastCommit = now();
                         written += s;
                     }
                     writer.close();
+                    taxoWriter.close();
+
                     logger.debug("{} indexed", written);
 
                 } catch (IOException e) {
@@ -770,7 +853,7 @@ public class SpimeDB  {
     }
 
     public static synchronized void sync(float seconds) {
-        exe.awaitQuiescence(Math.round(seconds * 1000f), TimeUnit.MILLISECONDS);
+        exe.awaitQuiescence(Math.round(seconds * 1000f), MILLISECONDS);
     }
 
 
@@ -786,114 +869,6 @@ public class SpimeDB  {
             return (GraphedNObject) n; //already wrapped
 
         return new GraphedNObject(this.graph, n);
-    }
-
-    @JsonSerialize(using = NObject.NObjectSerializer.class)
-    public static class FilteredNObject extends ProxyNObject {
-
-        private final ImmutableSet<String> keysInclude;
-
-        public FilteredNObject(NObject n, ImmutableSet<String> keysInclude) {
-            super(n);
-            this.keysInclude = keysInclude;
-        }
-
-        protected boolean includeKey(String key) {
-            return keysInclude.contains(key);
-        }
-
-        @Override
-        public void forEach(BiConsumer<String, Object> each) {
-            n.forEach((k,v)->{
-                if (includeKey(k)) { //HACK filter out tag field because the information will be present in the graph
-                    Object vv = value(k, v);
-                    if (vv!=null)
-                        each.accept(k, vv);
-                }
-            });
-        }
-
-        protected Object value(String k, Object v) {
-            return v;
-        }
-    }
-
-    @JsonSerialize(using = NObject.NObjectSerializer.class)
-    public static class GraphedNObject extends ProxyNObject {
-
-        private final MapGraph<String, String> graph;
-
-
-        GraphedNObject(MapGraph<String, String> graph) {
-            this.graph = graph;
-        }
-
-        GraphedNObject(MapGraph<String, String> graph, NObject n) {
-            this(graph);
-            set(n);
-        }
-
-        protected boolean includeKey(String key) {
-            return !key.equals(TAG);
-        }
-
-        @Override
-        public void forEach(BiConsumer<String, Object> each) {
-            n.forEach((k, v) -> {
-                if (includeKey(k)) //HACK filter out tag field because the information will be present in the graph
-                    each.accept(k, v);
-            });
-
-            VertexContainer<String, String> v = graph.vertex(id(), false);
-            if (v != null) {
-                Map<String, VertexIncidence<String>> boundary = v.incidence();
-                boundary.forEach(each);
-            }
-        }
-
-    }
-
-    public final static class SearchResult {
-
-        private final TopDocs docs;
-        private final IndexSearcher searcher;
-        private final org.apache.lucene.search.Query query;
-
-        public SearchResult(org.apache.lucene.search.Query q, IndexSearcher searcher, TopDocs docs) {
-            this.query = q;
-            this.searcher = searcher;
-            this.docs = docs;
-            logger.info("query({}) hits={}", query, docs!=null ? docs.totalHits : 0);
-        }
-
-        public Iterator<Document> docs() {
-            if (docs == null)
-                return Collections.emptyIterator();
-
-            final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
-
-            IndexReader reader = searcher.getIndexReader();
-            Document d = visitor.getDocument();
-
-            return Iterators.transform(Iterators.forArray(docs.scoreDocs), sd -> {
-                d.clear();
-                try {
-                    reader.document(sd.doc, visitor);
-                } catch (IOException e) {
-                    logger.error("{} {}", sd, e);
-                }
-                return d;
-            });
-        }
-
-        public void close() {
-            try {
-                searcher.getIndexReader().close();
-            } catch (IOException e) {
-                logger.error("{}", e);
-            }
-        }
-
     }
 
     private final class DBLock extends ReentrantLock {

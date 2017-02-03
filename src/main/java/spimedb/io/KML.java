@@ -11,7 +11,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.primitives.Ints;
 import org.opensextant.geodesy.Geodetic2DPoint;
 import org.opensextant.giscore.events.*;
 import org.opensextant.giscore.events.SimpleField.Type;
@@ -63,7 +62,7 @@ public class KML {
 
     public String nextID() {
         int c = serial.incrementAndGet();
-        return layer + "_" + Base64.getEncoder().encodeToString(Ints.toByteArray(c));
+        return Integer.toUnsignedString(c, Character.MAX_RADIX);
     }
 
 
@@ -587,7 +586,7 @@ public class KML {
                     }
                 }
             } else {
-                d = new MutableNObject(nextID());
+                d = new MutableNObject(pathString + "/" + nextID());
                 d.withTags(pathString);
 
             }

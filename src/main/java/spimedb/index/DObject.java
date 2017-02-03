@@ -1,9 +1,11 @@
-package spimedb.index.lucene;
+package spimedb.index;
 
 import com.google.common.base.Joiner;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.lucene.document.*;
+import org.apache.lucene.facet.FacetField;
+import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.IndexableFieldType;
 import org.jetbrains.annotations.NotNull;
@@ -175,6 +177,25 @@ public class DObject implements NObject {
         } else {
             min = max = unbounded;
         }
+
+        if (id.contains("/")) {
+            String[] path = id.split("/");
+            d.add(new FacetField(NObject.ID, path));
+        }
+
+        for (String t : tags()) {
+            if (/*t == null || */t.isEmpty())
+                continue;
+
+            d.add(new FacetField(NObject.TAG, t));
+        }
+////            if (t.contains("/")) {
+////                String[] path = t.split("/");
+////                d.add(new FacetField(NObject.TAG, path));
+////            } else {
+////                d.add(new SortedSetDocValuesFacetField(NObject.TAG, t));
+////            }
+//        }
     }
 
     @Override
@@ -210,6 +231,9 @@ public class DObject implements NObject {
     public void forEach(BiConsumer<String, Object> each) {
 
         document.forEach(f -> {
+            if (f instanceof SortedSetDocValuesFacetField || f instanceof FacetField)
+                return;
+
             String k = f.name();
             switch (k) {
                 case NObject.ID: break; //filtered

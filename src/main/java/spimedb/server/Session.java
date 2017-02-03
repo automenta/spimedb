@@ -10,9 +10,11 @@ import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import spimedb.FilteredNObject;
+import spimedb.GraphedNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.index.lucene.DObject;
+import spimedb.index.DObject;
 import spimedb.query.Query;
 
 import javax.script.SimpleBindings;
@@ -179,8 +181,8 @@ public class Session extends AbstractServerWebSocket {
                 }
 
                 @NotNull
-                private SpimeDB.FilteredNObject transmittable(NObject n) {
-                    return new SpimeDB.FilteredNObject( db.graphed(n), mapIncludesFields);
+                private FilteredNObject transmittable(NObject n) {
+                    return new FilteredNObject( db.graphed(n), mapIncludesFields);
                 }
             };
 
@@ -195,7 +197,7 @@ public class Session extends AbstractServerWebSocket {
             if (force || !remoteMemory.contains(idHash)) {
                 DObject d = db.get(id);
                 if (d!=null) {
-                    SpimeDB.GraphedNObject n = db.graphed(includeKeys!=null ? new SpimeDB.FilteredNObject(d, includeKeys) : d);
+                    GraphedNObject n = db.graphed(includeKeys!=null ? new FilteredNObject(d, includeKeys) : d);
                     if (n != null) {
                         t.sendJSON(chan, n);
                         remoteMemory.add(idHash);

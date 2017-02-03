@@ -90,7 +90,7 @@ public class JSON {
     }
     public static <X> X fromMsgPackBytes(byte[] msgPacked, Class<? extends X> type) {
         try {
-            return msgPackMapper.readerFor(type).readValue(msgPacked);
+            return msgPackMapper.reader(type).readValue(msgPacked);
         } catch (IOException e) {
             logger.error("{}", e);
             return null;

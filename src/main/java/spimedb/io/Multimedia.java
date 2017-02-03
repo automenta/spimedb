@@ -207,7 +207,7 @@ public class Multimedia {
 
 
                         db.addAsync(
-                                new MutableNObject(xid + "." + page)
+                                new MutableNObject(xid + "/" + page)
                                         .name(docTitle + " - (" + (page + 1) + " of " + (pageCount+1) + ")")
                                         .withTags(xid)
                                         .put("author", author)
