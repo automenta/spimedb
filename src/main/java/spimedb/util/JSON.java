@@ -80,17 +80,17 @@ public class JSON {
             return x.toString().getBytes();
         }
     }
-    public static byte[] toMsgPackBytes(Object x) {
+    public static byte[] toMsgPackBytes(Object x, Class c) {
         try {
-            return msgPackMapper.writer().writeValueAsBytes(x);
+            return msgPackMapper.writerFor(c).writeValueAsBytes(x);
         } catch (JsonProcessingException e) {
             logger.error("{}", e);
             return null;
         }
     }
-    public static JsonNode fromMsgPackBytes(byte[] msgPacked) {
+    public static <X> X fromMsgPackBytes(byte[] msgPacked, Class<? extends X> type) {
         try {
-            return msgPackMapper.reader().readValue(msgPacked);
+            return msgPackMapper.readerFor(type).readValue(msgPacked);
         } catch (IOException e) {
             logger.error("{}", e);
             return null;

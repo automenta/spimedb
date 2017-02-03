@@ -1,8 +1,12 @@
 package spimedb;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.ConsoleAppender;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spimedb.io.FileDirectory;
 import spimedb.io.Multimedia;
 import spimedb.server.WebServer;
@@ -16,7 +20,37 @@ import java.io.IOException;
 public class Main {
 
     static {
+
+
+        Thread.currentThread().setName("$");
+
+        //http://logback.qos.ch/manual/layouts.html
+
+        ch.qos.logback.classic.Logger LOG = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        LoggerContext loggerContext = LOG.getLoggerContext();
+        // we are not interested in auto-configuration
+        loggerContext.reset();
+
+        PatternLayoutEncoder logEncoder = new PatternLayoutEncoder();
+        logEncoder.setContext(loggerContext);
+        //logEncoder.setPattern("\\( %highlight(%level),%green(%thread),%yellow(%logger{0}) \\): \"%message\".%n");
+        logEncoder.setPattern("%highlight(%logger{0}) %green(%thread) %message%n");
+        logEncoder.setImmediateFlush(false);
+        logEncoder.start();
+
+
+        {
+            ConsoleAppender c = new ConsoleAppender();
+            c.setContext(loggerContext);
+            c.setEncoder(logEncoder);
+            //c.setWithJansi(true);
+            c.start();
+
+            LOG.addAppender(c);
+        }
+
         SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
+
     }
 
     public static void main(String[] args) throws IOException {

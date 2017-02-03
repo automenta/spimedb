@@ -41,10 +41,10 @@ public class DObject implements NObject {
     public static DObject get(NObject n, SpimeDB db) {
         if (n instanceof DObject)
             return ((DObject)n);
-        return new DObject(toDocument(n, db));
+        return get(toDocument(n, db));
     }
 
-    public static Document toDocument(NObject n, SpimeDB db) {
+    static Document toDocument(NObject n, SpimeDB db) {
 
         if (n instanceof DObject)
             return ((DObject)n).document;
@@ -73,7 +73,8 @@ public class DObject implements NObject {
                     //d.add(new FloatRangeField(NObject.BOUND, min, max));
                     //float[] aa = ArrayUtils.addAll(min, max);
                     //d.add(new FloatPoint(NObject.BOUND, aa));
-                    d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
+                    //d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
+                    d.add(bytes(NObject.BOUND, JSON.toMsgPackBytes(new float[][] { min, max }, float[][].class)));
                 } catch (IllegalArgumentException e) {
                     logger.warn("{}", e);
                 }
@@ -136,7 +137,9 @@ public class DObject implements NObject {
                 //HACK ignore
             } else if (c == double[][].class) {
                 //d.add(new StoredField(k, new BytesRef(JSON.toMsgPackBytes(v))));
-                d.add(new StoredField(k, JSON.toJSONBytes(v)));
+                //d.add(new StoredField(k, JSON.toJSONBytes(v)));
+                //throw new UnsupportedOperationException();
+                d.add(bytes(k, JSON.toMsgPackBytes(v, double[][].class)));
             } else if (c == byte[].class) {
                 d.add(new StoredField(k, (byte[])v));
             } else {
@@ -147,6 +150,10 @@ public class DObject implements NObject {
         });
 
         return d;
+    }
+
+    private static IndexableField bytes(String key, byte[] bytes) {
+        return new StoredField(key, bytes);
     }
 
 
@@ -161,7 +168,8 @@ public class DObject implements NObject {
 
             //HACK make faster
             Field f = (Field)b;
-            float[][] dd = JSON.fromJSON(f.stringValue(), float[][].class);
+            //float[][] dd = JSON.fromJSON(f.stringValue(), float[][].class);
+            float[][] dd = JSON.fromMsgPackBytes(f.binaryValue().bytes, float[][].class);
             min = new PointND(dd[0]);
             max = new PointND(dd[1]);
         } else {
@@ -227,7 +235,7 @@ public class DObject implements NObject {
         switch (f.name()) {
             case NObject.LINESTRING:
             case NObject.POLYGON:
-                return JSON.fromJSON(f.binaryValue().bytes, double[][].class);
+                return JSON.fromMsgPackBytes(f.binaryValue().bytes, double[][].class);
                 //return JSON.fromMsgPackBytes(f.binaryValue().bytes);
         }
 
@@ -235,15 +243,16 @@ public class DObject implements NObject {
             //HACK convert to boolean
             return f.binaryValue().bytes[0] != 0;
         } else if (f instanceof DoublePoint) {
-            DoublePoint dp = (DoublePoint) f;
-            byte[] b = dp.binaryValue().bytes;
-
-            double[] dd = new double[b.length / Double.BYTES];
-            for (int i = 0;i < dd.length; i++)
-                dd[i] = DoublePoint.decodeDimension(b, i);
-            if (dd.length == 1)
-                return dd[0];
-            return dd;
+            throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
+//            DoublePoint dp = (DoublePoint) f;
+//            byte[] b = dp.binaryValue().bytes;
+//
+//            double[] dd = new double[b.length / Double.BYTES];
+//            for (int i = 0;i < dd.length; i++)
+//                dd[i] = DoublePoint.decodeDimension(b, i);
+//            if (dd.length == 1)
+//                return dd[0];
+//            return dd;
 
         } else if (f instanceof LongPoint) {
             throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
@@ -265,14 +274,9 @@ public class DObject implements NObject {
         IndexableFieldType type = f.fieldType();
 
         if (type == StoredField.TYPE) {
-            byte[] b = f.binaryValue().bytes;
-            return b;
+            return f.binaryValue().bytes;
         } else {
-            Object v = f.stringValue(); //TODO adapt based on field type
-            if (v == null) {
-                throw new NullPointerException();
-            }
-            return v;
+            return f.stringValue(); //TODO adapt based on field type
         }
     }
 

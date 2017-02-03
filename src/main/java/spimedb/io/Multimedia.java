@@ -106,7 +106,13 @@ public class Multimedia {
                         Metadata metadata = new Metadata();
                         ParseContext context = new ParseContext();
 
-                        InputStream stream = con.getInputStream();
+                        InputStream stream;
+                        try {
+                            stream = con.getInputStream();
+                        } catch (FileNotFoundException e) {
+                            logger.error("{} {}", url, e.getMessage());
+                            return null;
+                        }
                         if (stream == null) {
                             throw new FileNotFoundException();
                         }

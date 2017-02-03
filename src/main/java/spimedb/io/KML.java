@@ -154,7 +154,7 @@ public class KML {
                 //System.err.println(t);
                 exceptions.incrementAndGet();
                 exceptionClass.add(t.getClass());
-                logger.error("error: {}", t);
+                logger.error("error: {}", t.getCause());
                 break;
             }
         } while (true);

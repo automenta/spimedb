@@ -637,6 +637,9 @@ public class SpimeDB  {
 
         /* When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering. */
         DirectoryReader r = reader();
+        if (r == null)
+            return;
+
         int max = r.maxDoc();
 
         IntStream.range(0, max).parallel().forEach(i -> {
@@ -785,6 +788,7 @@ public class SpimeDB  {
         return new GraphedNObject(this.graph, n);
     }
 
+    @JsonSerialize(using = NObject.NObjectSerializer.class)
     public static class FilteredNObject extends ProxyNObject {
 
         private final ImmutableSet<String> keysInclude;
