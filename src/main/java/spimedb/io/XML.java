@@ -13,7 +13,7 @@ public class XML {
 
     //final DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
 
-    public XML(String s) throws IOException, SAXException {
+    public XML(String s) {
 //        this(IOUtils.toInputStream(s, Charset.defaultCharset()));
 //    }
 //

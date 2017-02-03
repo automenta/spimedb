@@ -89,7 +89,7 @@ public class DObject implements NObject {
             if (v instanceof LazyValue) {
                 LazyValue l = (LazyValue)v;
                 v = l.pendingValue;
-                db.runLater(()->{
+                SpimeDB.runLater(()->{
                    Object lv = l.value.get();
                    if (lv!=null) {
                        MutableNObject nv = new MutableNObject(nid);
@@ -233,7 +233,7 @@ public class DObject implements NObject {
 
         if (f instanceof BinaryPoint) {
             //HACK convert to boolean
-            return ((BinaryPoint)f).binaryValue().bytes[0] == 0 ? false : true;
+            return f.binaryValue().bytes[0] != 0;
         } else if (f instanceof DoublePoint) {
             DoublePoint dp = (DoublePoint) f;
             byte[] b = dp.binaryValue().bytes;

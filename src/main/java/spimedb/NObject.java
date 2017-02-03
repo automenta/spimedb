@@ -93,15 +93,12 @@ public interface NObject extends Serializable {
     default boolean equalsDeep(NObject n) {
         //TODO more efficient comparison
 
-        if (!toString().equals(n.toString())) {
-            return false;
-        }
-        return true;
+        return toString().equals(n.toString());
         //return toString().equals(n.toString());
     }
 
 
-    public static MutableNObject fromJSON(String json) {
+    static MutableNObject fromJSON(String json) {
         JsonNode x = JSON.fromJSON(json);
         JsonNode idNode = x.get(ID);
         if (idNode == null)

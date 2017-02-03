@@ -106,6 +106,11 @@
             <version>6.4.0</version>
         </dependency>
 
+        <!--<dependency>-->
+            <!--<groupId>phex</groupId>-->
+            <!--<artifactId>phex</artifactId>-->
+            <!--<version>4.0.0</version>-->
+        <!--</dependency>-->
 
 
         <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->

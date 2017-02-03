@@ -71,7 +71,7 @@ public class Session extends AbstractServerWebSocket {
         private Task currentFocus;
 
         /** send predicted-to-be-known items after sending predicted-to-be-unknown-by-client */
-        private boolean ensureSent = false;
+        private final boolean ensureSent = false;
 
 
         public String status() {
@@ -248,11 +248,11 @@ public class Session extends AbstractServerWebSocket {
                     start((Task) resultObj);
                 } else {
                     //else send the immediate result
-                    try {
+                    //try {
                         sendJSONBinary(socket, result, defaultOutRate, null);
-                    } catch (IOException e) {
-                        logger.info("{} {}", socket, e.getMessage());
-                    }
+//                    } catch (IOException e) {
+//                        logger.info("{} {}", socket, e.getMessage());
+//                    }
                 }
             });
         });

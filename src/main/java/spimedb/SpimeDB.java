@@ -50,6 +50,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
@@ -74,10 +75,12 @@ public class SpimeDB  {
     protected final Directory dir;
 
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
+
         @Override
         public TopScoreDocCollector newCollector() {
             return TopScoreDocCollector.create(1);
         }
+
 
         @Override
         public TopDocs reduce(Collection<TopScoreDocCollector> collectors) {
@@ -233,14 +236,16 @@ public class SpimeDB  {
             TermQuery x = new TermQuery(new Term(NObject.ID, id));
             TopDocs y = searcher.search(x, firstResultOnly);
             int hits = y.totalHits;
+            Document result = null;
             if (hits > 0) {
                 if (hits > 1) {
                     logger.warn("multiple documents with id={} exist: {}", id, y);
                 }
-                return searcher.doc(y.scoreDocs[0].doc);
+                result = searcher.doc(y.scoreDocs[0].doc);
             }
 
             searcher.getIndexReader().close();
+            return result;
         } catch (IOException e) {
             logger.warn("query: {}", e);
         }
@@ -630,32 +635,63 @@ public class SpimeDB  {
 //    }
     public void forEach(Consumer<NObject> each)  {
 
-        //long startTime = System.currentTimeMillis();
-        //create the term query object
-        MatchAllDocsQuery query = new MatchAllDocsQuery();
-        //do the search
-        TopDocs hits = null;
-        try {
-            IndexSearcher searcher = searcher();
-            if (searcher == null)
-                return;
+        /* When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering. */
+        DirectoryReader r = reader();
+        int max = r.maxDoc();
 
-            hits = searcher.search(query, Integer.MAX_VALUE);
-            //long endTime = System.currentTimeMillis();
-
-//            System.out.println(hits.totalHits +
-//                    " documents found. Time :" + (endTime - startTime) + "ms");
-            for (ScoreDoc scoreDoc : hits.scoreDocs) {
-                Document doc = searcher.doc(scoreDoc.doc);
-                if (doc!=null) {
-                    each.accept(DObject.get(doc));
-                }
+        IntStream.range(0, max).parallel().forEach(i -> {
+            Document d = null;
+            try {
+                d = r.document(i);
+                if (d!=null)
+                    each.accept(DObject.get(d));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        });
 
-            searcher.getIndexReader().close();
+//        for (int i = 0; i < max; i++) {
+//            try {
+//                Document d = r.document(i);
+//                if (d!=null)
+//                    each.accept(DObject.get(d));
+//            } catch (IOException e) {
+//                logger.error("doc: {}", e.getMessage());
+//            }
+//        }
+
+        try {
+            r.close();
         } catch (IOException e) {
-            logger.error("{}",e);
+            e.printStackTrace();
         }
+
+//        //long startTime = System.currentTimeMillis();
+//        //create the term query object
+//        MatchAllDocsQuery query = new MatchAllDocsQuery();
+//        //do the search
+//        TopDocs hits = null;
+//        try {
+//            IndexSearcher searcher = searcher();
+//            if (searcher == null)
+//                return;
+//
+//            hits = searcher.search(query, Integer.MAX_VALUE);
+//            //long endTime = System.currentTimeMillis();
+//
+////            System.out.println(hits.totalHits +
+////                    " documents found. Time :" + (endTime - startTime) + "ms");
+//            for (ScoreDoc scoreDoc : hits.scoreDocs) {
+//                Document doc = searcher.doc(scoreDoc.doc);
+//                if (doc!=null) {
+//                    each.accept(DObject.get(doc));
+//                }
+//            }
+//
+//            searcher.getIndexReader().close();
+//        } catch (IOException e) {
+//            logger.error("{}",e);
+//        }
     }
 
 

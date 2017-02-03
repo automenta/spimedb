@@ -43,19 +43,19 @@ abstract public class AbstractServerWebSocket extends AbstractReceiveListener im
         logger.info("{} disconnect", socket.getPeerAddress());
     }
 
-    public static void sendJSONText(WebSocketChannel socket, Object object) throws IOException {
+    public static void sendJSONText(WebSocketChannel socket, Object object) {
         sendJSON(socket, object, JSON.jsonSafe, null, null);
     }
 
-    public static void sendJSONBinary(WebSocketChannel socket, Object object) throws IOException {
+    public static void sendJSONBinary(WebSocketChannel socket, Object object) {
         sendJSON(socket, object, JSON.msgPackMapper,null, null);
     }
 
-    public static void sendJSONBinary(WebSocketChannel socket, Object object, RateLimiter r, AtomicLong outBytes) throws IOException {
+    public static void sendJSONBinary(WebSocketChannel socket, Object object, RateLimiter r, AtomicLong outBytes) {
         sendJSON(socket, object, JSON.msgPackMapper, r, outBytes);
     }
 
-    public static void sendJSON(WebSocketChannel socket, Object object, ObjectMapper encoder, @Nullable RateLimiter r, @Nullable AtomicLong outBytes) throws IOException {
+    public static void sendJSON(WebSocketChannel socket, Object object, ObjectMapper encoder, @Nullable RateLimiter r, @Nullable AtomicLong outBytes) {
 
         byte[] s;
         if (object instanceof byte[]) {

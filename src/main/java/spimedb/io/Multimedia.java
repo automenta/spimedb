@@ -61,7 +61,7 @@ public class Multimedia {
     public Multimedia(SpimeDB db) {
 
         for (String s : new String[] { "org.apache.pdfbox.rendering.CIDType0Glyph2D", "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
-            ((Jdk14Logger)LogFactory.getLog(s)).getLogger().setLevel(Level.SEVERE);
+            ((Jdk14Logger) LogFactory.getLog(s)).getLogger().setLevel(Level.SEVERE);
         }
 
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
@@ -174,7 +174,7 @@ public class Multimedia {
                 for (int _page = 0; _page < pageCount; _page++) {
 
                     final int page = _page;
-                    db.runLater(() -> {
+                    SpimeDB.runLater(() -> {
 
                         logger.info("load: {} page {}", xid, page);
 

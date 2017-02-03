@@ -61,6 +61,10 @@ public class Main {
             return;
         }
 
+//        Phex p = Phex.the();
+//        p.start();
+//        p.startSearch("kml");
+
 
         FileDirectory.load(path, db);
 
