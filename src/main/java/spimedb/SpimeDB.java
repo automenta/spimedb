@@ -223,18 +223,18 @@ public class SpimeDB  {
         return new StringField(key, value, Field.Store.YES);
     }
 
-    public static final FieldType tokenizedString = new FieldType();
-    static {
-        tokenizedString.setOmitNorms(false);
-        tokenizedString.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
-        tokenizedString.setStored(true);
-        tokenizedString.setTokenized(true);
-        tokenizedString.freeze();
-    }
-
-    public static Field stringTokenized(String key, String value) {
-        return new Field(key, value, tokenizedString);
-    }
+//    public static final FieldType tokenizedString = new FieldType();
+//    static {
+//        tokenizedString.setOmitNorms(true);
+//        tokenizedString.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+//        tokenizedString.setStored(true);
+//        tokenizedString.setTokenized(true);
+//        tokenizedString.freeze();
+//    }
+//
+//    public static Field stringTokenized(String key, String value) {
+//        return new Field(key, value, tokenizedString);
+//    }
 
     public static TextField text(String key, String value) {
         return new TextField(key, value, Field.Store.YES);
