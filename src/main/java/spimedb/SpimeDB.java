@@ -30,6 +30,7 @@ import org.apache.lucene.search.suggest.analyzing.FreeTextSuggester;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
 import org.eclipse.collections.impl.factory.Sets;
@@ -666,16 +667,38 @@ public class SpimeDB  {
             IndexableField afi = af.get(i);
             IndexableField bfi = bf.get(i);
 
-            String as = afi.toString();
-            String bs = bfi.toString();
+
+            {
+                String asv = afi.stringValue();
+                String bsv = afi.stringValue();
+                if (asv != null && bsv != null && asv.equals(bsv))
+                    continue;
+                else if (asv != null ^ bsv != null)
+                    return false; //one is null the other isnt
+            }
+
+            {
+                BytesRef ab = afi.binaryValue();
+                BytesRef bb = bfi.binaryValue();
+                if (ab != null && bb != null && ab.bytesEquals(bb))
+                    continue;
+                else if (ab != null ^ bb != null)
+                    return false; //one is null the other isnt
+            }
+
+            {
+                String as = afi.toString();
+                String bs = bfi.toString();
+                if (as.equals(bs))
+                    continue;
 
 
-            //HACK
-            as = as.substring(as.indexOf('<'));
-            bs = bs.substring(bs.indexOf('<'));
-            if (!as.equals(bs))
-                return false;
-
+                //HACK
+                as = as.substring(as.indexOf('<'));
+                bs = bs.substring(bs.indexOf('<'));
+                if (!as.equals(bs))
+                    return false;
+            }
 
         }
         return true;
