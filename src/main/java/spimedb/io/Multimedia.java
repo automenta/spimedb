@@ -1,6 +1,7 @@
 package spimedb.io;
 
 import com.google.common.base.Joiner;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.Jdk14Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -119,7 +120,11 @@ public class Multimedia {
 
                         final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
 
-                        tikaWrapper.parse(new BufferedInputStream(stream, BUFFER_SIZE), new DefaultHandler(), metadata, context);
+                        int fileSize = con.getContentLength();
+
+                        byte[] bytes = IOUtils.readFully(stream, fileSize);
+                        InputStream is = new ByteArrayInputStream(bytes);
+                        tikaWrapper.parse(is, new DefaultHandler(), metadata, context);
 
                         stream.close();
 
@@ -144,6 +149,7 @@ public class Multimedia {
                             }
                         });
 
+                        y.put("data", bytes);
                     }
 
 
@@ -213,6 +219,7 @@ public class Multimedia {
                                         .put("author", author)
                                         .put("url", url_in) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
+                                        .put("data", "/data?I=" + xid)
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
                                         .putLater("textParse", 0.1f, ()-> {

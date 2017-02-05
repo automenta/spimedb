@@ -8,18 +8,19 @@ package spimedb.server;
 
 import com.google.common.collect.Lists;
 import io.undertow.Undertow;
+import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
-import io.undertow.util.HttpString;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.suggest.Lookup;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import spimedb.FilteredNObject;
 import spimedb.NObject;
@@ -141,21 +142,12 @@ public class WebServer extends PathHandler {
             }
         }));
 
-        addPrefixPath("/thumbnail", ex -> HTTP.stream(ex, (o) -> {
-            String id = getStringParameter(ex, "I");
-            if (id == null)
-                return;
-            DObject d = db.get(id);
-            if (d!=null) {
-                byte[] b = d.get("thumbnail");
-                if (b!=null) {
-                    try {
-                        ex.getResponseHeaders().add(HttpString.tryFromString("Content-type"), "image/jpg");
-                        o.write(b);
-                    } catch (IOException e) { }
-                }
-            }
-        }));
+        addPrefixPath("/thumbnail", ex -> {
+            send(getStringParameter(ex, "I"), "thumbnail", "image/jpg", ex);
+        });
+        addPrefixPath("/data", ex -> {
+            send(getStringParameter(ex, "I"), "data", "application/pdf", ex);
+        });
 
         addPrefixPath("/search", ex -> HTTP.stream(ex, (o) -> {
             String qText = getStringParameter(ex, "q");
@@ -335,10 +327,35 @@ public class WebServer extends PathHandler {
 
     }
 
+    private void send(@Nullable String id, String field, @Nullable String contentType, HttpServerExchange ex) {
+        if (id != null) {
+            HTTP.stream(ex, (o) -> {
+
+                DObject d = db.get(id);
+                if (d != null) {
+                    byte[] b = d.get(field);
+                    if (b != null) {
+                        try {
+                            o.write(b);
+                            return;
+                        } catch (IOException e) {
+
+                        }
+                    }
+                }
+
+                ex.setStatusCode(404);
+
+            }, contentType!=null ? contentType : "text/plain");
+        } else {
+            ex.setStatusCode(404);
+        }
+    }
+
     static final ImmutableSet<String> searchResultKeys =
         Sets.immutable.of(
         NObject.ID, NObject.NAME,NObject.DESC, NObject.INH, NObject.TAG, NObject.BOUND,
-                "thumbnail"
+                "thumbnail", "data", NObject.TYPE
         );
 
     private FilteredNObject searchResult(NObject d) {
@@ -349,6 +366,9 @@ public class WebServer extends PathHandler {
                     case "thumbnail":
                         //rewrite the thumbnail blob byte[] as a String URL
                         return "/thumbnail?I=" + d.id();
+                    case "data":
+                        //rewrite the thumbnail blob byte[] as a String URL (if not already a string representing a URL)
+                        return !(v instanceof String) ? "/data?I=" + d.id() : v;
                 }
                 return v;
             }

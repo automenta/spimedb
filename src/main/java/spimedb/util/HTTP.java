@@ -68,8 +68,12 @@ public class HTTP {
     }
 
     public static void stream(HttpServerExchange ex, Consumer<OutputStream> s) {
+        stream(ex, s, "text/plain");
+    }
 
-        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+    public static void stream(HttpServerExchange ex, Consumer<OutputStream> s, String contentType) {
+
+        ex.getResponseHeaders().put(Headers.CONTENT_TYPE, contentType);
 
         ex.dispatch(() -> {
             ex.startBlocking();
