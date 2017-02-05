@@ -65,6 +65,10 @@ public class Session extends AbstractServerWebSocket {
         this.chan = socket;
     }
 
+    static final ImmutableSet<String> tagFields = Sets.immutable.of(
+            NObject.ID, NObject.NAME, NObject.DESC
+    );
+
     /**
      * API accessible by clients
      */
@@ -85,7 +89,7 @@ public class Session extends AbstractServerWebSocket {
                 @Override public void run() {
                     for (String x : id) {
                         try {
-                            trySend(this, x, true);
+                            trySend(this, x, true, tagFields);
                         } catch (IOException e) {
                             break;
                         }
@@ -93,6 +97,8 @@ public class Session extends AbstractServerWebSocket {
                 }
             };
         }
+
+
 
         /**
          * provides root-level startup tags
@@ -105,7 +111,8 @@ public class Session extends AbstractServerWebSocket {
                     Iterator<String> r = db.roots();
                     try {
                         while (r.hasNext()) {
-                            trySend(this, r.next(), true);
+
+                            trySend(this, r.next(), true, tagFields);
                         }
                     } catch (IOException e) {
                         return;
@@ -188,9 +195,6 @@ public class Session extends AbstractServerWebSocket {
 
         }
 
-        private boolean trySend(Task t, String id, boolean force) throws IOException {
-            return trySend(t, id, force, null);
-        }
 
         private boolean trySend(Task t, String id, boolean force, @Nullable ImmutableSet<String> includeKeys) throws IOException {
             int[] idHash = remoteMemory.hash(id);

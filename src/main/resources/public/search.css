@@ -11,28 +11,25 @@ body {
     padding: 0.5em;
 }
 
-#facets, #query_results {
-    padding-top: 3em;
-}
-#facets {
-    float: left;
-    width: 25%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 #query_results {
     float: right;
     width: 75%;
 }
 
+#query_results {
+    padding-top: 3em;
+}
+
 #facets {
-    float: left;
+    margin-top: 3em;
+    position: fixed;
     width: 25%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+#facets div {
+    font-size: 50%;
 }
 
 #query_results {

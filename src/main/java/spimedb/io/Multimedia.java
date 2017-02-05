@@ -219,7 +219,7 @@ public class Multimedia {
                                         .put("author", author)
                                         .put("url", url_in) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
-                                        .put("data", "/data?I=" + xid)
+                                        .put("data", "/data?I=" + xid + "#" + page)
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
                                         .putLater("textParse", 0.1f, ()-> {
