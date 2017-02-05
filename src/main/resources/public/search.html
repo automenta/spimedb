@@ -25,7 +25,7 @@
 </div>
 
 <div id="query_results">
-    <ul data-template class="result">
+    <div data-template class="result">
 
         <h2 data-template>{{N}}</h2>
         <a data-template data-has="data" href="" data-href="{{data}}">Download</a>
@@ -41,7 +41,7 @@
             <p data-template data-has="_">{{ _ | replace '\n', '<br>' }}</p>
         </div>
 
-    </ul>
+    </div>
     <li data-template-fallback>JavaScript required</li>
 </div>
 
@@ -130,7 +130,7 @@
                             const id = v[0];
                             const score = v[1];
                             return $(d('li')).append(d('a')).click(()=>{
-                                queryText.val(queryText.val() + ' ' + dimension + ':' + id);
+                                queryText.val(/*queryText.val() + ' ' +*/ dimension + ':' + id);
                                 querySubmit();
                             }).text(id);
                         }))

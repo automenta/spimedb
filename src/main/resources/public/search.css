@@ -14,6 +14,31 @@ body {
 #facets, #query_results {
     padding-top: 3em;
 }
+#facets {
+    float: left;
+    width: 25%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#query_results {
+    float: right;
+    width: 75%;
+}
+
+#facets {
+    float: left;
+    width: 25%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#query_results {
+    float: right;
+    width: 70%
+}
 
 #query_suggestions div {
     padding: 2px;
@@ -30,6 +55,12 @@ body {
 }
 #query_status {
     display: none;
+}
+
+.result {
+    padding: 5px;
+    margin: 5px;
+    margin-bottom: 2em;
 }
 
 .result .meta { 
