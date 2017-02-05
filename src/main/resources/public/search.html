@@ -30,8 +30,10 @@
 <div id="query_results">
     <div data-template class="result">
 
-        <h2 data-template>{{N}}</h2>
-        <a data-template data-has="data" href="" data-href="{{data}}">Download</a>
+        <div class="header">
+            <div style="width:100%"><h2 data-template>{{N}}</h2></div>
+            <div><a data-template data-has="data" href="" data-href="{{data}}" target="_" title="Download"><h2>~</h2></a></div>
+        </div>
 
         <div class="meta">
             <span data-template data-has="in">+: {{in}}</span>

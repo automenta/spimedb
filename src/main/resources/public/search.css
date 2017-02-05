@@ -11,10 +11,7 @@ body {
     padding: 0.5em;
 }
 
-#query_results {
-    float: right;
-    width: 75%;
-}
+
 
 #query_results {
     padding-top: 3em;
@@ -33,8 +30,13 @@ body {
 }
 
 #query_results {
-    float: right;
-    width: 70%
+    /* float: right; */
+    /* width: 100%; */
+    margin-left: 270px;
+}
+
+#query_results .header {
+    display: flex;
 }
 
 #query_suggestions div {
