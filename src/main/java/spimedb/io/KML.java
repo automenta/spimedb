@@ -287,7 +287,7 @@ public class KML {
 
     public Runnable url(String url) {
         try {
-            return url(FileDirectory.fileName( new URL(url).getFile() ), url);
+            return url(Crawl.fileName( new URL(url).getFile() ), url);
         } catch (IOException e) {
             return () -> {
                 logger.error("invalid url \"{}\": {}", e);

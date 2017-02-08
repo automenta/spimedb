@@ -7,7 +7,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.io.FileDirectory;
+import spimedb.io.Crawl;
 import spimedb.io.Multimedia;
 import spimedb.server.WebServer;
 
@@ -99,8 +99,10 @@ public class Main {
 //        p.start();
 //        p.startSearch("kml");
 
+        Crawl.pageLinks("http://environmentalarchives.com/doc/STL", (x) -> x.endsWith(".pdf"), db);
 
-        FileDirectory.load(path, db);
+        //Crawl.fileDirectory(path, db);
+
 
         /*
         try {

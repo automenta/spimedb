@@ -82,7 +82,7 @@ public class SpimeDB  {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
-        Math.max(2, Runtime.getRuntime().availableProcessors()-1)
+        Math.max(2, Runtime.getRuntime().availableProcessors()*4)
     );
 
     /**
@@ -258,8 +258,6 @@ public class SpimeDB  {
         // you'd use a "normal" query:
         searcher.search(new MatchAllDocsQuery(), fc);
 
-        // Retrieve results
-        List<FacetResult> results = new ArrayList<>();
 
         Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
 
@@ -381,7 +379,8 @@ public class SpimeDB  {
 
 
     public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
-        return suggester().lookup(qText, false, count);
+        Lookup suggester = suggester();
+        return suggester != null ? suggester.lookup(qText, false, count) : null;
     }
 
 
@@ -486,7 +485,7 @@ public class SpimeDB  {
 
     }
 
-    DObject commit(NObject previous, NObject _next) {
+    @Nullable DObject commit(NObject previous, NObject _next) {
 
         NObject next = _next;
         if (!onChange.isEmpty()) {
@@ -494,6 +493,9 @@ public class SpimeDB  {
                 next = c.apply(previous, next);
             }
         }
+
+        if (next == null)
+            return null;
 
         DObject d = DObject.get(next, this);
         String id = d.id();

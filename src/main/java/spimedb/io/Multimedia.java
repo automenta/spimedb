@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -111,7 +112,7 @@ public class Multimedia {
                         try {
                             stream = con.getInputStream();
                         } catch (FileNotFoundException e) {
-                            logger.error("{} {}", url, e.getMessage());
+                            logger.error("not found: {}", url, e.getMessage());
                             return null;
                         }
                         if (stream == null) {
@@ -188,7 +189,7 @@ public class Multimedia {
                     final int page = _page;
                     db.runLater(0.75f, () -> {
 
-                        logger.info("load: {} page {}", xid, page);
+                        logger.info("paginate: {} {}", xid, page);
 
                         Document pd = Document.createShell("");
                         pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
@@ -268,6 +269,7 @@ public class Multimedia {
                 //String xname = x.name();
                 //String desc = x.get(NObject.DESC);
                 x = new MutableNObject(x)
+                        .name(titleify(xid))
                         .put(NObject.DESC, null)
                         /*.putLater("textParse", 0.15f, () -> {
                             return xname != null ? NLP.toString(NLP.parse(
@@ -290,7 +292,7 @@ public class Multimedia {
     }
 
     private String titleify(String id) {
-        return id.replace("_", " ").trim();
+        return URLDecoder.decode(id).replace("_", " ").trim();
     }
 
     @Nullable

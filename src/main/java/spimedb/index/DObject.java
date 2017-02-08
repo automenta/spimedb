@@ -46,7 +46,7 @@ public class DObject implements NObject {
         return get(toDocument(n, db));
     }
 
-    static Document toDocument(NObject n, SpimeDB db) {
+    static Document toDocument(@NotNull NObject n, @NotNull SpimeDB db) {
 
         if (n instanceof DObject)
             return ((DObject)n).document;
