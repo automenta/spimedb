@@ -62,7 +62,6 @@ public class Main extends FileAlterationListenerAdaptor {
         loggerContext.reset();
 
 
-
         SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
 
     }
@@ -161,7 +160,7 @@ public class Main extends FileAlterationListenerAdaptor {
     }
 
 
-    final Locker<Pair<Class,String>> locker = new Locker();
+    final Locker<Pair<Class, String>> locker = new Locker();
 
     private Object merge(Pair<Class, String> k, Function build) {
         Lock l = locker.get(k);
@@ -193,7 +192,7 @@ public class Main extends FileAlterationListenerAdaptor {
             case 1:
                 //string
                 if (id.getOne() == String.class) {
-                    return new TextBuilder(file);
+                    return new FileToString(file);
                 } else {
                     return buildDefault(id, file);
                 }
@@ -381,7 +380,7 @@ public class Main extends FileAlterationListenerAdaptor {
 
             Appender appender = null;
 
-            if (f!=null) {
+            if (f != null) {
                 try {
                     String line = Files.readFirstLine(f, Charset.defaultCharset()).trim();
                     switch (line) {
@@ -449,7 +448,7 @@ public class Main extends FileAlterationListenerAdaptor {
         }
 
         public void stop() {
-            if (appender!=null) {
+            if (appender != null) {
 
                 appender.stop();
                 appender = null;
@@ -464,7 +463,7 @@ public class Main extends FileAlterationListenerAdaptor {
         klassPath.put("log", LogConfigurator.class);
         //klassPath.put("crawl", Crawl.class);
 
-        put(LogConfigurator.class,  new LogConfigurator(null) );
+        put(LogConfigurator.class, new LogConfigurator(null));
 
         db = new SpimeDB(path + "/_");
         dbPathIgnored = db.file.getAbsolutePath();
@@ -475,24 +474,32 @@ public class Main extends FileAlterationListenerAdaptor {
 
         /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
         FileAlterationObserver observer = new FileAlterationObserver(path);
-        int updatePeriodMS = 1000;
+        int updatePeriodMS = 200;
         FileAlterationMonitor monitor = new FileAlterationMonitor(updatePeriodMS);
+
+        //monitor.setThreadFactory(Executors.defaultThreadFactory());
 
         observer.addListener(this);
         monitor.addObserver(observer);
         monitor.start();
 
         //load existing files
+        reload(observer);
+    }
+
+    private void reload(FileAlterationObserver observer) {
         for (File f : observer.getDirectory().listFiles()) {
             if (f.getName().startsWith("."))
                 continue; //ignore hidden files
 
-            if (f.isFile())
-                update(f);
-            else if (f.isDirectory() && !f.getAbsolutePath().equals(db.indexPath)) {
-                //default: index a directory
-                Crawl.fileDirectory(f.getAbsolutePath(), db);
-            }
+            db.exe.run(0.8f, () -> {
+                if (f.isFile()) {
+                    update(f);
+                } else if (f.isDirectory() && !f.getAbsolutePath().equals(db.indexPath)) {
+                    //default: index a directory
+                    Crawl.fileDirectory(f.getAbsolutePath(), db);
+                }
+            });
         }
     }
 
@@ -503,8 +510,7 @@ public class Main extends FileAlterationListenerAdaptor {
     public static void main(String[] args) throws Exception {
 
         if (args.length == 0) {
-            System.out.println("usage: spime [datapath]");
-            System.out.println();
+            System.out.println("usage: spime [datapath]\n");
             return;
         }
 
@@ -513,19 +519,11 @@ public class Main extends FileAlterationListenerAdaptor {
         new Main(dataPath);
 
 
-//        try {
-//            new WebServer(db, port);
-//        } catch (RuntimeException e) {
-//            e.printStackTrace();
-//            return;
-//        }
-
-
 //        Phex p = Phex.the();
 //        p.start();
 //        p.startSearch("kml");
 
-        //Crawl.pageLinks("http://environmentalarchives.com/doc/STL", (x) -> x.endsWith(".pdf"), db);
+        //Crawl.pageLinks("...", (x) -> x.endsWith(".pdf"), db);
 
         //Crawl.fileDirectory(path, db);
 
@@ -565,20 +563,14 @@ public class Main extends FileAlterationListenerAdaptor {
 //                System.out.println(x);
 //            });
 
-        //db.find("s*", 32).docs().forEachRemaining(d -> {
-//        db.forEach((n) -> {
-//            System.out.println(n);
-//
-//            Document dd = db.the(n.id());
-//            System.out.println("\t" + dd);
-//        });
+
     }
 
-    private class TextBuilder implements Function {
+    private class FileToString implements Function {
 
         private final File file;
 
-        public TextBuilder(File file) {
+        public FileToString(File file) {
             this.file = file;
         }
 

@@ -1,19 +1,20 @@
 package spimedb.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Comparator;
-import java.util.concurrent.Executor;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Created by me on 2/3/17.
  */
-public class PrioritizedExecutor  {
+public class PrioritizedExecutor implements Executor {
+
+    private static final float DEFAULT_PRIORITY = 0.5f;
 
     public final PriorityBlockingQueue<Runnable> pq = new PriorityBlockingQueue<Runnable>(128, new ComparePriority());
 
-    final Executor exe;
+    private final Executor exe;
 
     public PrioritizedExecutor(int threads) {
          this.exe = new ThreadPoolExecutor(threads, threads, 1, TimeUnit.SECONDS, pq);
@@ -26,6 +27,12 @@ public class PrioritizedExecutor  {
     public void run(RunWithPriority r) {
         exe.execute(r);
     }
+
+    @Override
+    public void execute(@NotNull Runnable command) {
+        run(DEFAULT_PRIORITY, command);
+    }
+
 
     public interface RunWithPriority extends Runnable {
         public float pri();

@@ -21,6 +21,10 @@
     "jquery.atwho": "ichord/At.js",
     "fullcalendar": "latest",
     "interact": "latest",
-    "tempojs": "latest"
+    "tempojs": "latest",
+    "packery": "latest"
+  },
+  "resolutions": {
+    "leaflet": "1.0.3"
   }
 }
