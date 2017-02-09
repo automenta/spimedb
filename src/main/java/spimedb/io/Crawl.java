@@ -36,7 +36,7 @@ public class Crawl {
 //            );
 
             for (File x : path.listFiles()) {
-                if (db.indexPath != null && x.getAbsolutePath().equals(db.indexPath)) //exclude the index folder
+                if (x.getAbsolutePath().equals(db.file.getAbsolutePath())) //exclude the index folder
                     continue;
 
                 if (x.isDirectory())

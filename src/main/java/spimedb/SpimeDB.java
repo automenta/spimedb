@@ -132,6 +132,7 @@ public class SpimeDB  {
 
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer;
+    public final File file;
 
     protected long lastCommit = 0;
 
@@ -169,21 +170,21 @@ public class SpimeDB  {
      * in-memory, map-based
      */
     public SpimeDB() throws IOException {
-        this(new RAMDirectory());
+        this(null, new RAMDirectory());
         this.indexPath = null;
         this.taxoDir = new RAMDirectory();
     }
 
     public SpimeDB(String path) throws IOException {
-        this(FSDirectory.open(new File(path).toPath()));
-        this.indexPath = new File(path).getAbsolutePath();
-        this.taxoDir = FSDirectory.open(new File(path).toPath().resolve("taxo"));
-        logger.info("index: {}", indexPath);
+        this(new File(path), FSDirectory.open(new File(path).toPath()));
+        this.indexPath = file.getAbsolutePath();
+        this.taxoDir = FSDirectory.open(file.toPath().resolve("taxo"));
+        logger.info("index ready: {}", indexPath);
     }
 
-    SpimeDB(Directory dir) throws IOException {
+    private SpimeDB(File file, Directory dir) throws IOException {
 
-
+        this.file = file;
         this.dir = dir;
         this.analyzer = new StandardAnalyzer();
 

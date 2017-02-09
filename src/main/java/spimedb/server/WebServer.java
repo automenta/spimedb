@@ -49,40 +49,33 @@ import static spimedb.util.HTTP.getStringParameter;
 public class WebServer extends PathHandler {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
-    public static final String resourcePath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
+    public static final String staticPath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
+
     private final SpimeDB db;
 
     final JavaToJavascript j2js;
 
     private final double websocketOutputRateLimitBytesPerSecond = 1024 * 1024;
 
+    private int port = 0;
+    private String host = null;
 
-    //    private List<String> paths = new ArrayList();
-//    private final String host;
-//    private final int port;
+    static final ContentEncodingRepository compression = new ContentEncodingRepository()
+            .addEncodingHandler("gzip", new GzipEncodingProvider(), 100)
+            .addEncodingHandler("deflate", new DeflateEncodingProvider(), 50);
 
-//    public Web add(String path, HttpHandler ph) {
-//        super.addPrefixPath(path, ph);
-//        paths.add(path);
-//        return this;
-//    }
+    private Undertow server;
 
-    public WebServer(SpimeDB db, int port) {
-        this(db, "0.0.0.0", port);
-    }
 
-    public WebServer(final SpimeDB db, String host, int port) {
+    public WebServer(final SpimeDB db) {
         super();
         this.db = db;
-
-
-
 
         //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
         j2js = JavaToJavascript.build();
 
         addPrefixPath("/", resource(new FileResourceManager(
-                Paths.get(resourcePath).toFile(), 0, true, "/")));
+                Paths.get(staticPath).toFile(), 0, true, "/")));
 
 
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
@@ -104,7 +97,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/suggest", ex -> HTTP.stream(ex, (o) -> {
             String qText = getStringParameter(ex, "q");
-            if (qText==null || (qText=qText.trim()).isEmpty())
+            if (qText == null || (qText = qText.trim()).isEmpty())
                 return;
 
             try {
@@ -112,17 +105,20 @@ public class WebServer extends PathHandler {
                 if (x == null) {
                     return;
                 }
-                JSON.toJSON( Lists.transform(x, y -> y.key), o );
+                JSON.toJSON(Lists.transform(x, y -> y.key), o);
 
             } catch (Exception e) {
                 logger.warn("suggest: {}", e);
-                try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
+                try {
+                    o.write(JSON.toJSONBytes(e));
+                } catch (IOException e1) {
+                }
             }
         }));
 
         addPrefixPath("/facet", ex -> HTTP.stream(ex, (o) -> {
             String dimension = getStringParameter(ex, "q");
-            if (dimension==null || (dimension=dimension.trim()).isEmpty())
+            if (dimension == null || (dimension = dimension.trim()).isEmpty())
                 return;
 
             try {
@@ -132,13 +128,16 @@ public class WebServer extends PathHandler {
                 }
 
                 JSON.toJSON(
-                        Stream.of(x.labelValues).map(y -> new Object[] { y.label, y.value }).toArray(Object[]::new)
+                        Stream.of(x.labelValues).map(y -> new Object[]{y.label, y.value}).toArray(Object[]::new)
                         /*Stream.of(x.labelValues).collect(
                         Collectors.toMap(y->y.label, y->y.value ))*/, o);
 
             } catch (Exception e) {
                 logger.warn("suggest: {}", e);
-                try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
+                try {
+                    o.write(JSON.toJSONBytes(e));
+                } catch (IOException e1) {
+                }
             }
         }));
 
@@ -151,7 +150,7 @@ public class WebServer extends PathHandler {
 
         addPrefixPath("/search", ex -> HTTP.stream(ex, (o) -> {
             String qText = getStringParameter(ex, "q");
-            if (qText==null || (qText=qText.trim()).isEmpty())
+            if (qText == null || (qText = qText.trim()).isEmpty())
                 return;
 
             try {
@@ -161,11 +160,11 @@ public class WebServer extends PathHandler {
                 o.write('[');
                 Iterator<Document> ii = x.docs();
                 while (ii.hasNext()) {
-                    JSON.toJSON( searchResult(
+                    JSON.toJSON(searchResult(
 
-                        DObject.get(ii.next())
+                            DObject.get(ii.next())
 
-                    ), o, ',' );
+                    ), o, ',');
                 }
                 o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
 
@@ -173,7 +172,10 @@ public class WebServer extends PathHandler {
 
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e);
-                try { o.write(JSON.toJSONBytes(e)); } catch (IOException e1) { }
+                try {
+                    o.write(JSON.toJSONBytes(e));
+                } catch (IOException e1) {
+                }
             }
 
         }));
@@ -183,18 +185,112 @@ public class WebServer extends PathHandler {
         addPrefixPath("/attn", websocket(new Session(db, websocketOutputRateLimitBytesPerSecond)));
 
 
+    }
+
+    public void setHost(String host) {
+        if (!this.host.equals(host)) {
+            this.host = host;
+            restart();
+        }
+    }
+
+    private synchronized void restart() {
+        String host = this.host;
+
+        if (host == null)
+            host = "0.0.0.0"; //any IPv4
+
+        if (port == 0)
+            return;
+
         Undertow.Builder b = Undertow.builder()
                 .addHttpListener(port, host)
-                .setServerOption(ENABLE_HTTP2, true)
-                //.setServerOption(ENABLE_SPDY, true)
-                .setHandler(new EncodingHandler(this, new ContentEncodingRepository()
-                        .addEncodingHandler("gzip", new GzipEncodingProvider(), 100)
-                        .addEncodingHandler("deflate", new DeflateEncodingProvider(), 50))
-                );
+                .setServerOption(ENABLE_HTTP2, true);
+
+        if (compression != null)
+            b.setHandler(new EncodingHandler(this, compression));
+
+        Undertow nextServer = b.build();
+        if (server != null) {
+            try {
+                server.stop();
+            } catch (Exception e) {
+                logger.error("http stop: {}", e);
+                this.server = null;
+            }
+
+            try {
+                logger.info("http start: {}:{}\n\tstaticPath={}", host, port, staticPath);
+                (this.server = nextServer).start();
+            } catch (Exception e) {
+                logger.error("http start: {}", e);
+                this.server = null;
+            }
+        }
+
+    }
+
+    public void setPort(int port) {
+        if (this.port != port) {
+            this.port = port;
+            restart();
+        }
+    }
+
+    private void send(@Nullable String id, String field, @Nullable String contentType, HttpServerExchange ex) {
+        if (id != null) {
+            HTTP.stream(ex, (o) -> {
+
+                DObject d = db.get(id);
+                if (d != null) {
+                    byte[] b = d.get(field);
+                    if (b != null) {
+                        try {
+                            o.write(b);
+                            return;
+                        } catch (IOException e) {
+
+                        }
+                    }
+                }
+
+                ex.setStatusCode(404);
+
+            }, contentType != null ? contentType : "text/plain");
+        } else {
+            ex.setStatusCode(404);
+        }
+    }
+
+    static final ImmutableSet<String> searchResultKeys =
+            Sets.immutable.of(
+                    NObject.ID, NObject.NAME, NObject.DESC, NObject.INH, NObject.TAG, NObject.BOUND,
+                    "thumbnail", "data", NObject.TYPE
+            );
+
+    private FilteredNObject searchResult(NObject d) {
+        return new FilteredNObject(db.graphed(d), searchResultKeys) {
+            @Override
+            protected Object value(String key, Object v) {
+                switch (key) {
+                    case "thumbnail":
+                        //rewrite the thumbnail blob byte[] as a String URL
+                        return "/thumbnail?I=" + d.id();
+                    case "data":
+                        //rewrite the thumbnail blob byte[] as a String URL (if not already a string representing a URL)
+                        return !(v instanceof String) ? "/data?I=" + d.id() : v;
+                }
+                return v;
+            }
+        };
+    }
 
 
-        //.setDirectoryListingEnabled(true)
-        //.setHandler(path().addPrefixPath("/", ClientResources.handleClientResources())
+}
+
+
+//.setDirectoryListingEnabled(true)
+//.setHandler(path().addPrefixPath("/", ClientResources.handleClientResources())
 
 //        addPrefixPath("/tag/meta", new HttpHandler() {
 //
@@ -224,20 +320,14 @@ public class WebServer extends PathHandler {
 //            }
 //
 //        });
-//
-        logger.info("Start @ {}:{}\n\tresources={}", host, port, resourcePath);
 
-
-
-        b.build().start();
-
-        //CORS fucking sucks
+//CORS fucking sucks
         /*  .header("Access-Control-Allow-Origin", "*")
             .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
             .header("Access-Control-Allow-CredentialMax-Age", "1209600")
          */
 
-        //https://github.com/undertow-io/undertow/blob/master/examples/src/main/java/io/undertow/examples/sessionhandling/SessionServer.java
+//https://github.com/undertow-io/undertow/blob/master/examples/src/main/java/io/undertow/examples/sessionhandling/SessionServer.java
 
 //        addPrefixPath("/socket", new WebSocketCore(
 //                index
@@ -322,67 +412,5 @@ public class WebServer extends PathHandler {
 //
 
 //
-        //addPrefixPath("/wikipedia", new Wikipedia());
+//addPrefixPath("/wikipedia", new Wikipedia());
 
-
-    }
-
-    private void send(@Nullable String id, String field, @Nullable String contentType, HttpServerExchange ex) {
-        if (id != null) {
-            HTTP.stream(ex, (o) -> {
-
-                DObject d = db.get(id);
-                if (d != null) {
-                    byte[] b = d.get(field);
-                    if (b != null) {
-                        try {
-                            o.write(b);
-                            return;
-                        } catch (IOException e) {
-
-                        }
-                    }
-                }
-
-                ex.setStatusCode(404);
-
-            }, contentType!=null ? contentType : "text/plain");
-        } else {
-            ex.setStatusCode(404);
-        }
-    }
-
-    static final ImmutableSet<String> searchResultKeys =
-        Sets.immutable.of(
-        NObject.ID, NObject.NAME,NObject.DESC, NObject.INH, NObject.TAG, NObject.BOUND,
-                "thumbnail", "data", NObject.TYPE
-        );
-
-    private FilteredNObject searchResult(NObject d) {
-        return new FilteredNObject( db.graphed(d), searchResultKeys) {
-            @Override
-            protected Object value(String key, Object v) {
-                switch (key) {
-                    case "thumbnail":
-                        //rewrite the thumbnail blob byte[] as a String URL
-                        return "/thumbnail?I=" + d.id();
-                    case "data":
-                        //rewrite the thumbnail blob byte[] as a String URL (if not already a string representing a URL)
-                        return !(v instanceof String) ? "/data?I=" + d.id() : v;
-                }
-                return v;
-            }
-        };
-    }
-
-
-    //    public void start() {
-//
-//        logger.info("Starting web server @ " + host + ":" + port + "\n  " + paths);
-//
-//        server.start();
-//
-//    }
-
-
-    }

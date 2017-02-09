@@ -4,20 +4,39 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.ConsoleAppender;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.io.Files;
+import com.uwyn.jhighlight.fastutil.objects.ObjectArrays;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
+import org.jetbrains.annotations.NotNull;
+import org.mockito.internal.util.reflection.BeanPropertySetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.io.Crawl;
 import spimedb.io.Multimedia;
 import spimedb.server.WebServer;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * Created by me on 6/14/15.
  */
 
-public class Main {
+public class Main extends FileAlterationListenerAdaptor {
+
+    public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     static {
 
@@ -28,16 +47,13 @@ public class Main {
 
         ch.qos.logback.classic.Logger LOG = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         LoggerContext loggerContext = LOG.getLoggerContext();
-        // we are not interested in auto-configuration
         loggerContext.reset();
 
         PatternLayoutEncoder logEncoder = new PatternLayoutEncoder();
         logEncoder.setContext(loggerContext);
-        //logEncoder.setPattern("\\( %highlight(%level),%green(%thread),%yellow(%logger{0}) \\): \"%message\".%n");
         logEncoder.setPattern("%highlight(%logger{0}) %green(%thread) %message%n");
         logEncoder.setImmediateFlush(false);
         logEncoder.start();
-
 
         {
             ConsoleAppender c = new ConsoleAppender();
@@ -53,53 +69,292 @@ public class Main {
 
     }
 
-    public static void main(String[] args) throws IOException {
+    private final SpimeDB db;
+    final String dbPathIgnored;
+
+    /** live objects */
+    final Map<Pair<Class,String>,Object> obj = new ConcurrentHashMap();
+
+    final Map<String,Class> klassPath = new ConcurrentHashMap<>();
+
+    final Pair<Class,String> key(File f) {
+
+        if (f.getAbsolutePath().equals(dbPathIgnored))
+            return null; //ignore index directory, subdirectory of the root
+
+        String fileName = f.getName();
+        String[] parts = fileName.split(".");
+
+        String id;
+        Class klass;
+        if (parts.length < 1) {
+            /** if only one filename component:
+             *       if this string resolves in the klasspath, then that's what it is and also its name
+             *       else default to 'String'
+             */
+            Class specificclass = klassPath.get(fileName);
+            if (specificclass == null) {
+                id = fileName;
+                klass = String.class;
+            } else {
+                klass = specificclass;
+                id = fileName;
+            }
+        } else if (parts.length >= 2) {
+            String classSting = parts[0];
+            klass = klass(classSting);
+            id = parts[1];
+        } else {
+            return null;
+        }
+
+        return Tuples.pair(klass, id);
+
+    }
+
+    public Class klass(String klass) {
+        return klassPath.get(klass);
+    }
+
+    @Override
+    public void onFileCreate(File file) {
+        update(file);
+    }
+
+    @Override
+    public void onFileChange(File file) {
+        update(file);
+    }
+
+    private void update(File file) {
+        logger.info("update file://{}", file);
+        Pair<Class, String> k = key(file);
+        if (k == null)
+            return;
+
+        merge(k, build(k, file));
+    }
+
+    @Override
+    public void onFileDelete(File file) {
+        Pair<Class, String> k = key(file);
+        if (k == null)
+            return;
+
+        remove(k);
+    }
+
+    private Object merge(Pair<Class, String> k, Function build) {
+        return obj.compute(k, (kk, existing) -> build.apply(existing));
+    }
+
+    /** the function returned will accept the previous value (null if there was none) and return a result
+     * @param file
+     * @param klass*/
+    @NotNull
+    private Function build(Pair<Class, String> id, File file) {
+        String[] parts = file.getName().split(".");
+        switch (parts.length) {
+            case 0:
+            case 1:
+                //string
+                if (id.getOne() == String.class) {
+                    return new TextBuilder(file);
+                } else {
+                    return new PropertyBuilder(id, file);
+                }
+            case 2:
+                //properties file
+                return new PropertyBuilder(id, file);
+
+
+            case 3:
+                switch (parts[3]) {
+                    case "js": //javascript
+                        break;
+                    case "json":
+                        break;
+                    case "xml":
+                        break;
+                    case "java": //dynamically recompiled java
+                        break;
+                }
+                break;
+        }
+
+        return (x) -> {
+            logger.info("unbuildable: {}", file);
+            return x;
+        };
+    }
+
+
+    static final Class[] spimeDBConstructor = new Class[] { SpimeDB.class };
+
+    public class PropertyBuilder<X> implements Function<X,X> {
+        public final File file;
+        private final Pair<Class, String> id;
+
+
+
+        public PropertyBuilder(Pair<Class, String> id, File file) {
+            this.id = id;
+            this.file = file;
+        }
+
+        @Override
+        public X apply(X x) {
+            if (x != null) {
+                Class cl = id.getOne();
+                for (Constructor c : cl.getConstructors()) {
+                    Class[] types = c.getParameterTypes();
+                    Object[] param;
+                    if (Arrays.equals(types, spimeDBConstructor)) { //HACK look for spimeDB as the only arg
+                        param = new Object[] { db };
+                    } else {
+                        param = ObjectArrays.EMPTY_ARRAY;
+                    }
+
+                    try {
+                        x = (X) c.newInstance(param);
+                    } catch (Exception e) {
+                        logger.error("instantiate {} {} {} {}", file, cl, c, e.getMessage());
+                        return null;
+                    }
+                }
+
+                Properties p = new Properties();
+                try {
+                    p.load(new FileInputStream(file));
+                } catch (IOException e) {
+                    logger.error("properties configure {} {} {}", file, cl, e.getMessage());
+                }
+
+                for (Map.Entry e : p.entrySet()) {
+                    Object k = e.getKey().toString();
+                    Object v = e.getValue();
+                    String field = k.toString();
+                    Field f = field(cl, field);
+                    if (f!=null) {
+                        BeanPropertySetter propSetter = new BeanPropertySetter(x, f);
+                        propSetter.set(v);
+                    } else {
+                        logger.info("unknown field {} {}", file, field);
+                    }
+                }
+            }
+            return x;
+        }
+    }
+
+    private Field field(Class cl, String field)  {
+        //TODO add a reflection cache
+        try {
+            return cl.getField(field);
+        } catch (NoSuchFieldException e) {
+            return null;
+        }
+    }
+
+    public <X> Object put(Pair<Class, String> k, X v) {
+        if (v == null) {
+            return remove(k);
+        }
+
+        Object existing = obj.put(k, v);
+        if (existing != v) {
+            if (existing != null) {
+                logger.info("put {}: {}", k, v);
+            } else {
+                logger.info("put {}: {} ==> {}", k, v, existing);
+                onRemove(k, existing);
+            }
+            onAdd(k, existing);
+        }
+        return existing;
+    }
+
+    protected void onAdd(Pair<Class, String> k, Object v) {
+
+    }
+
+    protected void onRemove(Pair<Class, String> k, Object v) {
+
+    }
+
+    private <X> X get(Pair<Class<? extends X>, String> k) {
+        return (X) obj.get(k);
+    }
+
+    public Object remove(Pair<Class, String> k) {
+        Object v = obj.remove(k);
+        logger.info("remove {}: {}", k, v);
+        return v;
+    }
+
+
+
+    public Main(String path) throws Exception {
+
+        //setup default klasspath
+        klassPath.put("http", WebServer.class);
+        //klassPath.put("crawl", Crawl.class);
+
+
+        db = new SpimeDB(path + "/_");
+        dbPathIgnored = db.file.getAbsolutePath();
+
+        new Multimedia(db);
+
+        logger.info("watching: {}", path);
+
+        /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
+        FileAlterationObserver observer = new FileAlterationObserver(path);
+        int updatePeriodMS = 1000;
+        FileAlterationMonitor monitor = new FileAlterationMonitor(updatePeriodMS);
+
+        observer.addListener(this);
+        monitor.addObserver(observer);
+        monitor.start();
+
+        //load existing files
+        for (File f : observer.getDirectory().listFiles()) {
+            if (f.isFile())
+                update(f);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
 
         if (args.length == 0) {
-            System.out.println("usage: spime '{...JSON configuration...}'");
-            System.out.println("\texample configuration:");
-            System.out.println("\t'{port:8080,path:\"/doc\"}'");
+            System.out.println("usage: spime [datapath]");
             System.out.println();
             return;
         }
 
-        String cfgString = args[0];
-        JsonNode config = spimedb.util.JSON.fromJSON(cfgString);
-        JsonNode portNode = config.get("port");
-        if (portNode==null) {
-            System.err.println("configuration missing 'port' field");
-            return;
-        }
-        int port = portNode.intValue();
-
-        JsonNode pathNode = config.get("path");
-        if (pathNode==null) {
-            System.err.println("configuration missing 'path' field");
-            return;
-        }
-
-        String path = pathNode.asText();
-
-        SpimeDB db =  /*Infinispan.db(
-            //"/tmp/climate"
-            null
-        );*/ new SpimeDB(path + "/index");
 
 
-        new Multimedia(db);
+        String dataPath = args[0];
+        new Main(dataPath);
 
-        try {
-            new WebServer(db, port);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            return;
-        }
+
+
+
+
+
+//        try {
+//            new WebServer(db, port);
+//        } catch (RuntimeException e) {
+//            e.printStackTrace();
+//            return;
+//        }
+
 
 //        Phex p = Phex.the();
 //        p.start();
 //        p.startSearch("kml");
 
-        Crawl.pageLinks("http://environmentalarchives.com/doc/STL", (x) -> x.endsWith(".pdf"), db);
+        //Crawl.pageLinks("http://environmentalarchives.com/doc/STL", (x) -> x.endsWith(".pdf"), db);
 
         //Crawl.fileDirectory(path, db);
 
@@ -147,6 +402,25 @@ public class Main {
 //            Document dd = db.the(n.id());
 //            System.out.println("\t" + dd);
 //        });
+    }
+
+    private class TextBuilder implements Function {
+
+        private final File file;
+
+        public TextBuilder(File file) {
+            this.file = file;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            try {
+                return Files.toString(file, Charset.defaultCharset());
+            } catch (IOException e) {
+                logger.error("reading string: {}", file);
+                return null;
+            }
+        }
     }
 
 
