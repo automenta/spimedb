@@ -3,7 +3,13 @@ package spimedb;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.encoder.Encoder;
+import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
+import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
+import ch.qos.logback.core.util.FileSize;
 import com.google.common.io.Files;
 import com.uwyn.jhighlight.fastutil.objects.ObjectArrays;
 import jcog.Texts;
@@ -41,32 +47,20 @@ public class Main extends FileAlterationListenerAdaptor {
 
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
-    static {
+    private static final ch.qos.logback.classic.Logger LOG;
 
+
+    static {
 
         Thread.currentThread().setName("$");
 
         //http://logback.qos.ch/manual/layouts.html
 
-        ch.qos.logback.classic.Logger LOG = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        LOG = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         LoggerContext loggerContext = LOG.getLoggerContext();
         loggerContext.reset();
 
-        PatternLayoutEncoder logEncoder = new PatternLayoutEncoder();
-        logEncoder.setContext(loggerContext);
-        logEncoder.setPattern("%highlight(%logger{0}) %green(%thread) %message%n");
-        logEncoder.setImmediateFlush(false);
-        logEncoder.start();
 
-        {
-            ConsoleAppender c = new ConsoleAppender();
-            c.setContext(loggerContext);
-            c.setEncoder(logEncoder);
-            //c.setWithJansi(true);
-            c.start();
-
-            LOG.addAppender(c);
-        }
 
         SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
 
@@ -90,7 +84,7 @@ public class Main extends FileAlterationListenerAdaptor {
 
         String absolutePath = f.getAbsolutePath();
 
-        if (absolutePath.equals(dbPathIgnored))
+        if (absolutePath.startsWith(dbPathIgnored))
             return null; //ignore index directory, subdirectory of the root
 
 
@@ -109,7 +103,7 @@ public class Main extends FileAlterationListenerAdaptor {
                 klass = String.class;
             } else {
                 klass = specificclass;
-                id = fileName;
+                id = ""; //designated for the singleton
             }
         } else if (parts.length >= 2) {
             String classSting = parts[0];
@@ -119,8 +113,17 @@ public class Main extends FileAlterationListenerAdaptor {
             return null;
         }
 
-        return Tuples.pair(klass, id);
+        return key(klass, id);
 
+    }
+
+    public Pair<Class, String> key(Class klass) {
+        return key(klass, "");
+    }
+
+    @NotNull
+    public Pair<Class, String> key(Class klass, String id) {
+        return Tuples.pair(klass, id);
     }
 
     public Class klass(String klass) {
@@ -191,11 +194,11 @@ public class Main extends FileAlterationListenerAdaptor {
                 if (id.getOne() == String.class) {
                     return new TextBuilder(file);
                 } else {
-                    return new PropertyBuilder(id, file);
+                    return buildDefault(id, file);
                 }
             case 2:
                 //properties file
-                return new PropertyBuilder(id, file);
+                return buildDefault(id, file);
 
 
             case 3:
@@ -216,6 +219,27 @@ public class Main extends FileAlterationListenerAdaptor {
             logger.info("unbuildable: {}", file);
             return x;
         };
+    }
+
+    @NotNull
+    private Function buildDefault(Pair<Class, String> id, File file) {
+        if (id.getOne() == LogConfigurator.class) {
+            return (Object x) -> {
+                LogConfigurator newConfig = new LogConfigurator(file);
+
+
+                if (x instanceof LogConfigurator) {
+                    LogConfigurator old = (LogConfigurator) x;
+                    logger.info("stop {}", old.message);
+                    old.stop();
+                }
+
+                logger.info("start {}", newConfig.message);
+                return newConfig;
+            };
+        } else {
+            return new PropertyBuilder(id, file);
+        }
     }
 
 
@@ -305,6 +329,10 @@ public class Main extends FileAlterationListenerAdaptor {
         }
     }
 
+    public <X> Object put(Class k, X v) {
+        return put(key(k), v);
+    }
+
     public <X> Object put(Pair<Class, String> k, X v) {
         if (v == null) {
             return remove(k);
@@ -332,7 +360,9 @@ public class Main extends FileAlterationListenerAdaptor {
 
     }
 
-    private <X> X get(Pair<Class<? extends X>, String> k) {
+    public <X> X get(Pair<Class<? extends X>, String> k) {
+        if (k == null)
+            return null;
         return (X) obj.get(k);
     }
 
@@ -341,12 +371,99 @@ public class Main extends FileAlterationListenerAdaptor {
     }
 
 
+    class LogConfigurator {
+
+        Appender appender;
+        String message;
+
+        public LogConfigurator(File f) {
+
+            Appender appender = null;
+
+            if (f!=null) {
+                try {
+                    String line = Files.readFirstLine(f, Charset.defaultCharset()).trim();
+                    switch (line) {
+                        case "rolling":
+                            String logFile = db.file.toPath().resolve("log").toAbsolutePath().toString();
+                            message = ("log output rolling to {}" + logFile);
+
+                            RollingFileAppender r = new RollingFileAppender();
+                            r.setFile(logFile);
+                            r.setAppend(true);
+
+                            SizeBasedTriggeringPolicy triggeringPolicy = new ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy();
+                            triggeringPolicy.setMaxFileSize(FileSize.valueOf("5MB"));
+                            triggeringPolicy.start();
+
+                            FixedWindowRollingPolicy policy = new FixedWindowRollingPolicy();
+                            policy.setFileNamePattern("log.%i.gz");
+                            policy.setParent(r);
+                            policy.setContext(LOG.getLoggerContext());
+                            policy.start();
+
+                            r.setEncoder(logEncoder());
+                            r.setRollingPolicy(policy);
+                            r.setTriggeringPolicy(triggeringPolicy);
+
+
+                            appender = r;
+                            break;
+                        //TODO TCP/UDP etc
+                    }
+                } catch (IOException e) {
+                    logger.error("{}", e);
+                    appender = null;
+                }
+            }
+
+            if (appender == null) {
+                //default
+                ConsoleAppender a = new ConsoleAppender();
+                a.setEncoder(logEncoder());
+                appender = a;
+                message = "Console";
+            }
+
+
+            LOG.detachAndStopAllAppenders();
+
+            appender.setContext(LOG.getLoggerContext());
+            appender.start();
+
+            LOG.addAppender(appender);
+
+
+            this.appender = appender;
+        }
+
+        private Encoder logEncoder() {
+            PatternLayoutEncoder logEncoder = new PatternLayoutEncoder();
+            logEncoder.setContext(LOG.getLoggerContext());
+            logEncoder.setPattern("%highlight(%logger{0}) %green(%thread) %message%n");
+            logEncoder.setImmediateFlush(true);
+            logEncoder.start();
+
+            return logEncoder;
+        }
+
+        public void stop() {
+            if (appender!=null) {
+
+                appender.stop();
+                appender = null;
+            }
+        }
+    }
+
     public Main(String path) throws Exception {
 
         //setup default klasspath
         klassPath.put("http", WebServer.class);
+        klassPath.put("log", LogConfigurator.class);
         //klassPath.put("crawl", Crawl.class);
 
+        put(LogConfigurator.class,  new LogConfigurator(null) );
 
         db = new SpimeDB(path + "/_");
         dbPathIgnored = db.file.getAbsolutePath();
@@ -369,6 +486,10 @@ public class Main extends FileAlterationListenerAdaptor {
             if (f.isFile())
                 update(f);
         }
+    }
+
+    public void put(Class c, String id, Object value) {
+        put(key(c, id), value);
     }
 
     public static void main(String[] args) throws Exception {
