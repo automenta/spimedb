@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mockito.internal.util.reflection.BeanPropertySetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.io.Crawl;
 import spimedb.io.Multimedia;
 import spimedb.server.WebServer;
 import spimedb.util.Locker;
@@ -483,8 +484,15 @@ public class Main extends FileAlterationListenerAdaptor {
 
         //load existing files
         for (File f : observer.getDirectory().listFiles()) {
+            if (f.getName().startsWith("."))
+                continue; //ignore hidden files
+
             if (f.isFile())
                 update(f);
+            else if (f.isDirectory() && !f.getAbsolutePath().equals(db.indexPath)) {
+                //default: index a directory
+                Crawl.fileDirectory(f.getAbsolutePath(), db);
+            }
         }
     }
 
