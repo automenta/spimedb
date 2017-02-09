@@ -6,6 +6,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.ConsoleAppender;
 import com.google.common.io.Files;
 import com.uwyn.jhighlight.fastutil.objects.ObjectArrays;
+import jcog.Texts;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.io.Multimedia;
 import spimedb.server.WebServer;
+import spimedb.util.Locker;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +30,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 
 /**
@@ -72,17 +75,25 @@ public class Main extends FileAlterationListenerAdaptor {
     private final SpimeDB db;
     final String dbPathIgnored;
 
-    /** live objects */
-    final Map<Pair<Class,String>,Object> obj = new ConcurrentHashMap();
+    /**
+     * live objects
+     */
+    final Map<Pair<Class, String>, Object> obj = new ConcurrentHashMap();
 
-    final Map<String,Class> klassPath = new ConcurrentHashMap<>();
+    final Map<String, Class> klassPath = new ConcurrentHashMap<>();
 
-    final Pair<Class,String> key(File f) {
-
-        if (f.getAbsolutePath().equals(dbPathIgnored))
-            return null; //ignore index directory, subdirectory of the root
+    final Pair<Class, String> key(File f) {
 
         String fileName = f.getName();
+        if (fileName.startsWith("."))
+            return null; //ignore hidden files
+
+        String absolutePath = f.getAbsolutePath();
+
+        if (absolutePath.equals(dbPathIgnored))
+            return null; //ignore index directory, subdirectory of the root
+
+
         String[] parts = fileName.split(".");
 
         String id;
@@ -127,11 +138,12 @@ public class Main extends FileAlterationListenerAdaptor {
     }
 
     private void update(File file) {
-        logger.info("update file://{}", file);
+
         Pair<Class, String> k = key(file);
         if (k == null)
             return;
 
+        logger.info("update file://{}", file);
         merge(k, build(k, file));
     }
 
@@ -144,13 +156,31 @@ public class Main extends FileAlterationListenerAdaptor {
         remove(k);
     }
 
+
+    final Locker<Pair<Class,String>> locker = new Locker();
+
     private Object merge(Pair<Class, String> k, Function build) {
-        return obj.compute(k, (kk, existing) -> build.apply(existing));
+        Lock l = locker.get(k);
+        l.lock();
+        try {
+            if (build == null) {
+                Object v = obj.remove(k);
+                logger.info("remove {}: {}", k, v);
+                return v;
+            } else {
+                return obj.compute(k, (kk, existing) -> build.apply(existing));
+            }
+        } finally {
+            l.unlock();
+        }
     }
 
-    /** the function returned will accept the previous value (null if there was none) and return a result
+    /**
+     * the function returned will accept the previous value (null if there was none) and return a result
+     *
      * @param file
-     * @param klass*/
+     * @param klass
+     */
     @NotNull
     private Function build(Pair<Class, String> id, File file) {
         String[] parts = file.getName().split(".");
@@ -189,12 +219,11 @@ public class Main extends FileAlterationListenerAdaptor {
     }
 
 
-    static final Class[] spimeDBConstructor = new Class[] { SpimeDB.class };
+    static final Class[] spimeDBConstructor = new Class[]{SpimeDB.class};
 
-    public class PropertyBuilder<X> implements Function<X,X> {
+    public class PropertyBuilder<X> implements Function<X, X> {
         public final File file;
         private final Pair<Class, String> id;
-
 
 
         public PropertyBuilder(Pair<Class, String> id, File file) {
@@ -204,13 +233,16 @@ public class Main extends FileAlterationListenerAdaptor {
 
         @Override
         public X apply(X x) {
-            if (x != null) {
-                Class cl = id.getOne();
+            Class cl = id.getOne();
+
+            if (x == null) {
+
+                //HACK TODO use some adaptive constructor argument injector
                 for (Constructor c : cl.getConstructors()) {
                     Class[] types = c.getParameterTypes();
                     Object[] param;
                     if (Arrays.equals(types, spimeDBConstructor)) { //HACK look for spimeDB as the only arg
-                        param = new Object[] { db };
+                        param = new Object[]{db};
                     } else {
                         param = ObjectArrays.EMPTY_ARRAY;
                     }
@@ -223,34 +255,51 @@ public class Main extends FileAlterationListenerAdaptor {
                     }
                 }
 
-                Properties p = new Properties();
-                try {
-                    p.load(new FileInputStream(file));
-                } catch (IOException e) {
-                    logger.error("properties configure {} {} {}", file, cl, e.getMessage());
-                }
+            }
 
-                for (Map.Entry e : p.entrySet()) {
-                    Object k = e.getKey().toString();
-                    Object v = e.getValue();
-                    String field = k.toString();
-                    Field f = field(cl, field);
-                    if (f!=null) {
-                        BeanPropertySetter propSetter = new BeanPropertySetter(x, f);
-                        propSetter.set(v);
-                    } else {
-                        logger.info("unknown field {} {}", file, field);
+            Properties p = new Properties();
+            try {
+                p.load(new FileInputStream(file));
+            } catch (IOException e) {
+                logger.error("properties configure {} {} {}", file, cl, e.getMessage());
+            }
+
+            for (Map.Entry e : p.entrySet()) {
+                Object k = e.getKey().toString();
+                Object v = e.getValue();
+
+                String field = k.toString();
+                Field f = field(cl, field);
+                if (f != null) {
+                    //TODO better type decoding
+                    BeanPropertySetter s = new BeanPropertySetter(x, f);
+                    try {
+                        switch (f.getType().toString()) {
+                            case "float":
+                                v = Texts.f(v.toString());
+                                break;
+                            case "int":
+                                v = Texts.i(v.toString());
+                                break;
+                        }
+                        logger.info("{}.{}={}", x, field, v);
+                        s.set(v);
+                    } catch (IllegalArgumentException aa) {
+                        logger.info("invalid type {} for {}", v.getClass(), f);
                     }
+                } else {
+                    logger.info("unknown field {} {}", file, field);
                 }
             }
+
             return x;
         }
     }
 
-    private Field field(Class cl, String field)  {
+    private Field field(Class cl, String field) {
         //TODO add a reflection cache
         try {
-            return cl.getField(field);
+            return cl.getDeclaredField(field);
         } catch (NoSuchFieldException e) {
             return null;
         }
@@ -263,10 +312,11 @@ public class Main extends FileAlterationListenerAdaptor {
 
         Object existing = obj.put(k, v);
         if (existing != v) {
+            logger.info("{} = {}", k, v);
             if (existing != null) {
-                logger.info("put {}: {}", k, v);
+                //logger.info("{} = {}", k, v);
             } else {
-                logger.info("put {}: {} ==> {}", k, v, existing);
+                //logger.info("{} = {} <== {}", k, v, existing);
                 onRemove(k, existing);
             }
             onAdd(k, existing);
@@ -287,11 +337,8 @@ public class Main extends FileAlterationListenerAdaptor {
     }
 
     public Object remove(Pair<Class, String> k) {
-        Object v = obj.remove(k);
-        logger.info("remove {}: {}", k, v);
-        return v;
+        return merge(k, null);
     }
-
 
 
     public Main(String path) throws Exception {
@@ -333,13 +380,8 @@ public class Main extends FileAlterationListenerAdaptor {
         }
 
 
-
         String dataPath = args[0];
         new Main(dataPath);
-
-
-
-
 
 
 //        try {
@@ -388,7 +430,6 @@ public class Main extends FileAlterationListenerAdaptor {
 
 
         //db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
-
 
 
 //            db.forEach(x -> {

@@ -6,6 +6,7 @@
 package spimedb.server;
 
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
@@ -184,11 +185,13 @@ public class WebServer extends PathHandler {
         /* client attention management */
         addPrefixPath("/attn", websocket(new Session(db, websocketOutputRateLimitBytesPerSecond)));
 
+        restart();
 
     }
 
     public void setHost(String host) {
-        if (!this.host.equals(host)) {
+
+        if (!Objects.equal(this.host, host)) {
             this.host = host;
             restart();
         }
@@ -218,14 +221,14 @@ public class WebServer extends PathHandler {
                 logger.error("http stop: {}", e);
                 this.server = null;
             }
+        }
 
-            try {
-                logger.info("http start: {}:{}\n\tstaticPath={}", host, port, staticPath);
-                (this.server = nextServer).start();
-            } catch (Exception e) {
-                logger.error("http start: {}", e);
-                this.server = null;
-            }
+        try {
+            logger.info("http start: {}:{} staticPath={}", host, port, staticPath);
+            (this.server = nextServer).start();
+        } catch (Exception e) {
+            logger.error("http start: {}", e);
+            this.server = null;
         }
 
     }

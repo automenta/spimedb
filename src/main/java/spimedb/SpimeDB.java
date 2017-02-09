@@ -14,7 +14,6 @@ import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.facet.Facets;
 import org.apache.lucene.facet.FacetsCollector;
 import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetCounts;
 import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
@@ -48,6 +47,7 @@ import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.index.rtree.*;
 import spimedb.query.Query;
+import spimedb.util.Locker;
 import spimedb.util.PrioritizedExecutor;
 
 import javax.script.ScriptEngineManager;
@@ -56,11 +56,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -550,7 +547,7 @@ public class SpimeDB  {
     }
 
 
-    public final ConcurrentHashMap<String,Lock> lock = new ConcurrentHashMap<>();
+    final Locker<String> locker = new Locker();
 
 
     public void run(String id, Runnable r)  {
@@ -561,7 +558,7 @@ public class SpimeDB  {
     }
 
     public <X> X run(String id, Supplier<X> r)  {
-        Lock l = lock.computeIfAbsent(id, DBLock::new);
+        Lock l = locker.get(id);
 
         Throwable thrown = null;
         X result = null;
@@ -925,22 +922,6 @@ public class SpimeDB  {
         return new GraphedNObject(this.graph, n);
     }
 
-    private final class DBLock extends ReentrantLock {
-        private final String id;
-
-        public DBLock(String id) {
-            super(true);
-            this.id = id;
-        }
-
-        @Override
-        public synchronized void unlock() {
-            if (!hasQueuedThreads()) {
-                lock.remove(id);
-            }
-            super.unlock();
-        }
-    }
 
     //    static class MyOctBox extends OctBox {
 //
