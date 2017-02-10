@@ -52,28 +52,11 @@
 </head>
 <body>
 
-<div id="query">
-    <div id="query_edit">
-        <span>
-            <input id="query_text" type="text" placeholder="Search"/>
-            <button id="query_update">Search</button>
-        </span>
-    </div>
-    <div id="query_status">
-    </div>
-    <div id="query_suggestions">
-    </div>
-</div>
 
-<div id="facets">
-    <div class="grid">
 
-    </div>
-</div>
+<div id="query_results" class="grid">
 
-<div id="query_results">
-
-    <div data-template class="result">
+    <div data-template class="grid-item result">
 
         <div class="header">
             <div style="width:100%"><h2 data-template>{{N}}</h2></div>
@@ -95,11 +78,28 @@
     <li data-template-fallback>JavaScript required</li>
 </div>
 
+<div id="facets" class="grid">
+
+</div>
+
+<div id="query">
+    <div id="query_edit">
+        <span>
+            <input id="query_text" type="text" placeholder="Search"/>
+            <button id="query_update">Search</button>
+        </span>
+    </div>
+    <div id="query_status">
+    </div>
+    <div id="query_suggestions">
+    </div>
+</div>
 
 </body>
 
 
 <script>
+
 
     function d(eleID) {
         return document.createElement(eleID);
@@ -190,6 +190,12 @@
     }
 
 
+    function newGrid(selector) {
+        return selector.packery({
+
+        });
+    }
+
     function addToGrid(result, builder, grid) {
 
         var newItems = _.map(result, (v) => {
@@ -210,9 +216,8 @@
 
     $(document).ready(() => {
 
-        const $grid = $('#facets .grid').packery({
-
-        });
+        const facets = newGrid($('#facets'));
+        const results = newGrid($('#query-results'));
 
         const resultsTemplate = Tempo.prepare("query_results", {'escape': false});
 
@@ -324,7 +329,7 @@
                     return c;
                 };
 
-                addToGrid(result, facetButtonBuilder, $grid);
+                addToGrid(result, facetButtonBuilder, facets);
 
 
             });

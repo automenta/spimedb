@@ -1,6 +1,8 @@
 body {
-    font-family: Arial, sans;
+    font-family: Arial, sans-serif;
+
 }
+
 #query {
     position: fixed;
     top: 0;
@@ -14,29 +16,38 @@ body {
 
 
 #query_results {
-    padding-top: 3em;
+    top: 0;
 }
 
 #facets {
-    margin-top: 3em;
+    opacity: 0.75;
     position: fixed;
     width: 25%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-height: 100%;
+    /*white-space: nowrap;
+    text-overflow: ellipsis;*/
+    overflow: auto;
+
 }
 #facets div {
     font-size: 50%;
 }
 
 #query_results {
+    position: fixed;
+    padding-left: 25%;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: scroll;
     /* float: right; */
     /* width: 100%; */
-    margin-left: 270px;
 }
 
 #query_results .header {
     display: flex;
+
 }
 
 #query_suggestions div {
@@ -59,7 +70,6 @@ body {
 .result {
     padding: 5px;
     margin: 5px;
-    margin-bottom: 2em;
 }
 
 .result .meta { 
@@ -69,5 +79,4 @@ body {
 .result .preview {
     display:flex;
     font-size: 80%;
-    width: 100%;
 }
