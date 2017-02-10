@@ -216,6 +216,7 @@ public class WebServer extends PathHandler {
         Undertow nextServer = b.build();
         if (server != null) {
             try {
+                logger.error("stop: {}", server);
                 server.stop();
             } catch (Exception e) {
                 logger.error("http stop: {}", e);
@@ -224,7 +225,7 @@ public class WebServer extends PathHandler {
         }
 
         try {
-            logger.info("http start: {}:{} staticPath={}", host, port, staticPath);
+            logger.info("start: {}:{} staticPath={}", host, port, staticPath);
             (this.server = nextServer).start();
         } catch (Exception e) {
             logger.error("http start: {}", e);

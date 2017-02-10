@@ -176,7 +176,7 @@ public class SpimeDB  {
         this(new File(path), FSDirectory.open(new File(path).toPath()));
         this.indexPath = file.getAbsolutePath();
         this.taxoDir = FSDirectory.open(file.toPath().resolve("taxo"));
-        logger.info("index ready: {}", indexPath);
+        logger.info("index ready: file://{}", indexPath);
     }
 
     private SpimeDB(File file, Directory dir) throws IOException {
@@ -340,8 +340,7 @@ public class SpimeDB  {
 
     }
 
-    @Nullable
-    protected IndexSearcher searcher()  {
+    @Nullable protected IndexSearcher searcher()  {
         DirectoryReader r = reader();
         return r != null ? new IndexSearcher(r) : null;
     }
@@ -357,12 +356,10 @@ public class SpimeDB  {
     }
 
     public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
-        org.apache.lucene.search.Query q = defaultFindQueryParser.parse(query);
-        return find(q, hitsPerPage);
+        return find(defaultFindQueryParser.parse(query), hitsPerPage);
     }
 
-    @NotNull
-    private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
+    @NotNull private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
 
         IndexSearcher searcher = searcher();
         if (searcher != null) {
@@ -427,9 +424,11 @@ public class SpimeDB  {
     }
 
     public int size() {
-        int[] size = new int[1];
-        forEach(x -> size[0]++); //HACK
-        return size[0];
+        DirectoryReader r = reader();
+        return r == null ? 0 : r.maxDoc();
+//        int[] size = new int[1];
+//        forEach(x -> size[0]++); //HACK
+//        return size[0];
     }
 
     public long now() { return System.currentTimeMillis(); }

@@ -1,5 +1,6 @@
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="lib/lodash.js"></script>
     <script src="lib/jquery.min.js"></script>
@@ -7,9 +8,47 @@
 
     <script src="lib/d3.min.js"></script>
 
+    <script src="lib/draggabilly.js"></script>
     <script src="lib/packery.js"></script>
 
     <link rel="stylesheet" href="search.css">
+    <style>
+
+        * { box-sizing: border-box; }
+
+        .grid-item {
+            float: left;
+            min-height: 50px;
+            /*width: 100%;
+            height: 100px;*/
+            background: #ddd;
+            border: 2px solid hsla(0, 0%, 0%, 0.5);
+            font-size: 150%;
+            padding: 2em;
+        }
+
+
+        .grid-item:hover {
+            border-color: hsla(0, 0%, 100%, 0.5);
+            cursor: move;
+        }
+
+        .grid-item.is-dragging,
+        .grid-item.is-positioning-post-drag {
+            background: #C90;
+            z-index: 2;
+        }
+
+        .packery-drop-placeholder {
+            outline: 3px dashed hsla(0, 0%, 0%, 0.5);
+            outline-offset: -6px;
+            -webkit-transition: -webkit-transform 0.1s;
+            transition: transform 0.1 s;
+        }
+
+
+
+    </style>
 </head>
 <body>
 
@@ -27,9 +66,17 @@
 </div>
 
 <div id="facets">
+    <div class="grid">
+
+    </div>
 </div>
 
+
+
+
+
 <div id="query_results">
+
     <div data-template class="result">
 
         <div class="header">
@@ -58,7 +105,110 @@
 
 <script>
 
+    function BubblesFacetSVG(f, result) {
+        var svg = d3.select(f[0]),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        var format = d3.format(",d");
+
+        var color = d3.scaleOrdinal(d3.schemeCategory20c);
+
+        var pack = d3.pack()
+            .size([width, height])
+            .padding(1.5);
+
+
+        var root = d3.hierarchy({children: result})
+            .sum(function (d) {
+                return d[1];
+            })
+            .each(function (d) {
+                d.id = d.data[0];
+                d.value = Math.log(1 + d.data[1]);
+            });
+
+        var node = svg.selectAll(".node")
+            .data(pack(root).leaves())
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", function (d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            });
+
+        node.append("circle")
+            .attr("id", function (d) {
+                return d.id;
+            })
+            .attr("r", function (d) {
+                return d.r;
+            })
+            .style("fill", function (d) {
+                return color(d.id);
+            });
+
+        node.append("clipPath")
+            .attr("id", function (d) {
+                return "clip-" + d.id;
+            })
+            .append("use")
+            .attr("xlink:href", function (d) {
+                return "#" + d.id;
+            });
+
+        node.append("text")
+            .attr("clip-path", function (d) {
+                return "url(#clip-" + d.id + ")";
+            })
+            .selectAll("tspan")
+            .data(function (d) {
+                return d.id.split(/(?=[A-Z][^A-Z])/g);
+            })
+            .enter().append("tspan")
+            .attr("x", 0)
+            .attr("y", function (d, i, nodes) {
+                return 13 + (i - nodes.length / 2 - 0.5) * 10;
+            })
+            .text(function (d) {
+                return d;
+            });
+
+        node.append("title")
+            .text(function (d) {
+                return d.id;// + "\n" + format(d.value);
+            });
+    }
+
+
+    function gridAppend(result, builder, grid) {
+        var newItems = _.map(result, (v) => {
+
+            const c = builder(v);
+
+            const x = $(d('div')).attr('class', 'grid-item').append(c);
+
+            return x[0];
+        });
+
+        var nn = $(newItems);
+
+        grid.append(nn).packery('appended', nn);
+
+        newItems.forEach((x) => draggabilify(x, grid));
+    }
     $(document).ready(() => {
+
+        const $grid = $('.grid').packery({
+
+
+        });
+
+        function draggabilify(gridItem, $grid) {
+            var draggie = new Draggabilly(gridItem);
+            // bind drag events to Packery
+            $grid.packery('bindDraggabillyEvents', draggie);
+            return gridItem;
+        }
 
         const resultsTemplate = Tempo.prepare("query_results", {'escape': false});
 
@@ -129,10 +279,10 @@
 
             const klass = label;
 
-            $('#facets.' + klass).remove();
-
-            const f = $('<svg width="250" height="250">').attr('class', klass);//.html(label + '...');
-            $('#facets').append($('<div>').append(f));
+//            $('#facets.' + klass).remove();
+//
+//            const f = $('<svg width="250" height="250">').attr('class', klass);//.html(label + '...');
+//            $('#facets').append($('<div>').append(f));
 
             $.get('/facet', {q: dimension}, function (result) {
                 result = JSON.parse(result);
@@ -142,8 +292,6 @@
                  $(d('h3')).text(label),
                  $(d('ul')).append(
                  _.map(result, (v) => {
-                 const id = v[0];
-                 const score = v[1];
                  return $(d('li')).append(d('a')).click(()=>{
                  queryText.val(dimension + ':' + id);
                  querySubmit();
@@ -152,82 +300,27 @@
                  ));
                  */
 
-
-                var svg = d3.select(f[0]),
-                    width = +svg.attr("width"),
-                    height =  +svg.attr("height");
-
-                var format = d3.format(",d");
-
-                var color = d3.scaleOrdinal(d3.schemeCategory20c);
-
-                var pack = d3.pack()
-                    .size([width, height])
-                    .padding(1.5);
+                //BubblesFacetSVG(f, result);
 
 
+                var facetButtonBuilder = (v) => {
+                    const id = v[0];
+                    const score = v[1];
 
-                var root = d3.hierarchy({children: result})
-                    .sum(function (d) {
-                        return d[1];
-                    })
-                    .each(function (d) {
-                        d.id = d.data[0];
-                        d.value = Math.log(1 + d.data[1]);
+                    const c = $(d('div')).attr('class', 'grid-item-content').text(id).click(() => {
+                        queryText.val(dimension + ':' + id);
+                        querySubmit();
+                        return false;
                     });
+                    c.attr('style', 'font-size:'+ (80.0 + (score)) + '%');
+                    return c;
+                };
 
-                var node = svg.selectAll(".node")
-                    .data(pack(root).leaves())
-                    .enter().append("g")
-                    .attr("class", "node")
-                    .attr("transform", function (d) {
-                        return "translate(" + d.x + "," + d.y + ")";
-                    });
-
-                node.append("circle")
-                    .attr("id", function (d) {
-                        return d.id;
-                    })
-                    .attr("r", function (d) {
-                        return d.r;
-                    })
-                    .style("fill", function (d) {
-                        return color(d.id);
-                    });
-
-                node.append("clipPath")
-                    .attr("id", function (d) {
-                        return "clip-" + d.id;
-                    })
-                    .append("use")
-                    .attr("xlink:href", function (d) {
-                        return "#" + d.id;
-                    });
-
-                node.append("text")
-                    .attr("clip-path", function (d) {
-                        return "url(#clip-" + d.id + ")";
-                    })
-                    .selectAll("tspan")
-                    .data(function (d) {
-                        return d.id.split(/(?=[A-Z][^A-Z])/g);
-                    })
-                    .enter().append("tspan")
-                    .attr("x", 0)
-                    .attr("y", function (d, i, nodes) {
-                        return 13 + (i - nodes.length / 2 - 0.5) * 10;
-                    })
-                    .text(function (d) {
-                        return d;
-                    });
-
-                node.append("title")
-                    .text(function (d) {
-                        return d.id;// + "\n" + format(d.value);
-                    });
+                gridAppend(result, facetButtonBuilder, $grid);
 
 
             });
+
         }
 
         updateFacet('I', 'Category');

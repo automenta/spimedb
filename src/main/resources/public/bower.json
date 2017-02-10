@@ -21,6 +21,7 @@
     "jquery.atwho": "ichord/At.js",
     "fullcalendar": "latest",
     "interact": "latest",
+    "draggabilly": "latest",
     "tempojs": "latest",
     "packery": "latest"
   },

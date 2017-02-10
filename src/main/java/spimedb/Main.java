@@ -46,7 +46,7 @@ import java.util.function.Function;
 
 public class Main extends FileAlterationListenerAdaptor {
 
-    public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
+    public final static Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static final ch.qos.logback.classic.Logger LOG;
 
@@ -146,7 +146,7 @@ public class Main extends FileAlterationListenerAdaptor {
         if (k == null)
             return;
 
-        logger.info("update file://{}", file);
+        logger.info("reload file://{}", file);
         merge(k, build(k, file));
     }
 
@@ -230,11 +230,11 @@ public class Main extends FileAlterationListenerAdaptor {
 
                 if (x instanceof LogConfigurator) {
                     LogConfigurator old = (LogConfigurator) x;
-                    logger.info("stop {}", old.message);
+                    LoggingLogger.info("stop {}", old.message);
                     old.stop();
                 }
 
-                logger.info("start {}", newConfig.message);
+                LoggingLogger.info("start {}", newConfig.message);
                 return newConfig;
             };
         } else {
@@ -371,7 +371,10 @@ public class Main extends FileAlterationListenerAdaptor {
     }
 
 
+    public final static Logger LoggingLogger = LoggerFactory.getLogger(LOG.getClass());
+
     class LogConfigurator {
+
 
         Appender appender;
         String message;
@@ -386,7 +389,7 @@ public class Main extends FileAlterationListenerAdaptor {
                     switch (line) {
                         case "rolling":
                             String logFile = db.file.toPath().resolve("log").toAbsolutePath().toString();
-                            message = ("log output rolling to {}" + logFile);
+                            message = ("rolling to file://{}" + logFile);
 
                             RollingFileAppender r = new RollingFileAppender();
                             r.setFile(logFile);
@@ -422,7 +425,7 @@ public class Main extends FileAlterationListenerAdaptor {
                 ConsoleAppender a = new ConsoleAppender();
                 a.setEncoder(logEncoder());
                 appender = a;
-                message = "Console";
+                message = "ConsoleAppender";
             }
 
 
@@ -470,7 +473,7 @@ public class Main extends FileAlterationListenerAdaptor {
 
         new Multimedia(db);
 
-        logger.info("watching: {}", path);
+        logger.info("watching: file://{}", path);
 
         /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
         FileAlterationObserver observer = new FileAlterationObserver(path);
