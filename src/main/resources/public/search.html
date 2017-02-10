@@ -12,6 +12,7 @@
     <script src="lib/packery.js"></script>
 
     <link rel="stylesheet" href="search.css">
+
     <style>
 
         * { box-sizing: border-box; }
@@ -46,9 +47,8 @@
             transition: transform 0.1 s;
         }
 
-
-
     </style>
+
 </head>
 <body>
 
@@ -70,10 +70,6 @@
 
     </div>
 </div>
-
-
-
-
 
 <div id="query_results">
 
@@ -105,8 +101,22 @@
 
 <script>
 
+    function d(eleID) {
+        return document.createElement(eleID);
+    }
+
+    function draggabilify(gridItem, grid) {
+
+        const draggie = new Draggabilly(gridItem);
+
+        grid.packery('bindDraggabillyEvents', draggie);
+
+        return gridItem;
+
+    }
+
     function BubblesFacetSVG(f, result) {
-        var svg = d3.select(f[0]),
+        const svg = d3.select(f[0]),
             width = +svg.attr("width"),
             height = +svg.attr("height");
 
@@ -180,14 +190,14 @@
     }
 
 
-    function gridAppend(result, builder, grid) {
+    function addToGrid(result, builder, grid) {
+
         var newItems = _.map(result, (v) => {
 
             const c = builder(v);
 
-            const x = $(d('div')).attr('class', 'grid-item').append(c);
+            return ( $(d('div')).attr('class', 'grid-item').append(c))[0];
 
-            return x[0];
         });
 
         var nn = $(newItems);
@@ -196,24 +206,17 @@
 
         newItems.forEach((x) => draggabilify(x, grid));
     }
+
+
     $(document).ready(() => {
 
-        const $grid = $('.grid').packery({
-
+        const $grid = $('#facets .grid').packery({
 
         });
-
-        function draggabilify(gridItem, $grid) {
-            var draggie = new Draggabilly(gridItem);
-            // bind drag events to Packery
-            $grid.packery('bindDraggabillyEvents', draggie);
-            return gridItem;
-        }
 
         const resultsTemplate = Tempo.prepare("query_results", {'escape': false});
 
         const queryText = $('#query_text');
-
 
         const onQueryTextChanged = _.throttle(() => {
             const qText = queryText.val();
@@ -238,12 +241,13 @@
         };
 
         queryText.on('input', onQueryTextChanged);
+
         queryText.on('keypress', (e) => {
             if (e.keyCode === 13)
                 querySubmit();
         });
-        $('#query_update').click(querySubmit);
 
+        $('#query_update').click(querySubmit);
 
         function update(qText) {
 
@@ -262,14 +266,13 @@
                             v.in = vin;
                     }
                 });
+
                 resultsTemplate.render(rr);
 
             });
         }
 
-        function d(eleID) {
-            return document.createElement(eleID);
-        }
+
 
         //PACKERY.js
         //http://codepen.io/desandro/pen/vKjAPE/
@@ -304,19 +307,24 @@
 
 
                 var facetButtonBuilder = (v) => {
+
                     const id = v[0];
                     const score = v[1];
 
-                    const c = $(d('div')).attr('class', 'grid-item-content').text(id).click(() => {
-                        queryText.val(dimension + ':' + id);
-                        querySubmit();
-                        return false;
-                    });
-                    c.attr('style', 'font-size:'+ (80.0 + (score)) + '%');
+                    const c = $(d('div'))
+                        .attr('class', 'grid-item-content')
+                        .text(id).click(() => {
+                            queryText.val(dimension + ':' + id);
+                            querySubmit();
+                            return false;
+                        })
+                        .attr('style',
+                            'font-size:'+ (80.0 + (score)) + '%');
+
                     return c;
                 };
 
-                gridAppend(result, facetButtonBuilder, $grid);
+                addToGrid(result, facetButtonBuilder, $grid);
 
 
             });
@@ -327,6 +335,7 @@
         updateFacet('>', 'Tag');
 
     }, false);
+
 </script>
 
 
