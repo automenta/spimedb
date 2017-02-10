@@ -16,8 +16,8 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.FacetResult;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.suggest.Lookup;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
@@ -35,8 +35,8 @@ import spimedb.util.js.JavaToJavascript;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static io.undertow.Handlers.resource;
@@ -156,27 +156,24 @@ public class WebServer extends PathHandler {
 
             try {
 
-                SearchResult x = db.find(qText, 10);
+                SearchResult xx = db.find(qText, 10);
 
                 o.write('[');
-                Iterator<Document> ii = x.docs();
-                while (ii.hasNext()) {
+                xx.forEach((r, x) -> {
                     JSON.toJSON(searchResult(
-
-                            DObject.get(ii.next())
-
+                        DObject.get(r), x
                     ), o, ',');
-                }
+                });
                 o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
 
-                x.close();
+                xx.close();
 
             } catch (Exception e) {
-                logger.warn("{} -> {}", qText, e);
-                try {
+                logger.warn("{} -> {}", qText, e.getMessage());
+                /*try {
                     o.write(JSON.toJSONBytes(e));
                 } catch (IOException e1) {
-                }
+                }*/
             }
 
         }));
@@ -269,10 +266,11 @@ public class WebServer extends PathHandler {
     static final ImmutableSet<String> searchResultKeys =
             Sets.immutable.of(
                     NObject.ID, NObject.NAME, NObject.DESC, NObject.INH, NObject.TAG, NObject.BOUND,
-                    "thumbnail", "data", NObject.TYPE
+                    "thumbnail", "data", "score",
+                    NObject.TYPE
             );
 
-    private FilteredNObject searchResult(NObject d) {
+    private FilteredNObject searchResult(NObject d, ScoreDoc x) {
         return new FilteredNObject(db.graphed(d), searchResultKeys) {
             @Override
             protected Object value(String key, Object v) {
@@ -285,6 +283,12 @@ public class WebServer extends PathHandler {
                         return !(v instanceof String) ? "/data?I=" + d.id() : v;
                 }
                 return v;
+            }
+
+            @Override
+            public void forEach(BiConsumer<String, Object> each) {
+                super.forEach(each);
+                each.accept("score", x.score);
             }
         };
     }
