@@ -4,7 +4,7 @@
 
     <script src="lib/lodash.js"></script>
     <script src="lib/jquery.min.js"></script>
-    <script src="lib/tempo.js"></script>
+    <!--<script src="lib/tempo.js"></script>-->
 
     <script src="lib/d3.min.js"></script>
 
@@ -13,41 +13,6 @@
 
     <link rel="stylesheet" href="search.css">
 
-    <style>
-
-        * { box-sizing: border-box; }
-
-        .grid-item {
-            float: left;
-            min-height: 50px;
-            /*width: 100%;
-            height: 100px;*/
-            background: #ddd;
-            border: 2px solid hsla(0, 0%, 0%, 0.5);
-            font-size: 150%;
-            padding: 2em;
-        }
-
-
-        .grid-item:hover {
-            border-color: hsla(0, 0%, 100%, 0.5);
-            cursor: move;
-        }
-
-        .grid-item.is-dragging,
-        .grid-item.is-positioning-post-drag {
-            background: #C90;
-            z-index: 2;
-        }
-
-        .packery-drop-placeholder {
-            outline: 3px dashed hsla(0, 0%, 0%, 0.5);
-            outline-offset: -6px;
-            -webkit-transition: -webkit-transform 0.1s;
-            transition: transform 0.1 s;
-        }
-
-    </style>
 
 </head>
 <body>
@@ -56,26 +21,6 @@
 
 <div id="query_results" class="grid">
 
-    <div data-template class="grid-item result">
-
-        <div class="header">
-            <div style="width:100%"><h2 data-template>{{N}}</h2></div>
-            <div><a data-template data-has="data" href="" data-href="{{data}}" target="_" title="Download"><h2>~</h2></a></div>
-        </div>
-
-        <div class="meta">
-            <span data-template data-has="in">+: {{in}}</span>
-            <span data-template data-has="I">{{I}}</span>
-            <span data-template data-has="out">-: {{out}}</span>
-        </div>
-
-        <div class="preview">
-            <img data-template data-has="thumbnail" src="" data-src="{{thumbnail}}"/>
-            <p data-template data-has="_">{{ _ | replace '\n', '<br>' }}</p>
-        </div>
-
-    </div>
-    <li data-template-fallback>JavaScript required</li>
 </div>
 
 <div id="facets" class="grid">
@@ -99,10 +44,21 @@
 
 
 <script>
+    "use strict";
 
-
-    function d(eleID) {
+    function e(eleID) {
         return document.createElement(eleID);
+    }
+    function E(eleID) {
+        return $(e(eleID));
+    }
+
+    function DIVclass(cssclass) {
+        const x = $(e('div'));
+        if (cssclass) {
+            x.attr('class', cssclass);
+        }
+        return x;
     }
 
     function draggabilify(gridItem, grid) {
@@ -129,7 +85,7 @@
             .padding(1.5);
 
 
-        var root = d3.hierarchy({children: result})
+        const root = d3.hierarchy({children: result})
             .sum(function (d) {
                 return d[1];
             })
@@ -138,7 +94,7 @@
                 d.value = Math.log(1 + d.data[1]);
             });
 
-        var node = svg.selectAll(".node")
+        const node = svg.selectAll(".node")
             .data(pack(root).leaves())
             .enter().append("g")
             .attr("class", "node")
@@ -202,7 +158,7 @@
 
             const c = builder(v);
 
-            return ( $(d('div')).attr('class', 'grid-item').append(c))[0];
+            return ( $(e('div')).attr('class', 'grid-item').append(c))[0];
 
         });
 
@@ -219,7 +175,7 @@
         const facets = newGrid($('#facets'));
         const results = newGrid($('#query-results'));
 
-        const resultsTemplate = Tempo.prepare("query_results", {'escape': false});
+        //const resultsTemplate = Tempo.prepare("query_results", {'escape': false});
 
         const queryText = $('#query_text');
 
@@ -260,19 +216,55 @@
 
             $.get('/search', {q: qText}, function (result) {
 
-                const rr = JSON.parse(result);
+                var rr;
+                try {
+                    rr = JSON.parse(result);
+                } catch (e) {
+                    //usually just empty search result
+                    return;
+                }
 
-                _.each(rr, (v, k) => {
-                    if (v.inh) {
-                        v.out = v.inh['<'];
+                $('#query_results').html(
+                    _.map(rr, (x, k) => {
 
-                        const vin = v.inh['>'];
-                        if (vin && !(vin.length === 1 && vin[0].length === 0)) //exclude root tag
-                            v.in = vin;
-                    }
-                });
+                        if (!x.I)
+                            return;
 
-                resultsTemplate.render(rr);
+                        if (x.inh) {
+                            x.out = x.inh['<'];
+
+                            const vin = x.inh['>'];
+                            if (vin && !(vin.length === 1 && vin[0].length === 0)) //exclude root tag
+                                x.in = vin;
+                        }
+
+                        const preview = DIVclass('preview');
+                        if (x.thumbnail) {
+                            preview.append(
+                                E('img').attr('src', x.thumbnail)
+                            );
+                        }
+                        if (x['_']) {
+                            preview.append( E('p').html( x['_'].replace('\n','<br/>') ));
+                        }
+
+                        const meta = DIVclass('meta');
+
+                        const y = DIVclass('grid-item result').append(
+                            DIVclass('header')
+                                .append($(E('h2')).text(x.N)),
+                            meta,
+                            preview
+                        );
+
+
+                        return y;
+                    })
+                );
+
+
+                $("#query_results").scrollTop(0);
+
 
             });
         }
@@ -316,7 +308,7 @@
                     const id = v[0];
                     const score = v[1];
 
-                    const c = $(d('div'))
+                    const c = $(e('div'))
                         .attr('class', 'grid-item-content')
                         .text(id).click(() => {
                             queryText.val(dimension + ':' + id);

@@ -2,9 +2,6 @@ package spimedb.io;
 
 
 import org.jsoup.Jsoup;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
 
 /**
  * https://docs.oracle.com/javase/tutorial/jaxp/dom/readingXML.html

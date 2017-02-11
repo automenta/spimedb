@@ -9,7 +9,6 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.SpimeDB;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -31,7 +30,7 @@ public final class SearchResult {
         this.query = q;
         this.searcher = searcher;
         this.docs = docs;
-        SpimeDB.logger.info("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
+        logger.info("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
     }
 
     public void forEach(BiConsumer<Document,ScoreDoc> each) {
@@ -65,7 +64,7 @@ public final class SearchResult {
             try {
                 reader.document(sd.doc, visitor);
             } catch (IOException e) {
-                SpimeDB.logger.error("{} {}", sd, e);
+                logger.error("{} {}", sd, e);
             }
             return d;
         });
@@ -79,7 +78,7 @@ public final class SearchResult {
 
             searcher.getIndexReader().close();
         } catch (IOException e) {
-            SpimeDB.logger.error("{}", e);
+            logger.error("{}", e);
         }
     }
 

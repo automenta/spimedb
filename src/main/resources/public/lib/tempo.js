@@ -1,1 +1,0 @@
-../bower_components/tempojs/tempo.min.js
