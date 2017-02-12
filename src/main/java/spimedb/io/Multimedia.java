@@ -283,13 +283,9 @@ public class Multimedia {
         });
 
 
-
-
-
-
     }
 
-    private String titleify(String id) {
+    private static String titleify(String id) {
         return URLDecoder.decode(id).replace("_", " ").trim();
     }
 
@@ -405,7 +401,6 @@ public class Multimedia {
         return m;
     }
 
-    static final String pdfPageImageOutputPath = "/home/me/ea/res";
     static final int pdfPageImageDPI = 32;
 
 

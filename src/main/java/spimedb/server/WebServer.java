@@ -33,6 +33,7 @@ import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
@@ -50,7 +51,10 @@ import static spimedb.util.HTTP.getStringParameter;
 public class WebServer extends PathHandler {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
+
     public static final String staticPath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
+
+    public static final String localPathDefault = Paths.get("src/main/resources/local/").toAbsolutePath().toString();
 
     private final SpimeDB db;
 
@@ -75,8 +79,27 @@ public class WebServer extends PathHandler {
         //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
         j2js = JavaToJavascript.build();
 
+        boolean localPath = false;
+        if (db.indexPath!=null) {
+            File publicFolder = db.file.getParentFile().toPath().resolve("public").toFile();
+            if (publicFolder.exists()) {
+
+                addPrefixPath("/local", resource(new FileResourceManager(
+                        publicFolder, 0, true, "/")));
+                localPath = true;
+            }
+        }
+
+        if (!localPath) {
+            //HACK add the defaut local to prevent 404's
+            addPrefixPath("/local", resource(new FileResourceManager(
+                    Paths.get(localPathDefault).toFile(), 0, true, "/")));
+        }
+
+        File staticPathFile = Paths.get(staticPath).toFile();
+
         addPrefixPath("/", resource(new FileResourceManager(
-                Paths.get(staticPath).toFile(), 0, true, "/")));
+                staticPathFile, 0, true, "/")));
 
 
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
@@ -250,14 +273,13 @@ public class WebServer extends PathHandler {
                     if (b != null) {
                         try {
                             o.write(b);
-                            return;
                         } catch (IOException e) {
 
                         }
                     }
+                } else {
+                    ex.setStatusCode(404);
                 }
-
-                ex.setStatusCode(404);
 
             }, contentType != null ? contentType : "text/plain");
         } else {
