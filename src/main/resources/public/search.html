@@ -4,7 +4,6 @@
 
     <script src="lib/lodash.js"></script>
     <script src="lib/jquery.min.js"></script>
-    <!--<script src="lib/tempo.js"></script>-->
 
     <script src="lib/d3.min.js"></script>
 
@@ -18,27 +17,35 @@
 <body>
 
 
-
 <div id="query_results" class="grid">
 
 </div>
 
-<div id="facets" class="grid">
+<div id="menu">
 
+    <div id="query">
+        <div id="query_edit">
+            <span>
+                <input id="query_text" type="text" placeholder="Search"/>
+                <button id="query_update">Search</button>
+            </span>
+        </div>
+        
+        <div id="querySuggestionsWrapper">
+            <div id="query_suggestions" class="grid">
+            </div>
+        </div>
+    </div>
+
+    <hr/>
+
+    <div id="facetsWrapper">
+        <div id="facets" class="grid">
+
+        </div>
+    </div>
 </div>
 
-<div id="query">
-    <div id="query_edit">
-        <span>
-            <input id="query_text" type="text" placeholder="Search"/>
-            <button id="query_update">Search</button>
-        </span>
-    </div>
-    <div id="query_status">
-    </div>
-    <div id="query_suggestions">
-    </div>
-</div>
 
 </body>
 
@@ -147,9 +154,7 @@
 
 
     function newGrid(selector) {
-        return selector.packery({
-
-        });
+        return selector.packery({});
     }
 
     function addToGrid(result, builder, grid) {
@@ -179,21 +184,27 @@
 
         const queryText = $('#query_text');
 
+        const qs = $('#query_suggestions');
+
         const onQueryTextChanged = _.throttle(() => {
             const qText = queryText.val();
-            $('#query_status').html('Suggesting: ' + qText);
+            //$('#query_status').html('Suggesting: ' + qText);
+
             $.get('/suggest', {q: qText}, function (result) {
 
-                if (result.length === 0) return;
 
-                $('#query_suggestions').html(_.map(JSON.parse(result), (x) =>
-                    $(document.createElement('div')).append(
-                        $(document.createElement('a')).text(x).click((e) => {
-                            queryText.val(x);
-                            update(x);
-                        })
-                    )
-                ));
+                if (result.length === 0) {
+                    qs.html('');
+                } else {
+                    qs.html(_.map(JSON.parse(result), (x) =>
+                        DIVclass('grid-item').append(
+                            DIVclass('grid-item-content').text(x).click((e) => {
+                                queryText.val(x);
+                                update(x);
+                            })
+                        )
+                    ));
+                }
             });
         }, 100, true, true);
 
@@ -245,7 +256,7 @@
                             );
                         }
                         if (x['_']) {
-                            preview.append( E('p').html( x['_'].replace('\n','<br/>') ));
+                            preview.append(E('p').html(x['_'].replace('\n', '<br/>')));
                         }
 
                         const meta = DIVclass('meta');
@@ -268,7 +279,6 @@
 
             });
         }
-
 
 
         //PACKERY.js
@@ -305,8 +315,12 @@
 
                 var facetButtonBuilder = (v) => {
 
-                    const id = v[0];
+                    const id = v[0]
+                        .replace(/_/g, ' ')
+                        .replace(/\-/g, ' ')
+                    ; //HACK
                     const score = v[1];
+
 
                     const c = $(e('div'))
                         .attr('class', 'grid-item-content')
@@ -316,7 +330,7 @@
                             return false;
                         })
                         .attr('style',
-                            'font-size:'+ (80.0 + (score)) + '%');
+                            'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
 
                     return c;
                 };
@@ -329,7 +343,7 @@
         }
 
         updateFacet('I', 'Category');
-        updateFacet('>', 'Tag');
+        //updateFacet('>', 'Tag');
 
     }, false);
 
