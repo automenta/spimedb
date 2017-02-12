@@ -10,8 +10,8 @@
     <script src="lib/draggabilly.js"></script>
     <script src="lib/packery.js"></script>
 
+    <link rel="stylesheet" href="search.base.css">
     <link rel="stylesheet" href="search.css">
-
 
 </head>
 <body>
@@ -30,7 +30,7 @@
                 <button id="query_update">Search</button>
             </span>
         </div>
-        
+
         <div id="querySuggestionsWrapper">
             <div id="query_suggestions" class="grid">
             </div>
@@ -249,6 +249,22 @@
                                 x.in = vin;
                         }
 
+                        const header = DIVclass('header');
+                        if (x.data) {
+                            header.append(
+                                E('a').attr('href', x.data).attr('target', '_').append(
+                                    E('h2').text(x.N)
+                                )
+                            );
+                        } else {
+                            header.append(
+                                E('h2').text(x.N)
+                            );
+
+                        }
+
+                        const meta = DIVclass('meta');
+
                         const preview = DIVclass('preview');
                         if (x.thumbnail) {
                             preview.append(
@@ -259,11 +275,9 @@
                             preview.append(E('p').html(x['_'].replace('\n', '<br/>')));
                         }
 
-                        const meta = DIVclass('meta');
 
                         const y = DIVclass('grid-item result').append(
-                            DIVclass('header')
-                                .append($(E('h2')).text(x.N)),
+                            header,
                             meta,
                             preview
                         );
@@ -335,15 +349,15 @@
                     return c;
                 };
 
-                addToGrid(result, facetButtonBuilder, facets);
+                setTimeout(()=> addToGrid(result, facetButtonBuilder, facets), 0);
 
 
             });
 
         }
 
-        updateFacet('I', 'Category');
-        //updateFacet('>', 'Tag');
+        //updateFacet('I', 'Category');
+        updateFacet('>', 'Tag');
 
     }, false);
 

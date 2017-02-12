@@ -134,7 +134,7 @@ public class Session extends AbstractServerWebSocket {
 
         public Task focusLonLat(float[][] bounds) {
 
-            logger.info("start {} focusLonLat {}", this, bounds);
+            //logger.info("start {} focusLonLat {}", this, bounds);
 
             float[] lon = new float[]{bounds[0][0], bounds[1][0]};
             float[] lat = new float[]{bounds[0][1], bounds[1][1]};

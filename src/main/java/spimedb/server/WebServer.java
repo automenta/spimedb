@@ -56,7 +56,7 @@ public class WebServer extends PathHandler {
 
     final JavaToJavascript j2js;
 
-    private final double websocketOutputRateLimitBytesPerSecond = 1024 * 1024;
+    @Deprecated private final double websocketOutputRateLimitBytesPerSecond = 64 * 1024;
 
     private int port = 0;
     private String host = null;
@@ -103,17 +103,15 @@ public class WebServer extends PathHandler {
 
             try {
                 List<Lookup.LookupResult> x = db.suggest(qText, 16);
-                if (x == null) {
-                    return;
-                }
-                JSON.toJSON(Lists.transform(x, y -> y.key), o);
+                if (x != null)
+                    JSON.toJSON(Lists.transform(x, y -> y.key), o);
 
             } catch (Exception e) {
-                logger.warn("suggest: {}", e);
-                try {
+                logger.warn("suggest: {}", e.getMessage());
+                /*(try {
                     o.write(JSON.toJSONBytes(e));
                 } catch (IOException e1) {
-                }
+                })*/
             }
         }));
 
@@ -123,22 +121,17 @@ public class WebServer extends PathHandler {
                 return;
 
             try {
-                FacetResult x = db.facets(dimension, 32);
-                if (x == null) {
-                    return;
-                }
 
-                JSON.toJSON(
-                        Stream.of(x.labelValues).map(y -> new Object[]{y.label, y.value}).toArray(Object[]::new)
-                        /*Stream.of(x.labelValues).collect(
-                        Collectors.toMap(y->y.label, y->y.value ))*/, o);
+                FacetResult x = db.facets(dimension, 32);
+
+                if (x != null)
+                    JSON.toJSON(
+                            Stream.of(x.labelValues).map(y -> new Object[]{y.label, y.value}).toArray(Object[]::new)
+                            /*Stream.of(x.labelValues).collect(
+                            Collectors.toMap(y->y.label, y->y.value ))*/, o);
 
             } catch (Exception e) {
-                logger.warn("suggest: {}", e);
-                try {
-                    o.write(JSON.toJSONBytes(e));
-                } catch (IOException e1) {
-                }
+                logger.warn("suggest: {}", e.getMessage());
             }
         }));
 
@@ -157,16 +150,18 @@ public class WebServer extends PathHandler {
             try {
 
                 SearchResult xx = db.find(qText, 10);
+                if (xx!=null) {
 
-                o.write('[');
-                xx.forEach((r, x) -> {
-                    JSON.toJSON(searchResult(
-                        DObject.get(r), x
-                    ), o, ',');
-                });
-                o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
+                    o.write('[');
+                    xx.forEach((r, x) -> {
+                        JSON.toJSON(searchResult(
+                                DObject.get(r), x
+                        ), o, ',');
+                    });
+                    o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
 
-                xx.close();
+                    xx.close();
+                }
 
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e.getMessage());
@@ -185,6 +180,13 @@ public class WebServer extends PathHandler {
         restart();
 
     }
+
+//    void setStatic(String path) {
+//        if (usePath!=null) {
+//            addPrefixPath("/", resource(new FileResourceManager(
+//                    Paths.get(usePath).toFile(), 0, true, "/")));
+//        }
+//    }
 
     public void setHost(String host) {
 

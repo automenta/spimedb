@@ -179,7 +179,7 @@ public class DObject implements NObject {
         }
 
         if (id.contains("/")) {
-            String[] path = id.split("/");
+            String[] path = id.split("/\\/+/");
             if (path.length > 0)
                 d.add(new FacetField(NObject.ID, path));
         }

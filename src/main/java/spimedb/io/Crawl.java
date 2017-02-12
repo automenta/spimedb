@@ -58,7 +58,7 @@ public class Crawl {
     }
 
     public static void url(String id, URL u, float pri, SpimeDB db) throws URISyntaxException {
-        String us = u.toURI().toString();
+        String us = u.toString();
 
         DObject p = db.get(id);
         String whenCached = p != null ? p.get("url_cached") : null;
@@ -66,7 +66,7 @@ public class Crawl {
             if (whenCached == null || Long.valueOf(whenCached) < u.openConnection().getLastModified()) {
                 db.addAsync(pri, new MutableNObject(id)
                         .put("url_in", us)
-                        //.put("url", uf)
+                        .put("url", u.toString())
                 );
             }
         } catch (IOException e) {

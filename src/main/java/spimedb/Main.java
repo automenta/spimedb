@@ -461,6 +461,8 @@ public class Main extends FileAlterationListenerAdaptor {
 
     public Main(String path) throws Exception {
 
+
+
         //setup default klasspath
         klassPath.put("http", WebServer.class);
         klassPath.put("log", LogConfigurator.class);

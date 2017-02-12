@@ -37,8 +37,6 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Detects document and multimedia metadata, and schedules further processing
@@ -223,11 +221,11 @@ public class Multimedia {
                                         .put("data", "/data?I=" + xid + "#" + page)
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
-                                        .putLater("textParse", 0.1f, ()-> {
+                                        /*.putLater("textParse", 0.1f, ()-> {
                                             return (pdb.length > 0) ? Stream.of(pdb).map(
                                                     t -> NLP.toString(NLP.parse(t))
                                             ).collect(Collectors.joining("\n")) : null;
-                                        })
+                                        })*/
                                         .putLater("thumbnail", 0.5f, ()->{
                                             try {
                                                 PDDocument document = PDDocument.load(new URL(url_in).openStream());

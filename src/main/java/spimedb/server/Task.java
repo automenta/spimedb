@@ -16,8 +16,6 @@ abstract public class Task implements Runnable {
 
     public static Logger logger = LoggerFactory.getLogger(Task.class);
 
-    private final Session session;
-
     //final int MAX_RESULTS = 1024;
     //final int MAX_RESPONSE_BYTES = 1024 * 1024;
 
@@ -25,7 +23,8 @@ abstract public class Task implements Runnable {
 
     private final long whenCreated;
 
-    private long whenStarted /* TODO */, whenStopped;
+    //private long whenStarted; // TODO
+    private long whenStopped;
 
     /** bytes transferred out */
     protected final AtomicLong outBytes = new AtomicLong(0);
@@ -35,11 +34,10 @@ abstract public class Task implements Runnable {
 
 
     public Task(Session s) {
-        this(s, s.defaultOutRate);
+        this(s.defaultOutRate);
     }
 
-    public Task(Session s, final RateLimiter outRate) {
-        this.session = s;
+    public Task(final RateLimiter outRate) {
         this.outRate = outRate;
 
         this.whenCreated = System.currentTimeMillis();
@@ -54,7 +52,7 @@ abstract public class Task implements Runnable {
 
             long dms = whenStopped - whenCreated;
             float kb = outBytes.get()/1024f;
-            logger.info("stop {} {}ms, sent {}Kb ({} Kb/sec)", this, dms, kb, (kb/(dms/1000f)) );
+            //logger.info("stop {} {}ms, sent {}Kb ({} Kb/sec)", this, dms, kb, (kb/(dms/1000f)) );
         }
     }
 

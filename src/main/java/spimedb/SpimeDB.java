@@ -82,7 +82,7 @@ public class SpimeDB  {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
-        Math.max(2, Runtime.getRuntime().availableProcessors()*4)
+        Math.max(2, Runtime.getRuntime().availableProcessors())
     );
 
     /**
@@ -358,11 +358,11 @@ public class SpimeDB  {
         }
     }
 
-    public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
+    @Nullable public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
         return find(defaultFindQueryParser.parse(query), hitsPerPage);
     }
 
-    @NotNull private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
+    @Nullable private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
 
         IndexSearcher searcher = searcher();
         if (searcher != null) {
@@ -372,7 +372,8 @@ public class SpimeDB  {
             }
         }
 
-        return new SearchResult(q, null, null); //TODO: return EmptySearchResult;
+        //return new SearchResult(q, null, null); //TODO: return EmptySearchResult;
+        return null;
     }
 
 
