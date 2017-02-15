@@ -1,7 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang.ArrayUtils;
 import spimedb.index.rtree.PointND;
 import spimedb.index.rtree.RectND;
 import spimedb.util.JSON;

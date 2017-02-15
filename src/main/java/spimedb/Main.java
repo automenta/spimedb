@@ -274,7 +274,7 @@ public class Main extends FileAlterationListenerAdaptor {
                     try {
                         x = (X) c.newInstance(param);
                     } catch (Exception e) {
-                        logger.error("instantiate {} {} {} {}", file, cl, c, e.getMessage());
+                        logger.error("error instantiating {} {} {} {}", file, cl, c, e.getMessage());
                         return null;
                     }
                 }

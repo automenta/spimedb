@@ -29,10 +29,12 @@ import spimedb.SpimeDB;
 import spimedb.client.Client;
 import spimedb.index.DObject;
 import spimedb.index.SearchResult;
+import spimedb.server.webdav.WebdavServlet;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
 
+import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -101,6 +103,12 @@ public class WebServer extends PathHandler {
         addPrefixPath("/", resource(new FileResourceManager(
                 staticPathFile, 0, true, "/")));
 
+
+        try {
+            addPrefixPath("/", WebdavServlet.get("/"));
+        } catch (ServletException e) {
+            logger.error("{}", e);
+        }
 
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
             try {
