@@ -104,11 +104,11 @@ public class WebServer extends PathHandler {
                 staticPathFile, 0, true, "/")));
 
 
-        try {
-            addPrefixPath("/", WebdavServlet.get("/"));
-        } catch (ServletException e) {
-            logger.error("{}", e);
-        }
+//        try {
+//            addPrefixPath("/", WebdavServlet.get("/"));
+//        } catch (ServletException e) {
+//            logger.error("{}", e);
+//        }
 
         addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
             try {
