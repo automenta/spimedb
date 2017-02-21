@@ -1,13 +1,12 @@
 package spimedb.server.webdav.methods;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import spimedb.server.webdav.DAVMethod;
 import spimedb.server.webdav.ITransaction;
 import spimedb.server.webdav.WebdavStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class DoNotImplemented implements DAVMethod {
 

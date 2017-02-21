@@ -1,8 +1,7 @@
 package spimedb.server.webdav;
 
-import java.util.Hashtable;
-
 import javax.servlet.http.HttpServletResponse;
+import java.util.Hashtable;
 
 /**
  * Wraps the HttpServletResponse class to abstract the specific protocol used.

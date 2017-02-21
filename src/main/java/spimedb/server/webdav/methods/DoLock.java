@@ -15,15 +15,9 @@
  */
 package spimedb.server.webdav.methods;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Hashtable;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilder;
-
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import spimedb.server.webdav.ITransaction;
 import spimedb.server.webdav.IWebdavStore;
 import spimedb.server.webdav.StoredObject;
@@ -34,13 +28,13 @@ import spimedb.server.webdav.fromcatalina.XMLWriter;
 import spimedb.server.webdav.locking.IResourceLocks;
 import spimedb.server.webdav.locking.LockedObject;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Hashtable;
 
 public class DoLock extends AbstractMethod {
 

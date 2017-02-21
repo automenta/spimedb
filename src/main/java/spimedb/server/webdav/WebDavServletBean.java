@@ -1,34 +1,21 @@
 package spimedb.server.webdav;
 
+import spimedb.server.webdav.exceptions.UnauthenticatedException;
+import spimedb.server.webdav.exceptions.WebdavException;
+import spimedb.server.webdav.fromcatalina.MD5Encoder;
+import spimedb.server.webdav.locking.ResourceLocks;
+import spimedb.server.webdav.methods.*;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.Enumeration;
 import java.util.HashMap;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import spimedb.server.webdav.exceptions.UnauthenticatedException;
-import spimedb.server.webdav.exceptions.WebdavException;
-import spimedb.server.webdav.fromcatalina.MD5Encoder;
-import spimedb.server.webdav.locking.ResourceLocks;
-import spimedb.server.webdav.methods.DoCopy;
-import spimedb.server.webdav.methods.DoDelete;
-import spimedb.server.webdav.methods.DoGet;
-import spimedb.server.webdav.methods.DoHead;
-import spimedb.server.webdav.methods.DoLock;
-import spimedb.server.webdav.methods.DoMkcol;
-import spimedb.server.webdav.methods.DoMove;
-import spimedb.server.webdav.methods.DoNotImplemented;
-import spimedb.server.webdav.methods.DoOptions;
-import spimedb.server.webdav.methods.DoPropfind;
-import spimedb.server.webdav.methods.DoProppatch;
-import spimedb.server.webdav.methods.DoPut;
-import spimedb.server.webdav.methods.DoUnlock;
 
 public class WebDavServletBean extends HttpServlet {
 

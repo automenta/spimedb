@@ -22,10 +22,9 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 
+import javax.servlet.ServletException;
 import java.io.File;
 import java.lang.reflect.Constructor;
-
-import javax.servlet.ServletException;
 
 
 /**

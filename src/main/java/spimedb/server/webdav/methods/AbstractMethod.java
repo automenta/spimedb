@@ -16,22 +16,6 @@
 
 package spimedb.server.webdav.methods;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.text.SimpleDateFormat;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import spimedb.server.webdav.DAVMethod;
 import spimedb.server.webdav.ITransaction;
 import spimedb.server.webdav.StoredObject;
@@ -41,6 +25,17 @@ import spimedb.server.webdav.fromcatalina.URLEncoder;
 import spimedb.server.webdav.fromcatalina.XMLWriter;
 import spimedb.server.webdav.locking.IResourceLocks;
 import spimedb.server.webdav.locking.LockedObject;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public abstract class AbstractMethod implements DAVMethod {
 

@@ -1,11 +1,13 @@
 package spimedb.bag;
 
+import jcog.bag.PLink;
+import jcog.bag.RawPLink;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by me on 1/15/17.
  */
-public class Budget<X> {
+public class Budget<X> /*extends RawPLink<X>*/ {
     public final X id;
     public float pri;
 

@@ -15,21 +15,16 @@
  */
 package spimedb.server.webdav.methods;
 
+import spimedb.server.webdav.*;
+import spimedb.server.webdav.locking.ResourceLocks;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.text.DateFormat;
 import java.util.Locale;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import spimedb.server.webdav.IMimeTyper;
-import spimedb.server.webdav.ITransaction;
-import spimedb.server.webdav.IWebdavStore;
-import spimedb.server.webdav.StoredObject;
-import spimedb.server.webdav.WebdavStatus;
-import spimedb.server.webdav.locking.ResourceLocks;
 
 public class DoGet extends DoHead {
 

@@ -18,7 +18,6 @@ package spimedb.server.webdav.fromcatalina;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Iterator;
 import java.util.Map;
 
 /**

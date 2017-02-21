@@ -16,13 +16,13 @@
 
 package spimedb.server.webdav.locking;
 
+import spimedb.server.webdav.ITransaction;
+import spimedb.server.webdav.exceptions.LockFailedException;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import spimedb.server.webdav.ITransaction;
-import spimedb.server.webdav.exceptions.LockFailedException;
 
 /**
  * simple locking management for concurrent data access, NOT the webdav locking.

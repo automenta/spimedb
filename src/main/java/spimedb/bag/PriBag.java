@@ -344,12 +344,6 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     }
 
 
-    @Nullable
-    @Override
-    public Budget<V> put(/*@NotNull*/ V v, /*@NotNull*/ Budget<V> b) {
-        assert(b.id.equals(v)); //must match
-        return put(v, b.pri, null);
-    }
 
     public final Budget<V> put(/*@NotNull*/ V key, float pri) {
         return put(key, pri, null);

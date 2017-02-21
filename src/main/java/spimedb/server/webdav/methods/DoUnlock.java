@@ -1,17 +1,16 @@
 package spimedb.server.webdav.methods;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import spimedb.server.webdav.StoredObject;
 import spimedb.server.webdav.ITransaction;
-import spimedb.server.webdav.WebdavStatus;
 import spimedb.server.webdav.IWebdavStore;
+import spimedb.server.webdav.StoredObject;
+import spimedb.server.webdav.WebdavStatus;
 import spimedb.server.webdav.exceptions.LockFailedException;
 import spimedb.server.webdav.locking.IResourceLocks;
 import spimedb.server.webdav.locking.LockedObject;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class DoUnlock extends DeterminableMethod {
 

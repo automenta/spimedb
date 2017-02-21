@@ -1,16 +1,9 @@
 package spimedb.server.webdav.methods;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilder;
-
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 import spimedb.server.webdav.ITransaction;
 import spimedb.server.webdav.IWebdavStore;
 import spimedb.server.webdav.StoredObject;
@@ -23,10 +16,15 @@ import spimedb.server.webdav.fromcatalina.XMLWriter;
 import spimedb.server.webdav.locking.LockedObject;
 import spimedb.server.webdav.locking.ResourceLocks;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Vector;
 
 public class DoProppatch extends AbstractMethod {
 

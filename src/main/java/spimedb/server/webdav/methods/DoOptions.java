@@ -15,19 +15,18 @@
  */
 package spimedb.server.webdav.methods;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import spimedb.server.webdav.StoredObject;
 import spimedb.server.webdav.ITransaction;
-import spimedb.server.webdav.WebdavStatus;
 import spimedb.server.webdav.IWebdavStore;
+import spimedb.server.webdav.StoredObject;
+import spimedb.server.webdav.WebdavStatus;
 import spimedb.server.webdav.exceptions.AccessDeniedException;
 import spimedb.server.webdav.exceptions.LockFailedException;
 import spimedb.server.webdav.exceptions.WebdavException;
 import spimedb.server.webdav.locking.ResourceLocks;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class DoOptions extends DeterminableMethod {
 
