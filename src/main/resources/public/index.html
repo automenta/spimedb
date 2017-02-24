@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="search.base.css">
     <link rel="stylesheet" href="local/search.css">
 
+
     <link rel='stylesheet' href='//cdn.jsdelivr.net/font-hack/2.020/css/hack.min.css'>
     <style>
             body {
@@ -20,22 +21,37 @@
             }
     </style>
 
+    <!-- xxxxxxxxxxxxxxxxxxxxxx -->
+
+
+    <!-- Add mousewheel plugin (this is optional) -->
+    <!-- <script type="text/javascript" src="/fancybox/lib/jquery.mousewheel-3.0.6.pack.js"></script> -->
+
+    <!-- Add fancyBox -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.6/css/jquery.fancybox.min.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.6/js/jquery.fancybox.min.js"></script>
+
+    <!-- Optionally add helpers - button, thumbnail and/or media -->
+    <!-- <link rel="stylesheet" href="/fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" type="text/css" media="screen" />
+    <script type="text/javascript" src="/fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+    <script type="text/javascript" src="/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script> -->
+
+    <!-- <link rel="stylesheet" href="/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" type="text/css" media="screen" />
+    <script type="text/javascript" src="/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script> -->
+    <!-- xxxxxxxxxxxxxxxxxxxxxx -->
+
 </head>
 <body>
 
 
-<div id="query_results" class="grid">
-
-</div>
-
 <div id="menu">
 
-    <div id="query">
+    <div id="query" class="query_expand">
         <div id="query_edit">
-            <span>
-                <input id="query_text" type="text" placeholder="Search"/>
-                <button id="query_update">Search</button>
-            </span>
+
+            <input id="query_text" type="text" placeholder="Search"/>
+            <button id="query_update">&gt;</button>
+
         </div>
 
         <div id="querySuggestionsWrapper">
@@ -51,6 +67,9 @@
     </div>
 </div>
 
+<div id="query_results" class="grid">
+
+</div>
 
 </body>
 
@@ -86,6 +105,7 @@
 
 
     function newGrid(selector) {
+
         return selector.packery({});
     }
 
@@ -103,11 +123,14 @@
 
         grid.append(nn).packery('appended', nn);
 
+
         newItems.forEach((x) => draggabilify(x, grid));
     }
 
 
     $(document).ready(() => {
+
+
 
         const facets = newGrid($('#facets'));
         const results = newGrid($('#query-results'));
@@ -151,11 +174,24 @@
                 querySubmit();
         });
 
-        $('#query_update').click(querySubmit);
+        function expand() {
+          $('#menu').addClass('expand');
+          $('#query_results').hide();
+          setTimeout(() =>  facets.packery('layout'), 0);
+        }
+        function contract() {
+          $('#query_results').show();
+          $('#menu').removeClass('expand');
+          $('#menu').addClass('sidebar');
+          setTimeout(() =>  facets.packery('layout'), 0);
+        }
+        expand();
+
 
         function update(qText) {
 
             //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
+
 
             $.get('/search', {q: qText}, function (result) {
 
@@ -167,7 +203,12 @@
                     return;
                 }
 
+                contract();
+
+
                 $('#query_results').html(
+
+
                     _.map(rr, (x, k) => {
 
                         if (!x.I)
@@ -199,9 +240,15 @@
 
                         const preview = DIVclass('preview');
                         if (x.thumbnail) {
-                            preview.append(
-                                E('img').attr('src', x.thumbnail)
+                            const tt = E('a').attr('class', 'fancybox').attr('rel', 'group').append(
+                              E('img').attr('src', x.thumbnail)
                             );
+                            preview.append(
+                                tt
+                            );
+
+                            //http://fancyapps.com/fancybox/#examples
+                            tt.fancybox();
                         }
                         if (x['_']) {
                             preview.append(E('p').html(x['_'].replace('\n', '<br/>')));
@@ -217,6 +264,8 @@
 
                         return y;
                     })
+
+
                 );
 
 

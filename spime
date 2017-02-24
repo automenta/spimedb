@@ -1,8 +1,7 @@
 #!/bin/bash
 
 MAVEN_OPTS="-Xmx768m" \
-    mvn exec:java --quiet \
-        -Dexec.args="'$1'" \
-        -Dexec.mainClass="spimedb.Main"
-
+  mvn exec:java --quiet \
+      -Dexec.args="'$1'" \
+      -Dexec.mainClass="spimedb.Main"
 

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Requires 'daemonize'
+
+echo Starting SpimeDB as Daemon in: $1
+
+daemonize -v -c `pwd` \
+    # -o /tmp/spime.out -e /tmp/spime.err \
+    -p /tmp/spimedb.pid -l /tmp/spimedb.pid \
+    `pwd`/spime $1
+

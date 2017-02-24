@@ -185,12 +185,12 @@
             </exclusions>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.kohsuke/akuma -->
-        <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>akuma</artifactId>
-            <version>1.10</version>
-        </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.kohsuke/akuma &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.kohsuke</groupId>-->
+            <!--<artifactId>akuma</artifactId>-->
+            <!--<version>1.10</version>-->
+        <!--</dependency>-->
 
 
         <!--<dependency>-->
