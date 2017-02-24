@@ -14,6 +14,13 @@
     <link rel="stylesheet" href="local/search.css">
 
 
+    <link rel='stylesheet' href='//cdn.jsdelivr.net/font-hack/2.020/css/hack.min.css'>
+    <style>
+            body {
+                font-family: Hack, Sans-serif;
+            }
+    </style>
+
     <!-- xxxxxxxxxxxxxxxxxxxxxx -->
 
 
@@ -60,11 +67,7 @@
     </div>
 </div>
 
-<div id="results">
-
-</div>
-
-<div id="focus" style="display:none">
+<div id="query_results" class="grid">
 
 </div>
 
@@ -89,6 +92,17 @@
         return x;
     }
 
+    function draggabilify(gridItem, grid) {
+
+        const draggie = new Draggabilly(gridItem);
+
+        grid.packery('bindDraggabillyEvents', draggie);
+
+        return gridItem;
+
+    }
+
+
 
     function newGrid(selector) {
 
@@ -110,6 +124,7 @@
         grid.append(nn).packery('appended', nn);
 
 
+        newItems.forEach((x) => draggabilify(x, grid));
     }
 
 
@@ -118,8 +133,9 @@
 
 
         const facets = newGrid($('#facets'));
+        const results = newGrid($('#query-results'));
 
-        //const resultsTemplate = Tempo.prepare("results", {'escape': false});
+        //const resultsTemplate = Tempo.prepare("query_results", {'escape': false});
 
         const queryText = $('#query_text');
 
@@ -158,59 +174,24 @@
                 querySubmit();
         });
 
-        function scrollTop() {
-          $("body").scrollTop(0);
-        }
-
         function expand() {
           $('#menu').addClass('expand');
-          $('#results').hide();
-
-          $('#facets .list-item').removeClass('list-item').addClass('grid-item');
-
+          $('#query_results').hide();
           setTimeout(() =>  facets.packery('layout'), 0);
         }
-
         function contract() {
-          unfocus();
-          $('#results').show().addClass('main');
+          $('#query_results').show();
           $('#menu').removeClass('expand');
           $('#menu').addClass('sidebar');
-
-          $('#facets .grid-item').removeClass('grid-item').attr('style', '').addClass('list-item');
+          setTimeout(() =>  facets.packery('layout'), 0);
         }
+        expand();
 
-        function focus(url) {
-            suggestionsClear();
-
-            $('#focus').attr('class', 'main').html(
-                E('iframe').attr('src', url).attr('width', '100%').attr('height', '100%')
-            );
-            $('#results').attr('class', 'sidebar shiftdown');
-            $('#menu').attr('class', 'hide');
-            $('#focus').show();
-        }
-
-        function unfocus() {
-            $('#focus').hide();
-            $('#focus').html('');
-            $('#results').show();
-            $('#menu').removeClass('hide');
-            $('#results').removeClass('sidebar').removeClass('shiftdown');
-        }
-
-        function suggestionsClear() {
-          qs.html('');
-        }
 
         function update(qText) {
 
-            suggestionsClear();
-
-            contract();
-
             //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
-            $('#results').html('Searching...');
+
 
             $.get('/search', {q: qText}, function (result) {
 
@@ -219,14 +200,13 @@
                     rr = JSON.parse(result);
                 } catch (e) {
                     //usually just empty search result
-                    $('#results').html('No matches for: "' + qText + '"');
                     return;
                 }
 
                 contract();
 
 
-                $('#results').html(
+                $('#query_results').html(
 
 
                     _.map(rr, (x, k) => {
@@ -245,9 +225,9 @@
                         const header = DIVclass('header');
                         if (x.data) {
                             header.append(
-                                //E('a').attr('href', x.data).attr('target', '_').append(
+                                E('a').attr('href', x.data).attr('target', '_').append(
                                     E('h2').text(x.N)
-                                //)
+                                )
                             );
                         } else {
                             header.append(
@@ -258,36 +238,28 @@
 
                         const meta = DIVclass('meta');
 
-
-                        const y = DIVclass('list-item result').append(
-                            header,
-                            meta
-                        );
-
+                        const preview = DIVclass('preview');
                         if (x.thumbnail) {
-                            const tt =
-                            //E('a').attr('class', 'fancybox').attr('rel', 'group').append(
+                            const tt = E('a').attr('class', 'fancybox').attr('rel', 'group').append(
                               E('img').attr('src', x.thumbnail)
-                            //)
-                            ;
-                            y.append(
+                            );
+                            preview.append(
                                 tt
                             );
 
                             //http://fancyapps.com/fancybox/#examples
-                            //tt.fancybox();
+                            tt.fancybox();
                         }
-
                         if (x['_']) {
-                            y.append(E('p').attr('class', 'textpreview').html(x['_'].replace('\n', '<br/>')));
+                            preview.append(E('p').html(x['_'].replace('\n', '<br/>')));
                         }
 
 
-                        if (x.data) {
-                          y.click(()=>{
-                              focus(x.data);
-                          });
-                        }
+                        const y = DIVclass('grid-item result').append(
+                            header,
+                            meta,
+                            preview
+                        );
 
 
                         return y;
@@ -297,7 +269,7 @@
                 );
 
 
-                scrollTop();
+                $("#query_results").scrollTop(0);
 
 
             });
@@ -364,11 +336,6 @@
             });
 
         }
-
-
-        //START ----------------->
-
-        expand();
 
         //updateFacet('I', 'Category');
         updateFacet('>', 'Tag');
