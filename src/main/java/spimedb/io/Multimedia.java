@@ -50,17 +50,18 @@ public class Multimedia {
 
     public final static Logger logger = LoggerFactory.getLogger(Multimedia.class);
 
-    private static final int BUFFER_SIZE = 1024 * 128;
 
     final Parser tika = new AutoDetectParser();
     final ContentHandlerFactory tikaFactory = new BasicContentHandlerFactory(BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
 
     static final Cleaner cleaner = new Cleaner(Whitelist.basic());
 
+    private final float thumbnailQuality = 0.75f;
+
 
     public Multimedia(SpimeDB db) {
 
-        for (String s : new String[] { "org.apache.pdfbox.rendering.CIDType0Glyph2D", "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
+        for (String s : new String[]{"org.apache.pdfbox.rendering.CIDType0Glyph2D", "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
             ((Jdk14Logger) LogFactory.getLog(s)).getLogger().setLevel(Level.SEVERE);
         }
 
@@ -79,12 +80,12 @@ public class Multimedia {
                     URL uu = new URL(url);
                     URLConnection con = uu.openConnection();
                     long exp = con.getExpiration();
-                    if (exp== 0)
+                    if (exp == 0)
                         exp = con.getLastModified();
 
                     //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
 
-                    if (p!=null) {
+                    if (p != null) {
                         String whenCached = p.get("url_cached");
                         if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
                             logger.debug("cached: {}", url);
@@ -157,11 +158,10 @@ public class Multimedia {
                     //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
 
                     if (isKMLorKMZ) {
-                        new KML(db,y).url(url).run();
+                        new KML(db, y).url(url).run();
                     } else if (isGeoJSON) {
                         GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
                     }
-
 
 
                     x = y;
@@ -213,7 +213,7 @@ public class Multimedia {
 
                         db.add(
                                 new MutableNObject(xid + "/" + page)
-                                        .name(docTitle + " - (" + (page + 1) + " of " + (pageCount+1) + ")")
+                                        .name(docTitle + " - (" + (page + 1) + " of " + (pageCount + 1) + ")")
                                         .withTags(xid)
                                         .put("author", author)
                                         .put("url", url_in) //HACK browser loads the specific page when using the '#' anchor
@@ -226,33 +226,42 @@ public class Multimedia {
                                                     t -> NLP.toString(NLP.parse(t))
                                             ).collect(Collectors.joining("\n")) : null;
                                         })*/
-                                        .putLater("thumbnail", 0.5f, ()->{
+                                        .putLater("thumbnail", 0.5f, () -> {
+
+                                            PDDocument document = null;
+
+                                            logger.info("thumbnail: {} {}", xid, page);
+
                                             try {
-                                                PDDocument document = PDDocument.load(new URL(url_in).openStream());
-
-                                                try {
-
-                                                    PDFRenderer renderer = new PDFRenderer(document);
 
 
-                                                    BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
+                                                document = PDDocument.load(new URL(url_in).openStream());
 
 
-                                                    //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
-                                                    ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
-                                                    boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI);
+                                                PDFRenderer renderer = new PDFRenderer(document);
 
-                                                    return os.toByteArray();
 
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-                                                } finally {
-                                                    document.close();
-                                                }
+                                                BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
+
+
+                                                //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+                                                ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
+                                                boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI, thumbnailQuality);
+
+                                                return os.toByteArray();
 
                                             } catch (IOException f) {
+                                                logger.error("thumbnail: {} {} {}", xid, page, f.getMessage());
                                                 f.printStackTrace();
+                                            } finally {
+                                                if (document!=null)
+                                                    try {
+                                                        document.close();
+                                                    } catch (IOException e) {
+
+                                                    }
                                             }
+
 
                                             return null;
 
@@ -275,7 +284,7 @@ public class Multimedia {
                             )) : null;
                         }) //parse the title + description
                         */
-                        ;
+                ;
             }
 
             return x;
