@@ -82,7 +82,7 @@ public class SpimeDB  {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
-        Math.max(2, Runtime.getRuntime().availableProcessors())
+        Math.max(2, 2 + Runtime.getRuntime().availableProcessors())
     );
 
     /**
@@ -134,7 +134,7 @@ public class SpimeDB  {
     private final StandardAnalyzer analyzer;
     public final File file;
 
-    protected long lastCommit = 0;
+    protected long lastWrite = 0;
 
     private Lookup suggester;
 
@@ -272,7 +272,7 @@ public class SpimeDB  {
 
     @Nullable private Lookup suggester() {
         synchronized (dir) {
-            if (lastCommit - lastSuggesterCreated > minSuggesterUpdatePeriod ) {
+            if (lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod ) {
                 suggester = null; //re-create since it is invalidated
             }
 
@@ -442,6 +442,9 @@ public class SpimeDB  {
             exe.run(1f, () -> {
                 try {
 
+                    if (out.isEmpty())
+                        return;
+
                     IndexWriterConfig writerConf = new IndexWriterConfig(analyzer);
                     writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
                     writerConf.setRAMBufferSizeMB(1);
@@ -451,10 +454,8 @@ public class SpimeDB  {
                     DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
 
                     int written = 0;
-                    int s;
 
-
-                    while ((s = out.size()) > 0) {
+                    while (!out.isEmpty()) {
 
                         //long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
 
@@ -466,21 +467,26 @@ public class SpimeDB  {
                                     facetsConfig.build(taxoWriter, nn.getValue().document)
                                     //nn.getValue().document
                             );
-
+                            written++;
                         }
+
                         writer.commit();
-                        lastCommit = now();
-                        written += s;
+                        taxoWriter.commit();
                     }
+
                     writer.close();
                     taxoWriter.close();
+                    writing.set(false);
+
+                    lastWrite = now();
 
                     logger.debug("{} indexed", written);
 
                 } catch (IOException e) {
+                    writing.set(false);
+
                     logger.error("indexing error: {}", e);
                 }
-                writing.set(false);
             });
         }
 

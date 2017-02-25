@@ -153,7 +153,7 @@ public class WebServer extends PathHandler {
 
             try {
 
-                FacetResult x = db.facets(dimension, 32);
+                FacetResult x = db.facets(dimension, 48);
 
                 if (x != null)
                     JSON.toJSON(

@@ -17,7 +17,8 @@ public class PrioritizedExecutor implements Executor {
     final static Logger logger = LoggerFactory.getLogger(PrioritizedExecutor.class);
 
     private static final float DEFAULT_PRIORITY = 0.5f;
-    private static final long DEFAULT_TIMEOUT_ms = 30 * 1000; //30 SECONDS
+
+    private static final long DEFAULT_TIMEOUT_ms = 5 * 60 * 1000;
 
     public final PriorityBlockingQueue pq = new PriorityBlockingQueue<>(
             64 * 1024,
@@ -27,7 +28,17 @@ public class PrioritizedExecutor implements Executor {
 
     public PrioritizedExecutor(int threads) {
         //similar to Fixed-Size threadpool
-        this.exe = new ThreadPoolExecutor(threads, threads, 0, TimeUnit.MILLISECONDS, pq);
+        this.exe = new ThreadPoolExecutor(threads, threads, 0, TimeUnit.MILLISECONDS, pq) {
+            @Override
+            protected void beforeExecute(Thread t, Runnable r) {
+                super.beforeExecute(t, r);
+            }
+
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+            }
+        };
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::onShutDown));
     }
@@ -56,18 +67,14 @@ public class PrioritizedExecutor implements Executor {
         float pri();
     }
 
-    static final Comparator<RunWithPriority> runCompare = new Comparator<RunWithPriority>() {
+    static final Comparator<RunWithPriority> runCompare = (x, y) -> {
+        if (x == y) return 0;
 
-        @Override
-        public int compare(RunWithPriority x, RunWithPriority y) {
-            if (x == y) return 0;
-
-            int c = Float.compare(y.pri(), x.pri());
-            if (c == 0) {
-                return Integer.compare(x.hashCode(), y.hashCode());
-            }
-            return c;
+        int c = Float.compare(y.pri(), x.pri());
+        if (c == 0) {
+            return Integer.compare(x.hashCode(), y.hashCode());
         }
+        return c;
     };
 
     final Timer timer = new Timer(true);
