@@ -264,8 +264,8 @@ public class SpimeDB  {
 
         FacetResult result = facets.getTopChildren(count, dimension);
 
-        searcher.getIndexReader().close();
         taxoReader.close();
+        searcher.getIndexReader().close();
 
         return result;
     }

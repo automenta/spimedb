@@ -114,7 +114,7 @@ public class WebServer extends PathHandler {
             try {
                 o.write(j2js.compileMain(Client.class).toString().getBytes());
             } catch (IOException e) {
-                logger.warn("spimedb.js {}", e);
+                logger.error("spimedb.js {}", e);
 
             }
         }));
@@ -123,7 +123,7 @@ public class WebServer extends PathHandler {
             try {
                 o.write(JSON.toJSONBytes(db.tags().stream().map(db::get).toArray(NObject[]::new)));
             } catch (IOException e) {
-                logger.warn("tag {}", e);
+                logger.error("tag {}", e);
             }
         }));
 
@@ -138,7 +138,7 @@ public class WebServer extends PathHandler {
                     JSON.toJSON(Lists.transform(x, y -> y.key), o);
 
             } catch (Exception e) {
-                logger.warn("suggest: {}", e.getMessage());
+                logger.error("suggest: {}", e.getMessage());
                 /*(try {
                     o.write(JSON.toJSONBytes(e));
                 } catch (IOException e1) {
@@ -162,7 +162,7 @@ public class WebServer extends PathHandler {
                             Collectors.toMap(y->y.label, y->y.value ))*/, o);
 
             } catch (Exception e) {
-                logger.warn("suggest: {}", e.getMessage());
+                logger.warn("facet: {}", e.getMessage());
             }
         }));
 
