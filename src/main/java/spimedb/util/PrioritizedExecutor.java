@@ -1,5 +1,6 @@
 package spimedb.util;
 
+import jcog.Texts;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +110,11 @@ public class PrioritizedExecutor implements Executor {
 
             timeout.cancel();
 
+        }
+
+        @Override
+        public String toString() {
+            return Texts.n2(100f * pri) + "%:" + r.toString();
         }
     }
 

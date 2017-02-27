@@ -703,8 +703,10 @@ public class SpimeDB  {
 
 
                 //HACK
-                as = as.substring(as.indexOf('<'));
-                bs = bs.substring(bs.indexOf('<'));
+                int ai = as.indexOf('<');
+                as = ai!=-1 ? as.substring(ai) : "";
+                int bi = bs.indexOf('<');
+                bs = bi!=-1 ? bs.substring(bi) : "";
                 if (!as.equals(bs))
                     return false;
             }

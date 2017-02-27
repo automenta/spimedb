@@ -91,8 +91,7 @@ public class KML {
         SimpleField layerfield = new SimpleField("layer", Type.STRING);
         layerfield.setLength(32);
 
-        final AtomicInteger exceptions = new AtomicInteger();
-        final Set<Class> exceptionClass = new HashSet();
+        final Set<Throwable> exceptions = new HashSet();
 
         serial.set(1);
         path.clear();
@@ -151,8 +150,7 @@ public class KML {
 
             } catch (Throwable t) {
                 //System.err.println(t);
-                exceptions.incrementAndGet();
-                exceptionClass.add(t.getClass());
+                exceptions.add(t);
                 logger.error("error: {}", t.getCause());
                 break;
             }
@@ -206,16 +204,15 @@ public class KML {
 
                         @Override
                         public void kmlError(URI uri, Exception excptn) {
-                            exceptions.incrementAndGet();
-                            exceptionClass.add(excptn.getClass());
+                            exceptions.add(excptn);
                         }
 
                     });
 
         }
 
-        if (exceptions.get() > 0) {
-            System.err.println("  Exceptions: " + exceptions + " of " + exceptionClass);
+        if (!exceptions.isEmpty()) {
+            logger.error("{} exceptions: {}" + exceptions);
         }
 
         visitor.end();
@@ -542,7 +539,8 @@ public class KML {
         @Override
         public boolean on(IGISObject go, String[] path) throws IOException {
             if (go == null) {
-                throw new RuntimeException("null GISObject: " + Arrays.toString(path));
+                //throw new RuntimeException("null GISObject: " + Arrays.toString(path));
+                return false;
             }
 
             MutableNObject d;

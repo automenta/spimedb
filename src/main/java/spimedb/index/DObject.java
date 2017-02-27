@@ -3,6 +3,9 @@ package spimedb.index;
 import com.google.common.base.Joiner;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseTokenizer;
+import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
@@ -18,6 +21,11 @@ import spimedb.SpimeDB;
 import spimedb.index.rtree.PointND;
 import spimedb.util.JSON;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static spimedb.SpimeDB.string;
@@ -28,6 +36,7 @@ import static spimedb.index.rtree.RectND.unbounded;
  * (Lucene) Document-based NObject
  */
 public class DObject implements NObject {
+
 
     public final static Logger logger = LoggerFactory.getLogger(DObject.class);
 
@@ -42,14 +51,14 @@ public class DObject implements NObject {
 
     public static DObject get(NObject n, SpimeDB db) {
         if (n instanceof DObject)
-            return ((DObject)n);
+            return ((DObject) n);
         return get(toDocument(n, db));
     }
 
     static Document toDocument(@NotNull NObject n, @NotNull SpimeDB db) {
 
         if (n instanceof DObject)
-            return ((DObject)n).document;
+            return ((DObject) n).document;
 
         String nid = n.id();
 
@@ -76,7 +85,7 @@ public class DObject implements NObject {
                     //float[] aa = ArrayUtils.addAll(min, max);
                     //d.add(new FloatPoint(NObject.BOUND, aa));
                     //d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
-                    d.add(bytes(NObject.BOUND, JSON.toMsgPackBytes(new float[][] { min, max }, float[][].class)));
+                    d.add(bytes(NObject.BOUND, JSON.toMsgPackBytes(new float[][]{min, max}, float[][].class)));
                 } catch (IllegalArgumentException e) {
                     logger.warn("{}", e);
                 }
@@ -84,21 +93,21 @@ public class DObject implements NObject {
             }
         }
 
-        n.forEach((k,v)-> {
+        n.forEach((k, v) -> {
 
             if (v == null)
                 throw new NullPointerException();
 
             if (v instanceof LazyValue) {
-                LazyValue l = (LazyValue)v;
+                LazyValue l = (LazyValue) v;
                 v = l.pendingValue;
-                db.runLater(l.priority, ()->{
-                   Object lv = l.value.get();
-                   if (lv!=null) {
-                       MutableNObject nv = new MutableNObject(nid);
-                       nv.put(l.key, lv);
-                       db.merge(nv);
-                   }
+                db.runLater(l.priority, () -> {
+                    Object lv = l.value.get();
+                    if (lv != null) {
+                        MutableNObject nv = new MutableNObject(nid);
+                        nv.put(l.key, lv);
+                        db.merge(nv);
+                    }
                 });
                 if (v == null)
                     return; //dont write null pending value
@@ -129,7 +138,7 @@ public class DObject implements NObject {
                 d.add(new IntPoint(k, ((Integer) v).intValue()));
             } else if (c == Boolean.class) {
                 //HACK
-                d.add(new BinaryPoint(k, new byte[] { (byte)(((Boolean)v).booleanValue() ? 0 : 1) } ));
+                d.add(new BinaryPoint(k, new byte[]{(byte) (((Boolean) v).booleanValue() ? 0 : 1)}));
             } else if (c == Double.class) {
                 d.add(new DoublePoint(k, ((Double) v).doubleValue()));
             } else if (c == Long.class) {
@@ -143,7 +152,7 @@ public class DObject implements NObject {
                 //throw new UnsupportedOperationException();
                 d.add(bytes(k, JSON.toMsgPackBytes(v, double[][].class)));
             } else if (c == byte[].class) {
-                d.add(new StoredField(k, (byte[])v));
+                d.add(new StoredField(k, (byte[]) v));
             } else {
                 logger.warn("field un-documentable: {} {} {}", k, c, v);
                 d.add(string(k, v.toString()));
@@ -165,11 +174,11 @@ public class DObject implements NObject {
         this.id = d.get(NObject.ID);
 
         IndexableField b = d.getField(NObject.BOUND);
-        if (b!=null) {
+        if (b != null) {
             //FloatRangeField f = (FloatRangeField)b;
 
             //HACK make faster
-            Field f = (Field)b;
+            Field f = (Field) b;
             //float[][] dd = JSON.fromJSON(f.stringValue(), float[][].class);
             float[][] dd = JSON.fromMsgPackBytes(f.binaryValue().bytes, float[][].class);
             min = new PointND(dd[0]);
@@ -190,6 +199,17 @@ public class DObject implements NObject {
 
             d.add(new FacetField(NObject.TAG, t));
         }
+
+
+        String name = name();
+        if (name != null && !name.isEmpty()) {
+            Set<String> k = parseKeywords(new LowerCaseTokenizer(), name);
+            for (String l : k) {
+                d.add(new FacetField(NObject.TAG, l));
+            }
+        }
+
+
 ////            if (t.contains("/")) {
 ////                String[] path = t.split("/");
 ////                d.add(new FacetField(NObject.TAG, path));
@@ -199,9 +219,43 @@ public class DObject implements NObject {
 //        }
     }
 
+    public static Set<String> parseKeywords(Tokenizer stream, String text) {
+
+        stream.setReader(new StringReader(text));
+
+        try {
+            stream.reset();
+        } catch (IOException e) {
+            return Collections.emptySet();
+        }
+
+        if (stream.hasAttributes()) {
+            Set<String> result = new HashSet<String>();
+            try {
+                while (stream.incrementToken()) {
+                    result.add(new String(stream.getAttribute(
+                            TermToBytesRefAttribute.class).toString()
+                    ));
+                }
+            } catch (IOException e) {
+                // not thrown b/c we're using a string reader...
+            }
+            return result;
+        }
+
+        try {
+            stream.end();
+            stream.close();
+        } catch (IOException e) {
+        }
+
+        return Collections.emptySet();
+
+    }
+
     @Override
     public boolean equals(Object obj) {
-        return this == obj || id.equals(((NObject)obj).id());
+        return this == obj || id.equals(((NObject) obj).id());
     }
 
     @Override
@@ -237,8 +291,10 @@ public class DObject implements NObject {
 
             String k = f.name();
             switch (k) {
-                case NObject.ID: break; //filtered
-                case NObject.BOUND: break; //filtered
+                case NObject.ID:
+                    break; //filtered
+                case NObject.BOUND:
+                    break; //filtered
                 default:
                     each.accept(k, value(f));
                     break;
@@ -261,7 +317,7 @@ public class DObject implements NObject {
             case NObject.LINESTRING:
             case NObject.POLYGON:
                 return JSON.fromMsgPackBytes(f.binaryValue().bytes, double[][].class);
-                //return JSON.fromMsgPackBytes(f.binaryValue().bytes);
+            //return JSON.fromMsgPackBytes(f.binaryValue().bytes);
         }
 
         if (f instanceof BinaryPoint) {
@@ -292,7 +348,7 @@ public class DObject implements NObject {
         } else if (f instanceof FloatRangeField) {
             throw new UnsupportedOperationException();
         } else if (f instanceof IntPoint) {
-            IntPoint ff = (IntPoint)f;
+            IntPoint ff = (IntPoint) f;
             return ff.numericValue().intValue(); //HACK assumes dim=1
         }
 
@@ -320,7 +376,6 @@ public class DObject implements NObject {
     public String toString() {
         return toJSONString();
     }
-
 
 
 }
