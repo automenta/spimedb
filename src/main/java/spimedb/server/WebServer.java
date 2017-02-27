@@ -16,6 +16,7 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.server.handlers.resource.Resource;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.suggest.Lookup;
@@ -29,12 +30,10 @@ import spimedb.SpimeDB;
 import spimedb.client.Client;
 import spimedb.index.DObject;
 import spimedb.index.SearchResult;
-import spimedb.server.webdav.WebdavServlet;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
 
-import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -74,6 +73,27 @@ public class WebServer extends PathHandler {
     private Undertow server;
 
 
+    public static class OverridingFileResourceManager extends FileResourceManager {
+
+        private final FileResourceManager override;
+
+        public OverridingFileResourceManager(File base, File override) {
+            super(base, 0, true, "/");
+
+            this.override = new FileResourceManager(override, 0, true, "/");
+        }
+
+        @Override
+        public Resource getResource(String p) {
+            Resource x = override.getResource(p);
+            if (x != null)
+                return x;
+            else
+                return super.getResource(p);
+        }
+
+    }
+
     public WebServer(final SpimeDB db) {
         super();
         this.db = db;
@@ -81,27 +101,17 @@ public class WebServer extends PathHandler {
         //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
         j2js = JavaToJavascript.build();
 
-        boolean localPath = false;
-        if (db.indexPath!=null) {
-            File publicFolder = db.file.getParentFile().toPath().resolve("public").toFile();
-            if (publicFolder.exists()) {
 
-                addPrefixPath("/local", resource(new FileResourceManager(
-                        publicFolder, 0, true, "/")));
-                localPath = true;
-            }
-        }
-
-        if (!localPath) {
+        File staticPath = Paths.get(WebServer.staticPath).toFile();
+        File myStaticPath = db.file.getParentFile().toPath().resolve("public").toFile();
+        if (db.indexPath!=null && myStaticPath.exists()) {
+            addPrefixPath("/", resource(new OverridingFileResourceManager(
+                    staticPath, myStaticPath)));
+        } else {
             //HACK add the defaut local to prevent 404's
-            addPrefixPath("/local", resource(new FileResourceManager(
-                    Paths.get(localPathDefault).toFile(), 0, true, "/")));
+            addPrefixPath("/", resource(new FileResourceManager(
+                    staticPath, 0, true, "/")));
         }
-
-        File staticPathFile = Paths.get(staticPath).toFile();
-
-        addPrefixPath("/", resource(new FileResourceManager(
-                staticPathFile, 0, true, "/")));
 
 
 //        try {

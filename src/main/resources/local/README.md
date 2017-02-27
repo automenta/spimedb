@@ -1,1 +1,0 @@
-This folder contains an empty set of '/public' web resources to begin customizing a site.

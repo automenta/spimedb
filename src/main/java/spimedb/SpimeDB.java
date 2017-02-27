@@ -613,19 +613,19 @@ public class SpimeDB  {
         return run(n.id(), mergeProcedure(n));
     }
 
-    public Supplier<DObject> mergeProcedure(MutableNObject _next) {
+    public Supplier<DObject> mergeProcedure(MutableNObject next) {
         return () -> {
 
-            String id = _next.id();
+            String id = next.id();
 
             DObject previous = get(id);
             if (previous == null) {
-                logger.error("{} does not pre-exist for merge with {}", id, _next);
+                logger.error("{} does not pre-exist for merge with {}", id, next);
             }
             MutableNObject merged  = new MutableNObject(previous);
 
             final boolean[] changed = {false};
-            _next.forEach((k,v)->{
+            next.forEach((k,v)->{
                 Object v0 = merged.get(k);
                 if (v0 == null || !v0.equals(v)) {
                     merged.put(k, v);
