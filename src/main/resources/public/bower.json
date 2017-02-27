@@ -22,7 +22,8 @@
     "fullcalendar": "latest",
     "interact": "latest",
     "draggabilly": "latest",
-    "packery": "latest"
+    "packery": "latest",
+    "fancybox": "latest"
   },
   "resolutions": {
     "leaflet": "1.0.3"

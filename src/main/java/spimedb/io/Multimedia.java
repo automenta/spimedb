@@ -184,7 +184,7 @@ public class Multimedia {
                 int pageCount = x.get("pageCount");
                 for (int _page = 0; _page < pageCount; _page++) {
 
-                    final int page = _page;
+                    final int page = _page+1;
                     db.runLater(0.75f, () -> {
 
                         logger.info("paginate: {} {}", xid, page);
@@ -213,12 +213,12 @@ public class Multimedia {
 
                         db.add(
                                 new MutableNObject(xid + "/" + page)
-                                        .name(docTitle + " - (" + (page + 1) + " of " + (pageCount + 1) + ")")
+                                        .name(docTitle + " - (" + page + " of " + (pageCount + 1) + ")")
                                         .withTags(xid)
                                         .put("author", author)
                                         .put("url", url_in) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
-                                        .put("data", "/data?I=" + xid + "#" + page)
+                                        .put("data", "/data?I=" + xid + "#page=" + page)
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
                                         /*.putLater("textParse", 0.1f, ()-> {
