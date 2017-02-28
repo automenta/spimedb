@@ -249,7 +249,6 @@ public class SpimeDB  {
         if (searcher==null)
             return null;
 
-        TaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
 
 
         FacetsCollector fc = new FacetsCollector();
@@ -259,6 +258,8 @@ public class SpimeDB  {
         // you'd use a "normal" query:
         searcher.search(new MatchAllDocsQuery(), fc);
 
+
+        TaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
 
         Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
 
@@ -366,9 +367,26 @@ public class SpimeDB  {
 
         IndexSearcher searcher = searcher();
         if (searcher != null) {
+
+            FacetsCollector fc = new FacetsCollector();
+
+            FacetsCollector.search(searcher, q, hitsPerPage, fc);
+            //searcher.search(q, fc);
+
             TopDocs docs = searcher.search(q, hitsPerPage);
             if (docs.totalHits > 0) {
-                return new SearchResult(q, searcher, docs);
+
+                int facetCount = hitsPerPage; //DEFAULT
+
+                TaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
+
+                Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
+
+                FacetResult facetResults = facets.getTopChildren(facetCount, NObject.TAG);
+
+                taxoReader.close();
+
+                return new SearchResult(q, searcher, docs, facetResults);
             }
         }
 

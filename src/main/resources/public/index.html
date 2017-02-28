@@ -209,6 +209,41 @@
         }
 
 
+        function loadFacets(result) {
+            facets.html('');
+
+            var facetButtonBuilder = (v) => {
+
+                const id = v[0]
+                    .replace(/_/g, ' ')
+                    .replace(/\-/g, ' ')
+                ; //HACK
+                const score = v[1];
+
+
+                const c = $(e('div'))
+                    .attr('class', 'grid-item-content')
+                    .text(id).click(() => {
+                        queryText.val(/* dimension + ':' + */ id);
+                        querySubmit();
+                        return false;
+                    })
+                    .attr('style',
+                        'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
+
+                return c;
+            };
+
+            setTimeout(()=>{
+                addToGrid(result, facetButtonBuilder, facets);
+
+
+                setTimeout(()=>{
+                    facets.packery('layout');
+                }, 500);
+            }, 0);
+        }
+
         //PACKERY.js
         //http://codepen.io/desandro/pen/vKjAPE/
         //http://packery.metafizzy.co/extras.html#animating-item-size
@@ -241,36 +276,7 @@
                 //BubblesFacetSVG(f, result);
 
 
-                var facetButtonBuilder = (v) => {
-
-                    const id = v[0]
-                        .replace(/_/g, ' ')
-                        .replace(/\-/g, ' ')
-                    ; //HACK
-                    const score = v[1];
-
-
-                    const c = $(e('div'))
-                        .attr('class', 'grid-item-content')
-                        .text(id).click(() => {
-                            queryText.val(/* dimension + ':' + */ id);
-                            querySubmit();
-                            return false;
-                        })
-                        .attr('style',
-                            'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
-
-                    return c;
-                };
-
-                setTimeout(()=>{
-                    addToGrid(result, facetButtonBuilder, facets);
-
-
-                    setTimeout(()=>{
-                        facets.packery('layout');
-                    }, 500);
-                }, 0);
+                loadFacets(result);
 
 
             });
@@ -314,9 +320,11 @@
 
             $.get('/search', {q: qText}, function (result) {
 
-                var rr;
+                var ss, rr, ff;
                 try {
-                    rr = JSON.parse(result);
+                    ss = JSON.parse(result);
+                    rr = ss[0]; //first part: search results
+                    ff = ss[1]; //second part: facets
                 } catch (e) {
                     //usually just empty search result
                     $('#results').html('No matches for: "' + qText + '"');
@@ -325,6 +333,7 @@
 
                 contract();
 
+                loadFacets(ff);
 
                 $('#results').html(
 

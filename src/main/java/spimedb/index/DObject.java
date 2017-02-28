@@ -209,7 +209,7 @@ public class DObject implements NObject {
 
             Set<String> k = parseKeywords(new LowerCaseTokenizer(), name);
             for (String l : k) {
-                if (!StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(l))
+                if (l.length() >=3 && !StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(l))
                     d.add(new FacetField(NObject.TAG, l));
             }
         }

@@ -36,6 +36,7 @@ import spimedb.util.js.JavaToJavascript;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -166,10 +167,7 @@ public class WebServer extends PathHandler {
                 FacetResult x = db.facets(dimension, 48);
 
                 if (x != null)
-                    JSON.toJSON(
-                            Stream.of(x.labelValues).map(y -> new Object[]{y.label, y.value}).toArray(Object[]::new)
-                            /*Stream.of(x.labelValues).collect(
-                            Collectors.toMap(y->y.label, y->y.value ))*/, o);
+                    stream(o, x);
 
             } catch (Exception e) {
                 logger.warn("facet: {}", e.getMessage());
@@ -193,13 +191,19 @@ public class WebServer extends PathHandler {
                 SearchResult xx = db.find(qText, 10);
                 if (xx!=null) {
 
-                    o.write('[');
+                    o.write("[[".getBytes());
                     xx.forEach((r, x) -> {
                         JSON.toJSON(searchResult(
                                 DObject.get(r), x
                         ), o, ',');
                     });
-                    o.write("{}]".getBytes()); //<-- TODO search result metadata, query time etc
+                    o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
+
+                    if (xx.facets!=null) {
+                        stream(o, xx.facets);
+                        o.write(']');
+                    } else
+                        o.write("[]]".getBytes());
 
                     xx.close();
                 }
@@ -220,6 +224,13 @@ public class WebServer extends PathHandler {
 
         restart();
 
+    }
+
+    private void stream(OutputStream o, FacetResult x) {
+        JSON.toJSON(
+                Stream.of(x.labelValues).map(y -> new Object[]{y.label, y.value}).toArray(Object[]::new)
+                /*Stream.of(x.labelValues).collect(
+                Collectors.toMap(y->y.label, y->y.value ))*/, o);
     }
 
 //    void setStatic(String path) {

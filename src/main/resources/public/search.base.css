@@ -183,3 +183,30 @@ div {
     -webkit-transition: -webkit-transform 0.1s;
     transition: transform 0.1 s;
 }
+
+
+.result {
+  overflow: hidden;
+}
+
+.result h2 {
+    text-decoration: underline;
+    color: #1a0dab !important;
+    font-weight: bold;
+
+    margin-bottom: 26px;
+}
+
+.result .textpreview {
+
+  text-overflow: ellipsis;
+  max-height: 200px;
+  overflow: hidden;
+}
+
+.result img {
+    float: left;
+    max-height: 200px;
+    overflow: hidden;
+    padding-right: 1em;
+}

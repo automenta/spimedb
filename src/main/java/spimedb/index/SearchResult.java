@@ -3,8 +3,10 @@ package spimedb.index;
 import com.google.common.collect.Iterators;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DocumentStoredFieldVisitor;
+import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.slf4j.Logger;
@@ -25,10 +27,12 @@ public final class SearchResult {
     private final TopDocs docs;
     private final IndexSearcher searcher;
     private final org.apache.lucene.search.Query query;
+    public final FacetResult facets;
 
-    public SearchResult(org.apache.lucene.search.Query q, IndexSearcher searcher, TopDocs docs) {
+    public SearchResult(Query q, IndexSearcher searcher, TopDocs docs, FacetResult facetResults) {
         this.query = q;
         this.searcher = searcher;
+        this.facets = facetResults;
         this.docs = docs;
         logger.info("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
     }
