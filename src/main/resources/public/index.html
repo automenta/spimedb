@@ -48,6 +48,9 @@
 <div id="menu">
 
     <div id="query" class="query_expand">
+        <div id="logo">
+
+        </div>
         <div id="query_edit">
 
             <input id="query_text" type="text" placeholder="Search"/>
@@ -124,6 +127,9 @@
     $(document).ready(() => {
 
 
+        $.get('/logo.html', (x) => {
+            $('#logo').html(x);
+        });
 
         const facets = newGrid($('#facets'));
 
