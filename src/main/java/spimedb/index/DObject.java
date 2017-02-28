@@ -3,8 +3,10 @@ package spimedb.index;
 import com.google.common.base.Joiner;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.lucene.analysis.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseTokenizer;
+import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
@@ -203,9 +205,12 @@ public class DObject implements NObject {
 
         String name = name();
         if (name != null && !name.isEmpty()) {
+
+
             Set<String> k = parseKeywords(new LowerCaseTokenizer(), name);
             for (String l : k) {
-                d.add(new FacetField(NObject.TAG, l));
+                if (!StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(l))
+                    d.add(new FacetField(NObject.TAG, l));
             }
         }
 
