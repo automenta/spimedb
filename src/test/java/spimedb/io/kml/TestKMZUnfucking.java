@@ -29,7 +29,7 @@ public class TestKMZUnfucking {
 
         db.forEach( x -> System.out.println(x) );
 
-        assertEquals(23, db.size());
+        assertEquals(22, db.size());
 
         System.out.println(db.graph);
     }

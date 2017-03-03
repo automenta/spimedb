@@ -21,7 +21,7 @@ public class Crawl {
     public static final Logger logger = LoggerFactory.getLogger(Crawl.class);
 
     public static String filenameable(String inputName) {
-        return inputName.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
+        return inputName.replaceAll("[^\\/a-zA-Z0-9-_\\.]", "_");
     }
 
     public static void fileDirectory(String pathStr, SpimeDB db) {
@@ -35,8 +35,13 @@ public class Crawl {
 //                () -> Iterators.transform( Iterators.forArray( path.listFiles() ), eachFile::apply)
 //            );
 
+            String root = db.file.getParent();
+            String indexFolder = db.file.getAbsolutePath();
+            String publicFolder = db.file.getAbsolutePath() + "/public";
+
             for (File x : path.listFiles()) {
-                if (x.getAbsolutePath().equals(db.file.getAbsolutePath())) //exclude the index folder
+                String xPath = x.getAbsolutePath();
+                if (xPath.equals(indexFolder) || xPath.equals(publicFolder)) //exclude the index folder
                     continue;
 
                 if (x.isDirectory())
@@ -44,7 +49,12 @@ public class Crawl {
 
                 try {
                     URL u = x.toURL();
-                    url(filenameable(fileName(u.getFile())), u, 0.8f, db);
+                    String p = u.getPath();
+                    if (p.startsWith(root)) {
+                        p = p.substring(root.length()+1);
+                    }
+
+                    url(filenameable(p), u, 0.8f, db);
 
 
                 } catch (Exception e) {
@@ -57,7 +67,7 @@ public class Crawl {
         }
     }
 
-    public static void url(String id, URL u, float pri, SpimeDB db) throws URISyntaxException {
+    public static void url(String id, URL u, float pri, SpimeDB db) {
         String us = u.toString();
 
         DObject p = db.get(id);

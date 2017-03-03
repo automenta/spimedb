@@ -309,6 +309,8 @@
 
             suggestionsClear();
 
+            url = "/data?I=" + url;
+
             $('#focus').attr('class', 'main').html(
                 E('iframe').attr('src', url).attr('width', '100%').attr('height', '100%')
             );
@@ -387,7 +389,7 @@
                         if (x.thumbnail) {
                             const tt =
                             //E('a').attr('class', 'fancybox').attr('rel', 'group').append(
-                              E('img').attr('src', x.thumbnail)
+                              E('img').attr('src', "/thumbnail?I=" + x.thumbnail)
                             //)
                             ;
                             y.append(

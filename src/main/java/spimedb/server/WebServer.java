@@ -298,13 +298,31 @@ public class WebServer extends PathHandler {
 
                 DObject d = db.get(id);
                 if (d != null) {
-                    byte[] b = d.get(field);
+                    Object f = d.get(field);
+                    byte[] b = null;
+                    if (f instanceof String) {
+                        //interpret the string stored at this as a redirect to another field
+                        switch ((String)f) {
+                            case "data":
+                                b = (byte[])d.get("data");
+                                break;
+                            default:
+                                //?? unknown
+                                break;
+                        }
+                    } else if (f instanceof byte[]) {
+                        b = (byte[]) f;
+                    }
+
                     if (b != null) {
                         try {
                             o.write(b);
                         } catch (IOException e) {
 
                         }
+
+                    } else {
+                        ex.setStatusCode(404);
                     }
                 } else {
                     ex.setStatusCode(404);
@@ -330,10 +348,10 @@ public class WebServer extends PathHandler {
                 switch (key) {
                     case "thumbnail":
                         //rewrite the thumbnail blob byte[] as a String URL
-                        return "/thumbnail?I=" + d.id();
+                        return d.id();
                     case "data":
                         //rewrite the thumbnail blob byte[] as a String URL (if not already a string representing a URL)
-                        return !(v instanceof String) ? "/data?I=" + d.id() : v;
+                        return !(v instanceof String) ? d.id() : v;
                 }
                 return v;
             }

@@ -172,7 +172,18 @@ public class Multimedia {
 
             }
 
-            if ("application/pdf".equals(x.get(NObject.TYPE)) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
+            Object mime = x.get(NObject.TYPE);
+
+            if (mime!=null && (mime.equals("image/jpeg") || mime.equals("image/png") /* ... */)) {
+                x = new MutableNObject(x)
+                        .name(titleify(xid))
+                        .put(NObject.DESC, null)
+                        .put("thumbnail", "data" /* redirect to the data field which already has the byte[] image */)
+                ;
+
+            }
+
+            if ("application/pdf".equals(mime) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
 
                 String parentContent = x.get(NObject.DESC);
                 Document parentDOM = Jsoup.parse(parentContent);
@@ -184,13 +195,15 @@ public class Multimedia {
                 int pageCount = x.get("pageCount");
                 for (int _page = 0; _page < pageCount; _page++) {
 
+                    final int pageActual = _page;
                     final int page = _page+1;
+
                     db.runLater(0.75f, () -> {
 
                         logger.info("paginate: {} {}", xid, page);
 
                         Document pd = Document.createShell("");
-                        pd.body().appendChild(pagesHTML.get(page).removeAttr("class"));
+                        pd.body().appendChild(pagesHTML.get(pageActual).removeAttr("class"));
                         Elements cc = cleaner.clean(pd).body().children();
                         String[] pdb = cc.stream()
                                 .filter(xx -> !xx.children().isEmpty() || xx.hasText())
@@ -218,7 +231,7 @@ public class Multimedia {
                                         .put("author", author)
                                         .put("url", url_in) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
-                                        .put("data", "/data?I=" + xid + "#page=" + page)
+                                        .put("data", xid + "#page=" + page)
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
                                         /*.putLater("textParse", 0.1f, ()-> {
@@ -241,7 +254,7 @@ public class Multimedia {
                                                 PDFRenderer renderer = new PDFRenderer(document);
 
 
-                                                BufferedImage img = renderer.renderImageWithDPI(page, (float) pdfPageImageDPI, ImageType.RGB);
+                                                BufferedImage img = renderer.renderImageWithDPI(pageActual, (float) pdfPageImageDPI, ImageType.RGB);
 
 
                                                 //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
