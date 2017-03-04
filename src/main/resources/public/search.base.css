@@ -44,7 +44,6 @@ h2 { margin: 0; }
 
 
 .sidebar .result .textpreview {
-  max-height: 3em;
   text-overflow: ellipsis;
 }
 

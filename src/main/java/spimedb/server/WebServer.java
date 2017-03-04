@@ -56,8 +56,6 @@ public class WebServer extends PathHandler {
 
     public static final String staticPath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
 
-    public static final String localPathDefault = Paths.get("src/main/resources/local/").toAbsolutePath().toString();
-
     private final SpimeDB db;
 
     final JavaToJavascript j2js;
@@ -220,7 +218,9 @@ public class WebServer extends PathHandler {
 
 
         /* client attention management */
-        addPrefixPath("/attn", websocket(new Session(db, websocketOutputRateLimitBytesPerSecond)));
+        addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
+
+        addPrefixPath("/admin", websocket(new Admin(db)));
 
         restart();
 

@@ -31,6 +31,7 @@ import org.apache.lucene.search.suggest.Lookup;
 import org.apache.lucene.search.suggest.analyzing.FreeTextSuggester;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.NativeFSLockFactory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.eclipse.collections.api.set.ImmutableSet;
@@ -59,6 +60,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -73,7 +75,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
-public class SpimeDB  {
+public class SpimeDB {
 
 
     public static final String VERSION = "SpimeDB v-0.00";
@@ -82,7 +84,7 @@ public class SpimeDB  {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
-        Math.max(2, 2 + Runtime.getRuntime().availableProcessors())
+            Math.max(2, Runtime.getRuntime().availableProcessors())
     );
 
     /**
@@ -126,7 +128,7 @@ public class SpimeDB  {
 
     static final int NObjectCacheSize = 64 * 1024;
 
-    private final Map<String,DObject> out = new ConcurrentHashMap<>(1024);
+    private final Map<String, DObject> out = new ConcurrentHashMap<>(1024);
     private final Cache<String, DObject> cache =
             Caffeine.newBuilder().maximumSize(NObjectCacheSize).build();
 
@@ -197,12 +199,12 @@ public class SpimeDB  {
 //        taxoWriter.close();
 
 
-        final String[] defaultFindFields = new String[] { NObject.NAME, NObject.DESC };
-        final Map<String,Float> defaultFindFieldStrengths = Maps.mutable.with(
-            NObject.NAME,1f,
-            NObject.ID,0.75f,
-            NObject.DESC,0.5f,
-            NObject.TAG,0.25f
+        final String[] defaultFindFields = new String[]{NObject.NAME, NObject.DESC};
+        final Map<String, Float> defaultFindFieldStrengths = Maps.mutable.with(
+                NObject.NAME, 1f,
+                NObject.ID, 0.75f,
+                NObject.DESC, 0.5f,
+                NObject.TAG, 0.25f
         );
         this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, defaultFindFieldStrengths);
 
@@ -246,9 +248,8 @@ public class SpimeDB  {
     public FacetResult facets(String dimension, int count) throws IOException {
 
         IndexSearcher searcher = searcher();
-        if (searcher==null)
+        if (searcher == null)
             return null;
-
 
 
         FacetsCollector fc = new FacetsCollector();
@@ -271,14 +272,15 @@ public class SpimeDB  {
         return result;
     }
 
-    @Nullable private Lookup suggester() {
+    @Nullable
+    private Lookup suggester() {
         synchronized (dir) {
-            if (lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod ) {
+            if (lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod) {
                 suggester = null; //re-create since it is invalidated
             }
 
             if (suggester == null) {
-                if (nameDict==null) {
+                if (nameDict == null) {
                     nameDictReader = reader();
                     if (nameDictReader == null)
                         return null;
@@ -316,7 +318,6 @@ public class SpimeDB  {
     }
 
 
-
     private Document the(String id) {
 
         try {
@@ -344,12 +345,14 @@ public class SpimeDB  {
 
     }
 
-    @Nullable protected IndexSearcher searcher()  {
+    @Nullable
+    protected IndexSearcher searcher() {
         DirectoryReader r = reader();
         return r != null ? new IndexSearcher(r) : null;
     }
 
-    @Nullable private DirectoryReader reader()  {
+    @Nullable
+    private DirectoryReader reader() {
         try {
             return DirectoryReader.indexExists(dir) ? DirectoryReader.open(dir) : null;
         } catch (IOException e) {
@@ -359,11 +362,13 @@ public class SpimeDB  {
         }
     }
 
-    @Nullable public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
+    @Nullable
+    public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
         return find(defaultFindQueryParser.parse(query), hitsPerPage);
     }
 
-    @Nullable private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
+    @Nullable
+    private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
 
         IndexSearcher searcher = searcher();
         if (searcher != null) {
@@ -453,7 +458,9 @@ public class SpimeDB  {
 //        return size[0];
     }
 
-    public long now() { return System.currentTimeMillis(); }
+    public long now() {
+        return System.currentTimeMillis();
+    }
 
     private void commit() {
         if (writing.compareAndSet(false, true)) {
@@ -510,7 +517,8 @@ public class SpimeDB  {
 
     }
 
-    @Nullable DObject commit(NObject previous, NObject _next) {
+    @Nullable
+    DObject commit(NObject previous, NObject _next) {
 
         NObject next = _next;
         if (!onChange.isEmpty()) {
@@ -532,6 +540,41 @@ public class SpimeDB  {
     }
 
 
+    /**
+     * deletes the index and optionally triggers a rebuild
+     */
+    public synchronized void clear(boolean rebuild) {
+        exe.pq.clear();
+        try {
+            exe.exe.awaitTermination(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        out.clear();
+        cache.invalidateAll();
+        spacetime.clear();
+
+        if (indexPath != null) {
+            recursiveDelete(new File(indexPath));
+        }
+
+    }
+
+    static void recursiveDelete(File dir) {
+        //to end the recursive loop
+        if (!dir.exists())
+            return;
+
+        //if directory, go inside and call recursively
+        if (dir.isDirectory()) {
+            for (File f : dir.listFiles()) {
+                //call recursively
+                recursiveDelete(f);
+            }
+        }
+        //call delete to delete files and empty directory
+        dir.delete();
+    }
 
     private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
         public SubTags(MapGraph<V, E> graph, V... parentTags) {
@@ -543,7 +586,6 @@ public class SpimeDB  {
             return new BreadthFirstTravel<>(graph, start, seen);
         }
     }
-
 
 
     SpatialSearch<NObject> spaceIfExists(String tag) {
@@ -577,14 +619,14 @@ public class SpimeDB  {
     final Locker<String> locker = new Locker();
 
 
-    public void run(String id, Runnable r)  {
-        run(id, ()->{
+    public void run(String id, Runnable r) {
+        run(id, () -> {
             r.run();
             return null;
         });
     }
 
-    public <X> X run(String id, Supplier<X> r)  {
+    public <X> X run(String id, Supplier<X> r) {
         Lock l = locker.get(id);
 
         Throwable thrown = null;
@@ -601,7 +643,7 @@ public class SpimeDB  {
             l.unlock();
         }
 
-        if (thrown!=null) {
+        if (thrown != null) {
             throw new RuntimeException(thrown);
         }
 
@@ -609,9 +651,11 @@ public class SpimeDB  {
     }
 
     public void addAsync(float pri, @Nullable NObject next) {
-        if (next!=null) {
-            /*return */exe.run(pri, () -> {
-                /*return */add(next);
+        if (next != null) {
+            /*return */
+            exe.run(pri, () -> {
+                /*return */
+                add(next);
             });
         } /*else
             return null;*/
@@ -640,10 +684,10 @@ public class SpimeDB  {
             if (previous == null) {
                 logger.error("{} does not pre-exist for merge with {}", id, next);
             }
-            MutableNObject merged  = new MutableNObject(previous);
+            MutableNObject merged = new MutableNObject(previous);
 
             final boolean[] changed = {false};
-            next.forEach((k,v)->{
+            next.forEach((k, v) -> {
                 Object v0 = merged.get(k);
                 if (v0 == null || !v0.equals(v)) {
                     merged.put(k, v);
@@ -683,7 +727,7 @@ public class SpimeDB  {
         List<IndexableField> af = (a.getFields());
         List<IndexableField> bf = (b.getFields());
         int size = af.size();
-        if (bf.size()!=size)
+        if (bf.size() != size)
             return false;
 
         for (int i = 0; i < size; i++) {
@@ -722,9 +766,9 @@ public class SpimeDB  {
 
                 //HACK
                 int ai = as.indexOf('<');
-                as = ai!=-1 ? as.substring(ai) : "";
+                as = ai != -1 ? as.substring(ai) : "";
                 int bi = bs.indexOf('<');
-                bs = bi!=-1 ? bs.substring(bi) : "";
+                bs = bi != -1 ? bs.substring(bi) : "";
                 if (!as.equals(bs))
                     return false;
             }
@@ -752,7 +796,7 @@ public class SpimeDB  {
         if (current instanceof MutableNObject)
             ((MutableNObject) current).remove(">");
 
-        if ((previous!=null && previous.bounded()) || (current!=null && current.bounded())) {
+        if ((previous != null && previous.bounded()) || (current != null && current.bounded())) {
             reindexSpatial(previous, current, tags);
         }
 
@@ -775,7 +819,7 @@ public class SpimeDB  {
     }
 
 
-//    public Iterator<NObject> iterator() {
+    //    public Iterator<NObject> iterator() {
 //        GraphedNObject reusedWrapper = new GraphedNObject(graph);
 //        return Iterators.transform(
 //            objMap.values().iterator(), x -> {
@@ -784,7 +828,7 @@ public class SpimeDB  {
 //            }
 //        );
 //    }
-    public void forEach(Consumer<NObject> each)  {
+    public void forEach(Consumer<NObject> each) {
 
         /* When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering. */
         DirectoryReader r = reader();
@@ -797,7 +841,7 @@ public class SpimeDB  {
             Document d = null;
             try {
                 d = r.document(i);
-                if (d!=null)
+                if (d != null)
                     each.accept(DObject.get(d));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -852,7 +896,7 @@ public class SpimeDB  {
     public DObject get(String id) {
         return cache.get(id, (i) -> {
             Document d = the(i);
-            if (d!=null)
+            if (d != null)
                 return DObject.get(d);
             return null;
         });

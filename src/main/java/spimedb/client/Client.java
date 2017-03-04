@@ -47,7 +47,7 @@ public class Client {
     public final ObservablePriBag<NObj> obj = new ObservablePriBag<>(1024, BudgetMerge.or, new HashMap<>());
 
 
-    public final WebSocket io = WebSocket.newSocket("attn");
+    public final WebSocket io = WebSocket.newSocket("client");
 
     protected void init() {
 

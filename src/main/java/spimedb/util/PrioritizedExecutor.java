@@ -5,9 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -25,7 +23,7 @@ public class PrioritizedExecutor implements Executor {
             64 * 1024,
             runCompare);
 
-    private final Executor exe;
+    public final ExecutorService exe;
 
     public PrioritizedExecutor(int threads) {
         //similar to Fixed-Size threadpool
@@ -61,6 +59,12 @@ public class PrioritizedExecutor implements Executor {
     @Override
     public void execute(@NotNull Runnable command) {
         run(DEFAULT_PRIORITY, command);
+    }
+
+    public Map summary() {
+        Map x = new TreeMap();
+        x.put("pendingNum", pq.size());
+        return x;
     }
 
 

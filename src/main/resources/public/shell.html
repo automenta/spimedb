@@ -4,14 +4,18 @@
     <style>
         body {
             background-color: black;
-            color: #aaa;
+            color: #ccc;
             font-family: monospace;
             margin: 0em;
-            font-size: 150%;
             width: 100%;
             height: 100%;
             overflow: hidden;
         }
+
+        body, input {
+            font-size: 200%;
+        }
+
 
         #in {
             position: absolute;
@@ -42,7 +46,8 @@
 
 
 
-<script src="../lib/jquery.js"></script>
+<script src="../lib/jquery.min.js"></script>
+<script src="../lib/msgpack.js"></script>
 <script src="ReconnectingWebsocket.js"></script>
 <!--<script src="../lib/web_socket.js"></script>-->
 
@@ -56,7 +61,7 @@
 <script>
     $(document).ready(() => {
 
-        const path = "shell";
+        const path = "admin";
         const defaultHostname = window.location.hostname || 'localhost';
         const defaultWSPort = window.location.port || 8080;
         const options = undefined;
@@ -80,6 +85,7 @@
                */
           });
 
+        ws.binaryType = 'arraybuffer';
 
         ws.onopen = function() {
 
@@ -112,7 +118,13 @@
             show($('<pre>').text(JSON.stringify(e, null, 2)));
         }
 
-        ws.onmessage = function(e) {
+        function recv(x) {
+            showCode(x);
+        }
+
+        ws.onmessage = function(m) { recv(msgpack.decode(new Uint8Array(m.data))); };
+
+        /*ws.onmessage = function(e) {
             try {
                 var c = e.data;
                 var d = JSON.parse(c);
@@ -120,7 +132,7 @@
             } catch (e) {
                 showCode(c);
             }
-        };
+        };*/
 
         ws.onclose = function(e) {
             show(['Websocket disconnected', e]);

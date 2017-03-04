@@ -64,7 +64,12 @@ abstract public class AbstractServerWebSocket extends AbstractReceiveListener im
             try {
                 s = encoder.writeValueAsBytes(object);
             } catch (JsonProcessingException t) {
-                s = object.toString().getBytes(); //could not make json so just use toString()
+                try {
+                    s = encoder.writeValueAsBytes(object.toString()); //could not make json so just use toString()
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                    s = object.toString().getBytes();
+                }
             }
         }
 

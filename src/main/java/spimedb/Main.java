@@ -75,6 +75,7 @@ public class Main extends FileAlterationListenerAdaptor {
     final Map<Pair<Class, String>, Object> obj = new ConcurrentHashMap();
 
     final Map<String, Class> klassPath = new ConcurrentHashMap<>();
+    private final FileAlterationObserver fsObserver;
 
     final Pair<Class, String> key(File f) {
 
@@ -459,6 +460,7 @@ public class Main extends FileAlterationListenerAdaptor {
         }
     }
 
+
     public Main(String path) throws Exception {
 
 
@@ -470,7 +472,19 @@ public class Main extends FileAlterationListenerAdaptor {
 
         put(LogConfigurator.class, new LogConfigurator(null));
 
-        db = new SpimeDB(path + "/_");
+        fsObserver = new FileAlterationObserver(path);
+
+        db = new SpimeDB(path + "/_") {
+            @Override
+            public synchronized void clear(boolean rebuild) {
+                super.clear(rebuild);
+                System.exit(2);
+
+//                if (rebuild) {
+//                    Main.this.rebuild();
+//                }
+            }
+        };
         dbPathIgnored = db.file.getAbsolutePath();
 
         new Multimedia(db);
@@ -478,18 +492,21 @@ public class Main extends FileAlterationListenerAdaptor {
         logger.info("watching: file://{}", path);
 
         /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
-        FileAlterationObserver observer = new FileAlterationObserver(path);
         int updatePeriodMS = 200;
         FileAlterationMonitor monitor = new FileAlterationMonitor(updatePeriodMS);
 
         //monitor.setThreadFactory(Executors.defaultThreadFactory());
 
-        observer.addListener(this);
-        monitor.addObserver(observer);
+        fsObserver.addListener(this);
+        monitor.addObserver(fsObserver);
         monitor.start();
 
         //load existing files
-        reload(observer);
+        rebuild();
+    }
+
+    protected void rebuild() {
+        reload(fsObserver);
     }
 
     private void reload(FileAlterationObserver observer) {

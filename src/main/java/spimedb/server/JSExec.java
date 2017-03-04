@@ -1,5 +1,6 @@
 package spimedb.server;
 
+import com.google.common.base.Joiner;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 
 import javax.script.SimpleBindings;
@@ -39,7 +40,8 @@ public final class JSExec {
                 o = engine.eval(code, bindings);
 
         } catch (Throwable t) {
-            o = t;
+            o = t.getMessage() + "\n" + Joiner.on(' ').join(t.getStackTrace());
+
         }
 
         if (o == null) {
