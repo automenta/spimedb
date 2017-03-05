@@ -348,6 +348,8 @@
 
                 loadFacets(ff);
 
+                const clusters = { };
+
                 $('#results').html(
 
 
@@ -356,13 +358,27 @@
                         if (!x.I)
                             return;
 
-                        if (x.inh) {
-                            x.out = x.inh['<'];
+                        const y = DIVclass('list-item result');
+                        y.data('o', x);
 
-                            const vin = x.inh['>'];
-                            if (vin && !(vin.length === 1 && vin[0].length === 0)) //exclude root tag
+                        var tgt = x.I;
+                        if (x.inh) {
+                            x.out = x.inh['>'];
+
+                            const vin = x.inh['<'];
+                            if (vin && !(vin.length === 1 && vin[0].length === 0)) { //exclude root tag
                                 x.in = vin;
+                                tgt = vin;
+                            }
                         }
+
+
+                        if (clusters[tgt]===undefined) {
+                          clusters[tgt] = [ y ];
+                        } else {
+                          clusters[tgt].push(y);
+                        }
+
 
                         const header = DIVclass('header');
                         if (x.data) {
@@ -381,7 +397,7 @@
                         const meta = DIVclass('meta');
 
 
-                        const y = DIVclass('list-item result').append(
+                        y.append(
                             header,
                             meta
                         );
@@ -417,6 +433,38 @@
 
 
                 );
+
+                _.each(clusters, (c,k)=>{
+
+                  if (c.length < 2)
+                    return; //ignore clusters of length < 2
+
+                  const start = c[0];
+
+                  const d = DIVclass('list-item result');
+                  $(start).before(d);
+                  c.forEach(cc => {
+                      /* {
+
+                        d = cc;
+                      } else {
+                        children.push(cc);
+                      }*/
+                      cc.detach();
+                      cc.addClass('sub');
+                      if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
+                        d.append(cc);
+                  });
+
+                  //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
+                  var dc = d.children();
+                  if (dc.length == 1) {
+                    $(dc[0]).removeClass('sub');
+                    d.replaceWith(dc[0]);
+                  }
+
+
+                });
 
 
 
