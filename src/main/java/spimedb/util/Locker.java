@@ -4,9 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Created by me on 2/9/17.
- */
+
 public class Locker<X> {
 
     public final ConcurrentHashMap<X,DBLock> lock = new ConcurrentHashMap<>();

@@ -1,4 +1,4 @@
-package spimedb.bag;
+package spimedb.util.bag;
 
 import com.google.common.base.Joiner;
 import jcog.data.sorted.SortedArray;

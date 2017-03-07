@@ -1,4 +1,4 @@
-package spimedb.bag;
+package spimedb.util.bag;
 
 /**
  * Created by me on 1/15/17.

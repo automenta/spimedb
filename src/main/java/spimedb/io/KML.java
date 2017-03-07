@@ -22,7 +22,7 @@ import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.io.kml.KmlReader;
 import spimedb.io.kml.UrlRef;
-import spimedb.util.HTMLFilter;
+import spimedb.util.HTML;
 
 import java.io.File;
 import java.io.IOException;
@@ -581,7 +581,7 @@ public class KML {
                     String desc = cs.getDescription();
                     if ((desc != null) && (desc.length() > 0)) {
                         //filter
-                        desc = HTMLFilter.filterHTML(desc);
+                        desc = HTML.filterHTML(desc);
                         if (desc.length() > 0) {
                             d.description(desc);
                         }
@@ -613,7 +613,7 @@ public class KML {
                     String desc = f.getDescription();
                     if ((desc != null) && (desc.length() > 0)) {
                         //filter
-                        desc = HTMLFilter.filterHTML(desc);
+                        desc = HTML.filterHTML(desc);
                         if (desc.length() > 0) {
                             d.description(desc);
                         }

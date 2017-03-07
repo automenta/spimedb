@@ -75,8 +75,8 @@ public class Crawl {
         try {
             if (whenCached == null || Long.valueOf(whenCached) < u.openConnection().getLastModified()) {
                 db.addAsync(pri, new MutableNObject(id)
-                        .put("url_in", us)
-                        .put("url", u.toString())
+                    .put("url_in", us)
+                    .put("url", u.toString())
                 );
             }
         } catch (IOException e) {

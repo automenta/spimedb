@@ -1,4 +1,4 @@
-package spimedb.bag;
+package spimedb.util.bag;
 
 import org.junit.Test;
 

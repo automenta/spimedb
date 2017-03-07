@@ -11,7 +11,7 @@ import static spimedb.io.kml.KmlReader.logger;
 /**
  * Created by me on 12/26/16.
  */
-public final class HTMLFilter {
+public final class HTML {
 
     public static final HtmlCompressor compressor = new HtmlCompressor();
 

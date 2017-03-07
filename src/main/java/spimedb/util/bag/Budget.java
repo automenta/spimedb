@@ -1,7 +1,5 @@
-package spimedb.bag;
+package spimedb.util.bag;
 
-import jcog.bag.PLink;
-import jcog.bag.RawPLink;
 import org.jetbrains.annotations.Nullable;
 
 /**

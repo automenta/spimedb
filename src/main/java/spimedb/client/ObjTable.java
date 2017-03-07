@@ -6,7 +6,7 @@ import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
 import org.teavm.jso.dom.xml.Element;
 import org.teavm.jso.dom.xml.Node;
-import spimedb.bag.ChangeBatcher;
+import spimedb.util.bag.ChangeBatcher;
 
 import java.util.function.BiConsumer;
 

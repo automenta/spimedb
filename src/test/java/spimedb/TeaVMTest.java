@@ -4,8 +4,8 @@ import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.junit.Test;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
-import spimedb.bag.BudgetMerge;
-import spimedb.bag.PriBag;
+import spimedb.util.bag.BudgetMerge;
+import spimedb.util.bag.PriBag;
 import spimedb.util.js.JavaToJavascript;
 
 import static org.junit.Assert.assertTrue;

@@ -128,6 +128,10 @@ public class SpimeDB {
 
     static final int NObjectCacheSize = 64 * 1024;
 
+    final static DObject REMOVE = new DObject() {
+
+    };
+
     private final Map<String, DObject> out = new ConcurrentHashMap<>(1024);
     private final Cache<String, DObject> cache =
             Caffeine.newBuilder().maximumSize(NObjectCacheSize).build();
@@ -152,7 +156,7 @@ public class SpimeDB {
     private final VertexContainer<String, String> rootNode;
 
 
-    private /* final */ Directory taxoDir;
+    private /*final */ Directory taxoDir;
     private final FacetsConfig facetsConfig = new FacetsConfig();
 
     private final static RectBuilder<NObject> rectBuilder = (n) -> {
@@ -169,7 +173,7 @@ public class SpimeDB {
 
 
     /**
-     * in-memory, map-based
+     * in-memory
      */
     public SpimeDB() throws IOException {
         this(null, new RAMDirectory());
@@ -177,6 +181,9 @@ public class SpimeDB {
         this.taxoDir = new RAMDirectory();
     }
 
+    /**
+     * disk
+     */
     public SpimeDB(String path) throws IOException {
         this(new File(path), FSDirectory.open(new File(path).toPath()));
         this.indexPath = file.getAbsolutePath();
@@ -184,7 +191,7 @@ public class SpimeDB {
         logger.info("index ready: file://{}", indexPath);
     }
 
-    private SpimeDB(File file, Directory dir) throws IOException {
+    private SpimeDB(File file, Directory dir)  {
 
         this.file = file;
         this.dir = dir;
@@ -192,12 +199,6 @@ public class SpimeDB {
 
         this.facetsConfig.setHierarchical(NObject.ID, true);
         this.facetsConfig.setMultiValued(NObject.TAG, true);
-
-//        DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(dir);
-//        taxoWriter.addCategory(new FacetLabel(NObject.TYPE));
-//        taxoWriter.commit();
-//        taxoWriter.close();
-
 
         final String[] defaultFindFields = new String[]{NObject.NAME, NObject.DESC};
         final Map<String, Float> defaultFindFieldStrengths = Maps.mutable.with(
@@ -210,14 +211,11 @@ public class SpimeDB {
 
         rootNode = graph.addVertex(ROOT[0]);
 
-        int preloaded[] = new int[1];
         forEach(x -> {
-            //System.out.println(x.toJSONString(true));
             reindex(x);
-            preloaded[0]++;
         });
-        logger.info("{} objects loaded", preloaded[0]);
 
+        logger.info("{} objects loaded", size());
     }
 
     long lastSuggesterCreated = 0;
@@ -478,7 +476,7 @@ public class SpimeDB {
 
                     DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
 
-                    int written = 0;
+                    int written = 0, removed = 0;
 
                     while (!out.isEmpty()) {
 
@@ -488,11 +486,20 @@ public class SpimeDB {
                         while (ii.hasNext()) {
                             Map.Entry<String, DObject> nn = ii.next();
                             ii.remove();
-                            writer.updateDocument(new Term(NObject.ID, nn.getKey()),
-                                    facetsConfig.build(taxoWriter, nn.getValue().document)
-                                    //nn.getValue().document
-                            );
-                            written++;
+                            DObject val = nn.getValue();
+
+                            String id = nn.getKey();
+                            Term key = new Term(NObject.ID, id);
+                            if (val!=REMOVE) {
+                                writer.updateDocument(key,
+                                    facetsConfig.build(taxoWriter, val.document)
+                                );
+                                written++;
+                            } else {
+                                writer.deleteDocuments(key);
+                                cache.invalidate(id);
+                                removed++;
+                            }
                         }
 
                         writer.commit();
@@ -505,7 +512,7 @@ public class SpimeDB {
 
                     lastWrite = now();
 
-                    logger.debug("{} indexed", written);
+                    logger.debug("{} indexed, {} removed", written, removed);
 
                 } catch (IOException e) {
                     writing.set(false);
@@ -574,6 +581,12 @@ public class SpimeDB {
         }
         //call delete to delete files and empty directory
         dir.delete();
+    }
+
+    public void remove(String id) {
+        out.put(id, REMOVE);
+        reindex(get(id), null);
+        commit();
     }
 
     private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
@@ -783,14 +796,20 @@ public class SpimeDB {
 
     private void reindex(NObject previous, NObject current) {
 
+        String[] tags;
 
-        String[] tags = current.tags();
+        if (current!=null) {
 
-        this.tag(current.id(), tags, previous != null ? previous.tags() : null);
+            tags = current.tags();
+
+            this.tag(current.id(), tags, previous != null ? previous.tags() : null);
 
 
-        if (current instanceof GraphedNObject)
-            current = new MutableNObject(current); //store as un-graphed immutable
+            if (current instanceof GraphedNObject)
+                current = new MutableNObject(current); //store as un-graphed immutable
+        } else {
+            tags = null;
+        }
 
         //HACK remove tag field now that it is indexed in the graph
         if (current instanceof MutableNObject)

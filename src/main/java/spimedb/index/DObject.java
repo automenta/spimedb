@@ -170,6 +170,12 @@ public class DObject implements NObject {
     }
 
 
+    protected DObject() {
+        id = null;
+        document = null;
+        min = max = null;
+    }
+
     DObject(Document d) {
 
         this.document = d;

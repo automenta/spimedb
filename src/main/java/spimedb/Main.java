@@ -32,6 +32,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
@@ -479,10 +481,6 @@ public class Main extends FileAlterationListenerAdaptor {
             public synchronized void clear(boolean rebuild) {
                 super.clear(rebuild);
                 System.exit(2);
-
-//                if (rebuild) {
-//                    Main.this.rebuild();
-//                }
             }
         };
         dbPathIgnored = db.file.getAbsolutePath();
@@ -507,8 +505,32 @@ public class Main extends FileAlterationListenerAdaptor {
 
     protected void rebuild() {
         reload(fsObserver);
+        clean();
     }
 
+    /** remove entries for which their source file has been removed */
+    private void clean() {
+        db.forEach(x -> {
+           if (x.get("url_cached")!=null) {
+               String f = x.get("url_in");
+               boolean valid = false;
+               if (f.startsWith("file:")) {
+                   //try {
+
+                   valid = new File(f.substring(5)).exists();
+               } else {
+                   //TODO handle remote URI's in a different way than local files
+                   valid = true;
+               }
+               //} catch (URISyntaxException e) {
+
+               //}
+               if (!valid) {
+                   db.remove(x.id());
+               }
+           }
+        });
+    }
     private void reload(FileAlterationObserver observer) {
         for (File f : observer.getDirectory().listFiles()) {
             if (f.getName().startsWith("."))
