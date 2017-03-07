@@ -68,8 +68,7 @@ public class Multimedia {
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
 
         db.on((NObject p, NObject x) -> {
-            String url_in = x.get("url_in");
-            String url = url_in;
+            final String url = x.get("url_in");
 
             String xid = x.id();
 
@@ -149,7 +148,11 @@ public class Multimedia {
                             }
                         });
 
-                        y.put("data", bytes);
+                        if (url.startsWith("file:")) {
+                            y.put("data", url);
+                        } else {
+                            y.put("data", bytes);
+                        }
                     }
 
 
@@ -229,7 +232,7 @@ public class Multimedia {
                                         .name(docTitle + " - (" + page + " of " + (pageCount + 1) + ")")
                                         .withTags(xid)
                                         .put("author", author)
-                                        .put("url", url_in) //HACK browser loads the specific page when using the '#' anchor
+                                        .put("url", url) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
                                         .put("data", xid + "#page=" + page)
                                         .put("page", page)
@@ -248,7 +251,7 @@ public class Multimedia {
                                             try {
 
 
-                                                document = PDDocument.load(new URL(url_in).openStream());
+                                                document = PDDocument.load(new URL(url).openStream());
 
 
                                                 PDFRenderer renderer = new PDFRenderer(document);

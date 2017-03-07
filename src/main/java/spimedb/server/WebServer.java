@@ -17,6 +17,7 @@ import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.Resource;
+import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.suggest.Lookup;
@@ -35,6 +36,7 @@ import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
@@ -55,6 +57,8 @@ public class WebServer extends PathHandler {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
 
     public static final String staticPath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
+
+    private static final int BUFFER_SIZE = 32 * 1024;
 
     private final SpimeDB db;
 
@@ -292,43 +296,59 @@ public class WebServer extends PathHandler {
         }
     }
 
-    private void send(@Nullable String id, String field, @Nullable String contentType, HttpServerExchange ex) {
+    private void send(@Nullable String id, String field, @Deprecated @Nullable String contentType, HttpServerExchange ex) {
         if (id != null) {
-            HTTP.stream(ex, (o) -> {
 
-                DObject d = db.get(id);
-                if (d != null) {
-                    Object f = d.get(field);
-                    byte[] b = null;
-                    if (f instanceof String) {
-                        //interpret the string stored at this as a redirect to another field
-                        switch ((String)f) {
-                            case "data":
-                                b = (byte[])d.get("data");
-                                break;
-                            default:
-                                //?? unknown
-                                break;
-                        }
-                    } else if (f instanceof byte[]) {
-                        b = (byte[]) f;
+            DObject d = db.get(id);
+            if (d != null) {
+                Object f = d.get(field);
+
+                if (f instanceof String) {
+                    //interpret the string stored at this as a URL or a redirect to another field
+                    String s = (String) f;
+                    switch (s) {
+                        case "data":
+                            if (!field.equals("data"))
+                                send(id, "data", contentType, ex);
+                            else {
+                                //infinite loop
+                                throw new UnsupportedOperationException("document field redirect cycle");
+                            }
+                            break;
+                        default:
+                            if (s.startsWith("file:")) {
+                                File ff = new File(s.substring(5));
+                                if (ff.exists()) {
+                                    HTTP.stream(ex, (o) -> {
+                                        try {
+                                            IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE]);
+                                        } catch (IOException e) {
+                                            ex.setStatusCode(404);
+                                        }
+                                    }, contentType != null ? contentType : "text/plain");
+
+                                } else {
+                                    ex.setStatusCode(404);
+                                }
+                            }
+                            break;
                     }
+                } else if (f instanceof byte[]) {
 
-                    if (b != null) {
-                        try {
-                            o.write(b);
-                        } catch (IOException e) {
+                    byte[] b = (byte[]) f;
 
-                        }
+                    HTTP.stream(ex, (o) -> {
+                        try { o.write(b); } catch (IOException e) {   }
+                    }, contentType != null ? contentType : "text/plain");
 
-                    } else {
-                        ex.setStatusCode(404);
-                    }
                 } else {
                     ex.setStatusCode(404);
                 }
 
-            }, contentType != null ? contentType : "text/plain");
+            } else {
+                ex.setStatusCode(404);
+            }
+
         } else {
             ex.setStatusCode(404);
         }
