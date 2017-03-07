@@ -536,12 +536,14 @@ public class Main extends FileAlterationListenerAdaptor {
             if (f.getName().startsWith("."))
                 continue; //ignore hidden files
 
-            db.exe.run(0.8f, () -> {
+            db.exe.run(0.9f, () -> {
                 if (f.isFile()) {
                     update(f);
                 } else if (f.isDirectory() && !f.getAbsolutePath().equals(db.indexPath)) {
                     //default: index a directory
-                    Crawl.fileDirectory(f.getAbsolutePath(), db);
+                    db.exe.run(0.8f, () -> {
+                        Crawl.fileDirectory(f.getAbsolutePath(), db);
+                    });
                 }
             });
         }
