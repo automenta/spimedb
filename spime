@@ -3,7 +3,7 @@
 while(true)
 do
 
-    MAVEN_OPTS="-Xmx768m -da -dsa"  mvn exec:java --quiet     -Dexec.args="'$1'"      -Dexec.mainClass="spimedb.Main"
+    MAVEN_OPTS="-Xmx1500m -da -dsa"  mvn exec:java --quiet     -Dexec.args="'$1'"      -Dexec.mainClass="spimedb.Main"
 
     if [ $? != 2 ]
         then

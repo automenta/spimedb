@@ -190,7 +190,7 @@ public class WebServer extends PathHandler {
 
             try {
 
-                SearchResult xx = db.find(qText, 10);
+                SearchResult xx = db.find(qText, 50);
                 if (xx!=null) {
 
                     o.write("[[".getBytes());
@@ -371,7 +371,18 @@ public class WebServer extends PathHandler {
                         return d.id();
                     case "data":
                         //rewrite the thumbnail blob byte[] as a String URL (if not already a string representing a URL)
-                        return !(v instanceof String) ? d.id() : v;
+                        if (v instanceof byte[]) {
+                            return d.id();
+                        } else if (v instanceof String) {
+                            String s = (String)v;
+                            if (s.startsWith("file:")) {
+                                return d.id();  //same as if it's a byte
+                            } else {
+                                return s;
+                            }
+                        } else {
+                            //??
+                        }
                 }
                 return v;
             }
