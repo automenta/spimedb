@@ -77,11 +77,27 @@ public class Multimedia {
 
 
                 try {
-                    URL uu = new URL(url);
-                    URLConnection con = uu.openConnection();
-                    long exp = con.getExpiration();
-                    if (exp == 0)
-                        exp = con.getLastModified();
+                    long exp;
+                    InputStream stream;
+                    long fileSize;
+                    if (url.startsWith("file:")) {
+                        File f = new File(url.substring(5));
+                        exp = f.lastModified();
+                        stream = new FileInputStream(f);
+                        fileSize = f.length();
+                    } else {
+                        URL uu = new URL(url);
+                        URLConnection con = uu.openConnection();
+                        exp = con.getExpiration();
+                        if (exp == 0)
+                            exp = con.getLastModified();
+                        fileSize = con.getContentLengthLong();
+                        stream = con.getInputStream();
+                    }
+
+                    if (stream == null) {
+                        throw new FileNotFoundException();
+                    }
 
                     //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
 
@@ -107,24 +123,18 @@ public class Multimedia {
                         Metadata metadata = new Metadata();
                         ParseContext context = new ParseContext();
 
-                        InputStream stream;
-                        try {
-                            stream = con.getInputStream();
-                        } catch (FileNotFoundException e) {
-                            logger.error("not found: {}", url, e.getMessage());
-                            return null;
-                        }
-                        if (stream == null) {
-                            throw new FileNotFoundException();
-                        }
-
                         final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
 
-                        int fileSize = con.getContentLength();
+                        if (stream instanceof FileInputStream) {
+                            y.put("data", url);
+                        } else {
+                            //buffer the bytes for saving
+                            byte[] bytes = IOUtils.readFully(stream, (int) fileSize);
+                            stream = new ByteArrayInputStream(bytes);
+                            y.put("data", bytes);
+                        }
 
-                        byte[] bytes = IOUtils.readFully(stream, fileSize);
-                        InputStream is = new ByteArrayInputStream(bytes);
-                        tikaWrapper.parse(is, new DefaultHandler(), metadata, context);
+                        tikaWrapper.parse(stream, new DefaultHandler(), metadata, context);
 
                         stream.close();
 
@@ -149,11 +159,7 @@ public class Multimedia {
                             }
                         });
 
-                        if (url.startsWith("file:")) {
-                            y.put("data", url);
-                        } else {
-                            y.put("data", bytes);
-                        }
+
                     }
 
 
