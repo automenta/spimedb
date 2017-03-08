@@ -465,14 +465,14 @@ public class SpimeDB {
     private void commit() {
         if (writing.compareAndSet(false, true)) {
             exe.run(1f, () -> {
-                try {
 
-                    if (out.isEmpty())
-                        return;
+                if (out.isEmpty())
+                    return;
+
+                try {
 
                     IndexWriterConfig writerConf = new IndexWriterConfig(analyzer);
                     writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-                    writerConf.setRAMBufferSizeMB(1);
 
                     IndexWriter writer = new IndexWriter(dir, writerConf);
 
@@ -523,9 +523,6 @@ public class SpimeDB {
                 lastWrite = now();
 
                 writing.set(false);
-
-                if (!out.isEmpty())
-                    commit(); //trigger another commit because new entries arrived during close()
 
             });
         }

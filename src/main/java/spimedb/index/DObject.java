@@ -335,16 +335,16 @@ public class DObject implements NObject {
             //HACK convert to boolean
             return f.binaryValue().bytes[0] != 0;
         } else if (f instanceof DoublePoint) {
-            throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
-//            DoublePoint dp = (DoublePoint) f;
-//            byte[] b = dp.binaryValue().bytes;
-//
-//            double[] dd = new double[b.length / Double.BYTES];
-//            for (int i = 0;i < dd.length; i++)
-//                dd[i] = DoublePoint.decodeDimension(b, i);
-//            if (dd.length == 1)
-//                return dd[0];
-//            return dd;
+            //throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
+            DoublePoint dp = (DoublePoint) f;
+            byte[] b = dp.binaryValue().bytes;
+
+            double[] dd = new double[b.length / Double.BYTES];
+            for (int i = 0;i < dd.length; i++)
+                dd[i] = DoublePoint.decodeDimension(b, i);
+            if (dd.length == 1)
+                return dd[0];
+            return dd;
 
         } else if (f instanceof LongPoint) {
             throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
