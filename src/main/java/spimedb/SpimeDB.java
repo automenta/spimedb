@@ -508,20 +508,25 @@ public class SpimeDB {
                         taxoWriter.commit();
                     }
 
-                    writing.set(false);
 
                     writer.close();
                     taxoWriter.close();
 
-                    lastWrite = now();
 
                     logger.debug("{} indexed, {} removed", written, removed);
 
                 } catch (IOException e) {
-                    writing.set(false);
 
                     logger.error("indexing error: {}", e);
                 }
+
+                lastWrite = now();
+
+                writing.set(false);
+
+                if (!out.isEmpty())
+                    commit(); //trigger another commit because new entries arrived during close()
+
             });
         }
 
