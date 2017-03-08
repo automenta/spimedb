@@ -96,6 +96,8 @@ public class SpimeDB {
     public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
     protected final Directory dir;
 
+
+
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
 
         @Override
@@ -985,7 +987,7 @@ public class SpimeDB {
     @Deprecated
     public synchronized void sync() {
         int waitDelayMS = 50;
-        while (!exe.pq.isEmpty()) {
+        while (!exe.pq.isEmpty() || exe.running.get() > 0) {
             try {
                 Thread.sleep(waitDelayMS);
             } catch (InterruptedException e) {

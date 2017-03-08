@@ -23,7 +23,9 @@ public class ImportSchemaOrgTest {
 //            System.out.println("\t" + r.graph.edgesOf(v));
 //        });
 
-        assertTrue(db.size() > 500);
+        db.sync();
+
+        assertTrue(db.size() + " has at least 500?" , db.size() > 500);
 
         assertEquals(1, db.graph.outDegreeOf("Action"));
         assertTrue(db.graph.inDegreeOf("Action") > 1);

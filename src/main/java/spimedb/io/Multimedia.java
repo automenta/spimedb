@@ -1,6 +1,7 @@
 package spimedb.io;
 
 import com.google.common.base.Joiner;
+import jcog.Util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.Jdk14Logger;
@@ -177,7 +178,7 @@ public class Multimedia {
 
             Object mime = x.get(NObject.TYPE);
 
-            if (mime!=null && (mime.equals("image/jpeg") || mime.equals("image/png") /* ... */)) {
+            if (mime != null && (mime.equals("image/jpeg") || mime.equals("image/png") /* ... */)) {
                 x = new MutableNObject(x)
                         .name(titleify(xid))
                         .put(NObject.DESC, null)
@@ -188,21 +189,23 @@ public class Multimedia {
 
             if ("application/pdf".equals(mime) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
 
+                int pageCount = x.get("pageCount");
+
+                float docPri = Util.lerp(1f / (pageCount), 0.75f, 0.25f);
+
                 String parentContent = x.get(NObject.DESC);
-                Document parentDOM = Jsoup.parse(parentContent);
-
-                Elements pagesHTML = parentDOM.select(".page");
-
                 String author = x.get("author");
 
-                int pageCount = x.get("pageCount");
-                for (int _page = 0; _page < pageCount; _page++) {
+                db.runLater(docPri, () -> {
 
-                    final int pageActual = _page;
-                    final int page = _page+1;
+                    Document parentDOM = Jsoup.parse(parentContent);
 
-                    db.runLater(0.75f, () -> {
+                    Elements pagesHTML = parentDOM.select(".page");
 
+                    for (int _page = 0; _page < pageCount; _page++) {
+
+                        final int pageActual = _page;
+                        final int page = _page + 1;
                         logger.info("paginate: {} {}", xid, page);
 
                         Document pd = Document.createShell("");
@@ -214,12 +217,12 @@ public class Multimedia {
                                 .map(Object::toString).toArray(String[]::new);
 
 
-//                    List<JsonNode> jdb = new ArrayList(pdb.size());
-//                    pdb.forEach(e -> {
-//                        if (e.children().isEmpty() && e.text().isEmpty())
-//                            return;
-//                        jdb.add(html2json(e));
-//                    });
+                        //                    List<JsonNode> jdb = new ArrayList(pdb.size());
+                        //                    pdb.forEach(e -> {
+                        //                        if (e.children().isEmpty() && e.text().isEmpty())
+                        //                            return;
+                        //                        jdb.add(html2json(e));
+                        //                    });
 
                         String docTitle = parentDOM.title(); //x.name();
                         if (docTitle == null || docTitle.isEmpty()) {
@@ -237,12 +240,12 @@ public class Multimedia {
                                         .put("data", xid + "#page=" + page)
                                         .put("page", page)
                                         .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
-                                        /*.putLater("textParse", 0.1f, ()-> {
-                                            return (pdb.length > 0) ? Stream.of(pdb).map(
-                                                    t -> NLP.toString(NLP.parse(t))
-                                            ).collect(Collectors.joining("\n")) : null;
-                                        })*/
-                                        .putLater("thumbnail", 0.5f, () -> {
+                                            /*.putLater("textParse", 0.1f, ()-> {
+                                                return (pdb.length > 0) ? Stream.of(pdb).map(
+                                                        t -> NLP.toString(NLP.parse(t))
+                                                ).collect(Collectors.joining("\n")) : null;
+                                            })*/
+                                        .putLater("thumbnail", docPri * 0.5f, () -> {
 
                                             PDDocument document = null;
 
@@ -270,7 +273,7 @@ public class Multimedia {
                                                 logger.error("thumbnail: {} {} {}", xid, page, f.getMessage());
                                                 f.printStackTrace();
                                             } finally {
-                                                if (document!=null)
+                                                if (document != null)
                                                     try {
                                                         document.close();
                                                     } catch (IOException e) {
@@ -284,24 +287,26 @@ public class Multimedia {
                                         })
 
                         );
-                    });
-                }
+                    }
+                });
 
-                //clean and update parent DOM
+            }
 
-                //String xname = x.name();
-                //String desc = x.get(NObject.DESC);
-                x = new MutableNObject(x)
-                        .name(titleify(xid))
-                        .put(NObject.DESC, null)
+            //clean and update parent DOM
+
+            //String xname = x.name();
+            //String desc = x.get(NObject.DESC);
+            x = new MutableNObject(x)
+                    .name(titleify(xid))
+                    .put(NObject.DESC, null)
                         /*.putLater("textParse", 0.15f, () -> {
                             return xname != null ? NLP.toString(NLP.parse(
                                     Joiner.on("\n").skipNulls().join(xname, desc)
                             )) : null;
                         }) //parse the title + description
                         */
-                ;
-            }
+            ;
+
 
             return x;
 

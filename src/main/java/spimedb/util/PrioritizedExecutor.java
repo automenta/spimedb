@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by me on 2/3/17.
@@ -20,22 +21,23 @@ public class PrioritizedExecutor implements Executor {
     private static final long DEFAULT_TIMEOUT_ms = 5 * 60 * 1000;
 
     public final PriorityBlockingQueue pq = new PriorityBlockingQueue<>(
-            64 * 1024,
+            512 * 1024,
             runCompare);
 
     public final ExecutorService exe;
+    public AtomicInteger running = new AtomicInteger();
 
     public PrioritizedExecutor(int threads) {
         //similar to Fixed-Size threadpool
         this.exe = new ThreadPoolExecutor(threads, threads, 0, TimeUnit.MILLISECONDS, pq) {
             @Override
             protected void beforeExecute(Thread t, Runnable r) {
-                super.beforeExecute(t, r);
+                running.incrementAndGet();
             }
 
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
-                super.afterExecute(r, t);
+                running.decrementAndGet();
             }
         };
 
@@ -63,7 +65,8 @@ public class PrioritizedExecutor implements Executor {
 
     public Map summary() {
         Map x = new TreeMap();
-        x.put("pendingNum", pq.size());
+        x.put("pending", pq.size());
+        x.put("running", running.get());
         return x;
     }
 

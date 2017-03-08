@@ -10,7 +10,6 @@ import spimedb.index.DObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.function.Predicate;
@@ -54,7 +53,7 @@ public class Crawl {
                         p = p.substring(root.length()+1);
                     }
 
-                    url(filenameable(p), u, 0.8f, db);
+                    url(filenameable(p), u, xPath, db);
 
 
                 } catch (Exception e) {
@@ -67,15 +66,15 @@ public class Crawl {
         }
     }
 
-    public static void url(String id, URL u, float pri, SpimeDB db) {
-        String us = u.toString();
+    public static void url(String id, URL u, String url_in, SpimeDB db) {
+
 
         DObject p = db.get(id);
         String whenCached = p != null ? p.get("url_cached") : null;
         try {
             if (whenCached == null || Long.valueOf(whenCached) < u.openConnection().getLastModified()) {
-                db.addAsync(pri, new MutableNObject(id)
-                    .put("url_in", us)
+                db.add(new MutableNObject(id)
+                    .put("url_in", url_in)
                     .put("url", u.toString())
                 );
             }
@@ -97,7 +96,7 @@ public class Crawl {
                     URL vv = new URL(uu, uu.getPath() + '/' + href);
                     if (acceptHref.test(vv.toString())) {
                         try {
-                            url(vv.getHost() + vv.getPath(), vv, 0.5f, db);
+                            url(vv.getHost() + vv.getPath(), vv, vv.toString(), db);
                         } catch (RuntimeException e) {
                             logger.warn("{}", e.getMessage());
                         }
