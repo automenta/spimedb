@@ -53,7 +53,7 @@ public class Crawl {
                         p = p.substring(root.length()+1);
                     }
 
-                    url(filenameable(p), u, xPath, db);
+                    url(filenameable(p), u, "file:" + xPath, db);
 
 
                 } catch (Exception e) {

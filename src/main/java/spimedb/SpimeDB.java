@@ -508,9 +508,10 @@ public class SpimeDB {
                         taxoWriter.commit();
                     }
 
+                    writing.set(false);
+
                     writer.close();
                     taxoWriter.close();
-                    writing.set(false);
 
                     lastWrite = now();
 
