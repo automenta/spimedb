@@ -1,5 +1,6 @@
 package spimedb.io;
 
+import jcog.Util;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class Crawl {
         String whenCached = p != null ? p.get("url_cached") : null;
         try {
             if (whenCached == null || Long.valueOf(whenCached) < u.openConnection().getLastModified()) {
-                db.add(new MutableNObject(id)
+                db.addAsync(0.5f, new MutableNObject(id)
                     .put("url_in", url_in)
                     .put("url", u.toString())
                 );

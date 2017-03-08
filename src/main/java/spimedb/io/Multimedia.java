@@ -74,8 +74,6 @@ public class Multimedia {
             String xid = x.id();
 
             if (url != null) {
-
-
                 try {
                     long exp;
                     InputStream stream;
@@ -202,7 +200,7 @@ public class Multimedia {
                 String parentContent = x.get(NObject.DESC);
                 String author = x.get("author");
 
-                db.runLater(docPri, () -> {
+                //db.runLater(docPri, () -> {
 
                     Document parentDOM = Jsoup.parse(parentContent);
 
@@ -294,7 +292,7 @@ public class Multimedia {
 
                         );
                     }
-                });
+                //});
 
             }
 

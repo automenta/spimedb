@@ -84,7 +84,7 @@ public class SpimeDB {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
-            Math.max(2, Runtime.getRuntime().availableProcessors())
+            Math.max(2, 1 + Runtime.getRuntime().availableProcessors())
     );
 
     /**
