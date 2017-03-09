@@ -1,7 +1,6 @@
 package spimedb.io;
 
 import com.google.common.base.Joiner;
-import jcog.Util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.Jdk14Logger;
@@ -16,6 +15,7 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.RecursiveParserWrapper;
 import org.apache.tika.sax.BasicContentHandlerFactory;
 import org.apache.tika.sax.ContentHandlerFactory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jpedal.jbig2.jai.JBIG2ImageReaderSpi;
 import org.jsoup.Jsoup;
@@ -73,7 +73,11 @@ public class Multimedia {
 
             String xid = x.id();
 
-            if (url != null) {
+            if (url == null) {
+                return x;
+            }
+
+            {
                 try {
                     long exp;
                     InputStream stream;
@@ -195,16 +199,34 @@ public class Multimedia {
 
                 int pageCount = x.get("pageCount");
 
-                float docPri = Util.lerp(1f / (pageCount), 0.75f, 0.25f);
+                //float docPri = Util.lerp(1f / (pageCount), 0.75f, 0.25f);
 
                 String parentContent = x.get(NObject.DESC);
                 String author = x.get("author");
 
                 //db.runLater(docPri, () -> {
 
-                    Document parentDOM = Jsoup.parse(parentContent);
+                Document parentDOM = Jsoup.parse(parentContent);
 
-                    Elements pagesHTML = parentDOM.select(".page");
+                Elements pagesHTML = parentDOM.select(".page");
+
+                PDDocument document = null;
+
+
+                try {
+
+
+                    InputStream is;
+                    if (url.startsWith("file:")) {
+                        is = fileStream(url);
+                    } else {
+                        is = new URL(url).openStream();
+                    }
+
+                    document = PDDocument.load(is);
+
+                    PDFRenderer renderer = new PDFRenderer(document);
+
 
                     for (int _page = 0; _page < pageCount; _page++) {
 
@@ -233,6 +255,15 @@ public class Multimedia {
                             docTitle = titleify(xid);
                         }
 
+                        BufferedImage img = renderer.renderImageWithDPI(pageActual, (float) pdfPageImageDPI, ImageType.RGB);
+
+                        //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+                        ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
+                        boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI, thumbnailQuality);
+
+                        byte[] thumbnail = os.toByteArray();
+
+                        String text = pdb.length > 0 ? Joiner.on('\n').join(pdb) : null;
 
                         db.add(
                                 new MutableNObject(xid + "/" + page)
@@ -243,56 +274,30 @@ public class Multimedia {
                                         .put(NObject.TYPE, "application/pdf")
                                         .put("data", xid + "#page=" + page)
                                         .put("page", page)
-                                        .put(NObject.DESC, pdb.length > 0 ? Joiner.on('\n').join(pdb) : null)
+                                        .put(NObject.DESC, text)
                                             /*.putLater("textParse", 0.1f, ()-> {
                                                 return (pdb.length > 0) ? Stream.of(pdb).map(
                                                         t -> NLP.toString(NLP.parse(t))
                                                 ).collect(Collectors.joining("\n")) : null;
                                             })*/
-                                        .putLater("thumbnail", docPri * 0.5f, () -> {
-
-                                            PDDocument document = null;
-
-                                            logger.info("thumbnail: {} {}", xid, page);
-
-                                            try {
-
-
-                                                document = PDDocument.load(new URL(url).openStream());
-
-
-                                                PDFRenderer renderer = new PDFRenderer(document);
-
-
-                                                BufferedImage img = renderer.renderImageWithDPI(pageActual, (float) pdfPageImageDPI, ImageType.RGB);
-
-
-                                                //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
-                                                ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
-                                                boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI, thumbnailQuality);
-
-                                                return os.toByteArray();
-
-                                            } catch (IOException f) {
-                                                logger.error("thumbnail: {} {} {}", xid, page, f.getMessage());
-                                                f.printStackTrace();
-                                            } finally {
-                                                if (document != null)
-                                                    try {
-                                                        document.close();
-                                                    } catch (IOException e) {
-
-                                                    }
-                                            }
-
-
-                                            return null;
-
-                                        })
-
+                                        .put("thumbnail", thumbnail)
                         );
                     }
-                //});
+
+
+                } catch (IOException f) {
+                    logger.error("error: {} {}", xid, f);
+                } finally {
+                    if (document != null)
+                        try {
+                            document.close();
+                        } catch (IOException e) {
+
+                        }
+
+
+                }
+
 
             }
 
@@ -317,6 +322,11 @@ public class Multimedia {
         });
 
 
+    }
+
+    @NotNull
+    private FileInputStream fileStream(String url) throws FileNotFoundException {
+        return new FileInputStream(url.substring(5));
     }
 
     private static String titleify(String id) {

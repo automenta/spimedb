@@ -54,8 +54,9 @@ public class Crawl {
                         p = p.substring(root.length()+1);
                     }
 
-                    url(filenameable(p), u, "file:" + xPath, db);
+                    float pri = 0.5f * (1 / (1f + x.length()/(1024*1024))); //deprioritize relative to megabyte increase
 
+                    url(filenameable(p), u, "file:" + xPath, db, pri);
 
                 } catch (Exception e) {
                     logger.error("{}", e.getMessage());
@@ -67,14 +68,14 @@ public class Crawl {
         }
     }
 
-    public static void url(String id, URL u, String url_in, SpimeDB db) {
+    public static void url(String id, URL u, String url_in, SpimeDB db, float pri) {
 
 
         DObject p = db.get(id);
         String whenCached = p != null ? p.get("url_cached") : null;
         try {
             if (whenCached == null || Long.valueOf(whenCached) < u.openConnection().getLastModified()) {
-                db.addAsync(0.5f, new MutableNObject(id)
+                db.addAsync(pri, new MutableNObject(id)
                     .put("url_in", url_in)
                     .put("url", u.toString())
                 );
@@ -97,7 +98,7 @@ public class Crawl {
                     URL vv = new URL(uu, uu.getPath() + '/' + href);
                     if (acceptHref.test(vv.toString())) {
                         try {
-                            url(vv.getHost() + vv.getPath(), vv, vv.toString(), db);
+                            url(vv.getHost() + vv.getPath(), vv, vv.toString(), db, 0.5f);
                         } catch (RuntimeException e) {
                             logger.warn("{}", e.getMessage());
                         }
