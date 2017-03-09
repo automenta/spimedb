@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
+import jcog.rtree.*;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -31,7 +32,6 @@ import org.apache.lucene.search.suggest.Lookup;
 import org.apache.lucene.search.suggest.analyzing.FreeTextSuggester;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.NativeFSLockFactory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.eclipse.collections.api.set.ImmutableSet;
@@ -49,7 +49,6 @@ import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
 import spimedb.index.DObject;
 import spimedb.index.SearchResult;
-import spimedb.index.rtree.*;
 import spimedb.query.Query;
 import spimedb.util.Locker;
 import spimedb.util.PrioritizedExecutor;
@@ -72,7 +71,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static spimedb.index.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
+import static jcog.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
 public class SpimeDB {

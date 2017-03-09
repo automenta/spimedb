@@ -3,7 +3,7 @@ package spimedb.query;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
-import spimedb.index.rtree.RectND;
+import jcog.rtree.RectND;
 
 import java.util.Arrays;
 import java.util.function.Predicate;

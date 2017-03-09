@@ -2,7 +2,7 @@ package spimedb.io;
 
 import org.junit.Test;
 import spimedb.SpimeDB;
-import spimedb.index.rtree.RectND;
+import jcog.rtree.RectND;
 import spimedb.query.QueryCollection;
 
 import java.io.BufferedInputStream;

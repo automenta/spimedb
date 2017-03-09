@@ -8,7 +8,7 @@ import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
-import spimedb.index.rtree.PointND;
+import jcog.rtree.PointND;
 import spimedb.io.KML;
 import spimedb.util.JSON;
 

@@ -1,7 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import spimedb.index.rtree.PointND;
+import jcog.rtree.PointND;
 
 import java.util.function.BiConsumer;
 

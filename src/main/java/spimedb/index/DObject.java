@@ -3,7 +3,6 @@ package spimedb.index;
 import com.google.common.base.Joiner;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.lucene.analysis.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseTokenizer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
@@ -20,7 +19,7 @@ import spimedb.LazyValue;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.index.rtree.PointND;
+import jcog.rtree.PointND;
 import spimedb.util.JSON;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ import java.util.function.BiConsumer;
 
 import static spimedb.SpimeDB.string;
 import static spimedb.SpimeDB.text;
-import static spimedb.index.rtree.RectND.unbounded;
+import static jcog.rtree.RectND.unbounded;
 
 /**
  * (Lucene) Document-based NObject
