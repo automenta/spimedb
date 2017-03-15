@@ -31,6 +31,5 @@ public class TestKMZUnfucking {
 
         assertEquals(23, db.size());
 
-        System.out.println(db.graph);
     }
 }

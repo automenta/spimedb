@@ -41,6 +41,11 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
         this.capacity = cap;
     }
 
+    @Override
+    public float floatValueOf(Budget<V> anObject) {
+        return anObject.pri;
+    }
+
     public boolean containsKey(Object o) {
         return map.containsKey(o);
     }

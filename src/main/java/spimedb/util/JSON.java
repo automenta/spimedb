@@ -58,6 +58,18 @@ public class JSON {
         }
     }
 
+    public static void writeArrayValues(double[] xx, JsonGenerator jsonGenerator) throws IOException {
+        for (double x : xx) {
+            double y;
+            /*if (x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY)
+                y = Float.NaN; //as string, "NaN" is shorter than "Infinity"
+            else*/
+            y = x;
+
+            jsonGenerator.writeNumber(y);
+        }
+    }
+
     public static String toJSONString(Object x) {
         return toJSONString(x, false);
     }

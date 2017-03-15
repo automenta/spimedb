@@ -195,7 +195,7 @@ public class Multimedia {
 
             }
 
-            if ("application/pdf".equals(mime) && x.has("pageCount") && x.has(NObject.DESC) && (db.graph.isLeaf(x.id())) /* leaf */) {
+            if ("application/pdf".equals(mime) && x.has("pageCount") && x.has(NObject.DESC)  /* leaf */) {
 
                 int pageCount = x.get("pageCount");
 

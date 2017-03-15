@@ -1,9 +1,10 @@
 package spimedb.query;
 
+import jcog.tree.rtree.rect.RectDoubleND;
+import jcog.tree.rtree.rect.RectFloatND;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
-import jcog.rtree.RectND;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -30,7 +31,7 @@ public class Query {
     /**
      * OR-d together, potentially executed in parallel
      */
-    public RectND[] bounds = null;
+    public RectDoubleND[] bounds = null;
 
     public BoundsCondition boundsCondition = Intersect;
 
@@ -38,6 +39,9 @@ public class Query {
      * tags within which to search; if null, searches all
      */
     public String[] include = null;
+
+    public int limit = 1024;
+
 
     Query() {
         this(null);
@@ -88,24 +92,24 @@ public class Query {
 
     /** time-axis only */
     public <Q extends Query> Q when(float start, float end) {
-        return (Q) bounds(new RectND(
-                new float[]{start, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY},
-                new float[]{end, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY}
+        return (Q) bounds(new RectDoubleND(
+                new double[]{start, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY},
+                new double[]{end, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}
         ));
     }
 
     /**
      * specific lat x lon region, at any time
      */
-    public <Q extends Query> Q where(float[] lon, float[] lat) {
-        return (Q) bounds(new RectND(
-                new float[]{Float.NEGATIVE_INFINITY, lon[0], lat[0], Float.NEGATIVE_INFINITY},
-                new float[]{Float.POSITIVE_INFINITY, lon[1], lat[1], Float.POSITIVE_INFINITY}
+    public <Q extends Query> Q where(double[] lon, double[] lat) {
+        return (Q) bounds(new RectDoubleND(
+                new double[]{Double.NEGATIVE_INFINITY, lon[0], lat[0], Double.NEGATIVE_INFINITY},
+                new double[]{Double.POSITIVE_INFINITY, lon[1], lat[1], Double.POSITIVE_INFINITY}
         ));
     }
 
     @NotNull
-    public <Q extends Query> Q bounds(RectND... newBounds) {
+    public <Q extends Query> Q bounds(RectDoubleND... newBounds) {
         ensureNotStarted();
 
         if (bounds!=null)

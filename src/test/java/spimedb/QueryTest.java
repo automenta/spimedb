@@ -1,7 +1,11 @@
 package spimedb;
 
 import com.google.common.collect.Iterables;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexableField;
 import org.junit.Test;
+import spimedb.index.DObject;
+import spimedb.index.SearchResult;
 import spimedb.io.ImportSchemaOrg;
 import spimedb.query.Query;
 
@@ -16,6 +20,31 @@ import static org.junit.Assert.*;
  * Created by me on 6/13/15.
  */
 public class QueryTest {
+
+    @Test
+    public void testSpacetimeIndexing() throws IOException {
+        SpimeDB db = new SpimeDB();
+
+        MutableNObject place = new MutableNObject("Somewhere");
+        place.where(0.5f, 0.5f);
+        place.withTags("Place");
+        DObject dplace = db.add(place);
+
+//        System.out.println(dplace);
+//        for (IndexableField f : dplace.document.getFields()) {
+//            System.out.println(f.name() + " = " + f.binaryValue());
+//        }
+
+        db.sync();
+
+        ArrayList<NObject> found = new ArrayList();
+        SearchResult result = db.get(new Query(found::add).where(new double[]{0, 1}, new double[]{0, 1}));
+
+        assertFalse(found.isEmpty());
+        assertTrue(found + "", found.contains(place));
+
+
+    }
 
     @Test
     public void testDAGActivation() throws IOException {
@@ -44,7 +73,7 @@ public class QueryTest {
         assertNotEquals(placeSubtags, actionSubtags);
 
         ArrayList<NObject> found = new ArrayList();
-        db.get(new Query(found::add).in("InteractAction").where(new float[] { 0, 1}, new float[] { 0, 1}));
+        db.get(new Query(found::add).in("InteractAction").where(new double[] { 0, 1}, new double[] { 0, 1}));
 
         assertFalse(found.isEmpty());
         assertTrue(found + "", found.contains(action));

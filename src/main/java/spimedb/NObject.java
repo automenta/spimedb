@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jcog.tree.rtree.point.DoubleND;
+import jcog.tree.rtree.point.FloatND;
 import org.apache.commons.lang.ArrayUtils;
-import jcog.rtree.PointND;
 import spimedb.util.JSON;
 
 import java.io.IOException;
@@ -40,9 +41,9 @@ public interface NObject extends Serializable {
         return (X)val;
     }
 
-    PointND min();
+    DoubleND min();
 
-    PointND max();
+    DoubleND max();
 
     default String toJSONString() {
         return toJSONString(false);
@@ -53,7 +54,7 @@ public interface NObject extends Serializable {
     }
 
     default boolean bounded() {
-        PointND min = min();
+        DoubleND min = min();
         return (min != null && min.dim() > 0 && !min.isInfNeg() && !max().isInfPos());
     }
 
@@ -154,10 +155,8 @@ public interface NObject extends Serializable {
         protected void writeBounds(NObject o, JsonGenerator jsonGenerator) throws IOException {
             //zip the min/max bounds
             if (o.bounded()) {
-                PointND min = o.min();
-
-
-                PointND max = o.max();
+                DoubleND min = o.min();
+                DoubleND max = o.max();
                 boolean point = max == null || min.equals(max);
                 if (!point) {
                     jsonGenerator.writeFieldName(BOUND);
@@ -166,8 +165,8 @@ public interface NObject extends Serializable {
                     if (!max.equals(min)) {
                         int dim = min.dim();
                         for (int i = 0; i < dim; i++) {
-                            float a = min.coord[i];
-                            float b = max.coord[i];
+                            double a = min.coord[i];
+                            double b = max.coord[i];
                             if (a == b) {
                                 jsonGenerator.writeNumber(a);
                             } else {

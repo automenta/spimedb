@@ -1,8 +1,9 @@
 package spimedb.io;
 
+import jcog.tree.rtree.rect.RectDoubleND;
+import jcog.tree.rtree.rect.RectFloatND;
 import org.junit.Test;
 import spimedb.SpimeDB;
-import jcog.rtree.RectND;
 import spimedb.query.QueryCollection;
 
 import java.io.BufferedInputStream;
@@ -50,9 +51,9 @@ public class GeoJSONTest {
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
         QueryCollection b = new QueryCollection(new ArrayList<>()).bounds(
-            new RectND(
-                    new float[] {  1.48252053E12f, 0, 0, Float.NEGATIVE_INFINITY },
-                    new float[] {  1.48250336E12f, 180, 180, Float.POSITIVE_INFINITY } )
+            new RectDoubleND(
+                    new double[] {  1.48252053E12f, 0, 0, Double.NEGATIVE_INFINITY },
+                    new double[] {  1.48250336E12f, 180, 180, Double.POSITIVE_INFINITY } )
         );
         db.get(b);
         int bNum = b.result.size();

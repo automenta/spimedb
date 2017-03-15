@@ -1,7 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import jcog.rtree.PointND;
+import jcog.tree.rtree.point.DoubleND;
 
 import java.util.function.BiConsumer;
 
@@ -49,12 +49,12 @@ public class ProxyNObject implements NObject {
     }
 
     @Override
-    public PointND min() {
+    public DoubleND min() {
         return n.min();
     }
 
     @Override
-    public PointND max() {
+    public DoubleND max() {
         return n.max();
     }
 

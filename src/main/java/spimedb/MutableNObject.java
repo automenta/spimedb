@@ -2,19 +2,21 @@ package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import jcog.tree.rtree.point.DoubleND;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
-import jcog.rtree.PointND;
 import spimedb.io.KML;
 import spimedb.util.JSON;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static jcog.tree.rtree.rect.RectDoubleND.unbounded;
 
 
 /**
@@ -40,7 +42,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     public MutableNObject(String id, String name) {
-        super(PointND.fill(4, Float.NEGATIVE_INFINITY), PointND.fill(4, Float.POSITIVE_INFINITY), id, name);
+        super(DoubleND.fill(4, Float.NEGATIVE_INFINITY), DoubleND.fill(4, Float.POSITIVE_INFINITY), id, name);
     }
 
     public MutableNObject putLater(String key, float pri, Supplier lazy) {
@@ -260,8 +262,8 @@ public class MutableNObject extends ImmutableNObject {
 
     @Deprecated
     public long[] whenLong() {
-        float a = min.coord[0];
-        float b = max.coord[0];
+        double a = min.coord[0];
+        double b = max.coord[0];
         return new long[]{(long) a, (long) b};
     }
 

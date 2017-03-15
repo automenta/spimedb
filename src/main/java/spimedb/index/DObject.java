@@ -1,6 +1,8 @@
 package spimedb.index;
 
 import com.google.common.base.Joiner;
+import jcog.Util;
+import jcog.tree.rtree.point.DoubleND;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.lucene.analysis.Tokenizer;
@@ -19,7 +21,6 @@ import spimedb.LazyValue;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import jcog.rtree.PointND;
 import spimedb.util.JSON;
 
 import java.io.IOException;
@@ -29,9 +30,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+
+import static jcog.tree.rtree.rect.RectDoubleND.unbounded;
 import static spimedb.SpimeDB.string;
 import static spimedb.SpimeDB.text;
-import static jcog.rtree.RectND.unbounded;
 
 /**
  * (Lucene) Document-based NObject
@@ -43,8 +45,8 @@ public class DObject implements NObject {
 
     final String id;
     public final Document document;
-    private final PointND min;
-    private final PointND max;
+    private final DoubleND min;
+    private final DoubleND max;
 
     public static DObject get(Document d) {
         return new DObject(d);
@@ -76,20 +78,22 @@ public class DObject implements NObject {
             d.add(string(NObject.TAG, Joiner.on(' ').join(t)));
 
         if (n.bounded()) {
-            PointND minP = n.min();
+            DoubleND minP = n.min();
             if (minP != unbounded) {
-                float[] min = minP.coord;
 
-                float[] max = n.max().coord;
-                try {
-                    //d.add(new FloatRangeField(NObject.BOUND, min, max));
-                    //float[] aa = ArrayUtils.addAll(min, max);
-                    //d.add(new FloatPoint(NObject.BOUND, aa));
-                    //d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
-                    d.add(bytes(NObject.BOUND, JSON.toMsgPackBytes(new float[][]{min, max}, float[][].class)));
-                } catch (IllegalArgumentException e) {
-                    logger.warn("{}", e);
-                }
+                double[] min = (minP.coord);
+                double[] max = (n.max().coord);
+
+
+                //d.add(new FloatRangeField(NObject.BOUND, min, max));
+                //float[] aa = ArrayUtils.addAll(min, max);
+                //d.add(new FloatPoint(NObject.BOUND, aa));
+                //d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
+
+
+                d.add(new DoubleRangeField(NObject.BOUND, min, max));
+
+
 
             }
         }
@@ -184,12 +188,16 @@ public class DObject implements NObject {
         if (b != null) {
             //FloatRangeField f = (FloatRangeField)b;
 
-            //HACK make faster
-            Field f = (Field) b;
-            //float[][] dd = JSON.fromJSON(f.stringValue(), float[][].class);
-            float[][] dd = JSON.fromMsgPackBytes(f.binaryValue().bytes, float[][].class);
-            min = new PointND(dd[0]);
-            max = new PointND(dd[1]);
+            DoubleRangeField f = (DoubleRangeField) b;
+            double[] min = new double[4];
+            double[] max = new double[4];
+            for (int i = 0; i < 4; i++) {
+                min[i] = f.getMin(i);
+                max[i] = f.getMax(i);
+            }
+
+            this.min = new DoubleND(min);
+            this.max = new DoubleND(max);
         } else {
             min = max = unbounded;
         }
@@ -372,12 +380,12 @@ public class DObject implements NObject {
     }
 
     @Override
-    public PointND min() {
+    public DoubleND min() {
         return min;
     }
 
     @Override
-    public PointND max() {
+    public DoubleND max() {
         return max;
     }
 

@@ -1,9 +1,9 @@
 package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jcog.tree.rtree.point.DoubleND;
+import jcog.tree.rtree.rect.RectDoubleND;
 import org.apache.commons.lang.ArrayUtils;
-import jcog.rtree.PointND;
-import jcog.rtree.RectND;
 import spimedb.util.JSON;
 
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 @JsonSerialize(using= NObject.NObjectSerializer.class)
-public abstract class ImmutableNObject extends RectND implements NObject {
+public abstract class ImmutableNObject extends RectDoubleND implements NObject {
 
     protected final String id;
 
@@ -26,7 +26,7 @@ public abstract class ImmutableNObject extends RectND implements NObject {
     protected final Map<String, Object> data = new TreeMap();
 
 
-    public ImmutableNObject(PointND a, PointND b, String id, String name) {
+    public ImmutableNObject(DoubleND a, DoubleND b, String id, String name) {
         super(a, b);
         this.id = id!=null ? id : JSON.uuid64();
         this.name = name;

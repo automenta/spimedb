@@ -107,12 +107,12 @@ public class ClientSession extends Session {
 
 
 
-        public Task focusLonLat(float[][] bounds) {
+        public Task focusLonLat(double[][] bounds) {
 
             //logger.info("start {} focusLonLat {}", this, bounds);
 
-            float[] lon = new float[]{bounds[0][0], bounds[1][0]};
-            float[] lat = new float[]{bounds[0][1], bounds[1][1]};
+            double[] lon = new double[]{bounds[0][0], bounds[1][0]};
+            double[] lat = new double[]{bounds[0][1], bounds[1][1]};
 
             String[] tags = new String[]{};
 
@@ -164,7 +164,7 @@ public class ClientSession extends Session {
 
                 @NotNull
                 private FilteredNObject transmittable(NObject n) {
-                    return new FilteredNObject( db.graphed(n), mapIncludesFields);
+                    return new FilteredNObject( n, mapIncludesFields);
                 }
             };
 
@@ -176,7 +176,7 @@ public class ClientSession extends Session {
             if (force || !remoteMemory.contains(idHash)) {
                 DObject d = db.get(id);
                 if (d!=null) {
-                    GraphedNObject n = db.graphed(includeKeys!=null ? new FilteredNObject(d, includeKeys) : d);
+                    NObject n = /*db.graphed( */includeKeys!=null ? new FilteredNObject(d, includeKeys) : d;
                     if (n != null) {
                         t.sendJSON(chan, n);
                         remoteMemory.add(idHash);

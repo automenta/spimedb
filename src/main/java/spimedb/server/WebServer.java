@@ -198,6 +198,7 @@ public class WebServer extends PathHandler {
                         JSON.toJSON(searchResult(
                                 DObject.get(r), x
                         ), o, ',');
+                        return true;
                     });
                     o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
 
@@ -362,7 +363,7 @@ public class WebServer extends PathHandler {
             );
 
     private FilteredNObject searchResult(NObject d, ScoreDoc x) {
-        return new FilteredNObject(db.graphed(d), searchResultKeys) {
+        return new FilteredNObject(d, searchResultKeys) {
             @Override
             protected Object value(String key, Object v) {
                 switch (key) {

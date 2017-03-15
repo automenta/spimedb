@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 
 /**
  * Created by me on 2/3/17.
@@ -37,7 +38,7 @@ public final class SearchResult {
         logger.info("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
     }
 
-    public void forEach(BiConsumer<Document,ScoreDoc> each) {
+    public void forEach(BiPredicate<Document,ScoreDoc> each) {
         final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
 
         IndexReader reader = searcher.getIndexReader();
@@ -47,7 +48,8 @@ public final class SearchResult {
             d.clear();
             try {
                 reader.document(x.doc, visitor);
-                each.accept(d, x);
+                if (!each.test(d, x))
+                    break;
             } catch (IOException e) {
                 SearchResult.logger.error("{}", e.getMessage());
             }

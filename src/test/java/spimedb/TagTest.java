@@ -23,17 +23,17 @@ public class TagTest {
         Tag v = new Tag("Test");
         db.add(v);
 
-        System.out.println(db.graph);
+        
 
         Tag u = new Tag("Y", "Test");
         db.add(u);
 
-        System.out.println(db.graph);
+
 
         Tag t = new Tag("X", "Test");
         db.add(t);
 
-        System.out.println(db.graph);
+
 
         assertEquals(0, t.pri(), 0.01f);
 

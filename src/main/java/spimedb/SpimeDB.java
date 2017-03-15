@@ -6,14 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
-import jcog.rtree.*;
+import jcog.list.FasterList;
+import jcog.tree.rtree.rect.RectDoubleND;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.facet.Facets;
 import org.apache.lucene.facet.FacetsCollector;
@@ -26,6 +24,10 @@ import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.core.nodes.OrQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.surround.query.OrQuery;
+import org.apache.lucene.queryparser.xml.builders.DisjunctionMaxQueryBuilder;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.suggest.DocumentDictionary;
 import org.apache.lucene.search.suggest.Lookup;
@@ -34,6 +36,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.QueryBuilder;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
 import org.eclipse.collections.impl.factory.Sets;
@@ -52,6 +55,7 @@ import spimedb.index.SearchResult;
 import spimedb.query.Query;
 import spimedb.util.Locker;
 import spimedb.util.PrioritizedExecutor;
+import spimedb.util.datatypes.DoubleRange;
 
 import javax.script.ScriptEngineManager;
 import java.io.File;
@@ -71,7 +75,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static jcog.rtree.SpatialSearch.DEFAULT_SPLIT_TYPE;
 
 
 public class SpimeDB {
@@ -91,8 +94,7 @@ public class SpimeDB {
      */
     public static final String TMP_SPIMEDB_CACHE_PATH = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
 
-    @JsonIgnore
-    public final Map<String, SpatialSearch<NObject>> spacetime = new ConcurrentHashMap<>();
+
     protected final Directory dir;
 
 
@@ -148,26 +150,13 @@ public class SpimeDB {
     private DocumentDictionary nameDict;
     private DirectoryReader nameDictReader;
 
-
-    public final MapGraph<String, String> graph = new MapGraph<String, String>(
-            new ConcurrentHashMap<>(),
-            () -> Collections.synchronizedSet(new UnifiedSet()));
-
     final static String[] ROOT = new String[]{""};
-    private final VertexContainer<String, String> rootNode;
 
 
     private /*final */ Directory taxoDir;
     private final FacetsConfig facetsConfig = new FacetsConfig();
 
-    private final static RectBuilder<NObject> rectBuilder = (n) -> {
-        PointND min = n.min();
-        PointND max = n.max();
-        if (min.equals(max))
-            return new RectND(min); //share min/max point
-        else
-            return new RectND(min.coord, max.coord);
-    };
+
     public String indexPath;
 
     final QueryParser defaultFindQueryParser;
@@ -180,6 +169,7 @@ public class SpimeDB {
         this(null, new RAMDirectory());
         this.indexPath = null;
         this.taxoDir = new RAMDirectory();
+
     }
 
     /**
@@ -209,12 +199,6 @@ public class SpimeDB {
                 NObject.TAG, 0.25f
         );
         this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, defaultFindFieldStrengths);
-
-        rootNode = graph.addVertex(ROOT[0]);
-
-        forEach(x -> {
-            reindex(x);
-        });
 
         logger.info("{} objects loaded", size());
     }
@@ -410,43 +394,14 @@ public class SpimeDB {
     }
 
 
-    public void tag(@NotNull String x, @NotNull String[] nextTags, @Nullable String[] prevTags) {
-
-        if (nextTags.length == 0)
-            nextTags = ROOT;
-
-        if (prevTags != null) {
-            ImmutableSet<String> ns = Sets.immutable.of(nextTags);
-            ImmutableSet<String> ps = Sets.immutable.of(prevTags);
-            if (ns.equals(ps))
-                return; //no change
-        }
-
-        synchronized (graph) {
-
-            VertexContainer<String, String> src = graph.addVertex(x);
-
-            if (prevTags != null) {
-                //TODO use Set intersection to determine the difference in tags that actually need to be removed because some may just get added again below
-                for (String y : prevTags) {
-                    graph.removeEdge(src, x, y, NObject.INH);
-                }
-            }
-
-            for (String y : nextTags) {
-                graph.addEdge(src, x, y, NObject.INH);
-            }
-        }
-
-    }
-
 
     public Set<String> tags() {
-        return graph.vertexSet();
+        return Collections.emptySet();
     }
 
     public Iterator<String> roots() {
-        return rootNode.inV();
+        return Collections.emptyIterator();
+
     }
 
     public int size() {
@@ -546,7 +501,6 @@ public class SpimeDB {
         out.put(id, d);
         cache.put(id, d);
         commit();
-        reindex(previous, d);
         return d;
     }
 
@@ -563,7 +517,6 @@ public class SpimeDB {
         }
         out.clear();
         cache.invalidateAll();
-        spacetime.clear();
 
         if (indexPath != null) {
             recursiveDelete(new File(indexPath));
@@ -589,9 +542,10 @@ public class SpimeDB {
 
     public void remove(String id) {
         out.put(id, REMOVE);
-        reindex(get(id), null);
         commit();
     }
+
+
 
     private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
         public SubTags(MapGraph<V, E> graph, V... parentTags) {
@@ -605,24 +559,13 @@ public class SpimeDB {
     }
 
 
-    SpatialSearch<NObject> spaceIfExists(String tag) {
-        return spacetime.get(tag);
-    }
 
-    SpatialSearch<NObject> space(String tag) {
-        return spacetime.computeIfAbsent(tag, (t) -> {
-            return new LockingRTree<NObject>(new RTree<NObject>(rectBuilder,
-                    2, 8, DEFAULT_SPLIT_TYPE),
-                    new ReentrantReadWriteLock());
-        });
-    }
 
 
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/
     @Override
     public String toString() {
-        return "{\"" + getClass().getSimpleName() + "\":{" +
-                ",\"spacetime\":\"" + spacetime + "\"}}";
+        return "{\"" + getClass().getSimpleName() + "\"}";
     }
 
 
@@ -681,7 +624,7 @@ public class SpimeDB {
     /**
      * returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics
      */
-    public NObject add(@Nullable NObject n) {
+    public DObject add(@Nullable NObject n) {
         if (n == null)
             return null;
 
@@ -794,48 +737,9 @@ public class SpimeDB {
         return true;
     }
 
-    private void reindex(NObject current) {
-        reindex(null, current);
-    }
-
-    private void reindex(NObject previous, NObject current) {
-
-        String[] tags;
-
-        if (current!=null) {
-
-            tags = current.tags();
-
-            this.tag(current.id(), tags, previous != null ? previous.tags() : null);
 
 
-            if (current instanceof GraphedNObject)
-                current = new MutableNObject(current); //store as un-graphed immutable
-        } else {
-            tags = null;
-        }
 
-        //HACK remove tag field now that it is indexed in the graph
-        if (current instanceof MutableNObject)
-            ((MutableNObject) current).remove(">");
-
-        if ((previous != null && previous.bounded()) || (current != null && current.bounded())) {
-            reindexSpatial(previous, current, tags);
-        }
-
-    }
-
-    private void reindexSpatial(NObject previous, NObject current, String[] tags) {
-        for (String t : tags) {
-            if (!t.isEmpty()) { //dont store in root
-                SpatialSearch<NObject> s = space(t);
-                if (previous != null && previous.bounded())
-                    s.remove(previous);
-                if (current != null && current.bounded())
-                    s.add(current);
-            }
-        }
-    }
 
     protected NObject internal(NObject next) {
         return next;
@@ -926,38 +830,81 @@ public class SpimeDB {
     }
 
 
-    public Query get(Query q) {
+    @Nullable public SearchResult get(@NotNull Query q) {
         q.onStart();
 
         Predicate<NObject> each = q.each;
 
-        Iterable<String> include = tagsAndSubtags(q.include);
-        for (String t : include) {
-            SpatialSearch<NObject> s = spaceIfExists(t);
-            if (s != null && !s.isEmpty()) {
-                if (q.bounds != null && q.bounds.length > 0) {
-                    for (RectND x : q.bounds) {
-                        switch (q.boundsCondition) {
-                            case Contain:
-                                if (!s.containing(x, each))
-                                    break;
-                                break;
-                            case Intersect:
-                                if (!s.intersecting(x, each))
-                                    break;
-                                break;
-                        }
+        IndexSearcher s = searcher();
+        if (s == null)
+            return null;
+
+        try {
+            if (q.bounds != null && q.bounds.length > 0) {
+                BooleanQuery.Builder bqb = new BooleanQuery.Builder();
+
+
+                List<QueryNode> nodes = new FasterList();
+                for (RectDoubleND x : q.bounds) {
+                    org.apache.lucene.search.Query subQuery;
+                    switch (q.boundsCondition) {
+                        case Intersect:
+                            subQuery = DoubleRangeField.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord);
+                            break;
+                        default:
+                            q.onEnd();
+                            throw new UnsupportedOperationException("TODO");
                     }
-                } else {
-                    if (!s.intersecting(RectND.ALL_4, each)) //iterate all items
-                        break;
+
+                    bqb.add(subQuery, BooleanClause.Occur.SHOULD);
+                }
+
+                try {
+                    SearchResult result = find(bqb.build(), q.limit);
+                    result.forEach((d, score) -> {
+                        return q.each.test(DObject.get(d));
+                    });
+                    q.onEnd();
+                    return result;
+                } catch (IOException e) {
+                    q.onEnd();
+                    logger.error("{}", e);
                 }
             }
 
+            throw new UnsupportedOperationException("empty query");
+        } finally {
+            try {
+                searcher().getIndexReader().close();
+            } catch (IOException e) { }
         }
 
-        q.onEnd();
-        return q;
+
+
+//        Iterable<String> include = Collections.emptyList(); //tagsAndSubtags(q.include);
+//        for (String t : include) {
+//            SpatialSearch<NObject> s = spaceIfExists(t);
+//            if (s != null && !s.isEmpty()) {
+//                if (q.bounds != null && q.bounds.length > 0) {
+//                    for (RectND x : q.bounds) {
+//                        switch (q.boundsCondition) {
+//                            case Contain:
+//                                if (!s.containing(x, each))
+//                                    break;
+//                                break;
+//                            case Intersect:
+//                                if (!s.intersecting(x, each))
+//                                    break;
+//                                break;
+//                        }
+//                    }
+//                } else {
+//                    if (!s.intersecting(RectND.ALL_4, each)) //iterate all items
+//                        break;
+//                }
+//            }
+        //}
+
     }
 
 
@@ -970,7 +917,7 @@ public class SpimeDB {
         if (parentTags == null || parentTags.length == 0)
             return this.tags(); //ALL
         else {
-            return new SubTags(graph, parentTags);
+            return Collections.emptyList(); //new SubTags(graph, parentTags);
         }
     }
 
@@ -1004,19 +951,20 @@ public class SpimeDB {
 //    }
 
 
-    public GraphedNObject graphed(String id) {
+    @Deprecated public NObject graphed(String id) {
         NObject n = get(id);
-        if (n != null)
-            return graphed(n);
-        return null;
+        return n;
+//        if (n != null)
+//            return graphed(n);
+//        return null;
     }
 
-    public GraphedNObject graphed(NObject n) {
-        if ((n instanceof GraphedNObject) && (((GraphedNObject) n).graph == graph))
-            return (GraphedNObject) n; //already wrapped
-
-        return new GraphedNObject(this.graph, n);
-    }
+//    public GraphedNObject graphed(NObject n) {
+//        if ((n instanceof GraphedNObject) && (((GraphedNObject) n).graph == graph))
+//            return (GraphedNObject) n; //already wrapped
+//
+//        return new GraphedNObject(this.graph, n);
+//    }
 
 
     //    static class MyOctBox extends OctBox {
