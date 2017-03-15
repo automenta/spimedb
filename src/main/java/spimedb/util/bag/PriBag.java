@@ -42,8 +42,8 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     }
 
     @Override
-    public float floatValueOf(Budget<V> anObject) {
-        return anObject.pri;
+    public float floatValueOf(Budget<V> x) {
+        return -pCmp(x);
     }
 
     public boolean containsKey(Object o) {
@@ -281,10 +281,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
     }
 
-    //@Override
-    public final float rank(Budget x) {
-        return -pCmp(x);
-    }
+
 
     //    //@Override
 //    public final int compare(@Nullable BLink o1, @Nullable BLink o2) {

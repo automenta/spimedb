@@ -9,12 +9,12 @@ import org.teavm.jso.dom.css.ElementCSSInlineStyle;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
 import org.teavm.jso.dom.xml.Node;
-import spimedb.util.bag.BudgetMerge;
-import spimedb.util.bag.ObservablePriBag;
 import spimedb.client.leaflet.Layer;
 import spimedb.client.lodash.Lodash;
 import spimedb.client.util.Console;
 import spimedb.client.websocket.WebSocket;
+import spimedb.util.bag.BudgetMerge;
+import spimedb.util.bag.ObservablePriBag;
 
 import java.util.Arrays;
 import java.util.HashMap;

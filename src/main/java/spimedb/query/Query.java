@@ -1,7 +1,6 @@
 package spimedb.query;
 
 import jcog.tree.rtree.rect.RectDoubleND;
-import jcog.tree.rtree.rect.RectFloatND;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;

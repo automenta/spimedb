@@ -80,9 +80,7 @@ public class DObject implements NObject {
             DoubleND minP = n.min();
             if (minP != unbounded) {
 
-                double[] min = (minP.coord);
-                double[] max = (n.max().coord);
-
+                d.add(new SpacetimeField((minP.coord), (n.max().coord)));
 
                 //d.add(new FloatRangeField(NObject.BOUND, min, max));
                 //float[] aa = ArrayUtils.addAll(min, max);
@@ -90,7 +88,6 @@ public class DObject implements NObject {
                 //d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
 
 
-                d.add(new SpacetimeField(min, max));
 
 
             }

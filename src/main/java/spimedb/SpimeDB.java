@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
-import jcog.list.FasterList;
+import jcog.Util;
 import jcog.tree.rtree.rect.RectDoubleND;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
@@ -21,13 +21,10 @@ import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.*;
+import org.apache.lucene.queries.TermsQuery;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.queryparser.flexible.core.nodes.OrQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.surround.query.OrQuery;
-import org.apache.lucene.queryparser.xml.builders.DisjunctionMaxQueryBuilder;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.suggest.DocumentDictionary;
 import org.apache.lucene.search.suggest.Lookup;
@@ -36,17 +33,12 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.QueryBuilder;
-import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
-import org.eclipse.collections.impl.factory.Sets;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.graph.MapGraph;
-import spimedb.graph.VertexContainer;
 import spimedb.graph.travel.BreadthFirstTravel;
 import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
@@ -55,7 +47,6 @@ import spimedb.index.SearchResult;
 import spimedb.query.Query;
 import spimedb.util.Locker;
 import spimedb.util.PrioritizedExecutor;
-import spimedb.util.datatypes.DoubleRange;
 
 import javax.script.ScriptEngineManager;
 import java.io.File;
@@ -66,7 +57,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -96,7 +86,6 @@ public class SpimeDB {
 
 
     protected final Directory dir;
-
 
 
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
@@ -182,7 +171,7 @@ public class SpimeDB {
         logger.info("index ready: file://{}", indexPath);
     }
 
-    private SpimeDB(File file, Directory dir)  {
+    private SpimeDB(File file, Directory dir) {
 
         this.file = file;
         this.dir = dir;
@@ -394,7 +383,6 @@ public class SpimeDB {
     }
 
 
-
     public Set<String> tags() {
         return Collections.emptySet();
     }
@@ -418,7 +406,7 @@ public class SpimeDB {
 
     private void commit() {
         if (writing.compareAndSet(false, true)) {
-            //exe.run(1f, () -> {
+            exe.run(1f, () -> {
 
                 if (out.isEmpty())
                     return;
@@ -446,9 +434,9 @@ public class SpimeDB {
 
                             String id = nn.getKey();
                             Term key = new Term(NObject.ID, id);
-                            if (val!=REMOVE) {
+                            if (val != REMOVE) {
                                 writer.updateDocument(key,
-                                    facetsConfig.build(taxoWriter, val.document)
+                                        facetsConfig.build(taxoWriter, val.document)
                                 );
                                 written++;
                             } else {
@@ -478,7 +466,7 @@ public class SpimeDB {
 
                 writing.set(false);
 
-            //});
+            });
         }
 
     }
@@ -546,7 +534,6 @@ public class SpimeDB {
     }
 
 
-
     private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
         public SubTags(MapGraph<V, E> graph, V... parentTags) {
             super(graph, parentTags);
@@ -557,9 +544,6 @@ public class SpimeDB {
             return new BreadthFirstTravel<>(graph, start, seen);
         }
     }
-
-
-
 
 
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/
@@ -738,9 +722,6 @@ public class SpimeDB {
     }
 
 
-
-
-
     protected NObject internal(NObject next) {
         return next;
     }
@@ -830,55 +811,49 @@ public class SpimeDB {
     }
 
 
-    @Nullable public SearchResult get(@NotNull Query q) {
+    @Nullable
+    public SearchResult get(@NotNull Query q) {
         q.onStart();
 
         Predicate<NObject> each = q.each;
 
-        IndexSearcher s = searcher();
-        if (s == null)
-            return null;
+        BooleanQuery.Builder bqb = new BooleanQuery.Builder();
 
-        try {
-            if (q.bounds != null && q.bounds.length > 0) {
-                BooleanQuery.Builder bqb = new BooleanQuery.Builder();
+        if (q.include != null && q.include.length > 0)
+            bqb.add(new TermsQuery(tagTerms(q.include)), BooleanClause.Occur.MUST);
 
-
-                List<QueryNode> nodes = new FasterList();
-                for (RectDoubleND x : q.bounds) {
-                    org.apache.lucene.search.Query subQuery;
-                    switch (q.boundsCondition) {
-                        case Intersect:
-                            subQuery = DoubleRangeField.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord);
-                            break;
-                        default:
-                            q.onEnd();
-                            throw new UnsupportedOperationException("TODO");
-                    }
-
-                    bqb.add(subQuery, BooleanClause.Occur.SHOULD);
+        if (q.bounds != null && q.bounds.length > 0) {
+            for (RectDoubleND x : q.bounds) {
+                org.apache.lucene.search.Query subQuery;
+                switch (q.boundsCondition) {
+                    case Intersect:
+                        subQuery = DoubleRangeField.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord);
+                        break;
+                    default:
+                        q.onEnd();
+                        throw new UnsupportedOperationException("TODO");
                 }
 
-                try {
-                    SearchResult result = find(bqb.build(), q.limit);
-                    result.forEach((d, score) -> {
-                        return q.each.test(DObject.get(d));
-                    });
-                    q.onEnd();
-                    return result;
-                } catch (IOException e) {
-                    q.onEnd();
-                    logger.error("{}", e);
-                }
+                bqb.add(subQuery, BooleanClause.Occur.SHOULD);
             }
-
-            throw new UnsupportedOperationException("empty query");
-        } finally {
-            try {
-                searcher().getIndexReader().close();
-            } catch (IOException e) { }
         }
 
+        try {
+            SearchResult result = find(bqb.build(), q.limit);
+            if (result!=null) {
+                result.forEach((d, score) -> {
+                    return q.each.test(DObject.get(d));
+                });
+                result.close();
+            }
+            q.onEnd();
+            return result;
+        } catch (IOException e) {
+            q.onEnd();
+            logger.error("{}", e);
+            return null;
+        }
+    }
 
 
 //        Iterable<String> include = Collections.emptyList(); //tagsAndSubtags(q.include);
@@ -901,12 +876,15 @@ public class SpimeDB {
 //                } else {
 //                    if (!s.intersecting(RectND.ALL_4, each)) //iterate all items
 //                        break;
-//                }
-//            }
-        //}
 
+
+    public static Term[] tagTerms(String... tags) {
+        Term[] t = new Term[tags.length];
+        for (int i = 0, tagsLength = tags.length; i < tagsLength; i++) {
+            t[i] = new Term(NObject.TAG, tags[i]);
+        }
+        return t;
     }
-
 
     /**
      * computes the set of subtree (children) tags held by the extension of the input (parent) tags
@@ -929,23 +907,20 @@ public class SpimeDB {
         exe.run(pri, r);
     }
 
+    public void add(Collection<? extends NObject> s) {
+        add(s.stream());
+    }
+
     public void add(Stream<? extends NObject> s) {
         s.forEach(this::add);
     }
 
     @Deprecated
     public synchronized void sync() {
-
-        Thread.yield();
-
         int waitDelayMS = 50;
-        while (!exe.pq.isEmpty() || exe.running.get() > 0) {
-            try {
-                Thread.sleep(waitDelayMS);
-            } catch (InterruptedException e) {
-                logger.warn("{}", e);
-            }
-        }
+        do {
+            Util.sleep(waitDelayMS);
+        } while (!exe.pq.isEmpty() || exe.running.get() > 0);
     }
 
 //    public synchronized void sync(float seconds) {
@@ -954,7 +929,8 @@ public class SpimeDB {
 //    }
 
 
-    @Deprecated public NObject graphed(String id) {
+    @Deprecated
+    public NObject graphed(String id) {
         NObject n = get(id);
         return n;
 //        if (n != null)

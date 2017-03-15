@@ -7,7 +7,6 @@ import org.eclipse.collections.impl.factory.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.FilteredNObject;
-import spimedb.GraphedNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;

@@ -1,6 +1,5 @@
 package spimedb.io;
 
-import jcog.Util;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;

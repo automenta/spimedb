@@ -16,8 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static jcog.tree.rtree.rect.RectDoubleND.unbounded;
-
 
 /**
  * dimensions: time (t), lon (x), lat (y), alt (z), ...

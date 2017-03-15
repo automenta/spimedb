@@ -2,9 +2,11 @@ package spimedb.io;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;
+import jcog.list.FasterList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.MutableNObject;
+import spimedb.NObject;
 import spimedb.SpimeDB;
 
 import java.io.FileReader;
@@ -28,9 +30,11 @@ abstract public class ImportSchemaOrg {
     public static void load(SpimeDB db) {
         //MutableGraph<String> types = GraphBuilder.directed().allowsSelfLoops(false).nodeOrder(ElementOrder.unordered()).expectedNodeCount(1024).build();
 
+        List<NObject> pending = new FasterList(1024);
 
         try {
             new ImportSchemaOrg() {
+
 
 
                 @Override
@@ -46,7 +50,7 @@ abstract public class ImportSchemaOrg {
                     t.put(">", supertypes.toArray(new String[supertypes.size()]));
 
 
-                    db.add(t);
+                    pending.add(t);
 
 
 //                    types.addNode(id);
@@ -84,6 +88,7 @@ abstract public class ImportSchemaOrg {
             e.printStackTrace();
         }
 
+        db.add(pending);
 
 
 //        MutableGraph<String> copy = Graphs.copyOf(types);

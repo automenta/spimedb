@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jcog.tree.rtree.point.DoubleND;
-import jcog.tree.rtree.point.FloatND;
 import org.apache.commons.lang.ArrayUtils;
 import spimedb.util.JSON;
 

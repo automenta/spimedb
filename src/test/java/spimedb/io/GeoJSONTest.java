@@ -1,7 +1,6 @@
 package spimedb.io;
 
 import jcog.tree.rtree.rect.RectDoubleND;
-import jcog.tree.rtree.rect.RectFloatND;
 import org.junit.Test;
 import spimedb.SpimeDB;
 import spimedb.query.QueryCollection;

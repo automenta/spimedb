@@ -7,11 +7,11 @@ import org.teavm.jso.core.JSArray;
 import org.teavm.jso.core.JSFunction;
 import org.teavm.jso.dom.html.HTMLElement;
 import spimedb.NObject;
-import spimedb.util.bag.ChangeBatcher;
 import spimedb.client.leaflet.*;
 import spimedb.client.lodash.Lodash;
 import spimedb.client.util.JS;
 import spimedb.client.util.JsConsumer;
+import spimedb.util.bag.ChangeBatcher;
 
 import java.util.Arrays;
 
