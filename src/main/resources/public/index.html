@@ -416,6 +416,22 @@
                             //tt.fancybox();
                         }
 
+                        const bounds = x['@'];
+                        if (bounds) {
+                          var when = bounds[0];
+                          var lon = bounds[1];
+                          var lat = bounds[2];
+                          var alt = bounds[3];
+                          try {
+                            lon = parseFloat(lon);
+                            lat = parseFloat(lat);
+                            var marker = L.marker([lat, lon]).addTo(map);
+                            //console.log(x.id, bounds);
+                          } catch (e) {
+
+                          }
+                        }
+
                         if (x['_']) {
                             y.append(E('p').attr('class', 'textpreview').html(x['_'].replace('\n', '<br/>')));
                         }
