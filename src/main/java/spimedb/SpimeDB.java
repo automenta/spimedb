@@ -418,7 +418,7 @@ public class SpimeDB {
 
     private void commit() {
         if (writing.compareAndSet(false, true)) {
-            exe.run(1f, () -> {
+            //exe.run(1f, () -> {
 
                 if (out.isEmpty())
                     return;
@@ -478,7 +478,7 @@ public class SpimeDB {
 
                 writing.set(false);
 
-            });
+            //});
         }
 
     }
@@ -935,6 +935,9 @@ public class SpimeDB {
 
     @Deprecated
     public synchronized void sync() {
+
+        Thread.yield();
+
         int waitDelayMS = 50;
         while (!exe.pq.isEmpty() || exe.running.get() > 0) {
             try {

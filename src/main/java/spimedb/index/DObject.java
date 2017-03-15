@@ -1,7 +1,6 @@
 package spimedb.index;
 
 import com.google.common.base.Joiner;
-import jcog.Util;
 import jcog.tree.rtree.point.DoubleND;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang.ArrayUtils;
@@ -14,6 +13,7 @@ import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.IndexableFieldType;
+import org.apache.lucene.util.NumericUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
-
 
 import static jcog.tree.rtree.rect.RectDoubleND.unbounded;
 import static spimedb.SpimeDB.string;
@@ -91,8 +90,7 @@ public class DObject implements NObject {
                 //d.add(string(NObject.BOUND, JSON.toJSONString(new float[][] { min, max } )));
 
 
-                d.add(new DoubleRangeField(NObject.BOUND, min, max));
-
+                d.add(new SpacetimeField(min, max));
 
 
             }
@@ -168,6 +166,7 @@ public class DObject implements NObject {
         return d;
     }
 
+
     private static IndexableField bytes(String key, byte[] bytes) {
         return new StoredField(key, bytes);
     }
@@ -185,9 +184,7 @@ public class DObject implements NObject {
         this.id = d.get(NObject.ID);
 
         IndexableField b = d.getField(NObject.BOUND);
-        if (b != null) {
-            //FloatRangeField f = (FloatRangeField)b;
-
+        if (b instanceof DoubleRangeField) {
             DoubleRangeField f = (DoubleRangeField) b;
             double[] min = new double[4];
             double[] max = new double[4];
@@ -198,6 +195,19 @@ public class DObject implements NObject {
 
             this.min = new DoubleND(min);
             this.max = new DoubleND(max);
+        } else if (b instanceof StoredField) {
+            StoredField sf = (StoredField) b;
+
+            byte[] bbb = sf.binaryValue().bytes;
+            int l = bbb.length/2;
+            double[] min = new double[4], max = new double[4];
+            for (int i = 0; i < 4; i++) {
+                min[i] = NumericUtils.sortableLongToDouble(NumericUtils.sortableBytesToLong(bbb, i * 8));
+                max[i] = NumericUtils.sortableLongToDouble(NumericUtils.sortableBytesToLong(bbb, l + i * 8));
+            }
+            this.min = new DoubleND(min);
+            this.max = new DoubleND(max);
+
         } else {
             min = max = unbounded;
         }
@@ -222,7 +232,7 @@ public class DObject implements NObject {
 
             Set<String> k = parseKeywords(new LowerCaseTokenizer(), name);
             for (String l : k) {
-                if (l.length() >=3 && !StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(l))
+                if (l.length() >= 3 && !StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(l))
                     d.add(new FacetField(NObject.TAG, l));
             }
         }
@@ -347,7 +357,7 @@ public class DObject implements NObject {
             byte[] b = dp.binaryValue().bytes;
 
             double[] dd = new double[b.length / Double.BYTES];
-            for (int i = 0;i < dd.length; i++)
+            for (int i = 0; i < dd.length; i++)
                 dd[i] = DoublePoint.decodeDimension(b, i);
             if (dd.length == 1)
                 return dd[0];

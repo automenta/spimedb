@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.google.common.collect.Iterables;
+import jcog.Util;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexableField;
 import org.junit.Test;
@@ -35,12 +36,21 @@ public class QueryTest {
 //            System.out.println(f.name() + " = " + f.binaryValue());
 //        }
 
+
+
         db.sync();
 
         ArrayList<NObject> found = new ArrayList();
-        SearchResult result = db.get(new Query(found::add).where(new double[]{0, 1}, new double[]{0, 1}));
+        SearchResult result = db.get(new Query(found::add)
+            //.in("Place")
+            .where(new double[]{0, 1}, new double[]{0, 1})
+        );
 
         assertFalse(found.isEmpty());
+
+        System.out.println(found);
+        assertEquals(dplace.toString(), found.get(0).toString());
+
         assertTrue(found + "", found.contains(place));
 
 
