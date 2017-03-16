@@ -122,14 +122,146 @@
 
     $(document).ready(() => {
 
+        const clusters = { };
+        const active = new Map();
+
+        function ResultNode(x) {
+          const y = DIVclass('list-item result');
+          y.data('o', x);
+
+          var tgt = x.I;
+          if (x.inh) {
+              x.out = x.inh['>'];
+
+              const vin = x.inh['<'];
+              if (vin && !(vin.length === 1 && vin[0].length === 0)) { //exclude root tag
+                  x.in = vin;
+                  tgt = vin;
+              }
+          }
+
+
+          if (clusters[tgt]===undefined) {
+            clusters[tgt] = [ y ];
+          } else {
+            clusters[tgt].push(y);
+          }
+
+
+          const header = DIVclass('header');
+          if (x.data) {
+              header.append(
+                  //E('a').attr('href', x.data).attr('target', '_').append(
+                      E('h2').text(x.N)
+                  //)
+              );
+          } else {
+              header.append(
+                  E('h2').text(x.N)
+              );
+
+          }
+
+          const meta = DIVclass('meta');
+
+
+          y.append(
+              header,
+              meta
+          );
+
+          if (x.thumbnail) {
+              const tt =
+              //E('a').attr('class', 'fancybox').attr('rel', 'group').append(
+                E('img').attr('src', "/thumbnail?I=" + x.thumbnail)
+              //)
+              ;
+              y.append(
+                  tt
+              );
+
+              //http://fancyapps.com/fancybox/#examples
+              //tt.fancybox();
+          }
+
+          const bounds = x['@'];
+          if (bounds) {
+            var when = bounds[0];
+            var lon = bounds[1];
+            var lat = bounds[2];
+            var alt = bounds[3];
+            try {
+              lon = parseFloat(lon);
+              lat = parseFloat(lat);
+              var marker = L.marker([lat, lon]).addTo(map);
+              //console.log(x.id, bounds);
+            } catch (e) {
+
+            }
+          }
+
+          if (x['_']) {
+              y.append(E('p').attr('class', 'textpreview').html(x['_'].replace('\n', '<br/>')));
+          }
+
+
+          if (x.data) {
+            y.click(()=>{
+                focus(x.data);
+            });
+          }
+
+
+          return y;
+
+        }
+
+        function ADD(x) {
+          if (!x.I)
+            return null;
+
+          const prev = active.delete(x.I);
+          if (prev) {
+
+          }
+
+          x.result = ResultNode(x);
+          $('#results').append(x.result);
+
+          active.set(x.I, x);
+          return x;
+        }
+
+
+        function REMOVE(id) {
+
+            const r = map.delete(id);
+            if (!r)
+              return;
+
+            r.result.remove();
+            delete r.result;
+        }
+
+        function CLEAR() {
+          active.forEach((value, key)=>{
+              REMOVE(key);
+          });
+        }
+
 
         $.get('/logo.html', (x) => {
             $('#logo').html(x);
         });
 
-        //init map
+
         var map = L.map('query_map').setView([51.505, -0.09], 2);
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+
+        //http://leaflet-extras.github.io/leaflet-providers/preview/
+        L.tileLayer(
+          //'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+          'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+          ,{
             //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
@@ -348,107 +480,9 @@
 
                 loadFacets(ff);
 
-                const clusters = { };
-
-                $('#results').html(
-
-
-                    _.map(rr, (x, k) => {
-
-                        if (!x.I)
-                            return;
-
-                        const y = DIVclass('list-item result');
-                        y.data('o', x);
-
-                        var tgt = x.I;
-                        if (x.inh) {
-                            x.out = x.inh['>'];
-
-                            const vin = x.inh['<'];
-                            if (vin && !(vin.length === 1 && vin[0].length === 0)) { //exclude root tag
-                                x.in = vin;
-                                tgt = vin;
-                            }
-                        }
-
-
-                        if (clusters[tgt]===undefined) {
-                          clusters[tgt] = [ y ];
-                        } else {
-                          clusters[tgt].push(y);
-                        }
-
-
-                        const header = DIVclass('header');
-                        if (x.data) {
-                            header.append(
-                                //E('a').attr('href', x.data).attr('target', '_').append(
-                                    E('h2').text(x.N)
-                                //)
-                            );
-                        } else {
-                            header.append(
-                                E('h2').text(x.N)
-                            );
-
-                        }
-
-                        const meta = DIVclass('meta');
-
-
-                        y.append(
-                            header,
-                            meta
-                        );
-
-                        if (x.thumbnail) {
-                            const tt =
-                            //E('a').attr('class', 'fancybox').attr('rel', 'group').append(
-                              E('img').attr('src', "/thumbnail?I=" + x.thumbnail)
-                            //)
-                            ;
-                            y.append(
-                                tt
-                            );
-
-                            //http://fancyapps.com/fancybox/#examples
-                            //tt.fancybox();
-                        }
-
-                        const bounds = x['@'];
-                        if (bounds) {
-                          var when = bounds[0];
-                          var lon = bounds[1];
-                          var lat = bounds[2];
-                          var alt = bounds[3];
-                          try {
-                            lon = parseFloat(lon);
-                            lat = parseFloat(lat);
-                            var marker = L.marker([lat, lon]).addTo(map);
-                            //console.log(x.id, bounds);
-                          } catch (e) {
-
-                          }
-                        }
-
-                        if (x['_']) {
-                            y.append(E('p').attr('class', 'textpreview').html(x['_'].replace('\n', '<br/>')));
-                        }
-
-
-                        if (x.data) {
-                          y.click(()=>{
-                              focus(x.data);
-                          });
-                        }
-
-
-                        return y;
-                    })
-
-
-                );
+                $('#results').html();
+                CLEAR();
+                _.forEach(rr, ADD);
 
                 _.each(clusters, (c,k)=>{
 

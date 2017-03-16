@@ -136,8 +136,7 @@ public class SpimeDB {
 
     private Lookup suggester;
 
-    private DocumentDictionary nameDict;
-    private DirectoryReader nameDictReader;
+
 
     final static String[] ROOT = new String[]{""};
 
@@ -246,43 +245,45 @@ public class SpimeDB {
 
     @Nullable
     private Lookup suggester() {
-        synchronized (dir) {
-            if (lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod) {
-                suggester = null; //re-create since it is invalidated
-            }
+
+        if (lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod) {
+            suggester = null; //re-create since it is invalidated
+        }
+
+        if (suggester == null) {
+            Lock l = locker.get("_suggester");
 
             if (suggester == null) {
-                if (nameDict == null) {
-                    nameDictReader = reader();
-                    if (nameDictReader == null)
-                        return null;
-                }
-
-                nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
-                FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
-
                 try {
+                    withReader((nameDictReader) -> {
 
-                    Stopwatch time = Stopwatch.createStarted();
+                        DocumentDictionary nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
+                        FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
 
-                    nextSuggester.build(nameDict);
-                    suggester = nextSuggester;
-                    lastSuggesterCreated = now();
-                    logger.info("suggester updated, count={} {}ms", suggester.getCount(), time.elapsed(MILLISECONDS));
+                        try {
 
-                    time.reset();
+                            Stopwatch time = Stopwatch.createStarted();
 
-//                    FacetsCollector fc = new FacetsCollector();
-//                    FacetsCollector.search(new IndexSearcher(nameDictReader), new MatchAllDocsQuery(), Integer.MAX_VALUE,
-//                            fc
-//                    );
-//                    logger.info("facets updated, count={} {}ms", fc., time.elapsed(MILLISECONDS));
+                            nextSuggester.build(nameDict);
+                            suggester = nextSuggester;
+                            lastSuggesterCreated = now();
+                            logger.info("suggester updated, count={} {}ms", nextSuggester.getCount(), time.elapsed(MILLISECONDS));
 
-                } catch (IllegalArgumentException f) {
-                    return null;
-                } catch (IOException e) {
-                    logger.error("suggester update: {}", e);
-                    return null;
+                            time.reset();
+
+                            //                    FacetsCollector fc = new FacetsCollector();
+                            //                    FacetsCollector.search(new IndexSearcher(nameDictReader), new MatchAllDocsQuery(), Integer.MAX_VALUE,
+                            //                            fc
+                            //                    );
+                            //                    logger.info("facets updated, count={} {}ms", fc., time.elapsed(MILLISECONDS));
+
+                        } catch (Exception f) {
+                            logger.error("suggester update: {}", f);
+                        }
+
+                    });
+                } finally {
+                    l.unlock();
                 }
             }
         }
@@ -331,6 +332,22 @@ public class SpimeDB {
             logger.error("index reader: {}", e);
             throw new RuntimeException(e);
             //return null;
+        }
+    }
+
+    public void withReader(Consumer<DirectoryReader> c) {
+        DirectoryReader r = reader();
+        if (r == null)
+            return;
+
+        try {
+            c.accept(r);
+        } finally {
+            try {
+                r.close();
+            } catch (IOException e) {
+
+            }
         }
     }
 
@@ -393,11 +410,11 @@ public class SpimeDB {
     }
 
     public int size() {
-        DirectoryReader r = reader();
-        return r == null ? 0 : r.maxDoc();
-//        int[] size = new int[1];
-//        forEach(x -> size[0]++); //HACK
-//        return size[0];
+        final int[] size = new int[1];
+        withReader((r)->{
+           size[0] = r.maxDoc();
+        });
+        return size[0];
     }
 
     public long now() {
@@ -739,74 +756,28 @@ public class SpimeDB {
     public void forEach(Consumer<NObject> each) {
 
         /* When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering. */
-        DirectoryReader r = reader();
-        if (r == null)
-            return;
+        withReader((r) -> {
+            int max = r.maxDoc();
 
-        int max = r.maxDoc();
+            IntStream.range(0, max).parallel().forEach(i -> {
+                Document d = null;
+                try {
+                    d = r.document(i);
+                    if (d != null)
+                        each.accept(DObject.get(d));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
 
-        IntStream.range(0, max).parallel().forEach(i -> {
-            Document d = null;
-            try {
-                d = r.document(i);
-                if (d != null)
-                    each.accept(DObject.get(d));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         });
-
-//        for (int i = 0; i < max; i++) {
-//            try {
-//                Document d = r.document(i);
-//                if (d!=null)
-//                    each.accept(DObject.get(d));
-//            } catch (IOException e) {
-//                logger.error("doc: {}", e.getMessage());
-//            }
-//        }
-
-        try {
-            r.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-//        //long startTime = System.currentTimeMillis();
-//        //create the term query object
-//        MatchAllDocsQuery query = new MatchAllDocsQuery();
-//        //do the search
-//        TopDocs hits = null;
-//        try {
-//            IndexSearcher searcher = searcher();
-//            if (searcher == null)
-//                return;
-//
-//            hits = searcher.search(query, Integer.MAX_VALUE);
-//            //long endTime = System.currentTimeMillis();
-//
-////            System.out.println(hits.totalHits +
-////                    " documents found. Time :" + (endTime - startTime) + "ms");
-//            for (ScoreDoc scoreDoc : hits.scoreDocs) {
-//                Document doc = searcher.doc(scoreDoc.doc);
-//                if (doc!=null) {
-//                    each.accept(DObject.get(doc));
-//                }
-//            }
-//
-//            searcher.getIndexReader().close();
-//        } catch (IOException e) {
-//            logger.error("{}",e);
-//        }
     }
 
 
     public DObject get(String id) {
         return cache.get(id, (i) -> {
             Document d = the(i);
-            if (d != null)
-                return DObject.get(d);
-            return null;
+            return d != null ? DObject.get(d) : null;
         });
     }
 
@@ -840,7 +811,7 @@ public class SpimeDB {
 
         try {
             SearchResult result = find(bqb.build(), q.limit);
-            if (result!=null) {
+            if (result != null) {
                 result.forEach((d, score) -> {
                     return q.each.test(DObject.get(d));
                 });
