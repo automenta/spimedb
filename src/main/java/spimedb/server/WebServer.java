@@ -225,7 +225,7 @@ public class WebServer extends PathHandler {
         /* client attention management */
         addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
 
-        addPrefixPath("/admin", websocket(new Admin(db)));
+        //addPrefixPath("/admin", websocket(new Admin(db)));
 
         restart();
 
