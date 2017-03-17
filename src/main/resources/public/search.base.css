@@ -3,7 +3,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-#query_map, #menu, #results, #focus {
+#map, #menu, #results, #focus {
     position: fixed;
     
 }
@@ -15,13 +15,13 @@ body {
     padding: 0.75em;
 }
 
-#query_map {
+#map {
     width: 100%;
     height: 100%;
     position: fixed;
     
 }
-#query_map * {
+#map * {
   -webkit-transition: none;
   transition: none;
 }
@@ -109,7 +109,7 @@ h2 { margin: 0; }
   width: 0;
   opacity: 0;
 }
-.hide #query #query_map {
+.hide #query #map {
   display: none;
 }
 

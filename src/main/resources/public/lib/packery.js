@@ -1,1 +1,0 @@
-../bower_components/packery/dist/packery.pkgd.min.js

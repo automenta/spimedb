@@ -137,7 +137,6 @@ public class SpimeDB {
     private Lookup suggester;
 
 
-
     final static String[] ROOT = new String[]{""};
 
 
@@ -246,48 +245,58 @@ public class SpimeDB {
     @Nullable
     private Lookup suggester() {
 
-        if (lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod) {
-            suggester = null; //re-create since it is invalidated
-        }
+        Lookup suggester = this.suggester;
 
-        if (suggester == null) {
+        if (suggester == null || lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod) {
+            suggester = null; //re-create since it is invalidated
+
             Lock l = locker.get("_suggester");
 
-            if (suggester == null) {
-                try {
-                    withReader((nameDictReader) -> {
+            l.lock();
+            try {
+                if (this.suggester != null)
+                    return this.suggester; //created while waiting for the lock
 
-                        DocumentDictionary nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
-                        FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
+                FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
 
-                        try {
+                withReader((nameDictReader) -> {
 
-                            Stopwatch time = Stopwatch.createStarted();
+                    DocumentDictionary nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
 
-                            nextSuggester.build(nameDict);
-                            suggester = nextSuggester;
-                            lastSuggesterCreated = now();
-                            logger.info("suggester updated, count={} {}ms", nextSuggester.getCount(), time.elapsed(MILLISECONDS));
+                    Stopwatch time = Stopwatch.createStarted();
 
-                            time.reset();
+                    try {
+                        nextSuggester.build(nameDict);
+                    } catch (IOException f) {
+                        logger.error("suggester build: {}", f);
+                    }
 
-                            //                    FacetsCollector fc = new FacetsCollector();
-                            //                    FacetsCollector.search(new IndexSearcher(nameDictReader), new MatchAllDocsQuery(), Integer.MAX_VALUE,
-                            //                            fc
-                            //                    );
-                            //                    logger.info("facets updated, count={} {}ms", fc., time.elapsed(MILLISECONDS));
+                    this.suggester = nextSuggester;
 
-                        } catch (Exception f) {
-                            logger.error("suggester update: {}", f);
-                        }
+                    lastSuggesterCreated = now();
+                    logger.info("suggester built: size={} {}ms", nextSuggester.getCount(), time.elapsed(MILLISECONDS));
 
-                    });
-                } finally {
-                    l.unlock();
-                }
+                    //time.reset();
+
+                    //                    FacetsCollector fc = new FacetsCollector();
+                    //                    FacetsCollector.search(new IndexSearcher(nameDictReader), new MatchAllDocsQuery(), Integer.MAX_VALUE,
+                    //                            fc
+                    //                    );
+                    //                    logger.info("facets updated, count={} {}ms", fc., time.elapsed(MILLISECONDS));
+
+
+                });
+
+
+                return this.suggester;
+            } finally {
+                l.unlock();
             }
+
+        } else {
+            return suggester;
         }
-        return suggester;
+
     }
 
 
@@ -411,8 +420,8 @@ public class SpimeDB {
 
     public int size() {
         final int[] size = new int[1];
-        withReader((r)->{
-           size[0] = r.maxDoc();
+        withReader((r) -> {
+            size[0] = r.maxDoc();
         });
         return size[0];
     }

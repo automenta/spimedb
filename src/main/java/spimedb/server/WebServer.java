@@ -11,12 +11,12 @@ import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.cache.DirectBufferCache;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
-import io.undertow.server.handlers.resource.FileResourceManager;
-import io.undertow.server.handlers.resource.Resource;
+import io.undertow.server.handlers.resource.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
@@ -25,6 +25,7 @@ import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
+import org.xnio.BufferAllocator;
 import spimedb.FilteredNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
@@ -80,10 +81,10 @@ public class WebServer extends PathHandler {
 
         private final FileResourceManager override;
 
-        public OverridingFileResourceManager(File base, File override) {
-            super(base, 0, true, "/");
+        public OverridingFileResourceManager(File base, int transferMinSize, File override) {
+            super(base, transferMinSize, true, "/");
 
-            this.override = new FileResourceManager(override, 0, true, "/");
+            this.override = new FileResourceManager(override, transferMinSize, true, "/");
         }
 
         @Override
@@ -107,14 +108,29 @@ public class WebServer extends PathHandler {
 
         File staticPath = Paths.get(WebServer.staticPath).toFile();
         File myStaticPath = db.file.getParentFile().toPath().resolve("public").toFile();
+
+        int transferMinSize = 1024 * 1024;
+        final int METADATA_MAX_AGE = 3 * 1000; //ms
+
+        ResourceManager res;
         if (db.indexPath!=null && myStaticPath.exists()) {
-            addPrefixPath("/", resource(new OverridingFileResourceManager(
-                    staticPath, myStaticPath)));
+            res = new OverridingFileResourceManager(staticPath, transferMinSize, myStaticPath);
         } else {
             //HACK add the defaut local to prevent 404's
-            addPrefixPath("/", resource(new FileResourceManager(
-                    staticPath, 0, true, "/")));
+            res = new FileResourceManager(
+                    staticPath, 0, true, "/");
         }
+
+        DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
+                16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
+                METADATA_MAX_AGE);
+
+        CachingResourceManager cres = new CachingResourceManager(
+                100,
+                transferMinSize,
+                dataCache, res, METADATA_MAX_AGE);
+
+        addPrefixPath("/", resource(cres));
 
 
 //        try {
