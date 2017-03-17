@@ -3,12 +3,12 @@ body {
   font-family: Arial, sans-serif;
 }
 
-#map, #menu, #results, #focus {
+#map, #menu, #resultsPane, #focus {
     position: fixed;
     
 }
 
-#results, #focus {
+#resultsPane, #focus {
     right: 0;
     max-height: 100%;
     overflow: auto;
@@ -71,7 +71,7 @@ h2 { margin: 0; }
 }
 
 .main {
-    width: 73%;
+    width: 50%;
     float: right;
 }
 
@@ -146,9 +146,22 @@ h2 { margin: 0; }
     display: none;
 }
 
-#results, #facetsWrapper {
+
+#resultsPane, #facetsWrapper {
   overflow: auto;
+  background-color: rgba(255, 255, 255, 0.5);
 }
+
+/*#resultsDragger {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    width: 0.5em;
+    cursor: col-resize;
+}
+#resultsDragger:hover {
+    background-color: rgba(250, 250, 250, 0.8);
+}*/
 
 #menu.expand #facetsWrapper {
     overflow: hidden;

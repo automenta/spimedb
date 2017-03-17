@@ -78,8 +78,13 @@
             </div>
         </div>
 
-        <div id="results">
+        <div id="resultsPane">
+<!--            <div id="resultsDragger"></div>-->
+            <div id="results">
+            
+            </div>
         </div>
+        
 
         <div id="focus" style="display:none">
         </div>
@@ -333,6 +338,20 @@
                     continuousWorld: true,
                     worldCopyJump: true
                 }).setView([51.505, -0.09], 5);
+                
+                map.on('click', function(e) {
+                                        
+                    const center = e.latlng;
+                    //var myRenderer = L.svg({ padding: 0.5 }); //TODO use hexagon polygon renderer
+                    
+                   
+                    var m = L.circle( center, { 
+                        radius: 1000 //meters
+                        //renderer: myRenderer 
+                    } );
+                    
+                    m.addTo(map);                    
+                } );
 
                 //http://leaflet-extras.github.io/leaflet-providers/preview/
                 setTimeout(()=>
@@ -469,7 +488,7 @@
                 function expand() {
                     $('#menu').removeClass('sidebar');
                     $('#menu').addClass('expand');
-                    $('#results').hide();
+                    $('#resultsPane').hide();
 
                     $('#facets .list-item').removeClass('list-item').addClass('grid-item');
 
@@ -477,7 +496,7 @@
 
                 function contract() {
                     unfocus();
-                    $('#results').show().addClass('main');
+                    $('#resultsPane').addClass('main').show();
                     $('#menu').removeClass('expand');
                     $('#menu').addClass('sidebar');
 
@@ -491,9 +510,8 @@
                 function unfocus() {
                     $('#focus').hide();
                     $('#focus').html('');
-                    $('#results').show();
                     $('#menu').removeClass('hide');
-                    $('#results').removeClass('sidebar').removeClass('shiftdown');
+                    $('#resultsPane').removeClass('sidebar').removeClass('shiftdown').show();
                 }
 
                 function suggestionsClear() {
@@ -586,6 +604,14 @@
                     });
 
                 }
+                
+//                //http://draggabilly.desandro.com/
+//                $('#resultsDragger').draggabilly({
+//                    axis: 'x'
+//                    
+//                }).on( 'dragMove', function( event, pointer, moveVector ) {
+//                                        
+//                });
 
 
                 //START ----------------->
@@ -604,12 +630,12 @@
 
                         url = "/data?I=" + url;
 
+                        $('#resultsPane').attr('class', 'sidebar shiftdown');
+                        $('#menu').attr('class', 'hide');
                         $('#focus').attr('class', 'main').html(
                                 E('iframe').attr('src', url).attr('width', '100%').attr('height', '100%')
-                                );
-                        $('#results').attr('class', 'sidebar shiftdown');
-                        $('#menu').attr('class', 'hide');
-                        $('#focus').show();
+                                ).show();
+                        
 
                     },
 
