@@ -46,7 +46,9 @@
 
     <body>
 
+        <div id="query_map"></div>
 
+        
         <div id="menu">
 
             <div id="query" class="query_expand">
@@ -60,9 +62,7 @@
                     <button id="query_update">&gt;</button>
 
                 </div>
-                <div id="query_map">
-
-                </div>
+                
 
                 <div id="querySuggestionsWrapper">
                     <div id="query_suggestions" class="grid">
@@ -81,7 +81,7 @@
 
         <div id="focus" style="display:none">
         </div>
-
+        
 
 
         <script>
@@ -330,7 +330,7 @@
                 var map = L.map('query_map', {
                     continuousWorld: true,
                     worldCopyJump: true
-                }).setView([51.505, -0.09], 2);
+                }).setView([51.505, -0.09], 5);
 
                 //http://leaflet-extras.github.io/leaflet-providers/preview/
                 L.tileLayer(
