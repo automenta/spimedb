@@ -820,12 +820,12 @@ public class SpimeDB {
 
         try {
             SearchResult result = find(bqb.build(), q.limit);
-            if (result != null) {
-                result.forEach((d, score) -> {
-                    return q.each.test(DObject.get(d));
-                });
-                result.close();
-            }
+//            if (result != null) {
+//                result.forEach((d, score) -> {
+//                    return q.each.test(DObject.get(d));
+//                });
+//                result.close();
+//            }
             q.onEnd();
             return result;
         } catch (IOException e) {

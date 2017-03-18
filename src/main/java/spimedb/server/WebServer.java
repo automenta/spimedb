@@ -17,6 +17,7 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.*;
+import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
@@ -32,6 +33,7 @@ import spimedb.SpimeDB;
 import spimedb.client.Client;
 import spimedb.index.DObject;
 import spimedb.index.SearchResult;
+import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
@@ -48,6 +50,7 @@ import java.util.stream.Stream;
 import static io.undertow.Handlers.resource;
 import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
+import static java.lang.Double.parseDouble;
 import static spimedb.util.HTTP.getStringParameter;
 
 /**
@@ -127,10 +130,13 @@ public class WebServer extends PathHandler {
 
         CachingResourceManager cres = new CachingResourceManager(
                 100,
-                transferMinSize,
+                transferMinSize /* max size */,
                 dataCache, res, METADATA_MAX_AGE);
 
-        addPrefixPath("/", resource(cres));
+
+        ResourceHandler rr = resource(cres);
+        rr.setCacheTime(24 * 60 * 60 * 1000);
+        addPrefixPath("/", rr);
 
 
 //        try {
@@ -199,6 +205,26 @@ public class WebServer extends PathHandler {
             send(getStringParameter(ex, "I"), "data", "application/pdf", ex);
         });
 
+        addPrefixPath("/earth", ex -> HTTP.stream(ex, (o) -> {
+            String b = getStringParameter(ex, "r");
+            String[] bb = b.split("_");
+            if (bb.length!=4) {
+                ex.setStatusCode(StatusCodes.BAD_REQUEST);
+                return;
+            }
+
+            double[] lons = new double[2], lats = new double[2];
+
+            lons[0] = parseDouble(bb[0]);
+            lats[0] = parseDouble(bb[1]);
+            lons[1] = parseDouble(bb[2]);
+            lats[1] = parseDouble(bb[3]);
+
+            SearchResult r = db.get(new Query((x)->true).limit(32).where(lons, lats));
+            send(r, o, ex);
+
+        }));
+
         addPrefixPath("/search", ex -> HTTP.stream(ex, (o) -> {
             String qText = getStringParameter(ex, "q");
             if (qText == null || (qText = qText.trim()).isEmpty())
@@ -206,33 +232,11 @@ public class WebServer extends PathHandler {
 
             try {
 
-                SearchResult xx = db.find(qText, 50);
-                if (xx!=null) {
-
-                    o.write("[[".getBytes());
-                    xx.forEach((r, x) -> {
-                        JSON.toJSON(searchResult(
-                                DObject.get(r), x
-                        ), o, ',');
-                        return true;
-                    });
-                    o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
-
-                    if (xx.facets!=null) {
-                        stream(o, xx.facets);
-                        o.write(']');
-                    } else
-                        o.write("[]]".getBytes());
-
-                    xx.close();
-                }
+                send(db.find(qText, 50), o, ex);
 
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e.getMessage());
-                /*try {
-                    o.write(JSON.toJSONBytes(e));
-                } catch (IOException e1) {
-                }*/
+                ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
             }
 
         }));
@@ -247,6 +251,37 @@ public class WebServer extends PathHandler {
 
     }
 
+    private void send(SearchResult r, OutputStream o, HttpServerExchange ex) {
+        if (r!=null) {
+
+            try {
+                o.write("[[".getBytes());
+                r.forEach((y, x) -> {
+                    JSON.toJSON(searchResult(
+                            DObject.get(y), x
+                    ), o, ',');
+                    return true;
+                });
+                o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
+
+                if (r.facets != null) {
+                    stream(o, r.facets);
+                    o.write(']');
+                } else
+                    o.write("[]]".getBytes());
+
+                r.close();
+                return;
+
+            } catch (IOException e) {
+
+            }
+        }
+
+        ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
+
+    }
+
     private void stream(OutputStream o, FacetResult x) {
         JSON.toJSON(
                 Stream.of(x.labelValues).map(y -> new Object[]{y.label, y.value}).toArray(Object[]::new)
@@ -254,12 +289,6 @@ public class WebServer extends PathHandler {
                 Collectors.toMap(y->y.label, y->y.value ))*/, o);
     }
 
-//    void setStatic(String path) {
-//        if (usePath!=null) {
-//            addPrefixPath("/", resource(new FileResourceManager(
-//                    Paths.get(usePath).toFile(), 0, true, "/")));
-//        }
-//    }
 
     public void setHost(String host) {
 

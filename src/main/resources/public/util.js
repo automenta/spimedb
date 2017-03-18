@@ -1,5 +1,41 @@
 "use strict";
 
+function e(eleID) {
+    return document.createElement(eleID);
+}
+function E(eleID) {
+    return $(e(eleID));
+}
+
+function DIVclass(cssclass) {
+    const x = $(e('div'));
+    if (cssclass) {
+        x.attr('class', cssclass);
+    }
+    return x;
+}
+
+function newGrid(selector) {
+    return selector.packery({});
+}
+
+function addToGrid(result, builder, grid) {
+
+    var newItems = _.map(result, (v) => {
+
+        const c = builder(v);
+
+        return ($(e('div')).attr('class', 'grid-item').append(c))[0];
+
+    });
+
+    var nn = $(newItems);
+
+    grid.append(nn).packery('appended', nn);
+
+}
+
+
 function jsonUnquote(json) {
     return json.replace(/\"([^(\")"]+)\":/g, "$1:");  //This will remove all the quotes
 }

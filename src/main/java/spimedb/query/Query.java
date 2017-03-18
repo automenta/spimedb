@@ -39,10 +39,10 @@ public class Query {
      */
     public String[] include = null;
 
-    public int limit = 1024;
+    public int limit = 128;
 
 
-    Query() {
+    protected Query() {
         this(null);
     }
 
@@ -55,6 +55,10 @@ public class Query {
         this.each = each != null ? each : (Predicate)this;
     }
 
+    public Query limit(int limit) {
+        this.limit = limit;
+        return this;
+    }
 
     public enum BoundsCondition {
         /**

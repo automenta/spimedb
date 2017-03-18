@@ -1,271 +1,728 @@
 "use strict";
 
-
-function ready() {
-
-    var VIEW_STARTUP = 'feed';
-
-    var app = new NClient();
-
-    window.me = app; //for browser js development tools console usage
-
-    Backbone.Router.extend({
-
-        routes: {
-//                "help":                 "help",    // #help
-//                "search/:query":        "search",  // #search/kiwis
-//                "search/:query/p:page": "search"   // #search/kiwis/p7
-        }
+var uiBoundsReactionPeriodMS = 75;
 
 
-//            help: function() {
-//
-//            },
-//
-//            search: function(query, page) {
-//
-//            }
+var app = {};
 
-    });
-    Backbone.history.start({pushState: true});
+const ME = new Map();
 
+$(document).ready(() => {
 
-    $('#sidebar').append(app.newViewControl());
+    var clusters = {};
+
+    const map = MAP();
 
 
-    app.setView(VIEW_STARTUP);
+    function ResultNode(x) {
+        const y = DIVclass('list-item result');
+        y.data('o', x);
 
-}
+        var tgt = x.I;
+        if (x.inh) {
+            x.out = x.inh['>'];
 
-//base websocket url path */
-const ws = 'ws://' + window.location.hostname + ':' + window.location.port + '/';
-
-class NClient extends EventEmitter {
-
-    constructor() {
-        super();
-
-        this.focus = {};
-        this.index = {};
-        this.views = {
-
-            'map2d': new Map2DView(),
-            'map3d': new Map3DView(),
-            //'feed': new FeedView(),
-            //'graph': new GraphView(),
-            //'wikipedia': new WikipediaView('Happiness'),
-            'time': new TimeView()
-
-            //    'edit1': new NObjectEditView('New NObject')
-            //'space1': new HTMLView('Spaces Test', 'lab', 'space.html')
-        };
-
-        this.socket = {};
-
-
-        const attn = this.attn = this.socket['attn'] = new ReconnectingWebSocket( ws + 'attn' );
-        attn.pri = new Cache(undefined, 2048);
-
-
-        attn.update = () => {
-            //TODO debounce this
-
-            attn.send(''); //empty string
-        };
-
-        attn.onmessage = a => {
-            const aa = JSON.parse(a.data);
-            _.each(aa, (v,k) => {
-                attn.pri.set(k, v);
-            });
-        };
-
-        attn.onopen = e => {
-
-            attn.update();
-            // attn.send("Earthquake\t1.0");
-            // attn.send("Pollution\t0.5");
-        };
-
-        /*this.attn.set = (tag, value)=>{
-            try {
-                attn.send((tag + '\t') + value);
-            } catch (x) {
-                //TODO if not connected, accept a buffer of finite # of commands in a wrapper extension of ReconnectingWebsocket
-                console.error(x);
+            const vin = x.inh['<'];
+            if (vin && !(vin.length === 1 && vin[0].length === 0)) { //exclude root tag
+                x.in = vin;
+                tgt = vin;
             }
-        };*/
+        }
 
+
+        if (clusters[tgt] === undefined) {
+            clusters[tgt] = [y];
+        } else {
+            clusters[tgt].push(y);
+        }
+
+
+        const header = DIVclass('header');
+        if (x.data) {
+            header.append(
+                //E('a').attr('href', x.data).attr('target', '_').append(
+                E('h2').text(x.N)
+                //)
+                );
+        } else {
+            header.append(
+                E('h2').text(x.N)
+                );
+
+        }
+
+        const meta = DIVclass('meta');
+
+
+        y.append(
+            header,
+            meta
+            );
+
+        if (x.thumbnail) {
+            const tt =
+                //E('a').attr('class', 'fancybox').attr('rel', 'group').append(
+                E('img').attr('src', "/thumbnail?I=" + x.thumbnail)
+                //)
+                ;
+            y.append(
+                tt
+                );
+
+            //http://fancyapps.com/fancybox/#examples
+            //tt.fancybox();
+        }
+
+
+
+        if (x['_']) {
+            y.append(E('p').attr('class', 'textpreview').html(x['_'].replace('\n', '<br/>')));
+        }
+
+
+        if (x.data) {
+            y.click(() => {
+                focus(x.data);
+            });
+        }
+
+
+        return y;
+
+    }
+
+    function ADD(f) {
+        var id = f.I;
+        if (!f || !id)
+            return null;
+
+        const prev = ME.get(id);
+        if (prev) {
+            ME.delete(id);
+            REMOVE(prev);
+        }
+
+
+        f.result = ResultNode(f);
+        $('#results').append(f.result);
+
+        const bounds = f['@'];
+        if (bounds) {
+
+
+
+            //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
+
+            //when = bounds[0]
+            var lon = bounds[1];
+            var lat = bounds[2];
+            //alt = bounds[3]
+
+            var label = f.N || id || "?";
+
+            var m;
+
+            var linePath, polygon;
+            if (linePath = f['g-']) {
+                //TODO f.lineWidth
+                m = L.polyline(linePath, {color: f.color || 'gray', data: f, title: label}).addTo(map);
+
+            } else if (polygon = f['g*']) {
+
+                m = L.polygon(polygon, {color: f.polyColor || f.color || 'gray', data: f, title: label}).addTo(map);
+
+            } else {
+                //default point or bounding rect marker:
+
+                var mm = {
+                    data: f,
+                    title: label,
+                    stroke: false,
+                    fillColor: "#0078ff",
+                    fillOpacity: 0.5,
+                    weight: 1
+                };
+
+                if (!(Array.isArray(lat) || Array.isArray(lon))) {
+                    mm.zIndexOffset = 100;                   
+                    //f.iconUrl
+                    m = L.circleMarker([lat, lon], mm).addTo(map);
+                } else {
+                    var latMin = lat[0], latMax = lat[1];
+                    var lonMin = lon[0], lonMax = lon[1];
+
+
+                    mm.fillOpacity = 0.3; //TODO decrease this by the bounds area
+
+                    m = L.rectangle([[latMin, lonMin], [latMax, lonMax]], mm).addTo(map);
+                }
+
+
+
+            }
+
+            if (m) {
+
+                m.on('click', clickHandler);
+                m.on('mouseover', overHandler);
+                m.on('mouseout', outHandler);
+
+                f.marker = m;
+
+            }
+        }
+
+
+        ME.set(id, f);
+        return f;
+    }
+
+
+    function REMOVE(id) {
+
+        const r = ME.get(id);
+        ME.delete(id);
+
+        if (!r)
+            return;
+
+        if (r.result) {
+            r.result.remove();
+            delete r.result;
+        }
+
+        if (r.marker) {
+            r.marker.remove();
+            delete r.marker;
+        }
+
+    }
+
+    function CLEAR() {
+        ME.forEach((value, key) => {
+            REMOVE(key);
+        });
+        ME.clear();
+        clusters = {};
+    }
+
+
+    $.get('/logo.html', (x) => {
+        setTimeout(() => $('#logo').html(x), 0);
+    });
+
+
+
+
+
+
+    //const mapClustering = new L.MarkerClusterGroup().addTo(map);
+
+    var geojsonMarkerOptions = {
+        radius: 8,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+    function clickHandler(e) {
+        var obj = e.target.options.data;
+        if (obj.result) {
+            obj.result[0].scrollIntoView();
+        }
+
+        /*var x = JSON.stringify(obj, null, 4);
+         
+         var w = newWindow($('<pre>').text(x));
+         $.getJSON('/obj/' + obj.I, function(c) {
+         var desc = c['^']['_'];
+         if (desc)
+         w.html(desc);
+         else
+         w.html(JSON.stringify(c, null, 4));
+         } );*/
+    }
+
+    function overHandler(e) {
+        var o = e.target.options;
+
+
+        /*if (o.ttRemove) {
+         clearTimeout(o.ttRemove);
+         o.tt.fadeIn();
+         }
+         else */{
+            if (o.tt)
+                return; //already shown
+
+
+            $('.map2d_status').remove();
+
+            //setTimeout(function () {
+            var tt = $('<div>').addClass('map2d_status');
+
+            tt.html($('<a>').text(o.title).click(function () {
+            }));
+
+            tt.css('left', e.containerPoint.x);
+            tt.css('top', e.containerPoint.y);
+
+            tt.appendTo($('#map'));
+
+            o.tt = tt;
+            //}, 0);
+        }
+    }
+
+    function outHandler(e) {
+
+        var o = e.target.options;
+        if (o.tt) {
+            o.tt.remove();
+            delete o.tt;
+            /*
+             var delay = 1500; //ms
+             var fadeTime = 500; //ms
+             o.ttRemove = setTimeout(function() {
+             o.tt.fadeOut(fadeTime);
+             delete o.tt;
+             delete o.ttRemove;
+             }, delay);
+             */
+        }
+    }
+
+    const facets = newGrid($('#facets'));
+
+    const queryText = $('#query_text');
+
+    const qs = $('#query_suggestions');
+
+    const onQueryTextChanged = _.throttle(() => {
+        const qText = queryText.val();
+        //$('#query_status').html('Suggesting: ' + qText);
+
+        $.get('/suggest', {q: qText}, function (result) {
+
+
+            if (result.length === 0) {
+                qs.html('');
+            } else {
+                setTimeout(() =>
+                    qs.html(_.map(JSON.parse(result), (x) =>
+                        DIVclass('grid-item').append(
+                            DIVclass('grid-item-content').text(x).click((e) => {
+                            queryText.val(x);
+                            update(x);
+                        })
+                            )
+                    )),
+                    0);
+            }
+        });
+    }, 100, true, true);
+
+    const querySubmit = () => {
+        update(queryText.val());
+    };
+
+    queryText.on('input', onQueryTextChanged);
+
+    queryText.on('keypress', (e) => {
+        if (e.keyCode === 13)
+            querySubmit();
+    });
+
+    function scrollTop() {
+        $("body").scrollTop(0);
+    }
+
+    function expand() {
+        $('#menu').removeClass('sidebar');
+        $('#menu').addClass('expand');
+        $('#resultsPane').hide();
+
+        $('#facets .list-item').removeClass('list-item').addClass('grid-item');
+
+    }
+
+    function contract() {
+        unfocus();
+        $('#resultsPane').addClass('main').show();
+        $('#menu').removeClass('expand');
+        $('#menu').addClass('sidebar');
+
+        $('#facets .grid-item').removeClass('grid-item').attr('style', '').addClass('list-item');
+    }
+
+    function focus(url) {
+        Backbone.history.navigate("the/" + encodeURIComponent(url), {trigger: true});
+    }
+
+    function unfocus() {
+        $('#focus').hide();
+        $('#focus').html('');
+        $('#menu').removeClass('hide');
+        $('#resultsPane').removeClass('sidebar').removeClass('shiftdown').show();
+    }
+
+    function suggestionsClear() {
+        qs.html('');
+    }
+
+    function update(qText) {
+
+        Backbone.history.navigate("all/" + encodeURIComponent(qText), {trigger: true});
 
     }
 
 
-    setView(v, cb) {
+    function loadFacets(result) {
+        facets.html('');
 
-        if (this.currentView) {
-            this.currentView.stop(this);
-            $('#view').remove();
-        }
+        var facetButtonBuilder = (v) => {
 
-        this.currentView = this.views[v];
+            const id = v[0]
+                .replace(/_/g, ' ')
+                .replace(/\-/g, ' ')
+                ; //HACK
+            const score = v[1];
 
-        if (this.currentView) {
-            this.currentView.start( $('<div id="view"/>').appendTo($('body')) , this, cb);
-        }
 
+            const c = $(e('div'))
+                .attr('class', 'grid-item-content')
+                .text(id).click(() => {
+                queryText.val(/* dimension + ':' + */ id);
+                querySubmit();
+                return false;
+            })
+                .attr('style',
+                    'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
+
+            return c;
+        };
+
+        addToGrid(result, facetButtonBuilder, facets);
+
+        //setTimeout(()=>{
+
+        setTimeout(() => {
+            facets.packery('layout');
+
+            setTimeout(() => {
+                facets.packery('layout');
+            }, 300);
+
+        }, 300);
+        //}, 0);
     }
 
-    newViewControl() {
-        //http://semantic-ui.com/elements/button.html#colored-group
-        /*<div class="large ui buttons">
-         <div class="ui button">One</div>
-         <div class="ui button">Two</div>
-         <div class="ui button">Three</div>
-         </div>
-         */
-        var that = this;
 
-        var d = $('<span/>')
-        _.each(that.views, function (v, k) {
-            d.append($('<button/>')
-            //.append($('<button>' + v.icon + '</button>')
-                .append($('<i class="fa fa-' + v.icon + '"></i>'))
-                /*.attr('data-content', v.name)
-                 .popup()*/
-                .click(function () {
-                    //setTimeout(function() {
-                    that.setView(k);
-                    //}, 0);
-                }));
+    function SEARCHtext(query, withResult) {
+        $.get('/search', {q: query}, withResult);
+    }
+
+
+    //PACKERY.js
+    //http://codepen.io/desandro/pen/vKjAPE/
+    //http://packery.metafizzy.co/extras.html#animating-item-size
+
+    function updateFacet(dimension, label) {
+
+        const klass = label;
+
+        //            $('#facets.' + klass).remove();
+        //
+        //            const f = $('<svg width="250" height="250">').attr('class', klass);//.html(label + '...');
+        //            $('#facets').append($('<div>').append(f));
+
+        $.get('/facet', {q: dimension}, function (result) {
+            setTimeout(() => {
+                result = JSON.parse(result);
+
+                /*
+                 f.html($('<div>').append(
+                 $(d('h3')).text(label),
+                 $(d('ul')).append(
+                 _.map(result, (v) => {
+                 return $(d('li')).append(d('a')).click(()=>{
+                 queryText.val(dimension + ':' + id);
+                 querySubmit();
+                 }).text(id);
+                 }))
+                 ));
+                 */
+
+                //BubblesFacetSVG(f, result);
+
+
+                loadFacets(result);
+            }, 0);
+
         });
 
-        var graphPopup;
-
-        d.prepend(
-            $('<i class="fa fa-adjust">').append($('<input type="checkbox"/>').click(e => {
-                var checked = $(e.target).is(':checked');
-                if (checked) {
-                    var target = $('<div id="graphpopup"/>').css({
-                        position: 'fixed',
-                        width: '100%', height: '100%',
-                        zIndex: 500
-                    }).appendTo($('body')).hide().fadeIn("slow");
-                    graphPopup = new GraphView();
-                    graphPopup.start(target, window.me);
-                } else {
-                    if (graphPopup) {
-
-                        $('#graphpopup').fadeOut("slow", ()=>{
-                            graphPopup.stop();
-                            $("#graphpopup").remove();
-                        });
-                    }
-                }
-            })
-        ));
-
-        return d;
-
     }
 
-    // /*addTag(tags) {
-    //     if (!Array.isArray(tags)) tags = [tags];
-    //
-    //     for (var i = 0; i < tags.length; i++)
-    //         this.index.tag.setNode(tags[i].id, tags[i]);
-    //
-    //     this.emit('index.change', [tags /* additions */, null /* removals */]);
-    // }*/
-
-    spaceOn(bounds, onFocus, onError) {
-        //adds a spatial boundary region to the focus
-        //console.log('spaceOn', bounds);
+//                //http://draggabilly.desandro.com/
+//                $('#resultsDragger').draggabilly({
+//                    axis: 'x'
+//                    
+//                }).on( 'dragMove', function( event, pointer, moveVector ) {
+//                                        
+//                });
 
 
-        //https://github.com/jDataView/jBinary ?
-        const oReq = new XMLHttpRequest();
-        oReq.open("GET", bounds.toURL(), true);
-        oReq.responseType = "arraybuffer"; //"blob"
+    function LOAD(result) {
 
-        oReq.onload = function (oEvent) {
-            const arrayBuffer = oReq.response;
-            if (arrayBuffer) {
-
-                onFocus(msgpack.decode(new Uint8Array(arrayBuffer)));
+        
+        setTimeout(() => {
+            var ss, rr, ff;
+            try {
+                ss = JSON.parse(result);
+                rr = ss[0]; //first part: search results
+                ff = ss[1]; //second part: facets
+            } catch (e) {
+                //usually just empty search result
+                //$('#results').html('No matches for: "' + qText + '"');
+                return;
             }
-        };
-        oReq.send(null);
+
+            contract();
+
+            loadFacets(ff);
+
+            $('#results').html('');
+            CLEAR();
+            _.forEach(rr, ADD);
+
+            _.each(clusters, (c, k) => {
+
+                if (c.length < 2)
+                    return; //ignore clusters of length < 2
+
+                const start = c[0];
+
+                const d = DIVclass('list-item result');
+                $(start).before(d);
+                c.forEach(cc => {
+                    /* {
+                     
+                     d = cc;
+                     } else {
+                     children.push(cc);
+                     }*/
+                    cc.detach();
+                    cc.addClass('sub');
+                    if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
+                        d.append(cc);
+                });
+
+                //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
+                var dc = d.children();
+                if (dc.length == 1) {
+                    $(dc[0]).removeClass('sub');
+                    d.replaceWith(dc[0]);
+                }
 
 
-        /*$.get(bounds.toURL())
-         .done(function(s) {
-         if (s.length == 0) return;
-         try {
-         //var p = JSON.parse(s);
+            });
 
-         var p = msgpack.decode(s);
-         console.log(s.length, p);
-         onFocus(p);
-         } catch (e) {
-         onError(e);
-         }
-         }).fail(onError);*/
+
+        }, 0);
+
     }
-}
+
+    function MAP() {
+
+        var map = L.map('map', {
+            continuousWorld: true,
+            worldCopyJump: true
+        }).setView([51.505, -0.09], 5);
+
+        //http://leaflet-extras.github.io/leaflet-providers/preview/
+        setTimeout(() =>
+            L.tileLayer(
+                //'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+                'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+                , {
+                    //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map),
+            0);
 
 
-// setFocus(tag, amount) {
-//     var prevFocus = this.focus[tag] || 0;
-//     if (prevFocus === amount) return;
-//
-//     this.focus[tag] = amount;
-//
-//     var t = this.index.tag.node(tag);
-//
-//     var app = this;
-//
-//     if (prevFocus === 0) {
-//         //add focus
-//
-//         if (t.channel) {
-//             //already open??? this shouldnt happen normally
-//             console.error('newly focused tag', t, 'already has channel opened');
-//         } else if (t.newChannel) {
-//             var c = t.newChannel({
-//
-//                 onOpen: function() {
-//
-//                 },
-//
-//                 //TODO onClose ?
-//
-//                 onChange: function (cc) {
-//                     //console.log('change', cc.data);
-//                     app.emit( tag + '.change', cc.data);
-//                     app.emit('change', this);
-//                 }
-//             });
-//             t.channel = c; //the default, we'll store there
-//         }
-//
-//         console.log('app focus on: ', tag, t, c);
-//     }
-//     else if (amount == 0) {
-//         //remove focus
-//         if (t.channel) {
-//             if (t.channel.off)
-//                 t.channel.off();
-//             delete t.channel;
-//         }
-//         console.log('app focus off: ', tag, t, c);
-//         delete this.focus[tag];
-//     }
-//     else {
-//         //change focus
-//     }
-//
-//     console.log('app focus: ', app.focus);
-//
-//     app.emit('focus'); //focus change
-//
-// }
+        //                map.on('click', function(e) {
+        //                                        
+        //                    const center = e.latlng;
+        //                    //var myRenderer = L.svg({ padding: 0.5 }); //TODO use hexagon polygon renderer
+        //                    
+        //                   
+        //                    var m = L.circle( center, { 
+        //                        radius: 1000 //meters
+        //                        //renderer: myRenderer 
+        //                    } );
+        //                    
+        //                    m.addTo(map);                    
+        //                } );
+
+        var seeing = undefined;
+
+        const errFunc = function (errV, errM) {
+            console.error('err', errV, errM);
+        };
+
+        function diff(curBounds, prevBounds) {
+            if (curBounds.intersects(prevBounds)) {
+                //console.log('diff', curBounds, prevBounds);
+                //TODO http://stackoverflow.com/questions/25068538/intersection-and-difference-of-two-rectangles/25068722#25068722
+                //return L.bounds([[p1y,p1x],[p2y,p2x]]);
+                return curBounds;
+            } else {
+                return curBounds; //no commonality to subtract
+            }
+        }
+
+        function rectBounds(b) {
+            return {
+                "x1": b.getWest(),
+                "x2": b.getEast(),
+                "y1": b.getSouth(),
+                "y2": b.getNorth(),
+                update: function () {
+                    $.get('/earth', {r:
+                        this.x1 + '_' +
+                        this.y1 + '_' +
+                        this.x2 + '_' +
+                        this.y2
+                    }, LOAD);
+                }
+            };
+        }
+
+        var updateBounds = _.debounce(function (e) {
+
+            var curBounds = map.getBounds();
+
+            var b = seeing ? /*difference*/diff(curBounds, seeing) : curBounds;
+
+            seeing = curBounds;
+
+            var r = rectBounds(b);
+            r.update();
+
+            /*var radiusMeters =
+             Math.max(b.getEast()-b.getWest(), b.getNorth()-b.getSouth()) / 2.0;*/
+
+
+
+
+            //var center = b.getCenter();
+            //var lon = center.lng;
+            //var lat = center.lat;
+            //app.spaceOn(circleBounds/*Compact*/(lon, lat, radiusMeters, 4),
+
+            //me.spaceOn(rectBounds(b), focus, errFunc);
+
+            /*.done(focus) //function (r) {
+             //console.log(r);
+             
+             //updateGeoJSONFeatures(r);
+             //})
+             .fail(function (v, m) {
+             console.log('err', v, m);
+             });*/
+
+            //}, uiBoundsReactionPeriodMS );
+        }, uiBoundsReactionPeriodMS, {
+            'leading': true,
+            'trailing': false
+        });
+
+
+
+        map.on('viewreset', nextUpdateBounds);
+        map.on('moveend', nextUpdateBounds);
+        map.on('resize', nextUpdateBounds);
+
+
+        function nextUpdateBounds() {
+            setTimeout(updateBounds, 0);
+        }
+
+        updateBounds();
+
+        return map;
+    }
+
+
+
+
+    //START ----------------->
+
+    app.Router = Backbone.Router.extend({
+
+        routes: {
+            "": "start",
+            "all/:query": "all",
+            "the/:query": "the"
+        },
+
+        the: function (url) {
+
+            suggestionsClear();
+
+            url = "/data?I=" + url;
+
+            $('#resultsPane').attr('class', 'sidebar shiftdown');
+            $('#menu').attr('class', 'hide');
+            $('#focus').attr('class', 'main').html(
+                E('iframe').attr('src', url).attr('width', '100%').attr('height', '100%')
+                ).show();
+
+
+        },
+
+        all: function (qText) {
+
+            suggestionsClear();
+
+            contract();
+
+            scrollTop();
+
+            //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
+            $('#results').html('Searching...');
+
+            SEARCHtext(qText, LOAD);
+
+        },
+
+        start: function () {
+
+
+            setTimeout(() => {
+
+                facets.html('');
+
+                expand();
+
+                //updateFacet('I', 'Category');
+                updateFacet('>', 'Tag');
+
+            }, 0);
+
+        }
+
+    });
+
+    app.router = new app.Router();
+
+    Backbone.history.start();
+
+
+
+
+}, false);
+
+
