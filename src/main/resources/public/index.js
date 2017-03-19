@@ -1,18 +1,191 @@
 "use strict";
 
 var uiBoundsReactionPeriodMS = 75;
-
+var MEMORY_SIZE = 64;
+var ACTIVATION_RATE = 0.5;
 
 var app = {};
 
+
+
 const ME = new Map();
 
+
+
+
+
 $(document).ready(() => {
+
+    
+    
 
     var clusters = {};
 
     const map = MAP();
 
+
+    class NObject {
+     
+        constructor(x) {
+            
+            this.pri = 0.0;
+            
+            this.visible = true;
+            this.where = false;
+            this.when = false;
+            this.what = false;
+
+            this.update(x);
+        }
+        
+        activate(p) {
+            this.pri = Math.min(1, Math.max(0, this.pri + p));
+        }
+        
+        remove() {
+            if (this.what) {
+                this.what.remove();
+                this.what = null;
+            }
+            if (this.where) {
+                this.where.remove();
+                this.where = null;
+            }
+        }
+
+        update(x) {
+
+            const id = x.I;
+
+            const that = this;
+            _.each(x, (v, k) => {
+                that[k] = v;
+            });
+
+            if (this.what) {
+                this.what.remove(); //remove existing node
+                //this.what = null;
+            }
+
+            this.what = ResultNode(x);
+            $('#results').append(this.what);
+
+            if (this.where) {
+                this.where.remove();
+                this.where = null;
+            }
+
+            const bounds = x['@'];
+            if (bounds) {
+
+                //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
+
+                //when = bounds[0]
+                var lon = bounds[1];
+                var lat = bounds[2];
+                //alt = bounds[3]
+
+                var label = x.N || id || "?";
+
+                var m;
+
+                var linePath, polygon;
+                if (linePath = x['g-']) {
+                    //TODO f.lineWidth
+                    m = L.polyline(linePath, {color: x.color || 'gray', data: x, title: label}).addTo(map);
+
+                } else if (polygon = x['g*']) {
+
+                    m = L.polygon(polygon, {color: x.polyColor || x.color || 'gray', data: x, title: label}).addTo(map);
+
+                } else {
+                    //default point or bounding rect marker:
+
+                    var mm = {
+                        data: x,
+                        title: label,
+                        stroke: false,
+                        fillColor: "#0078ff",
+                        fillOpacity: 0.5,
+                        weight: 1
+                    };
+
+                    if (!(Array.isArray(lat) || Array.isArray(lon))) {
+                        mm.zIndexOffset = 100;
+                        //f.iconUrl
+                        m = L.circleMarker([lat, lon], mm).addTo(map);
+                    } else {
+                        var latMin = lat[0], latMax = lat[1];
+                        var lonMin = lon[0], lonMax = lon[1];
+
+
+                        mm.fillOpacity = 0.3; //TODO decrease this by the bounds area
+
+                        m = L.rectangle([[latMin, lonMin], [latMax, lonMax]], mm).addTo(map);
+                    }
+
+
+
+                }
+
+                if (m) {
+
+                    m.on('click', clickHandler);
+                    m.on('mouseover', overHandler);
+                    m.on('mouseout', outHandler);
+
+
+                    this.where = m;
+
+                }
+            }
+        }
+
+    }
+
+    function Where(c) {
+        this.component = c;
+    }
+
+    function When() { }
+
+
+//    var IF = new RuleReactor({}, true);
+//    IF.when = IF.createRule;
+//
+//    IF.when("show", 1, {n: NObject},
+//        (n) => {
+//            return n.visible;
+//        },
+//        (n) => {
+//            console.log('show', n.I);
+//        }
+//    );
+//    IF.when("hide", 0, {n: NObject},
+//        (n) => {
+//            return !n.visible;
+//        },
+//        (n) => {
+//            console.log('hide', n.I);
+//
+//            if (n.what) {
+//                n.what.remove();
+//                n.what = null;
+//            }
+//
+//            if (n.where) {
+//                n.where.remove();
+//                n.where = null;
+//            }
+//
+//            IF.retract(n);
+//        }
+//    );
+//
+//    IF.trace(0);
+//    IF.run(Infinity, true, function () {
+//        console.log(JSON.stringify(p));
+//    });
 
     function ResultNode(x) {
         const y = DIVclass('list-item result');
@@ -91,111 +264,35 @@ $(document).ready(() => {
 
     }
 
-    function ADD(f) {
-        var id = f.I;
-        if (!f || !id)
+    function ADD(y) {
+        var id = y.I;
+        if (!y || !id)
             return null;
 
-        const prev = ME.get(id);
-        if (prev) {
-            ME.delete(id);
-            REMOVE(prev);
+        var x = ME.get(id);
+        if (x) {
+            x.update(y);
+            return x;
+        } else {
+
+            y = new NObject(y);
+
+            ME.set(id, y);
+            
+            return y;
         }
-
-
-        f.result = ResultNode(f);
-        $('#results').append(f.result);
-
-        const bounds = f['@'];
-        if (bounds) {
-
-
-
-            //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
-
-            //when = bounds[0]
-            var lon = bounds[1];
-            var lat = bounds[2];
-            //alt = bounds[3]
-
-            var label = f.N || id || "?";
-
-            var m;
-
-            var linePath, polygon;
-            if (linePath = f['g-']) {
-                //TODO f.lineWidth
-                m = L.polyline(linePath, {color: f.color || 'gray', data: f, title: label}).addTo(map);
-
-            } else if (polygon = f['g*']) {
-
-                m = L.polygon(polygon, {color: f.polyColor || f.color || 'gray', data: f, title: label}).addTo(map);
-
-            } else {
-                //default point or bounding rect marker:
-
-                var mm = {
-                    data: f,
-                    title: label,
-                    stroke: false,
-                    fillColor: "#0078ff",
-                    fillOpacity: 0.5,
-                    weight: 1
-                };
-
-                if (!(Array.isArray(lat) || Array.isArray(lon))) {
-                    mm.zIndexOffset = 100;                   
-                    //f.iconUrl
-                    m = L.circleMarker([lat, lon], mm).addTo(map);
-                } else {
-                    var latMin = lat[0], latMax = lat[1];
-                    var lonMin = lon[0], lonMax = lon[1];
-
-
-                    mm.fillOpacity = 0.3; //TODO decrease this by the bounds area
-
-                    m = L.rectangle([[latMin, lonMin], [latMax, lonMax]], mm).addTo(map);
-                }
-
-
-
-            }
-
-            if (m) {
-
-                m.on('click', clickHandler);
-                m.on('mouseover', overHandler);
-                m.on('mouseout', outHandler);
-
-                f.marker = m;
-
-            }
-        }
-
-
-        ME.set(id, f);
-        return f;
     }
 
 
     function REMOVE(id) {
 
         const r = ME.get(id);
-        ME.delete(id);
-
         if (!r)
             return;
 
-        if (r.result) {
-            r.result.remove();
-            delete r.result;
-        }
+        r.remove();
 
-        if (r.marker) {
-            r.marker.remove();
-            delete r.marker;
-        }
-
+        ME.delete(id);
     }
 
     function CLEAR() {
@@ -206,6 +303,44 @@ $(document).ready(() => {
         clusters = {};
     }
 
+    function FORGET(decay, maxItems) {
+        /*if (!ME.size() > maxItems) {
+            //dont have to sort
+        }*/
+        const n = ME.size;
+                
+        const filteredIterator = ME.values();
+        const nn = filteredIterator.next;
+        filteredIterator.next = () => {           
+            const v = nn.call(filteredIterator);
+            
+            v.pri *= decay;
+            
+            return v;            
+        };
+        
+        const a = Array.from(filteredIterator);
+        
+        
+        a.sort((x,y)=>{
+           
+           if (x === y) return 0;
+           
+           const xp = x.pri;
+           const yp = y.pri;
+           if (xp > yp) return -1;
+           else return +1;
+        });
+        
+        
+        
+        const toRemove = n - maxItems;      
+                
+        for (var i = 0; i < toRemove; i++) {
+            const z = a.pop();
+            REMOVE(z.I);
+        }
+    }
 
     $.get('/logo.html', (x) => {
         setTimeout(() => $('#logo').html(x), 0);
@@ -229,8 +364,8 @@ $(document).ready(() => {
 
     function clickHandler(e) {
         var obj = e.target.options.data;
-        if (obj.result) {
-            obj.result[0].scrollIntoView();
+        if (obj.what) {
+            obj.what[0].scrollIntoView();
         }
 
         /*var x = JSON.stringify(obj, null, 4);
@@ -474,9 +609,9 @@ $(document).ready(() => {
 //                });
 
 
-    function LOAD(result) {
+    function LOAD(result, activationRate) {
 
-        
+
         setTimeout(() => {
             var ss, rr, ff;
             try {
@@ -492,42 +627,49 @@ $(document).ready(() => {
             contract();
 
             loadFacets(ff);
-
-            $('#results').html('');
-            CLEAR();
-            _.forEach(rr, ADD);
-
-            _.each(clusters, (c, k) => {
-
-                if (c.length < 2)
-                    return; //ignore clusters of length < 2
-
-                const start = c[0];
-
-                const d = DIVclass('list-item result');
-                $(start).before(d);
-                c.forEach(cc => {
-                    /* {
-                     
-                     d = cc;
-                     } else {
-                     children.push(cc);
-                     }*/
-                    cc.detach();
-                    cc.addClass('sub');
-                    if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
-                        d.append(cc);
-                });
-
-                //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
-                var dc = d.children();
-                if (dc.length == 1) {
-                    $(dc[0]).removeClass('sub');
-                    d.replaceWith(dc[0]);
+                       
+            _.forEach(rr, x => {
+                const score = x.score;
+                const y = ADD(x);
+                if (y) {
+                    y.activate(score * ACTIVATION_RATE * activationRate);                
                 }
-
-
             });
+            
+            FORGET(0.9, MEMORY_SIZE);
+
+
+//            _.each(clusters, (c, k) => {
+//
+//                if (c.length < 2)
+//                    return; //ignore clusters of length < 2
+//
+//                const start = c[0];
+//
+//                const d = DIVclass('list-item result');
+//                $(start).before(d);
+//                c.forEach(cc => {
+//                    /* {
+//                     
+//                     d = cc;
+//                     } else {
+//                     children.push(cc);
+//                     }*/
+//                    cc.detach();
+//                    cc.addClass('sub');
+//                    if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
+//                        d.append(cc);
+//                });
+//
+//                //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
+//                var dc = d.children();
+//                if (dc.length == 1) {
+//                    $(dc[0]).removeClass('sub');
+//                    d.replaceWith(dc[0]);
+//                }
+//
+//
+//            });
 
 
         }, 0);
@@ -591,11 +733,13 @@ $(document).ready(() => {
                 "y2": b.getNorth(),
                 update: function () {
                     $.get('/earth', {r:
-                        this.x1 + '_' +
-                        this.y1 + '_' +
-                        this.x2 + '_' +
-                        this.y2
-                    }, LOAD);
+                            this.x1 + '_' +
+                            this.y1 + '_' +
+                            this.x2 + '_' +
+                            this.y2
+                    }, (x)=>{
+                        LOAD(x, 0.5);
+                    });
                 }
             };
         }
@@ -692,9 +836,11 @@ $(document).ready(() => {
             scrollTop();
 
             //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
-            $('#results').html('Searching...');
+            //$('#results').html('Searching...');
 
-            SEARCHtext(qText, LOAD);
+            SEARCHtext(qText, (d) => {
+                LOAD(d, 1.0);
+            });
 
         },
 
