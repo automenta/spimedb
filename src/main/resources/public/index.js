@@ -16,19 +16,44 @@ const ME = new Map();
 
 $(() => {
 
-    
-    var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
-    $('body').w2layout({
-        name: 'layout',
-        panels: [
-            { type: 'top',  size: 50, resizable: true, style: pstyle, content: 'top' },
-            { type: 'left', size: 200, resizable: true, style: pstyle, content: 'left' },
-            { type: 'main', style: pstyle, content: 'main' },
-            { type: 'preview', size: '50%', resizable: true, style: pstyle, content: 'preview' },
-            { type: 'right', size: 200, resizable: true, style: pstyle, content: 'right' },
-            { type: 'bottom', size: 50, resizable: true, style: pstyle, content: 'bottom' }
+    $('#query').w2toolbar({
+        name : 'myToolbar',
+        items: [
+            { type: 'html',  id: 'queryEdit', html: 
+                    '<input id="query_text" type="text" placeholder="Search"/><button id="query_update">&gt;</button>'},
+            { type: 'check',  id: 'item1', caption: 'Check', img: 'icon-add', checked: true },
+            { type: 'break' },
+            { type: 'menu',   id: 'item2', caption: 'Drop Down', img: 'icon-folder', 
+                items: [
+                    { text: 'Item 1', img: 'icon-page' }, 
+                    { text: 'Item 2', img: 'icon-page' }, 
+                    { text: 'Item 3', img: 'icon-page' }
+                ]
+            },
+            { type: 'break' },
+            { type: 'radio',  id: 'item3',  group: '1', caption: 'Radio 1', img: 'icon-page' },
+            { type: 'radio',  id: 'item4',  group: '1', caption: 'Radio 2', img: 'icon-page' },
+            { type: 'spacer' },
+            { type: 'button',  id: 'item5',  caption: 'Item 5', img: 'icon-save' }
         ]
     });
+    
+    var pstyle = 'background-color: rgba(127,127,127,0.5); border: 1px solid #dfdfdf; padding: 5px;';
+    $('#layout').w2layout({
+        name: 'dock',
+        panels: [
+            { type: 'top',  size: 50, resizable: false, style: pstyle, content: '' },
+            { type: 'left', size: 200, resizable: true, style: pstyle, content: '' },
+            { type: 'main' },
+//            { type: 'preview', size: '50%', resizable: true, style: pstyle, content: 'preview' },
+            { type: 'right', size: 200, resizable: true, style: pstyle, content: '' },
+//            { type: 'bottom', size: 50, resizable: true, style: pstyle, content: 'bottom' }
+        ]
+    });
+    const dock = w2ui.dock;   
+    $('#menu').detach().appendTo(dock.el('left'));
+    $('#query').detach().appendTo(dock.el('top'));
+    $('#resultsPane').detach().appendTo(dock.el('right'));
     
     
     

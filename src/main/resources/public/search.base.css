@@ -3,16 +3,16 @@ body {
   font-family: Arial, sans-serif;
 }
 
-#map, #menu, #resultsPane, #focus {
-    position: fixed;
-    
+#layout {
+    height: 100%;
 }
 
-#resultsPane, #focus {
-    right: 0;
+
+#resultsPane, #focus {   
+    width: 100%;
+    height: 100%;
     max-height: 100%;
-    overflow: auto;
-    padding: 0.75em;
+    overflow: auto;   
 }
 
 #map {
@@ -48,16 +48,13 @@ h2 { margin: 0; }
 
 
 #focus {
-  position: fixed;
   right: 0;
   top: 0;
 }
 
-.sidebar {
-    width: 25%;
-    float : left;
-    position: fixed;
-    max-height: 100%;
+.sidebar {    
+    height: 100%;
+    max-height:100%;
 }
 
 .sidebar .result {
@@ -71,7 +68,6 @@ h2 { margin: 0; }
 }
 
 .main {
-    width: 50%;
     float: right;
 }
 
@@ -95,7 +91,6 @@ h2 { margin: 0; }
 
 .hide #query {
     display: block;
-    position: fixed;
     top: 0;
     left: 0;
     z-index: 5;
@@ -165,6 +160,32 @@ h2 { margin: 0; }
 
 #menu.expand #facetsWrapper {
     overflow: hidden;
+}
+
+#layout {
+    pointer-events: none;
+}
+
+#layout div {
+    pointer-events: none;
+}
+
+#layout div *, .w2ui-panel, .w2ui-resizer {
+    pointer-events: auto;
+    font-size: 100% !important;
+}
+
+.w2ui-panel-content {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.w2ui-toolbar {
+    background: rgba(200,200,200,0.5) !important;
+}
+
+#layout_dock_panel_main, #layout_dock_panel_main * { 
+    background: transparent; pointer-events: none !important; display: none;
 }
 
 #menu.expand {

@@ -1,3 +1,7 @@
+* {
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
 body {
     overflow: hidden;
     width: 100%;
@@ -7,12 +11,21 @@ body {
     background-color: black !important;
     color: gray !important;
 
-    font-family: Arial, Helvetica, sans-serif !important;
+    
+    
 
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+#focus {
+    position: fixed;
+    width: 75%;
+    left: auto;
+    right: auto;
+    height: 100%;
 }
 
 #view {
@@ -206,3 +219,10 @@ input[type=range].tagSlider:focus::-ms-fill-upper {
 .windget .content {
     margin: 10px;
 }
+
+
+#layout div * {
+    font-size: 100% !important;
+    
+}
+
