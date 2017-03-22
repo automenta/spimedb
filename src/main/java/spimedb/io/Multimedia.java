@@ -325,7 +325,7 @@ public class Multimedia {
     }
 
     @NotNull
-    private FileInputStream fileStream(String url) throws FileNotFoundException {
+    private static FileInputStream fileStream(String url) throws FileNotFoundException {
         return new FileInputStream(url.substring(5));
     }
 

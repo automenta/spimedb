@@ -131,9 +131,9 @@ public class ClientSession extends Session {
 
                     Set<NObject> lowPriority = new HashSet<>(1024);
 
-                    db.get(new Query((n) -> {
+                    db.get(new Query().where(lon, lat).in(tags)).forEach((dd,s)->{
 
-                        n = transmittable(n);
+                        NObject n = transmittable(dd);
 
                         if (!running.get()) //early exit test
                             return false;
@@ -148,7 +148,7 @@ public class ClientSession extends Session {
 
                         return running.get(); //continue
 
-                    }).where(lon, lat).in(tags));
+                    });
 
                     if (running.get()) {
                         for (NObject n : lowPriority) {

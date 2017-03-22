@@ -118,12 +118,12 @@ public class Main extends FileAlterationListenerAdaptor {
 
     }
 
-    public Pair<Class, String> key(Class klass) {
+    public static Pair<Class, String> key(Class klass) {
         return key(klass, "");
     }
 
     @NotNull
-    public Pair<Class, String> key(Class klass, String id) {
+    public static Pair<Class, String> key(Class klass, String id) {
         return Tuples.pair(klass, id);
     }
 
@@ -321,7 +321,7 @@ public class Main extends FileAlterationListenerAdaptor {
         }
     }
 
-    private Field field(Class cl, String field) {
+    private static Field field(Class cl, String field) {
         //TODO add a reflection cache
         try {
             return cl.getDeclaredField(field);

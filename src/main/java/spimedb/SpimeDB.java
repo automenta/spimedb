@@ -795,8 +795,6 @@ public class SpimeDB {
     public SearchResult get(@NotNull Query q) {
         q.onStart();
 
-        Predicate<NObject> each = q.each;
-
         BooleanQuery.Builder bqb = new BooleanQuery.Builder();
 
         if (q.include != null && q.include.length > 0)

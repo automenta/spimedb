@@ -61,7 +61,7 @@ public abstract class AbstractClusterer extends BaseClusterer {
 	public void init() {
 		exec = Executors.newFixedThreadPool(DEFAULT_THREAD_POOL, new MyThreadFactory()); //.newSingleThreadExecutor();
 		
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate()));
+		Runtime.getRuntime().addShutdownHook(new Thread(this::terminate));
 	}
 	
 	@Override

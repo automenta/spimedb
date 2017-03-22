@@ -222,9 +222,7 @@ public class HTTP {
 
     public static void main(String[] args) throws IOException {
         HTTP http = new HTTP();
-        http.asFile("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_day.geojson", (f) -> {
-            System.out.println(f);
-        });
+        http.asFile("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_day.geojson", (Consumer<File>) System.out::println);
     }
 
 }

@@ -22,6 +22,7 @@
     "fullcalendar": "latest",
     "interact": "latest",
     "draggabilly": "latest",
-    "fancybox": "latest"
+    "fancybox": "latest",
+    "w2ui": "latest"
   }
 }

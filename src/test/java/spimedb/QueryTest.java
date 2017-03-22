@@ -31,14 +31,14 @@ public class QueryTest {
 
         db.sync();
 
-        ArrayList<NObject> found = new ArrayList();
-        SearchResult result = db.get(new Query(found::add)
+        ArrayList<DObject> found = new ArrayList();
+
+        new Query()
             .where(new double[]{0, 1}, new double[]{0, 1})
-        );
+            .forEach(db, (n, s) -> found.add(n));
 
         assertFalse(found.isEmpty());
 
-        System.out.println(found);
         assertEquals(dplace.toString(), found.get(0).toString());
 
         assertTrue(found + "", found.contains(place));
@@ -63,10 +63,10 @@ public class QueryTest {
         db.sync();
 
         ArrayList<NObject> found = new ArrayList();
-        SearchResult result = db.get(new Query(found::add)
-                .in("Person")
-                .where(new double[]{0, 1}, new double[]{0, 1})
-        );
+        new Query()
+            .in("Person")
+            .where(new double[]{0, 1}, new double[]{0, 1})
+            .forEach(db, (d, s) -> found.add(d));
 
         assertEquals(1, found.size());
         System.out.println(found);

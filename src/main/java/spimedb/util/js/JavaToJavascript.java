@@ -347,7 +347,7 @@ public class JavaToJavascript {
 
         }
 
-        private void update(MyFileSymbolTable symbolTable, MyFileSymbolTable fileTable) {
+        private static void update(MyFileSymbolTable symbolTable, MyFileSymbolTable fileTable) {
             try {
                 fileTable.update();
                 symbolTable.update();

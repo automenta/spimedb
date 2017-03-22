@@ -37,7 +37,11 @@ public final class SearchResult {
         logger.info("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
     }
 
-    public void forEach(BiPredicate<Document,ScoreDoc> each) {
+    public void forEach(BiPredicate<DObject,ScoreDoc> each) {
+        forEachDocument((d,s)->each.test(DObject.get(d), s));
+    }
+
+    public void forEachDocument(BiPredicate<Document,ScoreDoc> each) {
         final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
 
         IndexReader reader = searcher.getIndexReader();

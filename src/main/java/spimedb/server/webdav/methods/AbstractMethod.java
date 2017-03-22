@@ -361,10 +361,10 @@ public abstract class AbstractMethod implements DAVMethod {
 
         generatedXML.writeElement("DAV::multistatus", XMLWriter.OPENING);
 
-        Enumeration<String> pathList = errorList.keys();
-        while (pathList.hasMoreElements()) {
+        Iterator<String> iterator = errorList.keySet().iterator();
+        while (iterator.hasNext()) {
 
-            String errorPath = pathList.nextElement();
+            String errorPath = iterator.next();
             int errorCode = errorList.get(errorPath);
 
             generatedXML.writeElement("DAV::response", XMLWriter.OPENING);

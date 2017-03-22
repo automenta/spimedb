@@ -1,11 +1,15 @@
 package spimedb.query;
 
 import jcog.tree.rtree.rect.RectDoubleND;
+import org.apache.lucene.search.ScoreDoc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.NObject;
+import spimedb.SpimeDB;
+import spimedb.index.DObject;
 
 import java.util.Arrays;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static spimedb.query.Query.BoundsCondition.Intersect;
@@ -15,10 +19,6 @@ import static spimedb.query.Query.BoundsCondition.Intersect;
  */
 public class Query {
 
-    /**
-     * for each result; if returns false, the query terminates
-     */
-    public final Predicate<NObject> each;
 
     /**
      * time the query was created
@@ -42,17 +42,13 @@ public class Query {
     public int limit = 128;
 
 
-    protected Query() {
-        this(null);
-    }
 
     /**
      *
      * @param each if null, attempts to use this instance as the predicate (as it can be implemented in subclasses)
      */
-    public Query(@Nullable Predicate<NObject> each) {
+    public Query() {
         this.whenCreated = System.currentTimeMillis();
-        this.each = each != null ? each : (Predicate)this;
     }
 
     public Query limit(int limit) {
@@ -131,7 +127,6 @@ public class Query {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{" +
-                "each=" + (each != this ? each : "this" ) +
                 ", whenCreated=" + whenCreated +
                 ", whenStarted=" + whenStarted +
                 ", whenEnded=" + whenEnded + "=(" + ((double)(whenEnded - whenStarted)) + "ms)" +
@@ -140,4 +135,9 @@ public class Query {
                 ", include=" + ((include == null || include.length == 0) ? "ALL" : Arrays.toString(include)) +
                 '}';
     }
+
+    public void forEach(SpimeDB db, BiPredicate<DObject,ScoreDoc> each) {
+        db.get(this).forEach(each);
+    }
+
 }

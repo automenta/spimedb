@@ -192,7 +192,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
     /**
      * return whether to clean deleted entries prior to removing any lowest ranked items
      */
-    protected boolean cleanDeletedEntries() {
+    protected static boolean cleanDeletedEntries() {
         return false;
     }
 

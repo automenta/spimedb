@@ -70,9 +70,7 @@ public class DPMeans extends KMeans {
 		// randomly pick k instances as the initial k means
 		ArrayList<String> indexes = new ArrayList<>(ds.size());
 		ArrayList<String> keys = new ArrayList<>(ds.getKeys());
-	    for (int i = 0; i < keys.size(); i++) {
-	        indexes.add( keys.get(i) );
-	    }
+		indexes.addAll(keys);
 	    Collections.shuffle(indexes);
 	    for (int i = 0; i < ki; i++) {
 	    	Cluster c = this.createCluster();

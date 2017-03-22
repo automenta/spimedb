@@ -3,6 +3,7 @@ package spimedb.io;
 import jcog.tree.rtree.rect.RectDoubleND;
 import org.junit.Test;
 import spimedb.SpimeDB;
+import spimedb.query.Query;
 import spimedb.query.QueryCollection;
 
 import java.io.BufferedInputStream;
@@ -36,8 +37,11 @@ public class GeoJSONTest {
         assertTrue(all > 50);
 
         //time query
-        QueryCollection a = new QueryCollection(new ArrayList<>()).when(1.48252053E12f, 1.48250336E12f);
-        db.get(a);
+        QueryCollection a = new QueryCollection(
+                new Query().when(1.48252053E12f, 1.48250336E12f),
+                new ArrayList<>()
+        ).get(db);
+
         int aNum = a.result.size();
         assertTrue(aNum > 0);
         assertTrue(aNum < all/4);
@@ -49,12 +53,12 @@ public class GeoJSONTest {
 //        System.out.println();
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
-        QueryCollection b = new QueryCollection(new ArrayList<>()).bounds(
+        QueryCollection b = new QueryCollection(new Query().bounds(
             new RectDoubleND(
-                    new double[] {  1.48252053E12f, 0, 0, Double.NEGATIVE_INFINITY },
-                    new double[] {  1.48250336E12f, 180, 180, Double.POSITIVE_INFINITY } )
-        );
-        db.get(b);
+                    new double[]{1.48252053E12f, 0, 0, Double.NEGATIVE_INFINITY},
+                    new double[]{1.48250336E12f, 180, 180, Double.POSITIVE_INFINITY})
+        ), new ArrayList<>()).get(db);
+
         int bNum = b.result.size();
         assertTrue(bNum > 0);
         assertTrue(bNum < aNum);

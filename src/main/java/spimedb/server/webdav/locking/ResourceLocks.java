@@ -21,6 +21,7 @@ import spimedb.server.webdav.exceptions.LockFailedException;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -187,18 +188,18 @@ public class ResourceLocks implements IResourceLocks {
 
     public void checkTimeouts(ITransaction transaction, boolean temporary) {
         if (!temporary) {
-            Enumeration<LockedObject> lockedObjects = _locks.elements();
-            while (lockedObjects.hasMoreElements()) {
-                LockedObject currentLockedObject = lockedObjects.nextElement();
+            Iterator<LockedObject> iterator = _locks.values().iterator();
+            while (iterator.hasNext()) {
+                LockedObject currentLockedObject = iterator.next();
 
                 if (currentLockedObject._expiresAt < System.currentTimeMillis()) {
                     currentLockedObject.removeLockedObject();
                 }
             }
         } else {
-            Enumeration<LockedObject> lockedObjects = _tempLocks.elements();
-            while (lockedObjects.hasMoreElements()) {
-                LockedObject currentLockedObject = lockedObjects.nextElement();
+            Iterator<LockedObject> iterator = _tempLocks.values().iterator();
+            while (iterator.hasNext()) {
+                LockedObject currentLockedObject = iterator.next();
 
                 if (currentLockedObject._expiresAt < System.currentTimeMillis()) {
                     currentLockedObject.removeTempLockedObject();

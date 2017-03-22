@@ -220,7 +220,7 @@ public class WebServer extends PathHandler {
             lons[1] = parseDouble(bb[2]);
             lats[1] = parseDouble(bb[3]);
 
-            SearchResult r = db.get(new Query((x)->true).limit(32).where(lons, lats));
+            SearchResult r = db.get(new Query().limit(32).where(lons, lats));
             send(r, o, ex);
 
         }));
@@ -256,7 +256,7 @@ public class WebServer extends PathHandler {
 
             try {
                 o.write("[[".getBytes());
-                r.forEach((y, x) -> {
+                r.forEachDocument((y, x) -> {
                     JSON.toJSON(searchResult(
                             DObject.get(y), x
                     ), o, ',');
@@ -407,7 +407,7 @@ public class WebServer extends PathHandler {
                     NObject.TYPE
             );
 
-    private FilteredNObject searchResult(NObject d, ScoreDoc x) {
+    private static FilteredNObject searchResult(NObject d, ScoreDoc x) {
         return new FilteredNObject(d, searchResultKeys) {
             @Override
             protected Object value(String key, Object v) {

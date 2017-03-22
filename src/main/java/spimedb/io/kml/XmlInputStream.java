@@ -258,12 +258,12 @@ public abstract class XmlInputStream extends GISInputStreamBase {
             return this.getNonEmptyElementText();
         } catch (XMLStreamException var3) {
             log.warn("Unable to parse {} as text element: {}", name.getLocalPart(), var3);
-            this.skipNextElement(this.stream, name);
+            XmlInputStream.skipNextElement(this.stream, name);
             return null;
         }
     }
 
-    protected void skipNextElement(XMLEventReader element, QName name) throws XMLStreamException {
+    protected static void skipNextElement(XMLEventReader element, QName name) throws XMLStreamException {
         XMLEvent next;
         do {
             next = element.nextEvent();

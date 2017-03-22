@@ -117,9 +117,7 @@ public class FeatureFrequencyTable implements Serializable {
 		PriorityQueue<FeatureFrequency> freq = new PriorityQueue<>(11, new FeatureFreqComparator());
 		
 		// sort features by decreasing frequency
-		for (FeatureFrequency f : table.values()) {
-			freq.add(f);
-		}
+        freq.addAll(table.values());
 		
 		// return the first n elements in PQ
 		for (int i=0; i < n; i++) {
