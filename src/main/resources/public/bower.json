@@ -22,7 +22,7 @@
     "fullcalendar": "latest",
     "interact": "latest",
     "draggabilly": "latest",
-    "fancybox": "latest",
-    "w2ui": "latest"
+    "w2ui": "latest",
+    "patternfly-timeline": "latest"
   }
 }

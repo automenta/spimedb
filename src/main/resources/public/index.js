@@ -38,7 +38,7 @@ $(() => {
         ]
     });
     
-    var pstyle = 'background-color: rgba(127,127,127,0.5); border: 1px solid #dfdfdf; padding: 5px;';
+    var pstyle = 'background-color: rgba(255,255,255,0.8); border: 1px solid #dfdfdf; padding: 5px;';
     $('#layout').w2layout({
         name: 'dock',
         panels: [
@@ -47,14 +47,14 @@ $(() => {
             { type: 'main' },
 //            { type: 'preview', size: '50%', resizable: true, style: pstyle, content: 'preview' },
             { type: 'right', size: 200, resizable: true, style: pstyle, content: '' },
-//            { type: 'bottom', size: 50, resizable: true, style: pstyle, content: 'bottom' }
+            { type: 'bottom', size: 150, resizable: true, style: pstyle, content: '' }
         ]
     });
     const dock = w2ui.dock;   
     $('#menu').detach().appendTo(dock.el('left'));
     $('#query').detach().appendTo(dock.el('top'));
     $('#resultsPane').detach().appendTo(dock.el('right'));
-    
+    $('#timeline').detach().appendTo(dock.el('bottom'));
     
     
 

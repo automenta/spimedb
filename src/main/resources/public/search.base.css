@@ -1,10 +1,13 @@
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    height: 100%;
 }
 
 #layout {
     height: 100%;
+    width: 100%;
 }
 
 
@@ -19,22 +22,22 @@ body {
     width: 100%;
     height: 100%;
     position: fixed;
-    
+
 }
 #map * {
-  -webkit-transition: none;
-  transition: none;
+    -webkit-transition: none;
+    transition: none;
 }
 
 
 * {
-  /*-webkit-transition: all 0.5s ease;
-  transition: all 0.5s ease;*/
-  box-sizing: border-box;
+    /*-webkit-transition: all 0.5s ease;
+    transition: all 0.5s ease;*/
+    box-sizing: border-box;
 }
 
 h1 {
-  margin: 0;
+    margin: 0;
 }
 
 a {
@@ -48,8 +51,8 @@ h2 { margin: 0; }
 
 
 #focus {
-  right: 0;
-  top: 0;
+    right: 0;
+    top: 0;
 }
 
 .sidebar {    
@@ -64,7 +67,7 @@ h2 { margin: 0; }
 
 
 .sidebar .result .textpreview {
-  text-overflow: ellipsis;
+    text-overflow: ellipsis;
 }
 
 .main {
@@ -86,7 +89,7 @@ h2 { margin: 0; }
 }
 
 #logo {
-  margin-bottom: 1em;
+    margin-bottom: 1em;
 }
 
 .hide #query {
@@ -98,20 +101,20 @@ h2 { margin: 0; }
 }
 
 .hide #query #logo {
-  float: left;
-  padding-right: 1em;
-  display: none;
-  width: 0;
-  opacity: 0;
+    float: left;
+    padding-right: 1em;
+    display: none;
+    width: 0;
+    opacity: 0;
 }
 .hide #query #map {
-  display: none;
+    display: none;
 }
 
 .hide #query:hover #logo {
-  display: block;
-  width: auto;
-  opacity: 1.0;
+    display: block;
+    width: auto;
+    opacity: 1.0;
 }
 
 .hide #query:hover {
@@ -119,7 +122,7 @@ h2 { margin: 0; }
 }
 
 .hide #query_edit * {
-   font-size: 125%;
+    font-size: 125%;
 }
 
 .hide #query_edit {
@@ -143,8 +146,8 @@ h2 { margin: 0; }
 
 
 #resultsPane, #facetsWrapper {
-  overflow: auto;
-  background-color: rgba(255, 255, 255, 0.5);
+    overflow: auto;
+    background-color: rgba(255, 255, 255, 0.5);
 }
 
 /*#resultsDragger {
@@ -189,21 +192,21 @@ h2 { margin: 0; }
 }
 
 #menu.expand {
-  width: 100%;
+    width: 100%;
 
-  text-align: center;
+    text-align: center;
 }
 
 #menu.expand .grid-item-content {
-  max-width: 7em;
-  max-height: 4em;
-  text-overflow: clip;
-  overflow: hidden;
+    max-width: 7em;
+    max-height: 4em;
+    text-overflow: clip;
+    overflow: hidden;
 }
 
 
 #menu input, #menu button {
-  font-size: 200%;
+    font-size: 200%;
 }
 #menu input {   max-width: 85%;  }
 #menu button {   max-width: 13%;  }
@@ -229,7 +232,7 @@ h2 { margin: 0; }
 }
 
 .leaflet-control-attribution {
-  display: none;
+    display: none;
 }
 
 
@@ -238,7 +241,7 @@ h2 { margin: 0; }
 }
 
 .list-item-content, .grid-item-content, .result {
-  padding: 0.5em;
+    padding: 0.5em;
 }
 
 .result .sub {
@@ -258,7 +261,7 @@ h2 { margin: 0; }
     box-shadow: 0px 0px 2px 2px rgba(115, 115, 115, .2);
     -webkit-transition: all 0.7s ease;
     transition: all 0.4s ease;
-    background-color: rgba(170,170,170,0.5);
+    background-color: rgba(170,170,170,0.9);
 }
 
 .list-item:hover, .grid-item:hover {
@@ -268,8 +271,8 @@ h2 { margin: 0; }
     cursor: hand;
 }
 .sub:hover {
-  -webkit-box-shadow: 0px 0px 3px 6px rgba(50, 128, 127, .75);
-  box-shadow: 0px 0px 3px 6px rgba(50, 128, 127, .75);
+    -webkit-box-shadow: 0px 0px 3px 6px rgba(50, 128, 127, .75);
+    box-shadow: 0px 0px 3px 6px rgba(50, 128, 127, .75);
 }
 
 .grid-item.is-dragging,
@@ -287,7 +290,7 @@ h2 { margin: 0; }
 
 
 .result {
-  overflow: hidden;
+    overflow: hidden;
 }
 
 .result h2 {
@@ -300,9 +303,9 @@ h2 { margin: 0; }
 
 .result .textpreview {
 
-  text-overflow: ellipsis;
-  max-height: 200px;
-  overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 200px;
+    overflow: hidden;
 }
 
 .result img {
@@ -313,26 +316,37 @@ h2 { margin: 0; }
 }
 
 
-   .map2d_status {
-        position: absolute;               
-        max-width: 25%;
-        pointer-events: none;
-        z-index: 1000;      
-    }
-    
-    .map2d_status a {
-        color: white;
-        font-size: 120%;
-        opacity: 1.0;
-    }
+.map2d_status {
+    position: absolute;               
+    max-width: 25%;
+    pointer-events: none;
+    z-index: 1000;      
+}
 
-    .leaflet-container {
-        font: inherit !important;
-    }
+.map2d_status a {
+    color: white;
+    font-size: 120%;
+    opacity: 1.0;
+}
 
-    /** useless shadow pane consuming rendering energy */
-    .leaflet-shadow-pane { display: none }
+.leaflet-container {
+    font: inherit !important;
+}
 
-    .leaflet-container {
-        overflow: hidden !important;
-    }
+/** useless shadow pane consuming rendering energy */
+.leaflet-shadow-pane { display: none }
+
+.leaflet-container {
+    overflow: hidden !important;
+}
+
+
+#timeline {
+
+    background-color: rgba(255,255,255,0.8);
+}
+
+#pf-timeline .popover {
+    white-space: pre;
+    max-width: none;
+}
