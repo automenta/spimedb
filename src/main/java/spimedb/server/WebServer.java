@@ -7,6 +7,7 @@ package spimedb.server;
 
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
@@ -221,7 +222,7 @@ public class WebServer extends PathHandler {
             lats[1] = parseDouble(bb[3]);
 
             SearchResult r = db.get(new Query().limit(32).where(lons, lats));
-            send(r, o, ex);
+            send(r, o, ex, searchResultSummary);
 
         }));
 
@@ -232,7 +233,7 @@ public class WebServer extends PathHandler {
 
             try {
 
-                send(db.find(qText, 50), o, ex);
+                send(db.find(qText, 50), o, ex, searchResultFull);
 
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e.getMessage());
@@ -251,14 +252,14 @@ public class WebServer extends PathHandler {
 
     }
 
-    private void send(SearchResult r, OutputStream o, HttpServerExchange ex) {
+    private void send(SearchResult r, OutputStream o, HttpServerExchange ex, ImmutableSet<String> keys) {
         if (r!=null) {
 
             try {
                 o.write("[[".getBytes());
                 r.forEachDocument((y, x) -> {
                     JSON.toJSON(searchResult(
-                            DObject.get(y), x
+                            DObject.get(y), x, keys
                     ), o, ',');
                     return true;
                 });
@@ -400,15 +401,19 @@ public class WebServer extends PathHandler {
         }
     }
 
-    static final ImmutableSet<String> searchResultKeys =
+    static final ImmutableSet<String> searchResultSummary =
             Sets.immutable.of(
-                    NObject.ID, NObject.NAME, NObject.DESC, NObject.INH, NObject.TAG, NObject.BOUND,
-                    "thumbnail", "data", "score",
+                    NObject.ID, NObject.NAME, NObject.INH, NObject.TAG, NObject.BOUND,
+                    "thumbnail", "score", NObject.LINESTRING, NObject.POLYGON,
                     NObject.TYPE
             );
+    static final ImmutableSet<String> searchResultFull =
+            Sets.immutable.withAll(Iterables.concat(Sets.mutable.ofAll(searchResultSummary), Sets.immutable.of(
+                    NObject.DESC, "data"
+            )));
 
-    private static FilteredNObject searchResult(NObject d, ScoreDoc x) {
-        return new FilteredNObject(d, searchResultKeys) {
+    private static FilteredNObject searchResult(NObject d, ScoreDoc x, ImmutableSet<String> keys) {
+        return new FilteredNObject(d, keys) {
             @Override
             protected Object value(String key, Object v) {
                 switch (key) {

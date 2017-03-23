@@ -1,7 +1,7 @@
 "use strict";
 
 var uiBoundsReactionPeriodMS = 75;
-var MEMORY_SIZE = 64;
+var MEMORY_SIZE = 512;
 var ACTIVATION_RATE = 0.5;
 
 var app = {};
@@ -131,6 +131,7 @@ $(() => {
                 var linePath, polygon;
                 if (linePath = x['g-']) {
                     //TODO f.lineWidth
+
                     m = L.polyline(linePath, {color: x.color || 'gray', data: x, title: label}).addTo(map);
 
                 } else if (polygon = x['g*']) {
@@ -725,8 +726,8 @@ $(() => {
         //http://leaflet-extras.github.io/leaflet-providers/preview/
         setTimeout(() =>
             L.tileLayer(
-                //'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
-                'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+                'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+                //'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
                 , {
                     //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map),
