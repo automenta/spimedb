@@ -88,70 +88,71 @@ class NObject {
             this.where = null;
         }
 
-        const bounds = x['@'];
-        if (bounds) {
+        if (map) {
+            const bounds = x['@'];
+            if (bounds) {
 
-            //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
+                //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
 
-            //when = bounds[0]
-            var lon = bounds[1];
-            var lat = bounds[2];
-            //alt = bounds[3]
+                //when = bounds[0]
+                var lon = bounds[1];
+                var lat = bounds[2];
+                //alt = bounds[3]
 
-            var label = x.N || id || "?";
+                var label = x.N || id || "?";
 
-            var m;
+                var m;
 
-            var linePath, polygon;
-            if (linePath = x['g-']) {
-                //TODO f.lineWidth
+                var linePath, polygon;
+                if (linePath = x['g-']) {
+                    //TODO f.lineWidth
 
-                m = L.polyline(linePath, {color: x.color || 'gray', data: x, title: label});
+                    m = L.polyline(linePath, {color: x.color || 'gray', data: x, title: label});
                     //.addTo(map);
 
-            } else if (polygon = x['g*']) {
+                } else if (polygon = x['g*']) {
 
-                m = L.polygon(polygon, {color: x.polyColor || x.color || 'gray', data: x, title: label});
+                    m = L.polygon(polygon, {color: x.polyColor || x.color || 'gray', data: x, title: label});
                     //.addTo(map);
 
-            } else {
-                //default point or bounding rect marker:
-
-                var mm = {
-                    data: x,
-                    title: label,
-                    stroke: false,
-                    fillColor: "#0078ff",
-                    fillOpacity: 0.5,
-                    weight: 1
-                };
-
-                if (!(Array.isArray(lat) || Array.isArray(lon))) {
-                    mm.zIndexOffset = 100;
-                    //f.iconUrl
-                    m = L.circleMarker([lat, lon], mm);
-                        //.addTo(map);
                 } else {
-                    var latMin = lat[0], latMax = lat[1];
-                    var lonMin = lon[0], lonMax = lon[1];
+                    //default point or bounding rect marker:
 
+                    var mm = {
+                        data: x,
+                        title: label,
+                        stroke: false,
+                        fillColor: "#0078ff",
+                        fillOpacity: 0.5,
+                        weight: 1
+                    };
 
-                    mm.fillOpacity = 0.3; //TODO decrease this by the bounds area
-
-                    m = L.rectangle([[latMin, lonMin], [latMax, lonMax]], mm);
+                    if (!(Array.isArray(lat) || Array.isArray(lon))) {
+                        mm.zIndexOffset = 100;
+                        //f.iconUrl
+                        m = L.circleMarker([lat, lon], mm);
                         //.addTo(map);
+                    } else {
+                        var latMin = lat[0], latMax = lat[1];
+                        var lonMin = lon[0], lonMax = lon[1];
+
+
+                        mm.fillOpacity = 0.3; //TODO decrease this by the bounds area
+
+                        m = L.rectangle([[latMin, lonMin], [latMax, lonMax]], mm);
+                        //.addTo(map);
+                    }
+
+
                 }
 
+                if (m) {
+                    //m.on('click', clickHandler);
+                    //m.on('mouseover', overHandler);
+                    //m.on('mouseout', outHandler);
 
-
-            }
-
-            if (m) {
-                //m.on('click', clickHandler);
-                //m.on('mouseover', overHandler);
-                //m.on('mouseout', outHandler);
-
-                this.where = m;
+                    this.where = m;
+                }
             }
         }
     }

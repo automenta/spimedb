@@ -11,6 +11,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.HttpContinueAcceptingHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.cache.DirectBufferCache;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
@@ -19,6 +20,11 @@ import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.*;
 import io.undertow.util.StatusCodes;
+import nars.$;
+import nars.nar.Default;
+import nars.nar.NARBuilder;
+import nars.time.RealTime;
+import nars.time.Tense;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
@@ -102,42 +108,39 @@ public class WebServer extends PathHandler {
 
     }
 
+    //final Default nar = NARBuilder.newMultiThreadNAR(1, new RealTime.DS());
+
+//    @Override
+//    public void handleRequest(HttpServerExchange exchange) throws Exception {
+//        String s = exchange.getQueryString();
+//        nar.believe(
+//                s.isEmpty() ?
+//
+//            $.func(
+//                $.the(exchange.getDestinationAddress().toString()),
+//                $.quote(exchange.getRequestURL())
+//             )
+//                        :
+//            $.func(
+//                $.the(exchange.getDestinationAddress().toString()),
+//                $.quote(exchange.getRequestURL()),
+//                $.the(s)  ),
+//
+//            Tense.Present
+//        );
+//
+//        super.handleRequest(exchange);
+//    }
+
     public WebServer(final SpimeDB db) {
         super();
         this.db = db;
 
-        //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
-        j2js = JavaToJavascript.build();
 
+//        nar.log();
+//        nar.loop(10f);
 
-        File staticPath = Paths.get(WebServer.staticPath).toFile();
-        File myStaticPath = db.file.getParentFile().toPath().resolve("public").toFile();
-
-        int transferMinSize = 1024 * 1024;
-        final int METADATA_MAX_AGE = 3 * 1000; //ms
-
-        ResourceManager res;
-        if (db.indexPath!=null && myStaticPath.exists()) {
-            res = new OverridingFileResourceManager(staticPath, transferMinSize, myStaticPath);
-        } else {
-            //HACK add the defaut local to prevent 404's
-            res = new FileResourceManager(
-                    staticPath, 0, true, "/");
-        }
-
-        DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
-                16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
-                METADATA_MAX_AGE);
-
-        CachingResourceManager cres = new CachingResourceManager(
-                100,
-                transferMinSize /* max size */,
-                dataCache, res, METADATA_MAX_AGE);
-
-
-        ResourceHandler rr = resource(cres);
-        rr.setCacheTime(24 * 60 * 60 * 1000);
-        addPrefixPath("/", rr);
+        initStaticResource(db);
 
 
 //        try {
@@ -146,14 +149,8 @@ public class WebServer extends PathHandler {
 //            logger.error("{}", e);
 //        }
 
-        addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
-            try {
-                o.write(j2js.compileMain(Client.class).toString().getBytes());
-            } catch (IOException e) {
-                logger.error("spimedb.js {}", e);
-
-            }
-        }));
+        j2js = JavaToJavascript.build();
+        initJ2JS();
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
@@ -232,9 +229,7 @@ public class WebServer extends PathHandler {
                 return;
 
             try {
-
                 send(db.find(qText, 50), o, ex, searchResultFull);
-
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e.getMessage());
                 ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -250,6 +245,49 @@ public class WebServer extends PathHandler {
 
         restart();
 
+    }
+
+    private void initJ2JS() {
+        //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
+        addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
+            try {
+                o.write(j2js.compileMain(Client.class).toString().getBytes());
+            } catch (IOException e) {
+                logger.error("spimedb.js {}", e);
+
+            }
+        }));
+    }
+
+    private void initStaticResource(SpimeDB db) {
+        File staticPath = Paths.get(WebServer.staticPath).toFile();
+        File myStaticPath = db.file.getParentFile().toPath().resolve("public").toFile();
+
+        int transferMinSize = 1024 * 1024;
+        final int METADATA_MAX_AGE = 3 * 1000; //ms
+
+        ResourceManager res;
+        if (db.indexPath!=null && myStaticPath.exists()) {
+            res = new OverridingFileResourceManager(staticPath, transferMinSize, myStaticPath);
+        } else {
+            //HACK add the defaut local to prevent 404's
+            res = new FileResourceManager(
+                    staticPath, 0, true, "/");
+        }
+
+        DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
+                16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
+                METADATA_MAX_AGE);
+
+        CachingResourceManager cres = new CachingResourceManager(
+                100,
+                transferMinSize /* max size */,
+                dataCache, res, METADATA_MAX_AGE);
+
+
+        ResourceHandler rr = resource(cres);
+        rr.setCacheTime(24 * 60 * 60 * 1000);
+        addPrefixPath("/", rr);
     }
 
     private void send(SearchResult r, OutputStream o, HttpServerExchange ex, ImmutableSet<String> keys) {

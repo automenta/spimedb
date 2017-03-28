@@ -43,12 +43,13 @@
           left: 0;
           position: absolute;
           max-height: 100%;
+          max-width: 100%;
           overflow-y: auto;
         }
 
         .box {
-            background-color: gray;
-            overflow-x: auto;
+            background-color: #555;
+            overflow: auto;
             margin: 0.5em;
             padding: 0.5em;
             display: inline-flex;
@@ -61,10 +62,17 @@
 
 
         .box pre {
-            background-color: black;
+            background-color: #000;
         }
 
-        #map { display: none; }
+        .group .box {
+            max-height: 12em;
+            max-width: 30%;
+            background-color: #333;
+            font-size: 50%;
+            margin: 0.5em;
+        }
+
 
 
     </style>
@@ -88,20 +96,22 @@
     </div>
     <div id="in" />
 
-    <div id="map"/>
+
 
 </body>
 
 <script>
+    const map = null; /*MAP('map', (x)=>{
+     //LOAD(x, 0.5);
+     });*/
+
     $(() => {
 
-        const map = MAP('map', (x)=>{
-            //LOAD(x, 0.5);
-        });
+
 
         var Oo = $('#output');
 
-        function add(x) {
+        function ADD(x) {
 
             Oo.append($('<div class="box"/>').append(x));
 
@@ -138,7 +148,7 @@
                 const ss = JSON.parse(suggestions);
 
                 _.forEach(ss, x => {
-                   add(x);
+                   ADD(x);
                 });
             },
 
@@ -155,13 +165,18 @@
                     return;
                 }
 
+                var toAdd = [];
                 _.forEach(rr, x => {
                     if (!x.I) return;
 
                     //const score = x.score;
                     const y = new NObject(x);
-                    add(y.what);
+                    if (y.what)
+                        toAdd.push(y.what.addClass('box'));
                 });
+
+                if (toAdd.length > 0)
+                    ADD(divCls('group').append(toAdd));
 
             }
         );

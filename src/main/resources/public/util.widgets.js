@@ -132,7 +132,7 @@ class ChannelSummaryWidget {
 
         }
 
-        var content = newDivClassed('ui segment inverted').appendTo(target);
+        var content = divCls('ui segment inverted').appendTo(target);
 
         for (var x in data) {
             var d = data[x];
@@ -141,11 +141,11 @@ class ChannelSummaryWidget {
 
             console.log(d);
 
-            var e = newDivClassed(/*'three wide column'*/).appendTo(content);
+            var e = divCls(/*'three wide column'*/).appendTo(content);
             //e.append('<h3 class="header">' + x + '</h3>');
             e.append(// class="ui maxHalfHeight"/>',
                 //+ JSON.stringify(d, null, 4) + '</pre>');
-                newDivClassed("ui segment inverted").append(
+                divCls("ui segment inverted").append(
                     newJSONTable(d, [], ['function'])
                 )
             );

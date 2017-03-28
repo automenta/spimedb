@@ -28,9 +28,9 @@ function newSpan(id) {
     return e;
 }
 
-function newDivClassed(c) {
+function divCls(c) {
     var d = newDiv();
-    d.addClass(c);
+    d.attr('class', c);
     return d;
 }
 
