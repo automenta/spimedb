@@ -15,6 +15,34 @@ function DIVclass(cssclass) {
     return x;
 }
 
+
+//faster than $('<div/>');
+function newDiv(id) {
+    var e = newEle('div');
+    if (id) e.attr('id', id);
+    return e;
+}
+function newSpan(id) {
+    var e = newEle('span');
+    if (id) e.attr('id', id);
+    return e;
+}
+
+function newDivClassed(c) {
+    var d = newDiv();
+    d.addClass(c);
+    return d;
+}
+
+function newEle(e, dom) {
+    var d = document.createElement(e);
+    if (dom)
+        return d;
+    return $(d);
+}
+
+
+
 function newGrid(selector) {
     return selector.packery({});
 }
@@ -53,32 +81,6 @@ function notify(x) {
 
     new PNotify(x);
     //.container.click(_notifyRemoval);
-}
-
-
-//faster than $('<div/>');
-function newDiv(id) {
-    var e = newEle('div');
-    if (id) e.attr('id', id);
-    return e;
-}
-function newSpan(id) {
-    var e = newEle('span');
-    if (id) e.attr('id', id);
-    return e;
-}
-
-function newDivClassed(c) {
-    var d = newDiv();
-    d.addClass(c);
-    return d;
-}
-
-function newEle(e, dom) {
-    var d = document.createElement(e);
-    if (dom)
-        return d;
-    return $(d);
 }
 
 

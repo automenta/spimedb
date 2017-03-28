@@ -6,7 +6,7 @@
             background-color: black;
             color: #ccc;
             font-family: monospace;
-            margin: 0em;
+            margin: 1em;
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -16,144 +16,158 @@
             font-size: 200%;
         }
 
+        input {
+            background-color: black;
+            color: orange;
+        }
 
         #in {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 1.5em;
-            background-color: black;
-            color: orange;
-            margin: 0;
-            overflow-x: auto;
         }
 
-        #out {
+        #in input {
+            width: 100%;
+            border: none;
+            border-top: 1px solid gray;
+            padding: 0.25em;
         }
 
-        #outout {
+
+        #output {
           width: 100%;
-          top: 0;
+          top: -3em;
+          padding-bottom:3em;
           left: 0;
           position: absolute;
           max-height: 100%;
           overflow-y: auto;
-          padding-bottom:2em;
         }
+
+        .box {
+            background-color: gray;
+            overflow-x: auto;
+            margin: 0.5em;
+            padding: 0.5em;
+            display: inline-flex;
+        }
+
+        .box * {
+            padding: 0.5em;
+            margin: 0;
+        }
+
+
+        .box pre {
+            background-color: black;
+        }
+
+        #map { display: none; }
+
+
     </style>
 </head>
 
 
-
-<script src="../lib/jquery.min.js"></script>
-<script src="../lib/msgpack.js"></script>
+<script src="lib/lodash.js"></script>
+<script src="lib/jquery.min.js"></script>
+<script src="lib/msgpack.js"></script>
 <script src="ReconnectingWebsocket.js"></script>
 <!--<script src="../lib/web_socket.js"></script>-->
 
+<script src="lib/leaflet/leaflet.js"></script>
+
+<script src="util.js"></script>
+<script src="spime.js"></script>
+
 <body>
-    <div id="outout">
-      <div id="out"></div>
+
+    <div id="output">
     </div>
-    <input id="in" type="text" placeholder="?" />
+    <div id="in" />
+
+    <div id="map"/>
+
 </body>
 
 <script>
-    $(document).ready(() => {
+    $(() => {
 
-        const path = "admin";
-        const defaultHostname = window.location.hostname || 'localhost';
-        const defaultWSPort = window.location.port || 8080;
-        const options = undefined;
+        const map = MAP('map', (x)=>{
+            //LOAD(x, 0.5);
+        });
 
-        /** creates a websocket connection to a path on the server that hosts the currently visible webpage */
-        const ws = new ReconnectingWebSocket(
-          'ws://' + window.location.hostname + ':' + window.location.port + '/' + path,
-          null /* protocols */,
-          options || {
-              //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
-              /*
-               // The number of milliseconds to delay before attempting to reconnect.
-               reconnectInterval: 1000,
-               // The maximum number of milliseconds to delay a reconnection attempt.
-               maxReconnectInterval: 30000,
-               // The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist.
-               reconnectDecay: 1.5,
+        var Oo = $('#output');
 
-               // The maximum time in milliseconds to wait for a connection to succeed before closing and retrying.
-               timeoutInterval: 2000,
-               */
-          });
+        function add(x) {
 
-        ws.binaryType = 'arraybuffer';
-
-        ws.onopen = function() {
-
-            show('websocket connect');
-
-        };
-
-        ws.onclose = function() {
-            //already disconnected?
-            if (!this.opt)
-                return;
-
-            show("Websocket disconnect");
-
-            //attempt reconnect?
-        };
-
-        function show(msg) {
-            O.append(msg);
-
-            //scroll to bottom
+            Oo.append($('<div class="box"/>').append(x));
 
             setTimeout(()=>{
-              const height = O[0].scrollHeight;
+
+
+
+              //scroll to bottom
+              const height = Oo[0].scrollHeight;
               Oo.scrollTop(height);
             },0);
         }
 
-        function showCode(e) {
-            show($('<pre>').text(JSON.stringify(e, null, 2)));
+        function code(e) {
+            return $('<pre>').text(JSON.stringify(e, null, 2));
         }
 
-        function recv(x) {
-            showCode(x);
-        }
-
-        ws.onmessage = function(m) { recv(msgpack.decode(new Uint8Array(m.data))); };
-
-        /*ws.onmessage = function(e) {
-            try {
-                var c = e.data;
-                var d = JSON.parse(c);
-                showCode(d);
-            } catch (e) {
-                showCode(c);
-            }
-        };*/
-
-        ws.onclose = function(e) {
-            show(['Websocket disconnected', e]);
-        };
-
-        ws.onerror = function(e) {
-            show(["Websocket error", e]);
-        };
 
 
-        var O = $('#out');
-        var Oo = $('#outout');
-        var I = $('#in');
+        //var I = $('#in');
 
-        I.keyup(function(e) {
+        /*I.keyup(function(e) {
             if (e.keyCode == 13) {
                 var x = I.val();
                 I.val('');
                 ws.send(x);
             }
-        });
+        });*/
+
+
+        var I = QueryPrompt(
+
+            function(suggestions) {
+                const ss = JSON.parse(suggestions);
+
+                _.forEach(ss, x => {
+                   add(x);
+                });
+            },
+
+            function(result) {
+
+                var ss, rr, ff;
+                try {
+                    ss = JSON.parse(result);
+                    rr = ss[0]; //first part: search results
+                    ff = ss[1]; //second part: facets
+                } catch (e) {
+                    //usually just empty search result
+                    //$('#results').html('No matches for: "' + qText + '"');
+                    return;
+                }
+
+                _.forEach(rr, x => {
+                    if (!x.I) return;
+
+                    //const score = x.score;
+                    const y = new NObject(x);
+                    add(y.what);
+                });
+
+            }
+        );
+
+        $('#in').append(I);
+
     });
 </script>
 
