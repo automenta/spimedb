@@ -12,8 +12,8 @@
             overflow: hidden;
         }
 
-        body, input {
-            font-size: 200%;
+        body, input, select, button {
+            font-size: 150%;
         }
 
         input {
@@ -26,23 +26,21 @@
             bottom: 0;
             left: 0;
             width: 100%;
+            border-top: 1px solid gray;
         }
 
         #in input {
-            width: 100%;
+            width: 80%;
             border: none;
-            border-top: 1px solid gray;
             padding: 0.25em;
         }
 
 
         #output {
           width: 100%;
-          top: -3em;
-          padding-bottom:3em;
           left: 0;
-          position: absolute;
-          max-height: 100%;
+          position: fixed;
+          height: 90%;
           max-width: 100%;
           overflow-y: auto;
         }
@@ -66,8 +64,6 @@
         }
 
         .group .box {
-            max-height: 12em;
-            max-width: 30%;
             background-color: #333;
             font-size: 50%;
             margin: 0.5em;
@@ -94,7 +90,23 @@
 
     <div id="output">
     </div>
-    <div id="in" />
+    <div id="in" >
+
+        <span>
+            <select id="inMode">
+                <option value="find" selected>find</option>
+                <option value="say">say</option>
+            </select>
+        </span>
+
+        <span id="in_find" class="inner" >
+        </span>
+        <span id="in_say" class="inner" >
+            <input type="text"/>
+            <button>SEND</button>
+        </span>
+
+    </div>
 
 
 
@@ -108,6 +120,19 @@
     $(() => {
 
 
+        {
+            $('.inner').hide();
+
+            var shown = $('#in_find');
+            shown.show();
+
+            $('#inMode').change(function () {
+
+                shown.hide();
+                (shown = $('#in_' + this.value)).show();
+
+            })
+        }
 
         var Oo = $('#output');
 
@@ -220,7 +245,7 @@
             }
         );
 
-        $('#in').append(I);
+        $('#in_find').append(I);
 
     });
 </script>
