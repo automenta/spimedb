@@ -113,7 +113,8 @@
 
         function ADD(x) {
 
-            Oo.append($('<div class="box"/>').append(x));
+            const b = $('<div class="box"/>').append(x);
+            Oo.append(b);
 
             setTimeout(()=>{
 
@@ -123,6 +124,8 @@
               const height = Oo[0].scrollHeight;
               Oo.scrollTop(height);
             },0);
+
+            return b;
         }
 
         function code(e) {
@@ -141,18 +144,54 @@
             }
         });*/
 
+        var suggestBox = undefined;
+        var suggested = { };
+
+        function clearSuggestions() {
+            if (suggestBox) {
+                suggestBox.remove();
+                suggestBox = undefined;
+                suggested = { };
+            }
+        }
 
         var I = QueryPrompt(
 
             function(suggestions) {
-                const ss = JSON.parse(suggestions);
+                var ss;
+
+                try {
+                    ss = JSON.parse(suggestions);
+                } catch (e) {
+                    ss = [];
+                }
+
+                if (ss.length === 0) {
+                    //hard clear
+                    clearSuggestions();
+                    return;
+                } else if (suggestBox) {
+                    //soft clear
+                    suggestBox.html([]);
+                    suggested = {};
+                }
+
+                if (!suggestBox) {
+                    suggestBox = ADD().addClass('group');
+                }
 
                 _.forEach(ss, x => {
-                   ADD(x);
+                    if (!suggested[x]) {
+                        suggested[x] = suggestBox.append(divCls('box').append(x));
+                    }
                 });
             },
 
             function(result) {
+
+                I.val('');
+
+                clearSuggestions();
 
                 var ss, rr, ff;
                 try {

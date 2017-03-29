@@ -13,13 +13,18 @@ function FACETS(query, withResult) {
 
 function QueryPrompt(withSuggestions, withResults) {
 
+
     const queryText = $('<input type="text"/>');
     const onQueryTextChanged = _.throttle(() => {
 
         const qText = queryText.val();
-        //$('#query_status').html('Suggesting: ' + qText);
+        if (qText.length > 0) {
+            //$('#query_status').html('Suggesting: ' + qText);
 
-        $.get('/suggest', {q: qText}, withSuggestions);
+            $.get('/suggest', {q: qText}, withSuggestions);
+        } else {
+            withSuggestions('[]' /* HACK */);
+        }
 
     }, 100, true, true);
 
