@@ -181,8 +181,8 @@ public class DObject implements NObject {
         this.id = d.get(NObject.ID);
 
         IndexableField b = d.getField(NObject.BOUND);
-        if (b instanceof DoubleRangeField) {
-            DoubleRangeField f = (DoubleRangeField) b;
+        if (b instanceof DoubleRange) {
+            DoubleRange f = (DoubleRange) b;
             double[] min = new double[4];
             double[] max = new double[4];
             for (int i = 0; i < 4; i++) {
@@ -370,7 +370,7 @@ public class DObject implements NObject {
 //            if (dd.length == 1)
 //                return dd[0];
 //            return dd;
-        } else if (f instanceof FloatRangeField) {
+        } else if (f instanceof FloatRange) {
             throw new UnsupportedOperationException();
         } else if (f instanceof IntPoint) {
             IntPoint ff = (IntPoint) f;

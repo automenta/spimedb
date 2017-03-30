@@ -3,14 +3,11 @@ package spimedb.query;
 import jcog.tree.rtree.rect.RectDoubleND;
 import org.apache.lucene.search.ScoreDoc;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
 
 import java.util.Arrays;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 import static spimedb.query.Query.BoundsCondition.Intersect;
 

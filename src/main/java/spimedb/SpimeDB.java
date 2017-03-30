@@ -59,7 +59,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -805,7 +804,7 @@ public class SpimeDB {
                 org.apache.lucene.search.Query subQuery;
                 switch (q.boundsCondition) {
                     case Intersect:
-                        subQuery = DoubleRangeField.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord);
+                        subQuery = DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord);
                         break;
                     default:
                         q.onEnd();
