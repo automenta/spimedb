@@ -51,7 +51,7 @@ abstract public class AbstractServerWebSocket extends AbstractReceiveListener im
         sendJSON(socket, object, JSON.msgPackMapper,null, null);
     }
 
-    public static void sendJSONBinary(WebSocketChannel socket, Object object, RateLimiter r, AtomicLong outBytes) {
+    public static void sendJSONBinary(WebSocketChannel socket, Object object, @Nullable RateLimiter r, @Nullable AtomicLong outBytes) {
         sendJSON(socket, object, JSON.msgPackMapper, r, outBytes);
     }
 

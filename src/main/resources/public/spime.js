@@ -241,8 +241,8 @@ function ResultNode(x) {
 }
 
 
-function WebSocket() {
-    const path = "admin";
+function SpimeSocket(path, add) {
+
     const defaultHostname = window.location.hostname || 'localhost';
     const defaultWSPort = window.location.port || 8080;
     const options = undefined;
@@ -251,7 +251,7 @@ function WebSocket() {
     const ws = new ReconnectingWebSocket(
         'ws://' + window.location.hostname + ':' + window.location.port + '/' + path,
         null /* protocols */,
-        options || {
+        options); //{
             //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
             /*
              // The number of milliseconds to delay before attempting to reconnect.
@@ -264,7 +264,7 @@ function WebSocket() {
              // The maximum time in milliseconds to wait for a connection to succeed before closing and retrying.
              timeoutInterval: 2000,
              */
-        });
+        //});
 
     ws.binaryType = 'arraybuffer';
 
@@ -285,18 +285,18 @@ function WebSocket() {
     };
 
     ws.onmessage = function (m) {
-        recv(msgpack.decode(new Uint8Array(m.data)));
+        add(msgpack.decode(new Uint8Array(m.data)));
     };
 
-    /*ws.onmessage = function(e) {
-     try {
-     var c = e.data;
-     var d = JSON.parse(c);
-     showCode(d);
-     } catch (e) {
-     showCode(c);
-     }
-     };*/
+    // ws.onmessage = function (e) {
+    //     try {
+    //         var c = e.data;
+    //         var d = JSON.parse(c);
+    //         add(d);
+    //     } catch (e) {
+    //         add(c);
+    //     }
+    // };
 
     ws.onclose = function (e) {
         add(['Websocket disconnected', e]);
@@ -366,8 +366,8 @@ function MAP(target, withResults) {
             "y1": b.getSouth(),
             "y2": b.getNorth(),
             update: function () {
-                $.get('/earth', {r:
-                    this.x1 + '_' +
+                $.get('/earth', {
+                    r: this.x1 + '_' +
                     this.y1 + '_' +
                     this.x2 + '_' +
                     this.y2
@@ -391,8 +391,6 @@ function MAP(target, withResults) {
          Math.max(b.getEast()-b.getWest(), b.getNorth()-b.getSouth()) / 2.0;*/
 
 
-
-
         //var center = b.getCenter();
         //var lon = center.lng;
         //var lat = center.lat;
@@ -414,7 +412,6 @@ function MAP(target, withResults) {
         'leading': true,
         'trailing': false
     });
-
 
 
     map.on('viewreset', nextUpdateBounds);

@@ -46,6 +46,7 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static io.undertow.Handlers.resource;
@@ -80,6 +81,7 @@ public class WebServer extends PathHandler {
 
     private Undertow server;
 
+    final Router<String,Consumer<NObject>> TAG = new Router();
 
     public static class OverridingFileResourceManager extends FileResourceManager {
 
@@ -233,7 +235,10 @@ public class WebServer extends PathHandler {
 
 
         /* client attention management */
-        addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
+        //addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
+        addPrefixPath("/anon", websocket(
+            new AnonymousSession(db, TAG))
+        );
 
         //addPrefixPath("/admin", websocket(new Admin(db)));
 

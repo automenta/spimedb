@@ -119,7 +119,6 @@
 
     $(() => {
 
-
         {
             $('.inner').hide();
 
@@ -246,6 +245,27 @@
         );
 
         $('#in_find').append(I);
+
+        const sayBox = $('#in_say input');
+        sayBox.change(v=>{
+            const msg = sayBox.val();
+            if (msg.length > 0) {
+                sayBox.val('');
+                ws.send('me.tell([""], \"' + msg + '\")');
+            }
+        });
+
+        const ws = new SpimeSocket('anon', (m)=>{
+            if (typeof(m)!=='string') {
+                console.log(m);
+                m = JSON.stringify(m);
+            }
+
+            ADD(m);
+        });
+        ws.onopen = ()=>{
+            ADD('Connected')
+        };
 
     });
 </script>
