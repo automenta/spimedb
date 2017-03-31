@@ -10,8 +10,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.9</maven.compiler.source>
-        <maven.compiler.target>1.9</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
     </properties>
 
@@ -33,11 +33,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>opennars</groupId>
-            <artifactId>nal</artifactId>
-            <version>1.8-SNAPSHOT</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>opennars</groupId>-->
+            <!--<artifactId>nal</artifactId>-->
+            <!--<version>1.8-SNAPSHOT</version>-->
+        <!--</dependency>-->
 
 
         <!-- https://mvnrepository.com/artifact/net.sourceforge.argparse4j/argparse4j -->
@@ -114,13 +114,17 @@
         </dependency>
 
 
-
         <!--<dependency>-->
-            <!--<groupId>phex</groupId>-->
-            <!--<artifactId>phex</artifactId>-->
-            <!--<version>4.0.0</version>-->
+        <!--<groupId>phex</groupId>-->
+        <!--<artifactId>phex</artifactId>-->
+        <!--<version>4.0.0</version>-->
         <!--</dependency>-->
 
+        <dependency>
+            <groupId>com.maxmind.geoip2</groupId>
+            <artifactId>geoip2</artifactId>
+            <version>2.8.1</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
         <dependency>
@@ -136,14 +140,12 @@
         </dependency>
 
 
-
         <!-- https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-distr -->
         <dependency>
             <groupId>org.apache.opennlp</groupId>
             <artifactId>opennlp-tools</artifactId>
             <version>1.7.2</version>
         </dependency>
-
 
 
         <dependency>
@@ -168,35 +170,35 @@
 
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2 &ndash;&gt;-->
         <!--<dependency>-->
-            <!--<groupId>org.apache.commons</groupId>-->
-            <!--<artifactId>commons-vfs2</artifactId>-->
-            <!--<version>2.1.1744488.2</version>-->
+        <!--<groupId>org.apache.commons</groupId>-->
+        <!--<artifactId>commons-vfs2</artifactId>-->
+        <!--<version>2.1.1744488.2</version>-->
         <!--</dependency>-->
 
 
         <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>slf4j-api</artifactId>-->
-            <!--<version>1.7.23</version>-->
+        <!--<groupId>org.slf4j</groupId>-->
+        <!--<artifactId>slf4j-api</artifactId>-->
+        <!--<version>1.7.23</version>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>ch.qos.logback</groupId>-->
-            <!--<artifactId>logback-classic</artifactId>-->
-            <!--<version>1.2.1</version>-->
-            <!--<scope>compile</scope>-->
-            <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<artifactId>slf4j-api</artifactId>-->
-                    <!--<groupId>org.slf4j</groupId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
+        <!--<groupId>ch.qos.logback</groupId>-->
+        <!--<artifactId>logback-classic</artifactId>-->
+        <!--<version>1.2.1</version>-->
+        <!--<scope>compile</scope>-->
+        <!--<exclusions>-->
+        <!--<exclusion>-->
+        <!--<artifactId>slf4j-api</artifactId>-->
+        <!--<groupId>org.slf4j</groupId>-->
+        <!--</exclusion>-->
+        <!--</exclusions>-->
         <!--</dependency>-->
 
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.kohsuke/akuma &ndash;&gt;-->
         <!--<dependency>-->
-            <!--<groupId>org.kohsuke</groupId>-->
-            <!--<artifactId>akuma</artifactId>-->
-            <!--<version>1.10</version>-->
+        <!--<groupId>org.kohsuke</groupId>-->
+        <!--<artifactId>akuma</artifactId>-->
+        <!--<version>1.10</version>-->
         <!--</dependency>-->
 
 
@@ -234,53 +236,52 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--&lt;!&ndash; for teavm, requires v0.6.1 &ndash;&gt;-->
-            <!--<groupId>com.carrotsearch</groupId>-->
-            <!--<artifactId>hppc</artifactId>-->
-            <!--<version>0.6.1</version>-->
+        <!--&lt;!&ndash; for teavm, requires v0.6.1 &ndash;&gt;-->
+        <!--<groupId>com.carrotsearch</groupId>-->
+        <!--<artifactId>hppc</artifactId>-->
+        <!--<version>0.6.1</version>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
-            <!--<groupId>org.infinispan</groupId>-->
-            <!--<artifactId>infinispan-embedded</artifactId>-->
-            <!--<version>9.0.0.Beta1</version>-->
+        <!--<groupId>org.infinispan</groupId>-->
+        <!--<artifactId>infinispan-embedded</artifactId>-->
+        <!--<version>9.0.0.Beta1</version>-->
 
-            <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.jboss.logging</groupId>-->
-                    <!--<artifactId>jboss-logging</artifactId>-->
-                <!--</exclusion>-->
+        <!--<exclusions>-->
+        <!--<exclusion>-->
+        <!--<groupId>org.jboss.logging</groupId>-->
+        <!--<artifactId>jboss-logging</artifactId>-->
+        <!--</exclusion>-->
 
-                <!--<exclusion>-->
-                    <!--<groupId>org.slf4j</groupId>-->
-                    <!--<artifactId>slf4j-log4j12</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>log4j</groupId>-->
-                    <!--<artifactId>log4j</artifactId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
+        <!--<exclusion>-->
+        <!--<groupId>org.slf4j</groupId>-->
+        <!--<artifactId>slf4j-log4j12</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+        <!--<groupId>log4j</groupId>-->
+        <!--<artifactId>log4j</artifactId>-->
+        <!--</exclusion>-->
+        <!--</exclusions>-->
         <!--</dependency>-->
 
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.modeshape/modeshape-jcr &ndash;&gt;-->
         <!--<dependency>-->
-            <!--<groupId>org.modeshape</groupId>-->
-            <!--<artifactId>modeshape-jcr</artifactId>-->
-            <!--<version>5.3.0.Final</version>-->
+        <!--<groupId>org.modeshape</groupId>-->
+        <!--<artifactId>modeshape-jcr</artifactId>-->
+        <!--<version>5.3.0.Final</version>-->
         <!--</dependency>-->
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.modeshape/modeshape-sequencer-images &ndash;&gt;-->
         <!--<dependency>-->
-            <!--<groupId>org.modeshape</groupId>-->
-            <!--<artifactId>modeshape-sequencer-images</artifactId>-->
-            <!--<version>5.3.0.Final</version>-->
+        <!--<groupId>org.modeshape</groupId>-->
+        <!--<artifactId>modeshape-sequencer-images</artifactId>-->
+        <!--<version>5.3.0.Final</version>-->
         <!--</dependency>-->
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.modeshape/modeshape-schematic &ndash;&gt;-->
         <!--<dependency>-->
-            <!--<groupId>org.modeshape</groupId>-->
-            <!--<artifactId>modeshape-schematic</artifactId>-->
-            <!--<version>5.3.0.Final</version>-->
+        <!--<groupId>org.modeshape</groupId>-->
+        <!--<artifactId>modeshape-schematic</artifactId>-->
+        <!--<version>5.3.0.Final</version>-->
         <!--</dependency>-->
-
 
 
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/io.baratine/baratine &ndash;&gt;-->
@@ -289,8 +290,6 @@
         <!--<artifactId>baratine</artifactId>-->
         <!--<version>1.0.1</version>-->
         <!--</dependency>-->
-
-
 
 
         <!--<dependency>-->
@@ -375,9 +374,9 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.undertow/undertow-websockets-jsr -->
         <!--<dependency>-->
-            <!--<groupId>io.undertow</groupId>-->
-            <!--<artifactId>undertow-websockets-jsr</artifactId>-->
-            <!--<version>2.0.0.Alpha1</version>-->
+        <!--<groupId>io.undertow</groupId>-->
+        <!--<artifactId>undertow-websockets-jsr</artifactId>-->
+        <!--<version>2.0.0.Alpha1</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.jboss.spec.javax.websocket</groupId>
@@ -415,9 +414,9 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.jvnet.ogc</groupId>-->
-            <!--<artifactId>sensorml-common</artifactId>-->
-            <!--<version>1.1.0</version>-->
+        <!--<groupId>org.jvnet.ogc</groupId>-->
+        <!--<artifactId>sensorml-common</artifactId>-->
+        <!--<version>1.1.0</version>-->
         <!--</dependency>-->
 
         <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
@@ -434,15 +433,15 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>com.vividsolutions</groupId>-->
-            <!--<artifactId>jts</artifactId>-->
-            <!--<version>1.13</version>-->
-            <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<groupId>xerces</groupId>-->
-                    <!--<artifactId>xercesImpl</artifactId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
+        <!--<groupId>com.vividsolutions</groupId>-->
+        <!--<artifactId>jts</artifactId>-->
+        <!--<version>1.13</version>-->
+        <!--<exclusions>-->
+        <!--<exclusion>-->
+        <!--<groupId>xerces</groupId>-->
+        <!--<artifactId>xercesImpl</artifactId>-->
+        <!--</exclusion>-->
+        <!--</exclusions>-->
         <!--</dependency>-->
 
 
@@ -568,6 +567,70 @@
     <!--</repositories>-->
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <configuration>
+                    <mainClass>spimedb.Main</mainClass>
+                </configuration>
+            </plugin>
+
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-compiler-plugin</artifactId>-->
+            <!--<version>3.5.1</version>-->
+            <!--<configuration>-->
+            <!--<source>1.9</source>-->
+            <!--<target>1.9</target>-->
+            <!--&lt;!&ndash;<useIncrementalCompilation>false</useIncrementalCompilation>&ndash;&gt;-->
+            <!--</configuration>-->
+            <!--</plugin>-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <includes>
+                        <!-- because they dont all have the pattern: ____Test.java yet -->
+                        <include>**/*.java</include>
+                    </includes>
+                    <skipTests>true</skipTests>
+                    <useFile>false</useFile>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>spimedb.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.jolira</groupId>
+                <artifactId>onejar-maven-plugin</artifactId>
+                <version>1.4.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
 
         <testResources>
             <testResource>
@@ -608,188 +671,154 @@
         </resources>
 
 
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.5.0</version>
-                <configuration>
-                    <mainClass>spimedb.Main</mainClass>
-                </configuration>
-            </plugin>
+        <!--<plugins>-->
 
-            <!--<plugin>-->
-                <!--<groupId>com.github.eirslett</groupId>-->
-                <!--<artifactId>frontend-maven-plugin</artifactId>-->
-                <!--&lt;!&ndash; NB! Set <version> to the latest released version of frontend-maven-plugin, like in README.md &ndash;&gt;-->
-                <!--<version>0.0.23</version>-->
-                <!--<configuration>-->
-                    <!--<workingDirectory>src/main/resources/public</workingDirectory>-->
-                    <!--<downloadRoot>/tmp</downloadRoot>-->
-                <!--</configuration>-->
-                <!--<executions>-->
+        <!--&lt;!&ndash;<plugin>&ndash;&gt;-->
+        <!--&lt;!&ndash;<groupId>com.github.eirslett</groupId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifactId>frontend-maven-plugin</artifactId>&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash; NB! Set <version> to the latest released version of frontend-maven-plugin, like in README.md &ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;<version>0.0.23</version>&ndash;&gt;-->
+        <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<workingDirectory>src/main/resources/public</workingDirectory>&ndash;&gt;-->
+        <!--&lt;!&ndash;<downloadRoot>/tmp</downloadRoot>&ndash;&gt;-->
+        <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<executions>&ndash;&gt;-->
 
-                    <!--<execution>-->
-                        <!--<id>install node and npm</id>-->
-                        <!--<goals>-->
-                            <!--<goal>install-node-and-npm</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<nodeVersion>v7.2.0</nodeVersion>-->
-                            <!--<npmVersion>3.10.10</npmVersion>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+        <!--&lt;!&ndash;<execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;<id>install node and npm</id>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goal>install-node-and-npm</goal>&ndash;&gt;-->
+        <!--&lt;!&ndash;</goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<nodeVersion>v7.2.0</nodeVersion>&ndash;&gt;-->
+        <!--&lt;!&ndash;<npmVersion>3.10.10</npmVersion>&ndash;&gt;-->
+        <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;</execution>&ndash;&gt;-->
 
-                    <!--<execution>-->
-                        <!--<id>npm install</id>-->
-                        <!--<goals>-->
-                            <!--<goal>npm</goal>-->
-                        <!--</goals>-->
-                        <!--&lt;!&ndash; Optional configuration which provides for running any npm command &ndash;&gt;-->
-                        <!--<configuration>-->
-                            <!--<arguments>install</arguments>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+        <!--&lt;!&ndash;<execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;<id>npm install</id>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goal>npm</goal>&ndash;&gt;-->
+        <!--&lt;!&ndash;</goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash; Optional configuration which provides for running any npm command &ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<arguments>install</arguments>&ndash;&gt;-->
+        <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;</execution>&ndash;&gt;-->
 
-                    <!--<execution>-->
-                        <!--<id>bower install</id>-->
-                        <!--<goals>-->
-                            <!--<goal>bower</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<arguments>install -p &#45;&#45;allow-root</arguments>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+        <!--&lt;!&ndash;<execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;<id>bower install</id>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goal>bower</goal>&ndash;&gt;-->
+        <!--&lt;!&ndash;</goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<arguments>install -p &#45;&#45;allow-root</arguments>&ndash;&gt;-->
+        <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;</execution>&ndash;&gt;-->
 
-                <!--</executions>-->
-            <!--</plugin>-->
+        <!--&lt;!&ndash;</executions>&ndash;&gt;-->
+        <!--&lt;!&ndash;</plugin>&ndash;&gt;-->
 
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <!--<useIncrementalCompilation>false</useIncrementalCompilation>-->
-                </configuration>
-            </plugin>
+        <!--&lt;!&ndash;<plugin>&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash; https://github.com/chrischristo/capsule-maven-plugin &ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;<groupId>com.github.chrischristo</groupId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifactId>capsule-maven-plugin</artifactId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<version>0.10.1</version>&ndash;&gt;-->
+        <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<appClass>jnetention.run.RunMemoryPeer</appClass>&ndash;&gt;-->
+        <!--&lt;!&ndash;<manifest>&ndash;&gt;-->
+        <!--&lt;!&ndash;<entry>&ndash;&gt;-->
+        <!--&lt;!&ndash;<key>Min-Java-Version</key>&ndash;&gt;-->
+        <!--&lt;!&ndash;<value>1.8.0</value>&ndash;&gt;-->
+        <!--&lt;!&ndash;</entry>&ndash;&gt;-->
+        <!--&lt;!&ndash;</manifest>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;&lt;!&ndash;<fileSets>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;<fileSet>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;<directory>${project.build.directory}/data</directory>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;<outputDirectory>data</outputDirectory>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;<includes>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;<include>*</include>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;</includes>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;</fileSet>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;</fileSets>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<executions>&ndash;&gt;-->
+        <!--&lt;!&ndash;<execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goal>build</goal>&ndash;&gt;-->
+        <!--&lt;!&ndash;</goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;</execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;</executions>&ndash;&gt;-->
+        <!--&lt;!&ndash;</plugin>&ndash;&gt;-->
 
 
-            <!--<plugin>-->
-            <!--&lt;!&ndash; https://github.com/chrischristo/capsule-maven-plugin &ndash;&gt;-->
-            <!--<groupId>com.github.chrischristo</groupId>-->
-            <!--<artifactId>capsule-maven-plugin</artifactId>-->
-            <!--<version>0.10.1</version>-->
-            <!--<configuration>-->
-            <!--<appClass>jnetention.run.RunMemoryPeer</appClass>-->
-            <!--<manifest>-->
-            <!--<entry>-->
-            <!--<key>Min-Java-Version</key>-->
-            <!--<value>1.8.0</value>-->
-            <!--</entry>-->
-            <!--</manifest>-->
-
-            <!--&lt;!&ndash;<fileSets>&ndash;&gt;-->
-            <!--&lt;!&ndash;<fileSet>&ndash;&gt;-->
-            <!--&lt;!&ndash;<directory>${project.build.directory}/data</directory>&ndash;&gt;-->
-            <!--&lt;!&ndash;<outputDirectory>data</outputDirectory>&ndash;&gt;-->
-            <!--&lt;!&ndash;<includes>&ndash;&gt;-->
-            <!--&lt;!&ndash;<include>*</include>&ndash;&gt;-->
-            <!--&lt;!&ndash;</includes>&ndash;&gt;-->
-            <!--&lt;!&ndash;</fileSet>&ndash;&gt;-->
-            <!--&lt;!&ndash;</fileSets>&ndash;&gt;-->
-            <!--</configuration>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<goals>-->
-            <!--<goal>build</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
+        <!--&lt;!&ndash;<plugin>&ndash;&gt;-->
+        <!--&lt;!&ndash;<groupId>org.apache.maven.plugins</groupId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifactId>maven-shade-plugin</artifactId>&ndash;&gt;-->
+        <!--&lt;!&ndash;<version>2.3</version>&ndash;&gt;-->
+        <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
 
 
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-shade-plugin</artifactId>-->
-            <!--<version>2.3</version>-->
-            <!--<configuration>-->
+        <!--&lt;!&ndash;<transformers>&ndash;&gt;-->
+        <!--&lt;!&ndash;<transformer&ndash;&gt;-->
+        <!--&lt;!&ndash;implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">&ndash;&gt;-->
+        <!--&lt;!&ndash;<mainClass>automenta.climatenet.run.Main</mainClass>&ndash;&gt;-->
+        <!--&lt;!&ndash;</transformer>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<transformer&ndash;&gt;-->
+        <!--&lt;!&ndash;implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;</transformers>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<createDependencyReducedPom>false</createDependencyReducedPom>&ndash;&gt;-->
+        <!--&lt;!&ndash;<generateUniqueDependencyReducedPom>false</generateUniqueDependencyReducedPom>&ndash;&gt;-->
+        <!--&lt;!&ndash;<minimizeJar>true</minimizeJar>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<filters>&ndash;&gt;-->
+        <!--&lt;!&ndash;<filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifact>org.jboss.xnio:*</artifact>&ndash;&gt;-->
+        <!--&lt;!&ndash;<includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;<include>**</include>&ndash;&gt;-->
+        <!--&lt;!&ndash;</includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;</filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifact>org.jboss.logging:*</artifact>&ndash;&gt;-->
+        <!--&lt;!&ndash;<includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;<include>**</include>&ndash;&gt;-->
+        <!--&lt;!&ndash;</includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;</filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifact>io.undertow:*</artifact>&ndash;&gt;-->
+        <!--&lt;!&ndash;<includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;<include>**</include>&ndash;&gt;-->
+        <!--&lt;!&ndash;</includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;</filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;&ndash;&gt;-->
+        <!--&lt;!&ndash;<filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifact>org.apache.lucene:*</artifact>&ndash;&gt;-->
+        <!--&lt;!&ndash;<includes><include>**</include></includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;</filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<artifact>org.elasticsearch:*</artifact>&ndash;&gt;-->
+        <!--&lt;!&ndash;<includes><include>**</include></includes>&ndash;&gt;-->
+        <!--&lt;!&ndash;</filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;</filters>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+        <!--&lt;!&ndash;<executions>&ndash;&gt;-->
+        <!--&lt;!&ndash;<execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;<phase>package</phase>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;<goal>shade</goal>&ndash;&gt;-->
+        <!--&lt;!&ndash;</goals>&ndash;&gt;-->
+        <!--&lt;!&ndash;</execution>&ndash;&gt;-->
+        <!--&lt;!&ndash;</executions>&ndash;&gt;-->
+        <!--&lt;!&ndash;</plugin>&ndash;&gt;-->
 
 
-            <!--<transformers>-->
-            <!--<transformer-->
-            <!--implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-            <!--<mainClass>automenta.climatenet.run.Main</mainClass>-->
-            <!--</transformer>-->
-
-            <!--<transformer-->
-            <!--implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>-->
-
-            <!--</transformers>-->
-
-            <!--<createDependencyReducedPom>false</createDependencyReducedPom>-->
-            <!--<generateUniqueDependencyReducedPom>false</generateUniqueDependencyReducedPom>-->
-            <!--<minimizeJar>true</minimizeJar>-->
-
-            <!--<filters>-->
-            <!--<filter>-->
-            <!--<artifact>org.jboss.xnio:*</artifact>-->
-            <!--<includes>-->
-            <!--<include>**</include>-->
-            <!--</includes>-->
-            <!--</filter>-->
-            <!--<filter>-->
-            <!--<artifact>org.jboss.logging:*</artifact>-->
-            <!--<includes>-->
-            <!--<include>**</include>-->
-            <!--</includes>-->
-            <!--</filter>-->
-            <!--<filter>-->
-            <!--<artifact>io.undertow:*</artifact>-->
-            <!--<includes>-->
-            <!--<include>**</include>-->
-            <!--</includes>-->
-            <!--</filter>-->
-            <!--&lt;!&ndash;-->
-            <!--<filter>-->
-            <!--<artifact>org.apache.lucene:*</artifact>-->
-            <!--<includes><include>**</include></includes>-->
-            <!--</filter>-->
-            <!--<filter>-->
-            <!--<artifact>org.elasticsearch:*</artifact>-->
-            <!--<includes><include>**</include></includes>-->
-            <!--</filter>-->
-            <!--&ndash;&gt;-->
-            <!--</filters>-->
-
-            <!--</configuration>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>shade</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
-                <configuration>
-                    <includes>
-                        <!-- because they dont all have the pattern: ____Test.java yet -->
-                        <include>**/*.java</include>
-                    </includes>
-                    <skipTests>true</skipTests>
-                    <useFile>false</useFile>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                </configuration>
-            </plugin>
-
-        </plugins>
+        <!--</plugins>-->
     </build>
 </project>

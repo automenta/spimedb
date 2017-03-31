@@ -39,5 +39,6 @@ pushd .
 	bower update
 popd
 
+
 echo 'Finished'
 

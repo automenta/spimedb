@@ -22,12 +22,9 @@ import java.util.function.Consumer;
 public class AnonymousSession extends Session implements Consumer<NObject> {
 
     final ConcurrentHashMap<String, Integer> filter = new ConcurrentHashMap();
-    private final Router<String, Consumer<NObject>> tag;
 
-    public AnonymousSession(SpimeDB db, Router<String,Consumer<NObject>> tag) {
+    public AnonymousSession(SpimeDB db) {
         super(db);
-
-        this.tag = tag;
 
         UUID u = UUID.randomUUID();
         sessionID = u.toString();// LongString.toString(u.getLeastSignificantBits()) + "" + LongString.toString(u.getMostSignificantBits());
@@ -38,21 +35,23 @@ public class AnonymousSession extends Session implements Consumer<NObject> {
 
     @Override
     protected void onConnected(WebSocketChannel socket) {
-        synchronized (chan) {
-            if (chan.size() == 1) { //first
-                tag("", +1);
+        if (chan.size() == 1) { //first one?
+            synchronized (chan) {
+                if (chan.size() == 1) { //check again. the first one only elides synchronization in non-empty case
+                    tag("", +1);
+                }
             }
         }
     }
 
-
-
     @Override
     protected void onDisconnected(WebSocketChannel socket) {
-        synchronized (chan) {
-            if (chan.size() == 0) { //last
-                tag.off(filter.keySet(), this);
-                filter.clear();
+        if (chan.isEmpty()) { //last one?
+            synchronized (chan) {
+                if (chan.isEmpty()) { //check again. the first one only elides synchronization in non-empty case
+                    db.tag.off(filter.keySet(), this);
+                    filter.clear();
+                }
             }
         }
     }
@@ -76,7 +75,6 @@ public class AnonymousSession extends Session implements Consumer<NObject> {
             //TODO decorate with: geo-ip, etc
 
             db.add(n);
-            tag.each(channels, (c)->c.accept(n));
         }
 
     }
@@ -87,11 +85,11 @@ public class AnonymousSession extends Session implements Consumer<NObject> {
         filter.compute(s, (ss, e) -> {
             if (v == 0) {
                 if (e!=null)
-                    tag.off(ss, this);
+                    db.tag.off(ss, this);
                 return null;
             }else {
                 if (e == null) {
-                    tag.on(ss, this);
+                    db.tag.on(ss, this);
                 }
                 return v;
             }

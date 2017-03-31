@@ -19,6 +19,7 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mockito.internal.util.reflection.BeanPropertySetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,8 @@ public class Main extends FileAlterationListenerAdaptor {
     final Map<Pair<Class, String>, Object> obj = new ConcurrentHashMap();
 
     final Map<String, Class> klassPath = new ConcurrentHashMap<>();
+
+    @Nullable
     private final FileAlterationObserver fsObserver;
 
     final Pair<Class, String> key(File f) {
@@ -472,37 +475,49 @@ public class Main extends FileAlterationListenerAdaptor {
 
         put(LogConfigurator.class, new LogConfigurator(null));
 
-        fsObserver = new FileAlterationObserver(path);
 
-        db = new SpimeDB(path + "/_") {
-            @Override
-            public synchronized void clear(boolean rebuild) {
-                super.clear(rebuild);
-                System.exit(2);
-            }
-        };
-        dbPathIgnored = db.file.getAbsolutePath();
+        if (path!=null) {
+            db = new SpimeDB(path + "/_");
+        } else {
+            db = new SpimeDB();
+        }
+
+        dbPathIgnored = db.file!=null ? db.file.getAbsolutePath() : null;
 
         new Multimedia(db);
 
-        logger.info("watching: file://{}", path);
-
+        if (path!=null) {
+            fsObserver = new FileAlterationObserver(path);
+            logger.info("watching: file://{}", path);
         /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
-        int updatePeriodMS = 200;
-        FileAlterationMonitor monitor = new FileAlterationMonitor(updatePeriodMS);
+            int updatePeriodMS = 200;
+            FileAlterationMonitor monitor = new FileAlterationMonitor(updatePeriodMS);
 
-        //monitor.setThreadFactory(Executors.defaultThreadFactory());
+            //monitor.setThreadFactory(Executors.defaultThreadFactory());
 
-        fsObserver.addListener(this);
-        monitor.addObserver(fsObserver);
-        monitor.start();
+            fsObserver.addListener(this);
+            monitor.addObserver(fsObserver);
+            monitor.start();
 
-        //load existing files
-        rebuild();
+            //load existing files
+            rebuild();
+        } else {
+            fsObserver = null;
+        }
+
+//            @Override
+//            public synchronized void clear(boolean rebuild) {
+//                super.clear(rebuild);
+//                System.exit(2);
+//            }
+//        };
+
+
     }
 
     protected void rebuild() {
-        reload(fsObserver);
+        if (fsObserver!=null)
+            reload(fsObserver);
         clean();
     }
 
@@ -556,12 +571,16 @@ public class Main extends FileAlterationListenerAdaptor {
 
         if (args.length == 0) {
             System.out.println("usage: spime [datapath]\n");
-            return;
+            System.out.println("running default configuration");
+            Main m = new Main(null);
+            WebServer w = new WebServer(m.db);
+            w.setPort(8080);
+            m.put(WebServer.class, w);
+
+        } else {
+            String dataPath = args[0];
+            new Main(dataPath);
         }
-
-
-        String dataPath = args[0];
-        new Main(dataPath);
 
 
 //        Phex p = Phex.the();

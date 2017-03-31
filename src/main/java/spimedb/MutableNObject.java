@@ -1,5 +1,6 @@
 package spimedb;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import jcog.tree.rtree.point.DoubleND;
@@ -16,6 +17,7 @@ import spimedb.util.JSON;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 
 /**
@@ -231,13 +233,15 @@ public class MutableNObject extends ImmutableNObject {
     }
 
 
-    public void when(long when) {
+    public MutableNObject when(long when) {
         min.coord[0] = max.coord[0] = when;
+        return this;
     }
 
-    public void when(long start, long end) {
+    public MutableNObject when(long start, long end) {
         min.coord[0] = start;
         max.coord[0] = end;
+        return this;
     }
 
     public void when(float when) {
@@ -287,8 +291,24 @@ public class MutableNObject extends ImmutableNObject {
         return data.putIfAbsent(key, value);
     }
 
-    public NObject without(String k) {
+    public MutableNObject without(String k) {
         remove(k);
+        return this;
+    }
+
+    public MutableNObject putAll(JsonNode x) {
+        x.fields().forEachRemaining(e -> {
+            JsonNode v = e.getValue();
+            Object s;
+            if (v.isBoolean())
+                s = v.booleanValue();
+            else if (v.isNumber()/* || v.canConvertToInt()*/)
+                s = v.numberValue();
+            else
+                s = v.toString();
+            put(e.getKey(), s);
+
+        });
         return this;
     }
 

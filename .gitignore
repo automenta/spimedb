@@ -4,6 +4,7 @@ cache/
 dependency-reduced-pom.xml
 
 .idea/
+dist/
 
 *.iml
 /src/main/resources/public/nbproject/private/

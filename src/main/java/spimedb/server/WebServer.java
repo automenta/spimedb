@@ -6,10 +6,10 @@
 package spimedb.server;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
@@ -19,6 +19,7 @@ import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 import io.undertow.server.handlers.resource.*;
+import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
 import spimedb.FilteredNObject;
+import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.client.Client;
@@ -40,12 +42,10 @@ import spimedb.util.HTTP;
 import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -81,21 +81,6 @@ public class WebServer extends PathHandler {
             .addEncodingHandler("deflate", new DeflateEncodingProvider(), 50);
 
     private Undertow server;
-
-    final Router<String,Consumer<NObject>> TAG = new Router() {
-        @Override
-        public boolean on(Object k, Object c) {
-            boolean b = super.on(k, c);
-            logger.info("{} on  {} {}", k, c, b );
-            return b;
-        }
-
-        @Override
-        public void off(Object o, Object o2) {
-            logger.info("{} off {}",o, o2 );
-            super.off(o, o2);
-        }
-    };
 
     public static class OverridingFileResourceManager extends FileResourceManager {
 
@@ -149,6 +134,7 @@ public class WebServer extends PathHandler {
 
 //        nar.log();
 //        nar.loop(10f);
+
 
         initStaticResource(db);
 
@@ -233,6 +219,32 @@ public class WebServer extends PathHandler {
 
         }));
 
+
+
+        addExactPath("/tell/json", (e) -> {
+            //POST only
+            if (e.getRequestMethod().equals(HttpString.tryFromString("POST"))) {
+                //System.out.println(e);
+                //System.out.println(e.getRequestHeaders());
+
+                e.getRequestReceiver().receiveFullString((ex, s) -> {
+
+                    JsonNode x = JSON.fromJSON(s);
+
+                    JsonNode inode = x.get("I");
+                    String I = (inode == null) ? UUID.randomUUID().toString() : inode.toString();
+
+                    MutableNObject d = new MutableNObject(I)
+                            .putAll(x)
+                            .when(System.currentTimeMillis());
+
+                    db.add( d );
+                });
+
+                e.endExchange();
+            }
+        });
+
         addPrefixPath("/search", ex -> HTTP.stream(ex, (o) -> {
             String qText = getStringParameter(ex, "q");
             if (qText == null || (qText = qText.trim()).isEmpty())
@@ -251,7 +263,7 @@ public class WebServer extends PathHandler {
         /* client attention management */
         //addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
         addPrefixPath("/anon",
-            websocket( new AnonymousSession(db, TAG) )
+            websocket( new AnonymousSession(db) )
         );
 
 
@@ -275,16 +287,17 @@ public class WebServer extends PathHandler {
 
     private void initStaticResource(SpimeDB db) {
         File staticPath = Paths.get(WebServer.staticPath).toFile();
-        File myStaticPath = db.file.getParentFile().toPath().resolve("public").toFile();
+        File myStaticPath = db.file!=null ? db.file.getParentFile().toPath().resolve("public").toFile() : null;
 
         int transferMinSize = 1024 * 1024;
         final int METADATA_MAX_AGE = 3 * 1000; //ms
 
         ResourceManager res;
-        if (db.indexPath!=null && myStaticPath.exists()) {
+        if (db.indexPath!=null && myStaticPath!=null && myStaticPath.exists()) {
             res = new OverridingFileResourceManager(staticPath, transferMinSize, myStaticPath);
         } else {
             //HACK add the defaut local to prevent 404's
+            //res = new ClassPathResourceManager(getClass().getClassLoader(), staticPath);
             res = new FileResourceManager(
                     staticPath, 0, true, "/");
         }

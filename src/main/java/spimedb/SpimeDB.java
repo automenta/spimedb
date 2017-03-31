@@ -45,6 +45,7 @@ import spimedb.graph.travel.UnionTravel;
 import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.query.Query;
+import spimedb.server.Router;
 import spimedb.util.Locker;
 import spimedb.util.PrioritizedExecutor;
 
@@ -74,6 +75,9 @@ public class SpimeDB {
     @JsonIgnore
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
+    //Tag
+    public static final String[] GENERAL = new String[]{ "" };
+
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
             Math.max(2, 1 + Runtime.getRuntime().availableProcessors())
     );
@@ -86,6 +90,7 @@ public class SpimeDB {
 
     protected final Directory dir;
 
+    public final Router<String,Consumer<NObject>> tag = new Router();
 
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
 
@@ -459,15 +464,18 @@ public class SpimeDB {
 
                             String id = nn.getKey();
                             Term key = new Term(NObject.ID, id);
+
                             if (val != REMOVE) {
-                                writer.updateDocument(key,
+                                if (writer.updateDocument(key,
                                         facetsConfig.build(taxoWriter, val.document)
-                                );
-                                written++;
+                                )!=-1) {
+                                    written++;
+                                }
                             } else {
-                                writer.deleteDocuments(key);
-                                cache.invalidate(id);
-                                removed++;
+                                if (writer.deleteDocuments(key)!=-1) {
+                                    cache.invalidate(id);
+                                    removed++;
+                                }
                             }
                         }
 
@@ -514,6 +522,15 @@ public class SpimeDB {
         out.put(id, d);
         cache.put(id, d);
         commit();
+
+        String[] tags = next.tags();
+        if (tags == null || tags.length == 0) {
+            tags = GENERAL;
+        }
+        NObject finalNext = next;
+        tag.each(tags, (c) -> c.accept(finalNext)); //broadcast through router
+
+
         return d;
     }
 
@@ -914,6 +931,10 @@ public class SpimeDB {
 //            return graphed(n);
 //        return null;
     }
+
+
+
+
 
 //    public GraphedNObject graphed(NObject n) {
 //        if ((n instanceof GraphedNObject) && (((GraphedNObject) n).graph == graph))
