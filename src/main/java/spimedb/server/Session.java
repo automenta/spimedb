@@ -1,12 +1,17 @@
 package spimedb.server;
 
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.RateLimiter;
 import io.undertow.websockets.core.BufferedTextMessage;
+import io.undertow.websockets.core.StreamSourceFrameChannel;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import spimedb.SpimeDB;
 
 import javax.script.SimpleBindings;
+import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by me on 3/4/17.
@@ -18,7 +23,7 @@ public class Session extends AbstractServerWebSocket {
     final RateLimiter defaultOutRate;
     final SpimeDB db;
     final SimpleBindings scope;
-    protected WebSocketChannel chan;
+    protected Set<WebSocketChannel> chan = Sets.newConcurrentHashSet();
 
     public Session(SpimeDB db) {
         this(db, Double.POSITIVE_INFINITY);
@@ -37,7 +42,25 @@ public class Session extends AbstractServerWebSocket {
     @Override
     public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel socket) {
         super.onConnect(exchange, socket);
-        this.chan = socket;
+        if (this.chan.add(socket)) {
+            onConnected(socket);
+        }
+    }
+
+    protected void onConnected(WebSocketChannel socket) {
+
+
+    }
+
+    @Override
+    protected void onClose(WebSocketChannel socket, StreamSourceFrameChannel channel) throws IOException {
+        super.onClose(socket, channel);
+        if (this.chan.remove(socket))
+            onDisconnected(socket);
+    }
+
+    protected void onDisconnected(WebSocketChannel socket) {
+
     }
 
     /**

@@ -177,7 +177,13 @@ public class ClientSession extends Session {
                 if (d!=null) {
                     NObject n = /*db.graphed( */includeKeys!=null ? new FilteredNObject(d, includeKeys) : d;
                     if (n != null) {
-                        t.sendJSON(chan, n);
+                        chan.forEach(c -> {
+                            try {
+                                t.sendJSON(c, n);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
                         remoteMemory.add(idHash);
                         return true;
                     } else {
@@ -191,7 +197,13 @@ public class ClientSession extends Session {
         private boolean trySend(Task t, NObject n, boolean force) throws IOException {
             int[] idHash = remoteMemory.hash(n.id());
             if (force || !remoteMemory.contains(idHash)) {
-                t.sendJSON(chan, n);
+                chan.forEach(c -> {
+                    try {
+                        t.sendJSON(c, n);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 remoteMemory.add(idHash);
                 return true;
             }

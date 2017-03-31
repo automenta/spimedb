@@ -3,6 +3,7 @@ package spimedb;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import jcog.tree.rtree.point.DoubleND;
+import org.eclipse.collections.impl.factory.Iterables;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.opensextant.geodesy.*;
@@ -12,8 +13,8 @@ import org.opensextant.giscore.geometry.Polygon;
 import spimedb.io.KML;
 import spimedb.util.JSON;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 
@@ -202,28 +203,37 @@ public class MutableNObject extends ImmutableNObject {
         return this;
     }
 
+    public MutableNObject withTags(String... tags) {
+        return withTags(Iterables.iList(tags));
+    }
+
     /**
      * sets the inside property
      */
-    public MutableNObject withTags(String... tags) {
+    public MutableNObject withTags(Iterable<? extends String> tags) {
+
+        TreeSet<String> s = new TreeSet();
 
         for (String t : tags) {
             if (t.equals(id()))
                 throw new RuntimeException("object can not be inside itself");
+            s.add(t);
         }
 
-        if (tags.length == 0) {
-            tags = SpimeDB.ROOT;
+        if (s.isEmpty()) {
+            this.tag = SpimeDB.ROOT;
         } else {
-            Arrays.sort(tags);
-            //TODO remove any duplicates
+            this.tag = s.toArray(new String[s.size()]);
         }
 
-        this.tag = tags;
 
         return this;
     }
 
+
+    public void when(long when) {
+        min.coord[0] = max.coord[0] = when;
+    }
 
     public void when(long start, long end) {
         min.coord[0] = start;

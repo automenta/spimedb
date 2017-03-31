@@ -257,7 +257,6 @@
 
         const ws = new SpimeSocket('anon', (m)=>{
             if (typeof(m)!=='string') {
-                console.log(m);
                 m = JSON.stringify(m);
             }
 

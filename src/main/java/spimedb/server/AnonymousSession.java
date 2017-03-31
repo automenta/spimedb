@@ -1,6 +1,7 @@
 package spimedb.server;
 
-import io.undertow.websockets.WebSocketConnectionCallback;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import io.undertow.websockets.core.StreamSourceFrameChannel;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
@@ -9,10 +10,9 @@ import spimedb.NObject;
 import spimedb.SpimeDB;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -29,23 +29,58 @@ public class AnonymousSession extends Session implements Consumer<NObject> {
 
         this.tag = tag;
 
-        tag("", +1); //auto-subscribve to the root
+        UUID u = UUID.randomUUID();
+        sessionID = u.toString();// LongString.toString(u.getLeastSignificantBits()) + "" + LongString.toString(u.getMostSignificantBits());
 
         set("me", new API());
     }
 
-    final UUID sessionID = UUID.randomUUID();
+
+    @Override
+    protected void onConnected(WebSocketChannel socket) {
+        synchronized (chan) {
+            if (chan.size() == 1) { //first
+                tag("", +1);
+            }
+        }
+    }
+
+
+
+    @Override
+    protected void onDisconnected(WebSocketChannel socket) {
+        synchronized (chan) {
+            if (chan.size() == 0) { //last
+                tag.off(filter.keySet(), this);
+                filter.clear();
+            }
+        }
+    }
+
+    final String sessionID;
     final AtomicInteger serial = new AtomicInteger();
 
     public class API {
 
         public void tell(String[] channels, String message) {
-            MutableNObject n = new MutableNObject(sessionID + "" + serial.incrementAndGet(), message);
-            //TODO geo-ip etc
+            MutableNObject n = new MutableNObject(sessionID + "." + serial.incrementAndGet(), message);
+
+            n.when(System.currentTimeMillis());
+            n.withTags(
+                //Iterables.concat(
+                    Lists.newArrayList(channels)
+                    //Collections.singletonList(chan.getDestinationAddress().toString())
+                //)
+            );
+
+            //TODO decorate with: geo-ip, etc
+
+            db.add(n);
             tag.each(channels, (c)->c.accept(n));
         }
 
     }
+
 
     public void tag(String s, int v) {
 
@@ -54,28 +89,22 @@ public class AnonymousSession extends Session implements Consumer<NObject> {
                 if (e!=null)
                     tag.off(ss, this);
                 return null;
+            }else {
+                if (e == null) {
+                    tag.on(ss, this);
+                }
+                return v;
             }
-
-            if (e==null) {
-                tag.on(ss, this);
-            }
-            return v;
         });
 
 
     }
 
-    @Override
-    protected void onClose(WebSocketChannel socket, StreamSourceFrameChannel channel) throws IOException {
-        super.onClose(socket, channel);
 
-        tag.off(filter.keySet(), this);
-        filter.clear();
-    }
 
     @Override
     public void accept(NObject nObject) {
-        sendJSONBinary(chan, nObject);
+        chan.forEach(c -> sendJSONBinary(c, nObject));
     }
 
 }

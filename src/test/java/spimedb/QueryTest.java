@@ -2,7 +2,6 @@ package spimedb;
 
 import org.junit.Test;
 import spimedb.index.DObject;
-import spimedb.index.SearchResult;
 import spimedb.query.Query;
 
 import java.io.IOException;

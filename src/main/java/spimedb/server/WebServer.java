@@ -9,6 +9,7 @@ package spimedb.server;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
@@ -81,7 +82,20 @@ public class WebServer extends PathHandler {
 
     private Undertow server;
 
-    final Router<String,Consumer<NObject>> TAG = new Router();
+    final Router<String,Consumer<NObject>> TAG = new Router() {
+        @Override
+        public boolean on(Object k, Object c) {
+            boolean b = super.on(k, c);
+            logger.info("{} on  {} {}", k, c, b );
+            return b;
+        }
+
+        @Override
+        public void off(Object o, Object o2) {
+            logger.info("{} off {}",o, o2 );
+            super.off(o, o2);
+        }
+    };
 
     public static class OverridingFileResourceManager extends FileResourceManager {
 
@@ -236,9 +250,10 @@ public class WebServer extends PathHandler {
 
         /* client attention management */
         //addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
-        addPrefixPath("/anon", websocket(
-            new AnonymousSession(db, TAG))
+        addPrefixPath("/anon",
+            websocket( new AnonymousSession(db, TAG) )
         );
+
 
         //addPrefixPath("/admin", websocket(new Admin(db)));
 
