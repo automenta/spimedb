@@ -1,4 +1,4 @@
-package spimedb.io;
+package spimedb.media;
 
 import org.junit.Test;
 import spimedb.SpimeDB;

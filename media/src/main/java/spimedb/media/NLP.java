@@ -1,4 +1,4 @@
-package spimedb.io;
+package spimedb.media;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;

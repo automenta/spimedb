@@ -1,4 +1,4 @@
-package spimedb.io;
+package spimedb.media;
 
 import jcog.tree.rtree.rect.RectDoubleND;
 import org.junit.Test;
@@ -38,13 +38,16 @@ public class GeoJSONTest {
 
         //time query
         QueryCollection a = new QueryCollection(
-                new Query().when(1.48252053E12f, 1.48250336E12f),
+                new Query()
+                        .when(1.48252053E12f, 1.48250336E12f),
                 new ArrayList<>()
         ).get(db);
 
         int aNum = a.result.size();
         assertTrue(aNum > 0);
         assertTrue(aNum < all/4);
+
+        db.sync();
 
 //        System.out.println(a);
 //        System.out.println(aNum + " / " + all + " found:");
@@ -53,16 +56,15 @@ public class GeoJSONTest {
 //        System.out.println();
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
-        QueryCollection b = new QueryCollection(new Query().bounds(
-            new RectDoubleND(
-                    new double[]{1.48252053E12f, 0, 0, Double.NEGATIVE_INFINITY},
-                    new double[]{1.48250336E12f, 180, 180, Double.POSITIVE_INFINITY})
+        QueryCollection b = new QueryCollection(new Query().where(
+                new double[]{1.48252053E12f, -90, 90, Double.NEGATIVE_INFINITY},
+                new double[]{1.48250336E12f, -90, 90, Double.POSITIVE_INFINITY}
         ), new ArrayList<>()).get(db);
 
         int bNum = b.result.size();
         assertTrue(bNum > 0);
-        assertTrue(bNum < aNum);
-        System.out.println("\t" + b.result);
+        System.out.println("\t" + b.result + "\n" + "bNum=" + bNum + ", aNum=" + aNum);
+        assertTrue(bNum != aNum);
 
     }
 

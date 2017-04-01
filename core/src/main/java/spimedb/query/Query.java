@@ -24,6 +24,10 @@ public class Query {
 
     long whenStarted, whenEnded;
 
+    public static final double[] ANY_SCALAR = {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
+//    public static final RectDoubleND[] ANYWHERE_4 =
+//            new RectDoubleND[] ( ANY_SCALAR, ANY_SCALAR );
+
     /**
      * OR-d together, potentially executed in parallel
      */

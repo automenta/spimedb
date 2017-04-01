@@ -11,5 +11,117 @@
 
     <artifactId>spimedb-media</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>automenta</groupId>
+            <artifactId>spimedb-core</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
 
+
+        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>1.14</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/de.intarsys.opensource/jbig2 -->
+        <dependency>
+            <groupId>de.intarsys.opensource</groupId>
+            <artifactId>jbig2</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-distr -->
+        <dependency>
+            <groupId>org.apache.opennlp</groupId>
+            <artifactId>opennlp-tools</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/de.grundid.opendatalab/geojson-jackson -->
+        <dependency>
+            <groupId>de.grundid.opendatalab</groupId>
+            <artifactId>geojson-jackson</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.openstreetmap.osmosis/osmosis-pbf2 -->
+        <dependency>
+            <groupId>org.openstreetmap.osmosis</groupId>
+            <artifactId>osmosis-pbf2</artifactId>
+            <version>0.45</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/com.rometools/rome-modules -->
+        <dependency>
+            <groupId>com.rometools</groupId>
+            <artifactId>rome-modules</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.htmlcompressor</groupId>
+            <artifactId>htmlcompressor</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.fasterxml/aalto-xml -->
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>aalto-xml</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/java/spimedb/media/util</directory>
+                <includes>
+                    <include>*.kmz</include>
+                    <include>*.kml</include>
+                    <include>*.json</include>
+                    <include>*.geojson</include>
+                </includes>
+                <filtering>false</filtering>
+            </testResource>
+            <testResource>
+                <directory>src/test/java/spimedb/media</directory>
+                <includes>
+                    <include>*.json</include>
+                    <include>*.geojson</include>
+                </includes>
+                <filtering>false</filtering>
+            </testResource>
+        </testResources>
+        <resources>
+
+            <resource>
+                <directory>${basedir}/data</directory>
+                <includes>
+                    <include>*/**</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+
+
+            <!--<resource>-->
+            <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->
+            <!--<directory>data</directory>-->
+            <!--</resource>-->
+        </resources>
+    </build>
 </project>

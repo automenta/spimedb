@@ -14,7 +14,7 @@
  *  their occurrence.
  *
  */
-package spimedb.io.kml;
+package spimedb.media.util;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;

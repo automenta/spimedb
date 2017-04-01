@@ -2,6 +2,7 @@ package spimedb.query;
 
 import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.SearchResult;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -26,7 +27,9 @@ public class QueryCollection implements Predicate<NObject> {
     }
 
     public QueryCollection get(SpimeDB db) {
-        db.get(query).forEach((d,s)->result.add(d));
+        SearchResult d = db.get(query);
+        if (d!=null)
+            d.forEach((doc, score)->result.add(doc));
         return this;
     }
 }

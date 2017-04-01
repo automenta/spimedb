@@ -1,4 +1,4 @@
-package spimedb.io;
+package spimedb.util;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,14 +14,14 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.function.Predicate;
 
+import static spimedb.util.HTTP.filenameable;
+
 
 public class Crawl {
 
     public static final Logger logger = LoggerFactory.getLogger(Crawl.class);
 
-    public static String filenameable(String inputName) {
-        return inputName.replaceAll("[^\\/a-zA-Z0-9-_\\.]", "_");
-    }
+
 
     public static void fileDirectory(String pathStr, SpimeDB db) {
         File path = Paths.get(pathStr).toFile();
@@ -110,7 +110,7 @@ public class Crawl {
 
     }
 
-    static String fileName(String url) {
+    public static String fileName(String url) {
         if (url.endsWith("/"))
             throw new RuntimeException("not a file?");
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spimedb.io;
+package spimedb.media;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -11,7 +11,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.opensextant.geodesy.Geodetic2DPoint;
 import org.opensextant.giscore.events.*;
 import org.opensextant.giscore.events.SimpleField.Type;
 import org.opensextant.giscore.geometry.Geometry;
@@ -20,8 +19,9 @@ import org.opensextant.giscore.utils.Color;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.io.kml.KmlReader;
-import spimedb.io.kml.UrlRef;
+import spimedb.media.util.KmlReader;
+import spimedb.media.util.UrlRef;
+import spimedb.util.Crawl;
 import spimedb.util.HTML;
 
 import java.io.File;
@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static spimedb.io.kml.KmlReader.logger;
+import static spimedb.media.util.KmlReader.logger;
 
 /**
  * TODO - remove null descriptions - store HTML content separately so it does
@@ -507,17 +507,7 @@ public class KML {
      return normalURL;
      }
      */
-    public static double[][] toArray(List<Point> lp) {
-        double[][] points = new double[lp.size()][2];
 
-        for (int i = 0; i < points.length; i++) {
-            Geodetic2DPoint c = lp.get(i).getCenter();
-            double[] pi = points[i];
-            pi[0] = c.getLatitudeAsDegrees();
-            pi[1] = c.getLongitudeAsDegrees();
-        }
-        return points;
-    }
 
     private class MyGISVisitor implements GISVisitor {
 

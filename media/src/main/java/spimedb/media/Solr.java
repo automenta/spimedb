@@ -1,4 +1,4 @@
-package spimedb.io;
+package spimedb.media;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

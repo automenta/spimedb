@@ -18,7 +18,7 @@
  *
  **************************************************************************************
  */
-package spimedb.io.kml;
+package spimedb.media.util;
 
 /**
  * Container for element and attribute names used in KML

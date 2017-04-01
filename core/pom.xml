@@ -41,12 +41,6 @@
             <version>0.7.0</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.fasterxml/aalto-xml -->
-        <dependency>
-            <groupId>com.fasterxml</groupId>
-            <artifactId>aalto-xml</artifactId>
-            <version>1.0.0</version>
-        </dependency>
 
 
         <dependency>
@@ -56,11 +50,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>net.sf.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>2.3</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
@@ -120,26 +109,7 @@
             <version>2.8.1</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
-            <version>1.14</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/de.intarsys.opensource/jbig2 -->
-        <dependency>
-            <groupId>de.intarsys.opensource</groupId>
-            <artifactId>jbig2</artifactId>
-            <version>5.5.1</version>
-        </dependency>
 
-
-        <!-- https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-distr -->
-        <dependency>
-            <groupId>org.apache.opennlp</groupId>
-            <artifactId>opennlp-tools</artifactId>
-            <version>1.7.2</version>
-        </dependency>
 
 
         <dependency>
@@ -208,12 +178,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/de.grundid.opendatalab/geojson-jackson -->
-        <dependency>
-            <groupId>de.grundid.opendatalab</groupId>
-            <artifactId>geojson-jackson</artifactId>
-            <version>1.8</version>
-        </dependency>
 
 
         <!--<dependency>-->
@@ -318,20 +282,7 @@
             </exclusions>
         </dependency>
         -->
-        <!-- https://mvnrepository.com/artifact/org.openstreetmap.osmosis/osmosis-pbf2 -->
-        <dependency>
-            <groupId>org.openstreetmap.osmosis</groupId>
-            <artifactId>osmosis-pbf2</artifactId>
-            <version>0.45</version>
-        </dependency>
 
-
-        <!-- https://mvnrepository.com/artifact/com.rometools/rome-modules -->
-        <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome-modules</artifactId>
-            <version>1.7.1</version>
-        </dependency>
 
 
         <dependency>
@@ -400,12 +351,6 @@
             <version>0.8.12</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>com.googlecode.htmlcompressor</groupId>
-            <artifactId>htmlcompressor</artifactId>
-            <version>1.5.2</version>
-        </dependency>
 
         <!--<dependency>-->
         <!--<groupId>org.jvnet.ogc</groupId>-->
@@ -508,6 +453,11 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.7.19</version>
+        </dependency>
 
         <!--<dependency>-->
         <!--<groupId>com.goldmansachs</groupId>-->
@@ -583,43 +533,8 @@
         </plugins>
 
 
-        <testResources>
-            <testResource>
-                <directory>src/test/java/spimedb/io/kml</directory>
-                <includes>
-                    <include>*.kmz</include>
-                    <include>*.kml</include>
-                    <include>*.json</include>
-                    <include>*.geojson</include>
-                </includes>
-                <filtering>false</filtering>
-            </testResource>
-            <testResource>
-                <directory>src/test/java/spimedb/io</directory>
-                <includes>
-                    <include>*.json</include>
-                    <include>*.geojson</include>
-                </includes>
-                <filtering>false</filtering>
-            </testResource>
-        </testResources>
-
-        <resources>
-
-            <resource>
-                <directory>${basedir}/data</directory>
-                <includes>
-                    <include>*/**</include>
-                </includes>
-                <filtering>false</filtering>
-            </resource>
 
 
-            <!--<resource>-->
-            <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->
-            <!--<directory>data</directory>-->
-            <!--</resource>-->
-        </resources>
 
 
         <!--<plugins>-->
@@ -771,6 +686,34 @@
 
 
         <!--</plugins>-->
+        <resources>
+
+            <resource>
+                <directory>${basedir}/../src/main/resources</directory>
+                <includes>
+                    <include>public/**</include>
+                </includes>
+                <excludes>
+                    <exclude>public/.idea/**</exclude>
+                    <exclude>public/snip/**</exclude>
+                    <exclude>public/depr/**</exclude>
+                    <exclude>public/bower_components/**</exclude>
+
+                    <exclude>public/lib/cesium/**</exclude>
+                    <exclude>public/lib/moment/**</exclude>
+                    <exclude>public/lib/jqueryui/themes/**</exclude>
+                    <exclude>public/lib/jqueryui/ui/widgets/**</exclude>
+                    <exclude>public/lib/fontawesome/**</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </resource>
+
+
+            <!--<resource>-->
+            <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->
+            <!--<directory>data</directory>-->
+            <!--</resource>-->
+        </resources>
     </build>
 
 </project>

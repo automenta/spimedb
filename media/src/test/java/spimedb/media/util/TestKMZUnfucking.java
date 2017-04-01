@@ -1,10 +1,10 @@
-package spimedb.io.kml;
+package spimedb.media.util;
 
 
 import org.junit.Test;
 import spimedb.MutableNObject;
 import spimedb.SpimeDB;
-import spimedb.io.KML;
+import spimedb.media.KML;
 
 import java.io.File;
 import java.io.IOException;

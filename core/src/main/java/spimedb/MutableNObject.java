@@ -11,7 +11,6 @@ import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
 import org.opensextant.giscore.geometry.Polygon;
-import spimedb.io.KML;
 import spimedb.util.JSON;
 
 import java.util.List;
@@ -184,10 +183,21 @@ public class MutableNObject extends ImmutableNObject {
     }
 
 
+    public static double[][] toArray(List<Point> lp) {
+        double[][] points = new double[lp.size()][2];
+
+        for (int i = 0; i < points.length; i++) {
+            Geodetic2DPoint c = lp.get(i).getCenter();
+            double[] pi = points[i];
+            pi[0] = c.getLatitudeAsDegrees();
+            pi[1] = c.getLongitudeAsDegrees();
+        }
+        return points;
+    }
     public NObject where(Line l) {
 
         List<Point> lp = l.getPoints();
-        double[][] points = KML.toArray(lp);
+        double[][] points = toArray(lp);
 
         where(l.getBoundingBox());
         put(NObject.LINESTRING, points);
@@ -195,7 +205,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     public NObject where(Polygon p) {
-        double[][] outerRing = KML.toArray(p.getOuterRing().getPoints());
+        double[][] outerRing = toArray(p.getOuterRing().getPoints());
 
         //TODO handle inner rings
 

@@ -1,4 +1,4 @@
-package spimedb.io;
+package spimedb.media;
 
 
 import org.jsoup.Jsoup;

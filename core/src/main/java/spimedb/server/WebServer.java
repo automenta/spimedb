@@ -43,6 +43,7 @@ import spimedb.util.JSON;
 import spimedb.util.js.JavaToJavascript;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
@@ -80,27 +81,6 @@ public class WebServer extends PathHandler {
             .addEncodingHandler("deflate", new DeflateEncodingProvider(), 50);
 
     private Undertow server;
-
-    public static class OverridingFileResourceManager extends FileResourceManager {
-
-        private final FileResourceManager override;
-
-        public OverridingFileResourceManager(File base, int transferMinSize, File override) {
-            super(base, transferMinSize, true, "/");
-
-            this.override = new FileResourceManager(override, transferMinSize, true, "/");
-        }
-
-        @Override
-        public Resource getResource(String p) {
-            Resource x = override.getResource(p);
-            if (x != null)
-                return x;
-            else
-                return super.getResource(p);
-        }
-
-    }
 
     //final Default nar = NARBuilder.newMultiThreadNAR(1, new RealTime.DS());
 
@@ -291,14 +271,28 @@ public class WebServer extends PathHandler {
         int transferMinSize = 1024 * 1024;
         final int METADATA_MAX_AGE = 3 * 1000; //ms
 
-        ResourceManager res;
+        ResourceManagerChain res = new ResourceManagerChain();
         if (db.indexPath!=null && myStaticPath!=null && myStaticPath.exists()) {
-            res = new OverridingFileResourceManager(staticPath, transferMinSize, myStaticPath);
+            //local override
+            logger.info("static resource: {}", myStaticPath);
+            res.add(
+                new FileResourceManager(myStaticPath, transferMinSize, true, "/")
+            );
+        }
+
+        if (staticPath!=null && staticPath.exists()) {
+            //development mode: serve the files from the FS
+            logger.info("static resource: {}", staticPath);
+            res.add(
+                new FileResourceManager(staticPath, transferMinSize, true, "/")
+            );
         } else {
-            //HACK add the defaut local to prevent 404's
-            //res = new ClassPathResourceManager(getClass().getClassLoader(), staticPath);
-            res = new FileResourceManager(
-                    staticPath, 0, true, "/");
+            logger.info("static resource: (classloader)");
+            //production mode: serve from classpath
+            res.add(
+                new ClassPathResourceManager(getClass().getClassLoader(), "public")
+            );
+
         }
 
         DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
@@ -391,7 +385,7 @@ public class WebServer extends PathHandler {
         }
 
         try {
-            logger.info("start: {}:{} staticPath={}", host, port, staticPath);
+            logger.info("start: {}:{}", host, port);
             (this.server = nextServer).start();
         } catch (Exception e) {
             logger.error("http start: {}", e);

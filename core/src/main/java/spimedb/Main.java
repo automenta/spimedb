@@ -11,7 +11,6 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 import com.google.common.io.Files;
-import com.uwyn.jhighlight.fastutil.objects.ObjectArrays;
 import jcog.Texts;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
@@ -23,9 +22,9 @@ import org.jetbrains.annotations.Nullable;
 import org.mockito.internal.util.reflection.BeanPropertySetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.io.Crawl;
-import spimedb.io.Multimedia;
+
 import spimedb.server.WebServer;
+import spimedb.util.Crawl;
 import spimedb.util.Locker;
 
 import java.io.File;
@@ -272,7 +271,7 @@ public class Main extends FileAlterationListenerAdaptor {
                     if (Arrays.equals(types, spimeDBConstructor)) { //HACK look for spimeDB as the only arg
                         param = new Object[]{db};
                     } else {
-                        param = ObjectArrays.EMPTY_ARRAY;
+                        param = new Object[] {};
                     }
 
                     try {
@@ -484,7 +483,7 @@ public class Main extends FileAlterationListenerAdaptor {
 
         dbPathIgnored = db.file!=null ? db.file.getAbsolutePath() : null;
 
-        new Multimedia(db);
+        //new Multimedia(db);
 
         if (path!=null) {
             fsObserver = new FileAlterationObserver(path);
