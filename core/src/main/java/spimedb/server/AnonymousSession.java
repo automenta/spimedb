@@ -1,16 +1,11 @@
 package spimedb.server;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import io.undertow.websockets.core.StreamSourceFrameChannel;
 import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.spi.WebSocketHttpExchange;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;

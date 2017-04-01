@@ -145,7 +145,7 @@ public class ResourceLocks implements IResourceLocks {
                     // there is no lock at that path. someone tried to unlock it
                     // anyway. could point to a problem
                     LOG
-                            .trace("spimedb.server.webdav.locking.ResourceLocks.unlock(): no lock for path {}", path);
+                            .trace("ResourceLocks.unlock(): no lock for path {}", path);
                     return false;
                 }
 
@@ -172,7 +172,7 @@ public class ResourceLocks implements IResourceLocks {
                 // there is no lock at that path. someone tried to unlock it
                 // anyway. could point to a problem
                 LOG
-                        .trace("spimedb.server.webdav.locking.ResourceLocks.unlock(): no lock for path {}", path);
+                        .trace("ResourceLocks.unlock(): no lock for path {}", path);
             }
 
             if (_cleanupCounter > _cleanupLimit) {

@@ -15,7 +15,7 @@
 //    public void test1() {
 //
 //        try {
-//            Class.forName("spimedb.NObject"); //hack
+//            Class.forName("NObject"); //hack
 //        } catch (ClassNotFoundException e) {
 //            e.printStackTrace();
 //        }
@@ -47,7 +47,7 @@
 ////import com.syncleus.ferma.annotations.Incidence;
 ////import com.syncleus.ferma.annotations.Property;
 ////import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
-////import spimedb.NObject;
+////import NObject;
 ////
 ////import java.util.Iterator;
 ////

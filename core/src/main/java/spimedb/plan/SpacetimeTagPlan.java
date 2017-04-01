@@ -5,7 +5,7 @@
 //import org.apache.commons.math3.ml.distance.DistanceMeasure;
 //import org.eclipse.collections.impl.list.mutable.FastList;
 //import org.geojson.LngLatAlt;
-//import spimedb.NObject;
+//import NObject;
 //
 //import java.util.*;
 //
