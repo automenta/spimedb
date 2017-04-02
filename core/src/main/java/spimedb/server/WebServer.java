@@ -41,7 +41,6 @@ import spimedb.util.HTTP;
 import spimedb.util.JSON;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
@@ -187,7 +186,7 @@ public class WebServer extends PathHandler {
             lats[1] = parseDouble(bb[3]);
 
             SearchResult r = db.get(new Query().limit(32).where(lons, lats));
-            send(r, o, ex, searchResultSummary);
+            send(r, o, searchResultSummary);
 
         }));
 
@@ -223,7 +222,7 @@ public class WebServer extends PathHandler {
                 return;
 
             try {
-                send(db.find(qText, 50), o, ex, searchResultFull);
+                send(db.find(qText, 50), o, searchResultFull);
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e.getMessage());
                 ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -294,7 +293,7 @@ public class WebServer extends PathHandler {
         addPrefixPath("/", rr);
     }
 
-    private void send(SearchResult r, OutputStream o, HttpServerExchange ex, ImmutableSet<String> keys) {
+    private void send(SearchResult r, OutputStream o, ImmutableSet<String> keys) {
         if (r!=null) {
 
             try {
@@ -443,13 +442,13 @@ public class WebServer extends PathHandler {
         }
     }
 
-    static final ImmutableSet<String> searchResultSummary =
+    public static final ImmutableSet<String> searchResultSummary =
             Sets.immutable.of(
                     NObject.ID, NObject.NAME, NObject.INH, NObject.TAG, NObject.BOUND,
                     "thumbnail", "score", NObject.LINESTRING, NObject.POLYGON,
                     NObject.TYPE
             );
-    static final ImmutableSet<String> searchResultFull =
+    public static final ImmutableSet<String> searchResultFull =
             Sets.immutable.withAll(Iterables.concat(Sets.mutable.ofAll(searchResultSummary), Sets.immutable.of(
                     NObject.DESC, "data"
             )));

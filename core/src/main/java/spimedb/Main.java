@@ -571,8 +571,7 @@ public class Main extends FileAlterationListenerAdaptor {
     public static void main(String[] args) throws Exception {
 
         if (args.length == 0) {
-            System.out.println("usage: spime [datapath]\n");
-            System.out.println("\tNo path specified; using default (in-memory) configuration");
+            System.out.println("usage: spime [path]\t\tNo path specified; using default (in-memory) configuration");
             Main m = new Main(null);
             mainDefault(m);
         } else {

@@ -36,7 +36,7 @@ public class Peer extends UDPeer {
                     if (message!=null) {
                         say(new Msg(message), 1f, false);
                     } else {
-                        say(e.toJSONString(false), 3);
+                        say(JSON.toJSONBytes(e), 3);
                     }
                 },
                 "")
@@ -63,8 +63,7 @@ public class Peer extends UDPeer {
             return;
         }
 
-        String json = m.dataString();
-        JsonNode parsed = JSON.fromJSON(json);
+        JsonNode parsed = JSON.fromJSON(m.data(), JsonNode.class);
         JsonNode pi = parsed.get("I");
         String id;
         if (pi!=null) {

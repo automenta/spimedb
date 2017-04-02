@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import jcog.Util;
 import jcog.tree.rtree.rect.RectDoubleND;
@@ -35,6 +36,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.eclipse.collections.impl.factory.Maps;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -47,6 +49,7 @@ import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.query.Query;
 import spimedb.server.Router;
+import spimedb.server.WebServer;
 import spimedb.util.Locker;
 import spimedb.util.PrioritizedExecutor;
 
@@ -524,15 +527,22 @@ public class SpimeDB {
         cache.put(id, d);
         commit();
 
+        pub(next);
+
+        return d;
+    }
+
+    private void pub(NObject next) {
+
         String[] tags = next.tags();
         if (tags == null || tags.length == 0) {
             tags = GENERAL;
         }
-        NObject finalNext = next;
+
+        org.eclipse.collections.api.set.ImmutableSet<String> filters =
+                WebServer.searchResultFull;
+        NObject finalNext = new FilteredNObject(next, filters);
         onTag.each(tags, (c) -> c.accept(finalNext)); //broadcast through router
-
-
-        return d;
     }
 
 
