@@ -42,7 +42,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -110,25 +109,10 @@
         </dependency>
 
 
-
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>21.0</version>
         </dependency>
 
 
@@ -179,7 +163,6 @@
         </dependency>
 
 
-
         <!--<dependency>-->
         <!--<groupId>org.jsimpledb</groupId>-->
         <!--<artifactId>jsimpledb-main</artifactId>-->
@@ -188,9 +171,9 @@
 
 
         <!--<dependency>-->
-            <!--<groupId>org.teavm</groupId>-->
-            <!--<artifactId>teavm-classlib</artifactId>-->
-            <!--<version>0.4.3</version>-->
+        <!--<groupId>org.teavm</groupId>-->
+        <!--<artifactId>teavm-classlib</artifactId>-->
+        <!--<version>0.4.3</version>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
@@ -284,29 +267,6 @@
         -->
 
 
-
-        <dependency>
-            <groupId>org.opensextant</groupId>
-            <artifactId>giscore</artifactId>
-            <version>2.0.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-
-            </exclusions>
-        </dependency>
-
-
         <dependency>
             <groupId>io.undertow</groupId>
             <artifactId>undertow-core</artifactId>
@@ -347,18 +307,6 @@
         <!--<version>1.1.0</version>-->
         <!--</dependency>-->
 
-        <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.9.9</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.spatial4j</groupId>
-            <artifactId>spatial4j</artifactId>
-            <version>0.5</version>
-        </dependency>
 
         <!--<dependency>-->
         <!--<groupId>com.vividsolutions</groupId>-->
@@ -445,19 +393,49 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.7.19</version>
+            <version>2.7.21</version>
         </dependency>
-
-        <!--<dependency>-->
-        <!--<groupId>com.goldmansachs</groupId>-->
-        <!--<artifactId>gs-collections</artifactId>-->
-        <!--<version>7.0.0</version>-->
-        <!--</dependency>-->
 
 
     </dependencies>
     <build>
         <plugins>
+            <!--<plugin>-->
+                <!--<groupId>com.github.chrisdchristo</groupId>-->
+                <!--<artifactId>capsule-maven-plugin</artifactId>-->
+                <!--<version>1.5.1</version>-->
+                <!--<configuration>-->
+                    <!--<type>fat</type>-->
+                    <!--<chmod>true</chmod>-->
+                    <!--<execPluginConfig>root</execPluginConfig>-->
+                    <!--<trampoline>true</trampoline>-->
+
+                    <!--<manifest>-->
+                        <!---->
+                    <!--</manifest>-->
+                    <!--&lt;!&ndash;<caplets>co.paralleluniverse:capsule-daemon:0.2.0</caplets>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<caplets>co.paralleluniverse:capsule-shield:0.2.0</caplets>&ndash;&gt;-->
+
+                    <!--&lt;!&ndash;<dependencySets>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<dependencySet>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<groupId>automenta</groupId>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<artifactId>jcog</artifactId>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<version>0.0.1-SNAPSHOT</version>&ndash;&gt;-->
+
+                            <!--&lt;!&ndash;<outputDirectory>/</outputDirectory>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<unpack>true</unpack>&ndash;&gt;-->
+
+                            <!--&lt;!&ndash;&lt;!&ndash;<includes>&ndash;&gt;&ndash;&gt;-->
+                                <!--&lt;!&ndash;&lt;!&ndash;<include>META-INF/MANIFEST.MF</include>&ndash;&gt;&ndash;&gt;-->
+                            <!--&lt;!&ndash;&lt;!&ndash;</includes>&ndash;&gt;&ndash;&gt;-->
+                        <!--&lt;!&ndash;</dependencySet>&ndash;&gt;-->
+
+                    <!--&lt;!&ndash;</dependencySets>&ndash;&gt;-->
+
+                <!--</configuration>-->
+
+            <!--</plugin>-->
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -520,10 +498,6 @@
                 </executions>
             </plugin>
         </plugins>
-
-
-
-
 
 
         <!--<plugins>-->
@@ -687,6 +661,9 @@
                     <exclude>public/snip/**</exclude>
                     <exclude>public/depr/**</exclude>
                     <exclude>public/bower_components/**</exclude>
+
+                    <exclude>public/icon/**</exclude>
+                    <exclude>public/nslider/**</exclude>
 
                     <exclude>public/lib/cesium/**</exclude>
                     <exclude>public/lib/moment/**</exclude>

@@ -4,6 +4,7 @@ package spimedb.media.util;
 import org.junit.Test;
 import spimedb.MutableNObject;
 import spimedb.SpimeDB;
+import spimedb.media.GeoNObject;
 import spimedb.media.KML;
 
 import java.io.File;
@@ -19,7 +20,7 @@ public class TestKMZUnfucking {
         URL v = TestKMZUnfucking.class.getClassLoader().getResource("WeeklyVolcanoGE-Reports.kmz");
         //System.out.println(v);
 
-        new KML(db, new MutableNObject("main")).file("main",
+        new KML(db, new GeoNObject("main")).file("main",
             new File(
                 v.getPath()
             )

@@ -48,7 +48,7 @@ public class KML {
     final int maxPathDepth = 3;
     //private final Proxy proxy;
     private final SpimeDB db;
-    private final MutableNObject root;
+    private final GeoNObject root;
 
     private String layer;
     final Deque<String> path = new ArrayDeque();
@@ -276,7 +276,7 @@ public class KML {
         }
     }
 
-    public KML(SpimeDB db, MutableNObject root) {
+    public KML(SpimeDB db, GeoNObject root) {
         this.db = db;
         this.root = root;
     }
@@ -533,7 +533,7 @@ public class KML {
                 return false;
             }
 
-            MutableNObject d;
+            GeoNObject d;
 
             if (go instanceof ContainerStart) {
                 ContainerStart cs = (ContainerStart) go;
@@ -549,9 +549,9 @@ public class KML {
                     d = root;
                 } else {
                     if (pathString.equals(root.id()))
-                        d = new MutableNObject(root);
+                        d = new GeoNObject(root);
                     else
-                        d = new MutableNObject(pathString);
+                        d = new GeoNObject(pathString);
 
                     d.withTags(parentPathString);
                 }
@@ -578,7 +578,7 @@ public class KML {
                     }
                 }
             } else {
-                d = new MutableNObject(pathString + "/" + nextID());
+                d = new GeoNObject(pathString + "/" + nextID());
                 d.withTags(pathString);
 
             }

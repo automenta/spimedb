@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import jcog.Util;
 import jcog.tree.rtree.rect.RectDoubleND;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
@@ -90,7 +91,7 @@ public class SpimeDB {
 
     protected final Directory dir;
 
-    public final Router<String,Consumer<NObject>> tag = new Router();
+    public final Router<String,Consumer<NObject>> onTag = new Router();
 
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
 
@@ -528,7 +529,7 @@ public class SpimeDB {
             tags = GENERAL;
         }
         NObject finalNext = next;
-        tag.each(tags, (c) -> c.accept(finalNext)); //broadcast through router
+        onTag.each(tags, (c) -> c.accept(finalNext)); //broadcast through router
 
 
         return d;
@@ -597,10 +598,34 @@ public class SpimeDB {
 
     final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
 
+    final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
+
     public void on(BiFunction<NObject, NObject, NObject> changed) {
         onChange.add(changed);
     }
 
+    public void on(NObjectConsumer c) {
+        update(c, true);
+    }
+    public void off(NObjectConsumer c) {
+        update(c, false);
+    }
+
+    public void update(NObjectConsumer c, boolean enable) {
+        if (c instanceof NObjectConsumer.OnTag) {
+            for (String x : ((NObjectConsumer.OnTag)c).any) {
+                if (enable)
+                    onTag.on(x, c);
+                else
+                    onTag.off(x, c);
+            }
+        } else {
+            if (enable)
+                on.add(c);
+            else
+                on.remove(c);
+        }
+    }
 
     final Locker<String> locker = new Locker();
 
@@ -630,6 +655,7 @@ public class SpimeDB {
         }
 
         if (thrown != null) {
+            logger.error("{} {} {}", id, r, thrown);
             throw new RuntimeException(thrown);
         }
 

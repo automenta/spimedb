@@ -263,12 +263,14 @@ public class WebServer extends PathHandler {
             );
         }
 
+        ResourceHandler rr;
         if (staticPath!=null && staticPath.exists()) {
             //development mode: serve the files from the FS
             logger.info("static resource: {}", staticPath);
             res.add(
                 new FileResourceManager(staticPath, transferMinSize, true, "/")
             );
+            rr = resource(res);
         } else {
             logger.info("static resource: (classloader)");
             //production mode: serve from classpath
@@ -276,19 +278,18 @@ public class WebServer extends PathHandler {
                 new ClassPathResourceManager(getClass().getClassLoader(), "public")
             );
 
+            DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
+                    16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
+                    METADATA_MAX_AGE);
+
+            CachingResourceManager cres = new CachingResourceManager(
+                    100,
+                    transferMinSize /* max size */,
+                    dataCache, res, METADATA_MAX_AGE);
+
+            rr = resource(cres);
         }
 
-        DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
-                16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
-                METADATA_MAX_AGE);
-
-        CachingResourceManager cres = new CachingResourceManager(
-                100,
-                transferMinSize /* max size */,
-                dataCache, res, METADATA_MAX_AGE);
-
-
-        ResourceHandler rr = resource(cres);
         rr.setCacheTime(24 * 60 * 60 * 1000);
         addPrefixPath("/", rr);
     }
@@ -320,7 +321,7 @@ public class WebServer extends PathHandler {
             }
         }
 
-        ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
+        //ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
 
     }
 

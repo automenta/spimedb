@@ -113,7 +113,7 @@ public class Multimedia {
 
                     logger.info("load: {}", url);
 
-                    MutableNObject y = new MutableNObject(x);
+                    GeoNObject y = new GeoNObject(x);
 
                     y.put("url_cached", Long.toString(exp));
 

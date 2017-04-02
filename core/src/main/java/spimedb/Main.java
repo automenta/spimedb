@@ -32,6 +32,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
@@ -62,7 +64,7 @@ public class Main extends FileAlterationListenerAdaptor {
         loggerContext.reset();
 
 
-        SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
+        SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
 
     }
 
@@ -570,12 +572,9 @@ public class Main extends FileAlterationListenerAdaptor {
 
         if (args.length == 0) {
             System.out.println("usage: spime [datapath]\n");
-            System.out.println("running default configuration");
+            System.out.println("\tNo path specified; using default (in-memory) configuration");
             Main m = new Main(null);
-            WebServer w = new WebServer(m.db);
-            w.setPort(8080);
-            m.put(WebServer.class, w);
-
+            mainDefault(m);
         } else {
             String dataPath = args[0];
             new Main(dataPath);
@@ -625,6 +624,25 @@ public class Main extends FileAlterationListenerAdaptor {
 //            db.forEach(x -> {
 //                System.out.println(x);
 //            });
+
+
+    }
+
+    private static void mainDefault(Main m) {
+        SpimeDB db = m.db;
+
+        int port = 8080;
+
+        WebServer w = new WebServer(db);
+        w.setPort(port);
+        m.put(WebServer.class, w);
+
+        try {
+            new Peer(port, m.db);
+        } catch (Exception e) {
+            logger.error("starting Peer: {}", e);
+            e.printStackTrace();
+        }
 
 
     }

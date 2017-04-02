@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jcog.data.array.Arrays;
 import jcog.tree.rtree.point.DoubleND;
-import org.apache.commons.lang.ArrayUtils;
 import spimedb.util.JSON;
 
 import java.io.IOException;
@@ -82,9 +82,7 @@ public interface NObject extends Serializable {
     /** intensional inheritance */
     String INH = "inh";
 
-    default boolean hasTag(String tag) {
-        return ArrayUtils.contains(tags(), tag);
-    }
+
 
     default boolean has(String key) {
         return get(key)!=null;

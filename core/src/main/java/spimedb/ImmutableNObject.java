@@ -3,7 +3,7 @@ package spimedb;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jcog.tree.rtree.point.DoubleND;
 import jcog.tree.rtree.rect.RectDoubleND;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import spimedb.util.JSON;
 
 import java.util.Map;

@@ -3,7 +3,7 @@ package spimedb.index;
 import com.google.common.base.Joiner;
 import jcog.tree.rtree.point.DoubleND;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseTokenizer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
