@@ -1,5 +1,7 @@
 package spimedb.index;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import jcog.tree.rtree.point.DoubleND;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -153,6 +155,26 @@ public class DObject implements NObject {
                 d.add(bytes(k, JSON.toMsgPackBytes(v, double[][].class)));
             } else if (c == byte[].class) {
                 d.add(new StoredField(k, (byte[]) v));
+            } else if (v instanceof JsonNode) {
+                try {
+                    JsonNode j = (JsonNode)v;
+                    String js = JSON.json.writeValueAsString(j);
+                    d.add(text(k, js));
+                    StringBuilder sb = new StringBuilder();
+                    j.fields().forEachRemaining(e->{
+                        sb.append(e.getKey()).append(' ');
+                        JsonNode val = e.getValue();
+                        if (val.isTextual())
+                            sb.append(val.textValue()).append(' ');
+                        /*else if (val.isNumber())
+                            sb.append(val.numberValue()).append(' ');*/
+                        /* TODO else: recurse */
+                    });
+                    if (sb.length()!=0)
+                        d.add(string(TAG,sb.toString()));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 logger.warn("field un-documentable: {} {} {}", k, c, v);
                 d.add(string(k, v.toString()));
@@ -382,7 +404,18 @@ public class DObject implements NObject {
         if (type == StoredField.TYPE) {
             return f.binaryValue().bytes;
         } else {
-            return f.stringValue(); //TODO adapt based on field type
+            String s = f.stringValue(); //TODO adapt based on field type
+            if (s.startsWith("{") && s.endsWith("}")) {
+                //try to parse as json
+                JsonNode j = null;
+                try {
+                    j = JSON.json.readValue(s, JsonNode.class);
+                    return j;
+                } catch (IOException e) {
+                    //could not parse
+                }
+            }
+            return s;
         }
     }
 

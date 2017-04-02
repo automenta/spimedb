@@ -97,7 +97,7 @@ public interface NObject extends Serializable {
 
 
     static MutableNObject fromJSON(String json) {
-        JsonNode x = JSON.fromJSON(json);
+        JsonNode x = JSON.fromJSON(json, JsonNode.class);
         JsonNode idNode = x.get(ID);
         if (idNode == null)
             throw new RuntimeException("invalid nobject JSON: " +  json);

@@ -206,7 +206,7 @@ public class WebServer extends PathHandler {
                     String I = (inode == null) ? UUID.randomUUID().toString() : inode.toString();
 
                     MutableNObject d = new MutableNObject(I)
-                            .putAll(x)
+                            .put("_", x)
                             .when(System.currentTimeMillis());
 
                     db.add( d );

@@ -225,7 +225,13 @@ function ResultNode(x) {
 
 
     if (x['_']) {
-        y.append(E('p').attr('class', 'textpreview').html(x['_'].replace('\n', '<br/>')));
+        var t = (x['_']);
+        if (typeof t === "object")
+            t = newEle('pre').append(JSON.stringify(t, null, 2));
+        else //if (typeof t === "string")
+            t = E('p').attr('class', 'textpreview').html((t+'').replace('\n', '<br/>'));
+
+        y.append(t);
     }
 
 
