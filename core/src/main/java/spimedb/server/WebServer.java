@@ -34,13 +34,11 @@ import spimedb.FilteredNObject;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.client.Client;
 import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
-import spimedb.util.js.JavaToJavascript;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -68,8 +66,6 @@ public class WebServer extends PathHandler {
     private static final int BUFFER_SIZE = 32 * 1024;
 
     private final SpimeDB db;
-
-    final JavaToJavascript j2js;
 
     @Deprecated private final double websocketOutputRateLimitBytesPerSecond = 64 * 1024;
 
@@ -123,9 +119,6 @@ public class WebServer extends PathHandler {
 //        } catch (ServletException e) {
 //            logger.error("{}", e);
 //        }
-
-        j2js = JavaToJavascript.build();
-        initJ2JS();
 
         addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
             try {
@@ -252,17 +245,7 @@ public class WebServer extends PathHandler {
 
     }
 
-    private void initJ2JS() {
-        //Cache<MethodReference, Program> programCache = (Cache<MethodReference, Program>) Infinispan.cache(HTTP.TMP_SPIMEDB_CACHE_PATH + "/j2js" , "programCache");
-        addPrefixPath("/spimedb.js", ex -> HTTP.stream(ex, (o) -> {
-            try {
-                o.write(j2js.compileMain(Client.class).toString().getBytes());
-            } catch (IOException e) {
-                logger.error("spimedb.js {}", e);
 
-            }
-        }));
-    }
 
     private void initStaticResource(SpimeDB db) {
         File staticPath = Paths.get(WebServer.staticPath).toFile();
