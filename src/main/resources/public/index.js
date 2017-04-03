@@ -33,7 +33,7 @@ $(() => {
         ]
     });
     
-    var pstyle = 'background-color: rgba(255,255,255,0.8); border: 1px solid #dfdfdf; padding: 5px;';
+    var pstyle = 'background-color: rgba(127,127,127,0.5); border: 1px solid #dfdfdf; padding: 5px;';
     $('#layout').w2layout({
         name: 'dock',
         panels: [

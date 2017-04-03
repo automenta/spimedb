@@ -131,7 +131,6 @@ h2 { margin: 0; }
 }
 
 .hide #querySuggestionsWrapper {
-    opacity: 0.8;
     max-width: 50%;
     float: right;
 }
@@ -147,7 +146,7 @@ h2 { margin: 0; }
 
 #resultsPane, #facetsWrapper {
     overflow: auto;
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(127, 127, 127, 0.5);
 }
 
 /*#resultsDragger {
@@ -184,7 +183,7 @@ h2 { margin: 0; }
 }
 
 .w2ui-toolbar {
-    background: rgba(200,200,200,0.5) !important;
+    background: rgba(127,127,127,0.5) !important;
 }
 
 #layout_dock_panel_main, #layout_dock_panel_main * { 
@@ -343,7 +342,7 @@ h2 { margin: 0; }
 
 #timeline {
 
-    background-color: rgba(255,255,255,0.8);
+    background-color: rgba(127,127,127,0.5);
 }
 
 #pf-timeline .popover {
