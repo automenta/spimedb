@@ -27,11 +27,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>opennars</groupId>-->
-        <!--<artifactId>nal</artifactId>-->
-        <!--<version>1.8-SNAPSHOT</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>opennars</groupId>
+            <artifactId>nal</artifactId>
+            <version>1.8-SNAPSHOT</version>
+        </dependency>
 
 
         <!-- https://mvnrepository.com/artifact/net.sourceforge.argparse4j/argparse4j -->
