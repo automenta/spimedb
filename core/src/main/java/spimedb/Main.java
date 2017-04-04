@@ -539,7 +539,7 @@ public class Main extends FileAlterationListenerAdaptor {
                     this.peer.stop();
                 }
                 try {
-                    this.peer = new Peer(port, db);
+                    this.peer = new SpimeDBPeer(port, db);
                 } catch (Exception e) {
                     logger.error("{}", e);
                 }
@@ -674,7 +674,7 @@ public class Main extends FileAlterationListenerAdaptor {
         m.put(WebServer.class, w);
 
         try {
-            new Peer(port, m.db);
+            new SpimeDBPeer(port, m.db);
         } catch (Exception e) {
             logger.error("starting Peer: {}", e);
             e.printStackTrace();
