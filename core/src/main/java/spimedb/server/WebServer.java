@@ -22,6 +22,7 @@ import io.undertow.server.handlers.resource.*;
 import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.suggest.Lookup;
@@ -31,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
 import spimedb.FilteredNObject;
-import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
@@ -43,7 +43,6 @@ import spimedb.util.JSON;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -192,25 +191,19 @@ public class WebServer extends PathHandler {
 
 
 
-        addExactPath("/tell/json", (e) -> {
+        addPrefixPath("/tell/json", (e) -> {
             //POST only
             if (e.getRequestMethod().equals(HttpString.tryFromString("POST"))) {
                 //System.out.println(e);
                 //System.out.println(e.getRequestHeaders());
 
                 e.getRequestReceiver().receiveFullString((ex, s) -> {
-
                     JsonNode x = JSON.fromJSON(s);
-
-                    JsonNode inode = x.get("I");
-                    String I = (inode == null) ? UUID.randomUUID().toString() : inode.toString();
-
-                    MutableNObject d = new MutableNObject(I)
-                            .withTags("")
-                            .put("_", x)
-                            .when(System.currentTimeMillis());
-
-                    db.add( d );
+                    if (x != null)
+                        db.add(x);
+                    else {
+                        e.setStatusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+                    }
                 });
 
                 e.endExchange();
@@ -223,7 +216,7 @@ public class WebServer extends PathHandler {
                 return;
 
             try {
-                send(db.find(qText, 50), o, searchResultFull);
+                send(db.find(qText, 20), o, searchResultFull);
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e.getMessage());
                 ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -314,7 +307,6 @@ public class WebServer extends PathHandler {
                     o.write("[]]".getBytes());
 
                 r.close();
-                return;
 
             } catch (IOException e) {
 
@@ -447,7 +439,7 @@ public class WebServer extends PathHandler {
             Sets.immutable.of(
                     NObject.ID, NObject.NAME, NObject.INH, NObject.TAG, NObject.BOUND,
                     "thumbnail", "score", NObject.LINESTRING, NObject.POLYGON,
-                    NObject.TYPE
+                    NObject.TYPE, "url"
             );
     public static final ImmutableSet<String> searchResultFull =
             Sets.immutable.withAll(Iterables.concat(Sets.mutable.ofAll(searchResultSummary), Sets.immutable.of(

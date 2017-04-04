@@ -13,8 +13,6 @@
     "leaflet.markercluster": "latest",
     "d3": "latest",
     "graphlib": "latest",
-    "fontawesome": "latest",
-    "pnotify": "latest",
     "lodash": "latest",
     "backbone": "latest",
     "es6-shim": "latest",
@@ -23,6 +21,7 @@
     "interact": "latest",
     "draggabilly": "latest",
     "w2ui": "latest",
-    "patternfly-timeline": "latest"
+    "patternfly-timeline": "latest",
+    "jscroll": "latest"
   }
 }

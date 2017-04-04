@@ -6,63 +6,62 @@ var ACTIVATION_RATE = 0.5;
 var app = {};
 
 
-
 const ME = new Map();
 
 $(() => {
 
     $('#query').w2toolbar({
-        name : 'myToolbar',
+        name: 'myToolbar',
         items: [
-            { type: 'html',  id: 'queryEdit', html: 
-                    '<input id="query_text" type="text" placeholder="Search"/><button id="query_update">&gt;</button>'},
-            { type: 'check',  id: 'item1', caption: 'Check', img: 'icon-add', checked: true },
-            { type: 'break' },
-            { type: 'menu',   id: 'item2', caption: 'Drop Down', img: 'icon-folder', 
+            {
+                type: 'html',
+                id: 'queryEdit',
+                html: '<input id="query_text" type="text" placeholder="Search"/><button id="query_update">&gt;</button>'
+            },
+            {type: 'check', id: 'item1', caption: 'Check', img: 'icon-add', checked: true},
+            {type: 'break'},
+            {
+                type: 'menu', id: 'item2', caption: 'Drop Down', img: 'icon-folder',
                 items: [
-                    { text: 'Item 1', img: 'icon-page' }, 
-                    { text: 'Item 2', img: 'icon-page' }, 
-                    { text: 'Item 3', img: 'icon-page' }
+                    {text: 'Item 1', img: 'icon-page'},
+                    {text: 'Item 2', img: 'icon-page'},
+                    {text: 'Item 3', img: 'icon-page'}
                 ]
             },
-            { type: 'break' },
-            { type: 'radio',  id: 'item3',  group: '1', caption: 'Radio 1', img: 'icon-page' },
-            { type: 'radio',  id: 'item4',  group: '1', caption: 'Radio 2', img: 'icon-page' },
-            { type: 'spacer' },
-            { type: 'button',  id: 'item5',  caption: 'Item 5', img: 'icon-save' }
+            {type: 'break'},
+            {type: 'radio', id: 'item3', group: '1', caption: 'Radio 1', img: 'icon-page'},
+            {type: 'radio', id: 'item4', group: '1', caption: 'Radio 2', img: 'icon-page'},
+            {type: 'spacer'},
+            {type: 'button', id: 'item5', caption: 'Item 5', img: 'icon-save'}
         ]
     });
-    
+
     var pstyle = 'background-color: rgba(127,127,127,0.5); border: 1px solid #dfdfdf; padding: 5px;';
     $('#layout').w2layout({
         name: 'dock',
         panels: [
-            { type: 'top',  size: 50, resizable: false, style: pstyle, content: '' },
-            { type: 'left', size: 200, resizable: true, style: pstyle, content: '' },
-            { type: 'main' },
+            {type: 'top', size: 50, resizable: false, style: pstyle, content: ''},
+            {type: 'left', size: 200, resizable: true, style: pstyle, content: ''},
+            {type: 'main'},
 //            { type: 'preview', size: '50%', resizable: true, style: pstyle, content: 'preview' },
-            { type: 'right', size: 200, resizable: true, style: pstyle, content: '' },
-            { type: 'bottom', size: 150, resizable: true, style: pstyle, content: '' }
+            {type: 'right', size: 200, resizable: true, style: pstyle, content: ''},
+            {type: 'bottom', size: 150, resizable: true, style: pstyle, content: ''}
         ]
     });
-    const dock = w2ui.dock;   
+    const dock = w2ui.dock;
     $('#menu').detach().appendTo(dock.el('left'));
     $('#query').detach().appendTo(dock.el('top'));
     $('#resultsPane').detach().appendTo(dock.el('right'));
     $('#timeline').detach().appendTo(dock.el('bottom'));
-    
-    
+
 
     var clusters = {};
 
     const map = MAP('map',
-        (x)=>{
+        (x) => {
             LOAD(x, 0.5);
         }
     );
-
-
-
 
 
 //    var IF = new RuleReactor({}, true);
@@ -117,7 +116,7 @@ $(() => {
             y = new NObject(y);
 
             ME.set(id, y);
-            
+
             return y;
         }
     }
@@ -144,37 +143,36 @@ $(() => {
 
     function FORGET(decay, maxItems) {
         /*if (!ME.size() > maxItems) {
-            //dont have to sort
-        }*/
+         //dont have to sort
+         }*/
         const n = ME.size;
-                
+
         const filteredIterator = ME.values();
         const nn = filteredIterator.next;
-        filteredIterator.next = () => {           
+        filteredIterator.next = () => {
             const v = nn.call(filteredIterator);
-            
+
             v.pri *= decay;
-            
-            return v;            
+
+            return v;
         };
-        
+
         const a = Array.from(filteredIterator);
-        
-        
-        a.sort((x,y)=>{
-           
-           if (x === y) return 0;
-           
-           const xp = x.pri;
-           const yp = y.pri;
-           if (xp > yp) return -1;
-           else return +1;
+
+
+        a.sort((x, y) => {
+
+            if (x === y) return 0;
+
+            const xp = x.pri;
+            const yp = y.pri;
+            if (xp > yp) return -1;
+            else return +1;
         });
-        
-        
-        
-        const toRemove = n - maxItems;      
-                
+
+
+        const toRemove = n - maxItems;
+
         for (var i = 0; i < toRemove; i++) {
             const z = a.pop();
             REMOVE(z.I);
@@ -184,10 +182,6 @@ $(() => {
     $.get('/logo.html', (x) => {
         setTimeout(() => $('#logo').html(x), 0);
     });
-
-
-
-
 
 
     //const mapClustering = new L.MarkerClusterGroup().addTo(map);
@@ -208,7 +202,7 @@ $(() => {
         }
 
         /*var x = JSON.stringify(obj, null, 4);
-         
+
          var w = newWindow($('<pre>').text(x));
          $.getJSON('/obj/' + obj.I, function(c) {
          var desc = c['^']['_'];
@@ -227,7 +221,8 @@ $(() => {
          clearTimeout(o.ttRemove);
          o.tt.fadeIn();
          }
-         else */{
+         else */
+        {
             if (o.tt)
                 return; //already shown
 
@@ -287,7 +282,7 @@ $(() => {
                                 })
                             )
                         )),
-                0);
+                    0);
             }
         },
         function (result) {
@@ -352,17 +347,21 @@ $(() => {
             const id = v[0]
                 .replace(/_/g, ' ')
                 .replace(/\-/g, ' ')
-                ; //HACK
+            ; //HACK
             const score = v[1];
 
 
             const c = $(e('div'))
                 .attr('class', 'grid-item-content')
                 .text(id).click(() => {
-                queryText.val(/* dimension + ':' + */ id);
-                querySubmit();
-                return false;
-            })
+
+                    queryText.val(/* dimension + ':' + */ id);
+                    Backbone.history.navigate("all/" + id);
+
+                    //querySubmit();
+
+                    return false;
+                })
                 .attr('style',
                     'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
 
@@ -385,9 +384,6 @@ $(() => {
     }
 
 
-
-
-
     //PACKERY.js
     //http://codepen.io/desandro/pen/vKjAPE/
     //http://packery.metafizzy.co/extras.html#animating-item-size
@@ -402,27 +398,34 @@ $(() => {
         //            $('#facets').append($('<div>').append(f));
 
         FACETS({q: dimension}, function (result) {
-            setTimeout(() => {
+
+            if (!result || result.length === 0)
+                return;
+
+            try {
                 result = JSON.parse(result);
+            } catch (e) {
+                console.error(e, result);
+                return;
+            }
 
-                /*
-                 f.html($('<div>').append(
-                 $(d('h3')).text(label),
-                 $(d('ul')).append(
-                 _.map(result, (v) => {
-                 return $(d('li')).append(d('a')).click(()=>{
-                 queryText.val(dimension + ':' + id);
-                 querySubmit();
-                 }).text(id);
-                 }))
-                 ));
-                 */
+            /*
+             f.html($('<div>').append(
+             $(d('h3')).text(label),
+             $(d('ul')).append(
+             _.map(result, (v) => {
+             return $(d('li')).append(d('a')).click(()=>{
+             queryText.val(dimension + ':' + id);
+             querySubmit();
+             }).text(id);
+             }))
+             ));
+             */
 
-                //BubblesFacetSVG(f, result);
+            //BubblesFacetSVG(f, result);
 
 
-                loadFacets(result);
-            }, 0);
+            loadFacets(result);
 
         });
 
@@ -455,15 +458,15 @@ $(() => {
             contract();
 
             loadFacets(ff);
-                       
+
             _.forEach(rr, x => {
                 const score = x.score;
                 const y = ADD(x);
                 if (y) {
-                    y.activate(score * ACTIVATION_RATE * activationRate);                
+                    y.activate(score * ACTIVATION_RATE * activationRate);
                 }
             });
-            
+
             FORGET(0.9, MEMORY_SIZE);
 
 
@@ -505,9 +508,6 @@ $(() => {
     }
 
 
-
-
-
     //START ----------------->
 
     app.Router = Backbone.Router.extend({
@@ -528,7 +528,7 @@ $(() => {
             $('#menu').attr('class', 'hide');
             $('#focus').attr('class', 'main').html(
                 E('iframe').attr('src', url).attr('width', '100%').attr('height', '100%')
-                ).show();
+            ).show();
 
 
         },
@@ -571,8 +571,6 @@ $(() => {
     app.router = new app.Router();
 
     Backbone.history.start();
-
-
 
 
 }, false);

@@ -188,18 +188,21 @@ function ResultNode(x) {
 
 
     const header = DIVclass('header');
-    if (x.data) {
-        header.append(
-            //E('a').attr('href', x.data).attr('target', '_').append(
-            E('h2').text(x.N)
-            //)
-        );
-    } else {
-        header.append(
-            E('h2').text(x.N)
-        );
+    // if (x.data) {
+    //     header.append(
+    //         //E('a').attr('href', x.data).attr('target', '_').append(
+    //         E('h2').text(x.N)
+    //         //)
+    //     );
+    // } else {
 
-    }
+    const label = E('h2').text(x.N || x.I);
+    header.append(
+        x.url ? newEle('a').attr('href', x.url).append(label) : label
+    );
+
+
+    //}
 
     const meta = DIVclass('meta');
 

@@ -9,6 +9,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public final class SearchResult {
     private final org.apache.lucene.search.Query query;
     public final FacetResult facets;
 
-    public SearchResult(Query q, IndexSearcher searcher, TopDocs docs, FacetResult facetResults) {
+    public SearchResult(Query q, IndexSearcher searcher, @Nullable TopDocs docs, FacetResult facetResults) {
         this.query = q;
         this.searcher = searcher;
         this.facets = facetResults;
@@ -42,6 +43,9 @@ public final class SearchResult {
     }
 
     public void forEachDocument(BiPredicate<Document,ScoreDoc> each) {
+        if (docs == null)
+            return;
+
         final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
 
         IndexReader reader = searcher.getIndexReader();
@@ -80,14 +84,16 @@ public final class SearchResult {
     }
 
     public void close() {
-        if (searcher == null)
-            return;
+        synchronized (query) {
+            if (searcher == null)
+                return;
 
-        try {
+            try {
 
-            searcher.getIndexReader().close();
-        } catch (IOException e) {
-            logger.error("{}", e);
+                searcher.getIndexReader().close();
+            } catch (IOException e) {
+                logger.error("{}", e);
+            }
         }
     }
 

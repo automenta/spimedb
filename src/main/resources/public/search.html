@@ -269,7 +269,12 @@
 //            $('#facets').append($('<div>').append(f));
 
             $.get('/facet', {q: dimension}, function (result) {
-                result = JSON.parse(result);
+                try {
+                    result = JSON.parse(result);
+                } catch (e) {
+                    console.error(e,result);
+                    return;
+                }
 
                 /*
                  f.html($('<div>').append(

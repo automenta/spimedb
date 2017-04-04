@@ -76,7 +76,7 @@ public class DObject implements NObject {
 
         String[] t = n.tags();
         if (t.length > 0)
-            d.add(string(NObject.TAG, Joiner.on(' ').join(t)));
+            d.add(text(NObject.TAG, Joiner.on(' ').join(t)));
 
         if (n.bounded()) {
             DoubleND minP = n.min();
@@ -171,7 +171,7 @@ public class DObject implements NObject {
                         /* TODO else: recurse */
                     });
                     if (sb.length()!=0)
-                        d.add(string(TAG,sb.toString()));
+                        d.add(text(TAG,sb.toString()));
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
@@ -238,8 +238,8 @@ public class DObject implements NObject {
         }
 
         for (String t : tags()) {
-            if (/*t == null || */t.isEmpty())
-                continue;
+//            if (/*t == null || */t.isEmpty())
+//                continue;
 
             d.add(new FacetField(NObject.TAG, t));
         }

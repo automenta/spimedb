@@ -1,5 +1,7 @@
 package spimedb.util;
 
+import com.google.common.base.Splitter;
+import org.apache.lucene.analysis.core.LowerCaseTokenizer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -12,8 +14,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
+import static spimedb.index.DObject.parseKeywords;
 import static spimedb.util.HTTP.filenameable;
 
 
@@ -74,10 +79,12 @@ public class Crawl {
         String whenCached = p != null ? p.get("url_cached") : null;
         try {
             if (whenCached == null || Long.valueOf(whenCached) < u.openConnection().getLastModified()) {
+                String urlString = u.toString();
+                Set<String> keywords = parseKeywords(new LowerCaseTokenizer(), urlString);
                 db.addAsync(pri, new MutableNObject(id)
-                    .name(id)
+                    .withTags(keywords.toArray(new String[keywords.size()]))
                     .put("url_in", url_in)
-                    .put("url", u.toString())
+                    .put("url", urlString)
                 );
             }
         } catch (IOException e) {

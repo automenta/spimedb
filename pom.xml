@@ -8,6 +8,7 @@
     <modules>
         <module>media</module>
         <module>core</module>
+        <module>logic</module>
     </modules>
     <packaging>pom</packaging>
 

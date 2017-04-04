@@ -3,6 +3,7 @@ package spimedb;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
@@ -184,14 +185,21 @@ public class SpimeDB {
         this.analyzer = new StandardAnalyzer();
 
         this.facetsConfig.setHierarchical(NObject.ID, true);
+        this.facetsConfig.setMultiValued(NObject.ID, false);
+
+        this.facetsConfig.setHierarchical(NObject.TAG, false);
         this.facetsConfig.setMultiValued(NObject.TAG, true);
 
-        final String[] defaultFindFields = new String[]{NObject.NAME, NObject.DESC};
+        final String[] defaultFindFields = new String[]{
+                NObject.NAME,
+                NObject.DESC,
+                NObject.TAG,
+                NObject.ID};
         final Map<String, Float> defaultFindFieldStrengths = Maps.mutable.with(
                 NObject.NAME, 1f,
-                NObject.ID, 0.75f,
-                NObject.DESC, 0.5f,
-                NObject.TAG, 0.25f
+                NObject.ID, 1f,
+                NObject.DESC, 0.25f,
+                NObject.TAG, 0.5f
         );
         this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, defaultFindFieldStrengths);
 
@@ -398,6 +406,8 @@ public class SpimeDB {
                 taxoReader.close();
 
                 return new SearchResult(q, searcher, docs, facetResults);
+            } else {
+                //return new SearchResult(q, searcher, null, null);
             }
         }
 
@@ -445,6 +455,8 @@ public class SpimeDB {
                 if (out.isEmpty())
                     return;
 
+                int written = 0, removed = 0;
+
                 try {
 
                     IndexWriterConfig writerConf = new IndexWriterConfig(analyzer);
@@ -454,7 +466,6 @@ public class SpimeDB {
 
                     DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
 
-                    int written = 0, removed = 0;
 
                     while (!out.isEmpty()) {
 
@@ -492,17 +503,16 @@ public class SpimeDB {
                     taxoWriter.close();
 
 
-                    logger.debug("{} indexed, {} removed", written, removed);
 
                 } catch (IOException e) {
-
                     logger.error("indexing error: {}", e);
                 }
 
-                lastWrite = now();
-
                 writing.set(false);
 
+                lastWrite = now();
+
+                logger.debug("{} indexed, {} removed", written, removed);
             });
         }
 
@@ -584,6 +594,24 @@ public class SpimeDB {
     public void remove(String id) {
         out.put(id, REMOVE);
         commit();
+    }
+
+    public void add(JsonNode x) {
+
+        if (x.isArray()) {
+            x.forEach(this::add);
+            return;
+        }
+
+        JsonNode inode = x.get("I");
+        String I = (inode == null) ? UUID.randomUUID().toString() : inode.toString();
+
+        MutableNObject d = new MutableNObject(I)
+                .withTags("")
+                .put("_", x)
+                .when(System.currentTimeMillis());
+
+        add( d );
     }
 
 
@@ -677,7 +705,8 @@ public class SpimeDB {
             /*return */
             exe.run(pri, () -> {
                 /*return */
-                add(next);
+                DObject d = add(next);
+                //System.out.println(d.document);
             });
         } /*else
             return null;*/

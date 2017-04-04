@@ -32,8 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
@@ -472,6 +470,7 @@ public class Main extends FileAlterationListenerAdaptor {
         //setup default klasspath
         klassPath.put("http", WebServer.class);
         klassPath.put("log", LogConfigurator.class);
+        klassPath.put("udp", UDP.class);
         //klassPath.put("crawl", Crawl.class);
 
         put(LogConfigurator.class, new LogConfigurator(null));
@@ -514,6 +513,44 @@ public class Main extends FileAlterationListenerAdaptor {
 //        };
 
 
+    }
+
+    static class UDP {
+
+        private final SpimeDB db;
+        int port;
+
+        private Peer peer = null;
+
+        public UDP(SpimeDB db) {
+            this.db = db;
+        }
+
+
+        public void setPort(int port) {
+            int p = this.port;
+            if (p == port)
+                return;
+            synchronized (this) {
+                this.port = port;
+                if (port==-1)
+                    return;
+                if (this.peer != null) {
+                    this.peer.stop();
+                }
+                try {
+                    this.peer = new Peer(port, db);
+                } catch (Exception e) {
+                    logger.error("{}", e);
+                }
+            }
+
+
+        }
+
+        public int getPort() {
+            return port;
+        }
     }
 
     protected void rebuild() {
