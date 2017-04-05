@@ -6,14 +6,13 @@
             background-color: black;
             color: #ccc;
             font-family: monospace;
-            margin: 1em;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            display: inline;
         }
 
         body, input, select, button {
-            font-size: 150%;
+            font-size: 120%;
         }
 
         input {
@@ -36,39 +35,51 @@
         }
 
 
-        #output {
-          width: 100%;
-          left: 0;
-          position: fixed;
-          height: 90%;
-          max-width: 100%;
-          overflow-y: auto;
-        }
-
         .box {
+            min-width: 10em;
+            min-height: 3em;
+            max-height: 100%;
+            max-width: 100%;
             background-color: #555;
-            overflow: auto;
             margin: 0.5em;
             padding: 0.5em;
-            display: inline-flex;
-            max-height: 75%;
+            overflow-y: auto;
+
         }
 
+
         .box * {
-            padding: 0.5em;
+            padding: 0.25em;
             margin: 0;
         }
 
+        body .box  {
+        }
 
         .box pre {
             background-color: #000;
             overflow: auto;
         }
 
+        .group {
+            display: inline;
+            max-width: 100%;
+        }
+
         .group .box {
             background-color: #333;
             font-size: 50%;
             margin: 0.5em;
+
+        }
+
+        .box .controls {
+        }
+        .controls .button {
+            background-color: #1a0dab;
+        }
+        .controls .button:hover {
+            background-color: #00a23f;
         }
 
 
@@ -86,12 +97,16 @@
 <script src="lib/leaflet/leaflet.js"></script>
 
 <script src="util.js"></script>
+
+<script src="lib/interact/interact.min.js"></script>
+
+<link rel="stylesheet" href="windgets.css">
+<script src="util.windget.js"></script>
+
 <script src="spime.js"></script>
 
 <body>
 
-    <div id="output">
-    </div>
     <div id="in" >
 
         <span>
@@ -135,11 +150,23 @@
             })
         }
 
-        var Oo = $('#output');
+        var Oo = $('body');
 
-        function ADD(x) {
+        function ADD(label, content) {
 
-            const b = $('<div class="box"/>').append(x);
+            const b = DIVclass('box');
+
+            const controls = DIVclass('controls').append(
+                SPANclass('label').append(label),
+                SPANclass('button').text('~').click(()=>{
+                    newWindow(b);
+                }),
+                SPANclass('button').text('x')
+            );
+
+            b.append( controls ).append( content );
+
+
             Oo.append(b);
 
             setTimeout(()=>{
@@ -147,11 +174,99 @@
 
 
               //scroll to bottom
-              const height = Oo[0].scrollHeight;
-              Oo.scrollTop(height);
+              const height = document.body.scrollHeight;
+              document.body.scrollTop = (height);
             },0);
 
             return b;
+        }
+
+        function ADD_QUERY() {
+
+            const query = DIV();
+            const suggestBox = DIV();
+            const results = DIVclass('group');
+
+            var suggested = { };
+
+            function clearSuggestions() {
+                if (suggestBox) {
+                    suggestBox.html('');
+                    suggested = { };
+                }
+            }
+
+            const I = QueryPrompt(
+
+                function(suggestions) {
+                    var ss;
+
+                    try {
+                        ss = JSON.parse(suggestions);
+                    } catch (e) {
+                        ss = [];
+                    }
+
+                    if (ss.length === 0) {
+                        //hard clear
+                        clearSuggestions();
+                        return;
+                    } else if (suggestBox) {
+                        //soft clear
+                        suggestBox.html([]);
+                        suggested = {};
+                    }
+
+
+                    _.forEach(ss, x => {
+                        if (!suggested[x]) {
+                            suggested[x] = suggestBox.append(divCls('box').append(x));
+                        }
+                    });
+                },
+
+                function(result) {
+
+                    clearSuggestions();
+                    results.html('');
+
+                    var ss, rr, ff;
+                    try {
+                        ss = JSON.parse(result);
+                        rr = ss[0]; //first part: search results
+                        ff = ss[1]; //second part: facets
+                    } catch (e) {
+                        //usually just empty search result
+                        //$('#results').html('No matches for: "' + qText + '"');
+                        return;
+                    }
+
+                    var toAdd = [];
+                    _.forEach(rr, x => {
+                        if (!x.I) return;
+
+                        //const score = x.score;
+                        const y = new NObject(x);
+                        if (y.what)
+                            toAdd.push(y.what.addClass('box'));
+                    });
+
+                    if (toAdd.length > 0)
+                        results.append(toAdd);
+
+                }
+            );
+
+            query.append( suggestBox, results );
+
+            return ADD(I, query);
+        }
+
+        function ADD_SAY() {
+
+        }
+        function ADD_COMMAND() {
+
         }
 
         function code(e) {
@@ -170,83 +285,10 @@
             }
         });*/
 
-        var suggestBox = undefined;
-        var suggested = { };
 
-        function clearSuggestions() {
-            if (suggestBox) {
-                suggestBox.remove();
-                suggestBox = undefined;
-                suggested = { };
-            }
-        }
 
-        var I = QueryPrompt(
 
-            function(suggestions) {
-                var ss;
 
-                try {
-                    ss = JSON.parse(suggestions);
-                } catch (e) {
-                    ss = [];
-                }
-
-                if (ss.length === 0) {
-                    //hard clear
-                    clearSuggestions();
-                    return;
-                } else if (suggestBox) {
-                    //soft clear
-                    suggestBox.html([]);
-                    suggested = {};
-                }
-
-                if (!suggestBox) {
-                    suggestBox = ADD().addClass('group');
-                }
-
-                _.forEach(ss, x => {
-                    if (!suggested[x]) {
-                        suggested[x] = suggestBox.append(divCls('box').append(x));
-                    }
-                });
-            },
-
-            function(result) {
-
-                I.val('');
-
-                clearSuggestions();
-
-                var ss, rr, ff;
-                try {
-                    ss = JSON.parse(result);
-                    rr = ss[0]; //first part: search results
-                    ff = ss[1]; //second part: facets
-                } catch (e) {
-                    //usually just empty search result
-                    //$('#results').html('No matches for: "' + qText + '"');
-                    return;
-                }
-
-                var toAdd = [];
-                _.forEach(rr, x => {
-                    if (!x.I) return;
-
-                    //const score = x.score;
-                    const y = new NObject(x);
-                    if (y.what)
-                        toAdd.push(y.what.addClass('box'));
-                });
-
-                if (toAdd.length > 0)
-                    ADD(divCls('group').append(toAdd));
-
-            }
-        );
-
-        $('#in_find').append(I);
 
         const sayBox = $('#in_say input');
         sayBox.change(v=>{
@@ -257,15 +299,15 @@
             }
         });
 
-        const ws = new SpimeSocket('anon', (m)=>{
+        const ws = new SpimeSocket('anon', (x)=>{
             if (typeof(m)!=='string') {
-                m = newEle('pre').text(JSON.stringify(m, null, 2));
+                m = newEle('pre').text(JSON.stringify(x, null, 2));
             }
 
-            ADD(m);
+            ADD( newEle('span').text(x.N || x.I), m );
         });
         ws.onopen = ()=>{
-            ADD('Connected')
+            ADD_QUERY();
         };
 
     });

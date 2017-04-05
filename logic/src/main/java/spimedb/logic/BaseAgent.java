@@ -92,7 +92,7 @@ public class BaseAgent extends NAR {
         };
 
 
-        new LeakOut(this, 16, 1) {
+        new LeakOut(this, 16, 0.1f) {
             @Override protected float send(Task task) {
                 peer.say("{ \">\": \"\", N: \"" + taskEscaper.escape(task.toString()) + "\" }", 2);
                 return 1f;

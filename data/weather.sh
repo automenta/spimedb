@@ -1,4 +1,7 @@
+# https://github.com/toddmotto/public-apis
+
 # https://stedolan.github.io/jq/tutorial/
+
 
 curl http://ana:8080/tell/json -d\
 "`curl \

@@ -238,8 +238,8 @@ public class DObject implements NObject {
         }
 
         for (String t : tags()) {
-//            if (/*t == null || */t.isEmpty())
-//                continue;
+            if (/*t == null || */t.isEmpty())
+                continue;
 
             d.add(new FacetField(NObject.TAG, t));
         }

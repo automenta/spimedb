@@ -113,7 +113,7 @@ function newJSONTable(x, withoutKeys, withoutTypes) {
                 .append('<td>' + JSON.stringify(v) + '</td>') );
     }
 
-    if (n.length == 0) return newDiv(); //empty
+    if (n.length == 0) return DIV(); //empty
 
     return $('<table class="ui celled striped table"/>').append(n);
 }

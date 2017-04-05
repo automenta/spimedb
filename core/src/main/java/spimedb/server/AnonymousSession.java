@@ -48,7 +48,7 @@ public class AnonymousSession extends Session implements NObjectConsumer {
 
     private void statusChange(WebSocketChannel socket, String status) {
         db.add(
-            new MutableNObject(sessionID + "." + serial.incrementAndGet(),
+            new MutableNObject(sessionID + '/' + serial.incrementAndGet(),
             status + " "+ socket.getDestinationAddress() ));
     }
 

@@ -8,16 +8,21 @@ function E(eleID) {
 }
 
 function DIVclass(cssclass) {
-    const x = $(e('div'));
-    if (cssclass) {
+    const x = E('div');
+    if (cssclass)
         x.attr('class', cssclass);
-    }
     return x;
 }
 
+function SPANclass(cssclass) {
+    const x = E('span');
+    if (cssclass)
+        x.attr('class', cssclass);
+    return x;
+}
 
 //faster than $('<div/>');
-function newDiv(id) {
+function DIV(id) {
     var e = newEle('div');
     if (id) e.attr('id', id);
     return e;
@@ -29,7 +34,7 @@ function newSpan(id) {
 }
 
 function divCls(c) {
-    var d = newDiv();
+    var d = DIV();
     d.attr('class', c);
     return d;
 }
