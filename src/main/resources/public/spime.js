@@ -3,8 +3,8 @@
 var uiBoundsReactionPeriodMS = 75;
 
 
-function SEARCHtext(query, withResult) {
-    $.get('/search', {q: query}, withResult);
+function FINDtext(query, withResult) {
+    $.get('/find', {q: query}, withResult);
 }
 
 function FACETS(query, withResult) {
@@ -29,7 +29,7 @@ function QueryPrompt(withSuggestions, withResults) {
     }, 100, true, true);
 
     queryText.submit = function () {
-        SEARCHtext(queryText.val(), withResults);
+        FINDtext(queryText.val(), withResults);
     };
 
     queryText.on('input', onQueryTextChanged);

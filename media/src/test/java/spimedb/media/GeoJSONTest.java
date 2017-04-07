@@ -1,6 +1,5 @@
 package spimedb.media;
 
-import jcog.tree.rtree.rect.RectDoubleND;
 import org.junit.Test;
 import spimedb.SpimeDB;
 import spimedb.query.Query;

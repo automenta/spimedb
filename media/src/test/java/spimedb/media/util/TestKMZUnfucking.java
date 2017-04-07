@@ -2,7 +2,6 @@ package spimedb.media.util;
 
 
 import org.junit.Test;
-import spimedb.MutableNObject;
 import spimedb.SpimeDB;
 import spimedb.media.GeoNObject;
 import spimedb.media.KML;

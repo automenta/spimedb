@@ -7,10 +7,8 @@ import jcog.tree.rtree.point.DoubleND;
 import org.eclipse.collections.impl.factory.Iterables;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import spimedb.util.JSON;
 
-import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 
@@ -27,6 +25,10 @@ import java.util.function.Supplier;
 @JsonSerialize(using = NObject.NObjectSerializer.class)
 public class MutableNObject extends ImmutableNObject {
 
+
+    public MutableNObject() {
+        this(SpimeDB.uuidString());
+    }
 
     public MutableNObject(String id) {
         this(id, null);
@@ -92,14 +94,15 @@ public class MutableNObject extends ImmutableNObject {
         return this;
     }
 
-    public void description(String d) {
+    public MutableNObject description(String d) {
         if (d.isEmpty()) {
             if (data != null)
                 data.remove(DESC);
-            return;
-        }
 
-        put(DESC, d);
+        } else {
+            put(DESC, d);
+        }
+        return this;
     }
 
 

@@ -9,6 +9,12 @@
             margin: 0;
             padding: 0;
             display: inline;
+
+        }
+
+        body * {
+            -webkit-transition: background-color 0.2s ease;
+            /*-webkit-transition: font-size 0.1s;*/
         }
 
         body, input, select, button {
@@ -40,17 +46,20 @@
             min-height: 3em;
             max-height: 100%;
             max-width: 100%;
-            background-color: #555;
             margin: 0.5em;
             padding: 0.5em;
             overflow-y: auto;
+            background-color: #555;
+        }
 
+        .box:hover {
+            background-color: #558;
         }
 
 
-        .box * {
-            padding: 0.25em;
-            margin: 0;
+        .box div {
+            padding: 0.1em;
+            /*margin: 0;*/
         }
 
         body .box  {
@@ -74,9 +83,15 @@
         }
 
         .box .controls {
+
+        }
+        .controls .label {
+            font-size: 150%;
         }
         .controls .button {
+            float:right;
             background-color: #1a0dab;
+            padding: 0.25em;
         }
         .controls .button:hover {
             background-color: #00a23f;
@@ -106,27 +121,11 @@
 <script src="spime.js"></script>
 
 <body>
-
     <div id="in" >
-
-        <span>
-            <select id="inMode">
-                <option value="find" selected>find</option>
-                <option value="say">say</option>
-            </select>
-        </span>
-
-        <span id="in_find" class="inner" >
-        </span>
-        <span id="in_say" class="inner" >
-            <input type="text"/>
-            <button>SEND</button>
-        </span>
-
+        <button id="add_find">find</button>
+        <button id="add_say">say</button>
+        <button id="add_code">code</button>
     </div>
-
-
-
 </body>
 
 <script>
@@ -156,16 +155,34 @@
 
             const b = DIVclass('box');
 
+            var font = 1.0;
+
+            function updateFont() {
+                b.attr('style', 'font-size:' + (parseInt(font * 100.0)) + '%');
+            }
+
             const controls = DIVclass('controls').append(
                 SPANclass('label').append(label),
+
+                SPANclass('button').text('v').click(()=>{
+                    font*= 0.75; updateFont(); //font shrink
+                }),
+
+                SPANclass('button').text('^').click(()=>{
+                    font*= 1.333; updateFont(); //font grow
+                }),
+
                 SPANclass('button').text('~').click(()=>{
                     newWindow(b);
                 }),
-                SPANclass('button').text('x')
+
+                SPANclass('button').text('x').click(()=>b.hide())
             );
 
-            b.append( controls ).append( content );
+            b.append( controls );
 
+            if (content)
+                b.append( content );
 
             Oo.append(b);
 
@@ -181,7 +198,7 @@
             return b;
         }
 
-        function ADD_QUERY() {
+        function ADD_FIND() {
 
             const query = DIV();
             const suggestBox = DIV();
@@ -259,55 +276,49 @@
 
             query.append( suggestBox, results );
 
-            return ADD(I, query);
+            return ADD(SPAN().append('? ', I), query);
         }
 
         function ADD_SAY() {
+            const input = $('<input type="text">');
+            input.change(v=>{
+                const msg = input.val();
+                if (msg.length > 0) {
+                    input.val('');
+                    ws.send('me.tell([""], \"' + msg + '\")');
+                }
+            });
 
+            ADD(SPAN().append('> ', input));
         }
-        function ADD_COMMAND() {
 
+        function ADD_CODE() {
+            const input = $('<input type="text">');
+            input.change(v=>{
+                const msg = input.val();
+                if (msg.length > 0) {
+                    input.val('');
+                    ws.send(msg);
+                }
+            });
+
+            ADD(SPAN().append('! ', input));
         }
-
-        function code(e) {
-            return $('<pre>').text(JSON.stringify(e, null, 2));
-        }
-
-
-
-        //var I = $('#in');
-
-        /*I.keyup(function(e) {
-            if (e.keyCode == 13) {
-                var x = I.val();
-                I.val('');
-                ws.send(x);
-            }
-        });*/
-
-
-
-
-
-
-        const sayBox = $('#in_say input');
-        sayBox.change(v=>{
-            const msg = sayBox.val();
-            if (msg.length > 0) {
-                sayBox.val('');
-                ws.send('me.tell([""], \"' + msg + '\")');
-            }
-        });
 
         const ws = new SpimeSocket('anon', (x)=>{
             if (typeof(m)!=='string') {
-                m = newEle('pre').text(JSON.stringify(x, null, 2));
+                m = DIV().append(newEle('pre').text(JSON.stringify(x, null, 2)));
             }
 
             ADD( newEle('span').text(x.N || x.I), m );
         });
+
+        $('#add_find').click( ADD_FIND );
+        $('#add_say').click( ADD_SAY );
+        $('#add_code').click( ADD_CODE );
+
         ws.onopen = ()=>{
-            ADD_QUERY();
+            ADD_FIND();
         };
 
     });

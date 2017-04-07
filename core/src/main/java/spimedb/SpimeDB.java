@@ -7,11 +7,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Longs;
 import jcog.Util;
+import jcog.io.BinTxt;
+import jcog.random.XorShift128PlusRandom;
 import jcog.tree.rtree.rect.RectDoubleND;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
@@ -37,7 +40,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.eclipse.collections.impl.factory.Maps;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -82,6 +84,8 @@ public class SpimeDB {
 
     //Tag
     public static final String[] GENERAL = new String[]{ "" };
+
+    final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ (-31 * System.currentTimeMillis()));
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
             Math.max(2, 1 + Runtime.getRuntime().availableProcessors())
@@ -228,6 +232,19 @@ public class SpimeDB {
 
     public static TextField text(String key, String value) {
         return new TextField(key, value, Field.Store.YES);
+    }
+
+    @NotNull
+    public static String uuidString() {
+        return Base64.getEncoder().encodeToString(uuidBytes()).replaceAll("\\/", "`");
+        //return BinTxt.encode(uuidBytes());
+    }
+
+    public static byte[] uuidBytes() {
+        return ArrayUtils.addAll(
+            Longs.toByteArray(rng.nextLong()),
+            Longs.toByteArray(rng.nextLong())
+        );
     }
 
 
@@ -598,20 +615,21 @@ public class SpimeDB {
 
     public void add(JsonNode x) {
 
-        if (x.isArray()) {
-            x.forEach(this::add);
-            return;
-        }
+//        if (x.isArray()) {
+//            x.forEach(this::add);
+//            return;
+//        } else {
 
-        JsonNode inode = x.get("I");
-        String I = (inode == null) ? UUID.randomUUID().toString() : inode.toString();
+            JsonNode inode = x.get("I");
+            String I = (inode != null) ? inode.toString() : SpimeDB.uuidString();
 
-        MutableNObject d = new MutableNObject(I)
-                .withTags("")
-                .put("_", x)
-                .when(System.currentTimeMillis());
+            MutableNObject d = new MutableNObject(I)
+                    .withTags("")
+                    .put("_", x)
+                    .when(System.currentTimeMillis());
 
-        add( d );
+            add(d);
+//        }
     }
 
 

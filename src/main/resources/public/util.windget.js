@@ -27,7 +27,7 @@ function newFrame() {
     if (div.length === 0)
         div = $('<div>').addClass('windgets').appendTo($('body'));
 
-    var content = $('<div>').addClass('windget').fadeIn().appendTo(div);
+    var content = $('<div>').addClass('windget')/*.fadeIn()*/.appendTo(div);
 
     var dragMoveListener = function (event) {
         var target = event.target,

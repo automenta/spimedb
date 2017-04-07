@@ -336,7 +336,7 @@
                 //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
                 $('#results').html('Searching...');
 
-                $.get('/search', {q: qText}, function (result) {
+                $.get('/find', {q: qText}, function (result) {
 
                     var ss, rr, ff;
                     try {
@@ -386,18 +386,12 @@
 
 
                             const header = DIVclass('header');
-                            if (x.data) {
-                                header.append(
-                                    //E('a').attr('href', x.data).attr('target', '_').append(
-                                    E('h2').text(x.N)
-                                    //)
-                                );
-                            } else {
-                                header.append(
-                                    E('h2').text(x.N)
-                                );
 
-                            }
+                            header.append(
+                                E('h2').text(x.N || x.I)
+                            );
+
+
 
                             const meta = DIVclass('meta');
 

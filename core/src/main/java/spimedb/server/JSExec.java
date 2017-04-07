@@ -1,7 +1,11 @@
 package spimedb.server;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import spimedb.NObject;
+import spimedb.util.JSON;
 
 import javax.script.SimpleBindings;
 import java.util.function.Consumer;
@@ -57,8 +61,18 @@ public final class JSExec {
     @Override
     public String toString() {
         //HACK manual JSON generation, used for when jackson cant serialize 'o'
-        return "{\"i\":" + i +
-                ",\"o\":" + o +
+        return "{\"" + NObject.NAME + "\":" + i + //input command as 'NAME'
+                ",\"" + NObject.DESC + "\":" + o + //output result as 'DESC'
                 ",\"@\":[[" + when[0] + "," + when[1] + "]]}";
+    }
+
+    public JsonNode toJSON() {
+        ObjectNode x = JSON.json.createObjectNode();
+        x.put(NObject.NAME, i);
+        x.put(NObject.DESC, JSON.json.valueToTree(o));
+        x.put("@", JSON.json.createArrayNode().add(
+            JSON.json.createArrayNode().add(when[0]).add(when[1])
+        ) );
+        return x;
     }
 }

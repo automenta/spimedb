@@ -1,27 +1,19 @@
 package spimedb.logic;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import jcog.bag.impl.PLinkHijackBag;
-import jcog.net.UDPeer;
 import jcog.random.XorShift128PlusRandom;
 import nars.$;
 import nars.NAR;
 import nars.Task;
-import nars.bag.impl.ArrayBag;
-import nars.bag.impl.TaskHijackBag;
-import nars.bag.leak.Leak;
 import nars.bag.leak.LeakOut;
-import nars.budget.BudgetMerge;
 import nars.conceptualize.DefaultConceptBuilder;
 import nars.control.ConceptBagFocus;
 import nars.control.FireConcepts;
 import nars.derive.DefaultDeriver;
-import nars.derive.TrieDeriver;
-import nars.index.term.TermIndex;
 import nars.index.term.map.CaffeineIndex;
 import nars.premise.MatrixPremiseBuilder;
 import nars.premise.PreferSimpleAndConfident;
@@ -29,14 +21,11 @@ import nars.term.Compound;
 import nars.term.atom.Atomic;
 import nars.time.RealTime;
 import nars.time.Tense;
-import nars.time.Time;
 import nars.util.JsonCompound;
 import nars.util.exe.Executioner;
 import nars.util.exe.MultiThreadExecutor;
-import nars.util.exe.SynchronousExecutor;
-import org.jetbrains.annotations.NotNull;
 import spimedb.Peer;
-
+import spimedb.SpimeDB;
 
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -85,7 +74,7 @@ public class BaseAgent extends NAR {
 
                 //if (j.isJsonObject() && j.getAsJsonObject().get("I").getAsInt())
 
-                Atomic x = $.the(UUID.randomUUID().toString());
+                Atomic x = $.the(SpimeDB.uuidString());
                 believe($.sim(x, JsonCompound.the(j)));
                 believe($.inh(x, recv), Tense.Present);
             }

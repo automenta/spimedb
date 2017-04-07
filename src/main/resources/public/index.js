@@ -544,7 +544,7 @@ $(() => {
             //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
             //$('#results').html('Searching...');
 
-            SEARCHtext(qText, (d) => {
+            FINDtext(qText, (d) => {
                 LOAD(d, 1.0);
             });
 

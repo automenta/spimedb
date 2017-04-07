@@ -10,10 +10,8 @@ import spimedb.SpimeDB;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * Created by me on 3/30/17.
@@ -26,8 +24,7 @@ public class AnonymousSession extends Session implements NObjectConsumer {
     public AnonymousSession(SpimeDB db) {
         super(db);
 
-        UUID u = UUID.randomUUID();
-        sessionID = u.toString();// LongString.toString(u.getLeastSignificantBits()) + "" + LongString.toString(u.getMostSignificantBits());
+        sessionID = SpimeDB.uuidString();
 
         set("me", new API());
     }
@@ -71,8 +68,9 @@ public class AnonymousSession extends Session implements NObjectConsumer {
 
     public class API {
 
+
         public void tell(String[] tags, String message) {
-            MutableNObject n = new MutableNObject(sessionID + "." + serial.incrementAndGet(), message);
+            MutableNObject n = new MutableNObject(sessionID + "/" + serial.incrementAndGet(), message);
 
             ArrayList<String> tt = Lists.newArrayList(tags);
 

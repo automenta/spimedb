@@ -1,6 +1,5 @@
 package spimedb.util;
 
-import com.google.common.base.Splitter;
 import org.apache.lucene.analysis.core.LowerCaseTokenizer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 

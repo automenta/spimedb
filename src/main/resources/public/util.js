@@ -27,6 +27,11 @@ function DIV(id) {
     if (id) e.attr('id', id);
     return e;
 }
+function SPAN(id) {
+    var e = newEle('span');
+    if (id) e.attr('id', id);
+    return e;
+}
 function newSpan(id) {
     var e = newEle('span');
     if (id) e.attr('id', id);

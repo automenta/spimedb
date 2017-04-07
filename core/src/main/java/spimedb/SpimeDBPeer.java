@@ -63,7 +63,7 @@ public class SpimeDBPeer extends Peer {
         if (pi != null) {
             id = pi.textValue();
         } else {
-            id = UUID.randomUUID().toString(); //TODO better
+            id = SpimeDB.uuidString(); //TODO better
         }
 
         db.add(new MutableNObject(id).putAll(parsed).put("udp", m.data()));

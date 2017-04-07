@@ -18,7 +18,10 @@ import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
-import io.undertow.server.handlers.resource.*;
+import io.undertow.server.handlers.resource.CachingResourceManager;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
+import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
@@ -32,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
 import spimedb.FilteredNObject;
+import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
@@ -40,9 +44,13 @@ import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -210,10 +218,16 @@ public class WebServer extends PathHandler {
             }
         });
 
-        addPrefixPath("/search", ex -> HTTP.stream(ex, (o) -> {
+        addPrefixPath("/find", ex -> HTTP.stream(ex, (o) -> {
             String qText = getStringParameter(ex, "q");
             if (qText == null || (qText = qText.trim()).isEmpty())
                 return;
+
+            db.add(new MutableNObject()
+                    .name("find(\"" + qText + "\")")
+                    //.withTags("")
+                    .description(ex.toString())
+            );
 
             try {
                 send(db.find(qText, 20), o, searchResultFull);

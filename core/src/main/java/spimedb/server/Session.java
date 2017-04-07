@@ -84,11 +84,7 @@ public class Session extends AbstractServerWebSocket {
                     start((Task) resultObj);
                 } else {
                     //else send the immediate result
-                    //try {
-                        sendJSONBinary(socket, result, defaultOutRate, null);
-//                    } catch (IOException e) {
-//                        logger.info("{} {}", socket, e.getMessage());
-//                    }
+                    sendJSONBinary(socket, result.toJSON(), defaultOutRate, null);
                 }
             });
         });

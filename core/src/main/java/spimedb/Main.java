@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import org.mockito.internal.util.reflection.BeanPropertySetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import spimedb.server.WebServer;
 import spimedb.util.Crawl;
 import spimedb.util.Locker;
