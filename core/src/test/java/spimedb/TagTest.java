@@ -97,9 +97,9 @@ public class TagTest {
 
         db.sync();
 
-        assertEquals(null, db.graphed(""));
-        assertEquals("{\"I\":\"Disaster\",\"inh\":{\">\":[\"Hurricane\"],\"<\":[\"\"]}}", db.graphed("Disaster").toString() );
-        assertEquals("{\"I\":\"Hurricane\",\"inh\":{\"<\":[\"Disaster\"]}}", db.graphed("Hurricane").toString() );
+        assertEquals(null, db.get(""));
+        assertEquals("{\"I\":\"Disaster\",\"inh\":{\">\":[\"Hurricane\"],\"<\":[\"\"]}}", db.get("Disaster").toString() );
+        assertEquals("{\"I\":\"Hurricane\",\"inh\":{\"<\":[\"Disaster\"]}}", db.get("Hurricane").toString() );
     }
 
 }

@@ -64,9 +64,10 @@ public class QueryTest {
         ArrayList<NObject> found = new ArrayList();
         new Query()
             .in("Person")
-            .where(new double[]{0, 1}, new double[]{0, 1})
+            //.where(new double[]{0, 1}, new double[]{0, 1})
             .forEach(db, (d, s) -> found.add(d));
 
+        found.forEach(f -> System.out.println(f));
         assertEquals(1, found.size());
         System.out.println(found);
 

@@ -279,18 +279,8 @@ function SpimeSocket(path, add) {
 
     ws.onopen = function () {
 
-        //add('websocket connect');
+        add('websocket connect');
 
-    };
-
-    ws.onclose = function () {
-        //already disconnected?
-        // if (!this.opt)
-        //     return;
-
-        //add("Websocket disconnect");
-
-        //attempt reconnect?
     };
 
     ws.onmessage = m => add(msgpack.decode(new Uint8Array(m.data)));
