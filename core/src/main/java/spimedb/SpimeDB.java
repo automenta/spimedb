@@ -624,7 +624,7 @@ public class SpimeDB {
             String I = (inode != null) ? inode.toString() : SpimeDB.uuidString();
 
             MutableNObject d = new MutableNObject(I)
-                    .withTags("")
+                    .withTags(NObject.TAG_PUBLIC)
                     .put("_", x)
                     .when(System.currentTimeMillis());
 

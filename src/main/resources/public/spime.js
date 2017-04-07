@@ -258,7 +258,7 @@ function SpimeSocket(path, add) {
 
     /** creates a websocket connection to a path on the server that hosts the currently visible webpage */
     const ws = new ReconnectingWebSocket(
-        'ws://' + window.location.hostname + ':' + window.location.port + '/' + path,
+        'ws://' + defaultHostname + ':' + defaultWSPort + '/' + path,
         null /* protocols */,
         options); //{
             //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
@@ -279,23 +279,21 @@ function SpimeSocket(path, add) {
 
     ws.onopen = function () {
 
-        add('websocket connect');
+        //add('websocket connect');
 
     };
 
     ws.onclose = function () {
         //already disconnected?
-        if (!this.opt)
-            return;
+        // if (!this.opt)
+        //     return;
 
-        add("Websocket disconnect");
+        //add("Websocket disconnect");
 
         //attempt reconnect?
     };
 
-    ws.onmessage = function (m) {
-        add(msgpack.decode(new Uint8Array(m.data)));
-    };
+    ws.onmessage = m => add(msgpack.decode(new Uint8Array(m.data)));
 
     // ws.onmessage = function (e) {
     //     try {
@@ -307,13 +305,9 @@ function SpimeSocket(path, add) {
     //     }
     // };
 
-    ws.onclose = function (e) {
-        add(['Websocket disconnected', e]);
-    };
+    ws.onclose = e => add(['Websocket disconnected', e]);
 
-    ws.onerror = function (e) {
-        add(["Websocket error", e]);
-    };
+    ws.onerror = e => add(["Websocket error", e]);
 
     return ws;
 }
