@@ -7,10 +7,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
 import jcog.Util;
 import jcog.io.BinTxt;
+import jcog.list.FasterList;
 import jcog.random.XorShift128PlusRandom;
 import jcog.tree.rtree.rect.RectDoubleND;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
@@ -68,6 +70,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -150,7 +153,7 @@ public class SpimeDB {
     private Lookup suggester;
 
 
-    final static String[] ROOT = new String[]{""};
+
 
 
     private /*final */ Directory taxoDir;
@@ -424,7 +427,7 @@ public class SpimeDB {
 
                 return new SearchResult(q, searcher, docs, facetResults);
             } else {
-                //return new SearchResult(q, searcher, null, null);
+                return new SearchResult(q, searcher, null, null);
             }
         }
 
@@ -624,7 +627,7 @@ public class SpimeDB {
             String I = (inode != null) ? inode.toString() : SpimeDB.uuidString();
 
             MutableNObject d = new MutableNObject(I)
-                    .withTags("")
+                    .withTags(NObject.TAG_PUBLIC)
                     .put("_", x)
                     .when(System.currentTimeMillis());
 
@@ -851,16 +854,6 @@ public class SpimeDB {
         return next;
     }
 
-
-    //    public Iterator<NObject> iterator() {
-//        GraphedNObject reusedWrapper = new GraphedNObject(graph);
-//        return Iterators.transform(
-//            objMap.values().iterator(), x -> {
-//                reusedWrapper.set(x);
-//                return new MutableNObject( reusedWrapper );
-//            }
-//        );
-//    }
     public void forEach(Consumer<NObject> each) {
 
         /* When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering. */
@@ -894,35 +887,45 @@ public class SpimeDB {
     public SearchResult get(@NotNull Query q) {
         q.onStart();
 
+
         BooleanQuery.Builder bqb = new BooleanQuery.Builder();
 
-        if (q.include != null && q.include.length > 0)
-            bqb.add(new TermsQuery(tagTerms(q.include)), BooleanClause.Occur.MUST);
+        if (q.include != null && q.include.length > 0) {
+            List<org.apache.lucene.search.Query> tagQueries = new FasterList();
+            for (String s : q.include)
+                tagQueries.add(new TermQuery(new Term(NObject.TAG, s)));
+
+            bqb.add(
+                new DisjunctionMaxQuery(tagQueries, 1f / q.include.length),
+                    BooleanClause.Occur.MUST);
+
+        }
 
         if (q.bounds != null && q.bounds.length > 0) {
+
+            List<org.apache.lucene.search.Query> boundQueries = new FasterList();
+
             for (RectDoubleND x : q.bounds) {
-                org.apache.lucene.search.Query subQuery;
                 switch (q.boundsCondition) {
                     case Intersect:
-                        subQuery = DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord);
+                        boundQueries.add( DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord) );
                         break;
                     default:
                         q.onEnd();
                         throw new UnsupportedOperationException("TODO");
                 }
 
-                bqb.add(subQuery, BooleanClause.Occur.SHOULD);
+
+
             }
+
+            bqb.add(new DisjunctionMaxQuery(boundQueries, 0.1f),
+                    BooleanClause.Occur.MUST);
+
         }
 
         try {
             SearchResult result = find(bqb.build(), q.limit);
-//            if (result != null) {
-//                result.forEach((d, score) -> {
-//                    return q.each.test(DObject.get(d));
-//                });
-//                result.close();
-//            }
             q.onEnd();
             return result;
         } catch (IOException e) {
@@ -933,35 +936,6 @@ public class SpimeDB {
     }
 
 
-//        Iterable<String> include = Collections.emptyList(); //tagsAndSubtags(q.include);
-//        for (String t : include) {
-//            SpatialSearch<NObject> s = spaceIfExists(t);
-//            if (s != null && !s.isEmpty()) {
-//                if (q.bounds != null && q.bounds.length > 0) {
-//                    for (RectND x : q.bounds) {
-//                        switch (q.boundsCondition) {
-//                            case Contain:
-//                                if (!s.containing(x, each))
-//                                    break;
-//                                break;
-//                            case Intersect:
-//                                if (!s.intersecting(x, each))
-//                                    break;
-//                                break;
-//                        }
-//                    }
-//                } else {
-//                    if (!s.intersecting(RectND.ALL_4, each)) //iterate all items
-//                        break;
-
-
-    public static Term[] tagTerms(String... tags) {
-        Term[] t = new Term[tags.length];
-        for (int i = 0, tagsLength = tags.length; i < tagsLength; i++) {
-            t[i] = new Term(NObject.TAG, tags[i]);
-        }
-        return t;
-    }
 
     /**
      * computes the set of subtree (children) tags held by the extension of the input (parent) tags
@@ -999,56 +973,6 @@ public class SpimeDB {
             Util.sleep(waitDelayMS);
         } while (!exe.pq.isEmpty() || exe.running.get() > 0);
     }
-
-//    public synchronized void sync(float seconds) {
-//        //exe.awaitQuiescence(Math.round(seconds * 1000f), MILLISECONDS);
-//
-//    }
-
-
-    @Deprecated
-    public NObject graphed(String id) {
-        NObject n = get(id);
-        return n;
-//        if (n != null)
-//            return graphed(n);
-//        return null;
-    }
-
-
-
-
-
-//    public GraphedNObject graphed(NObject n) {
-//        if ((n instanceof GraphedNObject) && (((GraphedNObject) n).graph == graph))
-//            return (GraphedNObject) n; //already wrapped
-//
-//        return new GraphedNObject(this.graph, n);
-//    }
-
-
-    //    static class MyOctBox extends OctBox {
-//
-//        public MyOctBox(Vec3D origin, Vec3D extents, Vec3D resolution) {
-//            super(origin, extents, resolution);
-//        }
-//
-//        @NotNull
-//        @Override
-//        protected OctBox newBox(OctBox parent, Vec3D off, Vec3D extent) {
-//            return new MyOctBox(parent, off, extent);
-//        }
-//
-//        @Override protected void onModified() {
-//            System.out.println(this + " modified");
-//        }
-//
-//    }
-
-//    public static <E> Pair<E, Twin<String>> edge(E e, String from, String to) {
-//        return Tuples.pair(e, Tuples.twin(from, to));
-//    }
-
 
 }
 

@@ -1,5 +1,10 @@
 package spimedb;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import io.undertow.websockets.core.WebSocketChannel;
+import spimedb.server.Session;
+
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -14,6 +19,8 @@ public interface NObjectConsumer extends Consumer<NObject> {
     public static NObjectConsumer HashPredicate(BiConsumer<String,String> each, String... tags) {
         return new OnHashPredicate.LambdaHashPredicate(each, tags);
     }
+
+
 
     abstract class OnTag implements NObjectConsumer {
 

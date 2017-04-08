@@ -75,8 +75,10 @@ public class DObject implements NObject {
             d.add(text(NObject.NAME, name));
 
         String[] t = n.tags();
-        if (t.length > 0)
-            d.add(text(NObject.TAG, Joiner.on(' ').join(t)));
+        if (t!=null) {
+            for (String tt : t)
+                d.add(string(NObject.TAG, tt));
+        }
 
         if (n.bounded()) {
             DoubleND minP = n.min();

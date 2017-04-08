@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.util.JSON;
 
+import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 
@@ -130,7 +131,7 @@ public class MutableNObject extends ImmutableNObject {
         }
 
         if (s.isEmpty()) {
-            this.tag = SpimeDB.ROOT;
+            this.tag = null;
         } else {
             this.tag = s.toArray(new String[s.size()]);
         }

@@ -34,10 +34,7 @@ import org.eclipse.collections.impl.factory.Sets;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
-import spimedb.FilteredNObject;
-import spimedb.MutableNObject;
-import spimedb.NObject;
-import spimedb.SpimeDB;
+import spimedb.*;
 import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.query.Query;
@@ -171,10 +168,10 @@ public class WebServer extends PathHandler {
         }));
 
         addPrefixPath("/thumbnail", ex -> {
-            send(getStringParameter(ex, "I"), "thumbnail", "image/jpg", ex);
+            send(getStringParameter(ex, NObject.ID), "thumbnail", "image/jpg", ex);
         });
         addPrefixPath("/data", ex -> {
-            send(getStringParameter(ex, "I"), "data", "application/pdf", ex);
+            send(getStringParameter(ex, NObject.ID), "data", "application/pdf", ex);
         });
 
         addPrefixPath("/earth", ex -> HTTP.stream(ex, (o) -> {
@@ -238,12 +235,15 @@ public class WebServer extends PathHandler {
 
         }));
 
-
         /* client attention management */
         //addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
         addPrefixPath("/anon",
             websocket( new AnonymousSession(db) )
         );
+
+        addPrefixPath("/on/tag/",
+                //getRequestPath().substring(8)
+                websocket( AnonymousSession.tag(db, "public") ) );
 
 
         //addPrefixPath("/admin", websocket(new Admin(db)));

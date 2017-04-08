@@ -51,6 +51,9 @@
             overflow-y: auto;
             background-color: #555;
         }
+        .windget .box {
+            height: 100%;
+        }
 
         .box:hover {
             background-color: #558;
@@ -285,7 +288,7 @@
                 const msg = input.val();
                 if (msg.length > 0) {
                     input.val('');
-                    ws.send('me.tell([""], \"' + msg + '\")');
+                    ws.send('me.tell(["public"], \"' + msg + '\")');
                 }
             });
 
@@ -305,6 +308,14 @@
             ADD(SPAN().append('! ', input));
         }
 
+
+        const wsPublic = new SpimeSocket('on/tag/public', (x)=>{
+            if (typeof(m)!=='string') {
+                m = DIV().append(newEle('pre').text(JSON.stringify(x, null, 2)));
+            }
+
+            ADD( newEle('span').text(x.N || x.I), m );
+        });
         const ws = new SpimeSocket('anon', (x)=>{
             if (typeof(m)!=='string') {
                 m = DIV().append(newEle('pre').text(JSON.stringify(x, null, 2)));

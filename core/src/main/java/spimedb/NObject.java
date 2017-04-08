@@ -81,7 +81,7 @@ public interface NObject extends Serializable {
     /** intensional inheritance */
     String INH = "inh";
 
-
+    String TAG_PUBLIC = "public";
 
     default boolean has(String key) {
         return get(key)!=null;

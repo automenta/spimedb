@@ -1,9 +1,9 @@
 function newWindow(content) {
     const w = newFrame();
 
-    var closeButton = $('<button/>').text('x').addClass('close_button').click(function() {
-        w.fadeOut(150, function() { $(this).remove(); });
-    });
+    // var closeButton = $('<button/>').text('x').addClass('close_button').click(function() {
+    //     w.fadeOut(150, function() { $(this).remove(); });
+    // });
 
     /*var fontSlider = NSlider({ }).addClass('font_slider').css({
         width: '1em',
@@ -12,7 +12,7 @@ function newWindow(content) {
         top: 0
     });*/
   
-    w.append(content = (content || $('<div/>')), /*fontSlider,*/ closeButton);
+    w.append(content = (content || $('<div/>')), /*fontSlider,*/);
 
     content.addClass('content');
 
