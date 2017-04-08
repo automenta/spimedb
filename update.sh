@@ -18,25 +18,25 @@ echo 'Update dependency: JCog'
 git clone --depth 1 https://github.com/automenta/narchy/ 2> /dev/null # just to be sure
 pushd .
     cd narchy
-    git pull
+    git pull||exit 1
 popd
 
 echo 'Build dependency: JCog'
 pushd .
 	cd narchy/util
-	mvn install -DskipTests=true
+	mvn install -DskipTests=true||exit 1
 popd
 
 
 echo 'Build SpimeDB'
-mvn install -DskipTests=true
+mvn install -DskipTests=true||exit 1
 
 
 echo 'Generate Web App'
 pushd .
 	cd src/main/resources/public/
-	bower install
-	bower update
+	bower install||exit 1
+	bower update||exit 1
 popd
 
 
