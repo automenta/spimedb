@@ -1,5 +1,6 @@
 package spimedb.logic;
 
+import com.google.common.base.Charsets;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.gson.Gson;
@@ -24,9 +25,13 @@ import nars.time.Tense;
 import nars.util.JsonCompound;
 import nars.util.exe.Executioner;
 import nars.util.exe.MultiThreadExecutor;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.collections.impl.factory.primitive.CharSets;
 import spimedb.Peer;
 import spimedb.SpimeDB;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.UUID;
@@ -65,6 +70,16 @@ public class BaseAgent extends NAR {
         fire.activationRate.setValue(1f);
         fire.conceptsFiredPerCycle.set(8);
 
+        //load initial data
+        try {
+            IOUtils.readLines(BaseAgent.class.getClassLoader().getResource("sumo_merged.kif.nal").openStream(), Charsets.UTF_8).forEach(i -> {
+                try {
+                    input(i);
+                } catch (Throwable ignore) { }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         peer = new Peer(7979) {
 
@@ -83,7 +98,7 @@ public class BaseAgent extends NAR {
 
         new LeakOut(this, 16, 0.1f) {
             @Override protected float send(Task task) {
-                peer.say("{ \">\": \"\", N: \"" + taskEscaper.escape(task.toString()) + "\" }", 2);
+                peer.say("{ \">\": \"public\", N: \"" + taskEscaper.escape(task.toString()) + "\" }", 2);
                 return 1f;
             }
         };
@@ -95,6 +110,8 @@ public class BaseAgent extends NAR {
         a.log();
 
         a.peer.ping("a.narchy.xyz", 8080);
+        a.peer.ping("localhost", 8080);
+
 
         a.loop(10f).join();
     }
