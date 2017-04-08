@@ -14,7 +14,7 @@ echo
 echo 'Updating from git'
 git pull
 
-echo 'Update dependency: JCog'
+echo 'Update dependencies'
 git clone --depth 1 https://github.com/automenta/narchy/ 2> /dev/null # just to be sure
 pushd .
     cd narchy
@@ -27,6 +27,11 @@ pushd .
 	mvn install -DskipTests=true
 popd
 
+echo 'Build dependency: NAL'
+pushd .
+	cd narchy/nal
+	mvn install -DskipTests=true
+popd
 
 echo 'Build SpimeDB'
 mvn install -DskipTests=true
