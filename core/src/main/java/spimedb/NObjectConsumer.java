@@ -1,10 +1,5 @@
 package spimedb;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.undertow.websockets.core.WebSocketChannel;
-import spimedb.server.Session;
-
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 

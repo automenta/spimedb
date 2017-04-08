@@ -7,7 +7,6 @@ import spimedb.util.JSON;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.UUID;
 
 import static spimedb.NObjectConsumer.HashPredicate;
 import static spimedb.NObjectConsumer.Tagged;

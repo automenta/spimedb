@@ -2,7 +2,6 @@ package spimedb.index;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Joiner;
 import jcog.tree.rtree.point.DoubleND;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.ArrayUtils;

@@ -1,5 +1,7 @@
 package spimedb.logic;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Charsets;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
@@ -19,6 +21,8 @@ import nars.index.term.map.CaffeineIndex;
 import nars.premise.MatrixPremiseBuilder;
 import nars.premise.PreferSimpleAndConfident;
 import nars.term.Compound;
+import nars.term.Term;
+import nars.term.atom.Atom;
 import nars.term.atom.Atomic;
 import nars.time.RealTime;
 import nars.time.Tense;
@@ -26,15 +30,13 @@ import nars.util.JsonCompound;
 import nars.util.exe.Executioner;
 import nars.util.exe.MultiThreadExecutor;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.collections.impl.factory.primitive.CharSets;
 import spimedb.Peer;
 import spimedb.SpimeDB;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.UUID;
+import java.util.List;
 
 /**
  * Created by me on 4/4/17.
@@ -74,7 +76,13 @@ public class BaseAgent extends NAR {
         try {
             IOUtils.readLines(BaseAgent.class.getClassLoader().getResource("sumo_merged.kif.nal").openStream(), Charsets.UTF_8).forEach(i -> {
                 try {
-                    input(i);
+                    input(i).forEach(tt -> {
+                        tt.term().recurseTerms(x -> {
+                            if (x instanceof Atom) {
+                                index(x.toString(), null);
+                            }
+                        });
+                    });
                 } catch (Throwable ignore) { }
             });
         } catch (IOException e) {
@@ -102,6 +110,14 @@ public class BaseAgent extends NAR {
                 return 1f;
             }
         };
+    }
+
+    final Cache<String,List<Term>> indexCache = Caffeine
+            .newBuilder().maximumSize(16*1024).build();
+
+    protected void index(String text, Term ref) {
+        //k = DObject.parseKeywords(new LowerCaseTokenizer(), text);
+        //indexCache.get()
     }
 
     public static void main(String[] args) throws SocketException, UnknownHostException {
