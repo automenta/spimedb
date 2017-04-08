@@ -25,7 +25,15 @@
 
     </dependencies>
     <build>
-
+        <resources>
+            <resource>
+                <directory>src/main/java/spimedb/logic</directory>
+                <includes>
+                    <include>**.nal</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 
 </project>

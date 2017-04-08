@@ -64,9 +64,9 @@ public class DObject implements NObject {
         if (n instanceof DObject)
             return ((DObject) n).document;
 
-        String nid = n.id();
-
         Document d = new Document();
+
+        String nid = n.id();
 
         d.add(string(NObject.ID, nid));
 
