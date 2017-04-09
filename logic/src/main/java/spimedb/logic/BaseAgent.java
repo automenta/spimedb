@@ -30,13 +30,18 @@ import nars.util.JsonCompound;
 import nars.util.exe.Executioner;
 import nars.util.exe.MultiThreadExecutor;
 import org.apache.commons.io.IOUtils;
+import org.apache.lucene.analysis.core.LowerCaseTokenizer;
+import org.eclipse.collections.impl.factory.primitive.CharSets;
 import spimedb.Peer;
 import spimedb.SpimeDB;
+import spimedb.index.DObject;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by me on 4/4/17.
@@ -76,7 +81,11 @@ public class BaseAgent extends NAR {
         try {
             IOUtils.readLines(BaseAgent.class.getClassLoader().getResource("sumo_merged.kif.nal").openStream(), Charsets.UTF_8).forEach(i -> {
                 try {
-                    input(i).forEach(tt -> {
+                    List<Task> input = input(
+                            //"$0.0;0.9$ " +
+                                     i);
+                    input.forEach(System.out::println);
+                    input.forEach(tt -> {
                         tt.term().recurseTerms(x -> {
                             if (x instanceof Atom) {
                                 index(x.toString(), null);
