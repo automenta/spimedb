@@ -84,7 +84,7 @@ public class BaseAgent extends NAR {
                     List<Task> input = input(
                             //"$0.0;0.9$ " +
                                      i);
-                    input.forEach(System.out::println);
+                    //input.forEach(System.out::println);
                     input.forEach(tt -> {
                         tt.term().recurseTerms(x -> {
                             if (x instanceof Atom) {
