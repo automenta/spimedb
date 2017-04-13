@@ -7,6 +7,7 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import jcog.bag.impl.PLinkHijackBag;
 import jcog.random.XorShift128PlusRandom;
 import nars.$;
@@ -30,18 +31,17 @@ import nars.util.JsonCompound;
 import nars.util.exe.Executioner;
 import nars.util.exe.MultiThreadExecutor;
 import org.apache.commons.io.IOUtils;
-import org.apache.lucene.analysis.core.LowerCaseTokenizer;
-import org.eclipse.collections.impl.factory.primitive.CharSets;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+import spimedb.MutableNObject;
+import spimedb.NObject;
 import spimedb.Peer;
 import spimedb.SpimeDB;
-import spimedb.index.DObject;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by me on 4/4/17.
@@ -57,7 +57,7 @@ public class BaseAgent extends NAR {
         this(new MultiThreadExecutor(2, 64, true));
     }
 
-    static final Compound recv = (Compound)$.seti($.the("RECV"));
+    static final Compound recv = (Compound) $.seti($.the("RECV"));
 
     public BaseAgent(Executioner exe) throws SocketException, UnknownHostException {
         super(new RealTime.DSHalf(),
@@ -82,8 +82,8 @@ public class BaseAgent extends NAR {
             IOUtils.readLines(BaseAgent.class.getClassLoader().getResource("sumo_merged.kif.nal").openStream(), Charsets.UTF_8).forEach(i -> {
                 try {
                     List<Task> input = input(
-                            //"$0.0;0.9$ " +
-                                     i);
+                            "$0.01;0.9$ " +
+                            i);
                     //input.forEach(System.out::println);
                     input.forEach(tt -> {
                         tt.term().recurseTerms(x -> {
@@ -92,7 +92,8 @@ public class BaseAgent extends NAR {
                             }
                         });
                     });
-                } catch (Throwable ignore) { }
+                } catch (Throwable ignore) {
+                }
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -106,23 +107,68 @@ public class BaseAgent extends NAR {
 
                 //if (j.isJsonObject() && j.getAsJsonObject().get("I").getAsInt())
 
-                Atomic x = $.the(SpimeDB.uuidString());
-                believe($.sim(x, JsonCompound.the(j)));
-                believe($.inh(x, recv), Tense.Present);
+                input(j);
             }
         };
 
 
         new LeakOut(this, 16, 0.1f) {
-            @Override protected float send(Task task) {
+            @Override
+            protected float send(Task task) {
                 peer.say("{ \">\": \"public\", N: \"" + taskEscaper.escape(task.toString()) + "\" }", 2);
                 return 1f;
             }
         };
+
+        IRC irc = new IRC("experiment2", "irc.freenode.net", "#netention") {
+
+
+            @Override
+            public void onGenericMessage(GenericMessageEvent event) throws Exception {
+                super.onGenericMessage(event);
+
+                JsonObject m = new JsonObject();
+                m.addProperty(NObject.NAME, event.getMessage());
+                input(m);
+
+//                //MutableNObject m = new MutableNObject();
+//                m.name(event.getMessage());
+//                m.when(event.getTimestamp());
+
+                if (event instanceof MessageEvent) {
+                    //String channel = ((MessageEvent) event).getChannel().getName().substring(1) /* remove '#' */;
+                    //m.withTags(channel, "public");
+
+                }
+
+                //m.withTags("public");
+
+                //a.peer.say(m.toString(), 4);
+
+                //System.out.println(new Gson().toJson(event));
+
+                //a.peer.say
+            }
+        };
+
+        new Thread(() -> {
+            try {
+                irc.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
     }
 
-    final Cache<String,List<Term>> indexCache = Caffeine
-            .newBuilder().maximumSize(16*1024).build();
+    protected void input(JsonElement j) {
+        Atomic x = $.the(SpimeDB.uuidString());
+        believe($.sim(x, JsonCompound.the(j)));
+        believe($.inh(x, recv), Tense.Present);
+    }
+
+    final Cache<String, List<Term>> indexCache = Caffeine
+            .newBuilder().maximumSize(16 * 1024).build();
 
     protected void index(String text, Term ref) {
         //k = DObject.parseKeywords(new LowerCaseTokenizer(), text);
@@ -132,13 +178,14 @@ public class BaseAgent extends NAR {
     public static void main(String[] args) throws SocketException, UnknownHostException {
         BaseAgent a = new BaseAgent();
 
+
         a.log();
 
         a.peer.ping("a.narchy.xyz", 8080);
         a.peer.ping("localhost", 8080);
 
+        a.loop(1f).join();
 
-        a.loop(10f).join();
     }
 
 }
