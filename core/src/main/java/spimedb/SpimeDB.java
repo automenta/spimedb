@@ -160,7 +160,10 @@ public class SpimeDB {
 
     final QueryParser defaultFindQueryParser;
 
+    IndexWriter writer;
+    final IndexWriterConfig writerConf;
 
+    DirectoryTaxonomyWriter taxoWriter;
     /**
      * in-memory
      */
@@ -168,7 +171,7 @@ public class SpimeDB {
         this(null, new RAMDirectory());
         this.indexPath = null;
         this.taxoDir = new RAMDirectory();
-
+        this.taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
     }
 
     /**
@@ -178,6 +181,10 @@ public class SpimeDB {
         this(new File(path), FSDirectory.open(new File(path).toPath()));
         this.indexPath = file.getAbsolutePath();
         this.taxoDir = FSDirectory.open(file.toPath().resolve("taxo"));
+
+        this.taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
+
+
         logger.info("index ready: file://{}", indexPath);
     }
 
@@ -205,6 +212,14 @@ public class SpimeDB {
                 NObject.TAG, 0.5f
         );
         this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, defaultFindFieldStrengths);
+
+        writerConf = new IndexWriterConfig(analyzer);
+        writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+        try {
+            writer = new IndexWriter(dir, writerConf);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         logger.info("{} objects loaded", size());
     }
@@ -368,7 +383,8 @@ public class SpimeDB {
     @Nullable
     private DirectoryReader reader() {
         try {
-            return DirectoryReader.indexExists(dir) ? DirectoryReader.open(dir) : null;
+            return DirectoryReader.open(writer); //NRT mode
+            //return DirectoryReader.indexExists(dir) ? DirectoryReader.open(dir) : null;
         } catch (IOException e) {
             logger.error("index reader: {}", e);
             throw new RuntimeException(e);
@@ -475,12 +491,7 @@ public class SpimeDB {
 
                 try {
 
-                    IndexWriterConfig writerConf = new IndexWriterConfig(analyzer);
-                    writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 
-                    IndexWriter writer = new IndexWriter(dir, writerConf);
-
-                    DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
 
 
                     while (!out.isEmpty()) {
@@ -515,8 +526,8 @@ public class SpimeDB {
                     }
 
 
-                    writer.close();
-                    taxoWriter.close();
+//                    writer.close();
+//                    taxoWriter.close();
 
 
 
