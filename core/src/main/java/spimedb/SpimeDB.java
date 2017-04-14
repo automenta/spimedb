@@ -265,8 +265,6 @@ public class SpimeDB {
     public FacetResult facets(String dimension, int count) throws IOException {
 
         IndexSearcher searcher = searcher();
-        if (searcher == null)
-            return null;
 
 
         FacetsCollector fc = new FacetsCollector();
@@ -351,9 +349,6 @@ public class SpimeDB {
 
         try {
             IndexSearcher searcher = searcher();
-            if (searcher == null)
-                return null;
-
             TermQuery x = new TermQuery(new Term(NObject.ID, id));
             TopDocs y = searcher.search(x, firstResultOnly);
             int hits = y.totalHits;
@@ -374,13 +369,12 @@ public class SpimeDB {
 
     }
 
-    @Nullable
+    @NotNull
     protected IndexSearcher searcher() {
-        DirectoryReader r = reader();
-        return r != null ? new IndexSearcher(r) : null;
+        return new IndexSearcher(reader());
     }
 
-    @Nullable
+    @NotNull
     private DirectoryReader reader() {
         try {
             return DirectoryReader.open(writer); //NRT mode
@@ -394,9 +388,6 @@ public class SpimeDB {
 
     public void withReader(Consumer<DirectoryReader> c) {
         DirectoryReader r = reader();
-        if (r == null)
-            return;
-
         try {
             c.accept(r);
         } finally {
