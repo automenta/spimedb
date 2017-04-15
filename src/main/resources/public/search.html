@@ -16,6 +16,8 @@
     <script src="lib/leaflet/leaflet.js"></script>
     <link rel="stylesheet" href="lib/leaflet/leaflet.css">
 
+    <script src="util.eq.js"></script>
+
     <!-- xxxxxxxxxxxxxxxxxxxxxx -->
 
     <!--<link rel="stylesheet" href="lib/fancybox/jquery.fancybox.css" type="text/css" media="screen" />-->
@@ -178,21 +180,21 @@
         }
 
         function expand() {
-            $('#menu').removeClass('sidebar');
-            $('#menu').addClass('expand');
-            $('#results').hide();
-
-            $('#facets .list-item').removeClass('list-item').addClass('grid-item');
+//            $('#menu').removeClass('sidebar');
+//            $('#menu').addClass('expand');
+//            $('#results').hide();
+//
+//            $('#facets .list-item').removeClass('list-item').addClass('grid-item');
 
         }
 
         function contract() {
-            unfocus();
-            $('#results').show().addClass('main');
-            $('#menu').removeClass('expand');
-            $('#menu').addClass('sidebar');
-
-            $('#facets .grid-item').removeClass('grid-item').attr('style', '').addClass('list-item');
+//            unfocus();
+//            $('#results').show().addClass('main');
+//            $('#menu').removeClass('expand');
+//            $('#menu').addClass('sidebar');
+//
+//            $('#facets .grid-item').removeClass('grid-item').attr('style', '').addClass('list-item');
         }
 
         function focus(url) {
@@ -230,17 +232,16 @@
                 const score = v[1];
 
 
-                const c = $(e('div'))
-                    .attr('class', 'grid-item-content')
+                const c = $(e('button'))
                     .text(id).click(() => {
                         queryText.val(/* dimension + ':' + */ id);
                         querySubmit();
                         return false;
                     })
-                    .attr('style',
-                        'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
 
-                return c;
+                return EqualizeDiv(id, c)
+                    .capacity(score)
+                    .attr('class', 'grid-item-content');
             };
 
             addToGrid(result, facetButtonBuilder, facets);

@@ -204,7 +204,7 @@ h2 { margin: 0; }
     font-size: 200%;
 }
 #menu input {   max-width: 85%;  }
-#menu button {   max-width: 13%;  }
+/*#menu button {   max-width: 13%;  }*/
 
 
 #results .header {
