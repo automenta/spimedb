@@ -82,7 +82,7 @@ public class SpimeDB {
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
 
     //Tag
-    public static final String[] GENERAL = new String[]{ "" };
+    public static final String[] GENERAL = new String[]{""};
 
     final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ (-31 * System.currentTimeMillis()));
 
@@ -98,7 +98,7 @@ public class SpimeDB {
 
     protected final Directory dir;
 
-    public final Router<String,Consumer<NObject>> onTag = new Router();
+    public final Router<String, Consumer<NObject>> onTag = new Router();
 
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
 
@@ -149,9 +149,6 @@ public class SpimeDB {
     private Lookup suggester;
 
 
-
-
-
     private /*final */ Directory taxoDir;
     private final FacetsConfig facetsConfig = new FacetsConfig();
 
@@ -164,6 +161,7 @@ public class SpimeDB {
     final IndexWriterConfig writerConf;
 
     DirectoryTaxonomyWriter taxoWriter;
+
     /**
      * in-memory
      */
@@ -256,8 +254,8 @@ public class SpimeDB {
 
     public static byte[] uuidBytes() {
         return ArrayUtils.addAll(
-            Longs.toByteArray(rng.nextLong()),
-            Longs.toByteArray(rng.nextLong())
+                Longs.toByteArray(rng.nextLong()),
+                Longs.toByteArray(rng.nextLong())
         );
     }
 
@@ -408,34 +406,30 @@ public class SpimeDB {
     private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
 
         IndexSearcher searcher = searcher();
-        if (searcher != null) {
 
-            FacetsCollector fc = new FacetsCollector();
+        FacetsCollector fc = new FacetsCollector();
 
-            FacetsCollector.search(searcher, q, hitsPerPage, fc);
-            //searcher.search(q, fc);
+        FacetsCollector.search(searcher, q, hitsPerPage, fc);
 
-            TopDocs docs = searcher.search(q, hitsPerPage);
-            if (docs.totalHits > 0) {
+        TopDocs docs = searcher.search(q, hitsPerPage);
+        if (docs.totalHits > 0) {
 
-                int facetCount = hitsPerPage; //DEFAULT
+            int facetCount = hitsPerPage; //DEFAULT
 
-                TaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
+            TaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
 
-                Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
+            Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
 
-                FacetResult facetResults = facets.getTopChildren(facetCount, NObject.TAG);
+            FacetResult facetResults = facets.getTopChildren(facetCount, NObject.TAG);
 
-                taxoReader.close();
+            taxoReader.close();
 
-                return new SearchResult(q, searcher, docs, facetResults);
-            } else {
-                return new SearchResult(q, searcher, null, null);
-            }
+            return new SearchResult(q, searcher, docs, facetResults);
+        } else {
+            return new SearchResult(q, searcher, null, null);
         }
 
         //return new SearchResult(q, null, null); //TODO: return EmptySearchResult;
-        return null;
     }
 
 
@@ -472,67 +466,56 @@ public class SpimeDB {
     }
 
     private void commit() {
-        if (writing.compareAndSet(false, true)) {
-            exe.run(1f, () -> {
+        exe.run(1f, () -> {
 
-                if (out.isEmpty())
-                    return;
+            if (out.isEmpty() || !writing.compareAndSet(false, true)) {
+                return; //already writing in another thread
+            }
 
-                int written = 0, removed = 0;
+            int written = 0, removed = 0;
 
-                try {
+            try {
 
+                while (!out.isEmpty()) {
 
+                    //long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
 
+                    Iterator<Map.Entry<String, DObject>> ii = out.entrySet().iterator();
+                    while (ii.hasNext()) {
+                        Map.Entry<String, DObject> nn = ii.next();
+                        ii.remove();
 
-                    while (!out.isEmpty()) {
+                        String id = nn.getKey();
+                        Term key = new Term(NObject.ID, id);
 
-                        //long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
-
-                        Iterator<Map.Entry<String, DObject>> ii = out.entrySet().iterator();
-                        while (ii.hasNext()) {
-                            Map.Entry<String, DObject> nn = ii.next();
-                            ii.remove();
-                            DObject val = nn.getValue();
-
-                            String id = nn.getKey();
-                            Term key = new Term(NObject.ID, id);
-
-                            if (val != REMOVE) {
-                                if (writer.updateDocument(key,
-                                        facetsConfig.build(taxoWriter, val.document)
-                                )!=-1) {
-                                    written++;
-                                }
-                            } else {
-                                if (writer.deleteDocuments(key)!=-1) {
-                                    cache.invalidate(id);
-                                    removed++;
-                                }
+                        DObject val = nn.getValue();
+                        if (val != REMOVE) {
+                            if (-1 != writer.updateDocument(key,
+                                    facetsConfig.build(taxoWriter, val.document))) {
+                                written++;
+                            }
+                        } else {
+                            cache.invalidate(id);
+                            if (writer.deleteDocuments(key) != -1) {
+                                removed++;
                             }
                         }
-
-                        writer.commit();
-                        taxoWriter.commit();
                     }
 
-
-//                    writer.close();
-//                    taxoWriter.close();
-
-
-
-                } catch (IOException e) {
-                    logger.error("indexing error: {}", e);
+                    writer.commit();
+                    taxoWriter.commit();
+                    lastWrite = now();
                 }
 
+            } catch (IOException e) {
+                logger.error("indexing error: {}", e);
+            } finally {
                 writing.set(false);
-
-                lastWrite = now();
-
                 logger.debug("{} indexed, {} removed", written, removed);
-            });
-        }
+            }
+
+
+        });
 
     }
 
@@ -621,15 +604,15 @@ public class SpimeDB {
 //            return;
 //        } else {
 
-            JsonNode inode = x.get("I");
-            String I = (inode != null) ? inode.toString() : SpimeDB.uuidString();
+        JsonNode inode = x.get("I");
+        String I = (inode != null) ? inode.toString() : SpimeDB.uuidString();
 
-            MutableNObject d = new MutableNObject(I)
-                    .withTags(NObject.TAG_PUBLIC)
-                    .put("_", x)
-                    .when(System.currentTimeMillis());
+        MutableNObject d = new MutableNObject(I)
+                .withTags(NObject.TAG_PUBLIC)
+                .put("_", x)
+                .when(System.currentTimeMillis());
 
-            add(d);
+        add(d);
 //        }
     }
 
@@ -664,13 +647,14 @@ public class SpimeDB {
     public void on(NObjectConsumer c) {
         update(c, true);
     }
+
     public void off(NObjectConsumer c) {
         update(c, false);
     }
 
     public void update(NObjectConsumer c, boolean enable) {
         if (c instanceof NObjectConsumer.OnTag) {
-            for (String x : ((NObjectConsumer.OnTag)c).any) {
+            for (String x : ((NObjectConsumer.OnTag) c).any) {
                 if (enable)
                     onTag.on(x, c);
                 else
@@ -894,7 +878,7 @@ public class SpimeDB {
                 tagQueries.add(new TermQuery(new Term(NObject.TAG, s)));
 
             bqb.add(
-                new DisjunctionMaxQuery(tagQueries, 1f / q.include.length),
+                    new DisjunctionMaxQuery(tagQueries, 1f / q.include.length),
                     BooleanClause.Occur.MUST);
 
         }
@@ -906,13 +890,12 @@ public class SpimeDB {
             for (RectDoubleND x : q.bounds) {
                 switch (q.boundsCondition) {
                     case Intersect:
-                        boundQueries.add( DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord) );
+                        boundQueries.add(DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord));
                         break;
                     default:
                         q.onEnd();
                         throw new UnsupportedOperationException("TODO");
                 }
-
 
 
             }
@@ -932,7 +915,6 @@ public class SpimeDB {
             return null;
         }
     }
-
 
 
     /**
