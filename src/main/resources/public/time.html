@@ -17,37 +17,33 @@
 
 <style>
     body {
-        font-family: helvetica;
-        font-size: 14px;
+        background-color: black;
     }
 
     #cy {
         width: 100%;
         height: 100%;
-        position: absolute;
+        position: fixed;
         left: 0;
         top: 0;
         z-index: 999;
     }
 
-    h1 {
-        opacity: 0.5;
-        font-size: 1em;
-    }
+
 </style>
 
 <script>
-    $(() =>{
+    $(() => {
 
-        var cy = cytoscape({
+        var cy = window.cy = cytoscape({
             container: document.getElementById('cy'),
 
             boxSelectionEnabled: false,
             autounselectify: true,
 
-            layout: {
-                name: 'grid'
-            },
+//            layout: {
+//                name: 'grid'
+//            },
 
             style: [
                 {
@@ -56,7 +52,11 @@
                         'shape': 'hexagon',
                         'height': 20,
                         'width': 20,
-                        'background-color': '#18e0f8'
+                        'background-color': '#18e0f8',
+                        'color': '#000',
+                        'font-size': '20',
+                        'text-halign': 'center',
+                        'text-valign': 'center'
                     }
                 },
 
@@ -67,7 +67,7 @@
                         'haystack-radius': 0,
                         'width': 5,
                         'opacity': 0.5,
-                        'line-color': '#a2efa2'
+                        'line-color': '#f21232'
                     }
                 }
             ]
@@ -80,7 +80,7 @@
         const start = Date.now();
 
         function timeToX(ts) {
-            return (ts - start) / 1000.0 * 15;
+            return (ts - start) / 1000.0 * 15 + $(document).width();
         }
 
         function add(x) {
@@ -89,24 +89,135 @@
             let te = tr[1];
             const sx = timeToX(ts);
             const sy = timeToX(te)
-            return cy.add({
+
+            x.id = x.I;
+
+            var p = cy.add({
                 group: "nodes",
-                data: { id: x.I, weight: 175 },
-                position: { x: sx, y: 0 },
+                data: x,
+                position: {x: sx /*, y: 0*/},
                 style: {
-                    width: sy - sx,
-                    height: 40
+                    label: x.N || x.I,
+                    width: Math.max(64, sy - sx),
+                    height: 60
                 }
-            }).lock();
+            });//.lock();
+
+//            var node = p[0]._private;
+//
+//            console.log(node.position);
+//            console.log(node.__proto__.position);
+
+            return p;
         }
 
+        cy.batch(() => {
+
+            var now = start;
+            for (var i = 0; i < 30; i++) {
+                const x = now + (Math.random() - 0.5) * 2 * 60 * 1000 * 2
+                add({"I": '__a' + i, "@": [[x, x + (Math.random() * 10 * 1000)], NaN, NaN, NaN]});
+
+            }
+        });
+
+        var bbox = undefined;
+
+        var options = {
+            name: 'cose',
 
 
-        var now = start;
-        for (var i = 0; i < 10; i++) {
-            add({"I": 'a' + i, "@": [[now - 30 * 1000, now], NaN, NaN, NaN]});
-            now -= 60 * 1000;
-        }
+            ready: function () { // Called on `layoutready`
+                //console.log('ready');
+            },
+
+            stop: function () { // Called on `layoutstop`
+                cy.batch(() => {
+                    cy.nodes().each((z) => {
+                        const x = z.data();
+                        const tr = x['@'][0];
+                        const ts = tr[0];
+                        //const te = tr[1];
+                        const sx = timeToX(ts);
+
+                        z.position('x', sx);
+                    });
+                });
+            },
+
+            // Whether to animate while running the layout
+            animate: true,
+
+            // The layout animates only after this many milliseconds
+            // (prevents flashing on fast runs)
+            animationThreshold: 100,
+
+            // Number of iterations between consecutive screen positions update
+            // (0 -> only updated on the end)
+            refresh: 1,
+
+            // Whether to fit the network view after when done
+            fit: false,
+
+            // Padding on fit
+            padding: 30,
+
+            // Constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+//            boundingBox: ((x)=>{
+//                console.log(x);
+//                return { x1: -100, y1: -100, x2: 100, y2: 100 };
+//            }),
+
+            // Randomize the initial positions of the nodes (true) or use existing positions (false)
+            randomize: false,
+
+            // Extra spacing between components in non-compound graphs
+            componentSpacing: 50,
+
+            // Node repulsion (non overlapping) multiplier
+            nodeRepulsion: function (node) {
+                return 400000;
+            },
+
+            // Node repulsion (overlapping) multiplier
+            nodeOverlap: 10,
+
+            // Ideal edge (non nested) length
+            idealEdgeLength: function (edge) {
+                return 10;
+            },
+
+            // Divisor to compute edge forces
+            edgeElasticity: function (edge) {
+                return 100;
+            },
+
+            // Nesting factor (multiplier) to compute ideal edge length for nested edges
+            nestingFactor: 5,
+
+            // Gravity force (constant)
+            gravity: 80,
+
+            // Maximum number of iterations to perform
+            numIter: 1000,
+
+            // Initial temperature (maximum node displacement)
+            initialTemp: 200,
+
+            // Cooling factor (how the temperature is reduced between consecutive iterations
+            coolingFactor: 0.95,
+
+            // Lower temperature threshold (below this point the layout will end)
+            minTemp: 1.0,
+
+            // Pass a reference to weaver to use threads for calculations
+            weaver: false
+        };
+
+        setTimeout(() => {
+            const l = cy.makeLayout(options);
+            l.start();
+        }, 0);
 
 
     });
@@ -114,7 +225,6 @@
 </head>
 
 <body id="cy">
-
 
 
 </body>
