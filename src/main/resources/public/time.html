@@ -7,6 +7,8 @@
 
     <script src="lib/backbone.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.0/pixi.min.js"></script>
+
     <script src="lib/cytoscape.js"></script>
 
     <link rel="stylesheet" href="search.base.css">
@@ -20,13 +22,17 @@
         background-color: black;
     }
 
-    #cy {
+    .full {
         width: 100%;
         height: 100%;
-        position: fixed;
-        left: 0;
-        top: 0;
-        z-index: 999;
+        position: absolute;
+        overflow: hidden;
+        /*left: 0;
+        top: 0;*/
+    }
+
+    #cy {
+        /*z-index: 999;*/
     }
 
 
@@ -77,49 +83,6 @@
 
         });
 
-        const start = Date.now();
-
-        function timeToX(ts) {
-            return (ts - start) / 1000.0 * 15 + $(document).width();
-        }
-
-        function add(x) {
-            let tr = x['@'][0];
-            let ts = tr[0];
-            let te = tr[1];
-            const sx = timeToX(ts);
-            const sy = timeToX(te)
-
-            x.id = x.I;
-
-            var p = cy.add({
-                group: "nodes",
-                data: x,
-                position: {x: sx /*, y: 0*/},
-                style: {
-                    label: x.N || x.I,
-                    width: Math.max(64, sy - sx),
-                    height: 60
-                }
-            });//.lock();
-
-//            var node = p[0]._private;
-//
-//            console.log(node.position);
-//            console.log(node.__proto__.position);
-
-            return p;
-        }
-
-        cy.batch(() => {
-
-            var now = start;
-            for (var i = 0; i < 30; i++) {
-                const x = now + (Math.random() - 0.5) * 2 * 60 * 1000 * 2
-                add({"I": '__a' + i, "@": [[x, x + (Math.random() * 10 * 1000)], NaN, NaN, NaN]});
-
-            }
-        });
 
         var bbox = undefined;
 
@@ -214,19 +177,190 @@
             weaver: false
         };
 
-        setTimeout(() => {
+        const start = Date.now();
+
+        function timeToX(ts) {
+            return (ts - start) / 1000.0 * 15 + $(document).width();
+        }
+
+        var app = new PIXI.Application({
+            'width': '100%',
+            'height': '100%',
+            'autoResize': true,
+            'roundPixels': true,
+            'resolution': 0.25
+            /*backgroundColor: 0x1099bb*/
+        });
+        $(document.body).prepend($(app.view).attr('class', 'full'));
+
+
+        //const GAME_WIDTH = 800, GAME_HEIGHT = 600;
+        function resize() {
+
+            // Determine which screen dimension is most constrained
+//            const ratio = Math.min(window.innerWidth/GAME_WIDTH,
+//                window.innerHeight/GAME_HEIGHT);
+
+            // Scale the view appropriately to fill that dimension
+            //app.stage.scale.x = app.stage.scale.y = ratio;
+
+            // Update the renderer dimensions
+            app.renderer.resize(
+                window.innerWidth, window.innerHeight);
+            //Math.ceil(GAME_WIDTH * ratio), Math.ceil(GAME_HEIGHT * ratio));
+        }
+
+        resize();
+        window.addEventListener("resize", resize);
+
+
+        const vertexGfx = [];
+
+        function add(x) {
+
+            var existing = cy.getElementById(x.I);
+            if (existing)
+                existing.remove();
+
+            let tr = x['@'][0];
+            let ts = tr[0];
+            let te = tr[1];
+            const sx = timeToX(ts);
+            const sy = timeToX(te)
+
+            x.id = x.I;
+
+            var p = cy.add({
+                group: "nodes",
+                data: x,
+                position: {x: sx /*, y: 0*/},
+                style: {
+                    label: x.N || x.I,
+                    width: Math.max(64, sy - sx),
+                    height: 60
+                }
+            });//.lock();
+
+            var thing = new PIXI.Graphics();
+            thing.cacheAsBitmap = true;
+
+            //thing.clear();
+            //thing.lineStyle(10, 0xff0000, 1);
+            thing.beginFill(0xffFF00, 0.5);
+            thing.moveTo(-0.5, -0.5);
+            thing.lineTo(+0.5, -0.5);
+            thing.lineTo(+0.5, +0.5);
+            thing.lineTo(-0.5, +0.5);
+            thing.vertex = p[0];
+
+            vertexGfx.push(thing);
+
+            app.stage.addChild(thing);
+
+//            var node = p[0]._private;
+//
+//            console.log(node.position);
+//            console.log(node.__proto__.position);
+
+            return p;
+        }
+
+        cy.batch(() => {
+
+            var now = start;
+            for (var i = 0; i < 30; i++) {
+                const x = now + (Math.random() - 0.5) * 2 * 60 * 1000 * 2
+                add({"I": '__a' + i, "@": [[x, x + (Math.random() * 10 * 1000)], NaN, NaN, NaN]});
+
+            }
+
             const l = cy.makeLayout(options);
             l.start();
-        }, 0);
+        });
 
 
-    });
+//        var basicText = new PIXI.Text('Basic text in pixi');
+//        basicText.x = 30;
+//        basicText.y = 90;
+//
+//        app.stage.addChild(basicText);
+
+//        var style = new PIXI.TextStyle({
+//            fontFamily: 'Arial',
+//            fontSize: 36,
+//            fontStyle: 'italic',
+//            fontWeight: 'bold',
+//            fill: ['#ffffff', '#00ff99'], // gradient
+//            stroke: '#4a1850',
+//            strokeThickness: 5,
+//            dropShadow: true,
+//            dropShadowColor: '#000000',
+//            dropShadowBlur: 4,
+//            dropShadowAngle: Math.PI / 6,
+//            dropShadowDistance: 6,
+//            wordWrap: true,
+//            wordWrapWidth: 440
+//        });
+
+//        var richText = new PIXI.Text('', style);
+//        richText.x = 30;
+//        richText.y = 180;
+//
+//        app.stage.addChild(richText);
+
+//        var count = 0;
+//
+//        var thing = new PIXI.Graphics();
+//        app.stage.addChild(thing);
+
+        const bbOpt = {
+            includeNodes: true,
+            includeLabels: false,
+            includeEdges: false
+        };
+
+        setInterval(() => {
+            _.each(vertexGfx, v => {
+                const n = v.vertex;
+                const s = n.renderedBoundingBox(bbOpt);
+
+                v.position.set(s.x1, s.y1);
+                v.scale.set(s.w * 1.1, s.h * 1.1);
+
+                //console.log(s);
+            });
+        }, 50);
+
+        app.ticker.add(function () {
+
+
+
+//            richText.text = Math.random();
+//
+//            count += 0.1;
+//
+//
+//            thing.clear();
+//            thing.lineStyle(10, 0xff0000, 1);
+//            thing.beginFill(0xffFF00, 0.5);
+//
+//            thing.moveTo(-120 + Math.sin(count) * 20, -100 + Math.cos(count) * 20);
+//            thing.lineTo(120 + Math.cos(count) * 20, -100 + Math.sin(count) * 20);
+//            thing.lineTo(120 + Math.sin(count) * 20, 100 + Math.cos(count) * 20);
+//            thing.lineTo(-120 + Math.cos(count) * 20, 100 + Math.sin(count) * 20);
+//            thing.lineTo(-120 + Math.sin(count) * 20, -100 + Math.cos(count) * 20);
+
+//            thing.rotation = count * 0.1;
+            });
+        });
 </script>
 </head>
+<body>
 
-<body id="cy">
-
+<div id="bg" class="full"></div>
+<div id="cy" class="full"></div>
 
 </body>
+
 
 </html>
