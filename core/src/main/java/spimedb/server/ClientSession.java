@@ -1,7 +1,7 @@
 package spimedb.server;
 
 import jcog.bloom.StableBloomFilter;
-import jcog.bloom.hashing.StringHashProvider;
+import jcog.bloom.hash.StringHashProvider;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jetbrains.annotations.NotNull;

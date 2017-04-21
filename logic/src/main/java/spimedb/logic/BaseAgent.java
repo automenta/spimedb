@@ -8,8 +8,8 @@ import com.google.common.escape.Escapers;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import jcog.bag.impl.PLinkHijackBag;
-import jcog.random.XorShift128PlusRandom;
+import jcog.bag.impl.hijack.DefaultHijackBag;
+import jcog.pri.PriMerge;
 import nars.$;
 import nars.NAR;
 import nars.Task;
@@ -23,6 +23,7 @@ import nars.premise.MatrixPremiseBuilder;
 import nars.premise.PreferSimpleAndConfident;
 import nars.term.Compound;
 import nars.term.Term;
+import nars.term.Termed;
 import nars.term.atom.Atom;
 import nars.term.atom.Atomic;
 import nars.time.RealTime;
@@ -33,7 +34,6 @@ import nars.util.exe.MultiThreadExecutor;
 import org.apache.commons.io.IOUtils;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
-import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.Peer;
 import spimedb.SpimeDB;
@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by me on 4/4/17.
@@ -62,11 +63,11 @@ public class BaseAgent extends NAR {
     public BaseAgent(Executioner exe) throws SocketException, UnknownHostException {
         super(new RealTime.DSHalf(),
                 new CaffeineIndex(new DefaultConceptBuilder(), 200000, false, exe),
-                new XorShift128PlusRandom(1), exe);
+                ThreadLocalRandom::current, exe);
 
 
         ConceptBagFocus focus = new ConceptBagFocus(this,
-                new PLinkHijackBag(512, 2, random));
+                new DefaultHijackBag<Termed>(512, 2, PriMerge.plus));
 
         setFocus(focus);
 
@@ -74,7 +75,7 @@ public class BaseAgent extends NAR {
                 focus,
                 new MatrixPremiseBuilder(DefaultDeriver.the, new PreferSimpleAndConfident()),
                 this);
-        fire.activationRate.setValue(1f);
+
         fire.conceptsFiredPerCycle.set(8);
 
         //load initial data
@@ -162,7 +163,7 @@ public class BaseAgent extends NAR {
     }
 
     protected void input(JsonElement j) {
-        Atomic x = $.the(SpimeDB.uuidString());
+        Term x = $.the(SpimeDB.uuidString());
         believe($.sim(x, JsonCompound.the(j)));
         believe($.inh(x, recv), Tense.Present);
     }

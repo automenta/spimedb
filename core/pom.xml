@@ -13,9 +13,9 @@
     <dependencies>
 
         <dependency>
-            <groupId>automenta</groupId>
-            <artifactId>jcog</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>narchy</groupId>
+            <artifactId>util</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jgrapht-core</artifactId>
@@ -111,6 +111,11 @@
             <version>2.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.googlecode.lanterna</groupId>
+            <artifactId>lanterna</artifactId>
+            <version>3.0.0-rc1</version>
+        </dependency>
 
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2 &ndash;&gt;-->
         <!--<dependency>-->
@@ -487,6 +492,7 @@
                 <version>1.4.4</version>
                 <executions>
                     <execution>
+
                         <goals>
                             <goal>one-jar</goal>
                         </goals>
