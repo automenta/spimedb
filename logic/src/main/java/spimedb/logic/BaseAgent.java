@@ -67,7 +67,7 @@ public class BaseAgent extends NAR {
 
 
         ConceptBagFocus focus = new ConceptBagFocus(this,
-                new DefaultHijackBag<Termed>(512, 2, PriMerge.plus));
+                new DefaultHijackBag<Termed>(PriMerge.plus, 512, 2));
 
         setFocus(focus);
 
