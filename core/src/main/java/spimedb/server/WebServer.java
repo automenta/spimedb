@@ -247,6 +247,9 @@ public class WebServer extends PathHandler {
                 //getRequestPath().substring(8)
                 websocket( AnonymousSession.tag(db, "public") ) );
 
+        addPrefixPath("/console",
+                //getRequestPath().substring(8)
+                websocket( new ConsoleSession(db) ) );
 
         //addPrefixPath("/admin", websocket(new Admin(db)));
 
