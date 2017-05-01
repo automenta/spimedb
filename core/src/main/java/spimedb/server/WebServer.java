@@ -222,16 +222,16 @@ public class WebServer extends PathHandler {
             if (qText == null || (qText = qText.trim()).isEmpty())
                 return;
 
-            db.add(new MutableNObject()
-                    .name("find(\"" + qText + "\")")
-                    //.withTags("")
-                    .description(ex.toString())
-            );
+//            db.add(new MutableNObject()
+//                    .name("find(\"" + qText + "\")")
+//                    //.withTags("")
+//                    .description(ex.toString())
+//            );
 
             try {
                 send(db.find(qText, 20), o, searchResultFull);
             } catch (Exception e) {
-                logger.warn("{} -> {}", qText, e.getMessage());
+                logger.warn("{} -> {}", qText, e);
                 ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
             }
 
@@ -239,17 +239,18 @@ public class WebServer extends PathHandler {
 
         /* client attention management */
         //addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
-        addPrefixPath("/anon",
-            websocket( new AnonymousSession(db) )
-        );
 
-        addPrefixPath("/on/tag/",
-                //getRequestPath().substring(8)
-                websocket( AnonymousSession.tag(db, "public") ) );
-
-        addPrefixPath("/console",
-                //getRequestPath().substring(8)
-                websocket( new ConsoleSession(db) ) );
+//        addPrefixPath("/anon",
+//            websocket( new AnonymousSession(db) )
+//        );
+//
+//        addPrefixPath("/on/tag/",
+//                //getRequestPath().substring(8)
+//                websocket( AnonymousSession.tag(db, "public") ) );
+//
+//        addPrefixPath("/console",
+//                //getRequestPath().substring(8)
+//                websocket( new ConsoleSession(db) ) );
 
         //addPrefixPath("/admin", websocket(new Admin(db)));
 

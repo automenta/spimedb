@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.google.common.collect.Iterators;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by me on 1/14/17.
  */
+@Ignore
 public class TagTest {
 
 

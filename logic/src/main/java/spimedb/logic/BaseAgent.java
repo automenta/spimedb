@@ -19,8 +19,7 @@ import nars.control.ConceptBagFocus;
 import nars.control.FireConcepts;
 import nars.derive.DefaultDeriver;
 import nars.index.term.map.CaffeineIndex;
-import nars.premise.MatrixPremiseBuilder;
-import nars.premise.PreferSimpleAndConfident;
+import nars.premise.PreferSimpleAndPolarized;
 import nars.term.Compound;
 import nars.term.Term;
 import nars.term.Termed;
@@ -66,16 +65,16 @@ public class BaseAgent extends NAR {
 
 
         ConceptBagFocus focus = new ConceptBagFocus(this,
-                new DefaultHijackBag<Termed>(PriMerge.plus, 512, 2));
+                new DefaultHijackBag<>(PriMerge.plus, 512, 2));
 
         setFocus(focus);
 
-        FireConcepts.FireConceptsDirect fire = new FireConcepts.FireConceptsDirect(
+        FireConcepts fire = new FireConcepts.FireConceptsDirect(
                 focus,
-                new MatrixPremiseBuilder(DefaultDeriver.the, new PreferSimpleAndConfident()),
+                DefaultDeriver.the,
+                new PreferSimpleAndPolarized(),
                 this);
 
-        fire.conceptsFiredPerCycle.set(8);
 
         //load initial data
         try {

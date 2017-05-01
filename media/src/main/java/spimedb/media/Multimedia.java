@@ -58,6 +58,7 @@ public class Multimedia {
     static final Cleaner cleaner = new Cleaner(Whitelist.basic());
 
     private final float thumbnailQuality = 0.75f;
+    static final int pdfPageImageDPI = 32;
 
 
     public Multimedia(SpimeDB db) {
@@ -445,7 +446,6 @@ public class Multimedia {
         return m;
     }
 
-    static final int pdfPageImageDPI = 32;
 
 
 //    private static JsonNode html2json(Element e) {

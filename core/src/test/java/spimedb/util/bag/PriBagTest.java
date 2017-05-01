@@ -1,5 +1,6 @@
 package spimedb.util.bag;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by me on 1/15/17.
  */
+@Ignore
 public class PriBagTest {
 
     @Test

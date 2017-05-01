@@ -29,7 +29,6 @@
         </dependency>
 
 
-
         <!-- https://mvnrepository.com/artifact/net.sourceforge.argparse4j/argparse4j -->
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
@@ -53,42 +52,42 @@
             <version>1.10.2</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
+
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>6.5.1</version>
+            <version>7.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-queryparser</artifactId>
-            <version>6.5.1</version>
+            <version>7.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers-common</artifactId>
-            <version>6.5.1</version>
+            <version>7.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-memory</artifactId>
-            <version>6.5.1</version>
+            <version>7.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-codecs</artifactId>
-            <version>6.5.1</version>
+            <version>7.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-suggest</artifactId>
-            <version>6.5.1</version>
+            <version>7.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-facet</artifactId>
-            <version>6.5.1</version>
+            <version>7.0.0-SNAPSHOT</version>
         </dependency>
 
 
@@ -402,38 +401,38 @@
     <build>
         <plugins>
             <!--<plugin>-->
-                <!--<groupId>com.github.chrisdchristo</groupId>-->
-                <!--<artifactId>capsule-maven-plugin</artifactId>-->
-                <!--<version>1.5.1</version>-->
-                <!--<configuration>-->
-                    <!--<type>fat</type>-->
-                    <!--<chmod>true</chmod>-->
-                    <!--<execPluginConfig>root</execPluginConfig>-->
-                    <!--<trampoline>true</trampoline>-->
+            <!--<groupId>com.github.chrisdchristo</groupId>-->
+            <!--<artifactId>capsule-maven-plugin</artifactId>-->
+            <!--<version>1.5.1</version>-->
+            <!--<configuration>-->
+            <!--<type>fat</type>-->
+            <!--<chmod>true</chmod>-->
+            <!--<execPluginConfig>root</execPluginConfig>-->
+            <!--<trampoline>true</trampoline>-->
 
-                    <!--<manifest>-->
-                        <!---->
-                    <!--</manifest>-->
-                    <!--&lt;!&ndash;<caplets>co.paralleluniverse:capsule-daemon:0.2.0</caplets>&ndash;&gt;-->
-                    <!--&lt;!&ndash;<caplets>co.paralleluniverse:capsule-shield:0.2.0</caplets>&ndash;&gt;-->
+            <!--<manifest>-->
+            <!---->
+            <!--</manifest>-->
+            <!--&lt;!&ndash;<caplets>co.paralleluniverse:capsule-daemon:0.2.0</caplets>&ndash;&gt;-->
+            <!--&lt;!&ndash;<caplets>co.paralleluniverse:capsule-shield:0.2.0</caplets>&ndash;&gt;-->
 
-                    <!--&lt;!&ndash;<dependencySets>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<dependencySet>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<groupId>automenta</groupId>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<artifactId>jcog</artifactId>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<version>0.0.1-SNAPSHOT</version>&ndash;&gt;-->
+            <!--&lt;!&ndash;<dependencySets>&ndash;&gt;-->
+            <!--&lt;!&ndash;<dependencySet>&ndash;&gt;-->
+            <!--&lt;!&ndash;<groupId>automenta</groupId>&ndash;&gt;-->
+            <!--&lt;!&ndash;<artifactId>jcog</artifactId>&ndash;&gt;-->
+            <!--&lt;!&ndash;<version>0.0.1-SNAPSHOT</version>&ndash;&gt;-->
 
-                            <!--&lt;!&ndash;<outputDirectory>/</outputDirectory>&ndash;&gt;-->
-                            <!--&lt;!&ndash;<unpack>true</unpack>&ndash;&gt;-->
+            <!--&lt;!&ndash;<outputDirectory>/</outputDirectory>&ndash;&gt;-->
+            <!--&lt;!&ndash;<unpack>true</unpack>&ndash;&gt;-->
 
-                            <!--&lt;!&ndash;&lt;!&ndash;<includes>&ndash;&gt;&ndash;&gt;-->
-                                <!--&lt;!&ndash;&lt;!&ndash;<include>META-INF/MANIFEST.MF</include>&ndash;&gt;&ndash;&gt;-->
-                            <!--&lt;!&ndash;&lt;!&ndash;</includes>&ndash;&gt;&ndash;&gt;-->
-                        <!--&lt;!&ndash;</dependencySet>&ndash;&gt;-->
+            <!--&lt;!&ndash;&lt;!&ndash;<includes>&ndash;&gt;&ndash;&gt;-->
+            <!--&lt;!&ndash;&lt;!&ndash;<include>META-INF/MANIFEST.MF</include>&ndash;&gt;&ndash;&gt;-->
+            <!--&lt;!&ndash;&lt;!&ndash;</includes>&ndash;&gt;&ndash;&gt;-->
+            <!--&lt;!&ndash;</dependencySet>&ndash;&gt;-->
 
-                    <!--&lt;!&ndash;</dependencySets>&ndash;&gt;-->
+            <!--&lt;!&ndash;</dependencySets>&ndash;&gt;-->
 
-                <!--</configuration>-->
+            <!--</configuration>-->
 
             <!--</plugin>-->
 
@@ -684,4 +683,16 @@
         </resources>
     </build>
 
+    <repositories>
+        <repository>
+            <id>snapshots-repo</id>
+            <url>https://repository.apache.org/content/groups/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

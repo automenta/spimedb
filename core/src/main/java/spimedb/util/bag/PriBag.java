@@ -35,7 +35,7 @@ public class PriBag<V> extends SortedListTable<V, Budget<V>> implements BiFuncti
 
 
     public PriBag(int cap, BudgetMerge mergeFunction, /*@NotNull*/ Map<V, Budget<V>> map) {
-        super(Budget[]::new, map);
+        super(new SortedArray<>(), map);
 
         this.mergeFunction = mergeFunction;
         this.capacity = cap;

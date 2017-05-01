@@ -162,6 +162,7 @@ public class SpimeDB {
 
     DirectoryTaxonomyWriter taxoWriter;
 
+
     /**
      * in-memory
      */
@@ -409,14 +410,13 @@ public class SpimeDB {
 
         FacetsCollector fc = new FacetsCollector();
 
-        FacetsCollector.search(searcher, q, hitsPerPage, fc);
+        TopDocs docs = FacetsCollector.search(searcher, q, hitsPerPage, fc);
 
-        TopDocs docs = searcher.search(q, hitsPerPage);
         if (docs.totalHits > 0) {
 
             int facetCount = hitsPerPage; //DEFAULT
 
-            TaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
+            DirectoryTaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
 
             Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
 
