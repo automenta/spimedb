@@ -16,7 +16,7 @@
  *
  **************************************************************************************
  */
-package spimedb.media.util;
+package spimedb.media.kml;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;

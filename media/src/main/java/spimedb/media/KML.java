@@ -19,8 +19,8 @@ import org.opensextant.giscore.utils.Color;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.media.util.KmlReader;
-import spimedb.media.util.UrlRef;
+import spimedb.media.kml.KmlReader;
+import spimedb.media.kml.UrlRef;
 import spimedb.util.Crawl;
 import spimedb.util.HTML;
 
@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static spimedb.media.util.KmlReader.logger;
+import static spimedb.media.kml.KmlReader.logger;
 
 /**
  * TODO - remove null descriptions - store HTML content separately so it does

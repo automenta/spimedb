@@ -1,4 +1,4 @@
-package spimedb.media.util;
+package spimedb.media.kml;
 
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.evt.EventReaderImpl;

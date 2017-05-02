@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.helpers.DefaultHandler;
 import spimedb.MutableNObject;
 import spimedb.NObject;
+import spimedb.Plugin;
 import spimedb.SpimeDB;
 
 import javax.imageio.spi.IIORegistry;
@@ -37,6 +38,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 
 /**
@@ -46,7 +48,7 @@ import java.util.logging.Level;
  * https://svn.apache.org/repos/asf/tika/trunk/tika-example/src/main/java/org/apache/tika/example/SimpleTextExtractor.java
  * https://github.com/apache/pdfbox/tree/trunk/examples/src/main/java/org/apache/pdfbox/examples
  */
-public class Multimedia {
+public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject> {
 
 
     public final static Logger logger = LoggerFactory.getLogger(Multimedia.class);
@@ -60,16 +62,33 @@ public class Multimedia {
     private final float thumbnailQuality = 0.75f;
     static final int pdfPageImageDPI = 32;
 
-
-    public Multimedia(SpimeDB db) {
-
+    static {
         for (String s : new String[]{"org.apache.pdfbox.rendering.CIDType0Glyph2D", "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
             ((Jdk14Logger) LogFactory.getLog(s)).getLogger().setLevel(Level.SEVERE);
         }
-
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
+    }
 
-        db.on((NObject p, NObject x) -> {
+    private final SpimeDB db;
+
+    public Multimedia(SpimeDB db) {
+        this.db = db;
+
+        db.on(this);
+
+        //process existing items
+        db.forEach((x) -> {
+            db.runLater(0.5f, ()-> {
+                NObject y = apply(x, x);
+                if (y != x) {
+                    db.add(y);
+                }
+            });
+        });
+    }
+
+        @Override
+    public NObject apply(NObject p, NObject x) {
             final String url = x.get("url_in");
 
             String xid = x.id();
@@ -78,7 +97,7 @@ public class Multimedia {
                 return x;
             }
 
-            {
+
                 try {
                     long exp;
                     InputStream stream;
@@ -104,6 +123,9 @@ public class Multimedia {
 
                     //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
 
+                    //TODO use a separate url_cached for each instance of a sibling class like Multimedia that does only one processing
+                    //this way they can be enabled/disabled separately without interfering with each other
+                    //TODO store a hashcode of the data as well as the time for additional integrity
                     if (p != null) {
                         String whenCached = p.get("url_cached");
                         if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
@@ -183,7 +205,7 @@ public class Multimedia {
                     logger.error("url_in removal: {}", e);
                 }
 
-            }
+
 
             Object mime = x.get(NObject.TYPE);
 
@@ -320,10 +342,8 @@ public class Multimedia {
 
             return x;
 
-        });
-
-
     }
+
 
     @NotNull
     private static FileInputStream fileStream(String url) throws FileNotFoundException {

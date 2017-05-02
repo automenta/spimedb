@@ -1,7 +1,8 @@
-package spimedb.media;
+package spimedb.media.geojson;
 
 import org.junit.Test;
 import spimedb.SpimeDB;
+import spimedb.media.GeoJSON;
 import spimedb.query.Query;
 import spimedb.query.QueryCollection;
 

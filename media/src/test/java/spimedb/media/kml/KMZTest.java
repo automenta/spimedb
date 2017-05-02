@@ -1,4 +1,4 @@
-package spimedb.media.util;
+package spimedb.media.kml;
 
 
 import org.junit.Test;
@@ -13,10 +13,10 @@ import java.net.URL;
 import static junit.framework.TestCase.assertEquals;
 
 
-public class TestKMZUnfucking {
+public class KMZTest {
     @Test public void testKMLGeometry1() throws IOException {
         SpimeDB db = new SpimeDB();
-        URL v = TestKMZUnfucking.class.getClassLoader().getResource("WeeklyVolcanoGE-Reports.kmz");
+        URL v = KMZTest.class.getClassLoader().getResource("WeeklyVolcanoGE-Reports.kmz");
         //System.out.println(v);
 
         new KML(db, new GeoNObject("main")).file("main",
