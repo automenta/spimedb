@@ -14,19 +14,18 @@ public class Locker<X> {
     }
 
     public final class DBLock extends ReentrantLock {
-        private final Object id;
+        private final X id;
 
-        public DBLock(Object id) {
+        public DBLock(X id) {
             super(true);
             this.id = id;
         }
 
-        @Override
-        public synchronized void unlock() {
-            if (!hasQueuedThreads()) {
-                lock.remove(id);
-            }
+        //TODO did this need to be synchronized?
+        @Override public void unlock() {
             super.unlock();
+            lock.computeIfPresent(id,
+                (k,v) -> (!hasQueuedThreads()) ? null : v);
         }
     }
 

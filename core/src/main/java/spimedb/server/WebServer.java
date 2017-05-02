@@ -381,7 +381,7 @@ public class WebServer extends PathHandler {
         }
 
         try {
-            logger.info("start: {}:{}", host, port);
+            logger.info("listen {}:{}", host, port);
             (this.server = nextServer).start();
         } catch (Exception e) {
             logger.error("http start: {}", e);

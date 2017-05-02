@@ -21,7 +21,7 @@ public class GeoJSONTest {
 
 
 
-    public final static Supplier<InputStream> eqGeoJson = ()->new BufferedInputStream(GeoJSONTest.class.getClassLoader().getResourceAsStream("eq.geojson"), 1024);
+    public final static Supplier<InputStream> eqGeoJson = ()->new BufferedInputStream(GeoJSONTest.class.getClassLoader().getResourceAsStream("geojson/eq.geojson"), 1024);
 
     @Test
     public void test1() throws IOException {

@@ -173,20 +173,12 @@
         </plugins>
         <testResources>
             <testResource>
-                <directory>src/test/java/spimedb/media/util</directory>
-                <includes>
-                    <include>*.kmz</include>
-                    <include>*.kml</include>
-                    <include>*.json</include>
-                    <include>*.geojson</include>
-                </includes>
-                <filtering>false</filtering>
-            </testResource>
-            <testResource>
                 <directory>src/test/java/spimedb/media</directory>
                 <includes>
-                    <include>*.json</include>
-                    <include>*.geojson</include>
+                    <include>**/*.kmz</include>
+                    <include>**/*.kml</include>
+                    <include>**/*.json</include>
+                    <include>**/*.geojson</include>
                 </includes>
                 <filtering>false</filtering>
             </testResource>

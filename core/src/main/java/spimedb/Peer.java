@@ -22,7 +22,16 @@ public class Peer extends UDPeer {
 
     @Override
     public void ping(@Nullable InetSocketAddress to) {
-        logger.debug("ping: " + to);
+        logger.debug("ping: {}", to);
         super.ping(to);
     }
+
+    public void ask(String xyz) {
+        say("{\"?\": \"" + xyz + "\"}", 3);
+    }
+
+//    @Override
+//    protected void receive(Msg m) {
+//        logger.info("recv: {}", m);
+//    }
 }

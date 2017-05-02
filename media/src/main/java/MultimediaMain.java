@@ -1,4 +1,5 @@
 import spimedb.Main;
+import spimedb.Spime;
 
 /**
  * entrypoint for Multimedia enablement
@@ -6,6 +7,6 @@ import spimedb.Main;
 public class MultimediaMain {
 
     public static void main(String[] args) throws Exception {
-        Main.main(args);
+        Spime.main(args);
     }
 }

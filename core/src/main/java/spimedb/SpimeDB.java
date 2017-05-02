@@ -162,6 +162,8 @@ public class SpimeDB {
 
     DirectoryTaxonomyWriter taxoWriter;
 
+    long lastSuggesterCreated = 0;
+    long minSuggesterUpdatePeriod = 1000 * 2;
 
     /**
      * in-memory
@@ -184,7 +186,7 @@ public class SpimeDB {
         this.taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
 
 
-        logger.info("index ready: file://{}", indexPath);
+        logger.info("index file://{} loaded ({} objects)", indexPath, size());
     }
 
     private SpimeDB(File file, Directory dir) {
@@ -220,11 +222,8 @@ public class SpimeDB {
             e.printStackTrace();
         }
 
-        logger.info("{} objects loaded", size());
     }
 
-    long lastSuggesterCreated = 0;
-    long minSuggesterUpdatePeriod = 1000 * 2;
 
     public static StringField string(String key, String value) {
         return new StringField(key, value, Field.Store.YES);
@@ -442,6 +441,9 @@ public class SpimeDB {
     public static void LOG(String l, Level ll) {
         ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
     }
+    public static void LOG(Logger log, Level ll) {
+        LOG(log.getName(), ll);
+    }
 
 
     public Set<String> tags() {
@@ -511,7 +513,7 @@ public class SpimeDB {
                 logger.error("indexing error: {}", e);
             } finally {
                 writing.set(false);
-                logger.debug("{} indexed, {} removed", written, removed);
+                //logger.debug("{} indexed, {} removed", written, removed);
             }
 
 
@@ -771,7 +773,7 @@ public class SpimeDB {
                     return previous;
             }
 
-            logger.debug("add {}", id);
+            //logger.debug("add {}", id);
 
             return commit(previous, next);
         };
@@ -838,18 +840,18 @@ public class SpimeDB {
 
     public void forEach(Consumer<NObject> each) {
 
-        /* When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering. */
-        withReader((r) -> {
-            int max = r.maxDoc();
 
-            IntStream.range(0, max).parallel().forEach(i -> {
+        withReader((r) -> {
+            int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
+
+            IntStream.range(0, max).forEach(i -> {
                 Document d = null;
                 try {
                     d = r.document(i);
                     if (d != null)
                         each.accept(DObject.get(d));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("forEach {}", e);
                 }
             });
 

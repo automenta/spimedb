@@ -20,10 +20,11 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mockito.internal.util.reflection.BeanPropertySetter;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.server.WebServer;
-import spimedb.util.Crawl;
+import org.xnio.Xnio;
+import spimedb.server.UDP;
 import spimedb.util.Locker;
 
 import java.io.File;
@@ -32,9 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
@@ -43,7 +42,7 @@ import java.util.function.Function;
  * Created by me on 6/14/15.
  */
 
-public class Main extends FileAlterationListenerAdaptor {
+public abstract class Main extends FileAlterationListenerAdaptor {
 
     public final static Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -62,11 +61,12 @@ public class Main extends FileAlterationListenerAdaptor {
 
 
         SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
+        SpimeDB.LOG(Reflections.log, Level.WARN);
+        SpimeDB.LOG(Xnio.getInstance().getName(), Level.WARN);
+        SpimeDB.LOG("logging", Level.WARN);
 
     }
 
-    private final SpimeDB db;
-    final String dbPathIgnored;
 
     /**
      * live objects
@@ -78,16 +78,22 @@ public class Main extends FileAlterationListenerAdaptor {
     @Nullable
     private final FileAlterationObserver fsObserver;
 
-    final Pair<Class, String> key(File f) {
+    protected Pair<Class, String> key(File f) {
 
         String fileName = f.getName();
         if (fileName.startsWith("."))
             return null; //ignore hidden files
 
         String absolutePath = f.getAbsolutePath();
+        if (absolutePath == null)
+            return null;
 
-        if (absolutePath.startsWith(dbPathIgnored))
-            return null; //ignore index directory, subdirectory of the root
+        return key(fileName, absolutePath);
+
+    }
+
+    @Nullable
+    protected Pair<Class, String> key(String fileName, String absolutePath) {
 
 
         String[] parts = fileName.split(".");
@@ -116,7 +122,6 @@ public class Main extends FileAlterationListenerAdaptor {
         }
 
         return key(klass, id);
-
     }
 
     public static Pair<Class, String> key(Class klass) {
@@ -134,15 +139,15 @@ public class Main extends FileAlterationListenerAdaptor {
 
     @Override
     public void onFileCreate(File file) {
-        update(file);
+        updateFile(file);
     }
 
     @Override
     public void onFileChange(File file) {
-        update(file);
+        updateFile(file);
     }
 
-    private void update(File file) {
+    protected void updateFile(File file) {
 
         Pair<Class, String> k = key(file);
         if (k == null)
@@ -150,6 +155,10 @@ public class Main extends FileAlterationListenerAdaptor {
 
         logger.info("reload file://{}", file);
         merge(k, build(k, file));
+    }
+
+    protected void updateDirectory(File d) {
+        //impl in subclasses
     }
 
     @Override
@@ -247,6 +256,11 @@ public class Main extends FileAlterationListenerAdaptor {
 
     static final Class[] spimeDBConstructor = new Class[]{SpimeDB.class};
 
+    public <X extends Plugin> Main with(Class<X> c) {
+        //TODO
+        return this;
+    }
+
     public class PropertyBuilder<X> implements Function<X, X> {
         public final File file;
         private final Pair<Class, String> id;
@@ -266,14 +280,10 @@ public class Main extends FileAlterationListenerAdaptor {
                 //HACK TODO use some adaptive constructor argument injector
                 for (Constructor c : cl.getConstructors()) {
                     Class[] types = c.getParameterTypes();
-                    Object[] param;
-                    if (Arrays.equals(types, spimeDBConstructor)) { //HACK look for spimeDB as the only arg
-                        param = new Object[]{db};
-                    } else {
-                        param = new Object[] {};
-                    }
+                    Object[] param = defaultConstructorArgs(types);
 
                     try {
+                        logger.info("start {}", x);
                         x = (X) c.newInstance(param);
                     } catch (Exception e) {
                         logger.error("error instantiating {} {} {} {}", file, cl, c, e.getMessage());
@@ -322,6 +332,9 @@ public class Main extends FileAlterationListenerAdaptor {
         }
     }
 
+    /** HACK TODO make not required */
+    @NotNull     abstract protected Object[] defaultConstructorArgs(Class[] types);
+
     private static Field field(Class cl, String field) {
         //TODO add a reflection cache
         try {
@@ -333,6 +346,10 @@ public class Main extends FileAlterationListenerAdaptor {
 
     public <X> Object put(Class k, X v) {
         return put(key(k), v);
+    }
+
+    public <X> X get(Class<? extends X> k) {
+        return (X) obj.get(key(k));
     }
 
     public <X> Object put(Pair<Class, String> k, X v) {
@@ -375,6 +392,9 @@ public class Main extends FileAlterationListenerAdaptor {
 
     public final static Logger LoggingLogger = LoggerFactory.getLogger(LOG.getClass());
 
+    /** HACK TODO make not a requirement */
+    abstract String workingDirectory();
+
     class LogConfigurator {
 
 
@@ -390,7 +410,7 @@ public class Main extends FileAlterationListenerAdaptor {
                     String line = Files.readFirstLine(f, Charset.defaultCharset()).trim();
                     switch (line) {
                         case "rolling":
-                            String logFile = db.file.toPath().resolve("log").toAbsolutePath().toString();
+                            String logFile = workingDirectory();
                             message = ("rolling to file://{}" + logFile);
 
                             RollingFileAppender r = new RollingFileAppender();
@@ -462,32 +482,31 @@ public class Main extends FileAlterationListenerAdaptor {
     }
 
 
-    public Main(String path) throws Exception {
+    public Main(String path, Map<String, Class> initialKlassPath) throws Exception {
 
-
+        klassPath.putAll(initialKlassPath);
 
         //setup default klasspath
-        klassPath.put("http", WebServer.class);
-        klassPath.put("log", LogConfigurator.class);
-        klassPath.put("udp", UDP.class);
-        //klassPath.put("crawl", Crawl.class);
+        klassPath.putIfAbsent("log", LogConfigurator.class);
 
         put(LogConfigurator.class, new LogConfigurator(null));
 
 
-        if (path!=null) {
-            db = new SpimeDB(path + "/_");
-        } else {
-            db = new SpimeDB();
-        }
-
-        dbPathIgnored = db.file!=null ? db.file.getAbsolutePath() : null;
-
         //new Multimedia(db);
 
-        if (path!=null) {
+        Set<Class<? extends Plugin>> plugins = new Reflections("spimedb")
+                .getSubTypesOf(Plugin.class);
+
+        plugins.forEach(c -> {
+            String id = c.getSimpleName().toLowerCase();
+            logger.warn("Plugin available: {}", id);
+            klassPath.put(id, c);
+        });
+
+
+        if (path != null) {
             fsObserver = new FileAlterationObserver(path);
-            logger.info("watching: file://{}", path);
+            logger.info("watching file://{}", path);
         /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
             int updatePeriodMS = 200;
             FileAlterationMonitor monitor = new FileAlterationMonitor(updatePeriodMS);
@@ -498,8 +517,6 @@ public class Main extends FileAlterationListenerAdaptor {
             monitor.addObserver(fsObserver);
             monitor.start();
 
-            //load existing files
-            rebuild();
         } else {
             fsObserver = null;
         }
@@ -514,175 +531,38 @@ public class Main extends FileAlterationListenerAdaptor {
 
     }
 
-    static class UDP {
-
-        private final SpimeDB db;
-        int port;
-
-        private Peer peer = null;
-
-        public UDP(SpimeDB db) {
-            this.db = db;
-        }
-
-
-        public void setPort(int port) {
-            int p = this.port;
-            if (p == port)
-                return;
-            synchronized (this) {
-                this.port = port;
-                if (port==-1)
-                    return;
-                if (this.peer != null) {
-                    this.peer.stop();
-                }
-                try {
-                    this.peer = new SpimeDBPeer(port, db);
-                } catch (Exception e) {
-                    logger.error("{}", e);
-                }
-            }
-
-
-        }
-
-        public int getPort() {
-            return port;
-        }
-    }
-
-    protected void rebuild() {
-        if (fsObserver!=null)
+    /** reload files */
+    protected Main restart() {
+        if (fsObserver != null)
             reload(fsObserver);
-        clean();
+        return this;
     }
 
-    /** remove entries for which their source file has been removed */
-    private void clean() {
-        db.forEach(x -> {
-           if (x.get("url_cached")!=null) {
-               String f = x.get("url_in");
-               boolean valid = false;
-               if (f.startsWith("file:")) {
-                   //try {
 
-                   valid = new File(f.substring(5)).exists();
-               } else {
-                   //TODO handle remote URI's in a different way than local files
-                   valid = true;
-               }
-               //} catch (URISyntaxException e) {
-
-               //}
-               if (!valid) {
-                   db.remove(x.id());
-               }
-           }
-        });
-    }
     private void reload(FileAlterationObserver observer) {
         for (File f : observer.getDirectory().listFiles()) {
             if (f.getName().startsWith("."))
                 continue; //ignore hidden files
 
-            db.exe.run(0.9f, () -> {
+
+            //exe.submit(0.9f, () -> {
                 if (f.isFile()) {
-                    update(f);
-                } else if (f.isDirectory() && !f.getAbsolutePath().equals(db.indexPath)) {
-                    //default: index a directory
-                    db.exe.run(0.8f, () -> {
-                        Crawl.fileDirectory(f.getAbsolutePath(), db);
-                    });
+                    updateFile(f);
+                } else if (f.isDirectory()) {
+                    updateDirectory(f);
                 }
-            });
+            //});
         }
     }
 
-    public void put(Class c, String id, Object value) {
-        put(key(c, id), value);
-    }
 
 
-    public static void main(String[] args) throws Exception {
-
-        if (args.length == 0) {
-            System.out.println("usage: spime [path]\t\tNo path specified; using default (in-memory) configuration");
-            Main m = new Main(null);
-            mainDefault(m);
-        } else {
-            String dataPath = args[0];
-            new Main(dataPath);
-        }
+//    public void put(Class c, String id, Object value) {
+//        put(key(c, id), value);
+//    }
 
 
-//        Phex p = Phex.the();
-//        p.start();
-//        p.startSearch("kml");
-
-        //Crawl.pageLinks("...", (x) -> x.endsWith(".pdf"), db);
-
-        //Crawl.fileDirectory(path, db);
-
-
-        /*
-        try {
-            new SpimeJS(db).with("db", db).run(new File("data/climateviewer.js"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        */
-
-
-            /*
-            new Netention() {
-
-                @Override
-                protected void onTag(String id, String name, List<String> extend) {
-                    NObject n = new NObject(id, name);
-                    if (extend!=null && !extend.isEmpty())
-                        n.setTag(extend.toArray(new String[extend.size()]));
-                    db.put(n);
-                }
-            };
-            */
-
-
-        //ImportGeoJSON
-
-        //ImportSchemaOrg.load(db);
-
-
-        //db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
-
-
-//            db.forEach(x -> {
-//                System.out.println(x);
-//            });
-
-
-    }
-
-    private static void mainDefault(Main m) {
-        SpimeDB db = m.db;
-
-        int port = 8080;
-
-        WebServer w = new WebServer(db);
-        w.setPort(port);
-        m.put(WebServer.class, w);
-
-        try {
-            new SpimeDBPeer(port, m.db);
-        } catch (Exception e) {
-            logger.error("starting Peer: {}", e);
-            e.printStackTrace();
-        }
-
-
-    }
-
-    private class FileToString implements Function {
+    private static class FileToString implements Function {
 
         private final File file;
 

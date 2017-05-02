@@ -16,7 +16,7 @@ import static junit.framework.TestCase.assertEquals;
 public class KMZTest {
     @Test public void testKMLGeometry1() throws IOException {
         SpimeDB db = new SpimeDB();
-        URL v = KMZTest.class.getClassLoader().getResource("WeeklyVolcanoGE-Reports.kmz");
+        URL v = KMZTest.class.getClassLoader().getResource("kml/WeeklyVolcanoGE-Reports.kmz");
         //System.out.println(v);
 
         new KML(db, new GeoNObject("main")).file("main",

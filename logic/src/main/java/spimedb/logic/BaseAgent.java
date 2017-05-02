@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jcog.bag.impl.hijack.DefaultHijackBag;
 import jcog.pri.PriMerge;
+import jcog.random.XorShift128PlusRandom;
 import nars.$;
 import nars.NAR;
 import nars.Task;
@@ -61,7 +62,7 @@ public class BaseAgent extends NAR {
     public BaseAgent(Executioner exe) throws SocketException, UnknownHostException {
         super(new RealTime.DSHalf(),
                 new CaffeineIndex(new DefaultConceptBuilder(), 200000, false, exe),
-                ThreadLocalRandom::current, exe);
+                new XorShift128PlusRandom(1), exe);
 
 
         ConceptBagFocus focus = new ConceptBagFocus(this,
