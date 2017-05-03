@@ -1,20 +1,19 @@
 package spimedb.media;
 
 import jcog.Util;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.junit.Test;
 import spimedb.MutableNObject;
 import spimedb.NObject;
-import spimedb.Peer;
 import spimedb.Spime;
-import spimedb.index.SearchResult;
+import spimedb.SpimeDBPeer;
 import spimedb.server.UDP;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -27,26 +26,34 @@ public class MeshTest {
         Spime worker = new Spime();//TODO: .with(UDP.class, new UDP()).restart();
         Spime client = new Spime();
 
+        final SpimeDBPeer[] workerPeer = new SpimeDBPeer[1];
+
         ThreadGroup workerGroup = new ThreadGroup("Worker");
         Thread workerThread = new Thread(workerGroup, () -> {
 
             worker.put(UDP.class, new UDP(worker.db, 10000)); //HACK;
             worker.restart();
 
+            workerPeer[0] = client.get(UDP.class).peer();
+
             worker.db.add(new MutableNObject("abc").withTags("xyz"));
+
+            Util.sleep(3000);
 
         }, "Worker");
 
+        AtomicBoolean failure = new AtomicBoolean(false);
+
         ThreadGroup clientGroup = new ThreadGroup("Client");
         Thread clientThread = new Thread(clientGroup, () -> {
-            client.put(UDP.class,new UDP(client.db, 10001)); //HACK;
 
+            client.put(UDP.class,new UDP(client.db, 10001)); //HACK;
             client.restart();
 
-            Peer udp = client.get(UDP.class).peer();
+            SpimeDBPeer udp = client.get(UDP.class).peer();
             udp.ping(10000);
 
-            Util.sleep(1000);
+            Util.sleep(3000);
 
             List<NObject> found = new ArrayList();
             try {
@@ -55,15 +62,16 @@ public class MeshTest {
                     found.add(x);
                 });
 
-                udp.ask("xyz");
+                udp.need("xyz", 0.5f);
 
             } catch (Exception e) {
                 assertTrue(false);
             }
 
-            Util.sleep(1000);
+            Util.sleep(3000);
 
-            assertEquals(1, found.size());
+            if (found.size()!=1)
+                failure.set(true);
 
         }, "Client");
 
@@ -76,5 +84,12 @@ public class MeshTest {
         clientThread.join();
         workerThread.join(); //wait for clientThread to finish first
 
+
+        workerPeer[0].them.forEach(u -> {
+            System.out.println(u);
+        });
+
+
+        assertFalse(failure.get());
     }
 }

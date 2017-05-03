@@ -35,7 +35,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
 import spimedb.FilteredNObject;
-import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
@@ -54,7 +53,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static io.undertow.Handlers.resource;
-import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static java.lang.Double.parseDouble;
 import static spimedb.util.HTTP.getStringParameter;

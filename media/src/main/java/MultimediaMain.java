@@ -1,4 +1,3 @@
-import spimedb.Main;
 import spimedb.Spime;
 
 /**

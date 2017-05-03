@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jcog.bag.impl.hijack.DefaultHijackBag;
+import jcog.net.UDPeer;
 import jcog.pri.PriMerge;
 import jcog.random.XorShift128PlusRandom;
 import nars.$;
@@ -23,7 +24,6 @@ import nars.index.term.map.CaffeineIndex;
 import nars.premise.PreferSimpleAndPolarized;
 import nars.term.Compound;
 import nars.term.Term;
-import nars.term.Termed;
 import nars.term.atom.Atom;
 import nars.time.RealTime;
 import nars.time.Tense;
@@ -31,17 +31,18 @@ import nars.util.JsonCompound;
 import nars.util.exe.Executioner;
 import nars.util.exe.MultiThreadExecutor;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import spimedb.NObject;
-import spimedb.Peer;
 import spimedb.SpimeDB;
+import spimedb.SpimeDBPeer;
 
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by me on 4/4/17.
@@ -50,16 +51,16 @@ public class BaseAgent extends NAR {
 
     final static Escaper taskEscaper = Escapers.builder().addEscape('"', "\\\"").build();
 
-    private final Peer peer;
+    private final UDPeer UDPeer;
 
 
-    public BaseAgent() throws SocketException, UnknownHostException {
-        this(new MultiThreadExecutor(2, 64, true));
+    public BaseAgent(SpimeDB db) throws SocketException, UnknownHostException {
+        this(db, new MultiThreadExecutor(2, 64, true));
     }
 
     static final Compound recv = (Compound) $.seti($.the("RECV"));
 
-    public BaseAgent(Executioner exe) throws SocketException, UnknownHostException {
+    public BaseAgent(SpimeDB db, Executioner exe) throws SocketException, UnknownHostException {
         super(new RealTime.DSHalf(),
                 new CaffeineIndex(new DefaultConceptBuilder(), 200000, false, exe),
                 new XorShift128PlusRandom(1), exe);
@@ -99,10 +100,10 @@ public class BaseAgent extends NAR {
             e.printStackTrace();
         }
 
-        peer = new Peer(7979) {
+        UDPeer = new SpimeDBPeer(7979, db) {
 
             @Override
-            protected void receive(Msg m) {
+            protected void receive(@Nullable UDProfile connected, @NotNull Msg m) {
                 JsonElement j = new Gson().fromJson(new String(m.data()), JsonElement.class);
 
                 //if (j.isJsonObject() && j.getAsJsonObject().get("I").getAsInt())
@@ -115,7 +116,7 @@ public class BaseAgent extends NAR {
         new LeakOut(this, 16, 0.1f) {
             @Override
             protected float send(Task task) {
-                peer.say("{ \">\": \"public\", N: \"" + taskEscaper.escape(task.toString()) + "\" }", 2);
+                UDPeer.believe("{ \">\": \"public\", N: \"" + taskEscaper.escape(task.toString()) + "\" }", 2);
                 return 1f;
             }
         };
@@ -175,17 +176,16 @@ public class BaseAgent extends NAR {
         //indexCache.get()
     }
 
-    public static void main(String[] args) throws SocketException, UnknownHostException {
-        BaseAgent a = new BaseAgent();
-
-
-        a.log();
-
-        a.peer.ping("a.narchy.xyz", 8080);
-        a.peer.ping("localhost", 8080);
-
-        a.loop(1f).join();
-
-    }
+//    public static void main(String[] args) throws SocketException, UnknownHostException {
+//        BaseAgent a = new BaseAgent();
+//
+//        a.log();
+//
+//        a.UDPeer.ping("a.narchy.xyz", 8080);
+//        a.UDPeer.ping("localhost", 8080);
+//
+//        a.loop(1f).join();
+//
+//    }
 
 }

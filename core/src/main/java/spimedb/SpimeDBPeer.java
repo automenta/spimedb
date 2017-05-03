@@ -2,6 +2,9 @@ package spimedb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jcog.Texts;
+import jcog.net.UDPeer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import spimedb.util.JSON;
 
 import java.net.InetSocketAddress;
@@ -14,7 +17,7 @@ import static spimedb.NObjectConsumer.Tagged;
 /**
  * Created by me on 4/4/17.
  */
-public class SpimeDBPeer extends Peer {
+public class SpimeDBPeer extends UDPeer {
 
     private final SpimeDB db;
 
@@ -30,7 +33,7 @@ public class SpimeDBPeer extends Peer {
                             if (message != null) {
                                 say(new Msg(message), 1f, false);
                             } else {
-                                say(JSON.toJSONBytes(e), 3);
+                                believe(JSON.toJSONBytes(e), 3);
                             }
                         },
                         "")
@@ -51,10 +54,7 @@ public class SpimeDBPeer extends Peer {
     }
 
     @Override
-    protected void receive(Msg m) {
-        if (m.id() == id) {
-            return;
-        }
+    protected void receive(@Nullable UDPeer.UDProfile connected, @NotNull Msg m) {
 
         JsonNode parsed = JSON.fromJSON(m.data(), JsonNode.class);
         JsonNode pi = parsed.get("I");
@@ -66,5 +66,9 @@ public class SpimeDBPeer extends Peer {
         }
 
         db.add(new MutableNObject(id).putAll(parsed).put("udp", m.data()));
+    }
+
+    public void ask(String xyz) {
+
     }
 }

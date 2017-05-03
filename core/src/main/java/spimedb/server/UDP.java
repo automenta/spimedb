@@ -1,6 +1,9 @@
 package spimedb.server;
 
-import spimedb.*;
+import spimedb.Main;
+import spimedb.Plugin;
+import spimedb.SpimeDB;
+import spimedb.SpimeDBPeer;
 
 /**
  * Created by me on 5/1/17.
@@ -10,7 +13,7 @@ public class UDP implements Plugin {
     private final SpimeDB db;
     int port;
 
-    private Peer peer = null;
+    private SpimeDBPeer peer = null;
 
     public UDP(SpimeDB db) {
         this.db = db;
@@ -20,7 +23,7 @@ public class UDP implements Plugin {
         setPort(port);
     }
 
-    public Peer peer() { return peer; }
+    public SpimeDBPeer peer() { return peer; }
 
     public void setPort(int port) {
 

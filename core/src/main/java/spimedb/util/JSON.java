@@ -33,7 +33,7 @@ public class JSON {
             .configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, true)
             ;
 
-    public final static ObjectMapper msgPackMapper = new ObjectMapper(new MessagePackFactory());
+
 
     final public static ObjectMapper jsonSafe = json.copy()
             .enable(SerializationFeature.WRAP_EXCEPTIONS)
@@ -92,6 +92,9 @@ public class JSON {
             return x.toString().getBytes();
         }
     }
+
+    public final static ObjectMapper msgPackMapper = new ObjectMapper(new MessagePackFactory());
+
     public static byte[] toMsgPackBytes(Object x, Class c) {
         try {
             return msgPackMapper.writerFor(c).writeValueAsBytes(x);
@@ -100,6 +103,7 @@ public class JSON {
             return null;
         }
     }
+
     public static <X> X fromMsgPackBytes(byte[] msgPacked, Class<? extends X> type) {
         try {
             return msgPackMapper.reader(type).readValue(msgPacked);
