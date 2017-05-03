@@ -38,11 +38,11 @@ public final class SearchResult {
         logger.info("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
     }
 
-    public void forEach(BiPredicate<DObject,ScoreDoc> each) {
-        forEachDocument((d,s)->each.test(DObject.get(d), s));
+    public void forEach(BiPredicate<DObject, ScoreDoc> each) {
+        forEachDocument((d, s) -> each.test(DObject.get(d), s));
     }
 
-    public void forEachDocument(BiPredicate<Document,ScoreDoc> each) {
+    public void forEachDocument(BiPredicate<Document, ScoreDoc> each) {
         if (docs == null)
             return;
 
@@ -51,7 +51,7 @@ public final class SearchResult {
         IndexReader reader = searcher.getIndexReader();
         Document d = visitor.getDocument();
 
-        for ( ScoreDoc x : docs.scoreDocs) {
+        for (ScoreDoc x : docs.scoreDocs) {
             d.clear();
             try {
                 reader.document(x.doc, visitor);
@@ -72,15 +72,8 @@ public final class SearchResult {
         IndexReader reader = searcher.getIndexReader();
         Document d = visitor.getDocument();
 
-        return Iterators.transform(Iterators.forArray(docs.scoreDocs), sd -> {
-            d.clear();
-            try {
-                reader.document(sd.doc, visitor);
-            } catch (IOException e) {
-                logger.error("{} {}", sd, e);
-            }
-            return d;
-        });
+
+        return new SearchResultIterator(d, reader, visitor);
     }
 
     public void close() {
@@ -97,4 +90,41 @@ public final class SearchResult {
         }
     }
 
+    /** must be iterated completely for auto-close, or closed manually */
+    private class SearchResultIterator implements Iterator<Document> {
+
+        private final Document d;
+        private final IndexReader reader;
+        private final DocumentStoredFieldVisitor visitor;
+        Iterator<Document> ii;
+
+        public SearchResultIterator(Document d, IndexReader reader, DocumentStoredFieldVisitor visitor) {
+            this.d = d;
+            this.reader = reader;
+            this.visitor = visitor;
+            ii = Iterators.transform(Iterators.forArray(docs.scoreDocs), sd -> {
+                d.clear();
+                try {
+                    reader.document(sd.doc, visitor);
+                } catch (IOException e) {
+                    logger.error("{} {}", sd, e);
+                }
+                return d;
+            });
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (!ii.hasNext()) {
+                close();
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public Document next() {
+            return ii.next();
+        }
+    }
 }

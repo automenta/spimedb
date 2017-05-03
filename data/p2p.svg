@@ -15,7 +15,10 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.1 r15371"
-   sodipodi:docname="p2p.svg">
+   sodipodi:docname="p2p.svg"
+   inkscape:export-filename="/home/me/s/data/p2p.svg.png"
+   inkscape:export-xdpi="242.95"
+   inkscape:export-ydpi="242.95">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -23,7 +26,7 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
      inkscape:cx="406.9806"

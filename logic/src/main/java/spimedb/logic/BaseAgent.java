@@ -103,7 +103,7 @@ public class BaseAgent extends NAR {
         UDPeer = new SpimeDBPeer(7979, db) {
 
             @Override
-            protected void receive(@Nullable UDProfile connected, @NotNull Msg m) {
+            protected void onBelief(@Nullable UDProfile connected, @NotNull Msg m) {
                 JsonElement j = new Gson().fromJson(new String(m.data()), JsonElement.class);
 
                 //if (j.isJsonObject() && j.getAsJsonObject().get("I").getAsInt())

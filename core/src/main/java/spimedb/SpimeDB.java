@@ -38,6 +38,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
+import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +99,6 @@ public class SpimeDB {
 
     protected final Directory dir;
 
-    public final Router<String, Consumer<NObject>> onTag = new Router();
 
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
 
@@ -415,7 +415,8 @@ public class SpimeDB {
 
             int facetCount = hitsPerPage; //DEFAULT
 
-            DirectoryTaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoDir);
+
+            DirectoryTaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoWriter);
 
             Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
 
@@ -552,10 +553,13 @@ public class SpimeDB {
             tags = GENERAL;
         }
 
-        org.eclipse.collections.api.set.ImmutableSet<String> filters =
+        ImmutableSet<String> filters =
                 WebServer.searchResultFull;
         NObject finalNext = new FilteredNObject(next, filters);
-        onTag.each(tags, (c) -> c.accept(finalNext)); //broadcast through router
+
+        Consumer<Consumer<NObject>> take = (c) -> c.accept(finalNext);
+        onTag.each(tags, take);
+        on.forEach(take);
     }
 
 
@@ -641,6 +645,7 @@ public class SpimeDB {
     final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
 
     final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
+    public final Router<String, Consumer<NObject>> onTag = new Router(); //TODO make private
 
     public void on(BiFunction<NObject, NObject, NObject> changed) {
         onChange.add(changed);
@@ -654,7 +659,7 @@ public class SpimeDB {
         update(c, false);
     }
 
-    public void update(NObjectConsumer c, boolean enable) {
+    private void update(NObjectConsumer c, boolean enable) {
         if (c instanceof NObjectConsumer.OnTag) {
             for (String x : ((NObjectConsumer.OnTag) c).any) {
                 if (enable)

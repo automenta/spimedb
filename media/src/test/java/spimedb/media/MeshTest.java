@@ -1,11 +1,13 @@
 package spimedb.media;
 
 import jcog.Util;
+import org.apache.commons.collections4.IteratorUtils;
 import org.junit.Test;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.Spime;
 import spimedb.SpimeDBPeer;
+import spimedb.query.Query;
 import spimedb.server.UDP;
 
 import java.util.ArrayList;
@@ -36,13 +38,14 @@ public class MeshTest {
 
             workerPeer[0] = worker.get(UDP.class).peer();
 
-            worker.db.add(new MutableNObject("abc").withTags("xyz"));
+            worker.db.add(new MutableNObject("exists already").withTags("xyz"));
 
             Util.sleep(3000);
 
+            worker.db.add(new MutableNObject("newly created").withTags("xyz"));
+
         }, "Worker");
 
-        AtomicBoolean failure = new AtomicBoolean(false);
 
         ThreadGroup clientGroup = new ThreadGroup("Client");
         Thread clientThread = new Thread(clientGroup, () -> {
@@ -50,29 +53,26 @@ public class MeshTest {
             client.put(UDP.class,new UDP(client.db, 10001)); //HACK;
             client.restart();
 
-            SpimeDBPeer udp = client.get(UDP.class).peer();
-            udp.ping(10000);
+            SpimeDBPeer clientPeer = client.get(UDP.class).peer();
+            clientPeer.ping(10000);
 
             Util.sleep(1000);
 
             List<NObject> found = new ArrayList();
             try {
                 //SearchResult r = client.db.find("xyz", 10 /* HACK */);
-                client.db.onTag.on("xyz", (x) -> {
-                    found.add(x);
-                });
+//                client.db.onTag.on("xyz", (x) -> {
+//                    found.add(x);
+//                });
 
-
-                udp.need("xyz", 0.5f);
+                clientPeer.need("xyz", 0.5f);
 
             } catch (Exception e) {
                 assertTrue(false);
             }
 
-            Util.sleep(1000);
+            Util.sleep(3000);
 
-            if (found.size()!=1)
-                failure.set(true);
 
         }, "Client");
 
@@ -86,11 +86,7 @@ public class MeshTest {
         workerThread.join(); //wait for clientThread to finish first
 
 
-        workerPeer[0].them.forEach(u -> {
-            System.out.println(workerPeer[0].me + " sees " + u.id + " as " + u);
-        });
+        assertEquals(2, IteratorUtils.size(client.db.get(new Query().in("xyz")).docs()));
 
-
-        assertFalse(failure.get());
     }
 }
