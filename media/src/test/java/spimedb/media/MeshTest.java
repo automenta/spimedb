@@ -34,7 +34,7 @@ public class MeshTest {
             worker.put(UDP.class, new UDP(worker.db, 10000)); //HACK;
             worker.restart();
 
-            workerPeer[0] = client.get(UDP.class).peer();
+            workerPeer[0] = worker.get(UDP.class).peer();
 
             worker.db.add(new MutableNObject("abc").withTags("xyz"));
 
@@ -53,7 +53,7 @@ public class MeshTest {
             SpimeDBPeer udp = client.get(UDP.class).peer();
             udp.ping(10000);
 
-            Util.sleep(3000);
+            Util.sleep(1000);
 
             List<NObject> found = new ArrayList();
             try {
@@ -62,13 +62,14 @@ public class MeshTest {
                     found.add(x);
                 });
 
+                System.out.println(udp.me + " declaring need: xyz");
                 udp.need("xyz", 0.5f);
 
             } catch (Exception e) {
                 assertTrue(false);
             }
 
-            Util.sleep(3000);
+            Util.sleep(1000);
 
             if (found.size()!=1)
                 failure.set(true);
@@ -86,7 +87,7 @@ public class MeshTest {
 
 
         workerPeer[0].them.forEach(u -> {
-            System.out.println(u);
+            System.out.println(workerPeer[0].me + " sees " + u.id + " as " + u);
         });
 
 
