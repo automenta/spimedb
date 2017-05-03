@@ -62,7 +62,7 @@ public class MeshTest {
                     found.add(x);
                 });
 
-                System.out.println(udp.me + " declaring need: xyz");
+
                 udp.need("xyz", 0.5f);
 
             } catch (Exception e) {
