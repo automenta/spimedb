@@ -11,6 +11,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.cache.DirectBufferCache;
@@ -18,10 +19,7 @@ import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
-import io.undertow.server.handlers.resource.CachingResourceManager;
-import io.undertow.server.handlers.resource.ClassPathResourceManager;
-import io.undertow.server.handlers.resource.FileResourceManager;
-import io.undertow.server.handlers.resource.ResourceHandler;
+import io.undertow.server.handlers.resource.*;
 import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +29,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.suggest.Lookup;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
+import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
@@ -43,12 +42,19 @@ import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -59,8 +65,32 @@ import static spimedb.util.HTTP.getStringParameter;
 
 /**
  * @author me
+ *         see: https://docs.jboss.org/resteasy/docs/3.0.4.Final/userguide/html/RESTEasy_Embedded_Container.html#d4e1380
  */
 public class WebServer extends PathHandler {
+    private static UndertowJaxrsServer server;
+
+
+
+    @Path("/test")
+    public static class Resource {
+        @GET
+        @Produces("text/plain")
+        public String get() {
+            return "hello world";
+        }
+    }
+
+
+    @ApplicationPath("/")
+    public static class API extends Application {
+        @Override
+        public Set<Class<?>> getClasses() {
+            HashSet<Class<?>> classes = new HashSet<Class<?>>();
+            classes.add(Resource.class);
+            return classes;
+        }
+    }
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
 
@@ -70,7 +100,8 @@ public class WebServer extends PathHandler {
 
     private final SpimeDB db;
 
-    @Deprecated private final double websocketOutputRateLimitBytesPerSecond = 64 * 1024;
+    @Deprecated
+    private final double websocketOutputRateLimitBytesPerSecond = 64 * 1024;
 
     private int port = 0;
     private String host = null;
@@ -79,7 +110,6 @@ public class WebServer extends PathHandler {
             .addEncodingHandler("gzip", new GzipEncodingProvider(), 100)
             .addEncodingHandler("deflate", new DeflateEncodingProvider(), 50);
 
-    private Undertow server;
 
     //final Default nar = NARBuilder.newMultiThreadNAR(1, new RealTime.DS());
 
@@ -177,7 +207,7 @@ public class WebServer extends PathHandler {
         addPrefixPath("/earth", ex -> HTTP.stream(ex, (o) -> {
             String b = getStringParameter(ex, "r");
             String[] bb = b.split("_");
-            if (bb.length!=4) {
+            if (bb.length != 4) {
                 ex.setStatusCode(StatusCodes.BAD_REQUEST);
                 return;
             }
@@ -193,7 +223,6 @@ public class WebServer extends PathHandler {
             send(r, o, searchResultSummary);
 
         }));
-
 
 
         addPrefixPath("/tell/json", (e) -> {
@@ -257,36 +286,35 @@ public class WebServer extends PathHandler {
     }
 
 
-
     private void initStaticResource(SpimeDB db) {
         File staticPath = Paths.get(WebServer.staticPath).toFile();
-        File myStaticPath = db.file!=null ? db.file.getParentFile().toPath().resolve("public").toFile() : null;
+        File myStaticPath = db.file != null ? db.file.getParentFile().toPath().resolve("public").toFile() : null;
 
         int transferMinSize = 1024 * 1024;
         final int METADATA_MAX_AGE = 3 * 1000; //ms
 
         ResourceManagerChain res = new ResourceManagerChain();
-        if (db.indexPath!=null && myStaticPath!=null && myStaticPath.exists()) {
+        if (db.indexPath != null && myStaticPath != null && myStaticPath.exists()) {
             //local override
             logger.info("static resource: {}", myStaticPath);
             res.add(
-                new FileResourceManager(myStaticPath, transferMinSize, true, "/")
+                    new FileResourceManager(myStaticPath, transferMinSize, true, "/")
             );
         }
 
         ResourceHandler rr;
-        if (staticPath!=null && staticPath.exists()) {
+        if (staticPath != null && staticPath.exists()) {
             //development mode: serve the files from the FS
             logger.info("static resource: {}", staticPath);
             res.add(
-                new FileResourceManager(staticPath, transferMinSize, true, "/")
+                    new FileResourceManager(staticPath, transferMinSize, true, "/")
             );
             rr = resource(res);
         } else {
             logger.info("static resource: (classloader)");
             //production mode: serve from classpath
             res.add(
-                new ClassPathResourceManager(getClass().getClassLoader(), "public")
+                    new ClassPathResourceManager(getClass().getClassLoader(), "public")
             );
 
             DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
@@ -306,7 +334,7 @@ public class WebServer extends PathHandler {
     }
 
     private void send(SearchResult r, OutputStream o, ImmutableSet<String> keys) {
-        if (r!=null) {
+        if (r != null) {
 
             try {
                 o.write("[[".getBytes());
@@ -367,7 +395,9 @@ public class WebServer extends PathHandler {
         if (compression != null)
             b.setHandler(new EncodingHandler(this, compression));
 
-        Undertow nextServer = b.build();
+        UndertowJaxrsServer nextServer = new UndertowJaxrsServer();
+
+
         if (server != null) {
             try {
                 logger.error("stop: {}", server);
@@ -380,10 +410,30 @@ public class WebServer extends PathHandler {
 
         try {
             logger.info("listen {}:{}", host, port);
-            (this.server = nextServer).start();
+            (this.server = nextServer).start(b);
+            server.deploy(API.class, "/api");
+            server.addResourcePrefixPath("/", new NotAServlet(this));
+
         } catch (Exception e) {
             logger.error("http start: {}", e);
             this.server = null;
+        }
+
+    }
+
+
+    /** servlets - wtf!!!!!! */
+    private final static class NotAServlet extends ResourceHandler {
+
+        private final HttpHandler notAServlet;
+
+        public NotAServlet(HttpHandler thankfullyNotAServlet) {
+            this.notAServlet = thankfullyNotAServlet;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            notAServlet.handleRequest(exchange);
         }
 
     }
@@ -437,7 +487,10 @@ public class WebServer extends PathHandler {
                     byte[] b = (byte[]) f;
 
                     HTTP.stream(ex, (o) -> {
-                        try { o.write(b); } catch (IOException e) {   }
+                        try {
+                            o.write(b);
+                        } catch (IOException e) {
+                        }
                     }, contentType != null ? contentType : "text/plain");
 
                 } else {
@@ -477,7 +530,7 @@ public class WebServer extends PathHandler {
                         if (v instanceof byte[]) {
                             return d.id();
                         } else if (v instanceof String) {
-                            String s = (String)v;
+                            String s = (String) v;
                             if (s.startsWith("file:")) {
                                 return d.id();  //same as if it's a byte
                             } else {
@@ -499,6 +552,41 @@ public class WebServer extends PathHandler {
     }
 
 
+//       @Test
+//   public void testApplicationPath() throws Exception
+//   {
+//      server.deploy(MyApp.class);
+//      Client client = ClientBuilder.newClient();
+//      String val = client.target(TestPortProvider.generateURL("/base/test"))
+//                         .request().get(String.class);
+//      Assert.assertEquals("hello world", val);
+//      client.close();
+//   }
+//
+//   @Test
+//   public void testApplicationContext() throws Exception
+//   {
+//      server.deploy(MyApp.class, "/root");
+//      Client client = ClientBuilder.newClient();
+//      String val = client.target(TestPortProvider.generateURL("/root/test"))
+//                         .request().get(String.class);
+//      Assert.assertEquals("hello world", val);
+//      client.close();
+//   }
+//
+//   @Test
+//   public void testDeploymentInfo() throws Exception
+//   {
+//      DeploymentInfo di = server.undertowDeployment(MyApp.class);
+//      di.setContextPath("/di");
+//      di.setDeploymentName("DI");
+//      server.deploy(di);
+//      Client client = ClientBuilder.newClient();
+//      String val = client.target(TestPortProvider.generateURL("/di/base/test"))
+//                         .request().get(String.class);
+//      Assert.assertEquals("hello world", val);
+//      client.close();
+//   }
 }
 
 
