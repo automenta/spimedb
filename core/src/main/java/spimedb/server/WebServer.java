@@ -28,6 +28,7 @@ import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.lucene.facet.FacetResult;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.suggest.Lookup;
 import org.eclipse.collections.api.set.ImmutableSet;
@@ -235,6 +236,8 @@ public class WebServer extends PathHandler {
 
             try {
                 send(db.find(qText, 20), o, searchResultFull);
+            } catch (ParseException f) {
+                ex.setStatusCode(StatusCodes.BAD_REQUEST);
             } catch (Exception e) {
                 logger.warn("{} -> {}", qText, e);
                 ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
