@@ -152,7 +152,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>spimedb.Main</mainClass>
+                            <mainClass>spimedb.MultimediaMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
