@@ -139,10 +139,14 @@ h2 { margin: 0; }
     display: none;
 }
 
+#facets {
+    max-height: 6em;
+    overflow: auto;
+    display: inline-flex;
+}
 
 #resultsPane, #facetsWrapper {
     overflow: auto;
-    background-color: rgba(127, 127, 127, 0.5);
 }
 
 /*#resultsDragger {

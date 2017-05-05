@@ -14,7 +14,8 @@ RUN cd / ; git clone --depth 1 https://github.com/automenta/spimedb.git spimedb
 
 # RUN rm ~/.m2/repository/narchy/util/1.0/_remote.repositories ~/.m2/repository/narchy/nal/1.0/_remote.repositories
 
-# RUN cd /spimedb ; mvn --projects core,logic,media install -Dmaven.test.skip=true
+RUN cd /spimedb ; mvn install -U -Dmaven.test.skip=true
 
+# WORKDIR /spimedb
 
 

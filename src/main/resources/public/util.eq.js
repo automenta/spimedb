@@ -31,7 +31,7 @@ function EqualizeDiv(id, content) {
     function update() {
         //deferredUntilUnhover = ()=> {
             div.attr('style',
-                'font-size:' + (25.0 + 10 * (attn + (Math.log(1 + capacity))) ) + '%'
+                'font-size:' + (5.0 + 5 * (attn + (Math.log(1 + capacity))) ) + '%'
             );
         //};
 

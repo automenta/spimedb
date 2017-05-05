@@ -9,8 +9,8 @@
 
     <!--<script src="lib/d3.min.js"></script>-->
 
-    <script src="lib/draggabilly.js"></script>
-    <script src="lib/packery/packery.js"></script>
+    <!--<script src="lib/draggabilly.js"></script>-->
+    <!--<script src="lib/packery/packery.js"></script>-->
 
 
     <script src="lib/leaflet/leaflet.js"></script>
@@ -110,13 +110,14 @@
 
             const c = builder(v);
 
-            return ( $(e('div')).attr('class', 'grid-item').append(c))[0];
+            //return ( $(e('div')).attr('class', 'grid-item').append(c))[0];
+            return c[0];
 
         });
 
         const nn = $(newItems);
 
-        grid.append(nn).packery('appended', nn);
+        grid.append(nn) ; //.packery('appended', nn);
 
     }
 
@@ -136,7 +137,7 @@
         }).addTo(map);
 
 
-        const facets = newGrid($('#facets'));
+        const facets = /*newGrid*/($('#facets'));
 
         const queryText = $('#query_text');
 
@@ -248,11 +249,11 @@
 
             //setTimeout(()=>{
 
-            setTimeout(()=>{ facets.packery('layout');
-
-                setTimeout(()=>{ facets.packery('layout'); }, 300);
-
-            }, 300);
+//            setTimeout(()=>{ facets.packery('layout');
+//
+//                setTimeout(()=>{ facets.packery('layout'); }, 300);
+//
+//            }, 300);
             //}, 0);
         }
 
