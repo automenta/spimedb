@@ -106,7 +106,7 @@
 
     function addToGrid(result, builder, grid) {
 
-        var newItems = _.map(result, (v) => {
+        const newItems = _.map(result, (v) => {
 
             const c = builder(v);
 
@@ -114,13 +114,13 @@
 
         });
 
-        var nn = $(newItems);
+        const nn = $(newItems);
 
         grid.append(nn).packery('appended', nn);
 
     }
 
-    var app = {};
+    const app = {};
 
     $(document).ready(() => {
 
@@ -130,7 +130,7 @@
         });
 
         //init map
-        var map = L.map('query_map').setView([51.505, -0.09], 2);
+        const map = L.map('query_map').setView([51.505, -0.09], 2);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -223,7 +223,7 @@
         function loadFacets(result) {
             facets.html('');
 
-            var facetButtonBuilder = (v) => {
+            const facetButtonBuilder = (v) => {
 
                 const id = v[0]
                     .replace(/_/g, ' ')
@@ -237,7 +237,7 @@
                         queryText.val(/* dimension + ':' + */ id);
                         querySubmit();
                         return false;
-                    })
+                    });
 
                 return EqualizeDiv(id, c)
                     .capacity(score)
@@ -262,7 +262,7 @@
 
         function updateFacet(dimension, label) {
 
-            const klass = label;
+            //const klass = label;
 
 //            $('#facets.' + klass).remove();
 //
@@ -339,7 +339,7 @@
 
                 $.get('/find', {q: qText}, function (result) {
 
-                    var ss, rr, ff;
+                    let ss, rr, ff;
                     try {
                         ss = JSON.parse(result);
                         rr = ss[0]; //first part: search results
@@ -367,7 +367,7 @@
                             const y = DIVclass('list-item result');
                             y.data('o', x);
 
-                            var tgt = x.I;
+                            let tgt = x.I;
                             if (x.inh) {
                                 x.out = x.inh['>'];
 
@@ -457,8 +457,8 @@
                         });
 
                         //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
-                        var dc = d.children();
-                        if (dc.length == 1) {
+                        const dc = d.children();
+                        if (dc.length === 1) {
                             $(dc[0]).removeClass('sub');
                             d.replaceWith(dc[0]);
                         }

@@ -23,7 +23,6 @@ import org.mockito.internal.util.reflection.BeanPropertySetter;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xnio.Xnio;
 import spimedb.util.Locker;
 
 import java.io.File;
