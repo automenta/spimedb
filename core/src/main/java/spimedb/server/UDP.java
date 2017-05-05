@@ -18,20 +18,21 @@ public class UDP implements Plugin {
     public UDP(SpimeDB db) {
         this.db = db;
     }
-    public UDP(SpimeDB db, int port) {
-        this(db);
-        setPort(port);
-    }
+
+//    public UDP(SpimeDB db, int port) {
+//        this(db);
+//        setPort(port);
+//    }
 
     public SpimeDBPeer peer() { return peer; }
 
-    public void setPort(int port) {
+    public UDP setPort(int port) {
 
         synchronized (this) {
 
             int p = this.port;
             if (p == port)
-                return;
+                return this;
 
             if (this.peer != null) {
                 this.peer.stop();
@@ -40,7 +41,7 @@ public class UDP implements Plugin {
             this.port = port;
 
             if (port == -1)
-                return;
+                return this;
 
             try {
                 this.peer = new SpimeDBPeer(port, db);
@@ -49,6 +50,7 @@ public class UDP implements Plugin {
             }
         }
 
+        return this;
 
     }
 

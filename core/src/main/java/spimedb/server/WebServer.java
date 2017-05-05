@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import io.swagger.jaxrs.config.BeanConfig;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -19,7 +20,11 @@ import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
-import io.undertow.server.handlers.resource.*;
+import io.undertow.server.handlers.resource.CachingResourceManager;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
+import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.server.handlers.resource.ResourceHandler;
+import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
@@ -30,6 +35,7 @@ import org.apache.lucene.search.suggest.Lookup;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
+import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
@@ -42,55 +48,32 @@ import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Application;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
+
 import static java.lang.Double.parseDouble;
 import static spimedb.util.HTTP.getStringParameter;
 
 /**
  * @author me
- *         see: https://docs.jboss.org/resteasy/docs/3.0.4.Final/userguide/html/RESTEasy_Embedded_Container.html#d4e1380
+ *         see:
+ *         https://docs.jboss.org/resteasy/docs/3.1.2.Final/userguide/html/
+ *         https://docs.jboss.org/resteasy/docs/3.1.2.Final/userguide/html/RESTEasy_Embedded_Container.html#d4e1380
  */
 public class WebServer extends PathHandler {
-    private static UndertowJaxrsServer server;
 
+    public UndertowJaxrsServer server;
 
-
-    @Path("/test")
-    public static class Resource {
-        @GET
-        @Produces("text/plain")
-        public String get() {
-            return "hello world";
-        }
-    }
-
-
-    @ApplicationPath("/")
-    public static class API extends Application {
-        @Override
-        public Set<Class<?>> getClasses() {
-            HashSet<Class<?>> classes = new HashSet<Class<?>>();
-            classes.add(Resource.class);
-            return classes;
-        }
-    }
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
 
@@ -411,7 +394,15 @@ public class WebServer extends PathHandler {
         try {
             logger.info("listen {}:{}", host, port);
             (this.server = nextServer).start(b);
-            server.deploy(API.class, "/api");
+
+
+//            server.deploy(deployment()
+//                    .setDeploymentName("swagger")
+//                    .setContextPath("/swagger")
+//                    .setClassLoader(getClass().getClassLoader())
+//                    .addServlet(servlet(Swagger.class))
+//            );
+            server.deploy(new WebAPI(this), "/api");
             server.addResourcePrefixPath("/", new NotAServlet(this));
 
         } catch (Exception e) {
@@ -422,7 +413,9 @@ public class WebServer extends PathHandler {
     }
 
 
-    /** servlets - wtf!!!!!! */
+    /**
+     * servlets - wtf!!!!!!
+     */
     private final static class NotAServlet extends ResourceHandler {
 
         private final HttpHandler notAServlet;

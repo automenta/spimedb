@@ -33,7 +33,7 @@ public class MeshTest {
         ThreadGroup workerGroup = new ThreadGroup("Worker");
         Thread workerThread = new Thread(workerGroup, () -> {
 
-            worker.put(UDP.class, new UDP(worker.db, 10000)); //HACK;
+            worker.put(UDP.class, new UDP(worker.db).setPort(10000)); //HACK;
             worker.restart();
 
             workerPeer[0] = worker.get(UDP.class).peer();
@@ -50,7 +50,7 @@ public class MeshTest {
         ThreadGroup clientGroup = new ThreadGroup("Client");
         Thread clientThread = new Thread(clientGroup, () -> {
 
-            client.put(UDP.class,new UDP(client.db, 10001)); //HACK;
+            client.put(UDP.class,new UDP(client.db).setPort(10001)); //HACK;
             client.restart();
 
             SpimeDBPeer clientPeer = client.get(UDP.class).peer();

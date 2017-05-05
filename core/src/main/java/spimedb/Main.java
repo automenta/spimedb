@@ -40,15 +40,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 
 /**
- * Created by me on 6/14/15.
+ * "Main.java" - a file-system driven, dynamically reconfiguring, dependency-injection container
+ * designed to make DI as fun as mainlining an endless supply of ___
  */
-
 public abstract class Main extends FileAlterationListenerAdaptor {
 
     public final static Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static final ch.qos.logback.classic.Logger LOG;
-
 
     static {
 
@@ -61,9 +60,8 @@ public abstract class Main extends FileAlterationListenerAdaptor {
         loggerContext.reset();
 
 
-        SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
+        SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
         SpimeDB.LOG(Reflections.log, Level.WARN);
-        SpimeDB.LOG(Xnio.getInstance().getName(), Level.WARN);
         SpimeDB.LOG("logging", Level.WARN);
 
     }

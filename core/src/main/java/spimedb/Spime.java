@@ -1,9 +1,11 @@
 package spimedb;
 
+import ch.qos.logback.classic.Level;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.xnio.Xnio;
 import spimedb.server.UDP;
 import spimedb.server.WebServer;
 import spimedb.util.Crawl;
@@ -16,6 +18,11 @@ import java.util.Arrays;
  */
 public class Spime extends Main {
 
+    static {
+        SpimeDB.LOG(Xnio.getInstance().getName(), Level.WARN);
+        SpimeDB.LOG( "i18n", Level.WARN);
+
+    }
     public final SpimeDB db;
     private final String dbPathIgnored;
 
