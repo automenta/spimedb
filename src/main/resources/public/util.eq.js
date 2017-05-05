@@ -31,7 +31,7 @@ function EqualizeDiv(id, content) {
     function update() {
         //deferredUntilUnhover = ()=> {
             div.attr('style',
-                'font-size:' + (5.0 + 5 * (attn + (Math.log(1 + capacity))) ) + '%'
+                'font-size:' + (12.0 + 10 * (attn + (Math.log(1 + capacity))) ) + '%'
             );
         //};
 
@@ -42,21 +42,20 @@ function EqualizeDiv(id, content) {
         );
     }
 
-    var increment = 0.33;
-
-    const eqCut = $(document.createElement('button')).text('-').click(()=>{
-        attn = Math.max(-1, attn - increment);
-        update();
-    });
-    const eqBoost = $(document.createElement('button')).text('+').click(()=>{
-        attn = Math.min(+1, attn + increment);
-        update();
-    });
+    // var increment = 0.33;
+    //
+    // const eqCut = $(document.createElement('button')).text('-').click(()=>{
+    //     attn = Math.max(-1, attn - increment);
+    //     update();
+    // });
+    // const eqBoost = $(document.createElement('button')).text('+').click(()=>{
+    //     attn = Math.min(+1, attn + increment);
+    //     update();
+    // });
 
     div.append(
-        content,
-        eqCut,
-        eqBoost
+        content
+        //eqCut, eqBoost
     );
 
 

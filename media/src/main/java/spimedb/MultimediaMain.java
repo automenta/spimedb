@@ -1,4 +1,4 @@
-import spimedb.Spime;
+package spimedb;
 
 /**
  * entrypoint for Multimedia enablement
