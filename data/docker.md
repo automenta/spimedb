@@ -13,7 +13,7 @@ docker run -p 8080:8080 --rm  -it automenta/spimedb
 java -jar /spimedb/media/target/spimedb-media-1.0.one-jar.jar
 
 
-
+docker run -it -p 127.0.0.1:8080:8080  -v /EA:/data:ro jkilbride/node-npm-alpine sh
 docker run -it -p 8080:8080  -v /EA:/data:ro jkilbride/node-npm-alpine sh
-    http-server 'npm i -g http-server ; http-server /data -g -s -r'
-    node-ecstatic https://github.com/jfhbrook/node-ecstatic
+    npm i -g http-server ; http-server /data -g -s -r
+        also node-ecstatic: https://github.com/jfhbrook/node-ecstatic

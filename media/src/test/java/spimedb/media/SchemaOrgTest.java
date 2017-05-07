@@ -11,12 +11,12 @@ import static org.junit.Assert.assertTrue;
  * tests schema.org import and the type hierarchy creation and inference
  * ie. equivalent of a mini-RDFS reasoner
  */
-public class ImportSchemaOrgTest {
+public class SchemaOrgTest {
 
     @Test
     public void test1() throws IOException {
         SpimeDB db = new SpimeDB();
-        ImportSchemaOrg.load(db);
+        SchemaOrg.load(db);
 //        r.graph.vertexSet().forEach(v -> {
 //            System.out.println(v);
 //            System.out.println("\t" + r.graph.edgesOf(v));

@@ -23,9 +23,9 @@ import java.util.stream.Stream;
  *
  * @author me
  */
-abstract public class ImportSchemaOrg {
+abstract public class SchemaOrg {
 
-    final static Logger logger = LoggerFactory.getLogger(ImportSchemaOrg.class);
+    //final static Logger logger = LoggerFactory.getLogger(SchemaOrg.class);
 
     public static void load(SpimeDB db) {
         //MutableGraph<String> types = GraphBuilder.directed().allowsSelfLoops(false).nodeOrder(ElementOrder.unordered()).expectedNodeCount(1024).build();
@@ -33,7 +33,7 @@ abstract public class ImportSchemaOrg {
         List<NObject> pending = new FasterList(1024);
 
         try {
-            new ImportSchemaOrg() {
+            new SchemaOrg() {
 
 
 
@@ -118,7 +118,7 @@ abstract public class ImportSchemaOrg {
     }
 
 
-    public ImportSchemaOrg() throws IOException {
+    public SchemaOrg() throws IOException {
 
             String[] line;
             CSVReader reader = new CSVReader(new FileReader("data/schema.org/all-classes.csv"), ',', '\"');
