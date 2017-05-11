@@ -63,7 +63,7 @@ public class Spime extends Main {
     @Nullable
     @Override
     protected Pair<Class, String> key(String fileName, String absolutePath) {
-        if (absolutePath.startsWith(dbPathIgnored))
+        if (absolutePath == null || (dbPathIgnored!=null && absolutePath.startsWith(dbPathIgnored)))
             return null; //ignore index directory, subdirectory of the root
 
         return super.key(fileName, absolutePath);
