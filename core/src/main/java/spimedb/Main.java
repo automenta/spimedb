@@ -48,6 +48,7 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
     private static final ch.qos.logback.classic.Logger LOG;
 
+
     static {
 
         Thread.currentThread().setName("$");
@@ -59,9 +60,6 @@ public abstract class Main extends FileAlterationListenerAdaptor {
         loggerContext.reset();
 
 
-        SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
-        SpimeDB.LOG(Reflections.log, Level.WARN);
-        SpimeDB.LOG("logging", Level.WARN);
 
     }
 

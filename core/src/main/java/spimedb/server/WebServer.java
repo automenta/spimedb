@@ -8,8 +8,6 @@ package spimedb.server;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Objects;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -27,17 +25,11 @@ import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.apache.lucene.facet.FacetResult;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.suggest.Lookup;
-import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
-import spimedb.FilteredNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
@@ -46,14 +38,14 @@ import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.stream.Stream;
+import java.util.HashSet;
+import java.util.Set;
 
 import static io.undertow.Handlers.resource;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
@@ -77,7 +69,7 @@ public class WebServer extends PathHandler {
 
     private static final int BUFFER_SIZE = 32 * 1024;
 
-    private final SpimeDB db;
+    public final SpimeDB db;
 
     @Deprecated
     private final double websocketOutputRateLimitBytesPerSecond = 64 * 1024;
@@ -140,42 +132,6 @@ public class WebServer extends PathHandler {
             }
         }));
 
-        addPrefixPath("/suggest", ex -> HTTP.stream(ex, (o) -> {
-            String qText = getStringParameter(ex, "q");
-            if (qText == null || (qText = qText.trim()).isEmpty())
-                return;
-
-            try {
-                List<Lookup.LookupResult> x = db.suggest(qText, 16);
-                if (x != null)
-                    JSON.toJSON(Lists.transform(x, y -> y.key), o);
-
-            } catch (Exception e) {
-                logger.error("suggest: {}", e.getMessage());
-                /*(try {
-                    o.write(JSON.toJSONBytes(e));
-                } catch (IOException e1) {
-                })*/
-            }
-        }));
-
-        addPrefixPath("/facet", ex -> HTTP.stream(ex, (o) -> {
-            String dimension = getStringParameter(ex, "q");
-            if (dimension == null || (dimension = dimension.trim()).isEmpty())
-                return;
-
-            try {
-
-                FacetResult x = db.facets(dimension, 48);
-
-                if (x != null)
-                    stream(o, x);
-
-            } catch (Exception e) {
-                logger.warn("facet: {}", e.getMessage());
-            }
-        }));
-
         addPrefixPath("/thumbnail", ex -> {
             send(getStringParameter(ex, NObject.ID), "thumbnail", "image/jpg", ex);
         });
@@ -199,7 +155,7 @@ public class WebServer extends PathHandler {
             lats[1] = parseDouble(bb[3]);
 
             SearchResult r = db.get(new Query().limit(32).where(lons, lats));
-            send(r, o, searchResultSummary);
+            WebIO.send(r, o, WebIO.searchResultSummary);
 
         }));
 
@@ -223,27 +179,6 @@ public class WebServer extends PathHandler {
             }
         });
 
-        addPrefixPath("/find", ex -> HTTP.stream(ex, (o) -> {
-            String qText = getStringParameter(ex, "q");
-            if (qText == null || (qText = qText.trim()).isEmpty())
-                return;
-
-//            db.add(new MutableNObject()
-//                    .name("find(\"" + qText + "\")")
-//                    //.withTags("")
-//                    .description(ex.toString())
-//            );
-
-            try {
-                send(db.find(qText, 20), o, searchResultFull);
-            } catch (ParseException f) {
-                ex.setStatusCode(StatusCodes.BAD_REQUEST);
-            } catch (Exception e) {
-                logger.warn("{} -> {}", qText, e);
-                ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
-            }
-
-        }));
 
         /* client attention management */
         //addPrefixPath("/client", websocket(new ClientSession(db, websocketOutputRateLimitBytesPerSecond)));
@@ -274,7 +209,7 @@ public class WebServer extends PathHandler {
         int transferMinSize = 1024 * 1024;
         final int METADATA_MAX_AGE = 3 * 1000; //ms
 
-        ResourceManagerChain res = new ResourceManagerChain();
+        ChainedResourceManager res = new ChainedResourceManager();
         if (db.indexPath != null && myStaticPath != null && myStaticPath.exists()) {
             //local override
             logger.info("static resource: {}", myStaticPath);
@@ -314,44 +249,6 @@ public class WebServer extends PathHandler {
         addPrefixPath("/", rr);
     }
 
-    private void send(SearchResult r, OutputStream o, ImmutableSet<String> keys) {
-        if (r != null) {
-
-            try {
-                o.write("[[".getBytes());
-                r.forEachDocument((y, x) -> {
-                    JSON.toJSON(searchResult(
-                            DObject.get(y), x, keys
-                    ), o, ',');
-                    return true;
-                });
-                o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
-
-                if (r.facets != null) {
-                    stream(o, r.facets);
-                    o.write(']');
-                } else
-                    o.write("[]]".getBytes());
-
-                r.close();
-
-            } catch (IOException e) {
-
-            }
-        }
-
-        //ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
-
-    }
-
-    private void stream(OutputStream o, FacetResult x) {
-        JSON.toJSON(
-                Stream.of(x.labelValues).map(y -> new Object[]{y.label, y.value}).toArray(Object[]::new)
-                /*Stream.of(x.labelValues).collect(
-                Collectors.toMap(y->y.label, y->y.value ))*/, o);
-    }
-
-
     public void setHost(String host) {
 
         if (!Objects.equal(this.host, host)) {
@@ -378,7 +275,6 @@ public class WebServer extends PathHandler {
 
         UndertowJaxrsServer nextServer = new UndertowJaxrsServer();
 
-
         if (server != null) {
             try {
                 logger.error("stop: {}", server);
@@ -400,7 +296,8 @@ public class WebServer extends PathHandler {
 //                    .setClassLoader(getClass().getClassLoader())
 //                    .addServlet(servlet(Swagger.class))
 //            );
-            server.deploy(new WebAPI(this), "/api");
+
+            server.deploy(new WebApp(), "/api");
             server.addResourcePrefixPath("/", new NotAServlet(this));
 
         } catch (Exception e) {
@@ -411,6 +308,28 @@ public class WebServer extends PathHandler {
     }
 
 
+
+
+    @ApplicationPath("/")
+    public final class WebApp extends Application {
+
+        @Override
+        public Set getSingletons() {
+            return Sets.mutable.of(
+                new WebAPI(WebServer.this)
+            );
+        }
+
+        @Override
+        public Set<Class<?>> getClasses() {
+            HashSet<Class<?>> classes = new HashSet<Class<?>>();
+            classes.add(ExampleJaxResource.class);
+            classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
+            classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+            return classes;
+        }
+
+    }
     /**
      * servlets - wtf!!!!!!
      */
@@ -495,51 +414,6 @@ public class WebServer extends PathHandler {
         } else {
             ex.setStatusCode(404);
         }
-    }
-
-    public static final ImmutableSet<String> searchResultSummary =
-            Sets.immutable.of(
-                    NObject.ID, NObject.NAME, NObject.INH, NObject.TAG, NObject.BOUND,
-                    "thumbnail", "score", NObject.LINESTRING, NObject.POLYGON,
-                    NObject.TYPE, "url"
-            );
-    public static final ImmutableSet<String> searchResultFull =
-            Sets.immutable.withAll(Iterables.concat(Sets.mutable.ofAll(searchResultSummary), Sets.immutable.of(
-                    NObject.DESC, "data"
-            )));
-
-    private static FilteredNObject searchResult(NObject d, ScoreDoc x, ImmutableSet<String> keys) {
-        return new FilteredNObject(d, keys) {
-            @Override
-            protected Object value(String key, Object v) {
-                switch (key) {
-                    case "thumbnail":
-                        //rewrite the thumbnail blob byte[] as a String URL
-                        return d.id();
-                    case "data":
-                        //rewrite the thumbnail blob byte[] as a String URL (if not already a string representing a URL)
-                        if (v instanceof byte[]) {
-                            return d.id();
-                        } else if (v instanceof String) {
-                            String s = (String) v;
-                            if (s.startsWith("file:")) {
-                                return d.id();  //same as if it's a byte
-                            } else {
-                                return s;
-                            }
-                        } else {
-                            //??
-                        }
-                }
-                return v;
-            }
-
-            @Override
-            public void forEach(BiConsumer<String, Object> each) {
-                super.forEach(each);
-                each.accept("score", x.score);
-            }
-        };
     }
 
 

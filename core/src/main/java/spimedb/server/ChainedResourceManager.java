@@ -11,23 +11,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by me on 4/1/17.
  */
-public class ResourceManagerChain implements ResourceManager {
+public class ChainedResourceManager extends CopyOnWriteArrayList<ResourceManager> implements ResourceManager {
 
-    final List<ResourceManager> managers = new CopyOnWriteArrayList<>();
-
-
-    public ResourceManagerChain() {
-
-    }
-
-    public void add(ResourceManager a) {
-        managers.add(a);
-    }
 
     @Override
     public Resource getResource(String p) {
-        for (int i = 0, managersSize = managers.size(); i < managersSize; i++) {
-            ResourceManager x = managers.get(i);
+        for (int i = 0, managersSize = size(); i < managersSize; i++) {
+            ResourceManager x = get(i);
             try {
                 Resource y = x.getResource(p);
                 if (y != null)
@@ -56,7 +46,7 @@ public class ResourceManagerChain implements ResourceManager {
 
     @Override
     public void close() throws IOException {
-        managers.forEach(m -> {
+        forEach(m -> {
             try {
                 m.close();
             } catch (IOException e) {

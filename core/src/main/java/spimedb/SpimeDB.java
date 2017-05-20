@@ -42,6 +42,7 @@ import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.graph.MapGraph;
@@ -52,11 +53,12 @@ import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.query.Query;
 import spimedb.server.Router;
-import spimedb.server.WebServer;
+import spimedb.server.WebIO;
 import spimedb.util.Locker;
 import spimedb.util.PrioritizedExecutor;
 
 import javax.script.ScriptEngineManager;
+import javax.ws.rs.ext.Provider;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -74,8 +76,18 @@ import java.util.stream.Stream;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
+@Provider
 public class SpimeDB {
 
+    final static boolean DEBUG = System.getProperty("debug", "false").equals("true");
+
+    static {
+        if (!DEBUG)
+            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
+
+        SpimeDB.LOG(Reflections.log, Level.WARN);
+        SpimeDB.LOG("logging", Level.WARN);
+    }
 
     public static final String VERSION = "SpimeDB v-0.00";
 
@@ -442,6 +454,7 @@ public class SpimeDB {
     public static void LOG(String l, Level ll) {
         ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
     }
+
     public static void LOG(Logger log, Level ll) {
         LOG(log.getName(), ll);
     }
@@ -554,7 +567,7 @@ public class SpimeDB {
         }
 
         ImmutableSet<String> filters =
-                WebServer.searchResultFull;
+                WebIO.searchResultFull;
         NObject finalNext = new FilteredNObject(next, filters);
 
         Consumer<Consumer<NObject>> take = (c) -> c.accept(finalNext);

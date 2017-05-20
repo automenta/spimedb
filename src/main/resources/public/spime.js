@@ -21,7 +21,7 @@ function QueryPrompt(withSuggestions, withResults) {
         if (qText.length > 0) {
             //$('#query_status').html('Suggesting: ' + qText);
 
-            $.get('/suggest', {q: qText}, withSuggestions);
+            $.get('/api/suggest', {q: qText}, withSuggestions);
         } else {
             withSuggestions('[]' /* HACK */);
         }

@@ -29,7 +29,7 @@ public class PrioritizedExecutor implements Executor {
 
     public PrioritizedExecutor(int threads) {
         //similar to Fixed-Size threadpool
-        this.exe = new ThreadPoolExecutor(threads, threads, 0, TimeUnit.MILLISECONDS, pq) {
+        this.exe = new ThreadPoolExecutor(threads, threads, 1, TimeUnit.MINUTES, pq) {
             @Override
             protected void beforeExecute(Thread t, Runnable r) {
                 running.incrementAndGet();
@@ -80,7 +80,11 @@ public class PrioritizedExecutor implements Executor {
 
         int c = Float.compare(y.pri(), x.pri());
         if (c == 0) {
-            return Integer.compare(x.hashCode(), y.hashCode());
+            int h = Integer.compare(x.hashCode(), y.hashCode());
+            if (h == 0) {
+                return Integer.compare(System.identityHashCode(x),System.identityHashCode(y));
+            }
+            return h;
         }
         return c;
     };
