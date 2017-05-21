@@ -152,7 +152,7 @@
 
             //$('#query_status').html('Suggesting: ' + qText);
 
-            $.get('/api/suggest', { q: qText }, function (result) {
+            $.get('/suggest', { q: qText }, function (result) {
 
                 if (result.length === 0) {
                     qs.html('');
@@ -274,7 +274,7 @@
 //            const f = $('<svg width="250" height="250">').attr('class', klass);//.html(label + '...');
 //            $('#facets').append($('<div>').append(f));
 
-            $.get('/api/facet', {q: dimension}, function (result) {
+            $.get('/facet', {q: dimension}, function (result) {
                 try {
                     result = (result);
                 } catch (e) {
@@ -342,7 +342,7 @@
                 //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
                 $('#results').html('Searching...');
 
-                $.get('/api/find', {q: qText}, function (result) {
+                $.get('/find', {q: qText}, function (result) {
 
                     let ss, rr, ff;
                     try {

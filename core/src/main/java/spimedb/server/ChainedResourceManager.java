@@ -1,8 +1,10 @@
 package spimedb.server;
 
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceChangeListener;
 import io.undertow.server.handlers.resource.ResourceManager;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by me on 4/1/17.
  */
 public class ChainedResourceManager extends CopyOnWriteArrayList<ResourceManager> implements ResourceManager {
+
 
 
     @Override
