@@ -157,7 +157,7 @@
                 if (result.length === 0) {
                     qs.html('');
                 } else {
-                    qs.html(_.map(JSON.parse(result), (x) =>
+                    qs.html(_.map((result), (x) =>
                         DIVclass('grid-item').append(
                             DIVclass('grid-item-content').text(x).click((e) => {
                                 queryText.val(x);
@@ -276,7 +276,7 @@
 
             $.get('/api/facet', {q: dimension}, function (result) {
                 try {
-                    result = JSON.parse(result);
+                    result = (result);
                 } catch (e) {
                     console.error(e,result);
                     return;
@@ -346,7 +346,7 @@
 
                     let ss, rr, ff;
                     try {
-                        ss = JSON.parse(result);
+                        ss = (result);
                         rr = ss[0]; //first part: search results
                         ff = ss[1]; //second part: facets
                     } catch (e) {

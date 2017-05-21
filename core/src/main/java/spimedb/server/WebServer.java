@@ -21,12 +21,19 @@ import io.undertow.server.handlers.resource.CachingResourceManager;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
+import io.undertow.servlet.Servlets;
+import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.ServletContainer;
+import io.undertow.servlet.api.ServletInfo;
 import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.eclipse.collections.impl.factory.Sets;
+import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
+import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
@@ -38,6 +45,7 @@ import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
 
+import javax.servlet.ServletException;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.io.File;
@@ -45,6 +53,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import static io.undertow.Handlers.resource;
@@ -60,7 +70,7 @@ import static spimedb.util.HTTP.getStringParameter;
  */
 public class WebServer extends PathHandler {
 
-    public UndertowJaxrsServer server;
+    public Undertow server;
 
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
@@ -109,10 +119,6 @@ public class WebServer extends PathHandler {
     public WebServer(final SpimeDB db) {
         super();
         this.db = db;
-
-
-//        nar.log();
-//        nar.loop(10f);
 
 
         initStaticResource(db);
@@ -273,7 +279,6 @@ public class WebServer extends PathHandler {
         if (compression != null)
             b.setHandler(new EncodingHandler(this, compression));
 
-        UndertowJaxrsServer nextServer = new UndertowJaxrsServer();
 
         if (server != null) {
             try {
@@ -287,27 +292,201 @@ public class WebServer extends PathHandler {
 
         try {
             logger.info("listen {}:{}", host, port);
-            (this.server = nextServer).start(b);
 
-
-//            server.deploy(deployment()
-//                    .setDeploymentName("swagger")
-//                    .setContextPath("/swagger")
-//                    .setClassLoader(getClass().getClassLoader())
-//                    .addServlet(servlet(Swagger.class))
-//            );
-
-            server.deploy(new WebApp(), "/api");
-            server.addResourcePrefixPath("/", new NotAServlet(this));
-
+            UnfuckedUndertowJAXRSServer jax = new UnfuckedUndertowJAXRSServer();
+            jax.deploy(new WebApp(),"/api");
+            server = b.build();
+            server.start();
         } catch (Exception e) {
             logger.error("http start: {}", e);
             this.server = null;
         }
 
+
     }
 
+    final ServletContainer container = ServletContainer.Factory.newInstance();
 
+    public class UnfuckedUndertowJAXRSServer extends UndertowJaxrsServer {
+
+        public DeploymentInfo undertowDeployment(ResteasyDeployment deployment, String mapping) {
+            if (mapping == null) {
+                mapping = "/";
+            }
+
+            if (!mapping.startsWith("/")) {
+                mapping = "/" + mapping;
+            }
+
+            if (!mapping.endsWith("/")) {
+                mapping = mapping + "/";
+            }
+
+            mapping = mapping + "*";
+            String prefix = null;
+            if (!mapping.equals("/*")) {
+                prefix = mapping.substring(0, mapping.length() - 2);
+            }
+
+            ServletInfo resteasyServlet = Servlets.servlet("ResteasyServlet", HttpServlet30Dispatcher.class).setAsyncSupported(true).setLoadOnStartup(Integer.valueOf(1)).addMapping(mapping);
+            if (prefix != null) {
+                resteasyServlet.addInitParam("resteasy.servlet.mapping.prefix", prefix);
+            }
+
+            return (new DeploymentInfo()).addServletContextAttribute(ResteasyDeployment.class.getName(), deployment).addServlet(resteasyServlet);
+        }
+
+        public DeploymentInfo undertowDeployment(ResteasyDeployment deployment) {
+            return this.undertowDeployment(deployment, "/");
+        }
+
+        public DeploymentInfo undertowDeployment(Class<? extends Application> application, String mapping) {
+            ResteasyDeployment deployment = new ResteasyDeployment();
+            deployment.setApplicationClass(application.getName());
+            DeploymentInfo di = this.undertowDeployment(deployment, mapping);
+            di.setClassLoader(application.getClassLoader());
+            return di;
+        }
+
+        public DeploymentInfo undertowDeployment(Class<? extends Application> application) {
+            ApplicationPath appPath = (ApplicationPath) application.getAnnotation(ApplicationPath.class);
+            String path = "/";
+            if (appPath != null) {
+                path = appPath.value();
+            }
+
+            return this.undertowDeployment(application, path);
+        }
+
+        public void addResourcePrefixPath(String path, ResourceHandler handler) {
+            WebServer.this.addPrefixPath(path, handler);
+        }
+
+        public UndertowJaxrsServer deploy(ResteasyDeployment deployment) {
+            return this.deploy(deployment, "/");
+        }
+
+        public UndertowJaxrsServer deploy(ResteasyDeployment deployment, String contextPath) {
+            return this.deploy(deployment, contextPath, (Map) null, (Map) null);
+        }
+
+        public UndertowJaxrsServer deploy(ResteasyDeployment deployment, String contextPath, Map<String, String> contextParams, Map<String, String> initParams) {
+            if (contextPath == null) {
+                contextPath = "/";
+            }
+
+            if (!contextPath.startsWith("/")) {
+                contextPath = "/" + contextPath;
+            }
+
+            DeploymentInfo builder = this.undertowDeployment(deployment);
+            builder.setContextPath(contextPath);
+            builder.setDeploymentName("Resteasy" + contextPath);
+            builder.setClassLoader(deployment.getApplication().getClass().getClassLoader());
+            if (contextParams != null) {
+                Iterator var6 = contextParams.entrySet().iterator();
+
+                while (var6.hasNext()) {
+                    Map.Entry<String, String> e = (Map.Entry) var6.next();
+                    builder.addInitParameter((String) e.getKey(), (String) e.getValue());
+                }
+            }
+
+            if (initParams != null) {
+                ServletInfo servletInfo = (ServletInfo) builder.getServlets().get("ResteasyServlet");
+                Iterator var10 = initParams.entrySet().iterator();
+
+                while (var10.hasNext()) {
+                    Map.Entry<String, String> e = (Map.Entry) var10.next();
+                    servletInfo.addInitParam((String) e.getKey(), (String) e.getValue());
+                }
+            }
+
+            return this.deploy(builder);
+        }
+
+        public UndertowJaxrsServer deploy(Class<? extends Application> application) {
+            ApplicationPath appPath = (ApplicationPath) application.getAnnotation(ApplicationPath.class);
+            String path = "/";
+            if (appPath != null) {
+                path = appPath.value();
+            }
+
+            return this.deploy(application, path);
+        }
+
+        public UndertowJaxrsServer deploy(Class<? extends Application> application, String contextPath) {
+            if (contextPath == null) {
+                contextPath = "/";
+            }
+
+            if (!contextPath.startsWith("/")) {
+                contextPath = "/" + contextPath;
+            }
+
+            ResteasyDeployment deployment = new ResteasyDeployment();
+            deployment.setApplicationClass(application.getName());
+            DeploymentInfo di = this.undertowDeployment(deployment);
+            di.setClassLoader(application.getClassLoader());
+            di.setContextPath(contextPath);
+            di.setDeploymentName("Resteasy" + contextPath);
+            return this.deploy(di);
+        }
+
+        public UndertowJaxrsServer deploy(Application application) {
+            ApplicationPath appPath = (ApplicationPath) application.getClass().getAnnotation(ApplicationPath.class);
+            String path = "/";
+            if (appPath != null) {
+                path = appPath.value();
+            }
+
+            return this.deploy(application, path);
+        }
+
+        public UndertowJaxrsServer deploy(Application application, String contextPath) {
+            if (contextPath == null) {
+                contextPath = "/";
+            }
+
+            if (!contextPath.startsWith("/")) {
+                contextPath = "/" + contextPath;
+            }
+
+            ResteasyDeployment deployment = new ResteasyDeployment();
+            deployment.setApplication(application);
+            DeploymentInfo di = this.undertowDeployment(deployment);
+            di.setClassLoader(application.getClass().getClassLoader());
+            di.setContextPath(contextPath);
+            di.setDeploymentName("Resteasy" + contextPath);
+            return this.deploy(di);
+        }
+
+        public UndertowJaxrsServer deploy(DeploymentInfo builder) {
+            DeploymentManager manager = container.addDeployment(builder);
+            manager.deploy();
+
+            try {
+                addPrefixPath(builder.getContextPath(), manager.start());
+                return this;
+            } catch (ServletException var4) {
+                throw new RuntimeException(var4);
+            }
+        }
+
+//        public UndertowJaxrsServer start(Undertow.Builder builder) {
+//            this.server = builder.setHandler(this.root).build();
+//            this.server.start();
+//            return this;
+//        }
+//
+//        public UndertowJaxrsServer start() {
+//            this.server = Undertow.builder().addHttpListener(PortProvider.getPort(), "localhost").setHandler(this.root).build();
+//            this.server.start();
+//            return this;
+//        }
+
+
+    }
 
 
     @ApplicationPath("/")
@@ -316,7 +495,7 @@ public class WebServer extends PathHandler {
         @Override
         public Set getSingletons() {
             return Sets.mutable.of(
-                new WebAPI(WebServer.this)
+                    new WebAPI(WebServer.this)
             );
         }
 
@@ -330,14 +509,13 @@ public class WebServer extends PathHandler {
         }
 
     }
-    /**
-     * servlets - wtf!!!!!!
-     */
-    private final static class NotAServlet extends ResourceHandler {
+
+    @Deprecated
+    private final static class PathHandlerWrapper extends ResourceHandler {
 
         private final HttpHandler notAServlet;
 
-        public NotAServlet(HttpHandler thankfullyNotAServlet) {
+        public PathHandlerWrapper(HttpHandler thankfullyNotAServlet) {
             this.notAServlet = thankfullyNotAServlet;
         }
 

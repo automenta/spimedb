@@ -1,6 +1,8 @@
 package spimedb.server;
 
 import com.google.common.collect.Lists;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.suggest.Lookup;
@@ -23,12 +25,17 @@ import java.util.List;
 import static spimedb.server.WebIO.searchResultFull;
 
 
+
 @Path("/")
+@Api(description = "SpimeDB")
+/**
+ * http://editor.swagger.io/#/
+ */
 public class WebAPI {
 
     final static Logger logger = LoggerFactory.getLogger(WebAPI.class);
 
-    public final SpimeDB db;
+    private final SpimeDB db;
     private final WebServer web;
 
     public WebAPI(WebServer w) {
@@ -37,10 +44,15 @@ public class WebAPI {
     }
 
     final static int MaxSuggestLength = 10;
+    final static int MaxSuggestionResults = 16;
+    final static int MaxSearchResults = 32;
+    final static int MaxFacetResults = 64;
 
     @GET
     @Path("/suggest")
-    @Produces(MediaType.TEXT_PLAIN)
+    //  @ApiOperation(value = "Find person by e-mail", notes = "Find person by e-mail", response = Person.class) //http://stackoverflow.com/questions/21148861/swagger-codegen-simple-jax-rs-example
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation("Provides search query suggestions given a partially complete input query")
     public Response suggest(@QueryParam("q") String q) {
 
         if (q == null || (q = q.trim()).isEmpty() || q.length() > MaxSuggestLength)
@@ -48,7 +60,7 @@ public class WebAPI {
 
         String x = q;
         return Response.ok((StreamingOutput) os -> {
-            List<Lookup.LookupResult> x1 = db.suggest(x, 16);
+            List<Lookup.LookupResult> x1 = db.suggest(x, MaxSuggestionResults);
             if (x1 != null)
                 JSON.toJSON(Lists.transform(x1, y -> y.key), os);
         }).build();
@@ -56,14 +68,15 @@ public class WebAPI {
 
     @GET
     @Path("/find")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation("Finds the results of a text search query")
     public Response find(@QueryParam("q") String q) {
 
         if (q == null || (q = q.trim()).isEmpty())
             return Response.noContent().build();
 
         try {
-            SearchResult r = db.find(q, 20);
+            SearchResult r = db.find(q, MaxSearchResults);
             return Response.ok((StreamingOutput) os -> WebIO.send(r, os, searchResultFull)).build();
         } catch (IOException e) {
             return Response.serverError().build();
@@ -75,11 +88,12 @@ public class WebAPI {
 
     @GET
     @Path("/facet")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation("Finds matching search facets for a given dimension key")
     public Response facet(@QueryParam("q") String dimension) {
         if (!(dimension == null || (dimension = dimension.trim()).isEmpty())) {
             try {
-                FacetResult x = db.facets(dimension, 48);
+                FacetResult x = db.facets(dimension, MaxFacetResults);
                 if (x != null)
                     return Response.ok((StreamingOutput) os -> WebIO.stream(x, os)).build();
             } catch (IOException e) {
@@ -88,7 +102,6 @@ public class WebAPI {
         }
 
         return Response.noContent().build();
-
     }
 
 
@@ -132,3 +145,25 @@ public class WebAPI {
 //
 //        return Response.ok(stream).build();
 //    }
+
+
+///**
+// * Created by me on 5/4/17.
+// */
+//@Path("/test")
+////@Api(value = "/pet", description = "Operations about pets", authorizations = {
+////        @Authorization(value = "petstore_auth",
+////                scopes = {
+////                        @AuthorizationScope(scope = "write:pets", description = "modify pets in your account"),
+////                        @AuthorizationScope(scope = "read:pets", description = "read your pets")
+////                })
+////})
+////@Produces({"application/json", "application/xml"})
+//
+//public class ExampleJaxResource {
+//    @GET
+//    @Produces("text/plain")
+//    public String get() {
+//        return "hello world";
+//    }
+//}
