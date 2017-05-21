@@ -151,12 +151,12 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                         final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
 
                         if (stream instanceof FileInputStream) {
-                            y.put("data", url);
+                            y.put(NObject.DATA, url);
                         } else {
                             //buffer the bytes for saving
                             byte[] bytes = IOUtils.readFully(stream, (int) fileSize);
                             stream = new ByteArrayInputStream(bytes);
-                            y.put("data", bytes);
+                            y.put(NObject.DATA, bytes);
                         }
 
                         tikaWrapper.parse(stream, new DefaultHandler(), metadata, context);
@@ -213,7 +213,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                 x = new MutableNObject(x)
                         .name(titleify(xid))
                         .put(NObject.DESC, null)
-                        .put("thumbnail", "data" /* redirect to the data field which already has the byte[] image */)
+                        .put(NObject.ICON, NObject.DATA /* redirect to the data field which already has the byte[] image */)
                 ;
 
             }
@@ -295,7 +295,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                                         .put("author", author)
                                         .put("url", url) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
-                                        .put("data", xid + "#page=" + page)
+                                        .put(NObject.DATA, xid + "#page=" + page)
                                         .put("page", page)
                                         .put(NObject.DESC, text)
                                             /*.putLater("textParse", 0.1f, ()-> {
@@ -303,7 +303,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                                                         t -> NLP.toString(NLP.parse(t))
                                                 ).collect(Collectors.joining("\n")) : null;
                                             })*/
-                                        .put("thumbnail", thumbnail)
+                                        .put(NObject.ICON, thumbnail)
                         );
                     }
 

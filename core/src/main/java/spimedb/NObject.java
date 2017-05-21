@@ -66,6 +66,11 @@ public interface NObject extends Serializable {
     String ID = "I";
     String NAME = "N";
 
+    String URL = "url"; //TODO shorten to 'u'
+
+    String ICON = "icon"; //icon, binary data
+    String DATA = "data"; //blob data
+
     String TAG = ">";
     String CONTENT = "<";
 

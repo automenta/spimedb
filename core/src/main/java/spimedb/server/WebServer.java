@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Objects;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.cache.DirectBufferCache;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
@@ -24,19 +23,15 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.util.HttpString;
-import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
 import spimedb.NObject;
 import spimedb.SpimeDB;
-import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.query.Query;
 import spimedb.util.HTTP;
@@ -46,13 +41,10 @@ import javax.servlet.ServletException;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Set;
 
-import static io.undertow.Handlers.resource;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static java.lang.Double.parseDouble;
 import static spimedb.util.HTTP.getStringParameter;
@@ -65,19 +57,36 @@ import static spimedb.util.HTTP.getStringParameter;
  */
 public class WebServer extends PathHandler {
 
-    public Undertow server;
+    @ApplicationPath("/")
+    public final class WebApp extends Application {
 
+        @Override
+        public Set getSingletons() {
+            return Sets.mutable.of(
+                    new WebAPI(WebServer.this)
+            );
+        }
+
+        @Override
+        public Set<Class<?>> getClasses() {
+            return Sets.mutable.of(
+                io.swagger.jaxrs.listing.ApiListingResource.class,
+                io.swagger.jaxrs.listing.SwaggerSerializers.class
+            );
+        }
+
+    }
+
+    public Undertow server;
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
 
-    public static final String staticPath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
+    static final String staticPath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
 
-    private static final int BUFFER_SIZE = 32 * 1024;
+
 
     public final SpimeDB db;
 
-    @Deprecated
-    private final double websocketOutputRateLimitBytesPerSecond = 64 * 1024;
 
     private int port = 0;
     private String host = null;
@@ -115,24 +124,17 @@ public class WebServer extends PathHandler {
         super();
         this.db = db;
 
-
-
         Application application = new WebApp();
+
         String contextPath = "/";
-        if (contextPath == null) {
-            contextPath = "/";
-        }
-
-        if (!contextPath.startsWith("/")) {
-            contextPath = "/" + contextPath;
-        }
-
         ResteasyDeployment deployment = new ResteasyDeployment();
         deployment.setApplication(application);
         DeploymentInfo di = this.undertowDeployment(deployment);
         di.setClassLoader(application.getClass().getClassLoader());
         di.setContextPath(contextPath);
         di.setDeploymentName("SpimeDB");
+        di.setAsyncExecutor(db.exe);
+        //deployment.getProviderFactory().
         DeploymentManager manager = container.addDeployment(di);
         manager.deploy();
 
@@ -163,12 +165,7 @@ public class WebServer extends PathHandler {
             }
         }));
 
-        addPrefixPath("/thumbnail", ex -> {
-            send(getStringParameter(ex, NObject.ID), "thumbnail", "image/jpg", ex);
-        });
-        addPrefixPath("/data", ex -> {
-            send(getStringParameter(ex, NObject.ID), "data", "application/pdf", ex);
-        });
+
 
         addPrefixPath("/earth", ex -> HTTP.stream(ex, (o) -> {
             String b = getStringParameter(ex, "r");
@@ -372,26 +369,7 @@ public class WebServer extends PathHandler {
 //        }
 
 
-    @ApplicationPath("/")
-    public final class WebApp extends Application {
 
-        @Override
-        public Set getSingletons() {
-            return Sets.mutable.of(
-                    new WebAPI(WebServer.this)
-            );
-        }
-
-        @Override
-        public Set<Class<?>> getClasses() {
-            HashSet<Class<?>> classes = new HashSet<Class<?>>();
-            classes.add(ExampleJaxResource.class);
-            classes.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-            classes.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-            return classes;
-        }
-
-    }
 
 
     public void setPort(int port) {
@@ -400,69 +378,6 @@ public class WebServer extends PathHandler {
             restart();
         }
     }
-
-    private void send(@Nullable String id, String field, @Deprecated @Nullable String contentType, HttpServerExchange ex) {
-        if (id != null) {
-
-            DObject d = db.get(id);
-            if (d != null) {
-                Object f = d.get(field);
-
-                if (f instanceof String) {
-                    //interpret the string stored at this as a URL or a redirect to another field
-                    String s = (String) f;
-                    switch (s) {
-                        case "data":
-                            if (!field.equals("data"))
-                                send(id, "data", contentType, ex);
-                            else {
-                                //infinite loop
-                                throw new UnsupportedOperationException("document field redirect cycle");
-                            }
-                            break;
-                        default:
-                            if (s.startsWith("file:")) {
-                                File ff = new File(s.substring(5));
-                                if (ff.exists()) {
-                                    HTTP.stream(ex, (o) -> {
-                                        try {
-                                            IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE]);
-                                        } catch (IOException e) {
-                                            ex.setStatusCode(404);
-                                        }
-                                    }, contentType != null ? contentType : "text/plain");
-
-                                } else {
-                                    ex.setStatusCode(404);
-                                }
-                            }
-                            break;
-                    }
-                } else if (f instanceof byte[]) {
-
-                    byte[] b = (byte[]) f;
-
-                    HTTP.stream(ex, (o) -> {
-                        try {
-                            o.write(b);
-                        } catch (IOException e) {
-                        }
-                    }, contentType != null ? contentType : "text/plain");
-
-                } else {
-                    ex.setStatusCode(404);
-                }
-
-            } else {
-                ex.setStatusCode(404);
-            }
-
-        } else {
-            ex.setStatusCode(404);
-        }
-    }
-
-
 
 
 //       @Test

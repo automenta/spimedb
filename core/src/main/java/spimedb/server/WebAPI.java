@@ -8,20 +8,20 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.suggest.Lookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.DObject;
 import spimedb.index.SearchResult;
 import spimedb.util.JSON;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.util.List;
 
+import static spimedb.server.WebIO.searchResult;
 import static spimedb.server.WebIO.searchResultFull;
 
 
@@ -47,6 +47,31 @@ public class WebAPI {
     final static int MaxSuggestionResults = 16;
     final static int MaxSearchResults = 32;
     final static int MaxFacetResults = 64;
+
+    @GET
+    @Path("/{I}/json")
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation("Get by ID (JSON)")
+    public NObject get(@PathParam("I") String q) {
+        DObject n = db.get(q);
+        return (n != null) ? searchResult(n, searchResultFull) : null;
+    }
+
+    @GET
+    @Path("/{I}/icon")
+    @Produces({MediaType.MEDIA_TYPE_WILDCARD})
+    @ApiOperation("Get icon")
+    public Response getIcon(@PathParam("I") String q) {
+        return WebIO.send(db, q, NObject.ICON /* TODO: icon */);
+    }
+
+    @GET
+    @Path("/{I}/data")
+    @Produces({MediaType.MEDIA_TYPE_WILDCARD})
+    @ApiOperation("Get data")
+    public Response getData(@PathParam("I") String q) {
+        return WebIO.send(db, q, NObject.DATA);
+    }
 
     @GET
     @Path("/suggest")
