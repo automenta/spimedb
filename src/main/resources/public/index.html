@@ -125,6 +125,10 @@
 
     const app = {};
 
+    function itemURL(id, path) {
+        return encodeURIComponent(id) + '/' + path;
+    }
+
     $(document).ready(() => {
 
 
@@ -202,8 +206,8 @@
 //            $('#facets .grid-item').removeClass('grid-item').attr('style', '').addClass('list-item');
         }
 
-        function focus(url) {
-            Backbone.history.navigate("the/" + encodeURIComponent(url), { trigger: true });
+        function focus(id) {
+            Backbone.history.navigate("the/" + encodeURIComponent(id), { trigger: true });
         }
 
         function unfocus() {
@@ -316,14 +320,14 @@
                 "the/:query":        "the"
             },
 
-            the: function(url) {
-
+            the: function(id) {
+                
                 suggestionsClear();
 
-                url = "/data?I=" + url;
+                const dataURL = itemURL(id, 'data');
 
                 $('#focus').attr('class', 'main').html(
-                    E('iframe').attr('src', url).attr('width', '100%').attr('height', '100%')
+                    E('iframe').attr('src', dataURL).attr('width', '100%').attr('height', '100%')
                 );
                 $('#results').attr('class', 'sidebar shiftdown');
                 $('#menu').attr('class', 'hide');
@@ -372,22 +376,22 @@
                             const y = DIVclass('list-item result');
                             y.data('o', x);
 
-                            let tgt = x.I;
+                            let I = x.I;
                             if (x.inh) {
                                 x.out = x.inh['>'];
 
                                 const vin = x.inh['<'];
                                 if (vin && !(vin.length === 1 && vin[0].length === 0)) { //exclude root tag
                                     x.in = vin;
-                                    tgt = vin;
+                                    I = vin;
                                 }
                             }
 
 
-                            if (clusters[tgt]===undefined) {
-                                clusters[tgt] = [ y ];
+                            if (clusters[I]===undefined) {
+                                clusters[I] = [ y ];
                             } else {
-                                clusters[tgt].push(y);
+                                clusters[I].push(y);
                             }
 
 
@@ -407,10 +411,10 @@
                                 meta
                             );
 
-                            if (x.thumbnail) {
+                            if (x.icon) {
                                 const tt =
                                         //E('a').attr('class', 'fancybox').attr('rel', 'group').append(
-                                        E('img').attr('src', "/thumbnail?I=" + x.thumbnail)
+                                        E('img').attr('src', itemURL(I, 'icon'))
                                     //)
                                 ;
                                 y.append(

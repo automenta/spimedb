@@ -34,7 +34,7 @@ public enum WebIO {
             Sets.immutable.of(
                     NObject.ID, NObject.NAME, NObject.INH, NObject.TAG, NObject.BOUND,
                     NObject.ICON, "score", NObject.LINESTRING, NObject.POLYGON,
-                    NObject.TYPE, NObject.URL
+                    NObject.TYPE, NObject.URL, "page"
             );
     public static final ImmutableSet<String> searchResultFull =
             Sets.immutable.withAll(Iterables.concat(Sets.mutable.ofAll(searchResultSummary), Sets.immutable.of(
@@ -88,10 +88,10 @@ public enum WebIO {
             protected Object value(String key, Object v) {
                 switch (key) {
                     case NObject.ICON:
-                        //rewrite the thumbnail blob byte[] as a String URL
+                        //rewrite the thumbnail blob byte[] as ID reference
                         return d.id();
                     case NObject.DATA:
-                        //rewrite the thumbnail blob byte[] as a String URL (if not already a string representing a URL)
+                        //rewrite the thumbnail blob byte[] as ID reference (if not already a string representing a URL)
                         if (v instanceof byte[]) {
                             return d.id();
                         } else if (v instanceof String) {

@@ -91,7 +91,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
     public NObject apply(NObject p, NObject x) {
             final String url = x.get("url_in");
 
-            String xid = x.id();
+            String docID = x.id();
 
             if (url == null) {
                 return x;
@@ -211,7 +211,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
             if (mime != null && (mime.equals("image/jpeg") || mime.equals("image/png") /* ... */)) {
                 x = new MutableNObject(x)
-                        .name(titleify(xid))
+                        .name(titleify(docID))
                         .put(NObject.DESC, null)
                         .put(NObject.ICON, NObject.DATA /* redirect to the data field which already has the byte[] image */)
                 ;
@@ -255,7 +255,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
                         final int pageActual = _page;
                         final int page = _page + 1;
-                        logger.info("paginate: {} {}", xid, page);
+                        logger.info("paginate: {} {}", docID, page);
 
                         Document pd = Document.createShell("");
                         pd.body().appendChild(pagesHTML.get(pageActual).removeAttr("class"));
@@ -275,7 +275,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
                         String docTitle = parentDOM.title(); //x.name();
                         if (docTitle == null || docTitle.isEmpty()) {
-                            docTitle = titleify(xid);
+                            docTitle = titleify(docID);
                         }
 
                         BufferedImage img = renderer.renderImageWithDPI(pageActual, (float) pdfPageImageDPI, ImageType.RGB);
@@ -288,14 +288,15 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
                         String text = pdb.length > 0 ? Joiner.on('\n').join(pdb) : null;
 
+                        String pageID = docID + "/" + page;
                         db.add(
-                                new MutableNObject(xid + "/" + page)
+                                new MutableNObject(pageID)
                                         .name(docTitle + " - (" + page + " of " + (pageCount + 1) + ")")
-                                        .withTags(xid)
+                                        .withTags(docID)
                                         .put("author", author)
                                         .put("url", url) //HACK browser loads the specific page when using the '#' anchor
                                         .put(NObject.TYPE, "application/pdf")
-                                        .put(NObject.DATA, xid + "#page=" + page)
+                                        .put(NObject.DATA, docID)
                                         .put("page", page)
                                         .put(NObject.DESC, text)
                                             /*.putLater("textParse", 0.1f, ()-> {
@@ -309,7 +310,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
 
                 } catch (IOException f) {
-                    logger.error("error: {} {}", xid, f);
+                    logger.error("error: {} {}", docID, f);
                 } finally {
                     if (document != null)
                         try {
@@ -329,7 +330,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
             //String xname = x.name();
             //String desc = x.get(NObject.DESC);
             x = new MutableNObject(x)
-                    .name(titleify(xid))
+                    .name(titleify(docID))
                     .put(NObject.DESC, null)
                         /*.putLater("textParse", 0.15f, () -> {
                             return xname != null ? NLP.toString(NLP.parse(
