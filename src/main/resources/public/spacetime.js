@@ -275,8 +275,8 @@ $(() => {
             } else {
                 setTimeout(() =>
                         qs.html(_.map(JSON.parse(suggestions), (x) =>
-                            DIVclass('grid-item').append(
-                                DIVclass('grid-item-content').text(x).click((e) => {
+                            D('grid-item').append(
+                                D('grid-item-content').text(x).click((e) => {
                                     queryText.val(x);
                                     update(x);
                                 })

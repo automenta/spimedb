@@ -4,39 +4,8 @@
 
     <script src="lib/lodash.js"></script>
     <script src="lib/jquery.min.js"></script>
-
     <script src="lib/backbone.js"></script>
-
-    <!--<script src="lib/d3.min.js"></script>-->
-
-    <!--<script src="lib/draggabilly.js"></script>-->
-    <!--<script src="lib/packery/packery.js"></script>-->
-
-
-    <!--<script src="lib/leaflet/leaflet.js"></script>-->
-    <!--<link rel="stylesheet" href="lib/leaflet/leaflet.css">-->
-
-    <!--<script src="https://raw.githubusercontent.com/darsain/sly/master/dist/sly.min.js"></script> &lt;!&ndash;http://codepen.io/ritz078/pen/bEYOov&ndash;&gt;-->
-
-    <script src="util.eq.js"></script>
-
-    <!-- xxxxxxxxxxxxxxxxxxxxxx -->
-
-    <!--<link rel="stylesheet" href="lib/fancybox/jquery.fancybox.css" type="text/css" media="screen" />-->
-    <!--<script type="text/javascript" src="lib/fancybox/jquery.fancybox.pack.js"></script>-->
-
-    <!-- Add mousewheel plugin (this is optional) -->
-    <!-- <script type="text/javascript" src="/fancybox/lib/jquery.mousewheel-3.0.6.pack.js"></script> -->
-
-
-    <!-- Optionally add helpers - button, thumbnail and/or media -->
-    <!-- <link rel="stylesheet" href="/fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" type="text/css" media="screen" />
-    <script type="text/javascript" src="/fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
-    <script type="text/javascript" src="/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script> -->
-
-    <!-- <link rel="stylesheet" href="/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" type="text/css" media="screen" />
-    <script type="text/javascript" src="/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script> -->
-    <!-- xxxxxxxxxxxxxxxxxxxxxx -->
+    <script src="util.dom.js"></script>
 
     <link rel="stylesheet" href="search.base.css">
     <link rel="stylesheet" href="search.css">
@@ -45,32 +14,26 @@
 
 <body>
 
-
 <div id="menu">
 
-    <div id="query" class="query_expand">
+    <div id="query">
         <div id="logo">
-
         </div>
 
         <div id="query_edit">
-
-            <input id="query_text" type="text" placeholder="Search"/>
-            <button id="query_update">&gt;</button>
-
+            <input id="query_text" type="text" placeholder="&#x1F30D;"/>
+            <button id="query_update">&#x1f50e;</button>
         </div>
 
-
         <div id="querySuggestionsWrapper">
-            <div id="query_suggestions" class="grid">
+            <div id="query_suggestions">
             </div>
         </div>
     </div>
 
-    <div id="facetsWrapper">
-        <div id="facets" class="grid">
-        </div>
+    <div id="facets">
     </div>
+
 </div>
 
 <div id="results">
@@ -85,43 +48,6 @@
 <script>
     "use strict";
 
-    function e(eleID) {
-        return document.createElement(eleID);
-    }
-    function E(eleID) {
-        return $(e(eleID));
-    }
-
-    function DIVclass(cssclass) {
-        const x = $(e('div'));
-        if (cssclass) {
-            x.attr('class', cssclass);
-        }
-        return x;
-    }
-
-    function newGrid(selector) {
-        return selector.packery({});
-    }
-
-    function addToGrid(result, builder, grid) {
-
-        const newItems = _.map(result, (v) => {
-
-            const c = builder(v);
-
-            //return ( $(e('div')).attr('class', 'grid-item').append(c))[0];
-            return c[0];
-
-        });
-
-        const nn = $(newItems);
-
-        grid.append(nn) ; //.packery('appended', nn);
-
-    }
-
-
 
     function itemURL(id, path) {
         return encodeURIComponent(id) + '/' + path;
@@ -133,31 +59,30 @@
             $('#logo').html(x);
         });
 
-        const facets = /*newGrid*/($('#facets'));
-
+        const query = $('#query');
+        const facets = $('#facets');
         const queryText = $('#query_text');
-
-        const qs = $('#query_suggestions');
+        const suggestions = $('#query_suggestions');
 
         const onQueryTextChanged = _.throttle(() => {
             const qText = queryText.val();
-            if (qText.length == 0)
+            if (!qText.length) {
+                suggestions.html('');
                 return;
+            }
 
             //$('#query_status').html('Suggesting: ' + qText);
 
             $.get('/suggest', { q: qText }, function (result) {
 
-                if (result.length === 0) {
-                    qs.html('');
+                if (!result.length) {
+                    suggestions.html('');
                 } else {
-                    qs.html(_.map((result), (x) =>
-                        DIVclass('grid-item').append(
-                            DIVclass('grid-item-content').text(x).click((e) => {
-                                queryText.val(x);
-                                update(x);
-                            })
-                        )
+                    suggestions.html(_.map((result), (x) =>
+                        D('suggestion').text(x).click(() => {
+                            queryText.val(x);
+                            update(x);
+                        })
                     ));
                 }
             });
@@ -179,6 +104,7 @@
         }
 
         function expand() {
+            query.addClass('expand');
 //            $('#menu').removeClass('sidebar');
 //            $('#menu').addClass('expand');
 //            $('#results').hide();
@@ -188,6 +114,7 @@
         }
 
         function contract() {
+            query.removeClass('expand');
 //            unfocus();
 //            $('#results').show().addClass('main');
 //            $('#menu').removeClass('expand');
@@ -202,16 +129,9 @@
             window.open(itemURL(id, 'data'), '_blank', 'menubar=no,status=no,titlebar=no');
         }
 
-        function unfocus() {
-            $('#focus').hide();
-            $('#focus').html('');
-            $('#results').show();
-            $('#menu').removeClass('hide');
-            $('#results').removeClass('sidebar').removeClass('shiftdown');
-        }
 
         function suggestionsClear() {
-            qs.html('');
+            suggestions.html('');
         }
 
         function update(qText) {
@@ -220,32 +140,29 @@
 
         }
 
+        function facet(v) {
+
+            const id = v[0]
+                .replace(/_/g, ' ')
+                .replace(/\-/g, ' ')
+            ; //HACK
+            const score = v[1];
+
+            return E('button', 'facet')
+                .text(id)
+                .attr('style',
+                    'font-size:' + (50.0 + 20 * (Math.log(1.0 + score)) ) + '%'
+                )
+                .click(() => {
+                    queryText.val(/* dimension + ':' + */ id);
+                    querySubmit();
+                    return false;
+                });
+        };
 
         function loadFacets(result) {
-            facets.html('');
+            facets.html(_.map(result, facet));
 
-            const facetButtonBuilder = (v) => {
-
-                const id = v[0]
-                    .replace(/_/g, ' ')
-                    .replace(/\-/g, ' ')
-                ; //HACK
-                const score = v[1];
-
-
-                const c = $(e('button'))
-                    .text(id).click(() => {
-                        queryText.val(/* dimension + ':' + */ id);
-                        querySubmit();
-                        return false;
-                    });
-
-                return EqualizeDiv(id, c)
-                    .capacity(score)
-                    .attr('class', 'grid-item-content');
-            };
-
-            addToGrid(result, facetButtonBuilder, facets);
 
             //setTimeout(()=>{
 
@@ -261,7 +178,7 @@
         //http://codepen.io/desandro/pen/vKjAPE/
         //http://packery.metafizzy.co/extras.html#animating-item-size
 
-        function updateFacet(dimension, label) {
+        function updateFacet(dimension) {
 
             //const klass = label;
 
@@ -271,12 +188,6 @@
 //            $('#facets').append($('<div>').append(f));
 
             $.get('/facet', {q: dimension}, function (result) {
-                try {
-                    result = (result);
-                } catch (e) {
-                    console.error(e,result);
-                    return;
-                }
 
                 /*
                  f.html($('<div>').append(
@@ -303,6 +214,7 @@
 
 
         //START ----------------->
+        const $results = $('#results');
 
         const Router = Backbone.Router.extend({
 
@@ -336,7 +248,7 @@
                 scrollTop();
 
                 //$('#query_status').html('').append($('<p>').text('Query: ' + qText));
-                $('#results').html('Searching...');
+                $results.html('Searching...');
 
                 $.get('/find', {q: qText}, function (result) {
 
@@ -347,7 +259,7 @@
                         ff = ss[1]; //second part: facets
                     } catch (e) {
                         //usually just empty search result
-                        $('#results').html('No matches for: "' + qText + '"');
+                        $results.html('No matches for: "' + qText + '"');
                         return;
                     }
 
@@ -357,15 +269,15 @@
 
                     const clusters = { };
 
-                    $('#results').html(
+                    $results.html(
 
 
-                        _.map(rr, (x, k) => {
+                        _.map(rr, (x) => {
 
                             if (!x.I)
                                 return;
 
-                            const y = DIVclass('list-item result');
+                            const y = D('list-item result');
                             y.data('o', x);
 
                             let I = x.I;
@@ -374,7 +286,7 @@
 
                                 const vin = x.inh['<'];
                                 if (vin && !(vin.length === 1 && vin[0].length === 0)) { //exclude root tag
-                                    x.in = vin;
+                                    x['in'] = vin;
                                     I = vin;
                                 }
                             }
@@ -387,7 +299,7 @@
                             }
 
 
-                            const header = DIVclass('header');
+                            const header = D('header');
 
                             header.append(
                                 E('h2').text(x.N || x.I)
@@ -395,7 +307,7 @@
 
 
 
-                            const meta = DIVclass('meta');
+                            const meta = D('meta');
 
 
                             y.append(
@@ -442,7 +354,7 @@
 
                         const start = c[0];
 
-                        const d = DIVclass('list-item result');
+                        const d = D('list-item result');
                         $(start).before(d);
                         c.forEach(cc => {
                             /* {

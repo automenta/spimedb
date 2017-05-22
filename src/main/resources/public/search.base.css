@@ -76,13 +76,7 @@ h2 { margin: 0; }
 }
 
 #query {
-    /* position: fixed; */
-    /* top: 0; */
-    /* left: 0; */
-    /* width: 100%; */
-    /* height: 3em; */
     padding: 0.5em;
-
 }
 
 #logo {
@@ -136,18 +130,34 @@ h2 { margin: 0; }
     /*background-color: white;*/
 }
 
-.hide #facetsWrapper {
-    display: none;
-}
-
 #facets {
     max-height: 6em;
-    overflow: auto;
-    display: inline-flex;
+    overflow-x: auto;
+    display: table;
     padding: 0.5em;
+    max-width: 100%;
+}
+.suggestion, .facet {
+    margin: 0.25em;
+    padding: 0.25em;
+    max-height: 4em;
+    border: 0;
+}
+.suggestion:hover, .facet:hover {
+    cursor: hand;
+}
+.suggestion:hover {
+    background-color: rgba(0,255,30,0.1);
+}
+.facet:hover {
+    background-color: rgba(0,30,255,0.1);
+}
+.list-item:hover, .grid-item:hover {
+    background-color: rgba(0,30,255,0.1);
+    cursor: hand;
 }
 
-#resultsPane, #facetsWrapper {
+#resultsPane {
     overflow: auto;
 }
 
@@ -162,9 +172,7 @@ h2 { margin: 0; }
     background-color: rgba(250, 250, 250, 0.8);
 }*/
 
-#menu.expand #facetsWrapper {
-    overflow: hidden;
-}
+
 
 #layout {
     pointer-events: none;
@@ -198,13 +206,6 @@ h2 { margin: 0; }
     text-align: center;
 }
 
-#menu.expand .grid-item-content {
-    max-width: 7em;
-    max-height: 4em;
-    text-overflow: clip;
-    overflow: hidden;
-}
-
 
 #menu input, #menu button {
     font-size: 200%;
@@ -215,6 +216,11 @@ h2 { margin: 0; }
 
 #results .header {
     display: flex;
+}
+
+
+#query.expand {
+    text-align:center;
 }
 
 #query_suggestions div {
@@ -241,6 +247,8 @@ h2 { margin: 0; }
     margin-bottom: 1em !important;
 }
 
+
+
 .list-item-content, .grid-item-content, .result {
     padding: 0.5em;
 }
@@ -265,16 +273,7 @@ h2 { margin: 0; }
     /*background-color: rgba(170,170,170,0.9);*/
 }
 
-.list-item:hover, .grid-item:hover {
-    -webkit-box-shadow: 0px 0px 4px 8px rgba(50, 127, 255, .75);
-    box-shadow: 0px 0px 4px 8px rgba(50, 127, 255, .75);
-    /*transform: scale(1.1);*/
-    cursor: hand;
-}
-.sub:hover {
-    -webkit-box-shadow: 0px 0px 3px 6px rgba(50, 128, 127, .75);
-    box-shadow: 0px 0px 3px 6px rgba(50, 128, 127, .75);
-}
+
 
 .grid-item.is-dragging,
 .grid-item.is-positioning-post-drag {

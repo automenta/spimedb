@@ -165,7 +165,7 @@ class NObject {
 }
 
 function ResultNode(x) {
-    const y = DIVclass('list-item result');
+    const y = D('list-item result');
     y.data('o', x);
 
     var tgt = x.I;
@@ -187,7 +187,7 @@ function ResultNode(x) {
     // }
 
 
-    const header = DIVclass('header');
+    const header = D('header');
     // if (x.data) {
     //     header.append(
     //         //E('a').attr('href', x.data).attr('target', '_').append(
@@ -204,7 +204,7 @@ function ResultNode(x) {
 
     //}
 
-    const meta = DIVclass('meta');
+    const meta = D('meta');
 
 
     y.append(

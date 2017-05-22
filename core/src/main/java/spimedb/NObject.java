@@ -66,6 +66,9 @@ public interface NObject extends Serializable {
     String ID = "I";
     String NAME = "N";
 
+    /** relevance score (dynamic, context-dependent) */
+    String SCORE = "*";
+
     String URL = "url"; //TODO shorten to 'u'
 
     String ICON = "icon"; //icon, binary data

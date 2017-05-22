@@ -33,8 +33,8 @@ public enum WebIO {
     public static final ImmutableSet<String> searchResultSummary =
             Sets.immutable.of(
                     NObject.ID, NObject.NAME, NObject.INH, NObject.TAG, NObject.BOUND,
-                    NObject.ICON, "score", NObject.LINESTRING, NObject.POLYGON,
-                    NObject.TYPE, NObject.URL, "page"
+                    NObject.ICON, NObject.SCORE, NObject.LINESTRING, NObject.POLYGON,
+                    NObject.TYPE, "page"
             );
     public static final ImmutableSet<String> searchResultFull =
             Sets.immutable.withAll(Iterables.concat(Sets.mutable.ofAll(searchResultSummary), Sets.immutable.of(
@@ -112,7 +112,7 @@ public enum WebIO {
             public void forEach(BiConsumer<String, Object> each) {
                 super.forEach(each);
                 if (score != null)
-                    each.accept("score", score.score);
+                    each.accept(NObject.SCORE, score.score);
             }
         };
     }
