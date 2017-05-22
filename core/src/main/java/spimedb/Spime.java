@@ -39,7 +39,7 @@ public class Spime extends Main {
         ));
 
         if (path != null) {
-            db = new SpimeDB(path + "/_");
+            db = new SpimeDB(this.path.toPath().resolve("_").toFile());
         } else {
             db = new SpimeDB();
         }
@@ -135,18 +135,20 @@ public class Spime extends Main {
 
     }
 
+
     public static void main(String[] args) throws Exception {
 
+        Spime s;
         if (args.length == 0) {
             System.out.println("usage: spime [path]\t\tNo path specified; using default (in-memory) configuration");
-            Spime m = new Spime(null);
-            mainDefault(m);
-            m.restart();
+            s = new Spime(null);
+            mainDefault(s);
         } else {
             String dataPath = args[0];
-            new Spime(dataPath).restart();
+            s = new Spime(dataPath);
         }
 
+        s.restart();
 
 //        Phex p = Phex.the();
 //        p.start();

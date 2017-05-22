@@ -190,8 +190,8 @@ public class SpimeDB {
     /**
      * disk
      */
-    public SpimeDB(String path) throws IOException {
-        this(new File(path), FSDirectory.open(new File(path).toPath()));
+    public SpimeDB(File path) throws IOException {
+        this(path, FSDirectory.open(path.toPath()));
         this.indexPath = file.getAbsolutePath();
         this.taxoDir = FSDirectory.open(file.toPath().resolve("taxo"));
 

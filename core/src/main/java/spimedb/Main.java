@@ -1,6 +1,5 @@
 package spimedb;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.Appender;
@@ -48,6 +47,7 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
     private static final ch.qos.logback.classic.Logger LOG;
 
+    final int fileObservePeriod = 200;
 
     static {
 
@@ -72,7 +72,9 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     final Map<String, Class> klassPath = new ConcurrentHashMap<>();
 
     @Nullable
-    private final FileAlterationObserver fsObserver;
+    private FileAlterationObserver fsObserver;
+    public final File path;
+    private FileAlterationMonitor monitor;
 
     protected Pair<Class, String> key(File f) {
 
@@ -478,11 +480,16 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     }
 
 
-    public Main(String path, Map<String, Class> initialKlassPath) throws Exception {
-        this(new File(path).getAbsoluteFile(), initialKlassPath);
+    public Main(@Nullable String path, Map<String, Class> initialKlassPath) throws Exception {
+        this(path!=null ? new File(path) : null, initialKlassPath);
     }
 
-    public Main(File path, Map<String, Class> initialKlassPath) throws Exception {
+    public Main(@Nullable File path, Map<String, Class> initialKlassPath) throws Exception {
+
+        if (path!=null)
+            path = path.getAbsoluteFile();
+
+        this.path = path;
 
         klassPath.putAll(initialKlassPath);
 
@@ -506,17 +513,6 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
         if (path != null) {
             fsObserver = new FileAlterationObserver(path);
-            logger.info("watching file://{}", path);
-        /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
-            int updatePeriodMS = 200;
-            FileAlterationMonitor monitor = new FileAlterationMonitor(updatePeriodMS);
-
-            //monitor.setThreadFactory(Executors.defaultThreadFactory());
-
-            fsObserver.addListener(this);
-            monitor.addObserver(fsObserver);
-            monitor.start();
-
         } else {
             fsObserver = null;
         }
@@ -532,9 +528,28 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     }
 
     /** reload files */
-    protected Main restart() {
-        if (fsObserver != null)
-            reload(fsObserver);
+    protected synchronized Main restart() {
+        /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
+        if (fsObserver != null && this.monitor == null) {
+
+            fsObserver.addListener(this);
+
+            this.monitor = new FileAlterationMonitor(fileObservePeriod);
+
+            monitor.addObserver(fsObserver);
+
+            try {
+                monitor.start();
+                logger.info("watching file://{}", path);
+
+                reload(fsObserver);
+
+            } catch (Exception e) {
+                logger.error("file observe {}", e);
+                this.fsObserver = null;
+            }
+
+        }
         return this;
     }
 
