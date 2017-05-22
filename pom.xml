@@ -20,19 +20,7 @@
 
     </properties>
 
-    <build>
-        <plugins>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <configuration>
-                    <mainClass>spimedb.MultimediaMain</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
             <!--<plugin>-->
                 <!--<groupId>com.garethevans.plugin</groupId>-->

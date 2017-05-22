@@ -193,6 +193,31 @@
                 <filtering>false</filtering>
             </resource>
 
+            <!-- HACK this is a duplicate of core/pom.xml find a way to share it -->
+            <resource>
+
+                <directory>${basedir}/../src/main/resources</directory>
+                <includes>
+                    <include>public/**</include>
+                </includes>
+                <excludes>
+                    <exclude>public/.idea/**</exclude>
+                    <exclude>public/snip/**</exclude>
+                    <exclude>public/depr/**</exclude>
+                    <exclude>public/bower_components/**</exclude>
+
+                    <exclude>public/icon/**</exclude>
+                    <exclude>public/nslider/**</exclude>
+
+                    <exclude>public/lib/cesium/**</exclude>
+                    <exclude>public/lib/moment/**</exclude>
+                    <exclude>public/lib/jqueryui/themes/**</exclude>
+                    <exclude>public/lib/jqueryui/ui/widgets/**</exclude>
+                    <exclude>public/lib/fontawesome/**</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </resource>
+
 
             <!--<resource>-->
             <!--&lt;!&ndash; https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html &ndash;&gt;-->

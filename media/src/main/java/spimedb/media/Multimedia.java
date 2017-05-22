@@ -59,11 +59,14 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
     static final Cleaner cleaner = new Cleaner(Whitelist.basic());
 
-    private final float thumbnailQuality = 0.75f;
+    static final float thumbnailQuality = 0.75f;
     static final int pdfPageImageDPI = 32;
 
     static {
-        for (String s : new String[]{"org.apache.pdfbox.rendering.CIDType0Glyph2D", "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
+        for (String s : new String[]{
+                "org.apache.pdfbox.pdmodel.font.PDSimpleFont",
+                "org.apache.pdfbox.rendering.CIDType0Glyph2D",
+                "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
             ((Jdk14Logger) LogFactory.getLog(s)).getLogger().setLevel(Level.SEVERE);
         }
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
@@ -87,7 +90,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
         });
     }
 
-        @Override
+    @Override
     public NObject apply(NObject p, NObject x) {
             final String url = x.get("url_in");
 
@@ -97,113 +100,112 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                 return x;
             }
 
-
-                try {
-                    long exp;
-                    InputStream stream;
-                    long fileSize;
-                    if (url.startsWith("file:")) {
-                        File f = new File(url.substring(5));
-                        exp = f.lastModified();
-                        stream = new FileInputStream(f);
-                        fileSize = f.length();
-                    } else {
-                        URL uu = new URL(url);
-                        URLConnection con = uu.openConnection();
-                        exp = con.getExpiration();
-                        if (exp == 0)
-                            exp = con.getLastModified();
-                        fileSize = con.getContentLengthLong();
-                        stream = con.getInputStream();
-                    }
-
-                    if (stream == null) {
-                        throw new FileNotFoundException();
-                    }
-
-                    //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
-
-                    //TODO use a separate url_cached for each instance of a sibling class like Multimedia that does only one processing
-                    //this way they can be enabled/disabled separately without interfering with each other
-                    //TODO store a hashcode of the data as well as the time for additional integrity
-                    if (p != null) {
-                        String whenCached = p.get("url_cached");
-                        if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
-                            logger.debug("cached: {}", url);
-                            return p; //still valid
-                        }
-                    }
-
-                    logger.info("load: {}", url);
-
-                    GeoNObject y = new GeoNObject(x);
-
-                    y.put("url_cached", Long.toString(exp));
-
-                    boolean isKMLorKMZ = url.endsWith(".kml") || url.endsWith(".kmz");
-                    boolean isGeoJSON = url.endsWith(".geojson");
-
-                    if (!isKMLorKMZ && !isGeoJSON  /* handled separately below */) {
-
-                        Metadata metadata = new Metadata();
-                        ParseContext context = new ParseContext();
-
-                        final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
-
-                        if (stream instanceof FileInputStream) {
-                            y.put(NObject.DATA, url);
-                        } else {
-                            //buffer the bytes for saving
-                            byte[] bytes = IOUtils.readFully(stream, (int) fileSize);
-                            stream = new ByteArrayInputStream(bytes);
-                            y.put(NObject.DATA, bytes);
-                        }
-
-                        tikaWrapper.parse(stream, new DefaultHandler(), metadata, context);
-
-                        stream.close();
-
-                        List<Metadata> m = tikaWrapper.getMetadata();
-                        m.forEach(md -> {
-                            for (String k : md.names()) {
-                                String[] v = md.getValues(k);
-
-                                String kk = tikiToField(k);
-                                if (kk != null) {
-                                    Object vv = v.length > 1 ? v : v[0];
-                                    if (vv instanceof String) {
-                                        try {
-                                            int ivv = Integer.parseInt((String) vv);
-                                            vv = ivv;
-                                        } catch (Exception e) {
-                                            //not an int
-                                        }
-                                    }
-                                    y.put(kk, vv);
-                                }
-                            }
-                        });
-
-
-                    }
-
-
-                    //db.addAsync(y).get();
-
-                    //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
-
-                    if (isKMLorKMZ) {
-                        new KML(db, y).url(url).run();
-                    } else if (isGeoJSON) {
-                        GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
-                    }
-
-
-                    x = y;
-
-                } catch (Exception e) {
-                    logger.error("url_in removal: {}", e);
+            try {
+                long exp;
+                InputStream stream;
+                long fileSize;
+                if (url.startsWith("file:")) {
+                    File f = new File(url.substring(5));
+                    exp = f.lastModified();
+                    stream = new FileInputStream(f);
+                    fileSize = f.length();
+                } else {
+                    URL uu = new URL(url);
+                    URLConnection con = uu.openConnection();
+                    exp = con.getExpiration();
+                    if (exp == 0)
+                        exp = con.getLastModified();
+                    fileSize = con.getContentLengthLong();
+                    stream = con.getInputStream();
                 }
+
+                if (stream == null) {
+                    throw new FileNotFoundException();
+                }
+
+                //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
+
+                //TODO use a separate url_cached for each instance of a sibling class like Multimedia that does only one processing
+                //this way they can be enabled/disabled separately without interfering with each other
+                //TODO store a hashcode of the data as well as the time for additional integrity
+                if (p != null) {
+                    String whenCached = p.get("url_cached");
+                    if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
+                        logger.debug("cached: {}", url);
+                        return p; //still valid
+                    }
+                }
+
+                logger.info("load: {}", url);
+
+                GeoNObject y = new GeoNObject(x);
+
+                y.put("url_cached", Long.toString(exp));
+
+                boolean isKMLorKMZ = url.endsWith(".kml") || url.endsWith(".kmz");
+                boolean isGeoJSON = url.endsWith(".geojson");
+
+                if (!isKMLorKMZ && !isGeoJSON  /* handled separately below */) {
+
+                    Metadata metadata = new Metadata();
+                    ParseContext context = new ParseContext();
+
+                    final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
+
+                    if (stream instanceof FileInputStream) {
+                        y.put(NObject.DATA, url);
+                    } else {
+                        //buffer the bytes for saving
+                        byte[] bytes = IOUtils.readFully(stream, (int) fileSize);
+                        stream = new ByteArrayInputStream(bytes);
+                        y.put(NObject.DATA, bytes);
+                    }
+
+                    tikaWrapper.parse(stream, new DefaultHandler(), metadata, context);
+
+                    stream.close();
+
+                    List<Metadata> m = tikaWrapper.getMetadata();
+                    m.forEach(md -> {
+                        for (String k : md.names()) {
+                            String[] v = md.getValues(k);
+
+                            String kk = tikiToField(k);
+                            if (kk != null) {
+                                Object vv = v.length > 1 ? v : v[0];
+                                if (vv instanceof String) {
+                                    try {
+                                        int ivv = Integer.parseInt((String) vv);
+                                        vv = ivv;
+                                    } catch (Exception e) {
+                                        //not an int
+                                    }
+                                }
+                                y.put(kk, vv);
+                            }
+                        }
+                    });
+
+
+                }
+
+
+                //db.addAsync(y).get();
+
+                //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
+
+                if (isKMLorKMZ) {
+                    new KML(db, y).url(url).run();
+                } else if (isGeoJSON) {
+                    GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
+                }
+
+
+                x = y;
+
+            } catch (Exception e) {
+                logger.error("url_in removal: {}", e);
+            }
 
 
 
