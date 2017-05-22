@@ -479,6 +479,10 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
 
     public Main(String path, Map<String, Class> initialKlassPath) throws Exception {
+        this(new File(path).getAbsoluteFile(), initialKlassPath);
+    }
+
+    public Main(File path, Map<String, Class> initialKlassPath) throws Exception {
 
         klassPath.putAll(initialKlassPath);
 
