@@ -256,18 +256,19 @@ public class WebServer extends PathHandler {
             );
         }
 
+        return res;
 
-        final int METADATA_MAX_AGE = 3 * 1000; //ms
-        DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
-                16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
-                METADATA_MAX_AGE);
+//        final int METADATA_MAX_AGE = 3 * 1000; //ms
+//        DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
+//                16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
+//                METADATA_MAX_AGE);
 
-        CachingResourceManager cres = new CachingResourceManager(
-                100,
-                transferMinSize /* max size */,
-                dataCache, res, METADATA_MAX_AGE);
-
-        return cres;
+//        CachingResourceManager cres = new CachingResourceManager(
+//                100,
+//                transferMinSize /* max size */,
+//                dataCache, res, METADATA_MAX_AGE);
+//
+//        return cres;
     }
 
     public void setHost(String host) {
