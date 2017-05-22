@@ -30,7 +30,6 @@ import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.LoggerFactory;
 import org.xnio.BufferAllocator;
-import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.SearchResult;
 import spimedb.query.Query;
@@ -41,7 +40,6 @@ import javax.servlet.ServletException;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Set;
 
@@ -70,8 +68,8 @@ public class WebServer extends PathHandler {
         @Override
         public Set<Class<?>> getClasses() {
             return Sets.mutable.of(
-                io.swagger.jaxrs.listing.ApiListingResource.class,
-                io.swagger.jaxrs.listing.SwaggerSerializers.class
+                    io.swagger.jaxrs.listing.ApiListingResource.class,
+                    io.swagger.jaxrs.listing.SwaggerSerializers.class
             );
         }
 
@@ -82,7 +80,6 @@ public class WebServer extends PathHandler {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebServer.class);
 
     static final String staticPath = Paths.get("src/main/resources/public/").toAbsolutePath().toString();
-
 
 
     public final SpimeDB db;
@@ -166,7 +163,6 @@ public class WebServer extends PathHandler {
 //        }));
 
 
-
         addPrefixPath("/earth", ex -> HTTP.stream(ex, (o) -> {
             String b = getStringParameter(ex, "r");
             String[] bb = b.split("_");
@@ -231,48 +227,47 @@ public class WebServer extends PathHandler {
 
 
     private ResourceManager staticResources(SpimeDB db) {
-        File staticPath = Paths.get(WebServer.staticPath).toFile();
-        File myStaticPath = db.file != null ? db.file.getParentFile().toPath().resolve("public").toFile() : null;
 
         int transferMinSize = 1024 * 1024;
-        final int METADATA_MAX_AGE = 3 * 1000; //ms
 
         ChainedResourceManager res = new ChainedResourceManager();
-        if (db.indexPath != null && myStaticPath != null && myStaticPath.exists()) {
-            //local override
-            logger.info("static resource: {}", myStaticPath);
-            res.add(
-                    new FileResourceManager(myStaticPath, transferMinSize, true, "/")
-            );
+
+        if (db.indexPath != null) {
+            File myStaticPath = db.file != null ? db.file.getParentFile().toPath().resolve("public").toFile() : null;
+            if ( myStaticPath != null && myStaticPath.exists()) {
+                logger.info("static resource: overlay {}", myStaticPath);
+                res.add(
+                        new FileResourceManager(myStaticPath, transferMinSize, true, "/")
+                );
+            }
         }
 
-        ResourceHandler rr;
+        File staticPath = Paths.get(WebServer.staticPath).toFile();
         if (staticPath != null && staticPath.exists()) {
-            //development mode: serve the files from the FS
-            logger.info("static resource: {}", staticPath);
+            logger.info("static resource: source {}", staticPath);
             res.add(
                     new FileResourceManager(staticPath, transferMinSize, true, "/")
             );
             return res;
         } else {
-            logger.info("static resource: (classloader)");
-            //production mode: serve from classpath
+            logger.info("static resource: classloader");
             res.add(
                     new ClassPathResourceManager(getClass().getClassLoader(), "public")
             );
-
-            DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
-                    16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
-                    METADATA_MAX_AGE);
-
-            CachingResourceManager cres = new CachingResourceManager(
-                    100,
-                    transferMinSize /* max size */,
-                    dataCache, res, METADATA_MAX_AGE);
-
-            return cres;
         }
 
+
+//        final int METADATA_MAX_AGE = 3 * 1000; //ms
+//        DirectBufferCache dataCache = new DirectBufferCache(1000, 10,
+//                16 * 1024 * 1024, BufferAllocator.DIRECT_BYTE_BUFFER_ALLOCATOR,
+//                METADATA_MAX_AGE);
+//
+//        CachingResourceManager cres = new CachingResourceManager(
+//                100,
+//                transferMinSize /* max size */,
+//                dataCache, res, METADATA_MAX_AGE);
+
+        return res;
     }
 
     public void setHost(String host) {
@@ -367,9 +362,6 @@ public class WebServer extends PathHandler {
 //            this.server.start();
 //            return this;
 //        }
-
-
-
 
 
     public void setPort(int port) {

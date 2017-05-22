@@ -25,7 +25,7 @@ public class ChainedResourceManager extends CopyOnWriteArrayList<ResourceManager
                 Resource y = x.getResource(p);
                 if (y != null)
                     return y;
-            } catch (IOException ignored) {
+            } catch (Throwable ignored) {
                 //ignore
             }
         }
