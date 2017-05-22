@@ -28,15 +28,15 @@ public class Spime extends Main {
 
 
     /** in-memory */
-    public Spime() throws Exception {
-        this(null);
+    public Spime(Class<? extends Plugin>... plugin) throws Exception {
+        this(null, plugin);
     }
 
     /** on-disk */
-    public Spime(String path) throws Exception {
+    public Spime(String path, Class<? extends Plugin>... plugin) throws Exception {
         super(path, Maps.mutable.of(
                 "http", WebServer.class
-        ));
+        ), plugin);
 
         if (path != null) {
             db = new SpimeDB(this.path.toPath().resolve("_").toFile());
@@ -138,17 +138,7 @@ public class Spime extends Main {
 
     public static void main(String[] args) throws Exception {
 
-        Spime s;
-        if (args.length == 0) {
-            System.out.println("usage: spime [path]\t\tNo path specified; using default (in-memory) configuration");
-            s = new Spime(null);
-            mainDefault(s);
-        } else {
-            String dataPath = args[0];
-            s = new Spime(dataPath);
-        }
-
-        s.restart();
+        start(new Class[] {}, args);
 
 //        Phex p = Phex.the();
 //        p.start();
@@ -195,6 +185,20 @@ public class Spime extends Main {
 //            });
 
 
+    }
+
+    public static void start(Class<? extends Plugin>[] plugins, String[] args) throws Exception {
+        Spime s;
+        if (args.length == 0) {
+            System.out.println("usage: spime [path]\t\tNo path specified; using default (in-memory) configuration");
+            s = new Spime(null, plugins);
+            mainDefault(s);
+        } else {
+            String dataPath = args[0];
+            s = new Spime(dataPath, plugins);
+        }
+
+        s.restart();
     }
 
 

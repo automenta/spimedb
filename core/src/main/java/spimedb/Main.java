@@ -480,11 +480,11 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     }
 
 
-    public Main(@Nullable String path, Map<String, Class> initialKlassPath) throws Exception {
-        this(path!=null ? new File(path) : null, initialKlassPath);
+    public Main(@Nullable String path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) throws Exception {
+        this(path!=null ? new File(path) : null, initialKlassPath, plugin);
     }
 
-    public Main(@Nullable File path, Map<String, Class> initialKlassPath) throws Exception {
+    public Main(@Nullable File path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) throws Exception {
 
         if (path!=null)
             path = path.getAbsoluteFile();
@@ -498,17 +498,14 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
         put(LogConfigurator.class, new LogConfigurator(null));
 
+//        Set<Class<? extends Plugin>> plugins = new Reflections(Main.class.getClassLoader())
+//                .getSubTypesOf(Plugin.class);
 
-        //new Multimedia(db);
-
-        Set<Class<? extends Plugin>> plugins = new Reflections("spimedb")
-                .getSubTypesOf(Plugin.class);
-
-        plugins.forEach(c -> {
+        for (Class c : plugin) {
             String id = c.getSimpleName().toLowerCase();
             logger.warn("Plugin available: {}", id);
             klassPath.put(id, c);
-        });
+        }
 
 
         if (path != null) {
