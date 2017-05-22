@@ -73,27 +73,27 @@ public class ClientSession extends Session {
         }
 
 
-
-        /**
-         * provides root-level startup tags
-         */
-        public Task tagRoots() {
-            return this.currentFocus = new Task(ClientSession.this) {
-
-                @Override
-                public void run() {
-                    Iterator<String> r = db.roots();
-                    try {
-                        while (r.hasNext()) {
-
-                            trySend(this, r.next(), true, tagFields);
-                        }
-                    } catch (IOException e) {
-                        return;
-                    }
-                }
-            };
-        }
+//
+//        /**
+//         * provides root-level startup tags
+//         */
+//        public Task tagRoots() {
+//            return this.currentFocus = new Task(ClientSession.this) {
+//
+//                @Override
+//                public void run() {
+//                    Iterator<String> r = db.roots();
+//                    try {
+//                        while (r.hasNext()) {
+//
+//                            trySend(this, r.next(), true, tagFields);
+//                        }
+//                    } catch (IOException e) {
+//                        return;
+//                    }
+//                }
+//            };
+//        }
 
         /**
          * allows client to inform server of its forgotten items

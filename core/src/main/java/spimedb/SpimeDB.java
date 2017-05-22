@@ -218,13 +218,13 @@ public class SpimeDB {
                 NObject.DESC,
                 NObject.TAG,
                 NObject.ID};
-        final Map<String, Float> defaultFindFieldStrengths = Maps.mutable.with(
+
+        this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, Maps.mutable.with(
                 NObject.NAME, 1f,
                 NObject.ID, 1f,
                 NObject.DESC, 0.25f,
                 NObject.TAG, 0.5f
-        );
-        this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, defaultFindFieldStrengths);
+        ));
 
         writerConf = new IndexWriterConfig(analyzer);
         writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
@@ -237,11 +237,7 @@ public class SpimeDB {
     }
 
 
-    public static StringField string(String key, String value) {
-        return new StringField(key, value, Field.Store.YES);
-    }
-
-//    public static final FieldType tokenizedString = new FieldType();
+    //    public static final FieldType tokenizedString = new FieldType();
 //    static {
 //        tokenizedString.setOmitNorms(true);
 //        tokenizedString.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
@@ -253,10 +249,6 @@ public class SpimeDB {
 //    public static Field stringTokenized(String key, String value) {
 //        return new Field(key, value, tokenizedString);
 //    }
-
-    public static TextField text(String key, String value) {
-        return new TextField(key, value, Field.Store.YES);
-    }
 
     @NotNull
     public static String uuidString() {
@@ -297,7 +289,7 @@ public class SpimeDB {
         return result;
     }
 
-    @Nullable
+    @NotNull
     private Lookup suggester() {
 
         Lookup suggester = this.suggester;
@@ -323,13 +315,13 @@ public class SpimeDB {
                     try {
                         nextSuggester.build(nameDict);
                     } catch (IOException f) {
-                        logger.error("suggester build: {}", f);
+                        logger.error("suggester build {}", f);
                     }
 
                     this.suggester = nextSuggester;
 
                     lastSuggesterCreated = now();
-                    logger.info("suggester built: size={} {}ms", nextSuggester.getCount(), time.elapsed(MILLISECONDS));
+                    logger.info("suggester built size={} {}ms", nextSuggester.getCount(), time.elapsed(MILLISECONDS));
 
                     //time.reset();
 
@@ -390,7 +382,7 @@ public class SpimeDB {
             return DirectoryReader.open(writer); //NRT mode
             //return DirectoryReader.indexExists(dir) ? DirectoryReader.open(dir) : null;
         } catch (IOException e) {
-            logger.error("index reader: {}", e);
+            logger.error("reader open {}", e);
             throw new RuntimeException(e);
             //return null;
         }
@@ -404,18 +396,32 @@ public class SpimeDB {
             try {
                 r.close();
             } catch (IOException e) {
-
+                logger.error("reader close {}", e);
             }
         }
     }
 
     @Nullable
     public SearchResult find(String query, int hitsPerPage) throws IOException, ParseException {
-        return find(defaultFindQueryParser.parse(query), hitsPerPage);
+        return find(parseQuery(query), hitsPerPage);
+    }
+
+    private org.apache.lucene.search.Query parseQuery(String query) throws ParseException {
+        try {
+            return defaultFindQueryParser.parse(query);
+        } catch (ParseException e) {
+            //HACK remove special characters which lucene may try parse
+            query = query.replace('/', ' ');
+            return defaultFindQueryParser.parse(query);
+        }
+    }
+
+    private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
+        return find(q, hitsPerPage, hitsPerPage);
     }
 
     @Nullable
-    private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
+    private SearchResult find(org.apache.lucene.search.Query q, int hitsPerPage, int facetCount) throws IOException {
 
         IndexSearcher searcher = searcher();
 
@@ -424,9 +430,6 @@ public class SpimeDB {
         TopDocs docs = FacetsCollector.search(searcher, q, hitsPerPage, fc);
 
         if (docs.totalHits > 0) {
-
-            int facetCount = hitsPerPage; //DEFAULT
-
 
             DirectoryTaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoWriter);
 
@@ -446,8 +449,7 @@ public class SpimeDB {
 
 
     public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
-        Lookup suggester = suggester();
-        return suggester != null ? suggester.lookup(qText, false, count) : null;
+        return suggester().lookup(qText, false, count);
     }
 
 
@@ -459,15 +461,6 @@ public class SpimeDB {
         LOG(log.getName(), ll);
     }
 
-
-    public Set<String> tags() {
-        return Collections.emptySet();
-    }
-
-    public Iterator<String> roots() {
-        return Collections.emptyIterator();
-
-    }
 
     public int size() {
         final int[] size = new int[1];
@@ -507,7 +500,7 @@ public class SpimeDB {
                         DObject val = nn.getValue();
                         if (val != REMOVE) {
                             if (-1 != writer.updateDocument(key,
-                                    facetsConfig.build(taxoWriter, val.document))) {
+                                    facetsConfig.build(taxoWriter, val.document))) { //TODO FacetsConfig can be made faster in a batch mode which re-uses data structures
                                 written++;
                             }
                         } else {
@@ -937,19 +930,6 @@ public class SpimeDB {
     }
 
 
-    /**
-     * computes the set of subtree (children) tags held by the extension of the input (parent) tags
-     *
-     * @param parentTags if empty, searches all tags; otherwise searches the specified tags and all their subtags
-     */
-    public Iterable<String> tagsAndSubtags(@Nullable String... parentTags) {
-        if (parentTags == null || parentTags.length == 0)
-            return this.tags(); //ALL
-        else {
-            return Collections.emptyList(); //new SubTags(graph, parentTags);
-        }
-    }
-
     public void runLater(Runnable r) {
         runLater(0.5f, r);
     }
@@ -967,8 +947,7 @@ public class SpimeDB {
     }
 
     @Deprecated
-    public synchronized void sync() {
-        int waitDelayMS = 50;
+    public void sync(int waitDelayMS) {
         do {
             Util.sleep(waitDelayMS);
         } while (!exe.pq.isEmpty() || exe.running.get() > 0);

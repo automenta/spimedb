@@ -3,7 +3,7 @@
 var MEMORY_SIZE = 512;
 var ACTIVATION_RATE = 0.5;
 
-var app = {};
+
 
 
 const ME = new Map();

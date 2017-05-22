@@ -28,10 +28,11 @@ import static spimedb.server.WebIO.searchResultFull;
 
 @Path("/")
 @Api(description = "SpimeDB")
-/**
- * http://editor.swagger.io/#/
- */
 public class WebAPI {
+
+    /*
+    * swagger editor: http://editor.swagger.io/#/
+    */
 
     final static Logger logger = LoggerFactory.getLogger(WebAPI.class);
 
@@ -75,7 +76,6 @@ public class WebAPI {
 
     @GET
     @Path("/suggest")
-    //  @ApiOperation(value = "Find person by e-mail", notes = "Find person by e-mail", response = Person.class) //http://stackoverflow.com/questions/21148861/swagger-codegen-simple-jax-rs-example
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation("Provides search query suggestions given a partially complete input query")
     public Response suggest(@QueryParam("q") String q) {
@@ -101,11 +101,14 @@ public class WebAPI {
             return Response.noContent().build();
 
         try {
+
+
             SearchResult r = db.find(q, MaxSearchResults);
             return Response.ok((StreamingOutput) os -> WebIO.send(r, os, searchResultFull)).build();
         } catch (IOException e) {
             return Response.serverError().build();
         } catch (ParseException e) {
+            e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }

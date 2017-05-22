@@ -32,8 +32,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static jcog.tree.rtree.rect.RectDoubleND.unbounded;
-import static spimedb.SpimeDB.string;
-import static spimedb.SpimeDB.text;
 
 /**
  * (Lucene) Document-based NObject
@@ -299,6 +297,14 @@ public class DObject implements NObject {
 
         return Collections.emptySet();
 
+    }
+
+    static StringField string(String key, String value) {
+        return new StringField(key, value, Field.Store.YES);
+    }
+
+    public static TextField text(String key, String value) {
+        return new TextField(key, value, Field.Store.YES);
     }
 
     @Override

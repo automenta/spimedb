@@ -59,9 +59,7 @@
             <button id="query_update">&gt;</button>
 
         </div>
-        <div id="query_map">
 
-        </div>
 
         <div id="querySuggestionsWrapper">
             <div id="query_suggestions" class="grid">
@@ -123,7 +121,7 @@
 
     }
 
-    const app = {};
+
 
     function itemURL(id, path) {
         return encodeURIComponent(id) + '/' + path;
@@ -131,17 +129,9 @@
 
     $(document).ready(() => {
 
-
         $.get('/logo.html', (x) => {
             $('#logo').html(x);
         });
-
-//        //init map
-//        const map = L.map('query_map').setView([51.505, -0.09], 2);
-//        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-//            //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-//        }).addTo(map);
-
 
         const facets = /*newGrid*/($('#facets'));
 
@@ -207,7 +197,9 @@
         }
 
         function focus(id) {
-            Backbone.history.navigate("the/" + encodeURIComponent(id), { trigger: true });
+            //Backbone.history.navigate("the/" + encodeURIComponent(id), { trigger: true });
+
+            window.open(itemURL(id, 'data'), '_blank', 'menubar=no,status=no,titlebar=no');
         }
 
         function unfocus() {
@@ -312,7 +304,7 @@
 
         //START ----------------->
 
-        app.Router = Backbone.Router.extend({
+        const Router = Backbone.Router.extend({
 
             routes: {
                 "":                  "start",
@@ -320,20 +312,20 @@
                 "the/:query":        "the"
             },
 
-            the: function(id) {
-                
-                suggestionsClear();
-
-                const dataURL = itemURL(id, 'data');
-
-                $('#focus').attr('class', 'main').html(
-                    E('iframe').attr('src', dataURL).attr('width', '100%').attr('height', '100%')
-                );
-                $('#results').attr('class', 'sidebar shiftdown');
-                $('#menu').attr('class', 'hide');
-                $('#focus').show();
-
-            },
+//            the: function(id) {
+//
+//                suggestionsClear();
+//
+//
+//
+////                $('#focus').attr('class', 'main').html(
+////                    E('iframe').attr('src', dataURL).attr('width', '100%').attr('height', '100%')
+////                );
+////                $('#results').attr('class', 'sidebar shiftdown');
+////                $('#menu').attr('class', 'hide');
+////                $('#focus').show();
+//
+//            },
 
             all: function(qText) {
 
@@ -497,7 +489,7 @@
 
         });
 
-        app.router = new app.Router();
+        const router = new Router();
 
         Backbone.history.start();
 

@@ -157,13 +157,13 @@ public class WebServer extends PathHandler {
 //            logger.error("{}", e);
 //        }
 
-        addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
-            try {
-                o.write(JSON.toJSONBytes(db.tags().stream().map(db::get).toArray(NObject[]::new)));
-            } catch (IOException e) {
-                logger.error("tag {}", e);
-            }
-        }));
+//        addPrefixPath("/tag", ex -> HTTP.stream(ex, (o) -> {
+//            try {
+//                o.write(JSON.toJSONBytes(db.tags().stream().map(db::get).toArray(NObject[]::new)));
+//            } catch (IOException e) {
+//                logger.error("tag {}", e);
+//            }
+//        }));
 
 
 

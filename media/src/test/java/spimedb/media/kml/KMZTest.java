@@ -25,7 +25,7 @@ public class KMZTest {
             )
         ).run();
 
-        db.sync();
+        db.sync(50);
 
         db.forEach( x -> System.out.println(x) );
 

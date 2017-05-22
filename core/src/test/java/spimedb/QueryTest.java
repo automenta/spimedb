@@ -28,7 +28,7 @@ public class QueryTest {
 //            System.out.println(f.name() + " = " + f.binaryValue());
 //        }
 
-        db.sync();
+        db.sync(50);
 
         ArrayList<DObject> found = new ArrayList();
 
@@ -59,7 +59,7 @@ public class QueryTest {
         DObject dp = db.add(person);
 
 
-        db.sync();
+        db.sync(50);
 
         ArrayList<NObject> found = new ArrayList();
         new Query()

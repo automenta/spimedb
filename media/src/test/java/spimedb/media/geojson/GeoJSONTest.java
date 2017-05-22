@@ -30,7 +30,7 @@ public class GeoJSONTest {
 
         db.add(GeoJSON.get(eqGeoJson.get(), GeoJSON.baseGeoJSONBuilder));
 
-        db.sync();
+        db.sync(50);
 
 
         int all = db.size();
@@ -47,7 +47,7 @@ public class GeoJSONTest {
         assertTrue(aNum > 0);
         assertTrue(aNum < all/4);
 
-        db.sync();
+        db.sync(50);
 
 //        System.out.println(a);
 //        System.out.println(aNum + " / " + all + " found:");

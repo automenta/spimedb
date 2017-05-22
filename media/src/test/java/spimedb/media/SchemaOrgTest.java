@@ -22,7 +22,7 @@ public class SchemaOrgTest {
 //            System.out.println("\t" + r.graph.edgesOf(v));
 //        });
 
-        db.sync();
+        db.sync(50);
 
         assertTrue(db.size() + " has at least 500?" , db.size() > 500);
 
