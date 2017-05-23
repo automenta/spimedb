@@ -21,6 +21,8 @@ public class MeshTest {
     @Test
     public void testMesh1() throws Exception {
 
+        System.setProperty("debug", "true");
+
         final SpimePeer worker = new SpimePeer(10000, new SpimeDB());//TODO: .with(UDP.class, new UDP()).restart();
         final SpimePeer client = new SpimePeer(10001, new SpimeDB());//TODO: .with(UDP.class, new UDP()).restart();
 
@@ -29,7 +31,7 @@ public class MeshTest {
 
             worker.db.add(new MutableNObject("exists already").withTags("xyz"));
 
-            Util.sleep(3000);
+            Util.sleep(1500);
 
             worker.db.add(new MutableNObject("newly created").withTags("xyz"));
 
@@ -48,14 +50,10 @@ public class MeshTest {
             Util.sleep(1000);
 
             Search result = client.db.find(new Query().in("xyz"));
-            result.forEach((d,s) -> {
+            result.forEach((d) -> {
                 receivedAsync.add(d);
                 return true;
-            });
-
-            Util.sleep(3000);
-
-            client.stop();
+            }, 3000, client::stop);
 
         }, "Client");
 
@@ -63,7 +61,6 @@ public class MeshTest {
         workerThread.start();
         clientThread.start();
 
-        //
 
         clientThread.join();
         workerThread.join(); //wait for clientThread to finish first
@@ -71,9 +68,9 @@ public class MeshTest {
 
         System.out.println(receivedAsync);
 
-        assertEquals(2, IteratorUtils.size(client.db.find(new Query().in("xyz")).docs()));
-
-
+        assertEquals(2,
+                receivedAsync.size());
+                //IteratorUtils.size(client.db.find(new Query().in("xyz")).docs()));
 
     }
 

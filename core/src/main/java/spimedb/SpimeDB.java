@@ -45,7 +45,6 @@ import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mockito.internal.util.concurrent.WeakConcurrentSet;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,7 +159,7 @@ public class SpimeDB {
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer;
     public final File file;
-    private SearcherManager searcherMgr;
+    public SearcherManager searcherMgr;
     private ReaderManager readerMgr;
 
     protected long lastWrite = 0;
@@ -433,7 +432,7 @@ public class SpimeDB {
         }
     }
 
-    @Nullable
+    @NotNull
     public Search find(String query, int hitsPerPage) throws IOException, ParseException {
         return find(parseQuery(query), hitsPerPage);
     }
@@ -448,14 +447,13 @@ public class SpimeDB {
         }
     }
 
+    @NotNull
     private Search find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
         return find(q, hitsPerPage, hitsPerPage);
     }
 
-    @Nullable
+    @NotNull
     private Search find(org.apache.lucene.search.Query q, int hitsPerPage, int facetCount) throws IOException {
-
-
 
         FacetsCollector fc = new FacetsCollector();
 
@@ -484,8 +482,8 @@ public class SpimeDB {
 
         }
 
-        Search ss = new Search(q, searcher, searcherMgr, docs, facetResults);
-        searches.add(ss);
+        Search ss = new Search(q, searcher, this, docs, facetResults);
+
         onSearch.emit(ss);
 
         return ss;
@@ -610,7 +608,7 @@ public class SpimeDB {
         NObject finalNext = new FilteredNObject(next, filters);
 
         Consumer<Consumer<NObject>> take = (c) -> c.accept(finalNext);
-        onTag.each(tags, take);
+        onTag.emit(tags, take);
         on.forEach(take);
     }
 
@@ -703,7 +701,7 @@ public class SpimeDB {
      * active searches
      */
     public final Topic<Search> onSearch = new ArrayTopic();
-    public final WeakConcurrentSet searches = new WeakConcurrentSet(WeakConcurrentSet.Cleaner.INLINE);
+
 
     public void on(BiFunction<NObject, NObject, NObject> changed) {
         onChange.add(changed);
@@ -948,15 +946,20 @@ public class SpimeDB {
     private BooleanQuery buildQuery(@NotNull Query q) {
         BooleanQuery.Builder bqb = new BooleanQuery.Builder();
 
-        if (q.tagInclude != null && q.tagInclude.length > 0) {
-            List<org.apache.lucene.search.Query> tagQueries = new FasterList();
-            for (String s : q.tagInclude)
-                tagQueries.add(new TermQuery(new Term(NObject.TAG, s)));
+        if (q.tagInclude != null) {
+            int tags = q.tagInclude.length;
+            //if (tags > 1) {
+                List<org.apache.lucene.search.Query> tagQueries = new FasterList();
+                for (String s : q.tagInclude)
+                    tagQueries.add(tagTermQuery(s));
 
-            bqb.add(
-                    new DisjunctionMaxQuery(tagQueries, 1f / q.tagInclude.length),
-                    BooleanClause.Occur.MUST);
+                bqb.add(
+                        new DisjunctionMaxQuery(tagQueries, 1f / tags),
+                        BooleanClause.Occur.MUST);
 
+            /* } else if (tags == 1) {
+                bqb.add(tagTermQuery(q.tagInclude[0]))
+            }*/
         }
 
         if (q.bounds != null && q.bounds.length > 0) {
@@ -979,7 +982,13 @@ public class SpimeDB {
                     BooleanClause.Occur.MUST);
 
         }
+
         return bqb.build();
+    }
+
+    @NotNull
+    static private TermQuery tagTermQuery(String tag) {
+        return new TermQuery(new Term(NObject.TAG, tag));
     }
 
 

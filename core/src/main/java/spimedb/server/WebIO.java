@@ -45,9 +45,8 @@ public enum WebIO {
 
             try {
                 o.write("[[".getBytes());
-                r.forEachDocument((y, x) -> {
-                    JSON.toJSON(searchResult(
-                            DObject.get(y), keys, x
+                r.forEach((y, x) -> {
+                    JSON.toJSON(searchResult(y, keys, x
                     ), o, ',');
                     return true;
                 });
@@ -59,7 +58,7 @@ public enum WebIO {
                 } else
                     o.write("[]]".getBytes());
 
-                r.close();
+
 
             } catch (IOException e) {
 

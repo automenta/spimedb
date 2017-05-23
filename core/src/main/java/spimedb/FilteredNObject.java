@@ -13,9 +13,14 @@ public class FilteredNObject extends ProxyNObject {
 
     private final ImmutableSet<String> keysInclude;
 
-    public FilteredNObject(NObject n, ImmutableSet<String> keysInclude) {
-        super(n);
+    public FilteredNObject(ImmutableSet<String> keysInclude) {
+        super();
         this.keysInclude = keysInclude;
+    }
+
+    public FilteredNObject(NObject n, ImmutableSet<String> keysInclude) {
+        this(keysInclude);
+        set(n);
     }
 
     protected boolean includeKey(String key) {

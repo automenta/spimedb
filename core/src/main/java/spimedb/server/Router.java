@@ -20,7 +20,7 @@ public class Router<K,V> {
         return www.add(v);
     }
 
-    public void each(String[] ss, Consumer<V> vv) {
+    public void emit(String[] ss, Consumer<V> vv) {
         for (String s : ss) {
             Set<V> vs = on.get(s);
             if (vs!=null)

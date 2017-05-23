@@ -19,8 +19,9 @@ public class ProxyNObject implements NObject {
         set(n);
     }
 
-    public void set(NObject n) {
+    public ProxyNObject set(NObject n) {
         this.n = n;
+        return this;
     }
 
     @Override
