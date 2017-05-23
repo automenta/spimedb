@@ -18,7 +18,7 @@ public class PrioritizedExecutor implements Executor {
 
     private static final float DEFAULT_PRIORITY = 0.5f;
 
-    private static final long DEFAULT_TIMEOUT_ms = 5 * 60 * 1000;
+    private static final long DEFAULT_TIMEOUT_ms = 1 * 60 * 1000;
 
     public final PriorityBlockingQueue pq = new PriorityBlockingQueue<>(
             512 * 1024,

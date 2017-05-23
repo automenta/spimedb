@@ -24,13 +24,13 @@ import static spimedb.NObjectConsumer.Tagged;
 /**
  * Created by me on 4/4/17.
  */
-public class SpimeDBPeer extends UDPeer {
+public class SpimePeer extends UDPeer {
 
-    static final Logger logger = LoggerFactory.getLogger(SpimeDBPeer.class);
+    static final Logger logger = LoggerFactory.getLogger(SpimePeer.class);
 
     private final SpimeDB db;
 
-    public SpimeDBPeer(int port, SpimeDB db) throws SocketException {
+    public SpimePeer(int port, SpimeDB db) throws SocketException {
         super(port);
 
         this.db = db;
