@@ -14,7 +14,6 @@ import spimedb.query.Query;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -131,7 +130,7 @@ public class ClientSession extends Session {
 
                     Set<NObject> lowPriority = new HashSet<>(1024);
 
-                    db.get(new Query().where(lon, lat).in(tags)).forEach((dd,s)->{
+                    db.find(new Query().where(lon, lat).in(tags)).forEach((dd, s)->{
 
                         NObject n = transmittable(dd);
 

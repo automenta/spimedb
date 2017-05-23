@@ -6,11 +6,12 @@ import jcog.Texts;
 import jcog.Util;
 import jcog.net.UDPeer;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.lucene.search.BooleanQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.index.SearchResult;
+import spimedb.index.Search;
 import spimedb.query.Query;
 import spimedb.util.JSON;
 
@@ -28,7 +29,9 @@ public class SpimePeer extends UDPeer {
 
     static final Logger logger = LoggerFactory.getLogger(SpimePeer.class);
 
-    private final SpimeDB db;
+    private static final float QUERY_NEED = 0.5f;
+
+    public final SpimeDB db;
 
     public SpimePeer(int port, SpimeDB db) throws SocketException {
         super(port);
@@ -54,6 +57,8 @@ public class SpimePeer extends UDPeer {
                 }
             }
         });
+
+        db.onSearch.on(this::onSearch);
 
         db.on(
                 Tagged(
@@ -82,6 +87,24 @@ public class SpimePeer extends UDPeer {
         );
     }
 
+    private void onSearch(Search q) {
+        //String[] tagIncl = q.tagInclude;
+        org.apache.lucene.search.Query qq = q.query;
+        if (qq instanceof BooleanQuery) {
+            BooleanQuery bq = (BooleanQuery) qq;
+            bq.forEach(b -> {
+                System.out.println(b);
+            });
+        }
+
+//        if (tagIncl.length > 0) {
+//            float each = QUERY_NEED/tagIncl.length;
+//            for (String s : tagIncl) {
+//                need(s, each);
+//            }
+//        }
+    }
+
     public boolean isOnline() {
         return (!them.isEmpty());
     }
@@ -107,7 +130,7 @@ public class SpimePeer extends UDPeer {
     @Override
     protected void onUpdateNeed() {
 
-        SearchResult r = db.get(new Query().limit((int)Math.ceil(16)).in(need.data.keySet().toArray(ArrayUtils.EMPTY_STRING_ARRAY)));
+        Search r = db.find(new Query().limit((int)Math.ceil(16)).in(need.data.keySet().toArray(ArrayUtils.EMPTY_STRING_ARRAY)));
         if (r!=null) {
             r.forEach/*Document*/((d, s) -> {
                 share(d, 1f /* TODO: unitize(need.dotProduct(d.tags()) )) */);
@@ -143,7 +166,5 @@ public class SpimePeer extends UDPeer {
 
     }
 
-    public void ask(String xyz) {
 
-    }
 }

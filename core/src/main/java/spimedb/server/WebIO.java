@@ -12,10 +12,9 @@ import spimedb.FilteredNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
-import spimedb.index.SearchResult;
+import spimedb.index.Search;
 import spimedb.util.JSON;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.File;
@@ -41,7 +40,7 @@ public enum WebIO {
                     NObject.DESC, NObject.DATA
             )));
 
-    public static void send(SearchResult r, OutputStream o, ImmutableSet<String> keys) {
+    public static void send(Search r, OutputStream o, ImmutableSet<String> keys) {
         if (r != null) {
 
             try {

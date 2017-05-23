@@ -14,8 +14,11 @@ import static org.junit.Assert.*;
  */
 public class QueryTest {
 
-    /** tag not specified, gets everything */
-    @Test public void testSpacetimeIndexing() throws IOException {
+    /**
+     * tag not specified, gets everything
+     */
+    @Test
+    public void testSpacetimeIndexing() throws IOException {
         SpimeDB db = new SpimeDB();
 
         MutableNObject place = new MutableNObject("Somewhere");
@@ -32,9 +35,9 @@ public class QueryTest {
 
         ArrayList<DObject> found = new ArrayList();
 
-        new Query()
-            .where(new double[]{0, 1}, new double[]{0, 1})
-            .forEach(db, (n, s) -> found.add(n));
+        db.find(new Query()
+                .where(new double[]{0, 1}, new double[]{0, 1})
+        ).forEach((n, s) -> found.add(n));
 
         assertFalse(found.isEmpty());
 
@@ -44,7 +47,8 @@ public class QueryTest {
 
     }
 
-    @Test public void testSpacetimeTagIndexing() throws IOException {
+    @Test
+    public void testSpacetimeTagIndexing() throws IOException {
 
         SpimeDB db = new SpimeDB();
 
@@ -61,11 +65,9 @@ public class QueryTest {
 
         db.sync(50);
 
+
         ArrayList<NObject> found = new ArrayList();
-        new Query()
-            .in("Person")
-            //.where(new double[]{0, 1}, new double[]{0, 1})
-            .forEach(db, (d, s) -> found.add(d));
+        db.find( new Query().in("Person") ).forEach((d, s) -> found.add(d));
 
         found.forEach(f -> System.out.println(f));
         assertEquals(1, found.size());

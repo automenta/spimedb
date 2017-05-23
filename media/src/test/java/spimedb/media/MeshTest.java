@@ -4,8 +4,8 @@ import jcog.Util;
 import org.apache.commons.collections4.IteratorUtils;
 import org.junit.Test;
 import spimedb.*;
+import spimedb.index.Search;
 import spimedb.query.Query;
-import spimedb.server.SpimeUDP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,18 +20,12 @@ public class MeshTest {
 
     @Test
     public void testMesh1() throws Exception {
-        Spime worker = new Spime();//TODO: .with(UDP.class, new UDP()).restart();
-        Spime client = new Spime();
 
-        final SpimePeer[] workerPeer = new SpimePeer[1];
+        final SpimePeer worker = new SpimePeer(10000, new SpimeDB());//TODO: .with(UDP.class, new UDP()).restart();
+        final SpimePeer client = new SpimePeer(10001, new SpimeDB());//TODO: .with(UDP.class, new UDP()).restart();
 
         ThreadGroup workerGroup = new ThreadGroup("Worker");
         Thread workerThread = new Thread(workerGroup, () -> {
-
-            worker.put(SpimeUDP.class, new SpimeUDP(worker.db).setPort(10000)); //HACK;
-            worker.restart();
-
-            workerPeer[0] = worker.get(SpimeUDP.class).peer();
 
             worker.db.add(new MutableNObject("exists already").withTags("xyz"));
 
@@ -39,23 +33,29 @@ public class MeshTest {
 
             worker.db.add(new MutableNObject("newly created").withTags("xyz"));
 
+            worker.stop();
+
         }, "Worker");
 
+
+        List<NObject> receivedAsync = new ArrayList();
 
         ThreadGroup clientGroup = new ThreadGroup("Client");
         Thread clientThread = new Thread(clientGroup, () -> {
 
-            client.put(SpimeUDP.class,new SpimeUDP(client.db).setPort(10001)); //HACK;
-            client.restart();
-
-            SpimePeer clientPeer = client.get(SpimeUDP.class).peer();
-            clientPeer.ping(10000);
+            client.ping(10000);
 
             Util.sleep(1000);
 
-            clientPeer.need("xyz", 0.5f);
+            Search result = client.db.find(new Query().in("xyz"));
+            result.forEach((d,s) -> {
+                receivedAsync.add(d);
+                return true;
+            });
 
             Util.sleep(3000);
+
+            client.stop();
 
         }, "Client");
 
@@ -69,7 +69,11 @@ public class MeshTest {
         workerThread.join(); //wait for clientThread to finish first
 
 
-        assertEquals(2, IteratorUtils.size(client.db.get(new Query().in("xyz")).docs()));
+        System.out.println(receivedAsync);
+
+        assertEquals(2, IteratorUtils.size(client.db.find(new Query().in("xyz")).docs()));
+
+
 
     }
 

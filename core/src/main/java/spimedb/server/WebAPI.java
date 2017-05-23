@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
-import spimedb.index.SearchResult;
+import spimedb.index.Search;
 import spimedb.util.JSON;
 
 import javax.ws.rs.*;
@@ -103,7 +103,7 @@ public class WebAPI {
         try {
 
 
-            SearchResult r = db.find(q, MaxSearchResults);
+            Search r = db.find(q, MaxSearchResults);
             return Response.ok((StreamingOutput) os -> WebIO.send(r, os, searchResultFull)).build();
         } catch (IOException e) {
             return Response.serverError().build();

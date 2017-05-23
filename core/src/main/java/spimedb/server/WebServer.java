@@ -11,7 +11,6 @@ import com.google.common.base.Objects;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.cache.DirectBufferCache;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.DeflateEncodingProvider;
 import io.undertow.server.handlers.encoding.EncodingHandler;
@@ -29,9 +28,8 @@ import org.eclipse.collections.impl.factory.Sets;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.LoggerFactory;
-import org.xnio.BufferAllocator;
 import spimedb.SpimeDB;
-import spimedb.index.SearchResult;
+import spimedb.index.Search;
 import spimedb.query.Query;
 import spimedb.util.HTTP;
 import spimedb.util.JSON;
@@ -178,7 +176,7 @@ public class WebServer extends PathHandler {
             lons[1] = parseDouble(bb[2]);
             lats[1] = parseDouble(bb[3]);
 
-            SearchResult r = db.get(new Query().limit(32).where(lons, lats));
+            Search r = db.find(new Query().limit(32).where(lons, lats));
             WebIO.send(r, o, WebIO.searchResultSummary);
 
         }));

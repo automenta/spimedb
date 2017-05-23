@@ -1,20 +1,17 @@
 package spimedb.query;
 
 import jcog.tree.rtree.rect.RectDoubleND;
-import org.apache.lucene.search.ScoreDoc;
 import org.jetbrains.annotations.NotNull;
 import spimedb.SpimeDB;
-import spimedb.index.DObject;
 
 import java.util.Arrays;
-import java.util.function.BiPredicate;
 
 import static spimedb.query.Query.BoundsCondition.Intersect;
 
 /**
  * General spatiotemporal x tag Query
  */
-public class Query {
+public class Query  {
 
 
     /**
@@ -22,7 +19,7 @@ public class Query {
      */
     public final long whenCreated;
 
-    long whenStarted, whenEnded;
+    long whenAccepted;
 
     public static final double[] ANY_SCALAR = {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
 //    public static final RectDoubleND[] ANYWHERE_4 =
@@ -38,10 +35,9 @@ public class Query {
     /**
      * tags within which to search; if null, searches all
      */
-    public String[] include = null;
+    public String[] tagInclude = null;
 
     public int limit = 128;
-
 
 
     /**
@@ -56,6 +52,7 @@ public class Query {
         this.limit = limit;
         return this;
     }
+
 
     public enum BoundsCondition {
         /**
@@ -72,19 +69,18 @@ public class Query {
 
     /**
      * called by the db when the query begins executing
+     * @param spimeDB
      */
-    public void onStart() {
-        this.whenStarted = System.currentTimeMillis();
+    public void onStart(SpimeDB spimeDB) {
+        this.whenAccepted = System.currentTimeMillis();
     }
 
-    public void onEnd() {
-        this.whenEnded = System.currentTimeMillis();
-    }
+
 
     public Query in(String... tags) {
         ensureNotStarted();
 
-        include = tags;
+        tagInclude = tags;
 
         return this;
     }
@@ -121,7 +117,7 @@ public class Query {
     }
 
     private void ensureNotStarted() {
-        if (whenStarted != 0)
+        if (whenAccepted != 0)
             throw new RuntimeException("Query already executing");
     }
 
@@ -129,16 +125,12 @@ public class Query {
     public String toString() {
         return getClass().getSimpleName() + "{" +
                 ", whenCreated=" + whenCreated +
-                ", whenStarted=" + whenStarted +
-                ", whenEnded=" + whenEnded + "=(" + ((double)(whenEnded - whenStarted)) + "ms)" +
+                ", whenAccepted=" + whenAccepted +
                 ", bounds=" + Arrays.toString(bounds) +
                 ", boundsCondition=" + boundsCondition +
-                ", include=" + ((include == null || include.length == 0) ? "ALL" : Arrays.toString(include)) +
+                ", include=" + ((tagInclude == null || tagInclude.length == 0) ? "ALL" : Arrays.toString(tagInclude)) +
                 '}';
     }
 
-    public void forEach(SpimeDB db, BiPredicate<DObject,ScoreDoc> each) {
-        db.get(this).forEach(each);
-    }
 
 }
