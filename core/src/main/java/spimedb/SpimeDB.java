@@ -173,7 +173,7 @@ public class SpimeDB {
 
     public String indexPath;
 
-    final QueryParser defaultFindQueryParser;
+    final ThreadLocal<QueryParser> defaultFindQueryParser;
 
     IndexWriter writer;
     final IndexWriterConfig writerConf;
@@ -226,12 +226,12 @@ public class SpimeDB {
                 NObject.TAG,
                 NObject.ID};
 
-        this.defaultFindQueryParser = new MultiFieldQueryParser(defaultFindFields, analyzer, Maps.mutable.with(
+        this.defaultFindQueryParser = ThreadLocal.withInitial(()->new MultiFieldQueryParser(defaultFindFields, analyzer, Maps.mutable.with(
                 NObject.NAME, 1f,
                 NObject.ID, 1f,
                 NObject.DESC, 0.25f,
                 NObject.TAG, 0.5f
-        ));
+        )));
 
         writerConf = new IndexWriterConfig(analyzer);
         writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
@@ -438,12 +438,15 @@ public class SpimeDB {
     }
 
     private org.apache.lucene.search.Query parseQuery(String query) throws ParseException {
+        QueryParser qp = defaultFindQueryParser.get();
         try {
-            return defaultFindQueryParser.parse(query);
+            return qp.parse(query);
         } catch (ParseException e) {
             //HACK remove special characters which lucene may try parse
             query = query.replace('/', ' ');
-            return defaultFindQueryParser.parse(query);
+            return qp.parse(query);
+        } catch (Throwable t) {
+            throw new ParseException(query + ": " + t.getMessage());
         }
     }
 

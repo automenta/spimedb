@@ -1,24 +1,19 @@
 package spimedb;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
-import jcog.Texts;
 import jcog.Util;
+import jcog.list.FasterList;
 import jcog.net.UDPeer;
 import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import spimedb.index.DObject;
 import spimedb.index.Search;
-import spimedb.server.WebIO;
-import spimedb.util.JSON;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
-
-import static spimedb.NObjectConsumer.HashPredicate;
-import static spimedb.NObjectConsumer.Tagged;
+import java.util.List;
 
 /**
  * Created by me on 4/4/17.
@@ -35,55 +30,88 @@ public class SpimePeer extends UDPeer {
 
         this.db = db;
 
-        db.on((nobject) -> {
-            if (isOnline() && isOriginal(nobject) && isPublic(nobject)) {
-                String[] tags = nobject.tags();
-                int numTags = tags.length;
-                if (numTags > 0) {
-                    float totalNeed = 0;
-
-                    for (String t : tags) {
-                        totalNeed += need.pri(t);
-                    }
-                    float avgNeed = totalNeed / numTags;
-
-                    if (totalNeed > 0) {
-                        //TODO send to peers which need it (the most)
-                        tell(nobject, avgNeed);
-                    }
-                }
-            }
-        });
+        db.on(this::tryShare);
 
         db.onSearch.on(this::onSearch);
 
-        db.on(
-                Tagged(
-                        (e) -> {
-                            byte[] message = e.get("udp");
-                            if (message != null) {
-                                say(new Msg(message), 1f, false);
-                            } else {
-                                tell(JSON.toJSONBytes(e), 3);
-                            }
-                        },
-                        "")
-        );
-        db.on(
-                //#peer(<host>)
-                HashPredicate((PEER, addr) -> {
-                    String[] hp = addr.split(":");
-                    if (hp.length == 2) {
-                        int pp = Texts.i(hp[1], -1);
-                        String hh = hp[0];
-                        if (pp != -1) {
-                            ping(new InetSocketAddress(hh, pp));
-                        }
-                    }
-                }, "peer")
-        );
+//        db.on(
+//                Tagged(
+//                        (e) -> {
+//                            byte[] message = e.get("udp");
+//                            if (message != null) {
+//                                say(new Msg(message), 1f, false);
+//                            } else {
+//                                tell(JSON.toJSONBytes(e), 3);
+//                            }
+//                        },
+//                        "")
+//        );
+//        db.on(
+//                //#peer(<host>)
+//                HashPredicate((PEER, addr) -> {
+//                    String[] hp = addr.split(":");
+//                    if (hp.length == 2) {
+//                        int pp = Texts.i(hp[1], -1);
+//                        String hh = hp[0];
+//                        if (pp != -1) {
+//                            ping(new InetSocketAddress(hh, pp));
+//                        }
+//                    }
+//                }, "peer")
+//        );
     }
 
+    private void tryShare(NObject n) {
+
+        if (isOnline() && isOriginal(n) && isPublic(n)) {
+            String[] tags = n.tags();
+            int numTags = tags.length;
+            if (numTags > 0) {
+                float totalNeed = 0;
+
+                for (String t : tags) {
+                    totalNeed += need.pri(t);
+                }
+                float avgNeed = totalNeed / numTags;
+
+                if (totalNeed > 0) {
+                    //TODO send to peers which need it (the most)
+                    tellSome(n, avgNeed);
+                }
+            }
+        }
+
+    }
+
+    @Override
+    protected void update() {
+        super.update();
+
+
+        if (isOnline() && !need.data.isEmpty()) {
+
+            String[] needs = need.data.keySet().toArray(new String[need.data.size()]);
+
+            JsonNode query = Util.toJSON(Maps.mutable.of(
+                    NObject.QUERY, Joiner.on(" ").join(needs)
+            ));
+            boolean asked;
+            if (asked = tellSome(query, 1f) > 0) {
+                logger.info("asked: {} x {}", needs, asked);
+            }
+
+            //decay: TODO move to .mul method
+            List<String> toRemove = new FasterList();
+            need.data.replaceAll((k, x) -> {
+                float y = x * 0.75f; //decay rate
+                if (y < 0.1f) {
+                    toRemove.add(k);
+                }
+                return y;
+            });
+            toRemove.forEach(need.data::remove);
+        }
+    }
 
     private void onSearch(Search q) {
         if (!isOnline())
@@ -96,15 +124,6 @@ public class SpimePeer extends UDPeer {
                 need(q.tagsInc[i], each);
             }
 
-            tell(Util.toJSON(Maps.mutable.of(
-
-                NObject.ID, q.id,
-
-                NObject.QUERY,
-                    //HACK create a dummy query with just the tags
-                    Joiner.on(" ").join(q.tagsInc)
-
-            )), 1f);
         }
 
 
@@ -114,12 +133,25 @@ public class SpimePeer extends UDPeer {
         return (!them.isEmpty());
     }
 
-    protected void tell(Object n, float pri) {
-        try {
-            tell(Util.toBytes(n), 1 /* TODO pri */);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+    protected int tellSome(Object n, float pri) {
+        int ttl = priToTTL(pri);
+        if (ttl > 0) {
+            try {
+                return tellSome(Util.toBytes(n), ttl /* TODO pri */, true);
+            } catch (Throwable e) {
+                logger.error("{}", e);
+            }
         }
+        return 0;
+    }
+
+    private int priToTTL(float pri) {
+        if (pri > 0.5f)
+            return 2;
+        else if (pri > 0)
+            return 1;
+        else
+            return 0;
     }
 
     /**
@@ -147,18 +179,18 @@ public class SpimePeer extends UDPeer {
             parsed = Util.fromBytes(m.data(), JsonNode.class);
 
             JsonNode pi = parsed.get(NObject.ID);
-            if (pi!=null) {
 
-                JsonNode qi = parsed.get(NObject.QUERY);
-                if (qi != null) {
-                    db.runLater(() -> {
-                        String qt = qi.textValue();
-                        logger.debug("answering: {}", qt);
-                        onQuery(connected, pi.textValue(), qt);
-                    });
-                    return;
-                }
+
+            JsonNode qi = parsed.get(NObject.QUERY);
+            if (qi != null) {
+                db.runLater(() -> {
+                    String qt = qi.textValue();
+                    logger.debug("answering: {}", qt);
+                    onQuery(connected, qt);
+                });
+                return;
             }
+
 
             String id;
             if (pi != null) {
@@ -179,57 +211,61 @@ public class SpimePeer extends UDPeer {
 
     }
 
-    static class ResponseNObject extends FilteredNObject {
 
-        private final String queryID;
-
-        public ResponseNObject(String queryID) {
-            super(WebIO.searchResultFull);
-            this.queryID = queryID;
-        }
-
-        @Override
-        protected Object value(String k, Object v) {
-            if (k.equals(NObject.TAG)) {
-                if (v instanceof String)
-                    return v + " " +  queryID;
-//                else if (v instanceof String[])
-//                    return ArrayUtils.add((String[]) v, queryID);
-                else
-                    throw new UnsupportedOperationException();
-            }
-            return v;
-        }
-    }
-
-    protected void onQuery(UDProfile connected, String queryID, String query) {
+    protected void onQuery(UDProfile connected, String query) {
         //TODO move this to the peer query response handling
 
 
         try {
             Search r = db.find(query, MAX_HITS_FOR_PEER);
-            ResponseNObject rn = new ResponseNObject(queryID);
-            r.forEach((_n, s) -> {
-                try {
-                    ProxyNObject n = rn.set(_n);
+            //ResponseNObject rn = new ResponseNObject(queryID);
+            r.forEachLocal((_n, s) -> {
 
-                    byte[] nb = Util.toBytes(n);
-
-                    send(new Msg(Command.TELL.id,
-                            (byte) 1, this.me, null,
-                            nb), connected.addr);
-
-                    return true;
-                } catch (JsonProcessingException e) {
-                    logger.error("{}", e);
-                    return false;
-                }
-
+                tryShare(DObject.get(_n));
+                return true;
             });
+
+//                try {
+//                    ProxyNObject n = rn.set(DObject.get(_n));
+//
+//                    byte[] nb = Util.toBytes(n);
+//
+//                    send(new Msg(Command.TELL.id,
+//                            (byte) 1, this.me, null,
+//                            nb), connected.addr);
+//
+//                    return true;
+//                } catch (JsonProcessingException e) {
+//                    logger.error("{}", e);
+//                    return false;
+//                }
+//
+//            });
         } catch (Exception e) {
             logger.error("{}", e);
         }
     }
 
-
+//    static class ResponseNObject extends FilteredNObject {
+//
+//        private final String queryID;
+//
+//        public ResponseNObject(String queryID) {
+//            super(WebIO.searchResultFull);
+//            this.queryID = queryID;
+//        }
+//
+//        @Override
+//        protected Object value(String k, Object v) {
+//            if (k.equals(NObject.TAG)) {
+//                if (v instanceof String)
+//                    return v + " " + queryID;
+////                else if (v instanceof String[])
+////                    return ArrayUtils.add((String[]) v, queryID);
+//                else
+//                    throw new UnsupportedOperationException();
+//            }
+//            return v;
+//        }
+//    }
 }

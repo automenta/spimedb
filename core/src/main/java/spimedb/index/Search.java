@@ -1,5 +1,7 @@
 package spimedb.index;
 
+import jcog.list.FasterList;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DocumentStoredFieldVisitor;
 import org.apache.lucene.facet.FacetResult;
@@ -14,9 +16,7 @@ import spimedb.NObject;
 import spimedb.SpimeDB;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -49,12 +49,12 @@ public class Search {
         this.facets = facetResults;
         this.docs = docs;
 
-
-        List<String> tagsInc = new ArrayList();
+        Set<String> tagsInc = new TreeSet<>();
         collectTags(q, tagsInc);
-        this.tagsInc = tagsInc.toArray(new String[tagsInc.size()]);
+        int ts = tagsInc.size();
+        this.tagsInc = (ts > 0) ? tagsInc.toArray(new String[ts]) : ArrayUtils.EMPTY_STRING_ARRAY;
 
-        logger.info("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
+        logger.debug("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
     }
 
     @Override
@@ -63,16 +63,19 @@ public class Search {
     }
 
     /**
-     * return false if canceled via the predicate
+     * sync; returns false if canceled via the predicate
      */
     public boolean forEach(BiPredicate<DObject, ScoreDoc> each) {
         return forEachLocal((d, s) -> each.test(DObject.get(d), s));
     }
 
-    /**
-     * async
-     */
-    public void forEach(Predicate<NObject> each, long waitMS, Runnable onFinished) {
+    /** async */
+    public void forEach(Predicate<NObject> each, long waitMS) {
+        forEach(each, waitMS, null);
+    }
+
+    /** async  */
+    public void forEach(Predicate<NObject> each, long waitMS, @Nullable Runnable onFinished) {
 
         Thread t = Thread.currentThread();
         AtomicBoolean continuing = new AtomicBoolean(true);
@@ -104,7 +107,8 @@ public class Search {
                 db.onTag.off(x, recv);
             db.onTag.off(id, recv);
 
-            onFinished.run();
+            if (onFinished!=null)
+                onFinished.run();
         }
 
     }
@@ -113,7 +117,7 @@ public class Search {
     /**
      * return false if canceled via the predicate
      */
-    private boolean forEachLocal(BiPredicate<Document, ScoreDoc> each) {
+    public boolean forEachLocal(BiPredicate<Document, ScoreDoc> each) {
         if (docs == null)
             return true;
 
@@ -139,6 +143,7 @@ public class Search {
         return result;
     }
 
+    /** TODO collect a HashTagSet not only a list */
     static void collectTags(org.apache.lucene.search.Query q, Collection<String> tagsInc) {
         if (q instanceof BooleanQuery) {
             BooleanQuery bq = (BooleanQuery) q;
@@ -156,7 +161,7 @@ public class Search {
                         });
                     } else if (bqq instanceof BoostQuery) {
                         BoostQuery bbq = (BoostQuery) bqq;
-                        collectTags(bbq, tagsInc);
+                        collectTags(bbq.getQuery(), tagsInc);
 
                     } else {
                         throw new UnsupportedOperationException();
