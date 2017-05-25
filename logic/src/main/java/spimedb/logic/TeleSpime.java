@@ -4,57 +4,76 @@ import jcog.Util;
 import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.nanocloud.RemoteNode;
-import org.gridkit.vicluster.ViNode;
 import spimedb.SpimeDB;
 import spimedb.SpimePeer;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * https://github.com/gridkit/nanocloud-getting-started/blob/master/src/test/java/org/gridkit/lab/examples/nanocloud/BasicViNodeUsage.java
  */
 public class TeleSpime {
 
-    public static void main(String[] args) throws IOException {
+
+    public static void main(String[] args) throws UnknownHostException {
+
+        System.setProperty("debug", "true");
+
+        System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
+
+        Thread local = new Thread(() -> {
+
+
+            try {
+                SpimePeer me = new SpimePeer(10000, new SpimeDB());
+                me.setFPS(4f);
+
+                System.out.println("connecting");
+                for (int i = 0; i < 100; i++) {
+                    if (!me.them.isEmpty()) System.out.println(me.summary());
+                    else me.ping("ana", 10000);
+                    Util.sleep(1000);
+                }
+                me.stop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+
         Cloud cloud = CloudFactory.createCloud();
         RemoteNode rn = RemoteNode.at(cloud.node("**")).useSimpleRemoting();
         rn.setRemoteAccount("seh");
         rn.setRemoteJavaExec("/home/seh/jdk9/bin/java");
+        rn.setProp("debug", "true");
 
+        local.start();
 
-        ViNode x = cloud.node("ana");
-        //x.touch();
-
-        new Thread(() -> {
-
-            SpimePeer me = null;
-            try {
-                me = new SpimePeer(10000, new SpimeDB());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.out.println("connecting...");
-            while (!me.isOnline()) {
-                me.ping("ana", 10000);
-                Util.sleep(1000);
-            }
-            System.out.println("connected: " + me.summary());
-            Util.sleep(5000);
-            me.stop();
-        }).start();
-
-        cloud.node("**").exec(new Runnable() {
+        cloud.node(/*"**"*/ "ana").exec(new Runnable() {
             @Override
             public void run() {
 
                 //String jvmName = ManagementFactory.getRuntimeMXBean().getName();
                 System.out.println("System properties: " + System.getProperties());
+                try {
+                    System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
 
 
                 try {
-                    SpimePeer peer = new SpimePeer(10000, new SpimeDB());
+                    SpimePeer peer = new SpimePeer( 10000, new SpimeDB());
+                    peer.setFPS(2f);
                     System.out.println("ready: " + peer);
-                    Util.sleep(5000);
+
+                    for (int i = 0; i < 500; i++) {
+                        if (!peer.them.isEmpty()) System.out.println(peer.summary());
+                        Util.sleep(1000);
+                    }
+
                     peer.stop();
                 } catch (Exception e) {
                     e.printStackTrace();

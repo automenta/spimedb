@@ -1,6 +1,5 @@
 package spimedb.index;
 
-import jcog.list.FasterList;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DocumentStoredFieldVisitor;
@@ -16,7 +15,9 @@ import spimedb.NObject;
 import spimedb.SpimeDB;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;

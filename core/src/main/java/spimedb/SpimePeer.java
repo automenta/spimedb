@@ -12,7 +12,9 @@ import spimedb.index.DObject;
 import spimedb.index.Search;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -25,40 +27,27 @@ public class SpimePeer extends UDPeer {
 
     public final SpimeDB db;
 
-    public SpimePeer(int port, SpimeDB db) throws SocketException {
-        super(port);
+    public SpimePeer(SpimeDB db) throws IOException {
+        this((InetAddress)null, 0, db);
+    }
+
+
+    public SpimePeer(int port, SpimeDB db) throws IOException {
+        this((InetAddress)null, port, db);
+    }
+
+    public SpimePeer(String host, int port, SpimeDB db) throws IOException {
+        this(InetAddress.getByName(host), port, db);
+    }
+
+    public SpimePeer(InetAddress addr, int port, SpimeDB db) throws IOException {
+        super(addr, port);
 
         this.db = db;
 
         db.on(this::tryShare);
-
         db.onSearch.on(this::onSearch);
 
-//        db.on(
-//                Tagged(
-//                        (e) -> {
-//                            byte[] message = e.get("udp");
-//                            if (message != null) {
-//                                say(new Msg(message), 1f, false);
-//                            } else {
-//                                tell(JSON.toJSONBytes(e), 3);
-//                            }
-//                        },
-//                        "")
-//        );
-//        db.on(
-//                //#peer(<host>)
-//                HashPredicate((PEER, addr) -> {
-//                    String[] hp = addr.split(":");
-//                    if (hp.length == 2) {
-//                        int pp = Texts.i(hp[1], -1);
-//                        String hh = hp[0];
-//                        if (pp != -1) {
-//                            ping(new InetSocketAddress(hh, pp));
-//                        }
-//                    }
-//                }, "peer")
-//        );
     }
 
     private void tryShare(NObject n) {
@@ -84,9 +73,9 @@ public class SpimePeer extends UDPeer {
     }
 
     @Override
-    protected void update() {
-        super.update();
-
+    public boolean next() {
+        if (!super.next())
+            return false;
 
         if (isOnline() && !need.data.isEmpty()) {
 
@@ -111,6 +100,8 @@ public class SpimePeer extends UDPeer {
             });
             toRemove.forEach(need.data::remove);
         }
+
+        return true;
     }
 
     private void onSearch(Search q) {

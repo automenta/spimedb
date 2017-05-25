@@ -3,8 +3,6 @@ package spimedb.media;
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;
 import jcog.list.FasterList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
