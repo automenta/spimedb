@@ -5,17 +5,17 @@ import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.nanocloud.RemoteNode;
 import org.gridkit.vicluster.ViNode;
-import org.gridkit.vicluster.ViProps;
+import spimedb.SpimeDB;
+import spimedb.SpimePeer;
 
-import java.lang.management.ManagementFactory;
-import java.util.concurrent.Callable;
+import java.io.IOException;
 
 /**
  * https://github.com/gridkit/nanocloud-getting-started/blob/master/src/test/java/org/gridkit/lab/examples/nanocloud/BasicViNodeUsage.java
  */
 public class TeleSpime {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Cloud cloud = CloudFactory.createCloud();
         RemoteNode rn = RemoteNode.at(cloud.node("**")).useSimpleRemoting();
         rn.setRemoteAccount("seh");
@@ -23,19 +23,45 @@ public class TeleSpime {
 
 
         ViNode x = cloud.node("ana");
-                //x.touch();
+        //x.touch();
 
-        cloud.node("**").exec(new Callable<Void>() {
+        new Thread(() -> {
 
+            SpimePeer me = null;
+            try {
+                me = new SpimePeer(10000, new SpimeDB());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("connecting...");
+            while (!me.isOnline()) {
+                me.ping("ana", 10000);
+                Util.sleep(1000);
+            }
+            System.out.println("connected: " + me.summary());
+            Util.sleep(5000);
+            me.stop();
+        }).start();
+
+        cloud.node("**").exec(new Runnable() {
             @Override
-            public Void call() throws Exception {
+            public void run() {
+
                 //String jvmName = ManagementFactory.getRuntimeMXBean().getName();
                 System.out.println("System properties: " + System.getProperties());
-                //Thread.sleep(10000);
-                return null;
+
+
+                try {
+                    SpimePeer peer = new SpimePeer(10000, new SpimeDB());
+                    System.out.println("ready: " + peer);
+                    Util.sleep(5000);
+                    peer.stop();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
-        Util.sleep(100000);
+
 
 //        // exec() will invoke task synchronously (but in parallel across nodes)
 //        allNodes.exec(new Runnable() {
