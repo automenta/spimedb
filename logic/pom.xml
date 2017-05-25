@@ -12,6 +12,13 @@
     <artifactId>spimedb-logic</artifactId>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.gridkit.lab/telecontrol-ssh -->
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>nanocloud</artifactId>
+            <version>0.8.12</version>
+        </dependency>
+
         <dependency>
             <groupId>automenta</groupId>
             <artifactId>spimedb-core</artifactId>

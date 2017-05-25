@@ -117,11 +117,11 @@
             <version>2.5</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.googlecode.lanterna</groupId>
-            <artifactId>lanterna</artifactId>
-            <version>3.0.0-rc1</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.googlecode.lanterna</groupId>-->
+            <!--<artifactId>lanterna</artifactId>-->
+            <!--<version>3.0.0-rc1</version>-->
+        <!--</dependency>-->
 
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2 &ndash;&gt;-->
         <!--<dependency>-->
@@ -346,12 +346,7 @@
         <!--<version>2.7.0</version>-->
         <!--</dependency>-->
 
-        <!-- https://mvnrepository.com/artifact/org.msgpack/jackson-dataformat-msgpack -->
-        <dependency>
-            <groupId>org.msgpack</groupId>
-            <artifactId>jackson-dataformat-msgpack</artifactId>
-            <version>0.8.12</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-jaxb-annotations -->
         <!--<dependency>-->
         <!--<groupId>com.fasterxml.jackson.module</groupId>-->
