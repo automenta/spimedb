@@ -49,6 +49,7 @@ public class TeleSpime {
         rn.setRemoteJavaExec("/home/seh/jdk9/bin/java");
         rn.setProp("debug", "true");
 
+
         local.start();
 
         cloud.node(/*"**"*/ "ana").exec(new Runnable() {
