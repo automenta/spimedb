@@ -1,11 +1,16 @@
 package spimedb.query;
 
 import jcog.tree.rtree.rect.RectDoubleND;
+import org.apache.lucene.document.LatLonPoint;
+import org.apache.lucene.geo.GeoUtils;
 import org.jetbrains.annotations.NotNull;
 import spimedb.SpimeDB;
+import spimedb.cluster.feature.spatial.GeoSpatialFeature;
 
 import java.util.Arrays;
 
+import static java.lang.Double.*;
+import static java.lang.Double.NEGATIVE_INFINITY;
 import static spimedb.query.Query.BoundsCondition.Intersect;
 
 /**
@@ -21,7 +26,7 @@ public class Query  {
 
     long whenAccepted;
 
-    public static final double[] ANY_SCALAR = {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
+//    public static final double[] ANY_SCALAR = {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
 //    public static final RectDoubleND[] ANYWHERE_4 =
 //            new RectDoubleND[] ( ANY_SCALAR, ANY_SCALAR );
 
@@ -89,8 +94,8 @@ public class Query  {
     /** time-axis only */
     public <Q extends Query> Q when(float start, float end) {
         return (Q) bounds(new RectDoubleND(
-                new double[]{start, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY},
-                new double[]{end, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}
+                new double[]{start, NEGATIVE_INFINITY, NEGATIVE_INFINITY, NEGATIVE_INFINITY},
+                new double[]{end, POSITIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY}
         ));
     }
 
@@ -102,10 +107,52 @@ public class Query  {
     }
 
     public <Q extends Query> Q where(double lonMin, double lonMax, double latMin, double latMax) {
-        return (Q) bounds(new RectDoubleND(
-                new double[]{Double.NEGATIVE_INFINITY, lonMin, latMin, Double.NEGATIVE_INFINITY},
-                new double[]{Double.POSITIVE_INFINITY, lonMax, latMax, Double.POSITIVE_INFINITY}
-        ));
+
+        double centerX = (lonMin + lonMax)/2;
+        double centerY = (latMin + latMax)/2;
+
+        //TODO is there a way to do this without looping
+        while (centerX < -180)
+            centerX += 360;
+        while (centerX > +180)
+            centerX -= 360;
+
+        double wHalf = Math.min(Math.abs(lonMax - lonMin), 360)/2.0;
+        double hHalf = Math.min(Math.abs(latMax - latMin), 180)/2.0;
+
+        //TODO clip latitude in -90,+90
+
+        double latMinFinal = centerY - hHalf;
+        double latMaxFinal = centerY + hHalf;
+        if (centerX - wHalf < -180 || centerX + wHalf > +180) {
+            //crosses international dateline, subdivide into 2 queries
+
+            double x1max, x2min;
+            if (centerX - wHalf < -180) {
+                x1max = centerX + wHalf;
+                x2min = 360 + (centerX -wHalf);
+            } else if (centerX + wHalf > +180) {
+                x1max = -180 + ((centerX + wHalf) - 180);
+                x2min= centerX - wHalf;
+            } else {
+                ///??
+                throw new UnsupportedOperationException();
+            }
+
+            return bounds(
+                new RectDoubleND(
+                    new double[]{NEGATIVE_INFINITY, -180, latMinFinal, NEGATIVE_INFINITY},
+                    new double[]{POSITIVE_INFINITY, x1max, latMaxFinal, POSITIVE_INFINITY}
+                ),new RectDoubleND(
+                    new double[]{NEGATIVE_INFINITY, x2min, latMinFinal, NEGATIVE_INFINITY},
+                    new double[]{POSITIVE_INFINITY, +180, latMaxFinal, POSITIVE_INFINITY}
+            ));
+        } else {
+            return (Q) bounds(new RectDoubleND(
+                    new double[]{NEGATIVE_INFINITY, centerX-wHalf, latMinFinal, NEGATIVE_INFINITY},
+                    new double[]{POSITIVE_INFINITY, centerX+wHalf, latMaxFinal, POSITIVE_INFINITY}
+            ));
+        }
     }
 
     @NotNull

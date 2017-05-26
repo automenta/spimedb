@@ -28,7 +28,7 @@ public class Search {
 
     public final static Logger logger = LoggerFactory.getLogger(Search.class);
 
-    private final TopDocs docs;
+    public final TopDocs localDocs;
     @NotNull
     private final IndexSearcher searcher;
     public final org.apache.lucene.search.Query query;
@@ -48,7 +48,7 @@ public class Search {
         this.searcher = searcher;
         this.db = db;
         this.facets = facetResults;
-        this.docs = docs;
+        this.localDocs = docs;
 
         Set<String> tagsInc = new TreeSet<>();
         collectTags(q, tagsInc);
@@ -63,26 +63,30 @@ public class Search {
         return id.hashCode();
     }
 
-    /**
-     * sync; returns false if canceled via the predicate
-     */
-    public boolean forEach(BiPredicate<DObject, ScoreDoc> each) {
-        return forEachLocal((d, s) -> each.test(DObject.get(d), s));
+
+    /** async, object only */
+    public void forEachObject(Predicate<NObject> each) {
+        forEach((x,ignored)->each.test(x));
     }
 
     /** async */
-    public void forEach(Predicate<NObject> each, long waitMS) {
+    public void forEach(BiPredicate<NObject,ScoreDoc> each) {
+        forEach(each, 0);
+    }
+
+    /** async */
+    public void forEach(BiPredicate<NObject,ScoreDoc> each, long waitMS) {
         forEach(each, waitMS, null);
     }
 
     /** async  */
-    public void forEach(Predicate<NObject> each, long waitMS, @Nullable Runnable onFinished) {
+    public void forEach(BiPredicate<NObject,ScoreDoc> each, long waitMS, @Nullable Runnable onFinished) {
 
         Thread t = Thread.currentThread();
         AtomicBoolean continuing = new AtomicBoolean(true);
 
         Consumer<NObject> recv = (x) -> {
-            if (!each.test(x)) {
+            if (!each.test(x,null)) {
                 continuing.set(false);
                 t.interrupt();
             }
@@ -93,10 +97,10 @@ public class Search {
             db.onTag.on(x, recv);
 
         try {
-            if (!forEach((d, s) -> each.test(d))) {
+            if (!forEachLocal(each::test)) {
                 return;
             }
-            if (continuing.get()) {
+            if (continuing.get() && waitMS > 0) {
                 try {
                     Thread.sleep(waitMS);
                 } catch (InterruptedException ignored) {
@@ -116,10 +120,17 @@ public class Search {
 
 
     /**
+     * sync; returns false if canceled via the predicate
+     */
+    public boolean forEachLocal(BiPredicate<DObject, ScoreDoc> each) {
+        return forEachLocalDoc((d, s) -> each.test(DObject.get(d), s));
+    }
+
+    /**
      * return false if canceled via the predicate
      */
-    public boolean forEachLocal(BiPredicate<Document, ScoreDoc> each) {
-        if (docs == null)
+    public boolean forEachLocalDoc(BiPredicate<Document, ScoreDoc> each) {
+        if (localDocs == null)
             return true;
 
         final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
@@ -128,7 +139,7 @@ public class Search {
         Document d = visitor.getDocument();
 
         boolean result = true;
-        for (ScoreDoc x : docs.scoreDocs) {
+        for (ScoreDoc x : localDocs.scoreDocs) {
             d.clear();
             try {
                 reader.document(x.doc, visitor);

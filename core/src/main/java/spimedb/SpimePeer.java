@@ -208,7 +208,7 @@ public class SpimePeer extends UDPeer {
         try {
             Search r = db.find(query, MAX_HITS_FOR_PEER);
             //ResponseNObject rn = new ResponseNObject(queryID);
-            r.forEachLocal((_n, s) -> {
+            r.forEachLocalDoc((_n, s) -> {
 
                 tryShare(DObject.get(_n));
                 return true;

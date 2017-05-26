@@ -52,12 +52,20 @@ public class MeshTest {
 
             client.ping(10000);
 
-            sleep(1000);
+            //sleep(1000);
 
-            client.db.find(new Query().in("xyz")).forEach((d) -> {
+            client.db.find(new Query().in("xyz")).forEach((d, s) -> {
                 receivedAsync.add(d);
                 return true;
-            }, 4000, client::stop);
+            }, 4000, () -> {
+
+                System.out.println(receivedAsync);
+
+                assertEquals(2,
+                        receivedAsync.size());
+                //IteratorUtils.size(client.db.find(new Query().in("xyz")).docs()));
+
+            });
 
         }, "Client");
 
@@ -69,12 +77,6 @@ public class MeshTest {
         clientThread.join();
         workerThread.join(); //wait for clientThread to finish first
 
-
-        System.out.println(receivedAsync);
-
-        assertEquals(2,
-                receivedAsync.size());
-                //IteratorUtils.size(client.db.find(new Query().in("xyz")).docs()));
 
     }
 
@@ -90,12 +92,12 @@ public class MeshTest {
             peers.add(p);
 
             p.db.add(new MutableNObject().name("Bot" + port).withTags("peer"));
-            p.db.sync(50);
+            p.db.sync(100);
 
             p.setFPS(6f);
 
             if (i > 0) {
-                p.ping(peers.get(i-1).port());
+                p.ping(peers.get(i - 1).port());
             }
 
         }
@@ -108,18 +110,18 @@ public class MeshTest {
         peers.get(0).
                 db.find(new Query().in("peer"))
                 //db.find("peer", 16)
-        .forEach(recv::add, 2000, () -> {});
-
-
-//        System.out.println();
-        System.out.println(Joiner.on("\n").join(peers));
+                .forEach((r, s) -> recv.add(r), 2000, () -> {
+                    //        System.out.println();
+                    System.out.println(Joiner.on("\n").join(peers));
 //        System.out.println();
 
-        System.err.println(Joiner.on("\n").join(recv));
+                    System.err.println(Joiner.on("\n").join(recv));
 
-        assertEquals(3, recv.size());
+                    assertEquals(3, recv.size());
 
-        peers.forEach(SpimePeer::stop);
+                    peers.forEach(SpimePeer::stop);
+                });
+
 
     }
 

@@ -14,8 +14,12 @@ import spimedb.index.DObject;
 import spimedb.index.Search;
 import spimedb.query.Query;
 import spimedb.util.JSON;
+import spimedb.util.geom.PolygonTesselator;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -41,6 +45,7 @@ public class WebAPI {
     private final SpimeDB db;
     private final WebServer web;
 
+
     public WebAPI(WebServer w) {
         this.web = w;
         this.db = w.db;
@@ -51,6 +56,8 @@ public class WebAPI {
     final static int SearchResultsMax = 32;
     final static int GeoResultsMax = 32;
     final static int FacetResultsMax = 64;
+
+
 
     @GET
     @Path("/{I}/json")
@@ -107,7 +114,7 @@ public class WebAPI {
 
         try {
             Search r = db.find(q, SearchResultsMax);
-            return Response.ok((StreamingOutput) os -> WebIO.send(r, os, searchResultFull)).build();
+            return Response.ok((StreamingOutput) os -> WebIO.send(r, os, 0, searchResultFull)).build();
         } catch (IOException e) {
             return Response.serverError().build();
         } catch (ParseException e) {
@@ -124,16 +131,31 @@ public class WebAPI {
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation("Bounded longitude/latitude rectangle geoquery")
     public Response earthLonLatRect(
+            @Context HttpServletRequest request,
             @PathParam("lonMin") float lonMin,
             @PathParam("lonMax") float lonMax,
             @PathParam("latMin") float latMin,
             @PathParam("latMax") float latMax) {
 
+
+        HttpSession sess = request.getSession(true);
+
+        //TODO use a unique 'window' id to uniquify each tab/widnow session in case there are multiple
+        //System.out.println(sess.getId() + " " + request.getRemotePort() + " " + sess);
+
+
+        Object prevBounds = sess.getAttribute("earthLonLat");
+        if (prevBounds!=null) {
+
+        }
+        sess.setAttribute("earthLonLat", new double[] { lonMin, lonMax, latMin, latMax });
+
+
         //TODO validate the lon/lat coords
         //TODO filter by session's previously known requests
         //TODO track all sessions in an attention model
         Search r = db.find(new Query().limit(GeoResultsMax).where(lonMin, lonMax, latMin, latMax));
-        return Response.ok((StreamingOutput) os -> WebIO.send(r, os, searchResultSummary)).build();
+        return Response.ok((StreamingOutput) os -> WebIO.send(r, os, 0, searchResultSummary)).build();
     }
 
 

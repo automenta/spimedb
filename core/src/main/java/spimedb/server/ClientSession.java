@@ -128,7 +128,7 @@ public class ClientSession extends Session {
 
                     Set<NObject> lowPriority = new HashSet<>(1024);
 
-                    db.find(new Query().where(lon, lat).in(tags)).forEach((dd, s) -> {
+                    db.find(new Query().where(lon, lat).in(tags)).forEachLocal((dd, s) -> {
 
                         NObject n = transmittable(dd);
 

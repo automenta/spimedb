@@ -1011,11 +1011,15 @@ public class SpimeDB {
         s.forEach(this::add);
     }
 
-    @Deprecated
-    public void sync(int waitDelayMS) {
-        do {
+    /** returns whether the db has completely synch'd */
+    public boolean sync(int waitDelayMS) {
+        if (busy())
             Util.sleep(waitDelayMS);
-        } while (!exe.pq.isEmpty() || exe.running.get() > 0);
+        return busy();
+    }
+
+    private boolean busy() {
+        return exe.running.get() > 0 || !exe.pq.isEmpty();
     }
 
 }

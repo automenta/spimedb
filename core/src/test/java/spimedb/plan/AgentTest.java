@@ -1,6 +1,7 @@
 package spimedb.plan;
 
 import com.google.common.collect.Lists;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.ForkJoinPool;
@@ -47,6 +48,7 @@ public class AgentTest {
 
     }
 
+    @Ignore
     @Test
     public void test1() {
         TestAgent a = new TestAgent();

@@ -42,29 +42,36 @@ public enum WebIO {
                     NObject.DESC, NObject.DATA
             )));
 
-    public static void send(Search r, OutputStream o, ImmutableSet<String> keys) {
+
+    public static void send(Search r, OutputStream o, int timeoutMS, ImmutableSet<String> keys) {
         if (r != null) {
 
             try {
                 o.write("[[".getBytes());
-                r.forEach((y, x) -> {
-                    JSON.toJSON(searchResult(y, keys, x
-                    ), o, ',');
-                    return true;
-                });
-                o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
-
-                if (r.facets != null) {
-                    stream(r.facets, o);
-                    o.write(']');
-                } else
-                    o.write("[]]".getBytes());
-
-
-
-            } catch (IOException e) {
-
+            } catch (IOException ignored) {
+                return;
             }
+
+            r.forEach((y, x) -> {
+                JSON.toJSON(searchResult(y, keys, x), o, ',');
+                return true;
+            }, timeoutMS, () -> {
+                try {
+
+                    o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
+
+                    if (r.facets != null) {
+                        stream(r.facets, o);
+                        o.write(']');
+                    } else
+                        o.write("[]]".getBytes());
+
+                } catch (IOException ignored) {
+
+                }
+            });
+
+
         }
 
         //ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -168,26 +175,34 @@ public enum WebIO {
 
     private static String typeOf(String s) {
         int i = s.lastIndexOf('.');
-        if ((i != -1) && (i < s.length()-1)) {
+        if ((i != -1) && (i < s.length() - 1)) {
             //HACK todo use a nice trie or something
-            switch (s.substring(i+1)) {
-                case "jpg": return "image/jpg";
-                case "png": return "image/png";
-                case "gif": return "image/gif";
-                case "pdf": return "application/pdf";
-                case "html": return "text/html";
-                case "xml": return "text/xml";
-                case "json": return "application/json";
+            switch (s.substring(i + 1)) {
+                case "jpg":
+                    return "image/jpg";
+                case "png":
+                    return "image/png";
+                case "gif":
+                    return "image/gif";
+                case "pdf":
+                    return "application/pdf";
+                case "html":
+                    return "text/html";
+                case "xml":
+                    return "text/xml";
+                case "json":
+                    return "application/json";
             }
         }
         return "application/*";
     }
 
-    /** parse Lon/Lat Rectangle from string:
-     *  lonMin;lonMax;latMin;latMax
-     *  longitude first (x), then latitude (y)
-     *  see: https://www.w3.org/DesignIssues/MatrixURIs.html
-     *  TODO use more efficient number extraction method
+    /**
+     * parse Lon/Lat Rectangle from string:
+     * lonMin;lonMax;latMin;latMax
+     * longitude first (x), then latitude (y)
+     * see: https://www.w3.org/DesignIssues/MatrixURIs.html
+     * TODO use more efficient number extraction method
      */
     @Nullable
     public static double[] LonLatRect(String b) {
