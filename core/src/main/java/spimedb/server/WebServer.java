@@ -56,6 +56,8 @@ import static spimedb.util.HTTP.getStringParameter;
  */
 public class WebServer extends PathHandler {
 
+    private boolean development = false;
+
     @ApplicationPath("/")
     public final class WebApp extends Application {
 
@@ -142,6 +144,19 @@ public class WebServer extends PathHandler {
             ResourceHandler statics = new ResourceHandler(staticResources(db), api);
             statics.setCacheTime(24 * 60 * 60 * 1000);
 
+            if (development) { //add cache filter for client-side code development
+                statics.setCachable(p -> {
+
+                    String rp = p.getRequestPath();
+                    if (!rp.startsWith("/lib/")) {
+                        if (rp.endsWith(".js") || rp.endsWith(".html") || rp.endsWith(".css"))
+                            return false;
+                    }
+
+
+                    return true;
+                });
+            }
             addPrefixPath("/", statics);
 
         } catch (ServletException var4) {
@@ -164,25 +179,7 @@ public class WebServer extends PathHandler {
 //        }));
 
 
-        addPrefixPath("/earth", ex -> HTTP.stream(ex, (o) -> {
-            String b = getStringParameter(ex, "r");
-            String[] bb = b.split("_");
-            if (bb.length != 4) {
-                ex.setStatusCode(StatusCodes.BAD_REQUEST);
-                return;
-            }
 
-            double[] lons = new double[2], lats = new double[2];
-
-            lons[0] = parseDouble(bb[0]);
-            lats[0] = parseDouble(bb[1]);
-            lons[1] = parseDouble(bb[2]);
-            lats[1] = parseDouble(bb[3]);
-
-            Search r = db.find(new Query().limit(32).where(lons, lats));
-            WebIO.send(r, o, WebIO.searchResultSummary);
-
-        }));
 
 
         addPrefixPath("/tell/json", (e) -> {
@@ -235,7 +232,7 @@ public class WebServer extends PathHandler {
 
         if (db.indexPath != null) {
             File myStaticPath = db.file != null ? db.file.getParentFile().toPath().resolve("public").toFile() : null;
-            if ( myStaticPath != null && myStaticPath.exists()) {
+            if (myStaticPath != null && myStaticPath.exists()) {
                 logger.info("static resource: overlay {}", myStaticPath);
                 res.add(
                         new FileResourceManager(myStaticPath, transferMinSize, true, "/")
@@ -245,13 +242,15 @@ public class WebServer extends PathHandler {
 
         File staticPath = Paths.get(WebServer.staticPath).toFile();
         if (staticPath != null && staticPath.exists()) {
-            logger.info("static resource: source {}", staticPath);
+            logger.info("static resource: source {} (development mode)", staticPath);
+            development = true;
             res.add(
                     new FileResourceManager(staticPath, transferMinSize, true, "/")
             );
             return res;
         } else {
             logger.info("static resource: classloader");
+            development = false;
             res.add(
                     new ClassPathResourceManager(getClass().getClassLoader(), "public")
             );

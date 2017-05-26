@@ -98,9 +98,13 @@ public class Query  {
      * specific lat x lon region, at any time
      */
     public <Q extends Query> Q where(double[] lon, double[] lat) {
+        return where(lon[0], lon[1], lat[0], lat[1]);
+    }
+
+    public <Q extends Query> Q where(double lonMin, double lonMax, double latMin, double latMax) {
         return (Q) bounds(new RectDoubleND(
-                new double[]{Double.NEGATIVE_INFINITY, lon[0], lat[0], Double.NEGATIVE_INFINITY},
-                new double[]{Double.POSITIVE_INFINITY, lon[1], lat[1], Double.POSITIVE_INFINITY}
+                new double[]{Double.NEGATIVE_INFINITY, lonMin, latMin, Double.NEGATIVE_INFINITY},
+                new double[]{Double.POSITIVE_INFINITY, lonMax, latMax, Double.POSITIVE_INFINITY}
         ));
     }
 

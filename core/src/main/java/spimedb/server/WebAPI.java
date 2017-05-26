@@ -12,6 +12,7 @@ import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
 import spimedb.index.Search;
+import spimedb.query.Query;
 import spimedb.util.JSON;
 
 import javax.ws.rs.*;
@@ -23,7 +24,7 @@ import java.util.List;
 
 import static spimedb.server.WebIO.searchResult;
 import static spimedb.server.WebIO.searchResultFull;
-
+import static spimedb.server.WebIO.searchResultSummary;
 
 
 @Path("/")
@@ -36,6 +37,7 @@ public class WebAPI {
 
     final static Logger logger = LoggerFactory.getLogger(WebAPI.class);
 
+
     private final SpimeDB db;
     private final WebServer web;
 
@@ -44,10 +46,11 @@ public class WebAPI {
         this.db = w.db;
     }
 
-    final static int MaxSuggestLength = 10;
-    final static int MaxSuggestionResults = 16;
-    final static int MaxSearchResults = 32;
-    final static int MaxFacetResults = 64;
+    final static int SuggestLengthMax = 10;
+    final static int SuggestionResultsMax = 16;
+    final static int SearchResultsMax = 32;
+    final static int GeoResultsMax = 32;
+    final static int FacetResultsMax = 64;
 
     @GET
     @Path("/{I}/json")
@@ -74,23 +77,25 @@ public class WebAPI {
         return WebIO.send(db, q, NObject.DATA);
     }
 
+    /** TODO add PathParam version of this */
     @GET
     @Path("/suggest")
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation("Provides search query suggestions given a partially complete input query")
     public Response suggest(@QueryParam("q") String q) {
 
-        if (q == null || (q = q.trim()).isEmpty() || q.length() > MaxSuggestLength)
+        if (q == null || (q = q.trim()).isEmpty() || q.length() > SuggestLengthMax)
             return Response.noContent().build();
 
         String x = q;
         return Response.ok((StreamingOutput) os -> {
-            List<Lookup.LookupResult> x1 = db.suggest(x, MaxSuggestionResults);
+            List<Lookup.LookupResult> x1 = db.suggest(x, SuggestionResultsMax);
             if (x1 != null)
                 JSON.toJSON(Lists.transform(x1, y -> y.key), os);
         }).build();
     }
 
+    /** TODO add PathParam version of this */
     @GET
     @Path("/find")
     @Produces({MediaType.APPLICATION_JSON})
@@ -101,16 +106,34 @@ public class WebAPI {
             return Response.noContent().build();
 
         try {
-
-
-            Search r = db.find(q, MaxSearchResults);
+            Search r = db.find(q, SearchResultsMax);
             return Response.ok((StreamingOutput) os -> WebIO.send(r, os, searchResultFull)).build();
         } catch (IOException e) {
             return Response.serverError().build();
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.error("parse {}", e);
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
+    }
+
+    /** see: https://www.w3.org/DesignIssues/MatrixURIs.html
+     * TODO try to use ';' as a separator
+     * */
+    @GET
+    @Path("/earth/lonlat/rect/{lonMin}/{lonMax}/{latMin}/{latMax}/json")
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation("Bounded longitude/latitude rectangle geoquery")
+    public Response earthLonLatRect(
+            @PathParam("lonMin") float lonMin,
+            @PathParam("lonMax") float lonMax,
+            @PathParam("latMin") float latMin,
+            @PathParam("latMax") float latMax) {
+
+        //TODO validate the lon/lat coords
+        //TODO filter by session's previously known requests
+        //TODO track all sessions in an attention model
+        Search r = db.find(new Query().limit(GeoResultsMax).where(lonMin, lonMax, latMin, latMax));
+        return Response.ok((StreamingOutput) os -> WebIO.send(r, os, searchResultSummary)).build();
     }
 
 
@@ -120,7 +143,7 @@ public class WebAPI {
     @ApiOperation("Finds matching search facets for a given dimension key")
     public Response facet(@QueryParam("q") String dimension) {
         if (!(dimension == null || (dimension = dimension.trim()).isEmpty())) {
-            FacetResult x = db.facets(dimension, MaxFacetResults);
+            FacetResult x = db.facets(dimension, FacetResultsMax);
             if (x != null)
                 return Response.ok((StreamingOutput) os -> WebIO.stream(x, os)).build();
         }

@@ -2,9 +2,241 @@
 
 var uiBoundsReactionPeriodMS = 75;
 
+var MEMORY_SIZE = 512;
+var ACTIVATION_RATE = 0.5;
 
-function FINDtext(query, withResult) {
-    $.get('/find', {q: query}, withResult);
+
+
+
+const ME = new Map();
+var clusters = {};
+var facets = undefined; //HACK
+
+//    var IF = new RuleReactor({}, true);
+//    IF.when = IF.createRule;
+//
+//    IF.when("show", 1, {n: NObject},
+//        (n) => {
+//            return n.visible;
+//        },
+//        (n) => {
+//            console.log('show', n.I);
+//        }
+//    );
+//    IF.when("hide", 0, {n: NObject},
+//        (n) => {
+//            return !n.visible;
+//        },
+//        (n) => {
+//            console.log('hide', n.I);
+//
+//            if (n.what) {
+//                n.what.remove();
+//                n.what = null;
+//            }
+//
+//            if (n.where) {
+//                n.where.remove();
+//                n.where = null;
+//            }
+//
+//            IF.retract(n);
+//        }
+//    );
+//
+//    IF.trace(0);
+//    IF.run(Infinity, true, function () {
+//        console.log(JSON.stringify(p));
+//    });
+
+
+function ADD(y) {
+    var id = y.I;
+    if (!y || !id)
+        throw new Error("missing ID");
+
+    var x = ME.get(id);
+    if (x) {
+        x.update(y);
+        return x;
+    } else {
+
+        y = new NObject(y);
+
+        ME.set(id, y);
+
+        return y;
+    }
+}
+
+
+function REMOVE(id) {
+
+    const r = ME.get(id);
+    if (!r)
+        return;
+
+    r.remove();
+
+    ME.delete(id);
+}
+
+function CLEAR() {
+    ME.forEach((value, key) => {
+        REMOVE(key);
+    });
+    ME.clear();
+    clusters = {};
+}
+
+function FORGET(decay, maxItems) {
+    /*if (!ME.size() > maxItems) {
+     //dont have to sort
+     }*/
+    const n = ME.size;
+
+    const filteredIterator = ME.values();
+    const nn = filteredIterator.next;
+    filteredIterator.next = () => {
+        const v = nn.call(filteredIterator);
+
+        v.pri *= decay;
+
+        return v;
+    };
+
+    const a = Array.from(filteredIterator);
+
+
+    a.sort((x, y) => {
+
+        if (x === y) return 0;
+
+        const xp = x.pri;
+        const yp = y.pri;
+        if (xp > yp) return -1;
+        else return +1;
+    });
+
+
+    const toRemove = n - maxItems;
+
+    for (var i = 0; i < toRemove; i++) {
+        const z = a.pop();
+        REMOVE(z.I);
+    }
+}
+
+
+function loadFacets(result) {
+    facets.html('');
+
+    var facetButtonBuilder = (v) => {
+
+        const id = v[0]
+            .replace(/_/g, ' ')
+            .replace(/\-/g, ' ')
+        ; //HACK
+        const score = v[1];
+
+
+        const c = $(e('div'))
+            .attr('class', 'grid-item-content')
+            .text(id).click(() => {
+
+                queryText.val(/* dimension + ':' + */ id);
+                Backbone.history.navigate("all/" + id);
+
+                //querySubmit();
+
+                return false;
+            })
+            .attr('style',
+                'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
+
+        return c;
+    };
+
+    addToGrid(result, facetButtonBuilder, facets);
+
+    //setTimeout(()=>{
+
+    setTimeout(() => {
+        facets.packery('layout');
+
+        setTimeout(() => {
+            facets.packery('layout');
+        }, 300);
+
+    }, 300);
+    //}, 0);
+}
+
+
+function LOAD(ss, activationRate) {
+
+
+    //setTimeout(() => {
+
+    const results = ss[0]; //first part: search results
+    const facets = ss[1]; //second part: facets
+
+
+    const yy = _.map(results, x => {
+        if (!x.I) return;
+        const score = x['*'];
+        const y = ADD(x);
+        if (y) {
+            y.activate(score * ACTIVATION_RATE * activationRate);
+        }
+        return y;
+    });
+
+    FORGET(0.9, MEMORY_SIZE);
+
+    loadFacets(facets);
+
+    return yy;
+
+//            _.each(clusters, (c, k) => {
+//
+//                if (c.length < 2)
+//                    return; //ignore clusters of length < 2
+//
+//                const start = c[0];
+//
+//                const d = DIVclass('list-item result');
+//                $(start).before(d);
+//                c.forEach(cc => {
+//                    /* {
+//
+//                     d = cc;
+//                     } else {
+//                     children.push(cc);
+//                     }*/
+//                    cc.detach();
+//                    cc.addClass('sub');
+//                    if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
+//                        d.append(cc);
+//                });
+//
+//                //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
+//                var dc = d.children();
+//                if (dc.length == 1) {
+//                    $(dc[0]).removeClass('sub');
+//                    d.replaceWith(dc[0]);
+//                }
+//
+//
+//            });
+
+
+    //}, 0);
+
+}
+
+function ALL(query, withResult) {
+    $.get('/all', {q: query}, withResult);
 }
 
 function FACETS(query, withResult) {
@@ -29,7 +261,7 @@ function QueryPrompt(withSuggestions, withResults) {
     }, 100, true, true);
 
     queryText.submit = function () {
-        FINDtext(queryText.val(), withResults);
+        ALL(queryText.val(), withResults);
     };
 
     queryText.on('input', onQueryTextChanged);
@@ -41,6 +273,86 @@ function QueryPrompt(withSuggestions, withResults) {
 
     return queryText;
 }
+
+//const mapClustering = new L.MarkerClusterGroup().addTo(map);
+
+var geojsonMarkerOptions = {
+    radius: 8,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+
+function clickHandler(e) {
+    var obj = e.target.options.data;
+    if (obj.what) {
+        obj.what[0].scrollIntoView();
+    }
+
+    /*var x = JSON.stringify(obj, null, 4);
+
+     var w = newWindow($('<pre>').text(x));
+     $.getJSON('/obj/' + obj.I, function(c) {
+     var desc = c['^']['_'];
+     if (desc)
+     w.html(desc);
+     else
+     w.html(JSON.stringify(c, null, 4));
+     } );*/
+}
+
+function overHandler(e) {
+    var o = e.target.options;
+
+
+    /*if (o.ttRemove) {
+     clearTimeout(o.ttRemove);
+     o.tt.fadeIn();
+     }
+     else */
+    {
+        if (o.tt)
+            return; //already shown
+
+
+        $('.map2d_status').remove();
+
+        //setTimeout(function () {
+        var tt = $('<div>').addClass('map2d_status');
+
+        tt.html($('<a>').text(o.title).click(function () {
+        }));
+
+        tt.css('left', e.containerPoint.x);
+        tt.css('top', e.containerPoint.y);
+
+        tt.appendTo($('#map'));
+
+        o.tt = tt;
+        //}, 0);
+    }
+}
+
+function outHandler(e) {
+
+    var o = e.target.options;
+    if (o.tt) {
+        o.tt.remove();
+        delete o.tt;
+        /*
+         var delay = 1500; //ms
+         var fadeTime = 500; //ms
+         o.ttRemove = setTimeout(function() {
+         o.tt.fadeOut(fadeTime);
+         delete o.tt;
+         delete o.ttRemove;
+         }, delay);
+         */
+    }
+}
+
 
 class NObject {
 
@@ -303,7 +615,7 @@ function SpimeSocket(path, add) {
 }
 
 
-function MAP(target, withResults) {
+function MAP(target) {
 
     var map = L.map(target, {
         continuousWorld: true,
@@ -311,14 +623,14 @@ function MAP(target, withResults) {
     }).setView([51.505, -0.09], 5);
 
     //http://leaflet-extras.github.io/leaflet-providers/preview/
-    setTimeout(() =>
-            L.tileLayer(
-                'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
-                //'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
-                , {
-                    //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map),
-        0);
+    //setTimeout(() =>
+    L.tileLayer(
+        'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+        //'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+        , {
+            //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    //    0);
 
 
     //                map.on('click', function(e) {
@@ -335,50 +647,50 @@ function MAP(target, withResults) {
     //                    m.addTo(map);
     //                } );
 
-    var seeing = undefined;
+    var curBounds = undefined;
 
-    const errFunc = function (errV, errM) {
-        console.error('err', errV, errM);
-    };
 
-    function diff(curBounds, prevBounds) {
-        if (curBounds.intersects(prevBounds)) {
-            //console.log('diff', curBounds, prevBounds);
-            //TODO http://stackoverflow.com/questions/25068538/intersection-and-difference-of-two-rectangles/25068722#25068722
-            //return L.bounds([[p1y,p1x],[p2y,p2x]]);
-            return curBounds;
-        } else {
-            return curBounds; //no commonality to subtract
-        }
-    }
+    // function diff(curBounds, prevBounds) {
+    //     if (curBounds.intersects(prevBounds)) {
+    //         //console.log('diff', curBounds, prevBounds);
+    //         //TODO http://stackoverflow.com/questions/25068538/intersection-and-difference-of-two-rectangles/25068722#25068722
+    //         //return L.bounds([[p1y,p1x],[p2y,p2x]]);
+    //         return curBounds;
+    //     } else {
+    //         return curBounds; //no commonality to subtract
+    //     }
+    // }
 
-    function rectBounds(b) {
+    function rectBounds(b, precision=7) {
         return {
             "x1": b.getWest(),
             "x2": b.getEast(),
             "y1": b.getSouth(),
             "y2": b.getNorth(),
             update: function () {
-                $.get('/earth', {
-                    r: this.x1 + '_' +
-                    this.y1 + '_' +
-                    this.x2 + '_' +
-                    this.y2
-                }, withResults);
+                let sep = '/';
+                $.getJSON(  '/earth/lonlat/rect/' +
+                        this.x1.toPrecision(precision) + sep +
+                        this.y1.toPrecision(precision) + sep +
+                        this.x2.toPrecision(precision) + sep +
+                        this.y2.toPrecision(precision) +
+                        '/json'
+                ,
+                (x) => {
+                    const yy = LOAD(x, 0.5);
+                    _.forEach(yy, y => {
+                        if (y && y.where) {
+                            y.where.addTo(map);
+                        }
+                    });
+                });
             }
         };
     }
 
-    var updateBounds = _.debounce(function (e) {
+    const updateBounds = _.debounce(() =>{
 
-        var curBounds = map.getBounds();
-
-        var b = seeing ? /*difference*/diff(curBounds, seeing) : curBounds;
-
-        seeing = curBounds;
-
-        var r = rectBounds(b);
-        r.update();
+        rectBounds( curBounds = map.getBounds() ).update();
 
         /*var radiusMeters =
          Math.max(b.getEast()-b.getWest(), b.getNorth()-b.getSouth()) / 2.0;*/

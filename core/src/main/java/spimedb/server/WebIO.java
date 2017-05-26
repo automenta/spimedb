@@ -24,6 +24,8 @@ import java.io.OutputStream;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+import static java.lang.Double.parseDouble;
+
 public enum WebIO {
     ;
 
@@ -181,4 +183,29 @@ public enum WebIO {
         return "application/*";
     }
 
+    /** parse Lon/Lat Rectangle from string:
+     *  lonMin;lonMax;latMin;latMax
+     *  longitude first (x), then latitude (y)
+     *  see: https://www.w3.org/DesignIssues/MatrixURIs.html
+     *  TODO use more efficient number extraction method
+     */
+    @Nullable
+    public static double[] LonLatRect(String b) {
+
+        String[] bb = b.split(";");
+        if (bb.length != 4)
+            return null;
+
+        double[] x = new double[4];
+        try {
+            x[0] = parseDouble(bb[0]);
+            x[1] = parseDouble(bb[1]);
+            x[2] = parseDouble(bb[2]);
+            x[3] = parseDouble(bb[3]);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        return x;
+    }
 }

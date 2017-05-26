@@ -187,28 +187,7 @@
 //            const f = $('<svg width="250" height="250">').attr('class', klass);//.html(label + '...');
 //            $('#facets').append($('<div>').append(f));
 
-            $.get('/facet', {q: dimension}, function (result) {
-
-                /*
-                 f.html($('<div>').append(
-                 $(d('h3')).text(label),
-                 $(d('ul')).append(
-                 _.map(result, (v) => {
-                 return $(d('li')).append(d('a')).click(()=>{
-                 queryText.val(dimension + ':' + id);
-                 querySubmit();
-                 }).text(id);
-                 }))
-                 ));
-                 */
-
-                //BubblesFacetSVG(f, result);
-
-
-                loadFacets(result);
-
-
-            });
+            FACETS({q: dimension}, loadFacets);
 
         }
 
