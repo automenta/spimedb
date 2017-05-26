@@ -275,7 +275,7 @@ public class SpimeDB {
 
 
     @Nullable
-    public FacetResult facets(String dimension, int count) throws IOException {
+    public FacetResult facets(String dimension, int count) {
 
         return withSearcher((searcher) -> {
             FacetsCollector fc = new FacetsCollector();

@@ -120,13 +120,9 @@ public class WebAPI {
     @ApiOperation("Finds matching search facets for a given dimension key")
     public Response facet(@QueryParam("q") String dimension) {
         if (!(dimension == null || (dimension = dimension.trim()).isEmpty())) {
-            try {
-                FacetResult x = db.facets(dimension, MaxFacetResults);
-                if (x != null)
-                    return Response.ok((StreamingOutput) os -> WebIO.stream(x, os)).build();
-            } catch (IOException e) {
-                return Response.serverError().build();
-            }
+            FacetResult x = db.facets(dimension, MaxFacetResults);
+            if (x != null)
+                return Response.ok((StreamingOutput) os -> WebIO.stream(x, os)).build();
         }
 
         return Response.noContent().build();

@@ -44,7 +44,7 @@ public class VertexContainer<V,E> implements Serializable
         return incoming.add(pair(s, e));
     }
 
-    @NotNull private Pair pair(Object x, Object y) {
+    @NotNull private static Pair pair(Object x, Object y) {
         return Tuples.pair(x, y);
     }
 

@@ -28,7 +28,7 @@ public class SpimeUDP implements Plugin {
 
     public SpimeUDP setPort(int port) {
 
-        synchronized (this) {
+        synchronized (db) {
 
             int p = this.port;
             if (p == port)

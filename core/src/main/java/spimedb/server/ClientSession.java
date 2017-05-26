@@ -12,7 +12,6 @@ import spimedb.SpimeDB;
 import spimedb.index.DObject;
 import spimedb.query.Query;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,7 +48,9 @@ public class ClientSession extends Session {
 
         private Task currentFocus;
 
-        /** send predicted-to-be-known items after sending predicted-to-be-unknown-by-client */
+        /**
+         * send predicted-to-be-known items after sending predicted-to-be-unknown-by-client
+         */
         private final boolean ensureSent = false;
 
 
@@ -59,13 +60,12 @@ public class ClientSession extends Session {
 
         public Task get(String[] id) {
             return new Task(ClientSession.this) {
-                @Override public void run() {
+                @Override
+                public void run() {
                     for (String x : id) {
-                        try {
-                            trySend(this, x, true, tagFields);
-                        } catch (IOException e) {
-                            break;
-                        }
+
+                        trySend(this, x, true, tagFields);
+
                     }
                 }
             };
@@ -104,7 +104,6 @@ public class ClientSession extends Session {
         }
 
 
-
         public Task focusLonLat(double[][] bounds) {
 
             //logger.info("start {} focusLonLat {}", this, bounds);
@@ -115,7 +114,6 @@ public class ClientSession extends Session {
             String[] tags = new String[]{};
 
             return new Task(ClientSession.this) {
-
 
 
                 @Override
@@ -130,20 +128,17 @@ public class ClientSession extends Session {
 
                     Set<NObject> lowPriority = new HashSet<>(1024);
 
-                    db.find(new Query().where(lon, lat).in(tags)).forEach((dd, s)->{
+                    db.find(new Query().where(lon, lat).in(tags)).forEach((dd, s) -> {
 
                         NObject n = transmittable(dd);
 
                         if (!running.get()) //early exit test
                             return false;
 
-                        try {
-                            if (!trySend(this, n, false) && ensureSent)
-                                lowPriority.add(n); //buffer it for sending later (low-priority)
-                        } catch (IOException e) {
-                            stop();
-                            return false; //likely a disconnect
-                        }
+
+                        if (!trySend(this, n, false) && ensureSent)
+                            lowPriority.add(n); //buffer it for sending later (low-priority)
+
 
                         return running.get(); //continue
 
@@ -151,38 +146,30 @@ public class ClientSession extends Session {
 
                     if (running.get()) {
                         for (NObject n : lowPriority) {
-                            try {
-                                trySend(this, n, true);
-                            } catch (IOException e) {
-                                break;
-                            }
+
+                            trySend(this, n, true);
+
                         }
                     }
                 }
 
                 @NotNull
                 private FilteredNObject transmittable(NObject n) {
-                    return new FilteredNObject( n, mapIncludesFields);
+                    return new FilteredNObject(n, mapIncludesFields);
                 }
             };
 
         }
 
 
-        private boolean trySend(Task t, String id, boolean force, @Nullable ImmutableSet<String> includeKeys) throws IOException {
+        private boolean trySend(Task t, String id, boolean force, @Nullable ImmutableSet<String> includeKeys) {
             int[] idHash = remoteMemory.hash(id);
             if (force || !remoteMemory.contains(idHash)) {
                 DObject d = db.get(id);
-                if (d!=null) {
-                    NObject n = /*db.graphed( */includeKeys!=null ? new FilteredNObject(d, includeKeys) : d;
+                if (d != null) {
+                    NObject n = /*db.graphed( */includeKeys != null ? new FilteredNObject(d, includeKeys) : d;
                     if (n != null) {
-                        chan.forEach(c -> {
-                            try {
-                                t.sendJSON(c, n);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        });
+                        chan.forEach(c -> t.sendJSON(c, n));
                         remoteMemory.add(idHash);
                         return true;
                     } else {
@@ -193,15 +180,13 @@ public class ClientSession extends Session {
             return false;
         }
 
-        private boolean trySend(Task t, NObject n, boolean force) throws IOException {
+        private boolean trySend(Task t, NObject n, boolean force) {
             int[] idHash = remoteMemory.hash(n.id());
             if (force || !remoteMemory.contains(idHash)) {
                 chan.forEach(c -> {
-                    try {
-                        t.sendJSON(c, n);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+
+                    t.sendJSON(c, n);
+
                 });
                 remoteMemory.add(idHash);
                 return true;

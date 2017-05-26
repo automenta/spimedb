@@ -123,7 +123,7 @@ public class Query  {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" +
+        return getClass().getSimpleName() + '{' +
                 ", whenCreated=" + whenCreated +
                 ", whenAccepted=" + whenAccepted +
                 ", bounds=" + Arrays.toString(bounds) +

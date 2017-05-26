@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.regex.Pattern;
 
 import static jcog.tree.rtree.rect.RectDoubleND.unbounded;
 
@@ -40,6 +41,7 @@ public class DObject implements NObject {
 
 
     public final static Logger logger = LoggerFactory.getLogger(DObject.class);
+    private static final Pattern ID_PATH_SPLITTER = Pattern.compile("/\\/+/");
 
     final String id;
     public final Document document;
@@ -136,12 +138,12 @@ public class DObject implements NObject {
                     d.add(text(k, s));
                 }
             } else if (c == Integer.class) {
-                d.add(new IntPoint(k, ((Integer) v).intValue()));
+                d.add(new IntPoint(k, (Integer) v));
             } else if (c == Boolean.class) {
                 //HACK
-                d.add(new BinaryPoint(k, new byte[]{(byte) (((Boolean) v).booleanValue() ? 0 : 1)}));
+                d.add(new BinaryPoint(k, new byte[]{(byte) ((Boolean) v ? 0 : 1)}));
             } else if (c == Double.class) {
-                d.add(new DoublePoint(k, ((Double) v).doubleValue()));
+                d.add(new DoublePoint(k, (Double) v));
             } else if (c == Long.class) {
                 throw new UnsupportedOperationException();
                 //d.add(new LongPoint(k, ((Long) v).longValue()));
@@ -231,7 +233,7 @@ public class DObject implements NObject {
         }
 
         if (id.contains("/")) {
-            String[] path = id.split("/\\/+/");
+            String[] path = ID_PATH_SPLITTER.split(id);
             if (path.length > 0)
                 d.add(new FacetField(NObject.ID, path));
         }
@@ -275,27 +277,25 @@ public class DObject implements NObject {
             return Collections.emptySet();
         }
 
+
+        Set<String> result;
         if (stream.hasAttributes()) {
-            Set<String> result = new HashSet<String>();
+            result = new HashSet<>(1);
             try {
                 while (stream.incrementToken()) {
-                    result.add(new String(stream.getAttribute(
-                            TermToBytesRefAttribute.class).toString()
-                    ));
+                    result.add(stream.getAttribute(TermToBytesRefAttribute.class).toString());
                 }
-            } catch (IOException e) {
-                // not thrown b/c we're using a string reader...
-            }
-            return result;
+            } catch (IOException ignored) { }
+        } else {
+            result = Collections.emptySet();
         }
 
         try {
             stream.end();
             stream.close();
-        } catch (IOException e) {
-        }
+        } catch (IOException ignored) {        }
 
-        return Collections.emptySet();
+        return result;
 
     }
 
@@ -366,7 +366,7 @@ public class DObject implements NObject {
     }
 
     @NotNull
-    private Object value(IndexableField f) {
+    private static Object value(IndexableField f) {
         switch (f.name()) {
             case NObject.LINESTRING:
             case NObject.POLYGON:

@@ -45,7 +45,7 @@ public class ByteArrayFilter {
     // round to the next largest power of two
     int poweredSize = IntMath.pow(2, IntMath.log2(size, RoundingMode.CEILING));
     this.sizeMask = poweredSize - 1;
-    this.array = new AtomicReferenceArray<byte[]>(poweredSize);
+    this.array = new AtomicReferenceArray<>(poweredSize);
   }
 
   /**

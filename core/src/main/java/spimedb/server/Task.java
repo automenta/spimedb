@@ -57,7 +57,7 @@ abstract public class Task implements Runnable {
     }
 
     /** o may be any JSON serializable object, or byte[] */
-    protected void sendJSON(WebSocketChannel c, Object o) throws IOException {
+    protected void sendJSON(WebSocketChannel c, Object o) {
         AbstractServerWebSocket.sendJSONBinary(c, o, outRate, outBytes);
     }
 

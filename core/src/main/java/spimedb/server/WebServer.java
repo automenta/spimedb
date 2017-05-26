@@ -322,26 +322,26 @@ public class WebServer extends PathHandler {
     final ServletContainer container = ServletContainer.Factory.newInstance();
 
 
-    DeploymentInfo undertowDeployment(ResteasyDeployment deployment, String mapping) {
+    static DeploymentInfo undertowDeployment(ResteasyDeployment deployment, String mapping) {
         if (mapping == null) {
             mapping = "/";
         }
 
         if (!mapping.startsWith("/")) {
-            mapping = "/" + mapping;
+            mapping = '/' + mapping;
         }
 
         if (!mapping.endsWith("/")) {
-            mapping = mapping + "/";
+            mapping = mapping + '/';
         }
 
-        mapping = mapping + "*";
+        mapping = mapping + '*';
         String prefix = null;
         if (!mapping.equals("/*")) {
             prefix = mapping.substring(0, mapping.length() - 2);
         }
 
-        ServletInfo resteasyServlet = Servlets.servlet("ResteasyServlet", HttpServlet30Dispatcher.class).setAsyncSupported(true).setLoadOnStartup(Integer.valueOf(1)).addMapping(mapping);
+        ServletInfo resteasyServlet = Servlets.servlet("ResteasyServlet", HttpServlet30Dispatcher.class).setAsyncSupported(true).setLoadOnStartup(1).addMapping(mapping);
         if (prefix != null) {
             resteasyServlet.addInitParam("resteasy.servlet.mapping.prefix", prefix);
         }
@@ -350,7 +350,7 @@ public class WebServer extends PathHandler {
     }
 
     DeploymentInfo undertowDeployment(ResteasyDeployment deployment) {
-        return this.undertowDeployment(deployment, "/");
+        return WebServer.undertowDeployment(deployment, "/");
     }
 
     //        public UndertowJaxrsServer start(Undertow.Builder builder) {

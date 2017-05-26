@@ -26,7 +26,7 @@ public class GraphedNObject extends ProxyNObject {
         set(n);
     }
 
-    protected boolean includeKey(String key) {
+    protected static boolean includeKey(String key) {
         return !key.equals(TAG);
     }
 

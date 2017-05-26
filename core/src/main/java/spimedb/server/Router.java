@@ -12,8 +12,7 @@ import java.util.function.Consumer;
 public class Router<K,V> {
 
 
-    final ConcurrentHashMap<K,
-            Set<V>> on = new ConcurrentHashMap();
+    final ConcurrentHashMap<K, Set<V>> on = new ConcurrentHashMap();
 
     public boolean on(K k, V v) {
         Set<V> www = on.computeIfAbsent(k, (kk) -> Sets.newConcurrentHashSet());
@@ -24,7 +23,7 @@ public class Router<K,V> {
         for (String s : ss) {
             Set<V> vs = on.get(s);
             if (vs!=null)
-                vs.forEach(vv::accept);
+                vs.forEach(vv);
         }
     }
 

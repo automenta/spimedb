@@ -86,7 +86,7 @@ public class Spime extends Main {
     }
 
     @Override
-    public Spime restart() {
+    public synchronized Spime restart() {
         super.restart();
 
         //remove entries for which their source file has been removed

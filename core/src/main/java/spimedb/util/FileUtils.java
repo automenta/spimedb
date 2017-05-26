@@ -446,7 +446,7 @@ public class FileUtils {
             fd.setFilenameFilter((dir, name) -> {
                 boolean isAccepted = false;
                 for (String ext : formats) {
-                    if (name.indexOf(ext) != -1) {
+                    if (name.contains(ext)) {
                         isAccepted = true;
                         break;
                     }

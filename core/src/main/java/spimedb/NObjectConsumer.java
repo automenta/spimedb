@@ -8,10 +8,10 @@ import java.util.function.Consumer;
  */
 public interface NObjectConsumer extends Consumer<NObject> {
 
-    public static NObjectConsumer Tagged(Consumer<NObject> each, String... tags) {
+    static NObjectConsumer Tagged(Consumer<NObject> each, String... tags) {
         return new OnTag.LambdaOnTag(tags, each);
     }
-    public static NObjectConsumer HashPredicate(BiConsumer<String,String> each, String... tags) {
+    static NObjectConsumer HashPredicate(BiConsumer<String, String> each, String... tags) {
         return new OnHashPredicate.LambdaHashPredicate(each, tags);
     }
 

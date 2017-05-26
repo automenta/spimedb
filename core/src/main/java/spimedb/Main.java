@@ -58,7 +58,6 @@ public abstract class Main extends FileAlterationListenerAdaptor {
         loggerContext.reset();
 
 
-
     }
 
 
@@ -328,8 +327,11 @@ public abstract class Main extends FileAlterationListenerAdaptor {
         }
     }
 
-    /** HACK TODO make not required */
-    @NotNull     abstract protected Object[] defaultConstructorArgs(Class[] types);
+    /**
+     * HACK TODO make not required
+     */
+    @NotNull
+    abstract protected Object[] defaultConstructorArgs(Class[] types);
 
     private static Field field(Class cl, String field) {
         //TODO add a reflection cache
@@ -388,7 +390,9 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
     public final static Logger LoggingLogger = LoggerFactory.getLogger(LOG.getClass());
 
-    /** HACK TODO make not a requirement */
+    /**
+     * HACK TODO make not a requirement
+     */
     abstract String workingDirectory();
 
     class LogConfigurator {
@@ -479,12 +483,12 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
 
     public Main(@Nullable String path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) throws Exception {
-        this(path!=null ? new File(path) : null, initialKlassPath, plugin);
+        this(path != null ? new File(path) : null, initialKlassPath, plugin);
     }
 
-    public Main(@Nullable File path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) throws Exception {
+    public Main(@Nullable File path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) {
 
-        if (path!=null)
+        if (path != null)
             path = path.getAbsoluteFile();
 
         this.path = path;
@@ -522,7 +526,9 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
     }
 
-    /** reload files */
+    /**
+     * reload files
+     */
     protected synchronized Main restart() {
         /* http://www.baeldung.com/java-watchservice-vs-apache-commons-io-monitor-library */
         if (fsObserver != null && this.monitor == null) {
@@ -556,15 +562,14 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
 
             //exe.submit(0.9f, () -> {
-                if (f.isFile()) {
-                    updateFile(f);
-                } else if (f.isDirectory()) {
-                    updateDirectory(f);
-                }
+            if (f.isFile()) {
+                updateFile(f);
+            } else if (f.isDirectory()) {
+                updateDirectory(f);
+            }
             //});
         }
     }
-
 
 
 //    public void put(Class c, String id, Object value) {

@@ -162,7 +162,7 @@ public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
 
     @Override
     public Iterator<DelaunayVertex> iterator() {
-        return new Iterator<DelaunayVertex>() {
+        return new Iterator<>() {
 
             private final Iterator<DelaunayVertex> it = DelaunayTriangle.super
                     .iterator();

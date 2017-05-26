@@ -112,7 +112,7 @@ public interface NObject extends Serializable {
         if (idNode == null)
             throw new RuntimeException("invalid nobject JSON: " +  json);
 
-        MutableNObject y = new MutableNObject(idNode.textValue().toString());
+        MutableNObject y = new MutableNObject(idNode.textValue());
         x.fields().forEachRemaining(e -> {
             String k = e.getKey();
 
@@ -159,7 +159,7 @@ public interface NObject extends Serializable {
             jsonGenerator.writeEndObject();
         }
 
-        protected void writeBounds(NObject o, JsonGenerator jsonGenerator) throws IOException {
+        protected static void writeBounds(NObject o, JsonGenerator jsonGenerator) throws IOException {
             //zip the min/max bounds
             if (o.bounded()) {
                 DoubleND min = o.min();

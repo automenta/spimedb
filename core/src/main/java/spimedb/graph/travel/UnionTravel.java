@@ -19,7 +19,7 @@ abstract public class UnionTravel<V, E, D> implements Iterable<V>, Consumer<V> {
 
     private final Iterable<CrossComponentTravel<V, E, D>> subTravels;
 
-    private final Map<V, D> seen = new ConcurrentHashMap<V, D>();
+    private final Map<V, D> seen = new ConcurrentHashMap<>();
 
 
     public UnionTravel(MapGraph<V, E> g, V... keys) {

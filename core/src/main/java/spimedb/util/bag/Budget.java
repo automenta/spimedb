@@ -38,7 +38,7 @@ public class Budget<X> /*extends RawPLink<X>*/ {
     public Budget<X> clone() {
         float p = pri;
         if (p == p)
-            return new Budget<X>(id, p);
+            return new Budget<>(id, p);
         else
             return null;
     }
