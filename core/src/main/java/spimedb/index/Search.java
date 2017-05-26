@@ -175,8 +175,8 @@ public class Search {
                         BoostQuery bbq = (BoostQuery) bqq;
                         collectTags(bbq.getQuery(), tagsInc);
 
-                    } else {
-                        throw new UnsupportedOperationException();
+                    } else if (bqq instanceof BooleanQuery) {
+                        collectTags(bqq, tagsInc);
                     }
                 }
 
