@@ -6,7 +6,9 @@ import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.nanocloud.RemoteNode;
 import spimedb.SpimeDB;
 import spimedb.SpimePeer;
+import spimedb.server.WebServer;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -27,11 +29,14 @@ public class TeleSpime {
 
 
             try {
-                SpimePeer me = new SpimePeer(10000, new SpimeDB());
+                SpimePeer me = new SpimePeer(10000,
+                    new SpimeDB(new File("/home/me/doc/"))
+                    //new SpimeDB()
+                );
                 me.setFPS(4f);
 
                 System.out.println("connecting");
-                for (int i = 0; i < 100; i++) {
+                for (int i = 0; i < 100000; i++) {
                     if (!me.them.isEmpty()) System.out.println(me.summary());
                     else me.ping("ana", 10000);
                     Util.sleep(1000);
@@ -66,7 +71,12 @@ public class TeleSpime {
 
 
                 try {
-                    SpimePeer peer = new SpimePeer( 10000, new SpimeDB());
+                    SpimeDB db = new SpimeDB();
+                    SpimePeer peer = new SpimePeer( 10000, db);
+
+                    WebServer ws = new WebServer(db);
+                    ws.setPort(8080);
+
                     peer.setFPS(2f);
                     System.out.println("ready: " + peer);
 

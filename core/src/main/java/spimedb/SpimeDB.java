@@ -196,9 +196,10 @@ public class SpimeDB {
 
     /**
      * disk
+     * TODO must be a directory path, add test
      */
-    public SpimeDB(File path) throws IOException {
-        this(path, FSDirectory.open(path.toPath()));
+    public SpimeDB(File directoryPath) throws IOException {
+        this(directoryPath, FSDirectory.open(directoryPath.toPath()));
         this.indexPath = file.getAbsolutePath();
         this.taxoDir = FSDirectory.open(file.toPath().resolve("taxo"));
 

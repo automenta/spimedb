@@ -127,49 +127,40 @@ function FORGET(decay, maxItems) {
     }
 }
 
+const facetButtonBuilder = (v) => {
+
+    const id = v[0]
+        .replace(/_/g, ' ')
+        .replace(/\-/g, ' ')
+    ; //HACK
+    const score = v[1];
+
+
+    const c = $(e('div'))
+        .attr('class', 'grid-item-content')
+        .text(id).click(() => {
+
+            //queryText.val(/* dimension + ':' + */ id);
+            //Backbone.history.navigate("all/" + id);
+
+            //querySubmit();
+
+            return false;
+        })
+        .attr('style',
+            'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
+
+    return c;
+};
+
 
 function loadFacets(result) {
     facets.html('');
 
-    var facetButtonBuilder = (v) => {
-
-        const id = v[0]
-            .replace(/_/g, ' ')
-            .replace(/\-/g, ' ')
-        ; //HACK
-        const score = v[1];
-
-
-        const c = $(e('div'))
-            .attr('class', 'grid-item-content')
-            .text(id).click(() => {
-
-                queryText.val(/* dimension + ':' + */ id);
-                Backbone.history.navigate("all/" + id);
-
-                //querySubmit();
-
-                return false;
-            })
-            .attr('style',
-                'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
-
-        return c;
-    };
 
     addToGrid(result, facetButtonBuilder, facets);
 
-    //setTimeout(()=>{
 
-    setTimeout(() => {
-        facets.packery('layout');
-
-        setTimeout(() => {
-            facets.packery('layout');
-        }, 300);
-
-    }, 300);
-    //}, 0);
 }
 
 
@@ -180,6 +171,7 @@ function LOAD(ss, activationRate) {
 
     const results = ss[0]; //first part: search results
     const facets = ss[1]; //second part: facets
+
 
 
     const yy = _.map(results, x => {

@@ -35,6 +35,9 @@
     <style>
         body {
             padding: 0;
+            position: fixed;
+            height: 100%;
+            width: 100%;
         }
         leaflet-zoom-animated {
             display: none;
@@ -49,6 +52,15 @@
             position: fixed;
             z-index: 1000;
         }
+        #overfacets {
+            width: 100%;
+            height: 15% !important;
+            overflow-y: hidden;
+            position: absolute !important;
+            bottom: 0;
+            /*border: 1px solid red;*/
+        }
+
     </style>
 
     <body>
@@ -74,8 +86,7 @@
 
 
         <div id="menu">          
-            <div id="facets" class="grid">
-            </div>
+
             <!--            <div id="resultsDragger"></div>-->
             <div id="results">
 
@@ -83,6 +94,8 @@
         </div>
 
 
+        <div id="overfacets">
+        </div>
 
     </body>
 
@@ -93,43 +106,11 @@
     $(() => {
 
 
-        facets = newGrid($('#facets'));
+        facets = newGrid($('#overfacets'));
 
         const map = MAP('map');
 
 
-        const qs = $('#query_suggestions');
-
-        const queryText = new QueryPrompt(
-            function (suggestions) {
-                if (suggestions.length === 0) {
-                    qs.html('');
-                } else {
-                    setTimeout(() =>
-                            qs.html(_.map(JSON.parse(suggestions), (x) =>
-                                D('grid-item').append(
-                                    D('grid-item-content').text(x).click((e) => {
-                                        queryText.val(x);
-                                        update(x);
-                                    })
-                                )
-                            )),
-                        0);
-                }
-            },
-            function (result) {
-
-            }
-        );
-
-        queryText.submit = () => {
-            update(queryText.val()); //intercept this
-        };
-
-
-        function suggestionsClear() {
-            qs.html('');
-        }
 
 
 

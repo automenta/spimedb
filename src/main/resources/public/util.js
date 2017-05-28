@@ -69,7 +69,19 @@ function addToGrid(result, builder, grid) {
 
     var nn = $(newItems);
 
-    grid.append(nn).packery('appended', nn);
+    setTimeout(()=>{
+        grid.append(nn).packery('appended', nn);
+
+        setTimeout(() => {
+            grid.packery('layout');
+
+            // setTimeout(() => {
+            //     facets.packery('layout');
+            // }, 300);
+
+        }, 100);
+
+    }, 0);
 
 }
 
