@@ -192,9 +192,7 @@ h2 { margin: 0; }
     overflow: hidden;
 }
 
-.w2ui-toolbar {
-    background: rgba(127,127,127,0.5) !important;
-}
+
 
 #layout_dock_panel_main, #layout_dock_panel_main * { 
     background: transparent; pointer-events: none !important; display: none;

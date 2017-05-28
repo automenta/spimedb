@@ -118,7 +118,7 @@ public class Spime extends Main {
     private static void mainDefault(Spime m) {
         SpimeDB db = m.db;
 
-        int port = 8080;
+        int port = 0;
 
         WebServer w = new WebServer(db);
         w.setPort(port);
@@ -126,7 +126,7 @@ public class Spime extends Main {
 
 
         try {
-            m.put(SpimeUDP.class, new SpimePeer(port, m.db));
+            m.put(SpimeUDP.class, new SpimePeer(0, m.db));
         } catch (Exception e) {
             logger.error("udp {}", e);
             e.printStackTrace();

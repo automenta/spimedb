@@ -45,6 +45,7 @@ public class SpimeUDP implements Plugin {
 
             try {
                 this.peer = new SpimePeer(port, db);
+
             } catch (Exception e) {
                 Main.logger.error("{}", e);
             }
@@ -54,7 +55,5 @@ public class SpimeUDP implements Plugin {
 
     }
 
-    public int getPort() {
-        return port;
-    }
+
 }

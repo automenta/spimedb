@@ -5,9 +5,6 @@
     "jquery": "latest",
     "jquery-ui": "latest",
     "msgpack-lite": "latest",
-    "cytoscape": "latest",
-    "cytoscape-edgehandles": "latest",
-    "cytoscape-cola": "latest",
     "cesiumjs": "latest",
     "leaflet": "latest",
     "leaflet.markercluster": "latest",
@@ -20,8 +17,6 @@
     "fullcalendar": "latest",
     "interact": "latest",
     "draggabilly": "latest",
-    "w2ui": "latest",
-    "patternfly-timeline": "latest",
     "jscroll": "latest"
   }
 }

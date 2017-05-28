@@ -17,13 +17,12 @@
             /*-webkit-transition: font-size 0.1s;*/
         }
 
-        body, input, select, button {
-            font-size: 120%;
-        }
 
         input {
             background-color: black;
             color: orange;
+            font-size: 125%;
+
         }
 
         #in {
@@ -43,11 +42,10 @@
 
         .box {
             min-width: 10em;
-            min-height: 3em;
             max-height: 100%;
             max-width: 100%;
             margin: 0.5em;
-            padding: 0.5em;
+            padding: 0.1em;
             overflow-y: auto;
             background-color: #555;
         }
@@ -81,20 +79,18 @@
         .group .box {
             background-color: #333;
             font-size: 50%;
-            margin: 0.5em;
-
+            margin: 0.1em;
         }
 
         .box .controls {
 
         }
-        .controls .label {
-            font-size: 150%;
-        }
+
         .controls .button {
             float:right;
-            background-color: #1a0dab;
-            padding: 0.25em;
+            background-color: #6a2dab;
+            padding: 5px;
+            margin: 2px;
         }
         .controls .button:hover {
             background-color: #00a23f;
@@ -124,17 +120,10 @@
 <script src="spime.js"></script>
 
 <body>
-    <div id="in" >
-        <button id="add_find">find</button>
-        <button id="add_say">say</button>
-        <button id="add_code">code</button>
-    </div>
+
 </body>
 
 <script>
-    const map = null; /*MAP('map', (x)=>{
-     //LOAD(x, 0.5);
-     });*/
 
     $(() => {
 
@@ -201,122 +190,23 @@
             return b;
         }
 
-        function ADD_FIND() {
-
-            const query = DIV();
-            const suggestBox = DIV();
-            const results = DIVclass('group');
-
-            var suggested = { };
-
-            function clearSuggestions() {
-                if (suggestBox) {
-                    suggestBox.html('');
-                    suggested = { };
-                }
-            }
-
-            const I = QueryPrompt(
-
-                function(suggestions) {
-                    var ss;
-
-                    try {
-                        ss = JSON.parse(suggestions);
-                    } catch (e) {
-                        ss = [];
-                    }
-
-                    if (ss.length === 0) {
-                        //hard clear
-                        clearSuggestions();
-                        return;
-                    } else if (suggestBox) {
-                        //soft clear
-                        suggestBox.html([]);
-                        suggested = {};
-                    }
-
-
-                    _.forEach(ss, x => {
-                        if (!suggested[x]) {
-                            suggested[x] = suggestBox.append(divCls('box').append(x));
-                        }
-                    });
-                },
-
-                function(result) {
-
-                    clearSuggestions();
-                    results.html('');
-
-                    var ss, rr, ff;
-                    try {
-                        ss = JSON.parse(result);
-                        rr = ss[0]; //first part: search results
-                        ff = ss[1]; //second part: facets
-                    } catch (e) {
-                        //usually just empty search result
-                        //$('#results').html('No matches for: "' + qText + '"');
-                        return;
-                    }
-
-                    var toAdd = [];
-                    _.forEach(rr, x => {
-                        if (!x.I) return;
-
-                        //const score = x.score;
-                        const y = new NObject(x);
-                        if (y.what)
-                            toAdd.push(y.what.addClass('box'));
-                    });
-
-                    if (toAdd.length > 0)
-                        results.append(toAdd);
-
-                }
-            );
-
-            query.append( suggestBox, results );
-
-            return ADD(SPAN().append('? ', I), query);
-        }
-
-        function ADD_SAY() {
-            const input = $('<input type="text">');
-            input.change(v=>{
-                const msg = input.val();
-                if (msg.length > 0) {
-                    input.val('');
-                    ws.send('me.tell(["public"], \"' + msg + '\")');
-                }
-            });
-
-            ADD(SPAN().append('> ', input));
-        }
 
         function ADD_CODE() {
-            const input = $('<input type="text">');
+            const input = $('<input type="text" autofocus="true">');
             input.change(v=>{
                 const msg = input.val();
                 if (msg.length > 0) {
-                    input.val('');
+                    input.attr('readonly','true');
                     ws.send(msg);
+                    setTimeout(ADD_CODE, 0);
                 }
             });
 
+
             ADD(SPAN().append('! ', input));
+            input.focus();
         }
-
-
-        const wsPublic = new SpimeSocket('on/tag/public', (x)=>{
-            if (typeof(m)!=='string') {
-                m = DIV().append(newEle('pre').text(JSON.stringify(x, null, 2)));
-            }
-
-            ADD( newEle('span').text(x.N || x.I), m );
-        });
-        const ws = new SpimeSocket('anon', (x)=>{
+        const ws = new SpimeSocket('admin', (x)=>{
             if (typeof(m)!=='string') {
                 m = DIV().append(newEle('pre').text(JSON.stringify(x, null, 2)));
             }
@@ -324,15 +214,123 @@
             ADD( newEle('span').text(x.N || x.I), m );
         });
 
-        $('#add_find').click( ADD_FIND );
-        $('#add_say').click( ADD_SAY );
-        $('#add_code').click( ADD_CODE );
+//        const wsPublic = new SpimeSocket('on/tag/public', (x)=>{
+//            if (typeof(m)!=='string') {
+//                m = DIV().append(newEle('pre').text(JSON.stringify(x, null, 2)));
+//            }
+//
+//            ADD( newEle('span').text(x.N || x.I), m );
+//        });
+//        const ws = new SpimeSocket('anon', (x)=>{
+//            if (typeof(m)!=='string') {
+//                m = DIV().append(newEle('pre').text(JSON.stringify(x, null, 2)));
+//            }
+//
+//            ADD( newEle('span').text(x.N || x.I), m );
+//        });
+
+//        $('#add_find').click( ADD_FIND );
+//        $('#add_say').click( ADD_SAY );
+//        $('#add_code').click( ADD_CODE );
 
         ws.onopen = ()=>{
-            ADD_FIND();
+            ADD_CODE();
         };
 
     });
 </script>
 
 </html>
+<!--function ADD_FIND() {-->
+
+<!--const query = DIV();-->
+<!--const suggestBox = DIV();-->
+<!--const results = DIVclass('group');-->
+
+<!--var suggested = { };-->
+
+<!--function clearSuggestions() {-->
+<!--if (suggestBox) {-->
+<!--suggestBox.html('');-->
+<!--suggested = { };-->
+<!--}-->
+<!--}-->
+
+<!--const I = QueryPrompt(-->
+
+<!--function(suggestions) {-->
+<!--var ss;-->
+
+<!--try {-->
+<!--ss = JSON.parse(suggestions);-->
+<!--} catch (e) {-->
+<!--ss = [];-->
+<!--}-->
+
+<!--if (ss.length === 0) {-->
+<!--//hard clear-->
+<!--clearSuggestions();-->
+<!--return;-->
+<!--} else if (suggestBox) {-->
+<!--//soft clear-->
+<!--suggestBox.html([]);-->
+<!--suggested = {};-->
+<!--}-->
+
+
+<!--_.forEach(ss, x => {-->
+<!--if (!suggested[x]) {-->
+<!--suggested[x] = suggestBox.append(divCls('box').append(x));-->
+<!--}-->
+<!--});-->
+<!--},-->
+
+<!--function(result) {-->
+
+<!--clearSuggestions();-->
+<!--results.html('');-->
+
+<!--var ss, rr, ff;-->
+<!--try {-->
+<!--ss = JSON.parse(result);-->
+<!--rr = ss[0]; //first part: search results-->
+<!--ff = ss[1]; //second part: facets-->
+<!--} catch (e) {-->
+<!--//usually just empty search result-->
+<!--//$('#results').html('No matches for: "' + qText + '"');-->
+<!--return;-->
+<!--}-->
+
+<!--var toAdd = [];-->
+<!--_.forEach(rr, x => {-->
+<!--if (!x.I) return;-->
+
+<!--//const score = x.score;-->
+<!--const y = new NObject(x);-->
+<!--if (y.what)-->
+<!--toAdd.push(y.what.addClass('box'));-->
+<!--});-->
+
+<!--if (toAdd.length > 0)-->
+<!--results.append(toAdd);-->
+
+<!--}-->
+<!--);-->
+
+<!--query.append( suggestBox, results );-->
+
+<!--return ADD(SPAN().append('? ', I), query);-->
+<!--}-->
+
+<!--function ADD_SAY() {-->
+<!--const input = $('<input type="text">');-->
+<!--input.change(v=>{-->
+<!--const msg = input.val();-->
+<!--if (msg.length > 0) {-->
+<!--input.val('');-->
+<!--ws.send('me.tell(["public"], \"' + msg + '\")');-->
+<!--}-->
+<!--});-->
+
+<!--ADD(SPAN().append('> ', input));-->
+<!--}-->

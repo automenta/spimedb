@@ -26,12 +26,12 @@ public class SpimePeer extends UDPeer {
     public final SpimeDB db;
 
     public SpimePeer(SpimeDB db) throws IOException {
-        this((InetAddress)null, 0, db);
+        this((InetAddress) null, 0, db);
     }
 
 
     public SpimePeer(int port, SpimeDB db) throws IOException {
-        this((InetAddress)null, port, db);
+        this((InetAddress) null, port, db);
     }
 
     public SpimePeer(String host, int port, SpimeDB db) throws IOException {
@@ -47,6 +47,12 @@ public class SpimePeer extends UDPeer {
         db.onSearch.on(this::onSearch);
 
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ":" + addr;
+    }
+
 
     private void tryShare(NObject n) {
 

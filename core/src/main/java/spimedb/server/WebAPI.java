@@ -1,8 +1,11 @@
 package spimedb.server;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.undertow.util.HttpString;
+import org.apache.http.HttpStatus;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.suggest.Lookup;
@@ -173,6 +176,31 @@ public class WebAPI {
         return Response.noContent().build();
     }
 
+
+    @POST
+    @Path("/tell/json")
+    @ApiOperation("Input arbitrary JSON")
+    public Response tellJSON(@QueryParam("q") String dimension) {
+        //TODO @Context HttpServletRequest request,
+//            //POST only
+//            if (e.getRequestMethod().equals(HttpString.tryFromString("POST"))) {
+//                //System.out.println(e);
+//                //System.out.println(e.getRequestHeaders());
+//
+//                e.getRequestReceiver().receiveFullString((ex, s) -> {
+//                    JsonNode x = JSON.fromJSON(s);
+//                    if (x != null)
+//                        db.add(x);
+//                    else {
+//                        e.setStatusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+//                    }
+//                });
+//
+//                e.endExchange();
+//            }
+//        });
+        return Response.ok().build();
+    }
 
 }
 

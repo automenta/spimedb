@@ -6,7 +6,6 @@
 package spimedb.server;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Objects;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -24,29 +23,24 @@ import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
-import io.undertow.util.HttpString;
-import io.undertow.util.StatusCodes;
-import org.apache.http.HttpStatus;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
-import spimedb.index.Search;
-import spimedb.query.Query;
-import spimedb.util.HTTP;
-import spimedb.util.JSON;
 
+import javax.net.ssl.SSLContext;
 import javax.servlet.ServletException;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.io.File;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
+import static io.undertow.Handlers.ipAccessControl;
+import static io.undertow.Handlers.websocket;
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
-import static java.lang.Double.parseDouble;
-import static spimedb.util.HTTP.getStringParameter;
 
 /**
  * @author me
@@ -88,7 +82,7 @@ public class WebServer extends PathHandler {
     public final SpimeDB db;
 
 
-    private int port = 0;
+    private int port = Integer.MIN_VALUE;
     private String host = null;
 
     static final ContentEncodingRepository compression = new ContentEncodingRepository()
@@ -182,24 +176,6 @@ public class WebServer extends PathHandler {
 
 
 
-        addPrefixPath("/tell/json", (e) -> {
-            //POST only
-            if (e.getRequestMethod().equals(HttpString.tryFromString("POST"))) {
-                //System.out.println(e);
-                //System.out.println(e.getRequestHeaders());
-
-                e.getRequestReceiver().receiveFullString((ex, s) -> {
-                    JsonNode x = JSON.fromJSON(s);
-                    if (x != null)
-                        db.add(x);
-                    else {
-                        e.setStatusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
-                    }
-                });
-
-                e.endExchange();
-            }
-        });
 
 
         /* client attention management */
@@ -217,7 +193,11 @@ public class WebServer extends PathHandler {
 //                //getRequestPath().substring(8)
 //                websocket( new ConsoleSession(db) ) );
 
-        //addPrefixPath("/admin", websocket(new Admin(db)));
+        addPrefixPath("/admin",
+                ipAccessControl(websocket(new Admin(db)), false)
+                    .addAllow("0.0.0.0" /* localhost only (ipv4) */)
+                    .addAllow("0:0:0:0:0:0:0:1" /* loalhost only (ipv6) */)
+        );
 
         restart();
 
@@ -271,6 +251,13 @@ public class WebServer extends PathHandler {
 //        return cres;
     }
 
+    public void setPort(int port) {
+        if (this.port != port) {
+            this.port = port;
+            restart();
+        }
+    }
+
     public void setHost(String host) {
 
         if (!Objects.equal(this.host, host)) {
@@ -280,21 +267,30 @@ public class WebServer extends PathHandler {
     }
 
     private synchronized void restart() {
+        if (port == Integer.MIN_VALUE)
+            return;
+
         String host = this.host;
 
         if (host == null)
             host = "0.0.0.0"; //any IPv4
 
-        if (port == 0)
-            return;
 
-        Undertow.Builder b = Undertow.builder()
-                .addHttpListener(port, host)
-                .setServerOption(ENABLE_HTTP2, true);
+        Undertow.Builder b = Undertow.builder();
+        b.setServerOption(ENABLE_HTTP2, true);
+
+//        try {
+//            SSLContext ssl = SSLContext.getDefault();
+//            b.addHttpsListener(port, host, ssl);
+//        } catch (NoSuchAlgorithmException e) {
+//            logger.error("ssl not available {}", e);
+            b.addHttpListener(port, host);
+        //}
+
+
 
         if (compression != null)
             b.setHandler(new EncodingHandler(this, compression));
-
 
         if (server != null) {
             try {
@@ -307,15 +303,22 @@ public class WebServer extends PathHandler {
         }
 
         try {
-            logger.info("start {}:{}", host, port);
-
             (server = b.build()).start();
+
+            logger.info("start {}", this);
+
+
         } catch (Exception e) {
             logger.error("http start: {}", e);
             this.server = null;
         }
 
 
+    }
+
+    @Override
+    public String toString() {
+        return server != null ? server.getListenerInfo().toString() : "stopped";
     }
 
     final ServletContainer container = ServletContainer.Factory.newInstance();
@@ -363,14 +366,6 @@ public class WebServer extends PathHandler {
 //            this.server.start();
 //            return this;
 //        }
-
-
-    public void setPort(int port) {
-        if (this.port != port) {
-            this.port = port;
-            restart();
-        }
-    }
 
 
 //       @Test
