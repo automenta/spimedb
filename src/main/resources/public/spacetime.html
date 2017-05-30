@@ -1,73 +1,76 @@
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="stylesheet" href="lib/leaflet/leaflet.css">        
-        <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.css">
-        <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.Default.css">
-
-
+    <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+    <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.css">
+    <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.Default.css">
 
 
-        <script src="lib/lodash.js"></script>
-        <script src="lib/jquery.min.js"></script>
+    <script src="lib/lodash.js"></script>
+    <script src="lib/jquery.min.js"></script>
 
-        <script src="lib/backbone.js"></script>
-
-
-        <script src="lib/draggabilly.js"></script>
-
-        <script src="lib/packery/packery.js"></script>
-
-        <script src="lib/leaflet/leaflet.js"></script>
-        <script src="lib/leaflet.markercluster/leaflet.markercluster.js"></script>
+    <script src="lib/backbone.js"></script>
 
 
-        <link rel="stylesheet" href="search.base.css">
-        <link rel="stylesheet" href="search.css">
+    <script src="lib/draggabilly.js"></script>
 
-        <script src="util.dom.js"></script>
-        <script src="util.js"></script>
-        <script src="spime.js"></script>
+    <script src="lib/packery/packery.js"></script>
+
+    <script src="lib/leaflet/leaflet.js"></script>
+    <script src="lib/leaflet.markercluster/leaflet.markercluster.js"></script>
+
+    <script src="lib/edsc-timeline.min.js"></script>
+
+    <link rel="stylesheet" href="search.base.css">
+    <link rel="stylesheet" href="search.css">
+
+    <script src="util.dom.js"></script>
+    <script src="util.js"></script>
+    <script src="spime.js"></script>
 
 
-    </head>
-    <style>
-        body {
-            padding: 0;
-            position: fixed;
-            height: 100%;
-            width: 100%;
-        }
-        leaflet-zoom-animated {
-            display: none;
-        }
+</head>
+<style>
+    body {
+        padding: 0;
+        position: fixed;
+        height: 100%;
+        width: 100%;
+    }
 
-        #query {
-            position: fixed;
-        }
+    leaflet-zoom-animated {
+        display: none;
+    }
 
-        #settings {
-            opacity: 0.9;
-            position: fixed;
-            z-index: 1000;
-        }
-        #overfacets {
-            width: 100%;
-            height: 15% !important;
-            overflow-y: hidden;
-            position: absolute !important;
-            bottom: 0;
-            /*border: 1px solid red;*/
-        }
+    #query {
+        position: fixed;
+    }
 
-    </style>
+    #settings {
+        opacity: 0.9;
+        position: fixed;
+        z-index: 1000;
+    }
 
-    <body>
+    #overfacets {
+        width: 100%;
+        height: 15% !important;
+        overflow-y: hidden;
+        position: absolute !important;
+        bottom: 0;
+        /*border: 1px solid red;*/
+    }
 
-        <div id="map"></div>
+</style>
 
-        <div id="query">
+<body>
+
+<div id="map"></div>
+
+<div id="timeline-multiple" class="timeline"></div>
+
+<div id="query">
             <span id="query_edit">
 
                 <input id="query_text" type="text" placeholder="Search"/>
@@ -78,26 +81,85 @@
             </span>
 
 
-            <div id="querySuggestionsWrapper">
-                <div id="query_suggestions" class="grid">
-                </div>
-            </div>
+    <div id="querySuggestionsWrapper">
+        <div id="query_suggestions" class="grid">
         </div>
+    </div>
+</div>
 
 
-        <div id="menu">          
+<div id="menu">
 
-            <!--            <div id="resultsDragger"></div>-->
-            <div id="results">
+    <!--            <div id="resultsDragger"></div>-->
+    <div id="results">
 
-            </div>
-        </div>
+    </div>
+</div>
 
 
-        <div id="overfacets">
-        </div>
+<div id="overfacets">
+</div>
 
-    </body>
+</body>
+
+<script>
+    var $timelines = $('.timeline');
+    var data1 = {
+        start: Date.UTC(2015, 1) / 1000,
+        end: Date.UTC() / 1000,
+        resolution: 'day',
+        intervals: [
+            [Date.UTC(2015, 4) / 1000, Date.UTC(2015, 5) / 1000],
+            [Date.UTC(2015, 6) / 1000, Date.UTC(2015, 9) / 1000]
+        ]
+    };
+    var data2 = {
+        start: Date.UTC(2015, 1) / 1000,
+        end: Date.UTC() / 1000,
+        resolution: 'day',
+        color: '#ff0000',
+        intervals: [
+            [Date.UTC(2015, 4) / 1000, Date.UTC(2015, 5) / 1000],
+            [Date.UTC(2015, 6) / 1000, Date.UTC(2015, 9) / 1000]
+        ]
+    };
+    var row1 = {
+        id: "examplerow1",
+        title: "Example row 1",
+        min: Date.UTC(0) / 1000,
+        max: Date.UTC() / 1000
+    };
+    var row2 = {
+        id: "examplerow2",
+        title: "Example row 2",
+        min: Date.UTC(0) / 1000,
+        max: Date.UTC() / 1000,
+    };
+    $timelines.on('rangechange.timeline', function (e, start, end) {
+        console.log('range change', start, end);
+    });
+    $timelines.on('temporalset.timeline', function (e, start, end) {
+        console.log('temporal set', start, end);
+    });
+    $timelines.on('temporalremove.timeline', function (e) {
+        console.log('temporal cleared');
+    });
+    $timelines.on('focusset.timeline', function (e, start, end, resolution) {
+        console.log('focus set', start, end, resolution);
+    });
+    $timelines.on('focusremove.timeline', function (e) {
+        console.log('focus cleared');
+    });
+    $timelines
+        .timeline()
+        .timeline('show');
+    $('#timeline-multiple')
+        .timeline('rows', [row1, row2])
+        .timeline('data', row1.id, data1)
+        .timeline('data', row2.id, data2)
+        .timeline('setTemporal', [[Date.UTC(2015, 1), Date.UTC(2015, 2)]])
+        .timeline('setRowTemporal', 'examplerow2', [[Date.UTC(2015, 5), Date.UTC(2015, 6)]])
+</script>
 
 <script>
     "use strict";
@@ -111,11 +173,7 @@
         const map = MAP('map');
 
 
-
-
-
-
-        $('#settings').click(()=>{
+        $('#settings').click(() => {
             $('body').prepend('<iframe id="settings" src="/shell.html" width="100%" height="90%"></iframe>')
         });
 
@@ -127,9 +185,6 @@
 //                }).on( 'dragMove', function( event, pointer, moveVector ) {
 //
 //                });
-
-
-
 
 
         //START ----------------->
@@ -160,7 +215,6 @@
 
 
     }, false);
-
 
 
 </script>
