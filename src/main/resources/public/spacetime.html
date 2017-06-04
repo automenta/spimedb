@@ -14,6 +14,7 @@
 
 
     <script src="lib/draggabilly.js"></script>
+    <script src="lib/interact/interact.min.js"></script>
 
     <script src="lib/packery/packery.js"></script>
 
@@ -22,11 +23,16 @@
 
     <script src="lib/edsc-timeline.min.js"></script>
 
+    <!--<script src=https://cdnjs.cloudflare.com/ajax/libs/forerunnerdb/1.4.48/fdb-all.js"></script>-->
+
+    <link rel="stylesheet" href="spime.css">
     <link rel="stylesheet" href="search.base.css">
     <link rel="stylesheet" href="search.css">
 
     <script src="util.dom.js"></script>
     <script src="util.js"></script>
+    <script src="util.windget.js"></script>
+    <script src="graph.js"></script>
     <script src="spime.js"></script>
 
 
@@ -103,6 +109,7 @@
 </body>
 
 <script>
+    //var timelineRows = new
     var $timelines = $('.timeline');
     var data1 = {
         start: Date.UTC(2015, 1) / 1000,
@@ -157,7 +164,7 @@
         .timeline('rows', [row1, row2])
         .timeline('data', row1.id, data1)
         .timeline('data', row2.id, data2)
-        .timeline('setTemporal', [[Date.UTC(2015, 1), Date.UTC(2015, 2)]])
+        //.timeline('setTemporal', [[Date.UTC(2015, 1), Date.UTC(2015, 2)]])
         .timeline('setRowTemporal', 'examplerow2', [[Date.UTC(2015, 5), Date.UTC(2015, 6)]])
 </script>
 

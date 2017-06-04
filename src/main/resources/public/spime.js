@@ -1,6 +1,6 @@
 "use strict";
 
-var uiBoundsReactionPeriodMS = 75;
+var uiBoundsReactionPeriodMS = 25;
 
 var MEMORY_SIZE = 512;
 var ACTIVATION_RATE = 0.5;
@@ -8,10 +8,20 @@ var ACTIVATION_RATE = 0.5;
 
 
 
-const ME = new Map();
+
+class MMEE extends LFUGraph {
+
+    constructor() {
+        super(MEMORY_SIZE);
+    }
+
+}
+
+const ME = new MMEE(); //new Map();
+
 var clusters = {};
 var facets = undefined; //HACK
-
+var timeline = undefined;
 //    var IF = new RuleReactor({}, true);
 //    IF.when = IF.createRule;
 //
@@ -89,6 +99,7 @@ function CLEAR() {
     clusters = {};
 }
 
+//TODO see this active eviction is compatible with LFU
 function FORGET(decay, maxItems) {
     /*if (!ME.size() > maxItems) {
      //dont have to sort
@@ -133,24 +144,12 @@ const facetButtonBuilder = (v) => {
         .replace(/_/g, ' ')
         .replace(/\-/g, ' ')
     ; //HACK
-    const score = v[1];
 
 
-    const c = $(e('div'))
-        .attr('class', 'grid-item-content')
-        .text(id).click(() => {
+    return new NIcon(ME.computeIfAbsent(v[0], (v)=>{
+        return new NObject({I: id});
+    })).scale(v[1]).ele;
 
-            //queryText.val(/* dimension + ':' + */ id);
-            //Backbone.history.navigate("all/" + id);
-
-            //querySubmit();
-
-            return false;
-        })
-        .attr('style',
-            'font-size:' + (75.0 + 20 * (Math.log(1 + score))) + '%');
-
-    return c;
 };
 
 
@@ -398,8 +397,7 @@ class NObject {
         }
 
         if (map) {
-            const bounds = x['@'];
-            if (bounds) {
+            const bounds = x['@']; if (bounds) {
 
                 //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
 
@@ -463,9 +461,96 @@ class NObject {
                     this.where = m;
                 }
             }
+
+        }
+
+        if (timeline) {
+            const bounds = x['@']; if (bounds) {
+                const when = bounds[0];
+                if (typeof(when)==='number' || typeof(when)==='array')
+                    console.log(x, when);
+            }
         }
     }
 
+}
+
+/** nobject viewer/editor interface model */
+class NView {
+
+    constructor(n) {
+        this.n = n;
+        this.ele = DIVclass('box');
+        const b = this.ele;
+
+        const content = D();
+        content.html(JSON.stringify(n));
+
+        var font = 1.0;
+
+        function updateFont() {
+            b.attr('style', 'font-size:' + (parseInt(font * 100.0)) + '%');
+        }
+
+        const controls = DIVclass('controls').append(
+            SPANclass('label').append(n.N || n.I),
+
+            SPANclass('button').text('v').click(()=>{
+                font*= 0.75; updateFont(); //font shrink
+            }),
+
+            SPANclass('button').text('^').click(()=>{
+                font*= 1.333; updateFont(); //font grow
+            }),
+
+            // SPANclass('button').text('~').click(()=>{
+            //     newWindow(b);
+            // }),
+
+            SPANclass('button').text('x').click(()=>b.hide())
+        );
+
+        b.append( controls );
+
+        if (content)
+            b.append( content );
+
+    }
+
+    showPopup() {
+        return newWindow(this.ele);
+    }
+}
+
+/** label-sized icon which can become an NView */
+class NIcon {
+    constructor(n) {
+        this.n = n;
+        var d = this.ele = D('grid-item-content')
+            .text(n.I).click(() => {
+
+                //queryText.val(/* dimension + ':' + */ id);
+                //Backbone.history.navigate("all/" + id);
+
+                //querySubmit();
+
+                new NView(n).showPopup();
+
+                return false;
+            });
+
+
+        // d.append(E('button').text(n.N).click(()=>{
+        //     //popup
+        //     console.log(n, 'clicked');
+        // }));
+    }
+
+    scale(s) {
+        this.ele.attr('style',
+            'font-size:' + (75.0 + 20 * (Math.log(1 + s))) + '%');
+        return this;
+    }
 }
 
 function ResultNode(x) {
