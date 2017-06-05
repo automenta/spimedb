@@ -96,7 +96,7 @@ public class Search {
         for (String x : tagsInc)
             db.onTag.on(x, recv);
 
-        Exception ee = null;
+        Throwable ee = null;
         try {
             if (!forEachLocal(each::test)) {
                 return;
@@ -115,8 +115,15 @@ public class Search {
                 db.onTag.off(x, recv);
             db.onTag.off(id, recv);
 
-            if (onFinished!=null)
-                onFinished.run();
+            try {
+                if (onFinished != null)
+                    onFinished.run();
+            } catch (Throwable e) {
+                if (ee!=null)
+                    ee = new RuntimeException(ee + " " + e);
+                else
+                    ee = e;
+            }
         }
         if (ee!=null)
             throw new RuntimeException(ee);

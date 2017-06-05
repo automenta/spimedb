@@ -40,15 +40,19 @@ public class QueryTest {
 //            System.out.println(f.name() + " = " + f.binaryValue());
 //        }
 
-        assertFalse( db.sync(500) );
+        assertFalse( db.sync(300) );
 
 
         List<NObject> found = new ArrayList();
-        Search r = db.find(new Query()
-                .where(new double[]{0, 1}, new double[]{0, 1})
-        );
-        r.forEach((d, s) -> found.add(d), 100, () -> {
+
+        Query q = new Query()
+                .where(new double[]{0, 1}, new double[]{0, 1});
+        System.out.println(q);
+
+        Search r = db.find(q);
+        r.forEach((d, s) -> found.add(d), 300, () -> {
             assertEquals(1, db.size());
+            assertNotNull(r.localDocs);
             assertEquals(1, r.localDocs.totalHits);
             assertFalse(found.isEmpty());
 

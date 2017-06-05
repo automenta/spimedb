@@ -26,58 +26,59 @@ public class MeshTest {
         final SpimePeer client = new SpimePeer(10001, new SpimeDB());//TODO: .with(UDP.class, new UDP()).restart();
 
         ThreadGroup workerGroup = new ThreadGroup("Worker");
-        Thread workerThread = new Thread(workerGroup, () -> {
-
-            worker.runFPS(5f);
-
-            worker.db.add(new MutableNObject("exists already").withTags("xyz"));
-
-            sleep(1500);
-
-            worker.db.add(new MutableNObject("newly created").withTags("xyz"));
-
-            sleep(2500);
-
-            worker.stop();
-
-        }, "Worker");
 
 
         List<NObject> receivedAsync = new ArrayList();
 
-        ThreadGroup clientGroup = new ThreadGroup("Client");
-        Thread clientThread = new Thread(clientGroup, () -> {
 
-            client.runFPS(5f);
+        client.runFPS(5f);
+        Thread workerThread = new Thread(workerGroup, () -> {
 
-            client.ping(10000);
+            worker.runFPS(5f);
 
-            //sleep(1000);
+            sleep(500);
 
-            client.db.find(new Query().in("xyz")).forEach((d, s) -> {
-                receivedAsync.add(d);
-                return true;
-            }, 4000, () -> {
+            worker.db.add(new MutableNObject("exists already").withTags("xyz"));
 
-                System.out.println(receivedAsync);
+            sleep(500);
 
-                assertEquals(2,
-                        receivedAsync.size());
-                //IteratorUtils.size(client.db.find(new Query().in("xyz")).docs()));
+            worker.db.add(new MutableNObject("newly created").withTags("xyz"));
 
-            });
+            sleep(500);
 
-        }, "Client");
+            worker.stop();
 
-
+        }, "Worker");
         workerThread.start();
-        clientThread.start();
+
+        sleep(500);
+
+        assertEquals(0, client.them.size());
+
+        client.ping(10000);
+
+        sleep(500);
+
+        assertEquals(1, client.them.size());
+        assertEquals(1, worker.them.size());
+
+        client.db.find(new Query().in("xyz")).forEach((d, s) -> {
+            receivedAsync.add(d);
+            return true;
+        }, 2500, () -> {
+
+            System.out.println(receivedAsync);
+
+            assertEquals(2,
+                    receivedAsync.size());
+            //IteratorUtils.size(client.db.find(new Query().in("xyz")).docs()));
+
+        });
 
 
-        clientThread.join();
         workerThread.join(); //wait for clientThread to finish first
 
-
+        assertEquals(2, receivedAsync.size());
     }
 
     @Test
