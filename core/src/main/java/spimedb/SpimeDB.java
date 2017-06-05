@@ -1014,9 +1014,12 @@ public class SpimeDB {
 
     /** returns whether the db has completely synch'd */
     public boolean sync(int waitDelayMS) {
-        if (busy())
+        if (busy()) {
             Util.sleep(waitDelayMS);
-        return busy();
+            return busy();
+        } else {
+            return false;
+        }
     }
 
     private boolean busy() {

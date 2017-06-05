@@ -49,15 +49,14 @@
 
         function ADD(label, content) {
 
-            const b = DIVclass('box');
-
+            const b = D('box');
             var font = 1.0;
 
             function updateFont() {
                 b.attr('style', 'font-size:' + (parseInt(font * 100.0)) + '%');
             }
 
-            const controls = DIVclass('controls').append(
+            const controls = D('controls').append(
                 SPANclass('label').append(label),
 
                 SPANclass('button').text('v').click(()=>{

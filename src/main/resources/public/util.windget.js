@@ -27,8 +27,7 @@ function newFrame() {
     if (div.length === 0)
         div = $('<div>').addClass('windgets').prependTo($('body'));
 
-    var content = DIVclass('windget')/*.fadeIn()*/.appendTo(div);
-
+    var content = D('windget')/*.fadeIn()*/.appendTo(div);
     var dragMoveListener = function (event) {
         var target = event.target,
         // keep the dragged position in the data-x/data-y attributes

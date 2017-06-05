@@ -28,7 +28,7 @@ public class MeshTest {
         ThreadGroup workerGroup = new ThreadGroup("Worker");
         Thread workerThread = new Thread(workerGroup, () -> {
 
-            worker.setFPS(5f);
+            worker.runFPS(5f);
 
             worker.db.add(new MutableNObject("exists already").withTags("xyz"));
 
@@ -48,7 +48,7 @@ public class MeshTest {
         ThreadGroup clientGroup = new ThreadGroup("Client");
         Thread clientThread = new Thread(clientGroup, () -> {
 
-            client.setFPS(5f);
+            client.runFPS(5f);
 
             client.ping(10000);
 
@@ -92,9 +92,9 @@ public class MeshTest {
             peers.add(p);
 
             p.db.add(new MutableNObject().name("Bot" + port).withTags("peer"));
-            p.db.sync(100);
+            p.db.sync(200);
 
-            p.setFPS(6f);
+            p.runFPS(10f);
 
             if (i > 0) {
                 p.ping(peers.get(i - 1).port());
@@ -102,7 +102,7 @@ public class MeshTest {
 
         }
 
-        sleep(3000);
+        sleep(5000);
 
         //peers.forEach(p -> System.out.println(p.summary()));
 

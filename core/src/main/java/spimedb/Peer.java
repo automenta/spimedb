@@ -2,6 +2,7 @@ package spimedb;
 
 import jcog.net.UDPeer;
 
+import java.io.IOException;
 import java.net.SocketException;
 
 
@@ -10,7 +11,7 @@ import java.net.SocketException;
  */
 public class Peer extends UDPeer {
 
-    public Peer(int port) throws SocketException {
+    public Peer(int port) throws IOException {
         super(port);
     }
 

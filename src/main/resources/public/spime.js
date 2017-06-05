@@ -480,7 +480,7 @@ class NView {
 
     constructor(n) {
         this.n = n;
-        this.ele = DIVclass('box');
+        this.ele = D('box');
         const b = this.ele;
 
         const content = D();
@@ -492,7 +492,7 @@ class NView {
             b.attr('style', 'font-size:' + (parseInt(font * 100.0)) + '%');
         }
 
-        const controls = DIVclass('controls').append(
+        const controls = D('controls').append(
             SPANclass('label').append(n.N || n.I),
 
             SPANclass('button').text('v').click(()=>{
@@ -748,8 +748,8 @@ function MAP(target) {
                 let sep = '/';
                 $.getJSON(  '/earth/lonlat/rect/' +
                         this.x1.toPrecision(precision) + sep +
-                        this.y1.toPrecision(precision) + sep +
                         this.x2.toPrecision(precision) + sep +
+                        this.y1.toPrecision(precision) + sep +
                         this.y2.toPrecision(precision) +
                         '/json'
                 ,

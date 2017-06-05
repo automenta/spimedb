@@ -85,7 +85,7 @@ public class SpimePeer extends UDPeer {
 
             String[] needs = need.data.keySet().toArray(new String[need.data.size()]);
 
-            JsonNode query = Util.toJSON(Maps.mutable.of(
+            JsonNode query = Util.jsonNode(Maps.mutable.of(
                     NObject.QUERY, Joiner.on(" ").join(needs)
             ));
             boolean asked;

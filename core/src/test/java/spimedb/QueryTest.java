@@ -17,17 +17,23 @@ import static org.junit.Assert.*;
  */
 public class QueryTest {
 
+    final SpimeDB db;
+
+    public QueryTest() throws IOException {
+         db = new SpimeDB();
+    }
+
     /**
      * tag not specified, gets everything
      */
     @Test
     public void testSpacetimeIndexing() throws IOException {
-        SpimeDB db = new SpimeDB();
 
         MutableNObject place = new MutableNObject("Somewhere");
         place.where(0.5f, 0.5f);
         place.withTags("Place");
         DObject dplace = db.add(place);
+
 
 //        System.out.println(dplace);
 //        for (IndexableField f : dplace.document.getFields()) {
@@ -36,18 +42,20 @@ public class QueryTest {
 
         assertFalse( db.sync(500) );
 
+
         List<NObject> found = new ArrayList();
         Search r = db.find(new Query()
                 .where(new double[]{0, 1}, new double[]{0, 1})
         );
-        r.forEach((d, s) -> found.add(d), 0, () -> {
+        r.forEach((d, s) -> found.add(d), 100, () -> {
+            assertEquals(1, db.size());
+            assertEquals(1, r.localDocs.totalHits);
             assertFalse(found.isEmpty());
 
             assertEquals(dplace.toString(), found.get(0).toString());
 
             assertTrue(found + "", found.contains(place));
         });
-        assertEquals(1, r.localDocs.totalHits);
 
 
     }
@@ -55,7 +63,6 @@ public class QueryTest {
     @Test
     public void testSpacetimeTagIndexing() throws IOException {
 
-        SpimeDB db = new SpimeDB();
 
         MutableNObject place = new MutableNObject("Somewhere");
         place.where(0.5f, 0.5f);
@@ -68,7 +75,7 @@ public class QueryTest {
         DObject dp = db.add(person);
 
 
-        db.sync(50);
+        db.sync(250);
 
 
         ArrayList<NObject> found = new ArrayList();

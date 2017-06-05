@@ -1,18 +1,21 @@
 "use strict";
 
-function e(eleID) {
-    return document.createElement(eleID);
-}
-function E(eleID) {
-    return $(e(eleID));
-}
 
-function DIVclass(cssclass) {
-    const x = E('div');
+function e(eleID, cssclass) {
+    var x = document.createElement(eleID);
     if (cssclass)
-        x.attr('class', cssclass);
+        x.setAttribute('class', cssclass);
     return x;
 }
+
+function E(eleID, cssclass) {
+    return $(e(eleID, cssclass));
+}
+
+function D(cssclass) {
+    return E('div', cssclass);
+}
+
 
 function SPANclass(cssclass) {
     const x = E('span');
@@ -27,11 +30,13 @@ function DIV(id) {
     if (id) e.attr('id', id);
     return e;
 }
+
 function SPAN(id) {
     var e = newEle('span');
     if (id) e.attr('id', id);
     return e;
 }
+
 function newSpan(id) {
     var e = newEle('span');
     if (id) e.attr('id', id);
@@ -52,7 +57,6 @@ function newEle(e, dom) {
 }
 
 
-
 function newGrid(selector) {
     return selector.packery({});
 }
@@ -69,7 +73,7 @@ function addToGrid(result, builder, grid) {
 
     var nn = $(newItems);
 
-    setTimeout(()=>{
+    setTimeout(() => {
         grid.append(nn).packery('appended', nn);
 
         setTimeout(() => {
@@ -93,7 +97,7 @@ function jsonUnquote(json) {
 function notify(x) {
     PNotify.desktop.permission();
     if (typeof x === "string")
-        x = { text: x };
+        x = {text: x};
     else if (!x.text)
         x.text = '';
     if (!x.type)
@@ -115,13 +119,12 @@ function urlQuery(variable) {
             return pair[1];
         }
     }
-    return(false);
+    return (false);
 }
 
 var ajaxFail = function (v, m) {
     console.error('AJAJ Err:', v, m);
 };
-
 
 
 function loadCSS(url, med) {
@@ -150,31 +153,32 @@ const DEFAULT_MAX_LISTENERS = 12;
 
 //TODO use ES6 Map for better performance: http://jsperf.com/map-vs-object-as-hashes/2
 class EventEmitter {
-    constructor(){
+    constructor() {
         this._maxListeners = DEFAULT_MAX_LISTENERS
         this._events = {}
     }
+
     on(type, listener) {
 
         var that = this;
         if (Array.isArray(type)) {
-            _.each(type, function(t) {
+            _.each(type, function (t) {
                 that.on(t, listener);
             });
             return;
         }
 
-        if(typeof listener != "function") {
+        if (typeof listener != "function") {
             throw new TypeError()
         }
-        var listeners = this._events[type] ||(this._events[type] = [])
-        if(listeners.indexOf(listener) != -1) {
+        var listeners = this._events[type] || (this._events[type] = [])
+        if (listeners.indexOf(listener) != -1) {
             return this
         }
         listeners.push(listener)
-        if(listeners.length > this._maxListeners) {
+        if (listeners.length > this._maxListeners) {
             error(
-                "possible memory leak, added %i %s listeners, "+
+                "possible memory leak, added %i %s listeners, " +
                 "use EventEmitter#setMaxListeners(number) if you " +
                 "want to increase the limit (%i now)",
                 listeners.length,
@@ -184,42 +188,47 @@ class EventEmitter {
         }
         return this
     }
+
     once(type, listener) {
         var eventsInstance = this
-        function onceCallback(){
+
+        function onceCallback() {
             eventsInstance.off(type, onceCallback)
             listener.apply(null, arguments)
         }
+
         return this.on(type, onceCallback)
     }
+
     off(type, listener) {
 
         var that = this;
         if (Array.isArray(type)) {
-            _.each(type, function(t) {
+            _.each(type, function (t) {
                 that.off(t, listener);
             });
             return;
         }
 
 
-        if(typeof listener != "function") {
+        if (typeof listener != "function") {
             throw new TypeError()
         }
         var listeners = this._events[type]
-        if(!listeners || !listeners.length) {
+        if (!listeners || !listeners.length) {
             return this
         }
         var indexOfListener = listeners.indexOf(listener)
-        if(indexOfListener == -1) {
+        if (indexOfListener == -1) {
             return this
         }
         listeners.splice(indexOfListener, 1)
         return this
     }
-    emit(type, args){
+
+    emit(type, args) {
         var listeners = this._events[type]
-        if(!listeners || !listeners.length) {
+        if (!listeners || !listeners.length) {
             return false
         }
         for (var i = 0; i < listeners.length; i++)
@@ -227,8 +236,9 @@ class EventEmitter {
         //listeners.forEach(function(fn) { fn.apply(null, args) })
         return true
     }
-    setMaxListeners(newMaxListeners){
-        if(parseInt(newMaxListeners) !== newMaxListeners) {
+
+    setMaxListeners(newMaxListeners) {
+        if (parseInt(newMaxListeners) !== newMaxListeners) {
             throw new TypeError()
         }
         this._maxListeners = newMaxListeners
@@ -256,10 +266,14 @@ class Cache {
      * @param {number} max - the max. number of entries in the cache
      * @param {Object|Iterable} data - the data to initialize the cache with
      */
-    constructor (ttl, max) {
+    constructor(ttl, max) {
         this.data = new Map();
-        if (max) { this.max = max }
-        if (ttl) { this.ttl = ttl }
+        if (max) {
+            this.max = max
+        }
+        if (ttl) {
+            this.ttl = ttl
+        }
         // this.head = undefined
         // this.tail = undefined
         // if (data) {
@@ -273,13 +287,13 @@ class Cache {
         // }
     }
 
-    clear () {
+    clear() {
         this.data.clear()
         this.head = undefined
         this.tail = undefined
     }
 
-    delete (key) {
+    delete(key) {
         const curr = this.data.get(key)
         if (this.data.delete(key)) {
             this._remove(curr)
@@ -288,11 +302,11 @@ class Cache {
         return false
     }
 
-    entries () {
+    entries() {
         return this._iterator(entry => [entry.key, entry.value])
     }
 
-    evict () {
+    evict() {
         let count = 0
         let max = this.max
         let now = this.ttl ? Date.now() : false
@@ -306,15 +320,16 @@ class Cache {
         return count
     }
 
-    forEach (callback) {
+    forEach(callback) {
         const iterator = this._iterator(entry => {
             callback(entry.key, entry.value) // todo: support thisArg parameter
             return true
         })
-        while (iterator.next()) { /* no-op */ }
+        while (iterator.next()) { /* no-op */
+        }
     }
 
-    get (key) {
+    get(key) {
         const entry = this.data.get(key);
         if (entry) {
             if (entry.expires && entry.expires < Date.now()) {
@@ -326,7 +341,7 @@ class Cache {
         return undefined;
     }
 
-    has (key) {
+    has(key) {
         const entry = this.data.get(key)
         if (entry) {
             if (entry.expires && entry.expires < Date.now()) {
@@ -338,11 +353,11 @@ class Cache {
         return false
     }
 
-    keys () {
+    keys() {
         return this._iterator(entry => entry.key)
     }
 
-    set (key, value) {
+    set(key, value) {
         let curr = this.data.get(key)
         if (curr) {
             this._remove(curr)
@@ -351,22 +366,24 @@ class Cache {
         }
         curr.key = key
         curr.value = value
-        if (this.ttl) { curr.expires = Date.now() + this.ttl }
+        if (this.ttl) {
+            curr.expires = Date.now() + this.ttl
+        }
         this._insert(curr)
         this.evict()
         return this
     }
 
-    get size () {
+    get size() {
         // run an eviction then we will report the correct size
         return this.evict()
     }
 
-    values () {
+    values() {
         return this._iterator(entry => entry.value)
     }
 
-    [Symbol.iterator] () {
+    [Symbol.iterator]() {
         return this._iterator(entry => [entry.key, entry.value])
     }
 
@@ -375,7 +392,7 @@ class Cache {
      * @returns {{next: (function())}}
      * @private
      */
-    _iterator (accessFn) {
+    _iterator(accessFn) {
         const max = this.max
         let now = this.ttl ? Date.now() : false
         let curr = this.head
@@ -398,7 +415,7 @@ class Cache {
      * Remove entry `curr` from the linked list.
      * @private
      */
-    _remove (curr) {
+    _remove(curr) {
         if (!curr.prev) {
             this.head = curr.next
         } else {
@@ -415,7 +432,7 @@ class Cache {
      * Insert entry `curr` into the head of the linked list.
      * @private
      */
-    _insert (curr) {
+    _insert(curr) {
         if (!this.head) {
             this.head = curr
             this.tail = curr
@@ -432,7 +449,6 @@ class Cache {
         }
     }
 }
-
 
 
 // class Tag {
@@ -1022,10 +1038,11 @@ class Cache {
  expect(membered(obj1, obj2)).toEqual(1, 'ooh, I member!');
  * */
 var resultObject = {};
+
 function MEMOIZE(fn) {
     var wrappedPrimitives = {};
     var map = new WeakMap();
-    return function() {
+    return function () {
         var currentMap = map;
         for (var index = 0; index < arguments.length; index++) {
             var arg = arguments[index];

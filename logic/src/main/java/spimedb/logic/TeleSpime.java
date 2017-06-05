@@ -33,7 +33,7 @@ public class TeleSpime {
                     new SpimeDB(new File("/home/me/doc/"))
                     //new SpimeDB()
                 );
-                me.setFPS(4f);
+                me.runFPS(4f);
 
                 System.out.println("connecting");
                 for (int i = 0; i < 100000; i++) {
@@ -77,7 +77,7 @@ public class TeleSpime {
                     WebServer ws = new WebServer(db);
                     ws.setPort(8080);
 
-                    peer.setFPS(2f);
+                    peer.runFPS(2f);
                     System.out.println("ready: " + peer);
 
                     for (int i = 0; i < 500; i++) {

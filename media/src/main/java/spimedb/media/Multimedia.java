@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.Jdk14Logger;
+import org.apache.commons.logging.impl.SLF4JLocationAwareLog;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -63,12 +64,12 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
     static final int pdfPageImageDPI = 32;
 
     static {
-        for (String s : new String[]{
-                "org.apache.pdfbox.pdmodel.font.PDSimpleFont",
-                "org.apache.pdfbox.rendering.CIDType0Glyph2D",
-                "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
-            ((Jdk14Logger) LogFactory.getLog(s)).getLogger().setLevel(Level.SEVERE);
-        }
+//        for (String s : new String[]{
+//                "org.apache.pdfbox.pdmodel.font.PDSimpleFont",
+//                "org.apache.pdfbox.rendering.CIDType0Glyph2D",
+//                "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
+//            ((SLF4JLocationAwareLog) (LogFactory.getLog(s))).setLevel(Level.SEVERE);
+//        }
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
     }
 

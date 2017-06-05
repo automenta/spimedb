@@ -96,6 +96,7 @@ public class Search {
         for (String x : tagsInc)
             db.onTag.on(x, recv);
 
+        Exception ee = null;
         try {
             if (!forEachLocal(each::test)) {
                 return;
@@ -106,6 +107,8 @@ public class Search {
                 } catch (InterruptedException ignored) {
                 }
             }
+        } catch (Exception e) {
+            ee = e;
         } finally {
 
             for (String x : tagsInc)
@@ -115,6 +118,8 @@ public class Search {
             if (onFinished!=null)
                 onFinished.run();
         }
+        if (ee!=null)
+            throw new RuntimeException(ee);
 
     }
 
