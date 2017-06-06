@@ -495,11 +495,9 @@ public class SpimeDB {
         //return new SearchResult(q, null, null); //TODO: return EmptySearchResult;
     }
 
-
     public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
         return suggester().lookup(qText, false, count);
     }
-
 
     public static void LOG(String l, Level ll) {
         ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
@@ -607,8 +605,7 @@ public class SpimeDB {
             tags = GENERAL;
         }
 
-        ImmutableSet<String> filters =
-                WebIO.searchResultFull;
+        ImmutableSet<String> filters = WebIO.searchResultFull;
         NObject finalNext = new FilteredNObject(next, filters);
 
         Consumer<Consumer<NObject>> take = (c) -> c.accept(finalNext);
