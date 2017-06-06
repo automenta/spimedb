@@ -2,9 +2,6 @@ package spimedb.media;
 
 import com.google.common.base.Joiner;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.impl.Jdk14Logger;
-import org.apache.commons.logging.impl.SLF4JLocationAwareLog;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -40,7 +37,6 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.logging.Level;
 
 /**
  * Detects document and multimedia metadata, and schedules further processing
@@ -82,7 +78,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
         //process existing items
         db.forEach((x) -> {
-            db.runLater(0.5f, ()-> {
+            db.runLater(0.5f, () -> {
                 NObject y = apply(x, x);
                 if (y != x) {
                     db.add(y);
@@ -93,239 +89,234 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
     @Override
     public NObject apply(NObject p, NObject x) {
-            final String url = x.get("url_in");
+        final String url = x.get("url_in");
 
-            String docID = x.id();
+        String docID = x.id();
 
-            if (url == null) {
-                return x;
+        if (url == null) {
+            return x;
+        }
+
+        try {
+            long exp;
+            InputStream stream;
+            long fileSize;
+            if (url.startsWith("file:")) {
+                File f = new File(url.substring(5));
+                exp = f.lastModified();
+                stream = new FileInputStream(f);
+                fileSize = f.length();
+            } else {
+                URL uu = new URL(url);
+                URLConnection con = uu.openConnection();
+                exp = con.getExpiration();
+                if (exp == 0)
+                    exp = con.getLastModified();
+                fileSize = con.getContentLengthLong();
+                stream = con.getInputStream();
             }
+
+            if (stream == null) {
+                throw new FileNotFoundException();
+            }
+
+            //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
+
+            //TODO use a separate url_cached for each instance of a sibling class like Multimedia that does only one processing
+            //this way they can be enabled/disabled separately without interfering with each other
+            //TODO store a hashcode of the data as well as the time for additional integrity
+            if (p != null) {
+                Long whenCached = p.get("url_cached");
+                if (!(whenCached == null || whenCached < exp)) {
+                    logger.debug("cached: {}", url);
+                    return p; //still valid
+                }
+            }
+
+            logger.info("load: {}", url);
+
+            GeoNObject y = new GeoNObject(x);
+
+            y.put("url_cached", /*Long.toString*/(exp));
+
+            x = y;
+
+            boolean isKMLorKMZ = url.endsWith(".kml") || url.endsWith(".kmz");
+            boolean isGeoJSON = url.endsWith(".geojson");
+
+            if (!isKMLorKMZ && !isGeoJSON  /* handled separately below */) {
+
+                Metadata metadata = new Metadata();
+                ParseContext context = new ParseContext();
+
+                final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
+
+                if (stream instanceof FileInputStream) {
+                    y.put(NObject.DATA, url);
+                } else {
+                    //buffer the bytes for saving
+                    byte[] bytes = IOUtils.readFully(stream, (int) fileSize);
+                    stream = new ByteArrayInputStream(bytes);
+                    y.put(NObject.DATA, bytes);
+                }
+
+                tikaWrapper.parse(stream, new DefaultHandler(), metadata, context);
+
+                stream.close();
+
+                List<Metadata> m = tikaWrapper.getMetadata();
+                m.forEach(md -> {
+                    for (String k : md.names()) {
+                        String[] v = md.getValues(k);
+
+                        String kk = tikiToField(k);
+                        if (kk != null) {
+                            Object vv = v.length > 1 ? v : v[0];
+                            if (vv instanceof String) {
+                                try {
+                                    int ivv = Integer.parseInt((String) vv);
+                                    vv = ivv;
+                                } catch (Exception e) {
+                                    //not an int
+                                }
+                            }
+                            y.put(kk, vv);
+                        }
+                    }
+                });
+
+            }
+
+
+            //db.addAsync(y).get();
+
+            //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
+
+            if (isKMLorKMZ) {
+                new KML(db, y).url(url).run();
+            } else if (isGeoJSON) {
+                GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
+            }
+
+
+            x = y;
+
+        } catch (Exception e) {
+            logger.error("url_in removal: {}", e);
+        }
+
+
+        Object mime = x.get(NObject.TYPE);
+
+        if (mime != null && (mime.equals("image/jpeg") || mime.equals("image/png") /* ... */)) {
+            x = new MutableNObject(x)
+                    .name(titleify(docID))
+                    .put(NObject.DESC, null)
+                    .put(NObject.ICON, NObject.DATA /* redirect to the data field which already has the byte[] image */)
+            ;
+
+        }
+
+        if ("application/pdf".equals(mime) && x.has("pageCount") && x.has(NObject.DESC)  /* leaf */) {
+
+            int pageCount = x.get("pageCount");
+
+            //float docPri = Util.lerp(1f / (pageCount), 0.75f, 0.25f);
+
+            String parentContent = x.get(NObject.DESC);
+            String author = x.get("author");
+
+            //db.runLater(docPri, () -> {
+
+            Document parentDOM = Jsoup.parse(parentContent);
+
+            Elements pagesHTML = parentDOM.select(".page");
+
+            PDDocument document = null;
+
 
             try {
-                long exp;
-                InputStream stream;
-                long fileSize;
+
+
+                InputStream is;
                 if (url.startsWith("file:")) {
-                    File f = new File(url.substring(5));
-                    exp = f.lastModified();
-                    stream = new FileInputStream(f);
-                    fileSize = f.length();
+                    is = fileStream(url);
                 } else {
-                    URL uu = new URL(url);
-                    URLConnection con = uu.openConnection();
-                    exp = con.getExpiration();
-                    if (exp == 0)
-                        exp = con.getLastModified();
-                    fileSize = con.getContentLengthLong();
-                    stream = con.getInputStream();
+                    is = new URL(url).openStream();
                 }
 
-                if (stream == null) {
-                    throw new FileNotFoundException();
-                }
+                document = PDDocument.load(is);
 
-                //logger.info("in: {} {} {}", url, p!=null ? p.get("url_cached") : "null", x.get("url_cached"));
+                PDFRenderer renderer = new PDFRenderer(document);
 
-                //TODO use a separate url_cached for each instance of a sibling class like Multimedia that does only one processing
-                //this way they can be enabled/disabled separately without interfering with each other
-                //TODO store a hashcode of the data as well as the time for additional integrity
-                if (p != null) {
-                    String whenCached = p.get("url_cached");
-                    if (!(whenCached == null || Long.valueOf(whenCached) < exp)) {
-                        logger.debug("cached: {}", url);
-                        return p; //still valid
-                    }
-                }
 
-                logger.info("load: {}", url);
+                for (int _page = 0; _page < pageCount; _page++) {
 
-                GeoNObject y = new GeoNObject(x);
+                    final int pageActual = _page;
+                    final int page = _page + 1;
+                    logger.info("paginate: {} {}", docID, page);
 
-                y.put("url_cached", Long.toString(exp));
+                    Document pd = Document.createShell("");
+                    pd.body().appendChild(pagesHTML.get(pageActual).removeAttr("class"));
+                    Elements cc = cleaner.clean(pd).body().children();
+                    String[] pdb = cc.stream()
+                            .filter(xx -> !xx.children().isEmpty() || xx.hasText())
+                            .map(xx -> xx.tagName().equals("p") ? xx.text() : xx) //just use <p> contents
+                            .map(Object::toString).toArray(String[]::new);
 
-                boolean isKMLorKMZ = url.endsWith(".kml") || url.endsWith(".kmz");
-                boolean isGeoJSON = url.endsWith(".geojson");
 
-                if (!isKMLorKMZ && !isGeoJSON  /* handled separately below */) {
+                    //                    List<JsonNode> jdb = new ArrayList(pdb.size());
+                    //                    pdb.forEach(e -> {
+                    //                        if (e.children().isEmpty() && e.text().isEmpty())
+                    //                            return;
+                    //                        jdb.add(html2json(e));
+                    //                    });
 
-                    Metadata metadata = new Metadata();
-                    ParseContext context = new ParseContext();
-
-                    final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
-
-                    if (stream instanceof FileInputStream) {
-                        y.put(NObject.DATA, url);
-                    } else {
-                        //buffer the bytes for saving
-                        byte[] bytes = IOUtils.readFully(stream, (int) fileSize);
-                        stream = new ByteArrayInputStream(bytes);
-                        y.put(NObject.DATA, bytes);
+                    String docTitle = parentDOM.title(); //x.name();
+                    if (docTitle == null || docTitle.isEmpty()) {
+                        docTitle = titleify(docID);
                     }
 
-                    tikaWrapper.parse(stream, new DefaultHandler(), metadata, context);
+                    BufferedImage img = renderer.renderImageWithDPI(pageActual, (float) pdfPageImageDPI, ImageType.RGB);
 
-                    stream.close();
+                    //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
+                    ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
+                    boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI, thumbnailQuality);
 
-                    List<Metadata> m = tikaWrapper.getMetadata();
-                    m.forEach(md -> {
-                        for (String k : md.names()) {
-                            String[] v = md.getValues(k);
+                    byte[] thumbnail = os.toByteArray();
 
-                            String kk = tikiToField(k);
-                            if (kk != null) {
-                                Object vv = v.length > 1 ? v : v[0];
-                                if (vv instanceof String) {
-                                    try {
-                                        int ivv = Integer.parseInt((String) vv);
-                                        vv = ivv;
-                                    } catch (Exception e) {
-                                        //not an int
-                                    }
-                                }
-                                y.put(kk, vv);
-                            }
-                        }
-                    });
+                    String text = pdb.length > 0 ? Joiner.on('\n').join(pdb) : null;
 
-
-                }
-
-
-                //db.addAsync(y).get();
-
-                //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
-
-                if (isKMLorKMZ) {
-                    new KML(db, y).url(url).run();
-                } else if (isGeoJSON) {
-                    GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
-                }
-
-
-                x = y;
-
-            } catch (Exception e) {
-                logger.error("url_in removal: {}", e);
-            }
-
-
-
-            Object mime = x.get(NObject.TYPE);
-
-            if (mime != null && (mime.equals("image/jpeg") || mime.equals("image/png") /* ... */)) {
-                x = new MutableNObject(x)
-                        .name(titleify(docID))
-                        .put(NObject.DESC, null)
-                        .put(NObject.ICON, NObject.DATA /* redirect to the data field which already has the byte[] image */)
-                ;
-
-            }
-
-            if ("application/pdf".equals(mime) && x.has("pageCount") && x.has(NObject.DESC)  /* leaf */) {
-
-                int pageCount = x.get("pageCount");
-
-                //float docPri = Util.lerp(1f / (pageCount), 0.75f, 0.25f);
-
-                String parentContent = x.get(NObject.DESC);
-                String author = x.get("author");
-
-                //db.runLater(docPri, () -> {
-
-                Document parentDOM = Jsoup.parse(parentContent);
-
-                Elements pagesHTML = parentDOM.select(".page");
-
-                PDDocument document = null;
-
-
-                try {
-
-
-                    InputStream is;
-                    if (url.startsWith("file:")) {
-                        is = fileStream(url);
-                    } else {
-                        is = new URL(url).openStream();
-                    }
-
-                    document = PDDocument.load(is);
-
-                    PDFRenderer renderer = new PDFRenderer(document);
-
-
-                    for (int _page = 0; _page < pageCount; _page++) {
-
-                        final int pageActual = _page;
-                        final int page = _page + 1;
-                        logger.info("paginate: {} {}", docID, page);
-
-                        Document pd = Document.createShell("");
-                        pd.body().appendChild(pagesHTML.get(pageActual).removeAttr("class"));
-                        Elements cc = cleaner.clean(pd).body().children();
-                        String[] pdb = cc.stream()
-                                .filter(xx -> !xx.children().isEmpty() || xx.hasText())
-                                .map(xx -> xx.tagName().equals("p") ? xx.text() : xx) //just use <p> contents
-                                .map(Object::toString).toArray(String[]::new);
-
-
-                        //                    List<JsonNode> jdb = new ArrayList(pdb.size());
-                        //                    pdb.forEach(e -> {
-                        //                        if (e.children().isEmpty() && e.text().isEmpty())
-                        //                            return;
-                        //                        jdb.add(html2json(e));
-                        //                    });
-
-                        String docTitle = parentDOM.title(); //x.name();
-                        if (docTitle == null || docTitle.isEmpty()) {
-                            docTitle = titleify(docID);
-                        }
-
-                        BufferedImage img = renderer.renderImageWithDPI(pageActual, (float) pdfPageImageDPI, ImageType.RGB);
-
-                        //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
-                        ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
-                        boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI, thumbnailQuality);
-
-                        byte[] thumbnail = os.toByteArray();
-
-                        String text = pdb.length > 0 ? Joiner.on('\n').join(pdb) : null;
-
-                        String pageID = docID + "/" + page;
-                        db.add(
-                                new MutableNObject(pageID)
-                                        .name(docTitle + " - (" + page + " of " + (pageCount + 1) + ")")
-                                        .withTags(docID)
-                                        .put("author", author)
-                                        .put("url", url) //HACK browser loads the specific page when using the '#' anchor
-                                        .put(NObject.TYPE, "application/pdf")
-                                        .put(NObject.DATA, docID)
-                                        .put("page", page)
-                                        .put(NObject.DESC, text)
+                    String pageID = docID + "/" + page;
+                    db.add(
+                            new MutableNObject(pageID)
+                                    .name(docTitle + " - (" + page + " of " + (pageCount + 1) + ")")
+                                    .withTags(docID)
+                                    .put("author", author)
+                                    .put("url", url) //HACK browser loads the specific page when using the '#' anchor
+                                    .put(NObject.TYPE, "application/pdf")
+                                    .put(NObject.DATA, docID)
+                                    .put("page", page)
+                                    .put(NObject.DESC, text)
                                             /*.putLater("textParse", 0.1f, ()-> {
                                                 return (pdb.length > 0) ? Stream.of(pdb).map(
                                                         t -> NLP.toString(NLP.parse(t))
                                                 ).collect(Collectors.joining("\n")) : null;
                                             })*/
-                                        .put(NObject.ICON, thumbnail)
-                        );
-                    }
-
-
-                } catch (IOException f) {
-                    logger.error("error: {} {}", docID, f);
-                } finally {
-                    if (document != null)
-                        try {
-                            document.close();
-                        } catch (IOException e) {
-
-                        }
-
-
+                                    .put(NObject.ICON, thumbnail)
+                    );
                 }
 
 
+            } catch (IOException f) {
+                logger.error("error: {} {}", docID, f);
+            } finally {
+                if (document != null)
+                    try {
+                        document.close();
+                    } catch (IOException e) {
+
+                    }
             }
 
             //clean and update parent DOM
@@ -344,7 +335,10 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
             ;
 
 
-            return x;
+        }
+
+
+        return x;
 
     }
 
@@ -469,7 +463,6 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
         return m;
     }
-
 
 
 //    private static JsonNode html2json(Element e) {

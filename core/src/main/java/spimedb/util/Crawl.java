@@ -73,9 +73,9 @@ public class Crawl {
 
 
         DObject p = db.get(id);
-        String whenCached = p != null ? p.get("url_cached") : null;
+        Long whenCached = p != null ? p.get("url_cached") : null;
         try {
-            if (whenCached == null || Long.valueOf(whenCached) < u.openConnection().getLastModified()) {
+            if (whenCached == null || whenCached < u.openConnection().getLastModified()) {
                 String urlString = u.toString();
                 Set<String> keywords = parseKeywords(new LowerCaseTokenizer(), urlString);
                 db.addAsync(pri, new MutableNObject(id)

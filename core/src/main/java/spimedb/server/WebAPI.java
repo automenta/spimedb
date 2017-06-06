@@ -57,7 +57,7 @@ public class WebAPI {
     final static int SuggestLengthMax = 10;
     final static int SuggestionResultsMax = 16;
     final static int SearchResultsMax = 32;
-    final static int GeoResultsMax = 32;
+    final static int GeoResultsMax = 256;
     final static int FacetResultsMax = 64;
 
 

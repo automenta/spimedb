@@ -145,7 +145,8 @@ public class DObject implements NObject {
             } else if (c == Double.class) {
                 d.add(new DoublePoint(k, (Double) v));
             } else if (c == Long.class) {
-                throw new UnsupportedOperationException();
+                d.add(new StoredField(k, (Long) v));
+                //throw new UnsupportedOperationException();
                 //d.add(new LongPoint(k, ((Long) v).longValue()));
             } else if (v instanceof ScriptObjectMirror) {
                 //HACK ignore
@@ -390,15 +391,15 @@ public class DObject implements NObject {
             return dd;
 
         } else if (f instanceof LongPoint) {
-            throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
-//            LongPoint lp = (LongPoint)f;
-//            byte[] b = lp.binaryValue().bytes;
-//            long[] dd = new long[b.length / Long.BYTES];
-//            for (int i = 0;i < dd.length; i++)
-//                dd[i] = LongPoint.decodeDimension(b, i);
-//            if (dd.length == 1)
-//                return dd[0];
-//            return dd;
+            //throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
+            LongPoint lp = (LongPoint)f;
+            byte[] b = lp.binaryValue().bytes;
+            long[] dd = new long[b.length / Long.BYTES];
+            for (int i = 0;i < dd.length; i++)
+                dd[i] = LongPoint.decodeDimension(b, i);
+            if (dd.length == 1)
+                return dd[0];
+            return dd;
         } else if (f instanceof FloatRange) {
             throw new UnsupportedOperationException();
         } else if (f instanceof IntPoint) {
@@ -409,7 +410,12 @@ public class DObject implements NObject {
         IndexableFieldType type = f.fieldType();
 
         if (type == StoredField.TYPE) {
-            return f.binaryValue().bytes;
+            switch (f.name()) {
+                case "url_cached":
+                    return (Long)f.numericValue(); //HACK
+                default:
+                    return f.binaryValue().bytes;
+            }
         } else {
             String s = f.stringValue(); //TODO adapt based on field type
             if (s.startsWith("{") && s.endsWith("}")) {

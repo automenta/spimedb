@@ -236,10 +236,11 @@ public class SpimeDB {
 
         writerConf = new IndexWriterConfig(analyzer);
         writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+        writerConf.setCommitOnClose(true);
         try {
             writer = new IndexWriter(dir, writerConf);
-            readerMgr = new ReaderManager(writer);
-            searcherMgr = new SearcherManager(writer, new SearcherFactory());
+            readerMgr = new ReaderManager(writer, true, true);
+            searcherMgr = new SearcherManager(writer, true, true, new SearcherFactory());
         } catch (IOException e) {
             e.printStackTrace();
         }
