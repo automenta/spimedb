@@ -51,9 +51,6 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
     public final static Logger logger = LoggerFactory.getLogger(Multimedia.class);
 
 
-    final Parser tika = new AutoDetectParser();
-    final ContentHandlerFactory tikaFactory = new BasicContentHandlerFactory(BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
-
     static final Cleaner cleaner = new Cleaner(Whitelist.basic());
 
     static final float thumbnailQuality = 0.75f;
@@ -125,21 +122,20 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
             //TODO use a separate url_cached for each instance of a sibling class like Multimedia that does only one processing
             //this way they can be enabled/disabled separately without interfering with each other
             //TODO store a hashcode of the data as well as the time for additional integrity
-            if (p != null) {
-                Long whenCached = p.get("url_cached");
-                if (!(whenCached == null || whenCached < exp)) {
-                    logger.debug("cached: {}", url);
-                    return p; //still valid
-                }
+
+            Long whenCached = x.get("url_cached");
+            if (whenCached != null && whenCached <= exp) {
+                logger.debug("cached: {}", url);
+                return x; //still valid
             }
+
 
             logger.info("load: {}", url);
 
-            GeoNObject y = new GeoNObject(x);
+            x = new GeoNObject(x);
 
-            y.put("url_cached", /*Long.toString*/(exp));
+            ((MutableNObject) x).put("url_cached", /*Long.toString*/(exp));
 
-            x = y;
 
             boolean isKMLorKMZ = url.endsWith(".kml") || url.endsWith(".kmz");
             boolean isGeoJSON = url.endsWith(".geojson");
@@ -149,22 +145,29 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                 Metadata metadata = new Metadata();
                 ParseContext context = new ParseContext();
 
+                final Parser tika = new AutoDetectParser();
+                final ContentHandlerFactory tikaFactory = new BasicContentHandlerFactory(BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
+
                 final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
 
                 if (stream instanceof FileInputStream) {
-                    y.put(NObject.DATA, url);
+                    ((MutableNObject) x).put(NObject.DATA, url);
                 } else {
                     //buffer the bytes for saving
                     byte[] bytes = IOUtils.readFully(stream, (int) fileSize);
-                    stream = new ByteArrayInputStream(bytes);
-                    y.put(NObject.DATA, bytes);
+                    ByteArrayInputStream stream2 = new ByteArrayInputStream(bytes);
+                    stream.close();
+                    stream = stream2;
+                    ((MutableNObject) x).put(NObject.DATA, bytes);
                 }
 
                 tikaWrapper.parse(stream, new DefaultHandler(), metadata, context);
 
                 stream.close();
 
+
                 List<Metadata> m = tikaWrapper.getMetadata();
+                NObject finalX = x;
                 m.forEach(md -> {
                     for (String k : md.names()) {
                         String[] v = md.getValues(k);
@@ -180,7 +183,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                                     //not an int
                                 }
                             }
-                            y.put(kk, vv);
+                            ((MutableNObject) finalX).put(kk, vv);
                         }
                     }
                 });
@@ -193,13 +196,10 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
             //HACK run these after the updated 'y' is submitted in case these want to modify it when they run
 
             if (isKMLorKMZ) {
-                new KML(db, y).url(url).run();
+                new KML(db, ((GeoNObject) x)).url(url).run();
             } else if (isGeoJSON) {
                 GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
             }
-
-
-            x = y;
 
         } catch (Exception e) {
             logger.error("url_in removal: {}", e);
@@ -232,8 +232,6 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
             Elements pagesHTML = parentDOM.select(".page");
 
-            PDDocument document = null;
-
 
             try {
 
@@ -245,7 +243,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                     is = new URL(url).openStream();
                 }
 
-                document = PDDocument.load(is);
+                PDDocument document = PDDocument.load(is);
 
                 PDFRenderer renderer = new PDFRenderer(document);
 
@@ -282,6 +280,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                     //boolean result = ImageIOUtil.writeImage(img, outputFile, pdfPageImageDPI);
                     ByteArrayOutputStream os = new ByteArrayOutputStream(img.getWidth() * img.getHeight() * 3 /* estimate */);
                     boolean result = ImageIOUtil.writeImage(img, "jpg", os, pdfPageImageDPI, thumbnailQuality);
+                    os.close();
 
                     byte[] thumbnail = os.toByteArray();
 
@@ -308,15 +307,11 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                 }
 
 
+                document.close();
+
             } catch (IOException f) {
                 logger.error("error: {} {}", docID, f);
             } finally {
-                if (document != null)
-                    try {
-                        document.close();
-                    } catch (IOException e) {
-
-                    }
             }
 
             //clean and update parent DOM

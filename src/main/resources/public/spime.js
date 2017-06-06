@@ -2,7 +2,7 @@
 
 var uiBoundsReactionPeriodMS = 25;
 
-var MEMORY_SIZE = 512;
+var MEMORY_SIZE = 4096;
 var ACTIVATION_RATE = 0.5;
 
 
@@ -13,6 +13,11 @@ class MMEE extends LFUGraph {
 
     constructor() {
         super(MEMORY_SIZE);
+    }
+
+    evicted(key, value) {
+        super.evicted(key, value);
+        REMOVE(key);
     }
 
 }
@@ -62,21 +67,25 @@ var timeline = undefined;
 
 function ADD(y) {
     var id = y.I;
-    if (!y || !id)
+    if (!id)
         throw new Error("missing ID");
 
+    var z;
     var x = ME.get(id);
     if (x) {
-        x.update(y);
-        return x;
+        z = x;
+        z.update(y);
     } else {
-
-        y = new NObject(y);
-
-        ME.set(id, y);
-
-        return y;
+        z = new NObject(y);
+        ME.set(id, z);
+        if (map && z.where) {
+            z.where.addTo(map);
+        }
     }
+
+
+
+    return z;
 }
 
 
@@ -88,7 +97,13 @@ function REMOVE(id) {
 
     r.remove();
 
+    if (map && r.where) {
+        map.remove(r.where);
+        r.where = undefined;
+    }
+
     ME.delete(id);
+
 }
 
 function CLEAR() {
@@ -383,21 +398,22 @@ class NObject {
             that[k] = v;
         });
 
-        if (this.what) {
-            this.what.remove(); //remove existing node
+        if (!this.what) {
+            //this.what.remove(); //remove existing node
             //this.what = null;
-        }
 
-        this.what = ResultNode(x);
-        $('#results').append(this.what);
 
-        if (this.where) {
-            this.where.remove();
-            this.where = null;
-        }
+            this.what = ResultNode(x);
+            $('#results').append(this.what);
 
-        if (map) {
-            const bounds = x['@']; if (bounds) {
+            if (this.where) {
+                this.where.remove();
+                this.where = null;
+            }
+
+            //if (map) {
+            const bounds = x['@'];
+            if (bounds) {
 
                 //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
 
@@ -461,8 +477,8 @@ class NObject {
                     this.where = m;
                 }
             }
-
         }
+        //}
 
         if (timeline) {
             const bounds = x['@']; if (bounds) {
@@ -526,7 +542,7 @@ class NView {
 class NIcon {
     constructor(n) {
         this.n = n;
-        var d = this.ele = D('grid-item-content')
+        this.ele = D('grid-item-content')
             .text(n.I).click(() => {
 
                 //queryText.val(/* dimension + ':' + */ id);
@@ -557,14 +573,13 @@ function ResultNode(x) {
     const y = D('list-item result');
     y.data('o', x);
 
-    var tgt = x.I;
+
     if (x.inh) {
         x.out = x.inh['>'];
 
         const vin = x.inh['<'];
         if (vin && !(vin.length === 1 && vin[0].length === 0)) { //exclude root tag
             x.in = vin;
-            tgt = vin;
         }
     }
 
@@ -745,7 +760,7 @@ function MAP(target) {
             "y1": b.getSouth(),
             "y2": b.getNorth(),
             update: function () {
-                let sep = '/';
+                const sep = '/';
                 $.getJSON(  '/earth/lonlat/rect/' +
                         this.x1.toPrecision(precision) + sep +
                         this.x2.toPrecision(precision) + sep +
@@ -753,14 +768,7 @@ function MAP(target) {
                         this.y2.toPrecision(precision) +
                         '/json'
                 ,
-                (x) => {
-                    const yy = LOAD(x, 0.5);
-                    _.forEach(yy, y => {
-                        if (y && y.where) {
-                            y.where.addTo(map);
-                        }
-                    });
-                });
+                (x) => LOAD(x, 0.5));
             }
         };
     }

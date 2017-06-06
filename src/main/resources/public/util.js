@@ -73,19 +73,33 @@ function addToGrid(result, builder, grid) {
 
     var nn = $(newItems);
 
-    setTimeout(() => {
-        grid.append(nn).packery('appended', nn);
 
-        setTimeout(() => {
-            grid.packery('layout');
+    if (!grid.updateFn) {
+        grid.updateFn = _.throttle(() => {
+            //setTimeout(()=> {
+                grid.append(nn).packery('appended', grid.pending);
+                grid.pending = undefined;
 
-            // setTimeout(() => {
-            //     facets.packery('layout');
-            // }, 300);
+                //setTimeout(() => {
+                    grid.packery('layout');
 
-        }, 100);
+                // setTimeout(() => {
+                //     facets.packery('layout');
+              //   }, 300);
 
-    }, 0);
+                //}, 10);
+            //}, 100);
+
+        }, 50, {
+            leading: true,
+            trailing: true
+        });
+    }
+
+    grid.pending = (result);
+
+    grid.updateFn();
+
 
 }
 

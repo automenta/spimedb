@@ -226,26 +226,30 @@ class LFUGraph extends LFU {
     evicted(nid, n) {
         super.evicted(nid, n);
 
-        for (var tgtNode of n.o.keys()) {
-            //tgtNode = tgtNode.data;
-            //console.log('evict', nid, n, tgtNode);
-            tgtNode = this.get(tgtNode);
+        if (n.o) {
+            for (var tgtNode of n.o.keys()) {
+                //tgtNode = tgtNode.data;
+                //console.log('evict', nid, n, tgtNode);
+                tgtNode = this.get(tgtNode);
 
                 const e = tgtNode.i.remove(nid);
                 if (e)
                     this.edgeRemoved(n, tgtNode, e);
 
+            }
         }
 
-        for (var srcNode of n.i.keys()) {
-            //srcNode = srcNode.data;
-            //console.log('evict', nid, n, this.get(srcNode));
-            srcNode = this.get(srcNode);
+        if (n.i) {
+            for (var srcNode of n.i.keys()) {
+                //srcNode = srcNode.data;
+                //console.log('evict', nid, n, this.get(srcNode));
+                srcNode = this.get(srcNode);
 
                 const e = srcNode.o.remove(nid);
                 if (e)
                     this.edgeRemoved(srcNode, n, e);
 
+            }
         }
 
         this.nodeRemoved(nid, n);
