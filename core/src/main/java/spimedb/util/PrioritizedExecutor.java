@@ -18,7 +18,7 @@ public class PrioritizedExecutor implements Executor {
 
     private static final float DEFAULT_PRIORITY = 0.5f;
 
-    private static final long DEFAULT_TIMEOUT_ms = 1 * 60 * 1000;
+    private static final long DEFAULT_TIMEOUT_ms = 30 * 1000;
 
     public final PriorityBlockingQueue pq = new PriorityBlockingQueue<>(
             512 * 1024,
@@ -26,18 +26,28 @@ public class PrioritizedExecutor implements Executor {
 
     public final ExecutorService exe;
     public AtomicInteger running = new AtomicInteger();
+    public int concurrency;
 
     public PrioritizedExecutor(int threads) {
         //similar to Fixed-Size threadpool
+        this.concurrency = threads;
         this.exe = new ThreadPoolExecutor(threads, threads, 1, TimeUnit.MINUTES, pq) {
+
             @Override
             protected void beforeExecute(Thread t, Runnable r) {
                 running.incrementAndGet();
+                logger.debug("start {}", r);
             }
 
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
-                running.decrementAndGet();
+                logger.debug("  end {}", r);
+                int n = running.decrementAndGet();
+                if (n == 0) {
+                    logger.debug("quiescent");
+                }/* else {
+                    logger.debug("queue {}", getQueue());
+                }*/
             }
         };
 
@@ -111,16 +121,17 @@ public class PrioritizedExecutor implements Executor {
         public void run() {
 
             TimeOutTask timeout = new TimeOutTask(Thread.currentThread());
-            timer.schedule(timeout, timeoutMS);
-
             try {
-                r.run();
-            } catch (ThreadDeath ie) {
-                logger.error("{} interrupted {}", r, ie.getMessage());
+                timer.schedule(timeout, timeoutMS);
+
+                try {
+                    r.run();
+                } catch (ThreadDeath ie) {
+                    logger.error("{} interrupted {}", r, ie.getMessage());
+                }
+            } finally {
+                timeout.cancel();
             }
-
-            timeout.cancel();
-
         }
 
         @Override

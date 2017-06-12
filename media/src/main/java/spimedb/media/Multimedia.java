@@ -1,5 +1,6 @@
 package spimedb.media;
 
+import ch.qos.logback.classic.Level;
 import com.google.common.base.Joiner;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -57,12 +58,18 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
     static final int pdfPageImageDPI = 32;
 
     static {
-//        for (String s : new String[]{
-//                "org.apache.pdfbox.pdmodel.font.PDSimpleFont",
-//                "org.apache.pdfbox.rendering.CIDType0Glyph2D",
-//                "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont"}) {
-//            ((SLF4JLocationAwareLog) (LogFactory.getLog(s))).setLevel(Level.SEVERE);
-//        }
+        for (String s : new String[]{
+                "org.apache.pdfbox.pdmodel.font.PDSimpleFont",
+                "org.apache.pdfbox.rendering.CIDType0Glyph2D",
+                "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont",
+                "org.apache.pdfbox.io.ScratchFileBuffer",
+                "org.apache.pdfbox.pdfparser.PDFObjectStreamParser",
+                "org.apache.pdfbox.pdmodel.font.FileSystemFontProvider",
+                "org.apache.pdfbox.tools.imageio.MetaUtil"
+        }) {
+            SpimeDB.LOG(LoggerFactory.getLogger(s), Level.ERROR);
+            //((SLF4JLocationAwareLog) (LogFactory.getLog(s))).setLevel(Level.SEVERE);
+        }
         IIORegistry.getDefaultInstance().registerServiceProvider(new JBIG2ImageReaderSpi());
     }
 
@@ -74,14 +81,14 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
         db.on(this);
 
         //process existing items
-        db.forEach((x) -> {
-            db.runLater(0.5f, () -> {
+        db.forEach((xx) -> {
+            xx.forEach(x -> {
                 NObject y = apply(x, x);
                 if (y != x) {
-                    db.add(y);
+                    db.addAsync(0.5f, y);
                 }
             });
-        });
+        }, db.exe.concurrency);
     }
 
     @Override

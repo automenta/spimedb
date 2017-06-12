@@ -21,7 +21,8 @@
 
         <dependency>
             <groupId>automenta</groupId>
-            <artifactId>spimedb-core</artifactId>
+            <!--<artifactId>spimedb-core</artifactId>-->
+            <artifactId>spimedb-media</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>

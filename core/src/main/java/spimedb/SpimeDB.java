@@ -87,7 +87,9 @@ public class SpimeDB {
 
     static {
         if (!DEBUG)
-            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
+            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.WARN);
+        else
+            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
 
         SpimeDB.LOG(Reflections.log, Level.WARN);
         SpimeDB.LOG("logging", Level.WARN);
@@ -312,9 +314,8 @@ public class SpimeDB {
         if (suggester == null || lastWrite - lastSuggesterCreated > minSuggesterUpdatePeriod) {
             suggester = null; //re-create since it is invalidated
 
-            Lock l = locker.get("_suggester");
+            Lock l = locker.lock("_suggester");
 
-            l.lock();
             try {
                 if (this.suggester != null)
                     return this.suggester; //created while waiting for the lock
@@ -744,28 +745,14 @@ public class SpimeDB {
     }
 
     public <X> X run(String id, Supplier<X> r) {
-        Lock l = locker.get(id);
-
-        Throwable thrown = null;
-        X result = null;
-
-        l.lock();
-        try {
+        return locker.locked(id, (ii)->{
             try {
-                result = r.get();
+                return r.get();
             } catch (Throwable t) {
-                thrown = t;
+                logger.error("{} {} {}", id, r, t);
+                return null;
             }
-        } finally {
-            l.unlock();
-        }
-
-        if (thrown != null) {
-            logger.error("{} {} {}", id, r, thrown);
-            throw new RuntimeException(thrown);
-        }
-
-        return result;
+        });
     }
 
     public void addAsync(float pri, @Nullable NObject next) {
@@ -902,8 +889,6 @@ public class SpimeDB {
     }
 
     public void forEach(Consumer<NObject> each) {
-
-
         withReader((r) -> {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
 
@@ -921,6 +906,31 @@ public class SpimeDB {
         });
     }
 
+    public void forEach(Consumer<List<NObject>> each, int chunks) {
+        withReader((r) -> {
+            int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
+
+            int chunkSize = max / chunks;
+            int j = 0;
+            for (int i = 0; i < chunks && j < max; i++) {
+                List<NObject> l = new FasterList(chunkSize);
+                IntStream.range(j, j + chunkSize).forEach(k -> {
+                    Document d = null;
+                    try {
+                        d = r.document(k);
+                        if (d != null)
+                            l.add(DObject.get(d));
+                    } catch (IOException e) {
+                        logger.error("forEach {}", e);
+                    }
+                });
+                if (!l.isEmpty())
+                    each.accept(l);
+                j += chunkSize;
+            }
+
+        });
+    }
 
     public DObject get(String id) {
         return cache.get(id, (i) -> {

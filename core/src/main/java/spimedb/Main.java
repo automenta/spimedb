@@ -45,7 +45,7 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
     private static final ch.qos.logback.classic.Logger LOG;
 
-    final int fileObservePeriod = 200;
+    final int fileObservePeriod = 500;
 
     static {
 
@@ -73,16 +73,13 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     public final File path;
     private FileAlterationMonitor monitor;
 
-    protected Pair<Class, String> key(File f) {
+    @Nullable protected Pair<Class, String> key(File f) {
 
         String fileName = f.getName();
         if (fileName.startsWith("."))
             return null; //ignore hidden files
 
         String absolutePath = f.getAbsolutePath();
-        if (absolutePath == null)
-            return null;
-
         return key(fileName, absolutePath);
 
     }
@@ -166,22 +163,18 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     }
 
 
-    final Locker<Pair<Class, String>> locker = new Locker();
+    static final Locker<Pair<Class, String>> locker = new Locker();
 
-    private Object merge(Pair<Class, String> k, Function build) {
-        Lock l = locker.get(k);
-        l.lock();
-        try {
+    private Object merge(Pair<Class, String> kk, Function build) {
+        return locker.locked(kk, (k) -> {
             if (build == null) {
                 Object v = obj.remove(k);
                 logger.info("remove {}: {}", k, v);
                 return v;
             } else {
-                return obj.compute(k, (kk, existing) -> build.apply(existing));
+                return obj.compute(k, (kkk, existing) -> build.apply(existing));
             }
-        } finally {
-            l.unlock();
-        }
+        });
     }
 
     /**
