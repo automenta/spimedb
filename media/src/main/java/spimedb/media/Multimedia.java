@@ -59,9 +59,12 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
     static {
         for (String s : new String[]{
-                "org.apache.pdfbox.pdmodel.font.PDSimpleFont",
                 "org.apache.pdfbox.rendering.CIDType0Glyph2D",
+                "org.apache.pdfbox.pdmodel.font.PDSimpleFont",
                 "org.apache.pdfbox.pdmodel.font.PDTrueTypeFont",
+                "org.apache.pdfbox.pdmodel.font.PDType0Font",
+                "org.apache.pdfbox.pdmodel.font.PDCIDFontType0",
+                "org.apache.pdfbox.pdmodel.font.PDCIDFontType2",
                 "org.apache.pdfbox.io.ScratchFileBuffer",
                 "org.apache.pdfbox.pdfparser.PDFObjectStreamParser",
                 "org.apache.pdfbox.pdmodel.font.FileSystemFontProvider",
@@ -79,6 +82,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
         this.db = db;
 
         db.on(this);
+        logger.info("{} enabled {}", this, db.onChange);
 
         //process existing items
         db.forEach((xx) -> {
@@ -88,11 +92,14 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                     db.addAsync(0.5f, y);
                 }
             });
-        }, db.exe.concurrency);
+        }, db.exe.concurrency-1);
     }
 
     @Override
     public NObject apply(NObject p, NObject x) {
+
+        logger.debug("multimedia {}", p, x);
+
         final String url = x.get("url_in");
 
         String docID = x.id();
@@ -131,7 +138,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
             //TODO store a hashcode of the data as well as the time for additional integrity
 
             Long whenCached = x.get("url_cached");
-            if (whenCached != null && whenCached <= exp) {
+            if (whenCached != null && whenCached < exp) {
                 logger.debug("cached: {}", url);
                 return x; //still valid
             }

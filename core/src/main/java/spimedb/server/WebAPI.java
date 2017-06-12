@@ -1,11 +1,8 @@
 package spimedb.server;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.undertow.util.HttpString;
-import org.apache.http.HttpStatus;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.suggest.Lookup;
@@ -17,7 +14,6 @@ import spimedb.index.DObject;
 import spimedb.index.Search;
 import spimedb.query.Query;
 import spimedb.util.JSON;
-import spimedb.util.geom.PolygonTesselator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -29,9 +25,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.util.List;
 
-import static spimedb.server.WebIO.searchResult;
-import static spimedb.server.WebIO.searchResultFull;
-import static spimedb.server.WebIO.searchResultSummary;
+import static spimedb.server.WebIO.*;
 
 
 @Path("/")

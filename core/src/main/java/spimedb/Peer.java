@@ -3,7 +3,6 @@ package spimedb;
 import jcog.net.UDPeer;
 
 import java.io.IOException;
-import java.net.SocketException;
 
 
 /**

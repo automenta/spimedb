@@ -36,16 +36,16 @@ public class PrioritizedExecutor implements Executor {
             @Override
             protected void beforeExecute(Thread t, Runnable r) {
                 running.incrementAndGet();
-                logger.debug("start {}", r);
+                //logger.debug("start {}", r);
             }
 
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
-                logger.debug("  end {}", r);
+                //logger.debug("  end {}", r);
                 int n = running.decrementAndGet();
-                if (n == 0) {
+                /*if (n == 0) {
                     logger.debug("quiescent");
-                }/* else {
+                }*//* else {
                     logger.debug("queue {}", getQueue());
                 }*/
             }

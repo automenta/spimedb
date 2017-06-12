@@ -1,16 +1,13 @@
 package spimedb.query;
 
 import jcog.tree.rtree.rect.RectDoubleND;
-import org.apache.lucene.document.LatLonPoint;
-import org.apache.lucene.geo.GeoUtils;
 import org.jetbrains.annotations.NotNull;
 import spimedb.SpimeDB;
-import spimedb.cluster.feature.spatial.GeoSpatialFeature;
 
 import java.util.Arrays;
 
-import static java.lang.Double.*;
 import static java.lang.Double.NEGATIVE_INFINITY;
+import static java.lang.Double.POSITIVE_INFINITY;
 import static spimedb.query.Query.BoundsCondition.Intersect;
 
 /**

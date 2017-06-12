@@ -29,13 +29,11 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
 
-import javax.net.ssl.SSLContext;
 import javax.servlet.ServletException;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.io.File;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
 import static io.undertow.Handlers.ipAccessControl;

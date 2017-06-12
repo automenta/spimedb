@@ -87,7 +87,7 @@ public class SpimeDB {
 
     static {
         if (!DEBUG)
-            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.WARN);
+            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
         else
             SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
 
@@ -106,7 +106,7 @@ public class SpimeDB {
     final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ (-31 * System.currentTimeMillis()));
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
-            Math.max(2, 1 + Runtime.getRuntime().availableProcessors())
+            Math.max(2, 2 * Runtime.getRuntime().availableProcessors())
     );
 
     /**
@@ -306,7 +306,7 @@ public class SpimeDB {
         });
     }
 
-    @NotNull
+    @Nullable
     private Lookup suggester() {
 
         Lookup suggester = this.suggester;
@@ -323,6 +323,9 @@ public class SpimeDB {
                 FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
 
                 withReader((nameDictReader) -> {
+
+                    if (nameDictReader.maxDoc()==0)
+                        return;
 
                     DocumentDictionary nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
 
@@ -497,8 +500,12 @@ public class SpimeDB {
         //return new SearchResult(q, null, null); //TODO: return EmptySearchResult;
     }
 
-    public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
-        return suggester().lookup(qText, false, count);
+    @NotNull public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
+        Lookup s = suggester();
+        if (s == null)
+            return Collections.EMPTY_LIST;
+        else
+            return s.lookup(qText, false, count);
     }
 
     public static void LOG(String l, Level ll) {
@@ -580,6 +587,9 @@ public class SpimeDB {
     DObject commit(NObject previous, NObject _next) {
 
         NObject next = _next;
+
+        //logger.debug("commit onChange={}", onChange, previous, _next);
+
         if (!onChange.isEmpty()) {
             for (BiFunction<NObject, NObject, NObject> c : onChange) {
                 next = c.apply(previous, next);
@@ -695,7 +705,7 @@ public class SpimeDB {
     }
 
 
-    final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
+    public final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
 
     final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
     public final Router<String, Consumer<NObject>> onTag = new Router(); //TODO make private
@@ -818,9 +828,11 @@ public class SpimeDB {
             DObject next = DObject.get(_next, this);
 
             DObject previous = get(id);
-            if (previous != null) {
-                if (deepEquals(previous.document, next.document))
+            if (previous!=next && previous != null) {
+                if (deepEquals(previous.document, next.document)) {
+                    //logger.debug("equiv {}", id);
                     return previous;
+                }
             }
 
             //logger.debug("add {}", id);
@@ -906,7 +918,8 @@ public class SpimeDB {
         });
     }
 
-    public void forEach(Consumer<List<NObject>> each, int chunks) {
+    public void forEach(Consumer<List<NObject>> each, int _chunks) {
+        int chunks = Math.max(1, _chunks);
         withReader((r) -> {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
 

@@ -41,7 +41,9 @@ public class Crawl {
             String indexFolder = db.file.getAbsolutePath();
             String publicFolder = db.file.getAbsolutePath() + "/public";
 
+            logger.info("crawl directory {}", path);
             for (File x : path.listFiles()) {
+
                 String xPath = x.getAbsolutePath();
                 if (xPath.equals(indexFolder) || xPath.equals(publicFolder)) //exclude the index folder
                     continue;
@@ -78,11 +80,15 @@ public class Crawl {
             if (whenCached == null || whenCached < u.openConnection().getLastModified()) {
                 String urlString = u.toString();
                 Set<String> keywords = parseKeywords(new LowerCaseTokenizer(), urlString);
-                db.addAsync(pri, new MutableNObject(id)
-                    .withTags(keywords.toArray(new String[keywords.size()]))
-                    .put("url_in", url_in)
-                    .put("url", urlString)
-                );
+
+                MutableNObject n = new MutableNObject(id)
+                        .withTags(keywords.toArray(new String[keywords.size()]))
+                        .put("url_in", url_in)
+                        .put("url", urlString);
+
+                //logger.info("crawl {}", n);
+
+                db.addAsync(pri, n);
             }
         } catch (IOException e) {
             e.printStackTrace();

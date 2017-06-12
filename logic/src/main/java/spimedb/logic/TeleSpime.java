@@ -5,10 +5,9 @@ import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.nanocloud.RemoteNode;
 import org.jetbrains.annotations.NotNull;
+import spimedb.MultimediaMain;
 import spimedb.SpimeDB;
 import spimedb.SpimePeer;
-import spimedb.media.Multimedia;
-import spimedb.server.WebServer;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +22,7 @@ public class TeleSpime {
 
     public static void main(String[] args) {
 
-        System.setProperty("debug", "true");
+        //System.setProperty("debug", "true");
 
         //System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
 
@@ -33,7 +32,8 @@ public class TeleSpime {
         rn.setRemoteAccount("seh");
         //rn.setRemoteJavaExec("/home/seh/jdk9/bin/java");
         rn.setRemoteJavaExec("/jdk9/bin/java");
-        rn.setProp("debug", "true");
+
+        //rn.setProp("debug", "true");
 
 
         //Thread local = local();
@@ -53,21 +53,25 @@ public class TeleSpime {
 
 
                 try {
-                    int port = 8090;
+//                    int port = 8090;
 
-                    File home =
-                            //null;
-                            new File("/home/seh/doc");
+//                    File home =
+//                            //null;
+//                            new File("/home/seh/doc");
 
-                    SpimeDB db = new SpimeDB(home);
-                    SpimePeer peer = new SpimePeer(port, db);
-                    new Multimedia(db);
+                    MultimediaMain.main("/home/seh/doc");
 
-                    WebServer ws = new WebServer(db);
-                    ws.setPort(port);
+//                    SpimeDB db = new SpimeDB(home);
+//                    new Multimedia(db);
+//
+//
+//                    WebServer ws = new WebServer(db);
+//                    ws.setPort(port);
 
-                    peer.runFPS(0.5f);
-                    System.out.println("ready: " + peer);
+                    //SpimePeer peer = new SpimePeer(port, db);
+                    //peer.runFPS(0.5f);
+
+                    //System.out.println("ready: " + peer);
 
 //                    for (int i = 0; i < 500; i++) {
 //                        if (!peer.them.isEmpty()) System.out.println(peer.summary());

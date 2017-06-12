@@ -39,7 +39,7 @@ public class Spime extends Main {
         ), plugin);
 
         if (path != null) {
-            db = new SpimeDB(this.path.toPath().resolve("_").toFile());
+            db = new SpimeDB(this.path.getAbsoluteFile().toPath().resolve("_").toFile());
         } else {
             db = new SpimeDB();
         }
@@ -78,10 +78,12 @@ public class Spime extends Main {
     protected void updateDirectory(File d) {
         super.updateDirectory(d);
         //default: index a directory
-        //db.exe.run(0.8f, () -> {
-        if (!d.getAbsolutePath().equals(db.indexPath))
-            Crawl.fileDirectory(d.getAbsolutePath(), db);
-        //});
+
+        if (!d.getAbsolutePath().equals(db.indexPath)) {
+            db.exe.run(0.8f, () -> {
+                Crawl.fileDirectory(d.getAbsolutePath(), db);
+            });
+        }
 
     }
 

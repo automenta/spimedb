@@ -7,7 +7,7 @@ import spimedb.media.Multimedia;
  */
 public class MultimediaMain {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String... args) throws Exception {
         Spime.start(new Class[] { Multimedia.class }, args);
     }
 }

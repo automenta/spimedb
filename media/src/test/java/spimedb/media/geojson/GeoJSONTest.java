@@ -8,16 +8,11 @@ import spimedb.SpimeDB;
 import spimedb.media.GeoJSON;
 import spimedb.query.Query;
 
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**

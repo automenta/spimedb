@@ -32,7 +32,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 
 /**
@@ -145,7 +144,8 @@ public abstract class Main extends FileAlterationListenerAdaptor {
         if (k == null)
             return;
 
-        logger.info("reload file://{}", file);
+        //logger.info("reload file://{}", file);
+
         merge(k, build(k, file));
     }
 
@@ -550,16 +550,22 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 
     private void reload(FileAlterationObserver observer) {
         for (File f : observer.getDirectory().listFiles()) {
+
             if (f.getName().startsWith("."))
                 continue; //ignore hidden files
 
 
             //exe.submit(0.9f, () -> {
+
+            logger.debug("reload {}", f);
+
+
             if (f.isFile()) {
                 updateFile(f);
             } else if (f.isDirectory()) {
                 updateDirectory(f);
             }
+
             //});
         }
     }
