@@ -1,1 +1,0 @@
-../bower_components/cytoscape-edgehandles/cytoscape-edgehandles.js

@@ -138,7 +138,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
             //TODO store a hashcode of the data as well as the time for additional integrity
 
             Long whenCached = x.get("url_cached");
-            if (whenCached != null && whenCached < exp) {
+            if (whenCached != null && whenCached <= exp) {
                 logger.debug("cached: {}", url);
                 return x; //still valid
             }
@@ -148,7 +148,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
             x = new GeoNObject(x);
 
-            ((MutableNObject) x).put("url_cached", /*Long.toString*/(exp));
+            ((MutableNObject) x).put("url_cached", exp);
 
 
             boolean isKMLorKMZ = url.endsWith(".kml") || url.endsWith(".kmz");

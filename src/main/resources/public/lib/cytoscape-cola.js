@@ -1,1 +1,0 @@
-../bower_components/cytoscape-cola/cytoscape-cola.js

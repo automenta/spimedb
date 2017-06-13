@@ -1,6 +1,9 @@
 module.exports = {
-  entry: './spime.js',
-  output: {
-    filename: 'spime.dist.js'
-  }
+    entry: {
+        search: './search.js',
+        spacetime: './spacetime.js',
+    },
+    output: {
+        filename: 'spime.[name].js'
+    }
 };

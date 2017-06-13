@@ -5,193 +5,23 @@ import $ from "jquery";
 import Backbone from "backbone-lodash";
 import Packery from "packery";
 import L from "leaflet";
+import interact from "interact.js";
 
 
 const jQuery = window.jQuery = window.$ = $;
 
-var uiBoundsReactionPeriodMS = 25;
 
 var MEMORY_SIZE = 512;
 var ACTIVATION_RATE = 0.5;
-var map;
 
 
 
 
 
-function ADD(n) {
-    var id = n.I;
-    if (!id)
-        throw new Error("missing ID");
-
-    var y;
-    var x = ME.remove(id);
-    if (x) {
-        (y = x).update(n);
-    } else {
-        y = new NObject(n);
-        if (map && y.where) { //HACK
-             y.where.addTo(map);
-        }
-    }
-
-    ME.set(id, y); //update LFU cache by reinserting
-
-    return y;
-}
-
-
-function REMOVE(id) {
-
-    const r = ME.get(id);
-    if (!r)
-        return;
-
-    r.remove();
-
-    if (map && r.where) {
-        map.remove(r.where);
-        r.where = undefined;
-    }
-
-    ME.delete(id);
-
-}
-
-function CLEAR() {
-    ME.forEach((value, key) => {
-        REMOVE(key);
-    });
-    ME.clear();
-    clusters = {};
-}
-
-//TODO see this active eviction is compatible with LFU
-function FORGET(decay, maxItems) {
-    /*if (!ME.size() > maxItems) {
-     //dont have to sort
-     }*/
-    const n = ME.size;
-
-    const filteredIterator = ME.values();
-    const nn = filteredIterator.next;
-    filteredIterator.next = () => {
-        const v = nn.call(filteredIterator);
-
-        v.pri *= decay;
-
-        return v;
-    };
-
-    const a = Array.from(filteredIterator);
-
-
-    a.sort((x, y) => {
-
-        if (x === y) return 0;
-
-        const xp = x.pri;
-        const yp = y.pri;
-        if (xp > yp) return -1;
-        else return +1;
-    });
-
-
-    const toRemove = n - maxItems;
-
-    for (var i = 0; i < toRemove; i++) {
-        const z = a.pop();
-        REMOVE(z.I);
-    }
-}
-
-const facetButtonBuilder = (v) => {
-
-    const id = v[0]
-        .replace(/_/g, ' ')
-        .replace(/\-/g, ' ')
-    ; //HACK
-
-
-    return new NIcon(ME.computeIfAbsent(v[0], (v)=>{
-        return new NObject({I: id});
-    })).scale(v[1]).ele;
-
-};
-
-
-function loadFacets(result) {
-    facets.html('');
-
-
-    addToGrid(result, facetButtonBuilder, facets);
-
-
-}
-
-
-function LOAD(ss, activationRate) {
-
-
-    //setTimeout(() => {
-
-    const results = ss[0]; //first part: search results
-    const facets = ss[1]; //second part: facets
 
 
 
-    const yy = _.map(results, x => {
-        if (!x.I) return;
-        const score = x['*'];
-        const y = ADD(x);
-        if (y) {
-            y.activate(score * ACTIVATION_RATE * activationRate);
-        }
-        return y;
-    });
 
-    FORGET(0.9, MEMORY_SIZE);
-
-    loadFacets(facets);
-
-    return yy;
-
-//            _.each(clusters, (c, k) => {
-//
-//                if (c.length < 2)
-//                    return; //ignore clusters of length < 2
-//
-//                const start = c[0];
-//
-//                const d = DIVclass('list-item result');
-//                $(start).before(d);
-//                c.forEach(cc => {
-//                    /* {
-//
-//                     d = cc;
-//                     } else {
-//                     children.push(cc);
-//                     }*/
-//                    cc.detach();
-//                    cc.addClass('sub');
-//                    if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
-//                        d.append(cc);
-//                });
-//
-//                //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
-//                var dc = d.children();
-//                if (dc.length == 1) {
-//                    $(dc[0]).removeClass('sub');
-//                    d.replaceWith(dc[0]);
-//                }
-//
-//
-//            });
-
-
-    //}, 0);
-
-}
 
 function ALL(query, withResult) {
     $.get('/all', {q: query}, withResult);
@@ -659,116 +489,6 @@ function SpimeSocket(path, add) {
 }
 
 
-function MAP(target) {
-
-    var map = L.map(target, {
-        continuousWorld: true,
-        worldCopyJump: true
-    }).setView([51.505, -0.09], 5);
-
-    //http://leaflet-extras.github.io/leaflet-providers/preview/
-    //setTimeout(() =>
-    L.tileLayer(
-        'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
-        //'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
-        , {
-            //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-    //    0);
-
-
-    //                map.on('click', function(e) {
-    //
-    //                    const center = e.latlng;
-    //                    //var myRenderer = L.svg({ padding: 0.5 }); //TODO use hexagon polygon renderer
-    //
-    //
-    //                    var m = L.circle( center, {
-    //                        radius: 1000 //meters
-    //                        //renderer: myRenderer
-    //                    } );
-    //
-    //                    m.addTo(map);
-    //                } );
-
-    var curBounds = undefined;
-
-
-    // function diff(curBounds, prevBounds) {
-    //     if (curBounds.intersects(prevBounds)) {
-    //         //console.log('diff', curBounds, prevBounds);
-    //         //TODO http://stackoverflow.com/questions/25068538/intersection-and-difference-of-two-rectangles/25068722#25068722
-    //         //return L.bounds([[p1y,p1x],[p2y,p2x]]);
-    //         return curBounds;
-    //     } else {
-    //         return curBounds; //no commonality to subtract
-    //     }
-    // }
-
-    function rectBounds(b, precision=7) {
-        return {
-            "x1": b.getWest(),
-            "x2": b.getEast(),
-            "y1": b.getSouth(),
-            "y2": b.getNorth(),
-            update: function () {
-                const sep = '/';
-                $.getJSON(  '/earth/lonlat/rect/' +
-                        this.x1.toPrecision(precision) + sep +
-                        this.x2.toPrecision(precision) + sep +
-                        this.y1.toPrecision(precision) + sep +
-                        this.y2.toPrecision(precision) +
-                        '/json'
-                ,
-                (x) => LOAD(x, 0.5));
-            }
-        };
-    }
-
-    const updateBounds = _.debounce(() =>{
-
-        rectBounds( curBounds = map.getBounds() ).update();
-
-        /*var radiusMeters =
-         Math.max(b.getEast()-b.getWest(), b.getNorth()-b.getSouth()) / 2.0;*/
-
-
-        //var center = b.getCenter();
-        //var lon = center.lng;
-        //var lat = center.lat;
-        //app.spaceOn(circleBounds/*Compact*/(lon, lat, radiusMeters, 4),
-
-        //me.spaceOn(rectBounds(b), focus, errFunc);
-
-        /*.done(focus) //function (r) {
-         //console.log(r);
-
-         //updateGeoJSONFeatures(r);
-         //})
-         .fail(function (v, m) {
-         console.log('err', v, m);
-         });*/
-
-        //}, uiBoundsReactionPeriodMS );
-    }, uiBoundsReactionPeriodMS, {
-        'leading': true,
-        'trailing': false
-    });
-
-
-    map.on('viewreset', nextUpdateBounds);
-    map.on('moveend', nextUpdateBounds);
-    map.on('resize', nextUpdateBounds);
-
-
-    function nextUpdateBounds() {
-        setTimeout(updateBounds, 0);
-    }
-
-    updateBounds();
-
-    return map;
-}
 
 
 function e(eleID, cssclass) {
@@ -828,51 +548,6 @@ function newEle(e, dom) {
 
 
 
-function addToGrid(result, builder, grid) {
-
-    var newItems = _.map(result, (v) => {
-
-        const c = builder(v);
-
-        return ($(e('div')).attr('class', 'grid-item').append(c))[0];
-
-    });
-
-    var nn = $(newItems);
-
-    grid.pending = (result);
-
-    grid.append(nn);
-
-    //
-    // if (!grid.updateFn) {
-    //     grid.updateFn = _.throttle(() => {
-    //         //setTimeout(()=> {
-    //         grid.append(nn).packery('appended', grid.pending);
-    //         grid.pending = undefined;
-    //
-    //         //setTimeout(() => {
-    //         grid.packery('layout');
-    //
-    //         // setTimeout(() => {
-    //         //     facets.packery('layout');
-    //         //   }, 300);
-    //
-    //         //}, 10);
-    //         //}, 100);
-    //
-    //     }, 50, {
-    //         leading: true,
-    //         trailing: true
-    //     });
-    // }
-    //
-    //
-    //
-    // grid.updateFn();
-
-
-}
 
 
 function jsonUnquote(json) {
@@ -2230,12 +1905,192 @@ class MMEE extends LFUGraph {
 
     evicted(key, value) {
         super.evicted(key, value);
-        REMOVE(key);
+        this.REMOVE(key);
+    }
+
+
+    ADD(n) {
+        var id = n.I;
+        if (!id)
+            throw new Error("missing ID");
+
+        var y;
+        var x = this.remove(id);
+        if (x) {
+            (y = x).update(n);
+        } else {
+            y = new NObject(n);
+            // if (map && y.where) { //HACK
+            //     y.where.addTo(map);
+            // }
+        }
+
+        this.set(id, y); //update LFU cache by reinserting
+
+        return y;
+    }
+
+
+    REMOVE(id) {
+
+        const r = this.get(id);
+        if (!r)
+            return;
+
+        r.remove();
+
+        //if (map && r.where) {
+            //map.remove(r.where);
+            //r.where = undefined;
+        //}
+
+        this.delete(id);
+
+    }
+
+    CLEAR() {
+        this.forEach((value, key) => {
+            REMOVE(key);
+        });
+        this.clear();
+        clusters = {};
+    }
+
+//TODO see this active eviction is compatible with LFU
+    FORGET(decay, maxItems) {
+        /*if (!ME.size() > maxItems) {
+         //dont have to sort
+         }*/
+        const n = this.size;
+
+        const filteredIterator = this.values();
+        const nn = filteredIterator.next;
+        filteredIterator.next = () => {
+            const v = nn.call(filteredIterator);
+
+            v.pri *= decay;
+
+            return v;
+        };
+
+        const a = Array.from(filteredIterator);
+
+
+        a.sort((x, y) => {
+
+            if (x === y) return 0;
+
+            const xp = x.pri;
+            const yp = y.pri;
+            if (xp > yp) return -1;
+            else return +1;
+        });
+
+
+        const toRemove = n - maxItems;
+
+        for (var i = 0; i < toRemove; i++) {
+            const z = a.pop();
+            this.REMOVE(z.I);
+        }
+    }
+
+
+    LOAD(ss, activationRate) {
+
+
+        //setTimeout(() => {
+
+        const results = ss[0]; //first part: search results
+        const facets = ss[1]; //second part: facets
+
+
+
+        const that = this;
+
+        const yy = _.map(results, x => {
+            if (!x.I) return;
+            const score = x['*'];
+            const y = that.ADD(x);
+            if (y) {
+                y.activate(score * ACTIVATION_RATE * activationRate);
+            }
+            return y;
+        });
+
+        this.FORGET(0.9, MEMORY_SIZE);
+
+        //TODO use abstraction
+        if (this.facets) {
+
+            this.facets.html('');
+
+            const that = this;
+            var newItems = _.map(facets, (v) => {
+
+                const id = v[0]
+                    .replace(/_/g, ' ')
+                    .replace(/\-/g, ' ')
+                ; //HACK
+
+
+                const c = new NIcon(that.computeIfAbsent(v[0], (v)=>{
+                    return new NObject({I: id});
+                })).scale(v[1]).ele;
+
+                return ($(e('div')).attr('class', 'grid-item').append(c))[0];
+
+            });
+
+            var nn = $(newItems);
+            this.facets.append(nn);
+        }
+
+        return yy;
+
+//            _.each(clusters, (c, k) => {
+//
+//                if (c.length < 2)
+//                    return; //ignore clusters of length < 2
+//
+//                const start = c[0];
+//
+//                const d = DIVclass('list-item result');
+//                $(start).before(d);
+//                c.forEach(cc => {
+//                    /* {
+//
+//                     d = cc;
+//                     } else {
+//                     children.push(cc);
+//                     }*/
+//                    cc.detach();
+//                    cc.addClass('sub');
+//                    if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
+//                        d.append(cc);
+//                });
+//
+//                //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
+//                var dc = d.children();
+//                if (dc.length == 1) {
+//                    $(dc[0]).removeClass('sub');
+//                    d.replaceWith(dc[0]);
+//                }
+//
+//
+//            });
+
+
+        //}, 0);
+
     }
 
 }
 
-const ME = new MMEE(); //new Map();
+
+export default function me() {
+    return new MMEE();
+};
 
 var clusters = {};
 var facets = undefined; //HACK
@@ -2308,7 +2163,7 @@ function newFrame() {
         div = D('windgets').prependTo($('body'));
 
     var content = D('windget')/*.fadeIn()*/.appendTo(div);
-    var dragMoveListener = function (event) {
+    var dragMoveListener = event => {
         var target = event.target,
             // keep the dragged position in the data-x/data-y attributes
             x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
@@ -2322,7 +2177,8 @@ function newFrame() {
         // update the posiion attributes
         target.setAttribute('data-x', x);
         target.setAttribute('data-y', y);
-    }
+    };
+
 
 
     interact(content[0])
@@ -2359,118 +2215,3 @@ function newFrame() {
 }
 
 
-export default function spacetime() {
-
-
-    import('./lib/edsc-timeline.min.js').then( Timeline => {
-        //var timelineRows = new
-        var $timelines = $('.timeline');
-        var data1 = {
-            start: Date.UTC(2015, 1) / 1000,
-            end: Date.UTC() / 1000,
-            resolution: 'day',
-            intervals: [
-                [Date.UTC(2015, 4) / 1000, Date.UTC(2015, 5) / 1000],
-                [Date.UTC(2015, 6) / 1000, Date.UTC(2015, 9) / 1000]
-            ]
-        };
-        var data2 = {
-            start: Date.UTC(2015, 1) / 1000,
-            end: Date.UTC() / 1000,
-            resolution: 'day',
-            color: '#ff0000',
-            intervals: [
-                [Date.UTC(2015, 4) / 1000, Date.UTC(2015, 5) / 1000],
-                [Date.UTC(2015, 6) / 1000, Date.UTC(2015, 9) / 1000]
-            ]
-        };
-        var row1 = {
-            id: "examplerow1",
-            title: "Example row 1",
-            min: Date.UTC(0) / 1000,
-            max: Date.UTC() / 1000
-        };
-        var row2 = {
-            id: "examplerow2",
-            title: "Example row 2",
-            min: Date.UTC(0) / 1000,
-            max: Date.UTC() / 1000,
-        };
-        $timelines.on('rangechange.timeline', function (e, start, end) {
-            console.log('range change', start, end);
-        });
-        $timelines.on('temporalset.timeline', function (e, start, end) {
-            console.log('temporal set', start, end);
-        });
-        $timelines.on('temporalremove.timeline', function (e) {
-            console.log('temporal cleared');
-        });
-        $timelines.on('focusset.timeline', function (e, start, end, resolution) {
-            console.log('focus set', start, end, resolution);
-        });
-        $timelines.on('focusremove.timeline', function (e) {
-            console.log('focus cleared');
-        });
-        $timelines
-            .timeline()
-            .timeline('show');
-        $('#timeline-multiple')
-            .timeline('rows', [row1, row2])
-            .timeline('data', row1.id, data1)
-            .timeline('data', row2.id, data2)
-            //.timeline('setTemporal', [[Date.UTC(2015, 1), Date.UTC(2015, 2)]])
-            .timeline('setRowTemporal', 'examplerow2', [[Date.UTC(2015, 5), Date.UTC(2015, 6)]])
-
-    });
-
-
-
-    facets = /*newGrid*/($('#overfacets'));
-
-    map = MAP('map');
-
-
-    $('#settings').click(() => {
-        $('body').prepend('<iframe id="settings" src="/shell.html" width="100%" height="90%"></iframe>')
-    });
-
-
-//                //http://draggabilly.desandro.com/
-//                $('#resultsDragger').draggabilly({
-//                    axis: 'x'
-//
-//                }).on( 'dragMove', function( event, pointer, moveVector ) {
-//
-//                });
-
-
-    //START ----------------->
-
-    const Router = Backbone.Router.extend({
-
-        routes: {
-            "": "start",
-        },
-
-        start: function () {
-
-
-            // setTimeout(() => {
-            //
-            //     facets.html('');
-            //
-            //     FACETS({q: '>'}, loadFacets);
-            //
-            // }, 0);
-
-        }
-
-    });
-
-    new Router();
-    Backbone.history.start();
-
-
-}
-
-spacetime();

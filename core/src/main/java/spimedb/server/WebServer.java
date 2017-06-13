@@ -7,6 +7,7 @@ package spimedb.server;
 
 
 import com.google.common.base.Objects;
+import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
@@ -126,12 +127,13 @@ public class WebServer extends PathHandler {
         di.setContextPath(contextPath);
         di.setDeploymentName("SpimeDB");
         di.setAsyncExecutor(db.exe);
+
         //deployment.getProviderFactory().
         DeploymentManager manager = container.addDeployment(di);
         manager.deploy();
 
         try {
-            HttpHandler api = manager.start();
+            HttpHandler api = Handlers.disableCache(manager.start());
 
             ResourceHandler statics = new ResourceHandler(staticResources(db), api);
             statics.setCacheTime(24 * 60 * 60 * 1000);

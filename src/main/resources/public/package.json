@@ -4,24 +4,22 @@
   "dependencies": {
     "backbone-lodash": "latest",
     "cesium": "latest",
-    "d3": "latest",
     "draggabilly": "latest",
-    "es6-shim": "latest",
     "forerunnerdb": "latest",
     "fullcalendar": "latest",
-    "graphlib": "latest",
-    "interact": "latest",
+    "interact.js": "latest",
     "jquery": "latest",
     "jquery-ui": "latest",
     "jquery.atwho": "ichord/At.js",
     "jscroll": "latest",
     "leaflet": "latest",
     "leaflet.markercluster": "latest",
-    "lodash": "latest",
+    "msgpack-lite": "latest",
     "packery": "latest",
-    "msgpack-lite": "latest"
+    "three": "latest"
   },
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "dev": "webpack --watch"
   }
 }
