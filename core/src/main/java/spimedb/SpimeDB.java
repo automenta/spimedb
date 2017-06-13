@@ -106,7 +106,7 @@ public class SpimeDB {
     final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ (-31 * System.currentTimeMillis()));
 
     public final PrioritizedExecutor exe = new PrioritizedExecutor(
-            Math.max(2, 2 * Runtime.getRuntime().availableProcessors())
+            Math.max(2,  Runtime.getRuntime().availableProcessors())
     );
 
     /**
