@@ -54,12 +54,13 @@ public class MutableNObject extends ImmutableNObject {
     public MutableNObject put(String key, Object value) {
 
         switch (key) {
+
             case TAG:
                 String[] tt;
                 if (value instanceof String[])
                     tt = ((String[]) value).clone();
                 else if (value instanceof String)
-                    tt = ((String)value).split(" "); //new String[] { (String) value };
+                    tt = ((String)value).trim().split(" "); //new String[] { (String) value };
                 else if (value instanceof ArrayNode) {
                     tt = JSON.toStrings((ArrayNode)value);
                 } else
@@ -80,22 +81,25 @@ public class MutableNObject extends ImmutableNObject {
                 }
                 throw new RuntimeException(this + " can not change ID");
             case NAME:
-                name(value.toString());
+                name(value.toString().trim());
                 return this;
         }
 
-        synchronized (data) {
+        //synchronized (data) {
             if (value == null) {
                 data.remove(key);
             } else {
                 data.put(key, value);
             }
-        }
+        //}
         return this;
     }
 
     public MutableNObject description(String d) {
-        if (d.isEmpty()) {
+        if (d!=null)
+            d = d.trim();
+
+        if (d == null || d.isEmpty()) {
             if (data != null)
                 data.remove(DESC);
 

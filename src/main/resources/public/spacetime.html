@@ -2,37 +2,13 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+
     <link rel="stylesheet" href="lib/leaflet/leaflet.css">
     <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.css">
     <link rel="stylesheet" href="lib/leaflet.markercluster/MarkerCluster.Default.css">
-
-
-    <script src="lib/lodash.js"></script>
-    <script src="lib/jquery.min.js"></script>
-
-    <script src="lib/backbone.js"></script>
-
-
-    <script src="lib/draggabilly.js"></script>
-    <script src="lib/interact/interact.min.js"></script>
-
-    <script src="lib/packery/packery.js"></script>
-
-    <script src="lib/leaflet/leaflet.js"></script>
-    <script src="lib/leaflet.markercluster/leaflet.markercluster.js"></script>
-
-    <script src="lib/edsc-timeline.min.js"></script>
-
-    <!--<script src=https://cdnjs.cloudflare.com/ajax/libs/forerunnerdb/1.4.48/fdb-all.js"></script>-->
-
     <link rel="stylesheet" href="spime.css">
     <link rel="stylesheet" href="search.base.css">
     <link rel="stylesheet" href="search.css">
-
-    <script src="util.js"></script>
-    <script src="util.windget.js"></script>
-    <script src="graph.js"></script>
-    <script src="spime.js"></script>
 
 
 </head>
@@ -102,126 +78,18 @@
 </div>
 
 
-<div id="overfacets">
-</div>
+<div id="overfacets"  data-packery='{ "itemSelector": ".grid-item", "gutter": 10 }'></div>
+
+<script src="spime.dist.js"></script>
+
+
+<script src="lib/draggabilly.js"></script>
+<script src="lib/interact/interact.min.js"></script>
+
+
+<script src="lib/leaflet.markercluster/leaflet.markercluster.js"></script>
+
 
 </body>
 
-<script>
-    //var timelineRows = new
-    var $timelines = $('.timeline');
-    var data1 = {
-        start: Date.UTC(2015, 1) / 1000,
-        end: Date.UTC() / 1000,
-        resolution: 'day',
-        intervals: [
-            [Date.UTC(2015, 4) / 1000, Date.UTC(2015, 5) / 1000],
-            [Date.UTC(2015, 6) / 1000, Date.UTC(2015, 9) / 1000]
-        ]
-    };
-    var data2 = {
-        start: Date.UTC(2015, 1) / 1000,
-        end: Date.UTC() / 1000,
-        resolution: 'day',
-        color: '#ff0000',
-        intervals: [
-            [Date.UTC(2015, 4) / 1000, Date.UTC(2015, 5) / 1000],
-            [Date.UTC(2015, 6) / 1000, Date.UTC(2015, 9) / 1000]
-        ]
-    };
-    var row1 = {
-        id: "examplerow1",
-        title: "Example row 1",
-        min: Date.UTC(0) / 1000,
-        max: Date.UTC() / 1000
-    };
-    var row2 = {
-        id: "examplerow2",
-        title: "Example row 2",
-        min: Date.UTC(0) / 1000,
-        max: Date.UTC() / 1000,
-    };
-    $timelines.on('rangechange.timeline', function (e, start, end) {
-        console.log('range change', start, end);
-    });
-    $timelines.on('temporalset.timeline', function (e, start, end) {
-        console.log('temporal set', start, end);
-    });
-    $timelines.on('temporalremove.timeline', function (e) {
-        console.log('temporal cleared');
-    });
-    $timelines.on('focusset.timeline', function (e, start, end, resolution) {
-        console.log('focus set', start, end, resolution);
-    });
-    $timelines.on('focusremove.timeline', function (e) {
-        console.log('focus cleared');
-    });
-    $timelines
-        .timeline()
-        .timeline('show');
-    $('#timeline-multiple')
-        .timeline('rows', [row1, row2])
-        .timeline('data', row1.id, data1)
-        .timeline('data', row2.id, data2)
-        //.timeline('setTemporal', [[Date.UTC(2015, 1), Date.UTC(2015, 2)]])
-        .timeline('setRowTemporal', 'examplerow2', [[Date.UTC(2015, 5), Date.UTC(2015, 6)]])
-</script>
-
-<script>
-    "use strict";
-    var map;
-
-    $(() => {
-
-
-        facets = newGrid($('#overfacets'));
-
-        map = MAP('map');
-
-
-        $('#settings').click(() => {
-            $('body').prepend('<iframe id="settings" src="/shell.html" width="100%" height="90%"></iframe>')
-        });
-
-
-//                //http://draggabilly.desandro.com/
-//                $('#resultsDragger').draggabilly({
-//                    axis: 'x'
-//
-//                }).on( 'dragMove', function( event, pointer, moveVector ) {
-//
-//                });
-
-
-        //START ----------------->
-
-        const Router = Backbone.Router.extend({
-
-            routes: {
-                "": "start",
-            },
-
-            start: function () {
-
-
-                // setTimeout(() => {
-                //
-                //     facets.html('');
-                //
-                //     FACETS({q: '>'}, loadFacets);
-                //
-                // }, 0);
-
-            }
-
-        });
-
-        new Router();
-        Backbone.history.start();
-
-
-    }, false);
-
-
-</script>
 </html>

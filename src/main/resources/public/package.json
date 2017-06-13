@@ -1,10 +1,27 @@
 {
   "name": "spimedb",
   "version": "1.0.0",
-  "description": "spimedb",
-  "author": "",
-  "license": "AGPL",
   "dependencies": {
-    "bower": "latest"
+    "backbone-lodash": "latest",
+    "cesium": "latest",
+    "d3": "latest",
+    "draggabilly": "latest",
+    "es6-shim": "latest",
+    "forerunnerdb": "latest",
+    "fullcalendar": "latest",
+    "graphlib": "latest",
+    "interact": "latest",
+    "jquery": "latest",
+    "jquery-ui": "latest",
+    "jquery.atwho": "ichord/At.js",
+    "jscroll": "latest",
+    "leaflet": "latest",
+    "leaflet.markercluster": "latest",
+    "lodash": "latest",
+    "packery": "latest",
+    "msgpack-lite": "latest"
+  },
+  "scripts": {
+    "build": "webpack"
   }
 }
