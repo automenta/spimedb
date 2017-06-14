@@ -5,5 +5,11 @@ module.exports = {
     },
     output: {
         filename: 'spime.[name].js'
+    },
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty',
+        'crypto': 'empty'
     }
 };

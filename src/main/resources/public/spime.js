@@ -3,14 +3,20 @@
 import $ from "jquery";
 //import _ from "lodash";
 
+import pouch from "pouchdb";
+import pouchUpsert from "pouchdb-upsert";
+
 import interact from "interact.js";
 
 
 const jQuery = window.jQuery = window.$ = $;
 
 
+pouch.plugin(pouchUpsert);
+
 var MEMORY_SIZE = 512;
 var ACTIVATION_RATE = 0.5;
+
 
 
 
@@ -1884,6 +1890,27 @@ class MMEE extends LFUGraph {
 
     constructor() {
         super(MEMORY_SIZE);
+
+        const db = this.db = new pouch("spime");
+        console.log(db);
+
+        db.changes({
+            since: 'now',
+            live: true,
+            include_docs: true
+        }).on('change', function (change) {
+            // change.id contains the doc id, change.doc contains the doc
+            if (change.deleted) {
+                // document was deleted
+                console.log('delete', change);
+            } else {
+                // document was added/modified
+                console.log('change', change);
+            }
+        })/*.on('error', function (err) {
+            // handle errors
+        });*/
+
     }
 
     evicted(key, value) {
@@ -1909,6 +1936,25 @@ class MMEE extends LFUGraph {
         }
 
         this.set(id, y); //update LFU cache by reinserting
+
+        this.db.upsert(id, (d)=> {
+
+            n._id = id;
+            n._rev = d._rev; //temporary
+            if (_.isEqual(d, n)) {
+                return false; //no change
+            } else {
+                //console.log(JSON.stringify(d), JSON.stringify(n), _.isEqual(d, n));
+                delete n._rev; //undo the temporarily added revision for the comparison
+                return n;
+            }
+
+        })/*.then((d)=>{
+            console.log('then', d);
+        })*/.catch(function (err) {
+            console.error(err)
+        });
+
 
         return y;
     }
