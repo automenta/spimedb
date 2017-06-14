@@ -1,10 +1,8 @@
 "use strict";
 
-//import _ from "lodash";
 import $ from "jquery";
-import Backbone from "backbone-lodash";
-import Packery from "packery";
-import L from "leaflet";
+//import _ from "lodash";
+
 import interact from "interact.js";
 
 
@@ -15,21 +13,6 @@ var MEMORY_SIZE = 512;
 var ACTIVATION_RATE = 0.5;
 
 
-
-
-
-
-
-
-
-
-function ALL(query, withResult) {
-    $.get('/all', {q: query}, withResult);
-}
-
-function FACETS(query, withResult) {
-    $.get('/facet', query, withResult);
-}
 
 function QueryPrompt(withSuggestions, withResults) {
 
@@ -262,13 +245,13 @@ class NObject {
         }
         //}
 
-        if (timeline) {
+        /*if (timeline) {
             const bounds = x['@']; if (bounds) {
                 const when = bounds[0];
                 if (typeof(when)==='number' || typeof(when)==='array')
                     console.log(x, when);
             }
-        }
+        }*/
     }
 
 }
@@ -1953,7 +1936,7 @@ class MMEE extends LFUGraph {
             REMOVE(key);
         });
         this.clear();
-        clusters = {};
+        //clusters = {};
     }
 
 //TODO see this active eviction is compatible with LFU
@@ -2088,49 +2071,6 @@ class MMEE extends LFUGraph {
 }
 
 
-export default function me() {
-    return new MMEE();
-};
-
-var clusters = {};
-var facets = undefined; //HACK
-var timeline = undefined;
-//    var IF = new RuleReactor({}, true);
-//    IF.when = IF.createRule;
-//
-//    IF.when("show", 1, {n: NObject},
-//        (n) => {
-//            return n.visible;
-//        },
-//        (n) => {
-//            console.log('show', n.I);
-//        }
-//    );
-//    IF.when("hide", 0, {n: NObject},
-//        (n) => {
-//            return !n.visible;
-//        },
-//        (n) => {
-//            console.log('hide', n.I);
-//
-//            if (n.what) {
-//                n.what.remove();
-//                n.what = null;
-//            }
-//
-//            if (n.where) {
-//                n.where.remove();
-//                n.where = null;
-//            }
-//
-//            IF.retract(n);
-//        }
-//    );
-//
-//    IF.trace(0);
-//    IF.run(Infinity, true, function () {
-//        console.log(JSON.stringify(p));
-//    });
 
 
 function newWindow(content) {
@@ -2215,3 +2155,51 @@ function newFrame() {
 }
 
 
+
+const EXPORT = function () {
+    return new MMEE();
+};
+EXPORT.D = D;
+EXPORT.E = E;
+
+export default EXPORT;
+
+
+
+
+//    var IF = new RuleReactor({}, true);
+//    IF.when = IF.createRule;
+//
+//    IF.when("show", 1, {n: NObject},
+//        (n) => {
+//            return n.visible;
+//        },
+//        (n) => {
+//            console.log('show', n.I);
+//        }
+//    );
+//    IF.when("hide", 0, {n: NObject},
+//        (n) => {
+//            return !n.visible;
+//        },
+//        (n) => {
+//            console.log('hide', n.I);
+//
+//            if (n.what) {
+//                n.what.remove();
+//                n.what = null;
+//            }
+//
+//            if (n.where) {
+//                n.where.remove();
+//                n.where = null;
+//            }
+//
+//            IF.retract(n);
+//        }
+//    );
+//
+//    IF.trace(0);
+//    IF.run(Infinity, true, function () {
+//        console.log(JSON.stringify(p));
+//    });
