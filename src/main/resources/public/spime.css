@@ -8,7 +8,7 @@ body {
 }
 
 body * {
-    -webkit-transition: background-color 0.2s ease;
+    /* -webkit-transition: background-color 0.2s ease; */
     /*-webkit-transition: font-size 0.1s;*/
 }
 
