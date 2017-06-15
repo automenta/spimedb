@@ -1,3 +1,5 @@
+"use strict";
+
 import Backbone from "backbone-lodash";
 import S from "./spime.js";
 import Packery from "packery";

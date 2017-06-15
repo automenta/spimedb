@@ -1,27 +1,28 @@
 {
   "name": "spimedb",
   "version": "1.0.0",
+  "license": "AGPL-3.0",
   "dependencies": {
     "backbone-lodash": "latest",
     "cesium": "latest",
+    "collections": "latest",
     "draggabilly": "latest",
-    "pouchdb": "latest",
-    "pouchdb-adapter-idb": "latest",
-    "pouchdb-upsert": "latest",
     "fullcalendar": "latest",
     "interact.js": "latest",
     "jquery": "latest",
     "jquery-ui": "latest",
-    "jquery.atwho": "ichord/At.js",
     "jscroll": "latest",
     "leaflet": "latest",
     "leaflet.markercluster": "latest",
     "msgpack-lite": "latest",
     "packery": "latest",
+    "pouchdb": "latest",
+    "pouchdb-adapter-idb": "latest",
+    "pouchdb-upsert": "latest",
     "three": "latest"
   },
   "scripts": {
     "build": "webpack",
-    "dev": "webpack --watch"
+    "dev": "webpack --watch -p"
   }
 }

@@ -3,6 +3,9 @@
 import $ from "jquery";
 //import _ from "lodash";
 
+//import LfuMap from "collections/lfu-map";
+import LfuMap from "collections/lru-map"; //actually LRU
+
 import pouch from "pouchdb";
 import pouchUpsert from "pouchdb-upsert";
 
@@ -14,10 +17,8 @@ const jQuery = window.jQuery = window.$ = $;
 
 pouch.plugin(pouchUpsert);
 
-var MEMORY_SIZE = 512;
+var MEMORY_SIZE = 1024;
 var ACTIVATION_RATE = 0.5;
-
-
 
 
 function QueryPrompt(withSuggestions, withResults) {
@@ -137,119 +138,112 @@ class NObject {
 
         this.pri = 0.0;
 
-        this.visible = true;
-        this.where = false;
-        this.when = false;
-        this.what = false;
+        //this.visible = true;
 
-        this.update(x);
+        _.extend(this, x);
     }
 
     activate(p) {
         this.pri = Math.min(1, Math.max(0, this.pri + p));
     }
 
-    remove() {
-        if (this.what) {
-            this.what.remove();
-            this.what = null;
-        }
-        if (this.where) {
-            this.where.remove();
-            this.where = null;
+    // remove() {
+    //     if (this.what) {
+    //         this.what.remove();
+    //         this.what = null;
+    //     }
+    //     if (this.where) {
+    //         this.where.remove();
+    //         this.where = null;
+    //     }
+    // }
+
+    /** merge any changes into this instance; return true if change, false if no change */
+    update(next) {
+        //TODO
+        return false;
+    }
+
+    where() {
+        const w = this._where;
+        if (w !== undefined)
+            return w; //cached value
+
+        const bounds = this['@'];
+        if (bounds) {
+
+            //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
+
+            //when = bounds[0]
+            var lon = bounds[1];
+            var lat = bounds[2];
+            //alt = bounds[3]
+
+            var label = this.N || this.I || "?";
+
+            var m;
+
+            var linePath, polygon;
+            if (linePath = this['g-']) {
+                //TODO f.lineWidth
+
+                m = L.polyline(linePath, {color: this.color || 'gray', data: this, title: label});
+
+            } else if (polygon = this['g*']) {
+
+                m = L.polygon(polygon, {color: this.polyColor || this.color || 'gray', data: this, title: label});
+
+            } else {
+                //default point or bounding rect marker:
+
+                var mm = {
+                    data: this,
+                    title: label,
+                    stroke: false,
+                    fillColor: "#0078ff",
+                    fillOpacity: 0.5,
+                    weight: 1
+                };
+
+                if (!(Array.isArray(lat) || Array.isArray(lon))) {
+                    mm.zIndexOffset = 100;
+                    //f.iconUrl
+                    m = L.circleMarker([lat, lon], mm);
+                    //.addTo(map);
+                } else {
+                    const latMin = lat[0], latMax = lat[1];
+                    const lonMin = lon[0], lonMax = lon[1];
+
+
+                    mm.fillOpacity = 0.3; //TODO decrease this by the bounds area
+
+                    m = L.rectangle([[latMin, lonMin], [latMax, lonMax]], mm);
+                }
+
+
+            }
+
+            if (m) {
+                //m.on('click', clickHandler);
+                //m.on('mouseover', overHandler);
+                //m.on('mouseout', outHandler);
+
+                return this._where = m;
+            }
+        } else {
+            return this._where = false;
         }
     }
 
-    update(x) {
-
-        const id = x.I;
-
-        const that = this;
-        _.each(x, (v, k) => {
-            that[k] = v;
-        });
-
-        if (!this.what) {
-            //this.what.remove(); //remove existing node
-            //this.what = null;
-
-
-            this.what = ResultNode(x);
-            $('#results').append(this.what);
-
-            if (this.where) {
-                this.where.remove();
-                this.where = null;
-            }
-
-            //if (map) {
-            const bounds = x['@'];
-            if (bounds) {
-
-                //Leaflet uses (lat,lon) ordering but SpimeDB uses (lon,lat) ordering
-
-                //when = bounds[0]
-                var lon = bounds[1];
-                var lat = bounds[2];
-                //alt = bounds[3]
-
-                var label = x.N || id || "?";
-
-                var m;
-
-                var linePath, polygon;
-                if (linePath = x['g-']) {
-                    //TODO f.lineWidth
-
-                    m = L.polyline(linePath, {color: x.color || 'gray', data: x, title: label});
-                    //.addTo(map);
-
-                } else if (polygon = x['g*']) {
-
-                    m = L.polygon(polygon, {color: x.polyColor || x.color || 'gray', data: x, title: label});
-                    //.addTo(map);
-
-                } else {
-                    //default point or bounding rect marker:
-
-                    var mm = {
-                        data: x,
-                        title: label,
-                        stroke: false,
-                        fillColor: "#0078ff",
-                        fillOpacity: 0.5,
-                        weight: 1
-                    };
-
-                    if (!(Array.isArray(lat) || Array.isArray(lon))) {
-                        mm.zIndexOffset = 100;
-                        //f.iconUrl
-                        m = L.circleMarker([lat, lon], mm);
-                        //.addTo(map);
-                    } else {
-                        var latMin = lat[0], latMax = lat[1];
-                        var lonMin = lon[0], lonMax = lon[1];
-
-
-                        mm.fillOpacity = 0.3; //TODO decrease this by the bounds area
-
-                        m = L.rectangle([[latMin, lonMin], [latMax, lonMax]], mm);
-                        //.addTo(map);
-                    }
-
-
-                }
-
-                if (m) {
-                    //m.on('click', clickHandler);
-                    //m.on('mouseover', overHandler);
-                    //m.on('mouseout', outHandler);
-
-                    this.where = m;
-                }
-            }
+    what() {
+        if (!this._what) {
+            $('#results').append(this._what = ResultNode(this));
+            return this._what;
         }
-        //}
+    }
+
+    when() {
+        //TODO
 
         /*if (timeline) {
             const bounds = x['@']; if (bounds) {
@@ -282,25 +276,27 @@ class NView {
         const controls = D('controls').append(
             SPANclass('label').append(n.N || n.I),
 
-            SPANclass('button').text('v').click(()=>{
-                font*= 0.75; updateFont(); //font shrink
+            SPANclass('button').text('v').click(() => {
+                font *= 0.75;
+                updateFont(); //font shrink
             }),
 
-            SPANclass('button').text('^').click(()=>{
-                font*= 1.333; updateFont(); //font grow
+            SPANclass('button').text('^').click(() => {
+                font *= 1.333;
+                updateFont(); //font grow
             }),
 
             // SPANclass('button').text('~').click(()=>{
             //     newWindow(b);
             // }),
 
-            SPANclass('button').text('x').click(()=>b.hide())
+            SPANclass('button').text('x').click(() => b.hide())
         );
 
-        b.append( controls );
+        b.append(controls);
 
         if (content)
-            b.append( content );
+            b.append(content);
 
     }
 
@@ -407,7 +403,7 @@ function ResultNode(x) {
         if (typeof t === "object")
             t = newEle('pre').append(JSON.stringify(t, null, 2));
         else //if (typeof t === "string")
-            t = E('p').attr('class', 'textpreview').html((t+'').replace('\n', '<br/>'));
+            t = E('p').attr('class', 'textpreview').html((t + '').replace('\n', '<br/>'));
 
         y.append(t);
     }
@@ -436,19 +432,19 @@ function SpimeSocket(path, add) {
         'ws://' + defaultHostname + ':' + defaultWSPort + '/' + path,
         null /* protocols */,
         options); //{
-            //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
-            /*
-             // The number of milliseconds to delay before attempting to reconnect.
-             reconnectInterval: 1000,
-             // The maximum number of milliseconds to delay a reconnection attempt.
-             maxReconnectInterval: 30000,
-             // The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist.
-             reconnectDecay: 1.5,
+    //Options: //https://github.com/joewalnes/reconnecting-websocket/blob/master/reconnecting-websocket.js#L112
+    /*
+     // The number of milliseconds to delay before attempting to reconnect.
+     reconnectInterval: 1000,
+     // The maximum number of milliseconds to delay a reconnection attempt.
+     maxReconnectInterval: 30000,
+     // The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist.
+     reconnectDecay: 1.5,
 
-             // The maximum time in milliseconds to wait for a connection to succeed before closing and retrying.
-             timeoutInterval: 2000,
-             */
-        //});
+     // The maximum time in milliseconds to wait for a connection to succeed before closing and retrying.
+     timeoutInterval: 2000,
+     */
+    //});
 
     ws.binaryType = 'arraybuffer';
 
@@ -476,8 +472,6 @@ function SpimeSocket(path, add) {
 
     return ws;
 }
-
-
 
 
 function e(eleID, cssclass) {
@@ -534,9 +528,6 @@ function newEle(e, dom) {
         return d;
     return $(d);
 }
-
-
-
 
 
 function jsonUnquote(json) {
@@ -1514,224 +1505,48 @@ function MEMOIZE(fn) {
     }
 }
 
-/** https://github.com/kapouer/node-lfu-cache/blob/master/index.js */
-class LFU extends Map {
 
-    constructor(cap, halflife) {
-        super();
-        this.cap = cap;
-        this.halflife = halflife || null;
-        this.head = this.freq();
-        this.lastDecay = Date.now();
-    }
-
-    get(key) {
-        var el = super.get(key);
-        if (!el) return;
-        var cur = el.parent;
-        var next = cur.next;
-        if (!next || next.weight !== cur.weight + 1) {
-            next = this.entry(cur.weight + 1, cur, next);
-        }
-        this.removeFromParent(el.parent, key);
-        next.items.add(key);
-        el.parent = next;
-        var now = Date.now();
-        el.atime = now;
-        if (this.halflife && now - this.lastDecay >= this.halflife)
-            this.decay(now);
-        this.atime = now;
-        return el.data;
-    }
-
-    /** follows java's Map.computeIfAbsent semantics */
-    computeIfAbsent(key, builder) {
-        var x = this.get(key);
-        if (!x) {
-            x = builder.apply(key);
-            this.set(key, x);
-        }
-        return x;
-    }
-
-    decay(now) {
-        // iterate over all entries and move the ones that have
-        // this.atime - el.atime > this.halflife
-        // to lower freq nodes
-        // the idea is that if there is 10 hits / minute, and a minute gap,
-
-        this.lastDecay = now;
-        var diff = now - this.halflife;
-        //var halflife = this.halflife;
-        var weight, cur, prev;
-        for (var [key, value] of this) {
-            if (diff > value.atime) {
-                // decay that one
-                // 1) find freq
-                cur = value.parent;
-                weight = Math.round(cur.weight / 2);
-                if (weight === 1) continue;
-                prev = cur.prev;
-                while (prev && prev.weight > weight) {
-                    cur = prev;
-                    prev = prev.prev;
-                }
-                if (!prev || !cur) {
-                    throw new Error("Empty before and after halved weight - please report");
-                }
-                // 2) either prev has the right weight, or we must insert a freq with
-                // the right weight
-                if (prev.weight < weight) {
-                    prev = this.entry(weight, prev, cur);
-                }
-                this.removeFromParent(value.parent, key);
-                value.parent = prev;
-                prev.items.add(key);
-            }
-        }
-    }
-
-
-    set(key, obj) {
-
-        var now = Date.now();
-
-        const existing = this.remove(key, true);
-        if (existing===undefined) {
-            //ensure room for the new entry
-            while (this.size + 1 > this.cap) {
-                if (this.halflife && now - this.lastDecay >= this.halflife) {
-                    this.decay(now);
-                }
-
-                try {
-                    this.evict();
-                } catch (e) {
-                    console.error(e);
-                    break;
-                }
-            }
-        }
-
-
-        var cur = this.head.next;
-        if (!cur || cur.weight !== 1) {
-            cur = this.entry(1, this.head, cur);
-        }
-        if (!cur.items.add(key)) {
-            console.error('duplicate', key);
-        }
-
-
-        super.set(key, { //TODO store this as a 3 element tuple
-            data: obj,
-            atime: now,
-            parent: cur
-        });
-
-        return existing;
-
-    }
-
-    remove(key, reparentOnly=false) {
-        var el = super.get(key);
-        if (!el)
-            return undefined;
-        this.removeFromParent(el.parent, key);
-        if (!reparentOnly)
-            this.delete(key);
-        return el.data;
-    }
-
-
-    removeFromParent(parent, key) {
-        if (parent.items.delete(key)) {
-            if (parent.items.size === 0) {
-                parent.prev.next = parent.next;
-                if (parent.next) parent.next.prev = parent;
-            }
-        }
-    }
-
-    evict() {
-        const least = this.next();
-        if (least) {
-            const victim = this.remove(least);
-            if (victim) {
-                this.evicted(least, victim);
-            }
-        } else {
-            throw new Error("Cannot find an element to evict - please report issue");
-        }
-    }
-
-    next() {
-        if (this.head.next) {
-            var next = this.head.next; //its either head.next or just head
-            while (next.items.size === 0) {
-                next = next.next;
-            }
-
-            return next.items.keys().next().value;
-        }
-        return null;
-    }
-
-    evicted(key, value) {
-
-    }
-
-    freq() {
-        return {
-            weight: 0,
-            items: new Set()
-        }
-    }
-
-    item(obj, parent) {
-        return {
-            obj: obj,
-            parent: parent
-        };
-    }
-
-    entry(weight, prev, next) {
-        var node = this.freq();
-        node.weight = weight;
-        node.prev = prev;
-        node.next = next;
-        prev.next = node;
-        if (next) next.prev = node;
-        return node;
-    }
-}
-
+/** graph vertex */
 class Node {
-    constructor(id) {
+    constructor(id, maxIn = 8, maxOut = 8) {
         this.id = id;
-        //edge maps: (target, edge_value)
-        //this.i = new LFU(8)
-        this.i = new LFU(8);
-        this.o = new LFU(8); //LFU(8);
+        this.i = new LfuMap({}, maxIn);
+        this.o = new LfuMap({}, maxOut);
     }
 
 }
 
 
-class LFUGraph extends LFU {
+class LFUGraph extends LfuMap {
 
-    constructor(maxNodes, halflife) {
-        super(maxNodes, halflife);
+    constructor(maxNodes) {
+        super({}, maxNodes);
+
+        const that = this;
+        this.addBeforeMapChangeListener((n, nid, map) => {
+            if (n === undefined) {
+                n = that.get(nid); //WTF
+                if (n) {
+                    //console.log('-', nid, n);
+                    that.nodeEvicted(nid, n);
+                }
+            }
+        });
+        this.addMapChangeListener((n, nid, map) => {
+            if (n) {
+                //console.log("+", nid, n);
+                that.nodeAdded(nid, n);
+            }
+        });
     }
 
-    node(nid, createIfMissing=true) {
+    node(nid, createIfMissing = true) {
         const x = this.get(nid);
         if (x || !createIfMissing)
             return x;
 
         const n = new Node(nid);
         this.set(nid, n);
-        this.nodeAdded(nid, n);
         return n;
     }
 
@@ -1739,8 +1554,7 @@ class LFUGraph extends LFU {
         return this.get(nodeID);
     }
 
-    evicted(nid, n) {
-        super.evicted(nid, n);
+    nodeEvicted(nid, n) {
 
         if (n.o) {
             for (var tgtNode of n.o.keys()) {
@@ -1772,8 +1586,6 @@ class LFUGraph extends LFU {
 
         delete n.o;
         delete n.i;
-
-
     }
 
     nodeAdded(nid, n) {
@@ -1832,6 +1644,15 @@ class LFUGraph extends LFU {
         }
     }
 
+    /** follows java's Map.computeIfAbsent semantics */
+    computeIfAbsent(key, builder) {
+        var x = this.get(key);
+        if (!x) {
+            this.set(key, x = builder.apply(key));
+        }
+        return x;
+    }
+
     forEachEdge(edgeConsumer) {
         for (var [nodeID, srcVertex] of this) {
             const vv = srcVertex.data;
@@ -1855,7 +1676,7 @@ class LFUGraph extends LFU {
     /** computes a node-centric Map snapshot of the values */
     treeOut() {
         var x = {};
-        this.forEachEdge((src,tgtID,E)=>{
+        this.forEachEdge((src, tgtID, E) => {
             const vid = src.id;
             const eid = tgtID;
             var ex = x[vid];
@@ -1871,7 +1692,7 @@ class LFUGraph extends LFU {
 
     edgeList() {
         var x = [];
-        this.forEachEdge((src,tgtID,E)=>{
+        this.forEachEdge((src, tgtID, E) => {
             x.push([src.id, tgtID]);
         });
         return x;
@@ -1902,42 +1723,36 @@ class MMEE extends LFUGraph {
             // change.id contains the doc id, change.doc contains the doc
             if (change.deleted) {
                 // document was deleted
-                console.log('delete', change);
+                //console.log('delete', change);
             } else {
                 // document was added/modified
-                console.log('change', change);
+                //console.log('change', change);
             }
-        })/*.on('error', function (err) {
-            // handle errors
-        });*/
+        })
+        /*.on('error', function (err) {
+                    // handle errors
+                });*/
 
-    }
-
-    evicted(key, value) {
-        super.evicted(key, value);
-        this.REMOVE(key);
     }
 
 
     ADD(n) {
-        var id = n.I;
+        const id = n.I;
         if (!id)
             throw new Error("missing ID");
 
         var y;
-        var x = this.remove(id);
+        var x = this.get(id);
         if (x) {
-            (y = x).update(n);
+            if (!(y = x).update(n))
+                return y; //no changes that should update db
         } else {
             y = new NObject(n);
-            // if (map && y.where) { //HACK
-            //     y.where.addTo(map);
-            // }
+            this.set(id, y); //update LFU cache by reinserting
         }
 
-        this.set(id, y); //update LFU cache by reinserting
 
-        this.db.upsert(id, (d)=> {
+        this.db.upsert(id, (d) => {
 
             n._id = id;
             n._rev = d._rev; //temporary
@@ -1966,157 +1781,19 @@ class MMEE extends LFUGraph {
         if (!r)
             return;
 
-        r.remove();
-
-        //if (map && r.where) {
-            //map.remove(r.where);
-            //r.where = undefined;
-        //}
-
         this.delete(id);
+        return r;
 
     }
 
     CLEAR() {
-        this.forEach((value, key) => {
-            REMOVE(key);
-        });
+
         this.clear();
         //clusters = {};
     }
 
-//TODO see this active eviction is compatible with LFU
-    FORGET(decay, maxItems) {
-        /*if (!ME.size() > maxItems) {
-         //dont have to sort
-         }*/
-        const n = this.size;
-
-        const filteredIterator = this.values();
-        const nn = filteredIterator.next;
-        filteredIterator.next = () => {
-            const v = nn.call(filteredIterator);
-
-            v.pri *= decay;
-
-            return v;
-        };
-
-        const a = Array.from(filteredIterator);
-
-
-        a.sort((x, y) => {
-
-            if (x === y) return 0;
-
-            const xp = x.pri;
-            const yp = y.pri;
-            if (xp > yp) return -1;
-            else return +1;
-        });
-
-
-        const toRemove = n - maxItems;
-
-        for (var i = 0; i < toRemove; i++) {
-            const z = a.pop();
-            this.REMOVE(z.I);
-        }
-    }
-
-
-    LOAD(ss, activationRate) {
-
-
-        //setTimeout(() => {
-
-        const results = ss[0]; //first part: search results
-        const facets = ss[1]; //second part: facets
-
-
-
-        const that = this;
-
-        const yy = _.map(results, x => {
-            if (!x.I) return;
-            const score = x['*'];
-            const y = that.ADD(x);
-            if (y) {
-                y.activate(score * ACTIVATION_RATE * activationRate);
-            }
-            return y;
-        });
-
-        this.FORGET(0.9, MEMORY_SIZE);
-
-        //TODO use abstraction
-        if (this.facets) {
-
-            this.facets.html('');
-
-            const that = this;
-            var newItems = _.map(facets, (v) => {
-
-                const id = v[0]
-                    .replace(/_/g, ' ')
-                    .replace(/\-/g, ' ')
-                ; //HACK
-
-
-                const c = new NIcon(that.computeIfAbsent(v[0], (v)=>{
-                    return new NObject({I: id});
-                })).scale(v[1]).ele;
-
-                return ($(e('div')).attr('class', 'grid-item').append(c))[0];
-
-            });
-
-            var nn = $(newItems);
-            this.facets.append(nn);
-        }
-
-        return yy;
-
-//            _.each(clusters, (c, k) => {
-//
-//                if (c.length < 2)
-//                    return; //ignore clusters of length < 2
-//
-//                const start = c[0];
-//
-//                const d = DIVclass('list-item result');
-//                $(start).before(d);
-//                c.forEach(cc => {
-//                    /* {
-//
-//                     d = cc;
-//                     } else {
-//                     children.push(cc);
-//                     }*/
-//                    cc.detach();
-//                    cc.addClass('sub');
-//                    if (cc.data('o').I !== k) //the created root entry for this cluster, ignore for now
-//                        d.append(cc);
-//                });
-//
-//                //HACK if there was only 1 child, just pop it back to top-level subsuming any parents
-//                var dc = d.children();
-//                if (dc.length == 1) {
-//                    $(dc[0]).removeClass('sub');
-//                    d.replaceWith(dc[0]);
-//                }
-//
-//
-//            });
-
-
-        //}, 0);
-
-    }
 
 }
-
-
 
 
 function newWindow(content) {
@@ -2166,7 +1843,6 @@ function newFrame() {
     };
 
 
-
     interact(content[0])
         .draggable({
             onmove: dragMoveListener
@@ -2201,16 +1877,15 @@ function newFrame() {
 }
 
 
-
 const EXPORT = function () {
     return new MMEE();
 };
 EXPORT.D = D;
 EXPORT.E = E;
+EXPORT.NIcon = NIcon;
+EXPORT.NObject = NObject;
 
 export default EXPORT;
-
-
 
 
 //    var IF = new RuleReactor({}, true);
