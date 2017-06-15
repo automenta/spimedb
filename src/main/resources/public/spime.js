@@ -17,8 +17,8 @@ const jQuery = window.jQuery = window.$ = $;
 
 pouch.plugin(pouchUpsert);
 
-var MEMORY_SIZE = 1024;
-var ACTIVATION_RATE = 0.5;
+var MEMORY_SIZE = 256;
+
 
 
 function QueryPrompt(withSuggestions, withResults) {

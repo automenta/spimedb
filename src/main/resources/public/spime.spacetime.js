@@ -19735,8 +19735,8 @@ const jQuery = window.jQuery = window.$ = __WEBPACK_IMPORTED_MODULE_0_jquery___d
 
 __WEBPACK_IMPORTED_MODULE_2_pouchdb___default.a.plugin(__WEBPACK_IMPORTED_MODULE_3_pouchdb_upsert___default.a);
 
-var MEMORY_SIZE = 1024;
-var ACTIVATION_RATE = 0.5;
+var MEMORY_SIZE = 256;
+
 
 
 function QueryPrompt(withSuggestions, withResults) {
@@ -63682,12 +63682,35 @@ $('#timeline-multiple')
     .timeline('setRowTemporal', 'examplerow2', [[Date.UTC(2015, 5), Date.UTC(2015, 6)]])
 
 
-var uiBoundsReactionPeriodMS = 25;
+var mapUpdatePeriodMS = 30;
+var mapBoundsPeriodMS = 60;
 
 const map = __WEBPACK_IMPORTED_MODULE_1_leaflet___default.a.map('map', {
     continuousWorld: true,
-    worldCopyJump: true
+    worldCopyJump: true,
+    preferCanvas: true,
+    renderer: __WEBPACK_IMPORTED_MODULE_1_leaflet___default.a.canvas()
 }).setView([51.505, -0.09], 5);
+
+/** batch map changes */
+map.toAdd = new Set();
+map.toRemove = new Set();
+const mapChange = _.debounce(() => {
+
+    const r = map.toRemove;
+    r.forEach(x => x.remove());
+    r.clear();
+
+    const a = map.toAdd;
+    a.forEach(x => x.addTo(map));
+    a.clear();
+
+
+}, mapUpdatePeriodMS, {
+    'leading': true,
+    'trailing': false
+});
+mapChange();
 
 __WEBPACK_IMPORTED_MODULE_1_leaflet___default.a.tileLayer(
     'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
@@ -63712,12 +63735,12 @@ const Router = __WEBPACK_IMPORTED_MODULE_0_backbone_lodash___default.a.Router.ex
 });
 
 
-
 ME.nodeAdded = (nid, n) => {
     const w = n.where();
     if (w) {
         //console.log('add', w);
-        w.addTo(map);
+        map.toAdd.add(w);
+        mapChange();
     }
 };
 
@@ -63725,7 +63748,8 @@ ME.nodeRemoved = (nid, n) => {
     const w = n.where();
     if (w) {
         //console.log('remove', w);
-        w.remove();
+        map.toRemove.add(w);
+        mapChange();
     }
 };
 
@@ -63738,7 +63762,7 @@ function rectBounds(b, precision = 7) {
         "y2": b.getNorth(),
         update: function (each) {
             const sep = '/';
-            $.getJSON(  '/earth/lonlat/rect/' +
+            $.getJSON('/earth/lonlat/rect/' +
                 this.x1.toPrecision(precision) + sep +
                 this.x2.toPrecision(precision) + sep +
                 this.y1.toPrecision(precision) + sep +
@@ -63758,18 +63782,15 @@ function LOAD(ss) {
     const facets = ss[1]; //second part: facets
 
 
-
-
     const yy = _.map(results, x => {
         if (!x.I) return;
         const score = x['*'];
         const y = ME.ADD(x);
         if (y) {
-             y.activate(score);
+            y.activate(score);
         }
         return y;
     });
-
 
 
     //TODO use abstraction
@@ -63786,7 +63807,7 @@ function LOAD(ss) {
             ; //HACK
 
 
-            const c = new __WEBPACK_IMPORTED_MODULE_2__spime_js__["a" /* default */].NIcon(ME.computeIfAbsent(v[0], (v)=>{
+            const c = new __WEBPACK_IMPORTED_MODULE_2__spime_js__["a" /* default */].NIcon(ME.computeIfAbsent(v[0], (v) => {
                 return new __WEBPACK_IMPORTED_MODULE_2__spime_js__["a" /* default */].NObject({I: id});
             })).scale(v[1]).ele;
 
@@ -63837,6 +63858,7 @@ function LOAD(ss) {
 
 }
 
+
 const updateBounds = _.debounce(() => {
 
     rectBounds(map.getBounds()).update(LOAD);
@@ -63862,7 +63884,7 @@ const updateBounds = _.debounce(() => {
      });*/
 
     //}, uiBoundsReactionPeriodMS );
-}, uiBoundsReactionPeriodMS, {
+}, mapBoundsPeriodMS, {
     'leading': true,
     'trailing': false
 });
@@ -63882,7 +63904,6 @@ updateBounds();
 
 new Router();
 __WEBPACK_IMPORTED_MODULE_0_backbone_lodash___default.a.history.start();
-
 
 
 //http://leaflet-extras.github.io/leaflet-providers/preview/
@@ -63931,9 +63952,6 @@ __WEBPACK_IMPORTED_MODULE_0_backbone_lodash___default.a.history.start();
 
 
 //                } );
-
-
-
 
 
 // function diff(curBounds, prevBounds) {

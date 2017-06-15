@@ -69,12 +69,35 @@ $('#timeline-multiple')
     .timeline('setRowTemporal', 'examplerow2', [[Date.UTC(2015, 5), Date.UTC(2015, 6)]])
 
 
-var uiBoundsReactionPeriodMS = 25;
+var mapUpdatePeriodMS = 30;
+var mapBoundsPeriodMS = 60;
 
 const map = L.map('map', {
     continuousWorld: true,
-    worldCopyJump: true
+    worldCopyJump: true,
+    preferCanvas: true,
+    renderer: L.canvas()
 }).setView([51.505, -0.09], 5);
+
+/** batch map changes */
+map.toAdd = new Set();
+map.toRemove = new Set();
+const mapChange = _.debounce(() => {
+
+    const r = map.toRemove;
+    r.forEach(x => x.remove());
+    r.clear();
+
+    const a = map.toAdd;
+    a.forEach(x => x.addTo(map));
+    a.clear();
+
+
+}, mapUpdatePeriodMS, {
+    'leading': true,
+    'trailing': false
+});
+mapChange();
 
 L.tileLayer(
     'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
@@ -99,12 +122,12 @@ const Router = Backbone.Router.extend({
 });
 
 
-
 ME.nodeAdded = (nid, n) => {
     const w = n.where();
     if (w) {
         //console.log('add', w);
-        w.addTo(map);
+        map.toAdd.add(w);
+        mapChange();
     }
 };
 
@@ -112,7 +135,8 @@ ME.nodeRemoved = (nid, n) => {
     const w = n.where();
     if (w) {
         //console.log('remove', w);
-        w.remove();
+        map.toRemove.add(w);
+        mapChange();
     }
 };
 
@@ -125,7 +149,7 @@ function rectBounds(b, precision = 7) {
         "y2": b.getNorth(),
         update: function (each) {
             const sep = '/';
-            $.getJSON(  '/earth/lonlat/rect/' +
+            $.getJSON('/earth/lonlat/rect/' +
                 this.x1.toPrecision(precision) + sep +
                 this.x2.toPrecision(precision) + sep +
                 this.y1.toPrecision(precision) + sep +
@@ -145,18 +169,15 @@ function LOAD(ss) {
     const facets = ss[1]; //second part: facets
 
 
-
-
     const yy = _.map(results, x => {
         if (!x.I) return;
         const score = x['*'];
         const y = ME.ADD(x);
         if (y) {
-             y.activate(score);
+            y.activate(score);
         }
         return y;
     });
-
 
 
     //TODO use abstraction
@@ -173,7 +194,7 @@ function LOAD(ss) {
             ; //HACK
 
 
-            const c = new Spime.NIcon(ME.computeIfAbsent(v[0], (v)=>{
+            const c = new Spime.NIcon(ME.computeIfAbsent(v[0], (v) => {
                 return new Spime.NObject({I: id});
             })).scale(v[1]).ele;
 
@@ -224,6 +245,7 @@ function LOAD(ss) {
 
 }
 
+
 const updateBounds = _.debounce(() => {
 
     rectBounds(map.getBounds()).update(LOAD);
@@ -249,7 +271,7 @@ const updateBounds = _.debounce(() => {
      });*/
 
     //}, uiBoundsReactionPeriodMS );
-}, uiBoundsReactionPeriodMS, {
+}, mapBoundsPeriodMS, {
     'leading': true,
     'trailing': false
 });
@@ -269,7 +291,6 @@ updateBounds();
 
 new Router();
 Backbone.history.start();
-
 
 
 //http://leaflet-extras.github.io/leaflet-providers/preview/
@@ -318,9 +339,6 @@ Backbone.history.start();
 
 
 //                } );
-
-
-
 
 
 // function diff(curBounds, prevBounds) {

@@ -19735,8 +19735,8 @@ const jQuery = window.jQuery = window.$ = __WEBPACK_IMPORTED_MODULE_0_jquery___d
 
 __WEBPACK_IMPORTED_MODULE_2_pouchdb___default.a.plugin(__WEBPACK_IMPORTED_MODULE_3_pouchdb_upsert___default.a);
 
-var MEMORY_SIZE = 1024;
-var ACTIVATION_RATE = 0.5;
+var MEMORY_SIZE = 256;
+
 
 
 function QueryPrompt(withSuggestions, withResults) {
