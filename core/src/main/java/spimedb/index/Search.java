@@ -6,6 +6,7 @@ import org.apache.lucene.document.DocumentStoredFieldVisitor;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +24,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-
+/** manages and stores a collection process of search results */
 public class Search {
 
     public final static Logger logger = LoggerFactory.getLogger(Search.class);
@@ -32,7 +33,10 @@ public class Search {
     @NotNull
     private final IndexSearcher searcher;
     public final org.apache.lucene.search.Query query;
-    public final FacetResult facets;
+
+    @Nullable
+    public FacetResult facets = null;
+
     public final String id;
     private final SpimeDB db;
 
@@ -42,12 +46,13 @@ public class Search {
     transient public final String[] tagsInc;
 
 
-    public Search(Query q, @NotNull IndexSearcher searcher, SpimeDB db, @Nullable TopDocs docs, FacetResult facetResults) {
+
+
+    public Search(Query q, @NotNull IndexSearcher searcher, SpimeDB db, @Nullable TopDocs docs) {
         this.query = q;
         this.id = SpimeDB.uuidString();
         this.searcher = searcher;
         this.db = db;
-        this.facets = facetResults;
         this.localDocs = docs;
 
         Set<String> tagsInc = new TreeSet<>();
@@ -55,7 +60,17 @@ public class Search {
         int ts = tagsInc.size();
         this.tagsInc = (ts > 0) ? tagsInc.toArray(new String[ts]) : ArrayUtils.EMPTY_STRING_ARRAY;
 
+        db.onSearch.emit(this);
+
         logger.debug("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
+    }
+
+    public void setFacets(@Nullable FacetResult facets) {
+        this.facets = facets;
+    }
+
+    @Nullable public FacetResult facets() {
+        return facets;
     }
 
     @Override

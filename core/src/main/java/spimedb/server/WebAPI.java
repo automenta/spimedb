@@ -3,11 +3,9 @@ package spimedb.server;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import jcog.bloom.CountingLeakySet;
 import jcog.bloom.StableBloomFilter;
 import jcog.bloom.hash.StringHashProvider;
 import org.apache.lucene.facet.FacetResult;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.suggest.Lookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +13,7 @@ import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
 import spimedb.index.Search;
+import spimedb.query.CollectFacets;
 import spimedb.query.Query;
 import spimedb.util.JSON;
 
@@ -25,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
 import java.util.List;
 
 import static spimedb.server.WebIO.*;
@@ -112,15 +110,17 @@ public class WebAPI {
         if (q == null || (q = q.trim()).isEmpty())
             return Response.noContent().build();
 
-        try {
-            Search r = db.find(q, SearchResultsMax);
-            return Response.ok((StreamingOutput) os -> WebIO.send(r, os, 0, searchResultFull)).build();
-        } catch (IOException e) {
-            return Response.serverError().build();
-        } catch (ParseException e) {
-            logger.error("parse {}", e);
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
+        //try {
+        Search r = new Query(q).limit(SearchResultsMax)
+                .start(db, new CollectFacets(SearchResultsMax/2));
+        return Response.ok((StreamingOutput) os -> WebIO.send(r, os, 0, searchResultFull)).build();
+        //}
+//        catch (IOException e) {
+//            return Response.serverError().build();
+//        } catch (ParseException e) {
+//            logger.error("parse {}", e);
+//            return Response.status(Response.Status.BAD_REQUEST).build();
+//        }
     }
 
     /** see: https://www.w3.org/DesignIssues/MatrixURIs.html
@@ -170,7 +170,11 @@ public class WebAPI {
         //TODO validate the lon/lat coords
         //TODO filter by session's previously known requests
         //TODO track all sessions in an attention model
-        Search r = db.find(new Query().limit(GeoResultsMax).where(lonMin, lonMax, latMin, latMax));
+        Search r = new Query()
+                .where(lonMin, lonMax, latMin, latMax)
+                .limit(GeoResultsMax)
+                .start(db, new CollectFacets(SearchResultsMax/2));
+
         return Response.ok((StreamingOutput) os -> WebIO.send(r, os, 0, searchResultSummary, sentSTM)).build();
     }
 

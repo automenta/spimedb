@@ -61,11 +61,7 @@ public enum WebIO {
                 return;
             }
 
-//            final int[] sent = {0};
-//            final int[] results = { 0 };
             r.forEach((y, x) -> {
-
-                //results[0]++;
 
                 if (sentSTM!=null) {
                     if (!sentSTM.addIfMissing(y.id())) {
@@ -76,7 +72,6 @@ public enum WebIO {
                 }
 
                 JSON.toJSON(searchResult(y, keys, x), o, ',');
-                //sent[0]++;
 
                 return true;
             }, timeoutMS, () -> {
@@ -97,10 +92,8 @@ public enum WebIO {
                 }
             });
 
-            //System.out.println("sent=" + sent[0]/((float)results[0]));
         }
 
-        //ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
 
     }
 

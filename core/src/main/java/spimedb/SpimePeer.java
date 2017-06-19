@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.index.DObject;
 import spimedb.index.Search;
+import spimedb.query.Query;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -212,7 +213,7 @@ public class SpimePeer extends UDPeer {
 
 
         try {
-            Search r = db.find(query, MAX_HITS_FOR_PEER);
+            Search r = new Query(query).limit(MAX_HITS_FOR_PEER).start(db);
             //ResponseNObject rn = new ResponseNObject(queryID);
             r.forEachLocalDoc((_n, s) -> {
 

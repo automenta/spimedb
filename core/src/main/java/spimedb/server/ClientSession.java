@@ -43,8 +43,8 @@ public class ClientSession extends Session {
      */
     public class API {
 
-        final StableBloomFilter<String> remoteMemory = new StableBloomFilter<>(
-            /* size */ 32 * 1024, 3, 0.01f, new StringHashProvider());
+        final StableBloomFilter<String> remoteMemory = new StableBloomFilter(
+            /* size */ 32 * 1024, 3, new StringHashProvider());
 
         private Task currentFocus;
 
@@ -128,7 +128,7 @@ public class ClientSession extends Session {
 
                     Set<NObject> lowPriority = new HashSet<>(1024);
 
-                    db.find(new Query().where(lon, lat).in(tags)).forEachLocal((dd, s) -> {
+                    new Query().where(lon, lat).in(tags).start(db).forEachLocal((dd, s) -> {
 
                         NObject n = transmittable(dd);
 

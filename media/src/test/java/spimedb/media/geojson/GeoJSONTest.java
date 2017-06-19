@@ -41,10 +41,8 @@ public class GeoJSONTest {
 
         //time query
         ArrayList<Object> r1 = new ArrayList<>();
-        db.find(
-                new Query()
-                        .when(1.48252053E12f, 1.48250336E12f)
-        ).forEachObject(r1::add);
+        new Query()
+                .when(1.48252053E12f, 1.48250336E12f).start(db).forEachObject(r1::add);
 
         int aNum = r1.size();
         assertTrue(aNum > 0);
@@ -59,10 +57,10 @@ public class GeoJSONTest {
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
         List<NObject> res = new ArrayList();
-        db.find(new Query().bounds(new RectDoubleND(
+        new Query().bounds(new RectDoubleND(
                 new double[]{1.48252053E12f, 130, 0, Double.NEGATIVE_INFINITY},
                 new double[]{1.48250336E12f, +180, +90, Double.POSITIVE_INFINITY}
-        ))).forEachObject(res::add);
+        )).start(db).forEachObject(res::add);
 
         int bNum = res.size();
         assertTrue(bNum > 0);

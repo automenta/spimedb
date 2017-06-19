@@ -14,13 +14,11 @@ import jcog.event.ArrayTopic;
 import jcog.event.Topic;
 import jcog.list.FasterList;
 import jcog.random.XorShift128PlusRandom;
-import jcog.tree.rtree.rect.RectDoubleND;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.DoubleRange;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.facet.Facets;
 import org.apache.lucene.facet.FacetsCollector;
@@ -83,41 +81,15 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Provider
 public class SpimeDB {
 
-    final static boolean DEBUG = System.getProperty("debug", "false").equals("true");
-
-    static {
-        if (!DEBUG)
-            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
-        else
-            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
-
-        SpimeDB.LOG(Reflections.log, Level.WARN);
-        SpimeDB.LOG("logging", Level.WARN);
-    }
-
     public static final String VERSION = "SpimeDB v-0.00";
-
     @JsonIgnore
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
-
     //Tag
     public static final String[] GENERAL = new String[]{""};
-
-    final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ (-31 * System.currentTimeMillis()));
-
-    public final PrioritizedExecutor exe = new PrioritizedExecutor(
-            Math.max(2,  Runtime.getRuntime().availableProcessors())
-    );
-
     /**
      * default location of file resources if unspecified
      */
     public static final String TMP_SPIMEDB_CACHE_PATH = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
-
-
-    protected final Directory dir;
-
-
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
 
         @Override
@@ -136,54 +108,77 @@ public class SpimeDB {
             return null;
         }
     };
+    final static boolean DEBUG = System.getProperty("debug", "false").equals("true");
+    final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ (-31 * System.currentTimeMillis()));
+    static final int NObjectCacheSize = 64 * 1024;
+    final static DObject REMOVE = new DObject() {
+
+    };
+
+    static {
+        if (!DEBUG)
+            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
+        else
+            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
+
+        SpimeDB.LOG(Reflections.log, Level.WARN);
+        SpimeDB.LOG("logging", Level.WARN);
+    }
 
 //    @JsonIgnore
 //    @Deprecated
 //    public final Map<String, NObject> objMap;
 
-
+    public final PrioritizedExecutor exe = new PrioritizedExecutor(
+            Math.max(2, Runtime.getRuntime().availableProcessors())
+    );
+    public final File file;
+    public final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
+    public final Router<String, Consumer<NObject>> onTag = new Router(); //TODO make private
+    /**
+     * active searches
+     */
+    public final Topic<Search> onSearch = new ArrayTopic();
+    protected final Directory dir;
     /**
      * server-side javascript engine
      */
     transient final ScriptEngineManager engineManager = new ScriptEngineManager();
     transient public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
-
-    static final int NObjectCacheSize = 64 * 1024;
-
-    final static DObject REMOVE = new DObject() {
-
-    };
-
+    final ThreadLocal<QueryParser> defaultFindQueryParser;
+    final IndexWriterConfig writerConf;
+    final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
+    final Locker<String> locker = new Locker();
     private final Map<String, DObject> out = new ConcurrentHashMap<>(1024);
     private final Cache<String, DObject> cache =
             Caffeine.newBuilder().maximumSize(NObjectCacheSize).build();
-
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer;
-    public final File file;
-    public SearcherManager searcherMgr;
-    private ReaderManager readerMgr;
-
-    protected long lastWrite = 0;
-
-    private Lookup suggester;
-
-
-    private /*final */ Directory taxoDir;
     private final FacetsConfig facetsConfig = new FacetsConfig();
-
-
+    public SearcherManager searcherMgr;
     public String indexPath;
-
-    final ThreadLocal<QueryParser> defaultFindQueryParser;
-
+    protected long lastWrite = 0;
     IndexWriter writer;
-    final IndexWriterConfig writerConf;
-
     DirectoryTaxonomyWriter taxoWriter;
-
     long lastSuggesterCreated = 0;
     long minSuggesterUpdatePeriod = 1000 * 2;
+    private ReaderManager readerMgr;
+
+
+    //    public static final FieldType tokenizedString = new FieldType();
+//    static {
+//        tokenizedString.setOmitNorms(true);
+//        tokenizedString.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+//        tokenizedString.setStored(true);
+//        tokenizedString.setTokenized(true);
+//        tokenizedString.freeze();
+//    }
+//
+//    public static Field stringTokenized(String key, String value) {
+//        return new Field(key, value, tokenizedString);
+//    }
+    private Lookup suggester;
+    private /*final */ Directory taxoDir;
 
 
     /**
@@ -211,6 +206,7 @@ public class SpimeDB {
         logger.info("index file://{} loaded ({} objects)", indexPath, size());
     }
 
+
     private SpimeDB(File file, Directory dir) {
 
         this.file = file;
@@ -229,7 +225,7 @@ public class SpimeDB {
                 NObject.TAG,
                 NObject.ID};
 
-        this.defaultFindQueryParser = ThreadLocal.withInitial(()->new MultiFieldQueryParser(defaultFindFields, analyzer, Maps.mutable.with(
+        this.defaultFindQueryParser = ThreadLocal.withInitial(() -> new MultiFieldQueryParser(defaultFindFields, analyzer, Maps.mutable.with(
                 NObject.NAME, 1f,
                 NObject.ID, 1f,
                 NObject.DESC, 0.25f,
@@ -249,20 +245,6 @@ public class SpimeDB {
 
     }
 
-
-    //    public static final FieldType tokenizedString = new FieldType();
-//    static {
-//        tokenizedString.setOmitNorms(true);
-//        tokenizedString.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
-//        tokenizedString.setStored(true);
-//        tokenizedString.setTokenized(true);
-//        tokenizedString.freeze();
-//    }
-//
-//    public static Field stringTokenized(String key, String value) {
-//        return new Field(key, value, tokenizedString);
-//    }
-
     @NotNull
     public static String uuidString() {
         return Util.uuid64();
@@ -275,6 +257,30 @@ public class SpimeDB {
                 Longs.toByteArray(rng.nextLong()),
                 Longs.toByteArray(rng.nextLong())
         );
+    }
+
+    public static void LOG(String l, Level ll) {
+        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
+    }
+
+    public static void LOG(Logger log, Level ll) {
+        LOG(log.getName(), ll);
+    }
+
+    static void recursiveDelete(File dir) {
+        //to end the recursive loop
+        if (!dir.exists())
+            return;
+
+        //if directory, go inside and call recursively
+        if (dir.isDirectory()) {
+            for (File f : dir.listFiles()) {
+                //call recursively
+                recursiveDelete(f);
+            }
+        }
+        //call delete to delete files and empty directory
+        dir.delete();
     }
 
 
@@ -306,6 +312,10 @@ public class SpimeDB {
         });
     }
 
+    public FacetsConfig facetConfig() {
+        return facetsConfig;
+    }
+
     @Nullable
     private Lookup suggester() {
 
@@ -322,9 +332,9 @@ public class SpimeDB {
 
                 FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
 
-                withReader((nameDictReader) -> {
+                read((nameDictReader) -> {
 
-                    if (nameDictReader.maxDoc()==0)
+                    if (nameDictReader.maxDoc() == 0)
                         return;
 
                     DocumentDictionary nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
@@ -365,7 +375,6 @@ public class SpimeDB {
 
     }
 
-
     private Document the(String id) {
         return withSearcher((searcher) -> {
             TermQuery x = new TermQuery(new Term(NObject.ID, id));
@@ -385,7 +394,6 @@ public class SpimeDB {
         });
     }
 
-
     public <X> X withSearcher(Function<IndexSearcher, X> c) {
         IndexSearcher s = searcher();
         try {
@@ -401,7 +409,7 @@ public class SpimeDB {
     }
 
     @NotNull
-    protected IndexSearcher searcher() {
+    public IndexSearcher searcher() {
         try {
             searcherMgr.maybeRefresh();
             return searcherMgr.acquire();
@@ -410,9 +418,8 @@ public class SpimeDB {
         }
     }
 
-
     @NotNull
-    private DirectoryReader reader() {
+    private DirectoryReader read() {
         try {
             readerMgr.maybeRefresh();
             return readerMgr.acquire();
@@ -425,8 +432,8 @@ public class SpimeDB {
         }
     }
 
-    public void withReader(Consumer<DirectoryReader> c) {
-        DirectoryReader r = reader();
+    public void read(Consumer<DirectoryReader> c) {
+        DirectoryReader r = read();
         try {
             c.accept(r);
         } finally {
@@ -438,12 +445,9 @@ public class SpimeDB {
         }
     }
 
-    @NotNull
-    public Search find(String query, int hitsPerPage) throws IOException, ParseException {
-        return find(parseQuery(query), hitsPerPage);
-    }
 
-    private org.apache.lucene.search.Query parseQuery(String query) throws ParseException {
+
+    public org.apache.lucene.search.Query parseQuery(String query) throws ParseException {
         QueryParser qp = defaultFindQueryParser.get();
         try {
             return qp.parse(query);
@@ -456,51 +460,9 @@ public class SpimeDB {
         }
     }
 
-    @NotNull
-    private Search find(org.apache.lucene.search.Query q, int hitsPerPage) throws IOException {
-        return find(q, hitsPerPage, hitsPerPage);
-    }
 
     @NotNull
-    private Search find(org.apache.lucene.search.Query q, int hitsPerPage, int facetCount) throws IOException {
-
-        FacetsCollector fc = new FacetsCollector();
-
-        IndexSearcher searcher = searcher();
-
-        q.rewrite(searcher.getIndexReader());
-
-        TopDocs docs = FacetsCollector.search(searcher, q, hitsPerPage, fc);
-        FacetResult facetResults;
-
-        if (docs.totalHits > 0) {
-
-            DirectoryTaxonomyReader taxoReader = new DirectoryTaxonomyReader(taxoWriter);
-
-            Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
-
-            facetResults = facets.getTopChildren(facetCount, NObject.TAG);
-
-            taxoReader.close();
-
-
-        } else {
-
-            docs = null;
-            facetResults = null;
-
-        }
-
-        Search ss = new Search(q, searcher, this, docs, facetResults);
-
-        onSearch.emit(ss);
-
-        return ss;
-
-        //return new SearchResult(q, null, null); //TODO: return EmptySearchResult;
-    }
-
-    @NotNull public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
+    public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
         Lookup s = suggester();
         if (s == null)
             return Collections.EMPTY_LIST;
@@ -508,18 +470,9 @@ public class SpimeDB {
             return s.lookup(qText, false, count);
     }
 
-    public static void LOG(String l, Level ll) {
-        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
-    }
-
-    public static void LOG(Logger log, Level ll) {
-        LOG(log.getName(), ll);
-    }
-
-
     public int size() {
         final int[] size = new int[1];
-        withReader((r) -> {
+        read((r) -> {
             size[0] = r.maxDoc();
         });
         return size[0];
@@ -625,7 +578,6 @@ public class SpimeDB {
         on.forEach(take);
     }
 
-
     /**
      * deletes the index and optionally triggers a rebuild
      */
@@ -643,22 +595,6 @@ public class SpimeDB {
             recursiveDelete(new File(indexPath));
         }
 
-    }
-
-    static void recursiveDelete(File dir) {
-        //to end the recursive loop
-        if (!dir.exists())
-            return;
-
-        //if directory, go inside and call recursively
-        if (dir.isDirectory()) {
-            for (File f : dir.listFiles()) {
-                //call recursively
-                recursiveDelete(f);
-            }
-        }
-        //call delete to delete files and empty directory
-        dir.delete();
     }
 
     public void remove(String id) {
@@ -685,36 +621,11 @@ public class SpimeDB {
 //        }
     }
 
-
-    private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
-        public SubTags(MapGraph<V, E> graph, V... parentTags) {
-            super(graph, parentTags);
-        }
-
-        @Override
-        protected CrossComponentTravel<V, E, Object> get(V start, MapGraph<V, E> graph, Map<V, Object> seen) {
-            return new BreadthFirstTravel<>(graph, start, seen);
-        }
-    }
-
-
     @JsonProperty("status") /*@JsonSerialize(as = RawSerializer.class)*/
     @Override
     public String toString() {
         return "{\"" + getClass().getSimpleName() + "\"}";
     }
-
-
-    public final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
-
-    final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
-    public final Router<String, Consumer<NObject>> onTag = new Router(); //TODO make private
-
-    /**
-     * active searches
-     */
-    public final Topic<Search> onSearch = new ArrayTopic();
-
 
     public void on(BiFunction<NObject, NObject, NObject> changed) {
         onChange.add(changed);
@@ -744,9 +655,6 @@ public class SpimeDB {
         }
     }
 
-    final Locker<String> locker = new Locker();
-
-
     public void run(String id, Runnable r) {
         run(id, () -> {
             r.run();
@@ -755,7 +663,7 @@ public class SpimeDB {
     }
 
     public <X> X run(String id, Supplier<X> r) {
-        return locker.locked(id, (ii)->{
+        return locker.locked(id, (ii) -> {
             try {
                 return r.get();
             } catch (Throwable t) {
@@ -828,7 +736,7 @@ public class SpimeDB {
             DObject next = DObject.get(_next, this);
 
             DObject previous = get(id);
-            if (previous!=next && previous != null) {
+            if (previous != next && previous != null) {
                 if (deepEquals(previous.document, next.document)) {
                     //logger.debug("equiv {}", id);
                     return previous;
@@ -901,7 +809,7 @@ public class SpimeDB {
     }
 
     public void forEach(Consumer<NObject> each) {
-        withReader((r) -> {
+        read((r) -> {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
 
             IntStream.range(0, max).forEach(i -> {
@@ -920,7 +828,7 @@ public class SpimeDB {
 
     public void forEach(Consumer<List<NObject>> each, int _chunks) {
         int chunks = Math.max(1, _chunks);
-        withReader((r) -> {
+        read((r) -> {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
 
             int chunkSize = max / chunks;
@@ -953,70 +861,6 @@ public class SpimeDB {
     }
 
 
-    @Nullable
-    public Search find(@NotNull Query q) {
-
-        BooleanQuery bq = buildQuery(q);
-
-        q.onStart(this);
-        try {
-            return find(bq, q.limit);
-        } catch (IOException e) {
-
-            logger.error("{}", e);
-            return null;
-        }
-    }
-
-    private BooleanQuery buildQuery(@NotNull Query q) {
-        BooleanQuery.Builder bqb = new BooleanQuery.Builder();
-
-        if (q.tagInclude != null) {
-            int tags = q.tagInclude.length;
-            //if (tags > 1) {
-                List<org.apache.lucene.search.Query> tagQueries = new FasterList();
-                for (String s : q.tagInclude)
-                    tagQueries.add(tagTermQuery(s));
-
-                bqb.add(
-                        new DisjunctionMaxQuery(tagQueries, 1f / tags),
-                        BooleanClause.Occur.MUST);
-
-            /* } else if (tags == 1) {
-                bqb.add(tagTermQuery(q.tagInclude[0]))
-            }*/
-        }
-
-        if (q.bounds != null && q.bounds.length > 0) {
-
-            List<org.apache.lucene.search.Query> boundQueries = new FasterList();
-
-            for (RectDoubleND x : q.bounds) {
-                switch (q.boundsCondition) {
-                    case Intersect:
-                        boundQueries.add(DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord));
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("TODO");
-                }
-
-
-            }
-
-            bqb.add(new DisjunctionMaxQuery(boundQueries, 0.1f),
-                    BooleanClause.Occur.MUST);
-
-        }
-
-        return bqb.build();
-    }
-
-    @NotNull
-    static private TermQuery tagTermQuery(String tag) {
-        return new TermQuery(new Term(NObject.TAG, tag));
-    }
-
-
     public void runLater(Runnable r) {
         runLater(0.5f, r);
     }
@@ -1033,7 +877,9 @@ public class SpimeDB {
         s.forEach(this::add);
     }
 
-    /** returns whether the db has completely synch'd */
+    /**
+     * returns whether the db has completely synch'd
+     */
     public boolean sync(int waitDelayMS) {
         if (busy()) {
             Util.sleep(waitDelayMS);
@@ -1045,6 +891,21 @@ public class SpimeDB {
 
     private boolean busy() {
         return exe.running.get() > 0 || !exe.pq.isEmpty();
+    }
+
+    public DirectoryTaxonomyReader readTaxonomy() throws IOException {
+        return new DirectoryTaxonomyReader(taxoWriter);
+    }
+
+    private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
+        public SubTags(MapGraph<V, E> graph, V... parentTags) {
+            super(graph, parentTags);
+        }
+
+        @Override
+        protected CrossComponentTravel<V, E, Object> get(V start, MapGraph<V, E> graph, Map<V, Object> seen) {
+            return new BreadthFirstTravel<>(graph, start, seen);
+        }
     }
 
 }

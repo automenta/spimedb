@@ -1,10 +1,23 @@
 package spimedb.query;
 
+import jcog.list.FasterList;
 import jcog.tree.rtree.rect.RectDoubleND;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.lucene.document.DoubleRange;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.*;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.Search;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 import static java.lang.Double.NEGATIVE_INFINITY;
 import static java.lang.Double.POSITIVE_INFINITY;
@@ -15,6 +28,7 @@ import static spimedb.query.Query.BoundsCondition.Intersect;
  */
 public class Query  {
 
+    public final static Logger logger = LoggerFactory.getLogger(Query.class);
 
     /**
      * time the query was created
@@ -22,6 +36,8 @@ public class Query  {
     public final long whenCreated;
 
     long whenAccepted;
+
+
 
 //    public static final double[] ANY_SCALAR = {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
 //    public static final RectDoubleND[] ANYWHERE_4 =
@@ -34,13 +50,16 @@ public class Query  {
 
     public BoundsCondition boundsCondition = Intersect;
 
+    /** query string to parse */
+    String queryString = null;
+
     /**
      * tags within which to search; if null, searches all
      */
     public String[] tagInclude = null;
 
     public int limit = 128;
-
+    private ScoreDoc after = null;
 
     /**
      *
@@ -50,9 +69,123 @@ public class Query  {
         this.whenCreated = System.currentTimeMillis();
     }
 
+    public Query(String q)  {
+        this();
+        this.queryString = q;
+    }
+
     public Query limit(int limit) {
         this.limit = limit;
         return this;
+    }
+
+    public Query after(ScoreDoc after) {
+        this.after = after;
+        return this;
+    }
+
+    public Search start(SpimeDB db, Collector... collectors) {
+
+        BooleanQuery bq = buildQuery(db);
+
+        this.whenAccepted = System.currentTimeMillis();
+
+        try {
+            return find(bq, limit, db, after, collectors);
+        } catch (IOException e) {
+
+            logger.error("{}", e);
+            return null;
+        }
+
+    }
+
+    @NotNull
+    private Search find(org.apache.lucene.search.Query q, int limit, SpimeDB db, ScoreDoc after, Collector... collectors) throws IOException {
+
+        TopScoreDocCollector hitsCollector = TopScoreDocCollector.create(limit, after);
+
+        Collector collector = collectors.length > 0 ?
+                MultiCollector.wrap(ArrayUtils.add(collectors, hitsCollector))
+                :
+                hitsCollector;
+
+
+        IndexSearcher searcher = db.searcher();
+        searcher.search(q, collector);
+        TopDocs docs = hitsCollector.topDocs();
+
+        Search s = new Search(q, searcher, db, docs);
+
+        if (docs.totalHits > 0) {
+            for (Collector c : collectors) {
+                if (c instanceof CollectFacets) {
+                    ((CollectFacets) c).commit(s, db);
+                }
+            }
+        }
+
+        return s;
+    }
+
+
+
+    @NotNull
+    public static TermQuery tagTermQuery(String tag) {
+        return new TermQuery(new Term(NObject.TAG, tag));
+    }
+
+    private BooleanQuery buildQuery(SpimeDB db) {
+        BooleanQuery.Builder bqb = new BooleanQuery.Builder();
+
+        if (tagInclude != null) {
+            int tags = tagInclude.length;
+            //if (tags > 1) {
+            List<org.apache.lucene.search.Query> tagQueries = new FasterList(tags);
+            for (String s : tagInclude)
+                tagQueries.add(tagTermQuery(s));
+
+            bqb.add(
+                    new DisjunctionMaxQuery(tagQueries, 1f / tags),
+                    BooleanClause.Occur.MUST);
+
+            /* } else if (tags == 1) {
+                bqb.add(tagTermQuery(tagInclude[0]))
+            }*/
+        }
+
+        if (bounds != null && bounds.length > 0) {
+
+            List<org.apache.lucene.search.Query> boundQueries = new FasterList();
+
+            for (RectDoubleND x : bounds) {
+                switch (boundsCondition) {
+                    case Intersect:
+                        boundQueries.add(DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord));
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("TODO");
+                }
+
+
+            }
+
+            bqb.add(new DisjunctionMaxQuery(boundQueries, 0.1f),
+                    BooleanClause.Occur.MUST);
+
+        }
+
+
+
+        if (queryString!=null) {
+            try {
+                bqb.add(db.parseQuery(queryString), BooleanClause.Occur.MUST);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return bqb.build();
+
     }
 
 
@@ -67,16 +200,6 @@ public class Query  {
          */
         Contain
     }
-
-
-    /**
-     * called by the db when the query begins executing
-     * @param spimeDB
-     */
-    public void onStart(SpimeDB spimeDB) {
-        this.whenAccepted = System.currentTimeMillis();
-    }
-
 
 
     public Query in(String... tags) {

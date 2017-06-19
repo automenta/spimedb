@@ -62,7 +62,7 @@ public class MeshTest {
         assertEquals(1, client.them.size());
         assertEquals(1, worker.them.size());
 
-        client.db.find(new Query().in("xyz")).forEach((d, s) -> {
+        new Query().in("xyz").start(client.db).forEach((d, s) -> {
             receivedAsync.add(d);
             return true;
         }, 2500, () -> {
@@ -108,8 +108,8 @@ public class MeshTest {
         //peers.forEach(p -> System.out.println(p.summary()));
 
         Set<NObject> recv = new LinkedHashSet();
-        peers.get(0).
-                db.find(new Query().in("peer"))
+        new Query().in("peer").start(peers.get(0).
+                db)
                 //db.find("peer", 16)
                 .forEach((r, s) -> recv.add(r), 2000, () -> {
                     //        System.out.println();

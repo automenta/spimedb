@@ -45,7 +45,7 @@ public class QueryTest {
                 .where(new double[]{0, 1}, new double[]{0, 1});
         System.out.println(q);
 
-        Search r = db.find(q);
+        Search r = q.start(db);
         r.forEach((d, s) -> found.add(d), 300, () -> {
             assertEquals(1, db.size());
             assertNotNull(r.localDocs);
@@ -80,7 +80,7 @@ public class QueryTest {
 
 
         ArrayList<NObject> found = new ArrayList();
-        db.find( new Query().in("Person") ).forEachLocal((d, s) -> found.add(d));
+        new Query().in("Person").start(db).forEachLocal((d, s) -> found.add(d));
 
         found.forEach(f -> System.out.println(f));
         assertEquals(1, found.size());
