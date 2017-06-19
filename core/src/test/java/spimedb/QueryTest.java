@@ -17,11 +17,6 @@ import static org.junit.Assert.*;
  */
 public class QueryTest {
 
-    final SpimeDB db;
-
-    public QueryTest() throws IOException {
-         db = new SpimeDB();
-    }
 
     /**
      * tag not specified, gets everything
@@ -29,6 +24,7 @@ public class QueryTest {
     @Test
     public void testSpacetimeIndexing() throws IOException {
 
+        SpimeDB db = new SpimeDB();
         MutableNObject place = new MutableNObject("Somewhere");
         place.where(0.5f, 0.5f);
         place.withTags("Place");
@@ -66,6 +62,7 @@ public class QueryTest {
 
     @Test
     public void testSpacetimeTagIndexing() throws IOException {
+        SpimeDB db = new SpimeDB();
 
 
         MutableNObject place = new MutableNObject("Somewhere");
@@ -79,7 +76,7 @@ public class QueryTest {
         DObject dp = db.add(person);
 
 
-        db.sync(250);
+        db.sync(350);
 
 
         ArrayList<NObject> found = new ArrayList();

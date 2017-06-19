@@ -320,7 +320,7 @@ public class DObject implements NObject {
 
     @Override
     public String id() {
-        return document.get(NObject.ID);
+        return id;
     }
 
     @Override

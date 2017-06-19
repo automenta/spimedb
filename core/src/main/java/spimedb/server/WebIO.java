@@ -1,6 +1,7 @@
 package spimedb.server;
 
 import com.google.common.collect.Iterables;
+import jcog.bloom.StableBloomFilter;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
@@ -44,34 +45,59 @@ public enum WebIO {
 
 
     public static void send(Search r, OutputStream o, int timeoutMS, ImmutableSet<String> keys) {
+        send(r, o, timeoutMS, keys, null);
+    }
+
+    static final byte[] openingBracketBytes = "[[".getBytes();
+    static final byte[] intermediateClosingBracketBytes = "{}],".getBytes();
+    static final byte[] endingClosingBracketBytes = "[]]".getBytes();
+
+    public static void send(Search r, OutputStream o, int timeoutMS, ImmutableSet<String> keys, @Nullable StableBloomFilter<String> sentSTM) {
         if (r != null) {
 
             try {
-                o.write("[[".getBytes());
+                o.write(openingBracketBytes);
             } catch (IOException ignored) {
                 return;
             }
 
+//            final int[] sent = {0};
+//            final int[] results = { 0 };
             r.forEach((y, x) -> {
+
+                //results[0]++;
+
+                if (sentSTM!=null) {
+                    if (!sentSTM.addIfMissing(y.id())) {
+                        return true;
+                    } else {
+                        sentSTM.unlearn(0.0005f);
+                    }
+                }
+
                 JSON.toJSON(searchResult(y, keys, x), o, ',');
+                //sent[0]++;
+
                 return true;
             }, timeoutMS, () -> {
                 try {
 
-                    o.write("{}],".getBytes()); //<-- TODO search result metadata, query time etc
+
+                    o.write(intermediateClosingBracketBytes); //<-- TODO search result metadata, query time etc
 
                     if (r.facets != null) {
                         stream(r.facets, o);
                         o.write(']');
-                    } else
-                        o.write("[]]".getBytes());
+                    } else {
+                        o.write(endingClosingBracketBytes);
+                    }
 
                 } catch (IOException ignored) {
 
                 }
             });
 
-
+            //System.out.println("sent=" + sent[0]/((float)results[0]));
         }
 
         //ex.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);

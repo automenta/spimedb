@@ -3,6 +3,9 @@ package spimedb.server;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jcog.bloom.CountingLeakySet;
+import jcog.bloom.StableBloomFilter;
+import jcog.bloom.hash.StringHashProvider;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.suggest.Lookup;
@@ -141,6 +144,22 @@ public class WebAPI {
         //System.out.println(sess.getId() + " " + request.getRemotePort() + " " + sess);
 
 
+
+        Object _sentSTM = sess.getAttribute("sentSTM");
+        final StableBloomFilter<String> sentSTM;
+        int totalCells = 32 * 1024;
+        float unlearnCellsPerSecond = 2;
+        if (_sentSTM==null) {
+            sentSTM = new StableBloomFilter<>(totalCells, 3, new StringHashProvider());
+            sess.setAttribute("sentSTM", sentSTM);
+        } else {
+            sentSTM = (StableBloomFilter<String>)_sentSTM;
+            long msSinceLastAccess = System.currentTimeMillis() - sess.getLastAccessedTime();
+            int unlearnedCells = Math.round((msSinceLastAccess/1000f) * unlearnCellsPerSecond);
+            if (unlearnedCells > 0)
+                sentSTM.unlearn(unlearnedCells);
+        }
+
         Object prevBounds = sess.getAttribute("earthLonLat");
         if (prevBounds!=null) {
 
@@ -152,7 +171,7 @@ public class WebAPI {
         //TODO filter by session's previously known requests
         //TODO track all sessions in an attention model
         Search r = db.find(new Query().limit(GeoResultsMax).where(lonMin, lonMax, latMin, latMax));
-        return Response.ok((StreamingOutput) os -> WebIO.send(r, os, 0, searchResultSummary)).build();
+        return Response.ok((StreamingOutput) os -> WebIO.send(r, os, 0, searchResultSummary, sentSTM)).build();
     }
 
 

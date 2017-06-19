@@ -43,6 +43,16 @@ public class MutableNObject extends ImmutableNObject {
         super(DoubleND.fill(4, Float.NEGATIVE_INFINITY), DoubleND.fill(4, Float.POSITIVE_INFINITY), id, name);
     }
 
+    @Override
+    public DoubleND max() {
+        return max;
+    }
+
+    @Override
+    public DoubleND min() {
+        return min;
+    }
+
     public MutableNObject putLater(String key, float pri, Supplier lazy) {
         return putLater(key, pri, null, lazy);
     }
