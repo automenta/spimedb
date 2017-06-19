@@ -2,11 +2,26 @@
 
 var $ = require('jquery');
 var _ = require('lodash');
+
+var jQuery = $;
+window.jQuery = jQuery;
+window.$ = $;
+window._ = _;
+
 var LfuMap = require('collections/lru-map');
 var pouch = require('pouchdb');
 var pouchUpsert = require('pouchdb-upsert');
-var interact = require('interact');
+var interact = require('interact.js');
 
+var Backbone = require('backbone');
+var L = require('leaflet');
+
+var Timeline = require('./lib/edsc-timeline.min.js');
+var Packery = require('packery');
+
+// //THE ORDER HERE MATTERS
+// var CSS_leaflet = require('./node_modules/leaflet/dist/leaflet.css');
+// var CSS_local = [ require('./spime.css'), require('./search.base.css') ];
 
 pouch.plugin(pouchUpsert);
 
@@ -1869,14 +1884,19 @@ function newFrame() {
 }
 
 
+
+
 module.exports = {
     me: (opts) =>  new MMEE(opts),
     D: D,
     E: E,
     ME: MMEE,
     NIcon: NIcon,
-    NObject: NObject
+    NObject: NObject,
+    Backbone: Backbone,
+    Router: Backbone.Router
 };
+
 
 // EXPORT.D = D;
 // EXPORT.E = E;
@@ -1922,3 +1942,90 @@ module.exports = {
 //    IF.run(Infinity, true, function () {
 //        console.log(JSON.stringify(p));
 //    });
+
+
+
+
+
+
+
+
+
+
+//http://leaflet-extras.github.io/leaflet-providers/preview/
+
+
+//setTimeout(() =>
+
+
+//    0);
+
+
+//                map.on('click', function(e) {
+
+
+//
+
+
+//                    const center = e.latlng;
+
+
+//                    //var myRenderer = L.svg({ padding: 0.5 }); //TODO use hexagon polygon renderer
+
+
+//
+
+
+//
+
+
+//                    var m = L.circle( center, {
+
+
+//                        radius: 1000 //meters
+
+
+//                        //renderer: myRenderer
+
+
+//                    } );
+
+
+//
+
+
+//                    m.addTo(map);
+
+
+//                } );
+
+
+// function diff(curBounds, prevBounds) {
+
+
+//     if (curBounds.intersects(prevBounds)) {
+
+
+//         //console.log('diff', curBounds, prevBounds);
+
+
+//         //TODO http://stackoverflow.com/questions/25068538/intersection-and-difference-of-two-rectangles/25068722#25068722
+
+
+//         //return L.bounds([[p1y,p1x],[p2y,p2x]]);
+
+
+//         return curBounds;
+
+
+//     } else {
+
+
+//         return curBounds; //no commonality to subtract
+
+
+//     }
+
+
+// }
+

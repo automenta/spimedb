@@ -6,9 +6,9 @@
     "backbone": "^1.3.3",
     "backbone-lodash": "latest",
     "collections": "latest",
+    "cssify": "^1.0.3",
     "draggabilly": "latest",
     "fullcalendar": "latest",
-    "interact": "0.0.3",
     "interact.js": "latest",
     "jquery": "latest",
     "jscroll": "latest",
@@ -22,7 +22,10 @@
     "pouchdb-upsert": "latest",
     "three": "latest"
   },
-  "scripts":{
-      "watchify": "watchify spacetime.js -d -o spime.spacetime.js -v --ignore-watch='**/node_modules/**'"
+  "devDependencies": {
+    "watchify": "latest"
+  },
+  "scripts": {
+    "watchify": "watchify spime.js --standalone Spime       -d -o spime.run.js -v --ignore-watch='node_modules/**'"
   }
 }
