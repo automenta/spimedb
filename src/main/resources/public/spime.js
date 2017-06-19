@@ -1,23 +1,34 @@
-"use strict";
+//"use strict";
 
 var $ = require('jquery');
-var _ = require('lodash');
 
-var jQuery = $;
+const jQuery = $;
 window.jQuery = jQuery;
-window.$ = $;
+
+var _ = require('lodash');
 window._ = _;
 
-var LfuMap = require('collections/lru-map');
-var pouch = require('pouchdb');
-var pouchUpsert = require('pouchdb-upsert');
-var interact = require('interact.js');
+const Backbone = require('backbone');
 
-var Backbone = require('backbone');
-var L = require('leaflet');
+const LfuMap = require('collections/lru-map');
+const pouch = require('pouchdb');
+const pouchUpsert = require('pouchdb-upsert');
+const interact = require('interact.js');
 
-var Timeline = require('./lib/edsc-timeline.min.js');
-var Packery = require('packery');
+const L = require('leaflet');
+
+const Timeline = require('./lib/edsc-timeline.min.js');
+const Packery = require('packery');
+
+
+const p2 = require('p2');
+
+const initPIXI = require('pixi.js');
+
+const initWebGL = require('./WebGLRenderer.js');
+
+
+
 
 // //THE ORDER HERE MATTERS
 // var CSS_leaflet = require('./node_modules/leaflet/dist/leaflet.css');
@@ -1894,7 +1905,9 @@ module.exports = {
     NIcon: NIcon,
     NObject: NObject,
     Backbone: Backbone,
-    Router: Backbone.Router
+    Router: Backbone.Router,
+    p2: p2,
+    p2webgl: initWebGL
 };
 
 
