@@ -3,17 +3,18 @@
   "version": "1.0.0",
   "license": "AGPL-3.0",
   "dependencies": {
+    "backbone": "^1.3.3",
     "backbone-lodash": "latest",
-    "cesium": "latest",
     "collections": "latest",
     "draggabilly": "latest",
     "fullcalendar": "latest",
+    "interact": "0.0.3",
     "interact.js": "latest",
     "jquery": "latest",
-    "jquery-ui": "latest",
     "jscroll": "latest",
     "leaflet": "latest",
     "leaflet.markercluster": "latest",
+    "lodash": "^4.17.4",
     "msgpack-lite": "latest",
     "packery": "latest",
     "pouchdb": "latest",
@@ -21,8 +22,7 @@
     "pouchdb-upsert": "latest",
     "three": "latest"
   },
-  "scripts": {
-    "build": "webpack",
-    "dev": "webpack --watch -p"
+  "scripts":{
+      "watchify": "watchify spacetime.js -d -o spime.spacetime.js -v --ignore-watch='**/node_modules/**'"
   }
 }

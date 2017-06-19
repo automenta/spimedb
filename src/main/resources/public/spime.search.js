@@ -68,6 +68,11 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
 /***/ (function(module, exports) {
 
 var g;
@@ -95,6 +100,11 @@ module.exports = g;
 
 /***/ }),
 /* 1 */
+/* no static exports found */
+/* all exports used */
+/*!*********************************************!*\
+  !*** ./~/collections/generic-collection.js ***!
+  \*********************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -387,24 +397,34 @@ GenericCollection._sizePropertyDescriptor = {
 
 Object.defineProperty(GenericCollection.prototype,"size",GenericCollection._sizePropertyDescriptor);
 
-__webpack_require__(20);
+__webpack_require__(/*! ./shim-array */ 20);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 2 */
+/* no static exports found */
+/* all exports used */
+/*!*******************************!*\
+  !*** ./~/collections/shim.js ***!
+  \*******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var Array = __webpack_require__(20);
-var Object = __webpack_require__(6);
-var Function = __webpack_require__(21);
-var RegExp = __webpack_require__(39);
+var Array = __webpack_require__(/*! ./shim-array */ 20);
+var Object = __webpack_require__(/*! ./shim-object */ 6);
+var Function = __webpack_require__(/*! ./shim-function */ 21);
+var RegExp = __webpack_require__(/*! ./shim-regexp */ 39);
 
 
 
 /***/ }),
 /* 3 */
+/* no static exports found */
+/* all exports used */
+/*!**************************************************!*\
+  !*** ./~/collections/listen/property-changes.js ***!
+  \**************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -471,10 +491,10 @@ function PropertyChanges() {
     throw new Error("This is an abstract interface. Mix it. Don't construct it");
 }
 
-__webpack_require__(2);
-var Map = __webpack_require__(5);
-var WeakMap = __webpack_require__(41);
-var ChangeDescriptor = __webpack_require__(10),
+__webpack_require__(/*! ../shim */ 2);
+var Map = __webpack_require__(/*! ../_map */ 5);
+var WeakMap = __webpack_require__(/*! ../weak-map */ 41);
+var ChangeDescriptor = __webpack_require__(/*! ./change-descriptor */ 10),
     ObjectChangeDescriptor = ChangeDescriptor.ObjectChangeDescriptor,
     ListenerGhost = ChangeDescriptor.ListenerGhost;
 
@@ -892,6 +912,11 @@ PropertyChanges.makePropertyObservable = function (object, key) {
 
 /***/ }),
 /* 4 */
+/* no static exports found */
+/* all exports used */
+/*!********************************!*\
+  !*** ./~/weak-map/weak-map.js ***!
+  \********************************/
 /***/ (function(module, exports) {
 
 // Copyright (C) 2011 Google Inc.
@@ -1583,13 +1608,18 @@ PropertyChanges.makePropertyObservable = function (object, key) {
 
 /***/ }),
 /* 5 */
+/* no static exports found */
+/* all exports used */
+/*!*******************************!*\
+  !*** ./~/collections/_map.js ***!
+  \*******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Shim = __webpack_require__(2);
-var GenericCollection = __webpack_require__(1);
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
 var Map, GlobalMap, CollectionsMap;
 
 if((global.Map !== void 0) && (typeof global.Set.prototype.values === "function")) {
@@ -1834,8 +1864,8 @@ if((global.Map !== void 0) && (typeof global.Set.prototype.values === "function"
     var ChangeDispatchMap = Object.create(Map.prototype, observableMapProperties);
 }
 
-    var Set = __webpack_require__(16).CollectionsSet;
-    var GenericMap = __webpack_require__(8);
+    var Set = __webpack_require__(/*! ./_set */ 16).CollectionsSet;
+    var GenericMap = __webpack_require__(/*! ./generic-map */ 8);
 
     CollectionsMap = Map = function Map(values, equals, hash, getDefault) {
         if (!(this instanceof Map)) {
@@ -1897,16 +1927,21 @@ if((global.Map !== void 0) && (typeof global.Set.prototype.values === "function"
         GlobalMap.CollectionsMap = CollectionsMap;
     }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 6 */
+/* no static exports found */
+/* all exports used */
+/*!**************************************!*\
+  !*** ./~/collections/shim-object.js ***!
+  \**************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var WeakMap = __webpack_require__(4);
+var WeakMap = __webpack_require__(/*! weak-map */ 4);
 
 module.exports = Object;
 
@@ -2507,6 +2542,11 @@ Object.clear = function (object) {
 
 /***/ }),
 /* 7 */
+/* no static exports found */
+/* all exports used */
+/*!********************************!*\
+  !*** ./~/collections/_list.js ***!
+  \********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2514,9 +2554,9 @@ Object.clear = function (object) {
 
 module.exports = List;
 
-var Shim = __webpack_require__(2);
-var GenericCollection = __webpack_require__(1);
-var GenericOrder = __webpack_require__(17);
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
+var GenericOrder = __webpack_require__(/*! ./generic-order */ 17);
 
 function List(values, equals, getDefault) {
     return List._init(List, this, values, equals, getDefault);
@@ -2908,13 +2948,18 @@ Node.prototype.addAfter = function (node) {
 
 /***/ }),
 /* 8 */
+/* no static exports found */
+/* all exports used */
+/*!**************************************!*\
+  !*** ./~/collections/generic-map.js ***!
+  \**************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Object = __webpack_require__(6);
-var Iterator = __webpack_require__(18);
+var Object = __webpack_require__(/*! ./shim-object */ 6);
+var Iterator = __webpack_require__(/*! ./iterator */ 18);
 
 module.exports = GenericMap;
 function GenericMap() {
@@ -3126,6 +3171,11 @@ Item.prototype.compare = function (that) {
 
 /***/ }),
 /* 9 */
+/* no static exports found */
+/* all exports used */
+/*!**************************************!*\
+  !*** ./~/collections/generic-set.js ***!
+  \**************************************/
 /***/ (function(module, exports) {
 
 
@@ -3221,6 +3271,11 @@ GenericSet.prototype.entriesArray = function() {
 
 /***/ }),
 /* 10 */
+/* no static exports found */
+/* all exports used */
+/*!***************************************************!*\
+  !*** ./~/collections/listen/change-descriptor.js ***!
+  \***************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -3229,7 +3284,7 @@ GenericSet.prototype.entriesArray = function() {
     https://github.com/montagejs/montage/blob/master/LICENSE.md
 */
 
-var Map = __webpack_require__(5);
+var Map = __webpack_require__(/*! ../_map */ 5);
 
 var ObjectChangeDescriptor = module.exports.ObjectChangeDescriptor = function ObjectChangeDescriptor(name) {
     this.name = name;
@@ -3368,6 +3423,11 @@ WillChangeListenersRecord.prototype.genericHandlerMethodName = "handlePropertyWi
 
 /***/ }),
 /* 11 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************************!*\
+  !*** ./~/collections/listen/range-changes.js ***!
+  \***********************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3378,9 +3438,9 @@ WillChangeListenersRecord.prototype.genericHandlerMethodName = "handlePropertyWi
 //Use ObjectChangeDescriptor to avoid creating useless arrays and benefit from similar gains made in property-changes
 
 
-var WeakMap = __webpack_require__(4),
-    Map = __webpack_require__(5),
-    ChangeDescriptor = __webpack_require__(10),
+var WeakMap = __webpack_require__(/*! weak-map */ 4),
+    Map = __webpack_require__(/*! ../_map */ 5),
+    ChangeDescriptor = __webpack_require__(/*! ./change-descriptor */ 10),
     ObjectChangeDescriptor = ChangeDescriptor.ObjectChangeDescriptor,
     ChangeListenersRecord = ChangeDescriptor.ChangeListenersRecord,
     ListenerGhost = ChangeDescriptor.ListenerGhost;
@@ -3642,6 +3702,11 @@ RangeChanges.prototype.dispatchBeforeRangeChange = function (plus, minus, index)
 
 /***/ }),
 /* 12 */
+/* no static exports found */
+/* all exports used */
+/*!********************************!*\
+  !*** ./~/get-size/get-size.js ***!
+  \********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -3858,6 +3923,11 @@ return getSize;
 
 /***/ }),
 /* 13 */
+/* no static exports found */
+/* all exports used */
+/*!******************************!*\
+  !*** ./~/packery/js/rect.js ***!
+  \******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -4020,6 +4090,11 @@ return Rect;
 
 /***/ }),
 /* 14 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************!*\
+  !*** (webpack)/buildin/module.js ***!
+  \***********************************/
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -4048,17 +4123,22 @@ module.exports = function(module) {
 
 /***/ }),
 /* 15 */
+/* no static exports found */
+/* all exports used */
+/*!************************************!*\
+  !*** ./~/collections/_fast-set.js ***!
+  \************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Shim = __webpack_require__(2);
-var Dict = __webpack_require__(33);
-var List = __webpack_require__(7);
-var GenericCollection = __webpack_require__(1);
-var GenericSet = __webpack_require__(9);
-var TreeLog = __webpack_require__(40);
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var Dict = __webpack_require__(/*! ./_dict */ 33);
+var List = __webpack_require__(/*! ./_list */ 7);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
+var GenericSet = __webpack_require__(/*! ./generic-set */ 9);
+var TreeLog = __webpack_require__(/*! ./tree-log */ 40);
 
 var object_has = Object.prototype.hasOwnProperty;
 
@@ -4288,14 +4368,19 @@ FastSet.prototype.logNode = function (node, write) {
 
 /***/ }),
 /* 16 */
+/* no static exports found */
+/* all exports used */
+/*!*******************************!*\
+  !*** ./~/collections/_set.js ***!
+  \*******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Shim = __webpack_require__(2);
-var GenericCollection = __webpack_require__(1);
-var GenericSet = __webpack_require__(9);
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
+var GenericSet = __webpack_require__(/*! ./generic-set */ 9);
 var Set, GlobalSet, CollectionsSet;
 
 
@@ -4394,9 +4479,9 @@ if((global.Set !== void 0) && (typeof global.Set.prototype.values === "function"
 
 
 
-    var List = __webpack_require__(7);
-    var FastSet = __webpack_require__(15);
-    var Iterator = __webpack_require__(18);
+    var List = __webpack_require__(/*! ./_list */ 7);
+    var FastSet = __webpack_require__(/*! ./_fast-set */ 15);
+    var Iterator = __webpack_require__(/*! ./iterator */ 18);
 
     CollectionsSet = function CollectionsSet(values, equals, hash, getDefault) {
         return CollectionsSet._init(CollectionsSet, this, values, equals, hash, getDefault);
@@ -4572,14 +4657,19 @@ else {
     GlobalSet.CollectionsSet = CollectionsSet;
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 17 */
+/* no static exports found */
+/* all exports used */
+/*!****************************************!*\
+  !*** ./~/collections/generic-order.js ***!
+  \****************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var Object = __webpack_require__(6);
+var Object = __webpack_require__(/*! ./shim-object */ 6);
 
 module.exports = GenericOrder;
 function GenericOrder() {
@@ -4640,6 +4730,11 @@ GenericOrder.prototype.toJSON = function () {
 
 /***/ }),
 /* 18 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************!*\
+  !*** ./~/collections/iterator.js ***!
+  \***********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4647,8 +4742,8 @@ GenericOrder.prototype.toJSON = function () {
 
 module.exports = Iterator;
 
-var Object = __webpack_require__(6);
-var GenericCollection = __webpack_require__(1);
+var Object = __webpack_require__(/*! ./shim-object */ 6);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
 
 // upgrades an iterable to a Iterator
 function Iterator(iterable) {
@@ -5021,14 +5116,19 @@ Iterator.repeat = function (value, times) {
 
 /***/ }),
 /* 19 */
+/* no static exports found */
+/* all exports used */
+/*!*********************************************!*\
+  !*** ./~/collections/listen/map-changes.js ***!
+  \*********************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var WeakMap = __webpack_require__(4),
-    Map = __webpack_require__(5),
-    ChangeDescriptor = __webpack_require__(10),
+var WeakMap = __webpack_require__(/*! weak-map */ 4),
+    Map = __webpack_require__(/*! ../_map */ 5),
+    ChangeDescriptor = __webpack_require__(/*! ./change-descriptor */ 10),
     ObjectChangeDescriptor = ChangeDescriptor.ObjectChangeDescriptor,
     ChangeListenersRecord = ChangeDescriptor.ChangeListenersRecord,
     ListenerGhost = ChangeDescriptor.ListenerGhost;
@@ -5289,6 +5389,11 @@ MapChanges.prototype.dispatchBeforeMapChange = function (key, value) {
 
 /***/ }),
 /* 20 */
+/* no static exports found */
+/* all exports used */
+/*!*************************************!*\
+  !*** ./~/collections/shim-array.js ***!
+  \*************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5301,10 +5406,10 @@ MapChanges.prototype.dispatchBeforeMapChange = function (key, value) {
     https://github.com/motorola-mobility/montage/blob/master/LICENSE.md
 */
 
-var Function = __webpack_require__(21);
-var GenericCollection = __webpack_require__(1);
-var GenericOrder = __webpack_require__(17);
-var WeakMap = __webpack_require__(4);
+var Function = __webpack_require__(/*! ./shim-function */ 21);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
+var GenericOrder = __webpack_require__(/*! ./generic-order */ 17);
+var WeakMap = __webpack_require__(/*! weak-map */ 4);
 
 module.exports = Array;
 
@@ -5673,6 +5778,11 @@ ArrayIterator.prototype.next = function () {
 
 /***/ }),
 /* 21 */
+/* no static exports found */
+/* all exports used */
+/*!****************************************!*\
+  !*** ./~/collections/shim-function.js ***!
+  \****************************************/
 /***/ (function(module, exports) {
 
 
@@ -5738,6 +5848,11 @@ Function.get = function (key) {
 
 /***/ }),
 /* 22 */
+/* no static exports found */
+/* all exports used */
+/*!************************************!*\
+  !*** ./~/ev-emitter/ev-emitter.js ***!
+  \************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -5857,6 +5972,11 @@ return EvEmitter;
 
 /***/ }),
 /* 23 */
+/* no static exports found */
+/* all exports used */
+/*!************************************!*\
+  !*** ./~/immediate/lib/browser.js ***!
+  \************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5930,10 +6050,15 @@ function immediate(task) {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 24 */
+/* no static exports found */
+/* all exports used */
+/*!*********************************!*\
+  !*** ./~/jquery/dist/jquery.js ***!
+  \*********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -16194,11 +16319,16 @@ return jQuery;
 
 /***/ }),
 /* 25 */
+/* no static exports found */
+/* all exports used */
+/*!******************************!*\
+  !*** ./~/lie/lib/browser.js ***!
+  \******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var immediate = __webpack_require__(23);
+var immediate = __webpack_require__(/*! immediate */ 23);
 
 /* istanbul ignore next */
 function INTERNAL() {}
@@ -16454,6 +16584,11 @@ function race(iterable) {
 
 /***/ }),
 /* 26 */
+/* no static exports found */
+/* all exports used */
+/*!********************************!*\
+  !*** ./~/outlayer/outlayer.js ***!
+  \********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -16469,10 +16604,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   if ( true ) {
     // AMD - RequireJS
     !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-        __webpack_require__(22),
-        __webpack_require__(12),
-        __webpack_require__(45),
-        __webpack_require__(50)
+        __webpack_require__(/*! ev-emitter/ev-emitter */ 22),
+        __webpack_require__(/*! get-size/get-size */ 12),
+        __webpack_require__(/*! fizzy-ui-utils/utils */ 45),
+        __webpack_require__(/*! ./item */ 50)
       ], __WEBPACK_AMD_DEFINE_RESULT__ = function( EvEmitter, getSize, utils, Item ) {
         return factory( window, EvEmitter, getSize, utils, Item);
       }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -17398,6 +17533,11 @@ return Outlayer;
 
 /***/ }),
 /* 27 */
+/* no static exports found */
+/* exports used: default */
+/*!**********************************************!*\
+  !*** ./~/backbone-lodash/backbone-lodash.js ***!
+  \**********************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Backbone.js 1.1.0
@@ -17421,7 +17561,7 @@ return Outlayer;
   }
 
   if (true) {
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(24),__webpack_require__(48)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(/*! jquery */ 24),__webpack_require__(/*! lodash */ 48)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -19024,10 +19164,14 @@ return Outlayer;
   };
 });
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)(module), __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../nodejs/lib/~/webpack/buildin/module.js */ 14)(module), __webpack_require__(/*! ./../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 28 */
+/* no static exports found */
+/*!*********************************!*\
+  !*** ./~/packery/js/packery.js ***!
+  \*********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -19047,11 +19191,11 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   if ( true ) {
     // AMD
     !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-        __webpack_require__(12),
-        __webpack_require__(26),
-        __webpack_require__(13),
-        __webpack_require__(52),
-        __webpack_require__(51)
+        __webpack_require__(/*! get-size/get-size */ 12),
+        __webpack_require__(/*! outlayer/outlayer */ 26),
+        __webpack_require__(/*! ./rect */ 13),
+        __webpack_require__(/*! ./packer */ 52),
+        __webpack_require__(/*! ./item */ 51)
       ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -19703,18 +19847,23 @@ return Packery;
 
 /***/ }),
 /* 29 */
+/* exports provided: default */
+/* exports used: default */
+/*!******************!*\
+  !*** ./spime.js ***!
+  \******************/
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(/*! jquery */ 24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_collections_lru_map__ = __webpack_require__(62);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_collections_lru_map__ = __webpack_require__(/*! collections/lru-map */ 36);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_collections_lru_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_collections_lru_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_pouchdb__ = __webpack_require__(55);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_pouchdb__ = __webpack_require__(/*! pouchdb */ 55);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_pouchdb___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_pouchdb__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_pouchdb_upsert__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_pouchdb_upsert__ = __webpack_require__(/*! pouchdb-upsert */ 54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_pouchdb_upsert___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_pouchdb_upsert__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_interact_js__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_interact_js__ = __webpack_require__(/*! interact.js */ 47);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_interact_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_interact_js__);
 
 
@@ -21646,6 +21795,11 @@ EXPORT.NObject = NObject;
 
 /***/ }),
 /* 30 */
+/* no static exports found */
+/* all exports used */
+/*!************************************!*\
+  !*** (webpack)/~/events/events.js ***!
+  \************************************/
 /***/ (function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -21954,6 +22108,11 @@ function isUndefined(arg) {
 
 /***/ }),
 /* 31 */
+/* no static exports found */
+/* all exports used */
+/*!**************************************!*\
+  !*** (webpack)/~/process/browser.js ***!
+  \**************************************/
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -22144,6 +22303,11 @@ process.umask = function() { return 0; };
 
 /***/ }),
 /* 32 */
+/* no static exports found */
+/* all exports used */
+/*!******************************!*\
+  !*** ./~/argsarray/index.js ***!
+  \******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22169,14 +22333,19 @@ function argsArray(fun) {
 
 /***/ }),
 /* 33 */
+/* no static exports found */
+/* all exports used */
+/*!********************************!*\
+  !*** ./~/collections/_dict.js ***!
+  \********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Shim = __webpack_require__(2);
-var GenericCollection = __webpack_require__(1);
-var GenericMap = __webpack_require__(8);
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
+var GenericMap = __webpack_require__(/*! ./generic-map */ 8);
 
 // Burgled from https://github.com/domenic/dict
 
@@ -22382,14 +22551,19 @@ Dict.prototype.toJSON = function () {
 
 /***/ }),
 /* 34 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************!*\
+  !*** ./~/collections/fast-set.js ***!
+  \***********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Shim = __webpack_require__(2);
-var FastSet = __webpack_require__(15);
-var PropertyChanges = __webpack_require__(3);
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var FastSet = __webpack_require__(/*! ./_fast-set */ 15);
+var PropertyChanges = __webpack_require__(/*! ./listen/property-changes */ 3);
 
 module.exports = FastSet;
 
@@ -22397,18 +22571,21 @@ Object.addEach(FastSet.prototype, PropertyChanges.prototype);
 
 
 /***/ }),
-/* 35 */,
-/* 36 */,
-/* 37 */
+/* 35 */
+/* no static exports found */
+/* all exports used */
+/*!*******************************!*\
+  !*** ./~/collections/list.js ***!
+  \*******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 
-var _List = __webpack_require__(7);
-var PropertyChanges = __webpack_require__(3);
-var RangeChanges = __webpack_require__(11);
+var _List = __webpack_require__(/*! ./_list */ 7);
+var PropertyChanges = __webpack_require__(/*! ./listen/property-changes */ 3);
+var RangeChanges = __webpack_require__(/*! ./listen/range-changes */ 11);
 
 module.exports = List;
 
@@ -22676,16 +22853,277 @@ List.prototype.reverse = function () {
 
 
 /***/ }),
+/* 36 */
+/* no static exports found */
+/* exports used: default */
+/*!**********************************!*\
+  !*** ./~/collections/lru-map.js ***!
+  \**********************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var LruSet = __webpack_require__(/*! ./lru-set */ 37);
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
+var GenericMap = __webpack_require__(/*! ./generic-map */ 8);
+var PropertyChanges = __webpack_require__(/*! ./listen/property-changes */ 3);
+var MapChanges = __webpack_require__(/*! ./listen/map-changes */ 19);
+
+module.exports = LruMap;
+
+function LruMap(values, maxLength, equals, hash, getDefault) {
+    if (!(this instanceof LruMap)) {
+        return new LruMap(values, maxLength, equals, hash, getDefault);
+    }
+    equals = equals || Object.equals;
+    hash = hash || Object.hash;
+    getDefault = getDefault || Function.noop;
+    this.contentEquals = equals;
+    this.contentHash = hash;
+    this.getDefault = getDefault;
+    this.store = new LruSet(
+        undefined,
+        maxLength,
+        function keysEqual(a, b) {
+            return equals(a.key, b.key);
+        },
+        function keyHash(item) {
+            return hash(item.key);
+        }
+    );
+    this.length = 0;
+    this.addEach(values);
+}
+
+LruMap.LruMap = LruMap; // hack so require("lru-map").LruMap will work in MontageJS
+
+Object.addEach(LruMap.prototype, GenericCollection.prototype);
+Object.addEach(LruMap.prototype, GenericMap.prototype);
+Object.addEach(LruMap.prototype, PropertyChanges.prototype);
+Object.addEach(LruMap.prototype, MapChanges.prototype);
+
+Object.defineProperty(LruMap.prototype,"size",GenericCollection._sizePropertyDescriptor);
+LruMap.from = GenericCollection.from;
+
+LruMap.prototype.constructClone = function (values) {
+    return new this.constructor(
+        values,
+        this.maxLength,
+        this.contentEquals,
+        this.contentHash,
+        this.getDefault
+    );
+};
+
+LruMap.prototype.log = function (charmap, stringify) {
+    stringify = stringify || this.stringify;
+    this.store.log(charmap, stringify);
+};
+
+LruMap.prototype.stringify = function (item, leader) {
+    return leader + JSON.stringify(item.key) + ": " + JSON.stringify(item.value);
+};
+
+LruMap.prototype.addMapChangeListener = function () {
+    if (!this.dispatchesMapChanges) {
+        // Detect LRU deletions in the LruSet and emit as MapChanges.
+        // Array and Heap have no store.
+        // Dict and FastMap define no listeners on their store.
+        var self = this;
+        this.store.addBeforeRangeChangeListener(function(plus, minus) {
+            if (plus.length && minus.length) {  // LRU item pruned
+                self.dispatchBeforeMapChange(minus[0].key, undefined);
+            }
+        });
+        this.store.addRangeChangeListener(function(plus, minus) {
+            if (plus.length && minus.length) {
+                self.dispatchMapChange(minus[0].key, undefined);
+            }
+        });
+    }
+    MapChanges.prototype.addMapChangeListener.apply(this, arguments);
+};
+
+
+/***/ }),
+/* 37 */
+/* no static exports found */
+/* all exports used */
+/*!**********************************!*\
+  !*** ./~/collections/lru-set.js ***!
+  \**********************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Shim = __webpack_require__(/*! ./shim */ 2);
+var Set = __webpack_require__(/*! ./set */ 38).CollectionsSet;
+var GenericCollection = __webpack_require__(/*! ./generic-collection */ 1);
+var GenericSet = __webpack_require__(/*! ./generic-set */ 9);
+var PropertyChanges = __webpack_require__(/*! ./listen/property-changes */ 3);
+var RangeChanges = __webpack_require__(/*! ./listen/range-changes */ 11);
+
+module.exports = LruSet;
+
+function LruSet(values, capacity, equals, hash, getDefault) {
+    if (!(this instanceof LruSet)) {
+        return new LruSet(values, capacity, equals, hash, getDefault);
+    }
+    capacity = capacity || Infinity;
+    equals = equals || Object.equals;
+    hash = hash || Object.hash;
+    getDefault = getDefault || Function.noop;
+    this.store = new Set(undefined, equals, hash);
+    this.contentEquals = equals;
+    this.contentHash = hash;
+    this.getDefault = getDefault;
+    this.capacity = capacity;
+    this.length = 0;
+    this.addEach(values);
+}
+
+LruSet.LruSet = LruSet; // hack so require("lru-set").LruSet will work in MontageJS
+
+Object.addEach(LruSet.prototype, GenericCollection.prototype);
+Object.addEach(LruSet.prototype, GenericSet.prototype);
+Object.addEach(LruSet.prototype, PropertyChanges.prototype);
+Object.addEach(LruSet.prototype, RangeChanges.prototype);
+Object.defineProperty(LruSet.prototype,"size",GenericCollection._sizePropertyDescriptor);
+LruSet.from = GenericCollection.from;
+
+LruSet.prototype.constructClone = function (values) {
+    return new this.constructor(
+        values,
+        this.capacity,
+        this.contentEquals,
+        this.contentHash,
+        this.getDefault
+    );
+};
+
+LruSet.prototype.has = function (value) {
+    return this.store.has(value);
+};
+
+LruSet.prototype.get = function (value, equals) {
+    if (equals) {
+        throw new Error("LruSet#get does not support second argument: equals");
+    }
+    value = this.store.get(value);
+    if (value !== undefined) {
+        this.store["delete"](value);
+        this.store.add(value);
+    } else {
+        value = this.getDefault(value);
+    }
+    return value;
+};
+
+LruSet.prototype.add = function (value) {
+    var found = this.store.has(value);
+    var plus = [], minus = [], eldest;
+    // if the value already exists, we delete it and add it back again so it
+    // appears at the end of the list of values to truncate
+    if (found) {    // update
+        this.store["delete"](value);
+        this.store.add(value);
+    } else if (this.capacity > 0) {    // add
+        // because minus is constructed before adding value, we must ensure the
+        // set has positive length. hence the capacity check.
+        plus.push(value);
+        if (this.length >= this.capacity) {
+            eldest = this.store.order.head.next;
+            minus.push(eldest.value);
+        }
+        if (this.dispatchesRangeChanges) {
+            this.dispatchBeforeRangeChange(plus, minus, 0);
+        }
+        this.store.add(value);
+        if (minus.length > 0) {
+            this.store['delete'](eldest.value);
+        }
+        // only assign to length once to avoid jitter on length observers
+        this.length = this.length + plus.length - minus.length;
+        // after change
+        if (this.dispatchesRangeChanges) {
+            this.dispatchRangeChange(plus, minus, 0);
+        }
+    }
+    // whether it grew
+    return plus.length !== minus.length;
+};
+
+LruSet.prototype["delete"] = function (value, equals) {
+    if (equals) {
+        throw new Error("LruSet#delete does not support second argument: equals");
+    }
+    var found = this.store.has(value);
+    if (found) {
+        if (this.dispatchesRangeChanges) {
+            this.dispatchBeforeRangeChange([], [value], 0);
+        }
+        this.store["delete"](value);
+        this.length--;
+        if (this.dispatchesRangeChanges) {
+            this.dispatchRangeChange([], [value], 0);
+        }
+    }
+    return found;
+};
+
+LruSet.prototype.one = function () {
+    if (this.length > 0) {
+        return this.store.one();
+    }
+};
+
+LruSet.prototype.clear = function () {
+    this.store.clear();
+    this.length = 0;
+};
+
+LruSet.prototype.reduce = function (callback, basis /*, thisp*/) {
+    var thisp = arguments[2];
+    var set = this.store;
+    var index = 0;
+    return set.reduce(function (basis, value) {
+        return callback.call(thisp, basis, value, index++, this);
+    }, basis, this);
+};
+
+LruSet.prototype.reduceRight = function (callback, basis /*, thisp*/) {
+    var thisp = arguments[2];
+    var set = this.store;
+    var index = this.length - 1;
+    return set.reduceRight(function (basis, value) {
+        return callback.call(thisp, basis, value, index--, this);
+    }, basis, this);
+};
+
+LruSet.prototype.iterate = function () {
+    return this.store.iterate();
+};
+
+
+/***/ }),
 /* 38 */
+/* no static exports found */
+/* all exports used */
+/*!******************************!*\
+  !*** ./~/collections/set.js ***!
+  \******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Set = __webpack_require__(16);
-var PropertyChanges = __webpack_require__(3);
-var RangeChanges = __webpack_require__(11);
-var MapChanges = __webpack_require__(19);
+var Set = __webpack_require__(/*! ./_set */ 16);
+var PropertyChanges = __webpack_require__(/*! ./listen/property-changes */ 3);
+var RangeChanges = __webpack_require__(/*! ./listen/range-changes */ 11);
+var MapChanges = __webpack_require__(/*! ./listen/map-changes */ 19);
 var GlobalSet;
 
 
@@ -22833,8 +23271,8 @@ function setupCollectionSet() {
     CollectionsSet.prototype = new _CollectionsSet();
     CollectionsSet.prototype.constructor = CollectionsSet;
 
-    var List = __webpack_require__(37);
-    var FastSet = __webpack_require__(34);
+    var List = __webpack_require__(/*! ./list */ 35);
+    var FastSet = __webpack_require__(/*! ./fast-set */ 34);
     CollectionsSet.prototype.Order = List;
     CollectionsSet.prototype.Store = FastSet;
 
@@ -22906,10 +23344,15 @@ function setupCollectionSet() {
 
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 39 */
+/* no static exports found */
+/* all exports used */
+/*!**************************************!*\
+  !*** ./~/collections/shim-regexp.js ***!
+  \**************************************/
 /***/ (function(module, exports) {
 
 
@@ -22930,6 +23373,11 @@ if (!RegExp.escape) {
 
 /***/ }),
 /* 40 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************!*\
+  !*** ./~/collections/tree-log.js ***!
+  \***********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22977,14 +23425,24 @@ TreeLog.unicodeSharp = {
 
 /***/ }),
 /* 41 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************!*\
+  !*** ./~/collections/weak-map.js ***!
+  \***********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {module.exports = (global.WeakMap !== void 0) ? global.WeakMap : __webpack_require__(4);
+/* WEBPACK VAR INJECTION */(function(global) {module.exports = (global.WeakMap !== void 0) ? global.WeakMap : __webpack_require__(/*! weak-map */ 4);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 42 */
+/* no static exports found */
+/* all exports used */
+/*!********************************!*\
+  !*** ./~/debug/src/browser.js ***!
+  \********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22993,7 +23451,7 @@ TreeLog.unicodeSharp = {
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(43);
+exports = module.exports = __webpack_require__(/*! ./debug */ 43);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -23170,10 +23628,15 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../../nodejs/lib/~/webpack/~/process/browser.js */ 31)))
 
 /***/ }),
 /* 43 */
+/* no static exports found */
+/* all exports used */
+/*!******************************!*\
+  !*** ./~/debug/src/debug.js ***!
+  \******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -23189,7 +23652,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(49);
+exports.humanize = __webpack_require__(/*! ms */ 49);
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -23382,6 +23845,11 @@ function coerce(val) {
 
 /***/ }),
 /* 44 */
+/* no static exports found */
+/* all exports used */
+/*!*********************************************************!*\
+  !*** ./~/desandro-matches-selector/matches-selector.js ***!
+  \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -23445,6 +23913,11 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 /***/ }),
 /* 45 */
+/* no static exports found */
+/* all exports used */
+/*!***********************************!*\
+  !*** ./~/fizzy-ui-utils/utils.js ***!
+  \***********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -23461,7 +23934,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
   if ( true ) {
     // AMD
     !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-      __webpack_require__(44)
+      __webpack_require__(/*! desandro-matches-selector/matches-selector */ 44)
     ], __WEBPACK_AMD_DEFINE_RESULT__ = function( matchesSelector ) {
       return factory( window, matchesSelector );
     }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -23690,6 +24163,11 @@ return utils;
 
 /***/ }),
 /* 46 */
+/* no static exports found */
+/* all exports used */
+/*!****************************************!*\
+  !*** ./~/inherits/inherits_browser.js ***!
+  \****************************************/
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -23719,6 +24197,11 @@ if (typeof Object.create === 'function') {
 
 /***/ }),
 /* 47 */
+/* no static exports found */
+/* exports used: default */
+/*!***********************************!*\
+  !*** ./~/interact.js/interact.js ***!
+  \***********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -29702,6 +30185,11 @@ if (typeof Object.create === 'function') {
 
 /***/ }),
 /* 48 */
+/* no static exports found */
+/* all exports used */
+/*!*********************************!*\
+  !*** ./~/lodash/dist/lodash.js ***!
+  \*********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -36066,10 +36554,15 @@ if (typeof Object.create === 'function') {
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)(module), __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../../nodejs/lib/~/webpack/buildin/module.js */ 14)(module), __webpack_require__(/*! ./../../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 49 */
+/* no static exports found */
+/* all exports used */
+/*!***********************!*\
+  !*** ./~/ms/index.js ***!
+  \***********************/
 /***/ (function(module, exports) {
 
 /**
@@ -36225,6 +36718,11 @@ function plural(ms, n, name) {
 
 /***/ }),
 /* 50 */
+/* no static exports found */
+/* all exports used */
+/*!****************************!*\
+  !*** ./~/outlayer/item.js ***!
+  \****************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -36237,8 +36735,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   if ( true ) {
     // AMD - RequireJS
     !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-        __webpack_require__(22),
-        __webpack_require__(12)
+        __webpack_require__(/*! ev-emitter/ev-emitter */ 22),
+        __webpack_require__(/*! get-size/get-size */ 12)
       ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -36786,6 +37284,11 @@ return Item;
 
 /***/ }),
 /* 51 */
+/* no static exports found */
+/* all exports used */
+/*!******************************!*\
+  !*** ./~/packery/js/item.js ***!
+  \******************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -36798,8 +37301,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   if ( true ) {
     // AMD
     !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-        __webpack_require__(26),
-        __webpack_require__(13)
+        __webpack_require__(/*! outlayer/outlayer */ 26),
+        __webpack_require__(/*! ./rect */ 13)
       ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -36924,6 +37427,11 @@ return Item;
 
 /***/ }),
 /* 52 */
+/* no static exports found */
+/* all exports used */
+/*!********************************!*\
+  !*** ./~/packery/js/packer.js ***!
+  \********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -36936,7 +37444,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   /* jshint strict: false */ /* globals define, module, require */
   if ( true ) {
     // AMD
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(13) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! ./rect */ 13) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -37130,6 +37638,11 @@ return Packer;
 
 /***/ }),
 /* 53 */
+/* no static exports found */
+/* all exports used */
+/*!****************************************!*\
+  !*** ./~/pouchdb-promise/lib/index.js ***!
+  \****************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37137,7 +37650,7 @@ return Packer;
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var lie = _interopDefault(__webpack_require__(25));
+var lie = _interopDefault(__webpack_require__(/*! lie */ 25));
 
 /* istanbul ignore next */
 var PouchPromise = typeof Promise === 'function' ? Promise : lie;
@@ -37147,12 +37660,17 @@ module.exports = PouchPromise;
 
 /***/ }),
 /* 54 */
+/* no static exports found */
+/* exports used: default */
+/*!***********************************!*\
+  !*** ./~/pouchdb-upsert/index.js ***!
+  \***********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PouchPromise = __webpack_require__(53);
+var PouchPromise = __webpack_require__(/*! pouchdb-promise */ 53);
 
 // this is essentially the "update sugar" function from daleharvey/pouchdb#1388
 // the diffFun tells us what delta to apply to the doc.  it either returns
@@ -37248,6 +37766,11 @@ if (typeof window !== 'undefined' && window.PouchDB) {
 
 /***/ }),
 /* 55 */
+/* no static exports found */
+/* exports used: default */
+/*!****************************************!*\
+  !*** ./~/pouchdb/lib/index-browser.js ***!
+  \****************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37255,14 +37778,14 @@ if (typeof window !== 'undefined' && window.PouchDB) {
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var lie = _interopDefault(__webpack_require__(25));
-var getArguments = _interopDefault(__webpack_require__(32));
-var events = __webpack_require__(30);
-var inherits = _interopDefault(__webpack_require__(46));
-var nextTick = _interopDefault(__webpack_require__(23));
-var debug = _interopDefault(__webpack_require__(42));
-var Md5 = _interopDefault(__webpack_require__(56));
-var vuvuzela = _interopDefault(__webpack_require__(57));
+var lie = _interopDefault(__webpack_require__(/*! lie */ 25));
+var getArguments = _interopDefault(__webpack_require__(/*! argsarray */ 32));
+var events = __webpack_require__(/*! events */ 30);
+var inherits = _interopDefault(__webpack_require__(/*! inherits */ 46));
+var nextTick = _interopDefault(__webpack_require__(/*! immediate */ 23));
+var debug = _interopDefault(__webpack_require__(/*! debug */ 42));
+var Md5 = _interopDefault(__webpack_require__(/*! spark-md5 */ 56));
+var vuvuzela = _interopDefault(__webpack_require__(/*! vuvuzela */ 57));
 
 /* istanbul ignore next */
 var PouchPromise$1 = typeof Promise === 'function' ? Promise : lie;
@@ -49377,10 +49900,15 @@ PouchDB$5.plugin(IDBPouch)
 
 module.exports = PouchDB$5;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../../../../../../../../nodejs/lib/~/webpack/buildin/global.js */ 0)))
 
 /***/ }),
 /* 56 */
+/* no static exports found */
+/* all exports used */
+/*!**********************************!*\
+  !*** ./~/spark-md5/spark-md5.js ***!
+  \**********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 (function (factory) {
@@ -50138,6 +50666,11 @@ module.exports = PouchDB$5;
 
 /***/ }),
 /* 57 */
+/* no static exports found */
+/* all exports used */
+/*!*****************************!*\
+  !*** ./~/vuvuzela/index.js ***!
+  \*****************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50320,14 +50853,19 @@ exports.parse = function (str) {
 /* 58 */,
 /* 59 */,
 /* 60 */
+/* no static exports found */
+/* all exports used */
+/*!*******************!*\
+  !*** ./search.js ***!
+  \*******************/
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_backbone_lodash__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_backbone_lodash__ = __webpack_require__(/*! backbone-lodash */ 27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_backbone_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_backbone_lodash__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__spime_js__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_packery__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__spime_js__ = __webpack_require__(/*! ./spime.js */ 29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_packery__ = __webpack_require__(/*! packery */ 28);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_packery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_packery__);
 
 
@@ -50668,253 +51206,6 @@ const router = new Router();
 
 __WEBPACK_IMPORTED_MODULE_0_backbone_lodash___default.a.history.start();
 
-
-
-/***/ }),
-/* 61 */,
-/* 62 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Shim = __webpack_require__(2);
-var LruSet = __webpack_require__(63);
-var GenericCollection = __webpack_require__(1);
-var GenericMap = __webpack_require__(8);
-var PropertyChanges = __webpack_require__(3);
-var MapChanges = __webpack_require__(19);
-
-module.exports = LruMap;
-
-function LruMap(values, maxLength, equals, hash, getDefault) {
-    if (!(this instanceof LruMap)) {
-        return new LruMap(values, maxLength, equals, hash, getDefault);
-    }
-    equals = equals || Object.equals;
-    hash = hash || Object.hash;
-    getDefault = getDefault || Function.noop;
-    this.contentEquals = equals;
-    this.contentHash = hash;
-    this.getDefault = getDefault;
-    this.store = new LruSet(
-        undefined,
-        maxLength,
-        function keysEqual(a, b) {
-            return equals(a.key, b.key);
-        },
-        function keyHash(item) {
-            return hash(item.key);
-        }
-    );
-    this.length = 0;
-    this.addEach(values);
-}
-
-LruMap.LruMap = LruMap; // hack so require("lru-map").LruMap will work in MontageJS
-
-Object.addEach(LruMap.prototype, GenericCollection.prototype);
-Object.addEach(LruMap.prototype, GenericMap.prototype);
-Object.addEach(LruMap.prototype, PropertyChanges.prototype);
-Object.addEach(LruMap.prototype, MapChanges.prototype);
-
-Object.defineProperty(LruMap.prototype,"size",GenericCollection._sizePropertyDescriptor);
-LruMap.from = GenericCollection.from;
-
-LruMap.prototype.constructClone = function (values) {
-    return new this.constructor(
-        values,
-        this.maxLength,
-        this.contentEquals,
-        this.contentHash,
-        this.getDefault
-    );
-};
-
-LruMap.prototype.log = function (charmap, stringify) {
-    stringify = stringify || this.stringify;
-    this.store.log(charmap, stringify);
-};
-
-LruMap.prototype.stringify = function (item, leader) {
-    return leader + JSON.stringify(item.key) + ": " + JSON.stringify(item.value);
-};
-
-LruMap.prototype.addMapChangeListener = function () {
-    if (!this.dispatchesMapChanges) {
-        // Detect LRU deletions in the LruSet and emit as MapChanges.
-        // Array and Heap have no store.
-        // Dict and FastMap define no listeners on their store.
-        var self = this;
-        this.store.addBeforeRangeChangeListener(function(plus, minus) {
-            if (plus.length && minus.length) {  // LRU item pruned
-                self.dispatchBeforeMapChange(minus[0].key, undefined);
-            }
-        });
-        this.store.addRangeChangeListener(function(plus, minus) {
-            if (plus.length && minus.length) {
-                self.dispatchMapChange(minus[0].key, undefined);
-            }
-        });
-    }
-    MapChanges.prototype.addMapChangeListener.apply(this, arguments);
-};
-
-
-/***/ }),
-/* 63 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Shim = __webpack_require__(2);
-var Set = __webpack_require__(38).CollectionsSet;
-var GenericCollection = __webpack_require__(1);
-var GenericSet = __webpack_require__(9);
-var PropertyChanges = __webpack_require__(3);
-var RangeChanges = __webpack_require__(11);
-
-module.exports = LruSet;
-
-function LruSet(values, capacity, equals, hash, getDefault) {
-    if (!(this instanceof LruSet)) {
-        return new LruSet(values, capacity, equals, hash, getDefault);
-    }
-    capacity = capacity || Infinity;
-    equals = equals || Object.equals;
-    hash = hash || Object.hash;
-    getDefault = getDefault || Function.noop;
-    this.store = new Set(undefined, equals, hash);
-    this.contentEquals = equals;
-    this.contentHash = hash;
-    this.getDefault = getDefault;
-    this.capacity = capacity;
-    this.length = 0;
-    this.addEach(values);
-}
-
-LruSet.LruSet = LruSet; // hack so require("lru-set").LruSet will work in MontageJS
-
-Object.addEach(LruSet.prototype, GenericCollection.prototype);
-Object.addEach(LruSet.prototype, GenericSet.prototype);
-Object.addEach(LruSet.prototype, PropertyChanges.prototype);
-Object.addEach(LruSet.prototype, RangeChanges.prototype);
-Object.defineProperty(LruSet.prototype,"size",GenericCollection._sizePropertyDescriptor);
-LruSet.from = GenericCollection.from;
-
-LruSet.prototype.constructClone = function (values) {
-    return new this.constructor(
-        values,
-        this.capacity,
-        this.contentEquals,
-        this.contentHash,
-        this.getDefault
-    );
-};
-
-LruSet.prototype.has = function (value) {
-    return this.store.has(value);
-};
-
-LruSet.prototype.get = function (value, equals) {
-    if (equals) {
-        throw new Error("LruSet#get does not support second argument: equals");
-    }
-    value = this.store.get(value);
-    if (value !== undefined) {
-        this.store["delete"](value);
-        this.store.add(value);
-    } else {
-        value = this.getDefault(value);
-    }
-    return value;
-};
-
-LruSet.prototype.add = function (value) {
-    var found = this.store.has(value);
-    var plus = [], minus = [], eldest;
-    // if the value already exists, we delete it and add it back again so it
-    // appears at the end of the list of values to truncate
-    if (found) {    // update
-        this.store["delete"](value);
-        this.store.add(value);
-    } else if (this.capacity > 0) {    // add
-        // because minus is constructed before adding value, we must ensure the
-        // set has positive length. hence the capacity check.
-        plus.push(value);
-        if (this.length >= this.capacity) {
-            eldest = this.store.order.head.next;
-            minus.push(eldest.value);
-        }
-        if (this.dispatchesRangeChanges) {
-            this.dispatchBeforeRangeChange(plus, minus, 0);
-        }
-        this.store.add(value);
-        if (minus.length > 0) {
-            this.store['delete'](eldest.value);
-        }
-        // only assign to length once to avoid jitter on length observers
-        this.length = this.length + plus.length - minus.length;
-        // after change
-        if (this.dispatchesRangeChanges) {
-            this.dispatchRangeChange(plus, minus, 0);
-        }
-    }
-    // whether it grew
-    return plus.length !== minus.length;
-};
-
-LruSet.prototype["delete"] = function (value, equals) {
-    if (equals) {
-        throw new Error("LruSet#delete does not support second argument: equals");
-    }
-    var found = this.store.has(value);
-    if (found) {
-        if (this.dispatchesRangeChanges) {
-            this.dispatchBeforeRangeChange([], [value], 0);
-        }
-        this.store["delete"](value);
-        this.length--;
-        if (this.dispatchesRangeChanges) {
-            this.dispatchRangeChange([], [value], 0);
-        }
-    }
-    return found;
-};
-
-LruSet.prototype.one = function () {
-    if (this.length > 0) {
-        return this.store.one();
-    }
-};
-
-LruSet.prototype.clear = function () {
-    this.store.clear();
-    this.length = 0;
-};
-
-LruSet.prototype.reduce = function (callback, basis /*, thisp*/) {
-    var thisp = arguments[2];
-    var set = this.store;
-    var index = 0;
-    return set.reduce(function (basis, value) {
-        return callback.call(thisp, basis, value, index++, this);
-    }, basis, this);
-};
-
-LruSet.prototype.reduceRight = function (callback, basis /*, thisp*/) {
-    var thisp = arguments[2];
-    var set = this.store;
-    var index = this.length - 1;
-    return set.reduceRight(function (basis, value) {
-        return callback.call(thisp, basis, value, index--, this);
-    }, basis, this);
-};
-
-LruSet.prototype.iterate = function () {
-    return this.store.iterate();
-};
 
 
 /***/ })

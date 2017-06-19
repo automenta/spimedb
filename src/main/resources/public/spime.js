@@ -1,23 +1,14 @@
 "use strict";
 
-import $ from "jquery";
-//import _ from "lodash";
-
-//import LfuMap from "collections/lfu-map";
-import LfuMap from "collections/lru-map"; //actually LRU
-
-import pouch from "pouchdb";
-import pouchUpsert from "pouchdb-upsert";
-
-import interact from "interact.js";
-
-
-const jQuery = window.jQuery = window.$ = $;
+var $ = require('jquery');
+var _ = require('lodash');
+var LfuMap = require('collections/lru-map');
+var pouch = require('pouchdb');
+var pouchUpsert = require('pouchdb-upsert');
+var interact = require('interact');
 
 
 pouch.plugin(pouchUpsert);
-
-var MEMORY_SIZE = 256;
 
 
 
@@ -1707,6 +1698,7 @@ class LFUGraph extends LfuMap {
 //
 // }(typeof exports === 'undefined' ? this.share = {} : exports));
 
+var MEMORY_SIZE = 256;
 class MMEE extends LFUGraph {
 
     constructor() {
@@ -1877,15 +1869,21 @@ function newFrame() {
 }
 
 
-const EXPORT = function () {
-    return new MMEE();
+module.exports = {
+    me: (opts) =>  new MMEE(opts),
+    D: D,
+    E: E,
+    ME: MMEE,
+    NIcon: NIcon,
+    NObject: NObject
 };
-EXPORT.D = D;
-EXPORT.E = E;
-EXPORT.NIcon = NIcon;
-EXPORT.NObject = NObject;
 
-export default EXPORT;
+// EXPORT.D = D;
+// EXPORT.E = E;
+// EXPORT.NIcon = NIcon;
+// EXPORT.NObject = NObject;
+//
+// export default EXPORT;
 
 
 //    var IF = new RuleReactor({}, true);

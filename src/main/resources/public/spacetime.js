@@ -1,13 +1,23 @@
 "use strict";
 
-import Backbone from "backbone-lodash";
-import L from "leaflet";
-import Spime from "./spime.js";
-import Timeline from "./lib/edsc-timeline.min.js";
-import Packery from "packery";
+var $ = require('jquery');
+var jQuery = $;
+window.jQuery = jQuery;
 
-const ME = Spime();
-const facetsDiv = ME.facets = $('#overfacets'); //HACK
+
+var _ = require('lodash');
+var Backbone = require('backbone');
+var L = require('leaflet');
+
+var Timeline = require('./lib/edsc-timeline.min.js');
+var Packery = require('packery');
+
+
+var Spime = require('./spime.js');
+
+const ME = Spime.me({ });
+
+const tagsDiv = ME.facets = $('#overfacets'); //HACK
 
 
 //var timelineRows = new
@@ -43,21 +53,21 @@ var row2 = {
     min: Date.UTC(0) / 1000,
     max: Date.UTC() / 1000,
 };
-$timelines.on('rangechange.timeline', function (e, start, end) {
-    console.log('range change', start, end);
-});
-$timelines.on('temporalset.timeline', function (e, start, end) {
-    console.log('temporal set', start, end);
-});
-$timelines.on('temporalremove.timeline', function (e) {
-    console.log('temporal cleared');
-});
-$timelines.on('focusset.timeline', function (e, start, end, resolution) {
-    console.log('focus set', start, end, resolution);
-});
-$timelines.on('focusremove.timeline', function (e) {
-    console.log('focus cleared');
-});
+// $timelines.on('rangechange.timeline', function (e, start, end) {
+//     console.log('range change', start, end);
+// });
+// $timelines.on('temporalset.timeline', function (e, start, end) {
+//     console.log('temporal set', start, end);
+// });
+// $timelines.on('temporalremove.timeline', function (e) {
+//     console.log('temporal cleared');
+// });
+// $timelines.on('focusset.timeline', function (e, start, end, resolution) {
+//     console.log('focus set', start, end, resolution);
+// });
+// $timelines.on('focusremove.timeline', function (e) {
+//     console.log('focus cleared');
+// });
 $timelines
     .timeline()
     .timeline('show');
@@ -69,8 +79,8 @@ $('#timeline-multiple')
     .timeline('setRowTemporal', 'examplerow2', [[Date.UTC(2015, 5), Date.UTC(2015, 6)]])
 
 
-var mapUpdatePeriodMS = 30;
-var mapBoundsPeriodMS = 60;
+var mapUpdatePeriodMS = 5;
+var mapBoundsPeriodMS = 5;
 
 const map = L.map('map', {
     continuousWorld: true,
@@ -166,7 +176,7 @@ function LOAD(ss) {
     //setTimeout(() => {
 
     const results = ss[0]; //first part: search results
-    const facets = ss[1]; //second part: facets
+    const tags = ss[1]; //second part: facets
 
 
     const yy = _.map(results, x => {
@@ -181,12 +191,13 @@ function LOAD(ss) {
 
 
     //TODO use abstraction
-    if (facets) {
+    if (tags) {
 
-        facetsDiv.html('');
+
+        tagsDiv.html('');
 
         const that = this;
-        var newItems = _.map(facets, (v) => {
+        var newItems = _.map(tags, (v) => {
 
             const id = v[0]
                 .replace(/_/g, ' ')
@@ -203,7 +214,7 @@ function LOAD(ss) {
         });
 
         var nn = $(newItems);
-        facetsDiv.append(nn);
+        tagsDiv.append(nn);
     }
 
     return yy;
@@ -286,11 +297,11 @@ function nextUpdateBounds() {
     setTimeout(updateBounds, 0);
 }
 
-updateBounds();
 
 
 new Router();
 Backbone.history.start();
+
 
 
 //http://leaflet-extras.github.io/leaflet-providers/preview/
