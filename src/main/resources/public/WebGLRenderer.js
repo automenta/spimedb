@@ -1,6 +1,7 @@
+"use strict";
 /* global PIXI,Renderer */
 
-module.exports = function (p2, targetFPS) {
+export default function(p2) {
 
     p2.StateMachine = StateMachine;
 
@@ -22,7 +23,7 @@ module.exports = function (p2, targetFPS) {
         this.states = options.states.slice(0);
         this.state = this.states[0];
         this.transitions = [];
-        for(var i=0; i < options.transitions.length; i++){
+        for(let i=0; i < options.transitions.length; i++){
             this.transitions.push([
                 options.transitions[i][0],
                 options.transitions[i][1]
@@ -205,27 +206,28 @@ module.exports = function (p2, targetFPS) {
 
             'paused [p]': false,
             'manualStep [s]': function(){ that.world.step(that.world.lastTimeStep); },
-            fps: 60,
-            maxSubSteps: 3,
+            fps: 30 /* 60 */,
+            maxSubSteps: 2 /* 3 */,
+            iterations: 4 /* 10 */,
+            tolerance: 0.001 /*0.0001*/,
+
             gravityX: 0,
-            gravityY: -10,
-            sleepMode: p2.World.NO_SLEEPING,
+            gravityY: 0,
+            sleepMode: p2.World.ISLAND_SLEEPING /*NO_SLEEPING*/,
 
             'drawContacts [c]': false,
             'drawAABBs [t]': false,
             drawConstraints: false,
 
-            iterations: 10,
             stiffness: 1000000,
-            relaxation: 4,
-            tolerance: 0.0001,
+            relaxation: 4
         };
 
         this.init();
         this.resizeToFit();
         this.render();
         this.createStats();
-        this.addLogo();
+
 
         this.setCameraCenter([0, 0]);
 
@@ -970,28 +972,7 @@ module.exports = function (p2, targetFPS) {
         */
     };
 
-    Renderer.prototype.addLogo = function(){
-        var css = [
-            'position:absolute',
-            'left:10px',
-            'top:15px',
-            'text-align:center',
-            'font: 13px Helvetica, arial, freesans, clean, sans-serif',
-        ].concat(disableSelectionCSS);
 
-        var div = document.createElement('div');
-        div.innerHTML = [
-            "<div style='"+css.join(';')+"' user-select='none'>",
-            "<h1 style='margin:0px'><a href='http://github.com/schteppe/p2.js' style='color:black; text-decoration:none;'>p2.js</a></h1>",
-            "<p style='margin:5px'>Physics Engine</p>",
-            '<a style="color:black; text-decoration:none;" href="https://twitter.com/share" class="twitter-share-button" data-via="schteppe" data-count="none" data-hashtags="p2js">Tweet</a>',
-            "</div>"
-        ].join("");
-        this.elementContainer.appendChild(div);
-
-        // Twitter button script
-        !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
-    };
 
     Renderer.prototype.setEquationParameters = function(){
         this.world.setGlobalStiffness(this.settings.stiffness);
@@ -1752,12 +1733,13 @@ module.exports = function (p2, targetFPS) {
                     g.moveTo(x,y);
                 } else {
                     // Check if the lines are parallel
+                    let p3i = (i+1)%path.length;
                     var p1x = lastx,
                         p1y = lasty,
                         p2x = x,
                         p2y = y,
-                        p3x = path[(i+1)%path.length][0],
-                        p3y = path[(i+1)%path.length][1];
+                        p3x = path[p3i][0],
+                        p3y = path[p3i][1];
                     var area = ((p2x - p1x)*(p3y - p1y))-((p3x - p1x)*(p2y - p1y));
                     if(area !== 0){
                         g.lineTo(x,y);
@@ -1986,9 +1968,10 @@ module.exports = function (p2, targetFPS) {
 
             graphics.drawnSleeping = isSleeping;
 
-            if(this.bodyPolygonPaths[obj.id] && !this.debugPolygons){
+            let paths = this.bodyPolygonPaths[obj.id];
+            if(paths && !this.debugPolygons){
                 // Special case: bodies created using Body#fromPolygon
-                this.drawPath(graphics, this.bodyPolygonPaths[obj.id], lw, lineColor, color, alpha);
+                this.drawPath(graphics, paths, lw, lineColor, color, alpha);
             } else {
                 // Draw all shapes
                 for(var i=0; i<obj.shapes.length; i++){
@@ -2010,15 +1993,18 @@ module.exports = function (p2, targetFPS) {
     WebGLRenderer.prototype.getIslandColor = function(body){
         var islandColors = this.islandColors;
         var color;
-        if(body.islandId === -1){
+        let bodyId = body.islandId;
+        let bodyColor = islandColors[bodyId];
+        if(body === -1){
             color = this.islandStaticColor; // Gray for static objects
-        } else if(islandColors[body.islandId]){
-            color = islandColors[body.islandId];
+        } else if (bodyColor){
+            color = bodyColor;
         } else {
-            color = islandColors[body.islandId] = parseInt(WebGLRenderer.randomColor(),16);
+            color = parseInt(WebGLRenderer.randomColor(),16);
         }
         return color;
     };
+
 
     WebGLRenderer.prototype.addRenderable = function(obj){
 

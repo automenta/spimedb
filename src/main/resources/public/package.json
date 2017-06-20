@@ -7,6 +7,7 @@
     "collections": "latest",
     "draggabilly": "latest",
     "fullcalendar": "latest",
+    "html-webpack-plugin": "^2.28.0",
     "interact.js": "latest",
     "jquery": "latest",
     "jscroll": "latest",
@@ -16,15 +17,19 @@
     "msgpack-lite": "latest",
     "p2": "github:schteppe/p2.js#pixi-v4",
     "packery": "latest",
-    "pixi.js": "schteppe/p2.js#pixi-v4",
+    "pixi.js": "latest",
     "pouchdb": "latest",
     "pouchdb-adapter-idb": "latest",
     "pouchdb-upsert": "latest"
   },
   "devDependencies": {
-    "watchify": "latest"
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.0.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-es2016": "^6.24.1"
   },
   "scripts": {
-    "watchify": "watchify spime.js --standalone Spime       -d -o spime.run.js -v"
+    "start": "webpack --watch",
+    "build": "webpack -p"
   }
 }

@@ -1,1 +1,0 @@
-../bower_components/draggabilly/dist/draggabilly.pkgd.min.js

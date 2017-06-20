@@ -1,32 +1,22 @@
 //"use strict";
 
-var $ = require('jquery');
+import $ from 'jquery';     const jQuery = window.$ = window.jQuery = $;
+import _ from 'lodash';
+import BackBone from 'backbone';
+import LfuMap from 'collections/lru-map';
+import pouch from 'pouchdb';
+import pouchUpsert from 'pouchdb-upsert';
+import L from 'leaflet';
+import Packery from 'packery';
+import p2 from 'p2';
+import pixi from 'pixi.js';
+import initWebGL from './WebGLRenderer.js';
+//import Timelne from './lib/edsc-timeline.min.js';
 
-const jQuery = $;
-window.jQuery = jQuery;
+    //interact: require('interact.js'),
 
-var _ = require('lodash');
-window._ = _;
-
-const Backbone = require('backbone');
-
-const LfuMap = require('collections/lru-map');
-const pouch = require('pouchdb');
-const pouchUpsert = require('pouchdb-upsert');
-//const interact = require('interact.js');
-
-const L = require('leaflet');
-
-const Timeline = require('./lib/edsc-timeline.min.js');
-const Packery = require('packery');
-
-
-const p2 = require('p2');
-
-const initPIXI = require('pixi.js');
-
-const initWebGL = require('./WebGLRenderer.js');
-
+//initWebGL(p2);
+//pouch.plugin(pouchUpsert);
 
 
 
@@ -34,7 +24,6 @@ const initWebGL = require('./WebGLRenderer.js');
 // var CSS_leaflet = require('./node_modules/leaflet/dist/leaflet.css');
 // var CSS_local = [ require('./spime.css'), require('./search.base.css') ];
 
-pouch.plugin(pouchUpsert);
 
 
 
@@ -1897,7 +1886,8 @@ function newFrame() {
 
 
 
-module.exports = {
+
+export default {
     me: (opts) =>  new MMEE(opts),
     D: D,
     E: E,
@@ -1909,8 +1899,11 @@ module.exports = {
     p2: p2,
     p2webgl: initWebGL
 };
+console.log('Spime ready', module.exports);
 
-
+if (window.USE) {
+    console.err('spime start', window.USE);
+}
 // EXPORT.D = D;
 // EXPORT.E = E;
 // EXPORT.NIcon = NIcon;
