@@ -2,15 +2,12 @@
 const webpack = require('webpack');
 const path = require('path');
 
-// new webpack.ProvidePlugin({
-//     $: 'jquery',
-//     jQuery: 'jquery'
-// });
+
 
 const config = {
     context: path.resolve(__dirname, '.'),
     entry: [
-        './phys2d.js'
+        './spacegraph.js'
     ],
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -24,6 +21,8 @@ const config = {
             "window.$": "jquery"
         })
     ]
+
+
 //    debug   : true,
     //   devtool : 'source-map',
     // optimize : {

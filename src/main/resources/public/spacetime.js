@@ -1,6 +1,5 @@
 import Spime from './spime.js';
 
-
 const ME = Spime.me({ });
 
 const tagsDiv = ME.facets = $('#overfacets'); //HACK

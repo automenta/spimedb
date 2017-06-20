@@ -7,7 +7,6 @@
     "collections": "latest",
     "draggabilly": "latest",
     "fullcalendar": "latest",
-    "html-webpack-plugin": "^2.28.0",
     "interact.js": "latest",
     "jquery": "latest",
     "jscroll": "latest",
@@ -26,7 +25,8 @@
     "babel-core": "^6.25.0",
     "babel-loader": "^7.0.0",
     "babel-polyfill": "^6.23.0",
-    "babel-preset-es2016": "^6.24.1"
+    "babel-preset-es2016": "^6.24.1",
+    "dat.gui": "^0.6.1"
   },
   "scripts": {
     "start": "webpack --watch",

@@ -1,7 +1,15 @@
 "use strict";
 /* global PIXI,Renderer */
 
+
+
 export default function(p2) {
+
+    const opt = {
+        fps: 30
+    };
+
+    window.p2 = p2;
 
     p2.StateMachine = StateMachine;
 
@@ -69,7 +77,7 @@ export default function(p2) {
         window.oRequestAnimationFrame      ||
         window.msRequestAnimationFrame     ||
         function( callback ){
-            window.setTimeout(callback, 1000 / 60);
+            window.setTimeout(callback, 1000 / fps);
         };
 
     var disableSelectionCSS = [
@@ -157,7 +165,7 @@ export default function(p2) {
         // Bodies to draw
         this.bodies=[];
         this.springs=[];
-        this.timeStep = 1/60;
+        this.timeStep = 1.0/opt.fps;
         this.relaxation = p2.Equation.DEFAULT_RELAXATION;
         this.stiffness = p2.Equation.DEFAULT_STIFFNESS;
 
@@ -206,7 +214,7 @@ export default function(p2) {
 
             'paused [p]': false,
             'manualStep [s]': function(){ that.world.step(that.world.lastTimeStep); },
-            fps: 30 /* 60 */,
+            fps: opt.fps /* 60 */,
             maxSubSteps: 2 /* 3 */,
             iterations: 4 /* 10 */,
             tolerance: 0.001 /*0.0001*/,
@@ -245,7 +253,7 @@ export default function(p2) {
             this.gui.close();
         }
 
-        this.printConsoleMessage();
+        //this.printConsoleMessage();
 
         // Set first scene
         this.setSceneByIndex(0);
@@ -316,24 +324,37 @@ export default function(p2) {
         return window.devicePixelRatio || 1;
     };
 
-    Renderer.prototype.printConsoleMessage = function(){
-        console.log([
-            '=== p2.js v' + p2.version + ' ===',
-            'Welcome to the p2.js debugging environment!',
-            'Did you know you can interact with the physics here in the console? Try executing the following:',
-            '',
-            '  world.gravity[1] = 10;',
-            ''
-        ].join('\n'));
-    };
+    // Renderer.prototype.printConsoleMessage = function(){
+    //     console.log([
+    //         '=== p2.js v' + p2.version + ' ===',
+    //         'Welcome to the p2.js debugging environment!',
+    //         'Did you know you can interact with the physics here in the console? Try executing the following:',
+    //         '',
+    //         '  world.gravity[1] = 10;',
+    //         ''
+    //     ].join('\n'));
+    // };
+
 
     Renderer.prototype.resizeToFit = function(){
+        if (!this.element)
+            return;
+        //console.log('resize', this.element.getBoundingClientRect());
+
+        var ele = this.view;
         var dpr = this.getDevicePixelRatio();
-        var rect = this.elementContainer.getBoundingClientRect();
+        var rect = this.element.getBoundingClientRect();
+        if (!rect.width)
+            return;
+
         var w = rect.width * dpr;
         var h = rect.height * dpr;
+        console.log(Object.keys(this.element));
+        this.element.setAtttribute('width', w);
+        this.element.setAtttribute('height', h);
         this.resize(w, h);
-    }
+
+    };
 
     /**
      * Sets up dat.gui
@@ -362,7 +383,7 @@ export default function(p2) {
             that.paused = p;
         });
         worldFolder.add(settings, 'manualStep [s]');
-        worldFolder.add(settings, 'fps', 10, 60*10).step(10).onChange(function(freq){
+        worldFolder.add(settings, 'fps', 10, opt.fps*10).step(10).onChange(function(freq){
             that.timeStep = 1 / freq;
         });
         worldFolder.add(settings, 'maxSubSteps', 0, 10).step(1);
@@ -551,7 +572,7 @@ export default function(p2) {
     Renderer.prototype.setUpKeyboard = function() {
         var that = this;
 
-        this.elementContainer.onkeydown = function(e){
+        this.element.onkeydown = function(e){
             if(!e.keyCode){
                 return;
             }
@@ -611,7 +632,7 @@ export default function(p2) {
             that.updateGUI();
         };
 
-        this.elementContainer.onkeyup = function(e){
+        this.element.onkeyup = function(e){
             if(e.keyCode){
                 switch(String.fromCharCode(e.keyCode)){
                     default:
@@ -1072,6 +1093,7 @@ export default function(p2) {
 
         var that = this;
 
+
         var settings = {
             lineColor: 0x000000,
             lineWidth : 0.01,
@@ -1211,15 +1233,11 @@ export default function(p2) {
         el.classList.add(Renderer.elementClass);
         el.setAttribute('style','width:100%;');
 
-        var div = this.elementContainer = document.createElement('div');
-        div.classList.add(Renderer.containerClass);
-        div.setAttribute('style','width:100%; height:100%');
-        div.appendChild(el);
-        document.body.appendChild(div);
         el.focus();
         el.oncontextmenu = function(){
             return false;
         };
+        this.resizeToFit();
 
         this.container.addChild(stage);
 

@@ -1899,11 +1899,10 @@ export default {
     p2: p2,
     p2webgl: initWebGL
 };
-console.log('Spime ready', module.exports);
 
-if (window.USE) {
-    console.err('spime start', window.USE);
-}
+
+
+
 // EXPORT.D = D;
 // EXPORT.E = E;
 // EXPORT.NIcon = NIcon;
