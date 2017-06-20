@@ -13,7 +13,7 @@ const Backbone = require('backbone');
 const LfuMap = require('collections/lru-map');
 const pouch = require('pouchdb');
 const pouchUpsert = require('pouchdb-upsert');
-const interact = require('interact.js');
+//const interact = require('interact.js');
 
 const L = require('leaflet');
 

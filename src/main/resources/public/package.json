@@ -14,9 +14,9 @@
     "leaflet.markercluster": "latest",
     "lodash": "latest",
     "msgpack-lite": "latest",
-    "p2": "latest",
+    "p2": "github:schteppe/p2.js#pixi-v4",
     "packery": "latest",
-    "pixi.js": "latest",
+    "pixi.js": "schteppe/p2.js#pixi-v4",
     "pouchdb": "latest",
     "pouchdb-adapter-idb": "latest",
     "pouchdb-upsert": "latest"

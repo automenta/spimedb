@@ -1,8 +1,67 @@
 /* global PIXI,Renderer */
 
-module.exports = function (p2) {
+module.exports = function (p2, targetFPS) {
 
-    // shim layer with setTimeout fallback
+    p2.StateMachine = StateMachine;
+
+    /**
+     * var fsm = new StateMachine({
+ *     states: [
+ *         1, 2, 3 // first one is the initial state
+ *     ],
+ *     transitions: [
+ *         [1, 2],
+ *         [2, 3],
+ *         [3, 1]
+ *     ]
+ * });
+     */
+    function StateMachine(options){
+        p2.EventEmitter.call(this);
+
+        this.states = options.states.slice(0);
+        this.state = this.states[0];
+        this.transitions = [];
+        for(var i=0; i < options.transitions.length; i++){
+            this.transitions.push([
+                options.transitions[i][0],
+                options.transitions[i][1]
+            ]);
+        }
+    }
+    StateMachine.prototype = Object.create(p2.EventEmitter.prototype);
+
+    StateMachine.prototype.transitionTo = function(toState){
+        if(this.state === toState){
+            return;
+        }
+
+        // Check if OK
+        var ok = false;
+        for(var i=0; i<this.transitions.length; i++){
+            if(this.transitions[i][0] === this.state && this.transitions[i][1] === toState){
+                ok = true;
+                break;
+            }
+        }
+
+        if(!ok){
+            throw new Error('Illegal transition from ' + this.state + ' to ' + toState + '.');
+        }
+
+        this.state = toState;
+        this.emit({
+            state: toState
+        });
+        this.onStateChanged(toState);
+
+        return this;
+    };
+
+// To be implemented by subclasses
+    StateMachine.prototype.onStateChanged = function(){};
+
+// shim layer with setTimeout fallback
     var requestAnimFrame =  window.requestAnimationFrame       ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame    ||
@@ -21,7 +80,7 @@ module.exports = function (p2) {
     ];
 
     p2.Renderer = Renderer;
-
+    var vec2 = p2.vec2;
 
     /**
      * Base class for rendering a p2 physics scene.
@@ -30,7 +89,41 @@ module.exports = function (p2) {
      * @param {object} scenes One or more scene definitions. See setScene.
      */
     function Renderer(scenes, options){
-        p2.EventEmitter.call(this);
+        p2.StateMachine.call(this, {
+            states: [
+                Renderer.DEFAULT,
+                Renderer.PANNING,
+                Renderer.DRAGGING,
+                Renderer.DRAWPOLYGON,
+                Renderer.DRAWINGPOLYGON,
+                Renderer.DRAWCIRCLE,
+                Renderer.DRAWINGCIRCLE,
+                Renderer.DRAWRECTANGLE,
+                Renderer.DRAWINGRECTANGLE
+            ],
+            transitions: [
+                [Renderer.DEFAULT, Renderer.PANNING],
+                [Renderer.PANNING, Renderer.DEFAULT],
+
+                [Renderer.DEFAULT, Renderer.DRAGGING],
+                [Renderer.DRAGGING, Renderer.DEFAULT],
+
+                [Renderer.DEFAULT, Renderer.DRAWPOLYGON],
+                [Renderer.DRAWPOLYGON, Renderer.DEFAULT],
+                [Renderer.DRAWPOLYGON, Renderer.DRAWINGPOLYGON],
+                [Renderer.DRAWINGPOLYGON, Renderer.DRAWPOLYGON],
+
+                [Renderer.DEFAULT, Renderer.DRAWCIRCLE],
+                [Renderer.DRAWCIRCLE, Renderer.DEFAULT],
+                [Renderer.DRAWCIRCLE, Renderer.DRAWINGCIRCLE],
+                [Renderer.DRAWINGCIRCLE, Renderer.DRAWCIRCLE],
+
+                [Renderer.DEFAULT, Renderer.DRAWRECTANGLE],
+                [Renderer.DRAWRECTANGLE, Renderer.DEFAULT],
+                [Renderer.DRAWRECTANGLE, Renderer.DRAWINGRECTANGLE],
+                [Renderer.DRAWINGRECTANGLE, Renderer.DRAWRECTANGLE]
+            ]
+        });
 
         options = options || {};
 
@@ -53,8 +146,12 @@ module.exports = function (p2) {
         }
 
         this.scenes = scenes;
-
+        this.bodyPolygonPaths = {}; // body id -> array<vec2>
         this.state = Renderer.DEFAULT;
+
+        this.zoom = 200; // pixels per unit
+
+        this.cameraPosition = vec2.create();
 
         // Bodies to draw
         this.bodies=[];
@@ -65,21 +162,22 @@ module.exports = function (p2) {
 
         this.mouseConstraint = null;
         this.nullBody = new p2.Body();
-        this.pickPrecision = 5;
+        this.pickPrecision = 0.1;
 
         this.useInterpolatedPositions = true;
 
         this.drawPoints = [];
         this.drawPointsChangeEvent = { type : "drawPointsChange" };
-        this.drawCircleCenter = p2.vec2.create();
-        this.drawCirclePoint = p2.vec2.create();
+        this.drawCircleCenter = vec2.create();
+        this.drawCirclePoint = vec2.create();
         this.drawCircleChangeEvent = { type : "drawCircleChange" };
         this.drawRectangleChangeEvent = { type : "drawRectangleChange" };
-        this.drawRectStart = p2.vec2.create();
-        this.drawRectEnd = p2.vec2.create();
+        this.drawRectStart = vec2.create();
+        this.drawRectEnd = vec2.create();
 
         this.stateChangeEvent = { type : "stateChange", state:null };
 
+        this.mousePosition = vec2.create();
 
         // Default collision masks for new shapes
         this.newShapeCollisionMask = 1;
@@ -128,7 +226,8 @@ module.exports = function (p2) {
         this.render();
         this.createStats();
         this.addLogo();
-        this.centerCamera(0, 0);
+
+        this.setCameraCenter([0, 0]);
 
         window.onresize = function(){
             that.resizeToFit();
@@ -152,8 +251,9 @@ module.exports = function (p2) {
         this.startRenderingLoop();
 
     }
-    Renderer.prototype = new p2.EventEmitter();
+    Renderer.prototype = Object.create(p2.StateMachine.prototype);
 
+// States
     Renderer.DEFAULT =            1;
     Renderer.PANNING =            2;
     Renderer.DRAGGING =           3;
@@ -175,46 +275,39 @@ module.exports = function (p2) {
         Renderer.stateToolMap[Renderer.toolStateMap[key]] = key;
     }
 
-    Renderer.keydownEvent = {
-        type:"keydown",
-        originalEvent : null,
-        keyCode : 0,
-    };
-    Renderer.keyupEvent = {
-        type:"keyup",
-        originalEvent : null,
-        keyCode : 0,
-    };
+    Object.defineProperties(Renderer.prototype, {
 
-    Object.defineProperty(Renderer.prototype, 'drawContacts', {
-        get: function() {
-            return this.settings['drawContacts [c]'];
+        drawContacts: {
+            get: function() {
+                return this.settings['drawContacts [c]'];
+            },
+            set: function(value) {
+                this.settings['drawContacts [c]'] = value;
+                this.updateGUI();
+            }
         },
-        set: function(value) {
-            this.settings['drawContacts [c]'] = value;
-            this.updateGUI();
-        }
-    });
 
-    Object.defineProperty(Renderer.prototype, 'drawAABBs', {
-        get: function() {
-            return this.settings['drawAABBs [t]'];
+        drawAABBs: {
+            get: function() {
+                return this.settings['drawAABBs [t]'];
+            },
+            set: function(value) {
+                this.settings['drawAABBs [t]'] = value;
+                this.updateGUI();
+            }
         },
-        set: function(value) {
-            this.settings['drawAABBs [t]'] = value;
-            this.updateGUI();
-        }
-    });
 
-    Object.defineProperty(Renderer.prototype, 'paused', {
-        get: function() {
-            return this.settings['paused [p]'];
-        },
-        set: function(value) {
-            this.resetCallTime = true;
-            this.settings['paused [p]'] = value;
-            this.updateGUI();
+        paused: {
+            get: function() {
+                return this.settings['paused [p]'];
+            },
+            set: function(value) {
+                this.resetCallTime = true;
+                this.settings['paused [p]'] = value;
+                this.updateGUI();
+            }
         }
+
     });
 
     Renderer.prototype.getDevicePixelRatio = function() {
@@ -256,7 +349,7 @@ module.exports = function (p2) {
         var settings = this.settings;
 
         gui.add(settings, 'tool', Renderer.toolStateMap).onChange(function(state){
-            that.setState(parseInt(state));
+            that.transitionTo(Renderer.DEFAULT).transitionTo(parseInt(state));
         });
         gui.add(settings, 'fullscreen');
 
@@ -275,7 +368,7 @@ module.exports = function (p2) {
 
         function changeGravity(){
             if(!isNaN(settings.gravityX) && !isNaN(settings.gravityY)){
-                p2.vec2.set(that.world.gravity, settings.gravityX, settings.gravityY);
+                vec2.set(that.world.gravity, settings.gravityX, settings.gravityY);
             }
         }
         worldFolder.add(settings, 'gravityX', -maxg, maxg).onChange(changeGravity);
@@ -357,12 +450,13 @@ module.exports = function (p2) {
 
         var that = this;
 
-        world.on("postStep",function(e){
+        world.on("postStep",function(/*e*/){
             that.updateStats();
         }).on("addBody",function(e){
             that.addVisual(e.body);
         }).on("removeBody",function(e){
             that.removeVisual(e.body);
+            delete that.bodyPolygonPaths[e.body.id];
         }).on("addSpring",function(e){
             that.addVisual(e.spring);
         }).on("removeSpring",function(e){
@@ -390,7 +484,7 @@ module.exports = function (p2) {
         }
 
         for(var i=0; i<this.addedGlobals.length; i++){
-            delete window[this.addedGlobals];
+            delete window[this.addedGlobals[i]];
         }
 
         var preGlobalVars = Object.keys(window);
@@ -479,16 +573,19 @@ module.exports = function (p2) {
                     that.drawAABBs = !that.drawAABBs;
                     break;
                 case "D": // toggle draw polygon mode
-                    that.setState(s === Renderer.DRAWPOLYGON ? Renderer.DEFAULT : s = Renderer.DRAWPOLYGON);
+                    that.transitionTo(Renderer.DEFAULT);
+                    that.transitionTo(s === Renderer.DRAWPOLYGON ? Renderer.DEFAULT : s = Renderer.DRAWPOLYGON);
                     break;
                 case "A": // toggle draw circle mode
-                    that.setState(s === Renderer.DRAWCIRCLE ? Renderer.DEFAULT : s = Renderer.DRAWCIRCLE);
+                    that.transitionTo(Renderer.DEFAULT);
+                    that.transitionTo(s === Renderer.DRAWCIRCLE ? Renderer.DEFAULT : s = Renderer.DRAWCIRCLE);
                     break;
                 case "F": // toggle draw rectangle mode
-                    that.setState(s === Renderer.DRAWRECTANGLE ? Renderer.DEFAULT : s = Renderer.DRAWRECTANGLE);
+                    that.transitionTo(Renderer.DEFAULT);
+                    that.transitionTo(s === Renderer.DRAWRECTANGLE ? Renderer.DEFAULT : s = Renderer.DRAWRECTANGLE);
                     break;
                 case "Q": // set default
-                    that.setState(Renderer.DEFAULT);
+                    that.transitionTo(Renderer.DEFAULT);
                     break;
                 case "1":
                 case "2":
@@ -502,9 +599,11 @@ module.exports = function (p2) {
                     that.setSceneByIndex(parseInt(ch) - 1);
                     break;
                 default:
-                    Renderer.keydownEvent.keyCode = e.keyCode;
-                    Renderer.keydownEvent.originalEvent = e;
-                    that.emit(Renderer.keydownEvent);
+                    that.emit({
+                        type: "keydown",
+                        originalEvent: e,
+                        keyCode: e.keyCode
+                    });
                     break;
             }
             that.updateGUI();
@@ -514,9 +613,11 @@ module.exports = function (p2) {
             if(e.keyCode){
                 switch(String.fromCharCode(e.keyCode)){
                     default:
-                        Renderer.keyupEvent.keyCode = e.keyCode;
-                        Renderer.keyupEvent.originalEvent = e;
-                        that.emit(Renderer.keyupEvent);
+                        that.emit({
+                            type: "keyup",
+                            originalEvent: e,
+                            keyCode: e.keyCode
+                        });
                         break;
                 }
             }
@@ -530,7 +631,9 @@ module.exports = function (p2) {
         var demo = this,
             lastCallTime = Date.now() / 1000;
 
-        function update(){
+        var lastTime;
+
+        function update(time){
             if(!demo.paused){
                 var now = Date.now() / 1000,
                     timeSinceLastCall = now - lastCallTime;
@@ -539,9 +642,18 @@ module.exports = function (p2) {
                     demo.resetCallTime = false;
                 }
                 lastCallTime = now;
+
+                // Cap if we have a really large deltatime.
+                // The requestAnimationFrame deltatime is usually below 0.0333s (30Hz) and on desktops it should be below 0.0166s.
+                timeSinceLastCall = Math.min(timeSinceLastCall, 0.5);
+
                 demo.world.step(demo.timeStep, timeSinceLastCall, demo.settings.maxSubSteps);
             }
-            demo.render();
+
+            var deltaTime = lastTime ? (time - lastTime) / 1000 : 0;
+            lastTime = time;
+            demo.render(deltaTime);
+
             requestAnimFrame(update);
         }
         requestAnimFrame(update);
@@ -551,10 +663,7 @@ module.exports = function (p2) {
      * Set the app state.
      * @param {number} state
      */
-    Renderer.prototype.setState = function(state){
-        this.state = state;
-        this.stateChangeEvent.state = state;
-        this.emit(this.stateChangeEvent);
+    Renderer.prototype.onStateChanged = function(state){
         if(Renderer.stateToolMap[state]){
             this.settings.tool = state;
             this.updateGUI();
@@ -585,59 +694,62 @@ module.exports = function (p2) {
 
                 if(b){
                     b.wakeUp();
-                    this.setState(Renderer.DRAGGING);
+                    this.transitionTo(Renderer.DRAGGING);
                     // Add mouse joint to the body
-                    var localPoint = p2.vec2.create();
+                    var localPoint = vec2.create();
                     b.toLocalFrame(localPoint,physicsPosition);
                     this.world.addBody(this.nullBody);
                     this.mouseConstraint = new p2.RevoluteConstraint(this.nullBody, b, {
                         localPivotA: physicsPosition,
-                        localPivotB: localPoint
+                        localPivotB: localPoint,
+                        maxForce: 1000 * b.mass
                     });
                     this.world.addConstraint(this.mouseConstraint);
                 } else {
-                    this.setState(Renderer.PANNING);
+                    this.transitionTo(Renderer.PANNING);
                 }
                 break;
 
             case Renderer.DRAWPOLYGON:
                 // Start drawing a polygon
-                this.setState(Renderer.DRAWINGPOLYGON);
+                this.transitionTo(Renderer.DRAWINGPOLYGON);
                 this.drawPoints = [];
-                var copy = p2.vec2.create();
-                p2.vec2.copy(copy,physicsPosition);
+                var copy = vec2.create();
+                vec2.copy(copy,physicsPosition);
                 this.drawPoints.push(copy);
                 this.emit(this.drawPointsChangeEvent);
                 break;
 
             case Renderer.DRAWCIRCLE:
                 // Start drawing a circle
-                this.setState(Renderer.DRAWINGCIRCLE);
-                p2.vec2.copy(this.drawCircleCenter,physicsPosition);
-                p2.vec2.copy(this.drawCirclePoint, physicsPosition);
+                this.transitionTo(Renderer.DRAWINGCIRCLE);
+                vec2.copy(this.drawCircleCenter,physicsPosition);
+                vec2.copy(this.drawCirclePoint, physicsPosition);
                 this.emit(this.drawCircleChangeEvent);
                 break;
 
             case Renderer.DRAWRECTANGLE:
                 // Start drawing a circle
-                this.setState(Renderer.DRAWINGRECTANGLE);
-                p2.vec2.copy(this.drawRectStart,physicsPosition);
-                p2.vec2.copy(this.drawRectEnd, physicsPosition);
+                this.transitionTo(Renderer.DRAWINGRECTANGLE);
+                vec2.copy(this.drawRectStart,physicsPosition);
+                vec2.copy(this.drawRectEnd, physicsPosition);
                 this.emit(this.drawRectangleChangeEvent);
                 break;
         }
     };
 
     /**
-     * Should be called by subclasses whenever there's a mousedown event
+     * Should be called by subclasses whenever there's a mousemove event
      */
     Renderer.prototype.handleMouseMove = function(physicsPosition){
+        vec2.copy(this.mousePosition, physicsPosition);
+
         var sampling = 0.4;
         switch(this.state){
             case Renderer.DEFAULT:
             case Renderer.DRAGGING:
                 if(this.mouseConstraint){
-                    p2.vec2.copy(this.mouseConstraint.pivotA, physicsPosition);
+                    vec2.copy(this.mouseConstraint.pivotA, physicsPosition);
                     this.mouseConstraint.bodyA.wakeUp();
                     this.mouseConstraint.bodyB.wakeUp();
                 }
@@ -645,10 +757,10 @@ module.exports = function (p2) {
 
             case Renderer.DRAWINGPOLYGON:
                 // drawing a polygon - add new point
-                var sqdist = p2.vec2.dist(physicsPosition,this.drawPoints[this.drawPoints.length-1]);
+                var sqdist = vec2.distance(physicsPosition,this.drawPoints[this.drawPoints.length-1]);
                 if(sqdist > sampling*sampling){
                     var copy = [0,0];
-                    p2.vec2.copy(copy,physicsPosition);
+                    vec2.copy(copy,physicsPosition);
                     this.drawPoints.push(copy);
                     this.emit(this.drawPointsChangeEvent);
                 }
@@ -656,13 +768,13 @@ module.exports = function (p2) {
 
             case Renderer.DRAWINGCIRCLE:
                 // drawing a circle - change the circle radius point to current
-                p2.vec2.copy(this.drawCirclePoint, physicsPosition);
+                vec2.copy(this.drawCirclePoint, physicsPosition);
                 this.emit(this.drawCircleChangeEvent);
                 break;
 
             case Renderer.DRAWINGRECTANGLE:
                 // drawing a rectangle - change the end point to current
-                p2.vec2.copy(this.drawRectEnd, physicsPosition);
+                vec2.copy(this.drawRectEnd, physicsPosition);
                 this.emit(this.drawRectangleChangeEvent);
                 break;
         }
@@ -671,7 +783,7 @@ module.exports = function (p2) {
     /**
      * Should be called by subclasses whenever there's a mouseup event
      */
-    Renderer.prototype.handleMouseUp = function(physicsPosition){
+    Renderer.prototype.handleMouseUp = function(/*physicsPosition*/){
 
         var b;
 
@@ -685,33 +797,37 @@ module.exports = function (p2) {
                 this.world.removeConstraint(this.mouseConstraint);
                 this.mouseConstraint = null;
                 this.world.removeBody(this.nullBody);
-                this.setState(Renderer.DEFAULT);
+                this.transitionTo(Renderer.DEFAULT);
                 break;
 
             case Renderer.PANNING:
-                this.setState(Renderer.DEFAULT);
+                this.transitionTo(Renderer.DEFAULT);
                 break;
 
             case Renderer.DRAWINGPOLYGON:
                 // End this drawing state
-                this.setState(Renderer.DRAWPOLYGON);
+                this.transitionTo(Renderer.DRAWPOLYGON);
                 if(this.drawPoints.length > 3){
                     // Create polygon
-                    b = new p2.Body({ mass : 1 });
-                    if(b.fromPolygon(this.drawPoints,{
-                            removeCollinearPoints : 0.01,
-                        })){
+                    b = new p2.Body({ mass: 1 });
+                    if (b.fromPolygon(this.drawPoints, { removeCollinearPoints: 0.1 })) {
+                        var bodyPath = this.bodyPolygonPaths[b.id] = [];
+                        for(var i=0; i<this.drawPoints.length; i++){
+                            var point = vec2.clone(this.drawPoints[i]);
+                            vec2.subtract(point, point, b.position); // .fromPolygon() will move the body to the center of mass. Compensate by doing this.
+                            bodyPath.push(point);
+                        }
                         this.world.addBody(b);
                     }
                 }
-                this.drawPoints = [];
+                this.drawPoints.length = 0;
                 this.emit(this.drawPointsChangeEvent);
                 break;
 
             case Renderer.DRAWINGCIRCLE:
                 // End this drawing state
-                this.setState(Renderer.DRAWCIRCLE);
-                var R = p2.vec2.dist(this.drawCircleCenter,this.drawCirclePoint);
+                this.transitionTo(Renderer.DRAWCIRCLE);
+                var R = vec2.distance(this.drawCircleCenter,this.drawCirclePoint);
                 if(R > 0){
                     // Create circle
                     b = new p2.Body({ mass : 1, position : this.drawCircleCenter });
@@ -719,13 +835,13 @@ module.exports = function (p2) {
                     b.addShape(circle);
                     this.world.addBody(b);
                 }
-                p2.vec2.copy(this.drawCircleCenter,this.drawCirclePoint);
+                vec2.copy(this.drawCircleCenter,this.drawCirclePoint);
                 this.emit(this.drawCircleChangeEvent);
                 break;
 
             case Renderer.DRAWINGRECTANGLE:
                 // End this drawing state
-                this.setState(Renderer.DRAWRECTANGLE);
+                this.transitionTo(Renderer.DRAWRECTANGLE);
                 // Make sure first point is upper left
                 var start = this.drawRectStart;
                 var end = this.drawRectEnd;
@@ -748,7 +864,7 @@ module.exports = function (p2) {
                     b.addShape(rectangleShape);
                     this.world.addBody(b);
                 }
-                p2.vec2.copy(this.drawRectEnd,this.drawRectStart);
+                vec2.copy(this.drawRectEnd,this.drawRectStart);
                 this.emit(this.drawRectangleChangeEvent);
                 break;
         }
@@ -877,22 +993,86 @@ module.exports = function (p2) {
         !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
     };
 
-    Renderer.zoomInEvent = {
-        type:"zoomin"
-    };
-    Renderer.zoomOutEvent = {
-        type:"zoomout"
-    };
-
     Renderer.prototype.setEquationParameters = function(){
         this.world.setGlobalStiffness(this.settings.stiffness);
         this.world.setGlobalRelaxation(this.settings.relaxation);
     };
 
+// Set camera position in physics space
+    Renderer.prototype.setCameraCenter = function(position){
+        vec2.set(this.cameraPosition, position[0], position[1]);
+        this.onCameraPositionChanged();
+    };
+
+// Set camera zoom level
+    Renderer.prototype.setZoom = function(zoom){
+        this.zoom = zoom;
+        this.onZoomChanged();
+    };
+
+// Zoom around a point
+    Renderer.prototype.zoomAroundPoint = function(point, deltaZoom){
+        this.zoom *= 1 + deltaZoom;
+
+        // Move the camera closer to the zoom point, if the delta is positive
+        // If delta is infinity, the camera position should go toward the point
+        // If delta is close to zero, the camera position should be almost unchanged
+        // p = (point + p * delta) / (1 + delta)
+        vec2.set(
+            this.cameraPosition,
+            (this.cameraPosition[0] + point[0] * deltaZoom) / (1 + deltaZoom),
+            (this.cameraPosition[1] + point[1] * deltaZoom) / (1 + deltaZoom)
+        );
+        this.onZoomChanged();
+        this.onCameraPositionChanged();
+    };
+
+    Renderer.prototype.onCameraPositionChanged = function(){};
+    Renderer.prototype.onZoomChanged = function(){};
 
     p2.WebGLRenderer = WebGLRenderer;
 
+    var vec2 = p2.vec2;
     var Renderer = p2.Renderer;
+
+    function copyPixiVector(out, pixiVector){
+        if (!out)
+            return; //TODO detect this?
+
+        out[0] = pixiVector.x;
+        out[1] = pixiVector.y;
+    }
+
+    function smoothDamp(current, target, store, deltaTime, smoothTime, maxSpeed) {
+        if (smoothTime === undefined) {
+            smoothTime = 0.3;
+        }
+        if (maxSpeed === undefined) {
+            maxSpeed = 1e7;
+        }
+
+        smoothTime = Math.max(0.0001, smoothTime);
+        var num = 2 / smoothTime;
+        var num2 = num * deltaTime;
+        var num3 = 1 / (1 + num2 + 0.48 * num2 * num2 + 0.235 * num2 * num2 * num2);
+        var num4 = current - target;
+        var num5 = target;
+        var num6 = maxSpeed * smoothTime;
+        num4 = Math.max(-num6, Math.min(num6, num4));
+        target = current - num4;
+        var currentVelocity = store.y;
+        var num7 = (currentVelocity + num * num4) * deltaTime;
+        currentVelocity = (currentVelocity - num * num7) * num3;
+        var num8 = target + (num4 + num7) * num3;
+        if (num5 - current > 0 === num8 > num5){
+            num8 = num5;
+            currentVelocity = (num8 - num5) / deltaTime;
+        }
+        store.x = num8;
+        store.y = currentVelocity;
+
+        return num8;
+    }
 
     /**
      * Renderer using Pixi.js
@@ -906,118 +1086,157 @@ module.exports = function (p2) {
      * @param {Number}  [options.width]               Num pixels in horizontal direction
      * @param {Number}  [options.height]              Num pixels in vertical direction
      */
-    function WebGLRenderer(scenes, options) {
+    function WebGLRenderer(scenes, options){
         options = options || {};
 
         var that = this;
 
         var settings = {
-            lineWidth: 0.01,
-            scrollFactor: 0.1,
-            width: 1280, // Pixi screen resolution
-            height: 720,
-            useDeviceAspect: false,
-            sleepOpacity: 0.2,
+            lineColor: 0x000000,
+            lineWidth : 0.01,
+            scrollFactor : 0.1,
+            width : 1280, // Pixi screen resolution
+            height : 720,
+            useDeviceAspect : false,
+            sleepOpacity : 0.2
         };
-        for (var key in options) {
+        for(var key in options){
             settings[key] = options[key];
         }
 
-        if (settings.useDeviceAspect) {
+        if(settings.useDeviceAspect){
             settings.height = window.innerHeight / window.innerWidth * settings.width;
         }
 
-        //this.settings = settings;
-        this.lineWidth = settings.lineWidth;
-        this.scrollFactor = settings.scrollFactor;
-        this.sleepOpacity = settings.sleepOpacity;
+        this.lineWidth =            settings.lineWidth;
+        this.lineColor =            settings.lineColor;
+        this.drawLineColor =        0xff0000;
+        this.scrollFactor =         settings.scrollFactor;
+        this.sleepOpacity =         settings.sleepOpacity;
+
+        // Camera smoothing settings
+        this.smoothTime = 0.03;
+        this.maxSmoothVelocity = 1e7;
 
         this.sprites = [];
         this.springSprites = [];
         this.debugPolygons = false;
 
-        Renderer.call(this, scenes, options);
+        this.islandColors = {}; // id -> int
+        this.islandStaticColor = 0xdddddd;
 
-        for (var key in settings) {
+        this.startMouseDelta = vec2.create();
+        this.startCamPos = vec2.create();
+
+        this.touchPositions = {}; // identifier => vec2 in physics space
+        this.mouseDown = false;
+
+        this._zoomStore = {};
+        this._cameraStoreX = {};
+        this._cameraStoreY = {};
+
+        Renderer.call(this,scenes,options);
+
+        // Camera smoothing state
+        this.currentZoom = this.zoom;
+        this.currentStageX = 0;
+        this.currentStageY = 0;
+
+        for(var key in settings){
             this.settings[key] = settings[key];
         }
 
-        this.pickPrecision = 0.1;
-
         // Update "ghost draw line"
-        this.on("drawPointsChange", function (e) {
+        this.on("drawPointsChange",function(/*e*/){
             var g = that.drawShapeGraphics;
             var path = that.drawPoints;
 
+            if(!g.parent){
+                that.stage.addChild(g);
+            }
+
             g.clear();
 
+            if(!path.length){
+                that.stage.removeChild(g);
+                return;
+            }
+
             var path2 = [];
-            for (var j = 0; j < path.length; j++) {
+            for(var j=0; j<path.length; j++){
                 var v = path[j];
                 path2.push([v[0], v[1]]);
             }
 
-            that.drawPath(g, path2, 0xff0000, false, that.lineWidth, false);
+            that.drawPath(g, path2, that.lineWidth, that.drawLineColor, that.lineColor, 0);
         });
 
         // Update draw circle
-        this.on("drawCircleChange", function (e) {
+        this.on("drawCircleChange",function(/*e*/){
             var g = that.drawShapeGraphics;
+            if(!g.parent){
+                that.stage.addChild(g);
+            }
             g.clear();
-            var center = that.drawCircleCenter;
-            var R = p2.vec2.dist(center, that.drawCirclePoint);
-            that.drawCircle(g, center[0], center[1], 0, R, false, that.lineWidth);
+            var tmpCircle = new p2.Circle({
+                radius: vec2.distance(that.drawCircleCenter, that.drawCirclePoint),
+                position: that.drawCircleCenter
+            });
+            that.drawCircle(g, tmpCircle, 0x000000, 0, that.lineWidth);
         });
 
         // Update draw circle
-        this.on("drawRectangleChange", function (e) {
+        this.on("drawRectangleChange",function(/*e*/){
             var g = that.drawShapeGraphics;
+            if(!g.parent){
+                that.stage.addChild(g);
+            }
             g.clear();
             var start = that.drawRectStart;
             var end = that.drawRectEnd;
-            var width = start[0] - end[0];
-            var height = start[1] - end[1];
-            that.drawRectangle(g, start[0] - width / 2, start[1] - height / 2, 0, width, height, false, false, that.lineWidth, false);
+            var w = start[0] - end[0];
+            var h = start[1] - end[1];
+            var tmpBox = new p2.Box({
+                width: Math.abs(w),
+                height: Math.abs(h),
+                position: [
+                    start[0] - w/2,
+                    start[1] - h/2
+                ]
+            });
+            that.drawRectangle(g, tmpBox, 0, 0, that.lineWidth);
         });
     }
-
     WebGLRenderer.prototype = Object.create(Renderer.prototype);
-
-    WebGLRenderer.prototype.stagePositionToPhysics = function (out, stagePosition) {
-        var x = stagePosition[0],
-            y = stagePosition[1];
-        p2.vec2.set(out, x, y);
-        return out;
-    };
 
     /**
      * Initialize the renderer and stage
      */
-    var init_stagePosition = p2.vec2.create(),
-        init_physicsPosition = p2.vec2.create();
-    WebGLRenderer.prototype.init = function () {
-        var w = this.w,
-            h = this.h,
-            s = this.settings;
+    var init_physicsPosition = vec2.create();
+    WebGLRenderer.prototype.init = function(){
+        var s = this.settings;
 
         var that = this;
 
-        var renderer = this.renderer = PIXI.autoDetectRenderer(s.width, s.height, null, null, true);
-        var stage = this.stage = new PIXI.Container();
-        var container = this.container = new PIXI.Stage(0xFFFFFF, true);
+        this.renderer =     PIXI.autoDetectRenderer(s.width, s.height, { backgroundColor: 0xFFFFFF });
+        var stage =     this.stage =        new PIXI.Container();
+        var container = this.container =    new PIXI.Container();
+        container.interactive = stage.interactive = true;
+
+        container.hitArea = new PIXI.Rectangle(0,0,1e7,1e7);
 
         var el = this.element = this.renderer.view;
         el.tabIndex = 1;
         el.classList.add(Renderer.elementClass);
-        el.setAttribute('style', 'width:100%;');
+        el.setAttribute('style','width:100%;');
 
         var div = this.elementContainer = document.createElement('div');
         div.classList.add(Renderer.containerClass);
-        div.setAttribute('style', 'width:100%; height:100%');
+        div.setAttribute('style','width:100%; height:100%');
         div.appendChild(el);
         document.body.appendChild(div);
         el.focus();
-        el.oncontextmenu = function (e) {
+        el.oncontextmenu = function(){
             return false;
         };
 
@@ -1025,166 +1244,159 @@ module.exports = function (p2) {
 
         // Graphics object for drawing shapes
         this.drawShapeGraphics = new PIXI.Graphics();
-        stage.addChild(this.drawShapeGraphics);
 
         // Graphics object for contacts
         this.contactGraphics = new PIXI.Graphics();
-        stage.addChild(this.contactGraphics);
 
         // Graphics object for AABBs
         this.aabbGraphics = new PIXI.Graphics();
-        stage.addChild(this.aabbGraphics);
 
-        stage.scale.x = 200; // Flip Y direction.
-        stage.scale.y = -200;
+        // Graphics object for pick
+        this.pickGraphics = new PIXI.Graphics();
 
-        var lastX, lastY, lastMoveX, lastMoveY, startX, startY, down = false;
+        stage.scale.set(this.zoom, -this.zoom); // Flip Y direction since pixi has down as Y axis
 
-        var physicsPosA = p2.vec2.create();
-        var physicsPosB = p2.vec2.create();
-        var stagePos = p2.vec2.create();
-        var initPinchLength = 0;
-        var initScaleX = 1;
-        var initScaleY = 1;
-        var lastNumTouches = 0;
-        container.mousedown = container.touchstart = function (e) {
-            lastMoveX = e.global.x;
-            lastMoveY = e.global.y;
+        var physicsPosA = vec2.create();
+        var physicsPosB = vec2.create();
+        var initPinchCenter = vec2.create();
+        var touchPanDelta = vec2.create();
+        var lastPinchLength = 0;
+        var startZoom = 1;
 
-            if (e.originalEvent.touches) {
-                lastNumTouches = e.originalEvent.touches.length;
+        container.mousedown = container.touchstart = function(e){
+
+            // store touch state
+            if(e.data.identifier !== undefined){
+                var touchPos = vec2.create();
+                copyPixiVector(touchPos, e.data.getLocalPosition(stage));
+                that.touchPositions[e.data.identifier] = touchPos;
             }
 
-            if (e.originalEvent.touches && e.originalEvent.touches.length === 2) {
+            if(e.data.originalEvent.touches && e.data.originalEvent.touches.length === 2){
+                var pos = new PIXI.Point();
+                var touchA = e.data.originalEvent.touches[0];
+                var touchB = e.data.originalEvent.touches[1];
 
-                var touchA = that.container.interactionManager.touchs[0];
-                var touchB = that.container.interactionManager.touchs[1];
+                e.data.getLocalPosition(stage, pos, new PIXI.Point(touchA.clientX * that.getDevicePixelRatio(), touchA.clientY * that.getDevicePixelRatio()));
+                copyPixiVector(physicsPosA, pos);
 
-                var pos = touchA.getLocalPosition(stage);
-                p2.vec2.set(stagePos, pos.x, pos.y);
-                that.stagePositionToPhysics(physicsPosA, stagePos);
+                e.data.getLocalPosition(stage, pos, new PIXI.Point(touchB.clientX * that.getDevicePixelRatio(), touchB.clientY * that.getDevicePixelRatio()));
+                copyPixiVector(physicsPosB, pos);
 
-                var pos = touchB.getLocalPosition(stage);
-                p2.vec2.set(stagePos, pos.x, pos.y);
-                that.stagePositionToPhysics(physicsPosB, stagePos);
-
-                initPinchLength = p2.vec2.dist(physicsPosA, physicsPosB);
-
-                var initScaleX = stage.scale.x;
-                var initScaleY = stage.scale.y;
+                lastPinchLength = vec2.distance(physicsPosA, physicsPosB);
+                startZoom = that.zoom;
+                vec2.add(initPinchCenter, physicsPosA, physicsPosB);
+                vec2.scale(initPinchCenter, initPinchCenter, 0.5);
 
                 return;
             }
-            lastX = e.global.x;
-            lastY = e.global.y;
-            startX = stage.position.x;
-            startY = stage.position.y;
-            down = true;
 
-            that.lastMousePos = e.global;
+            that.mouseDown = true;
 
-            var pos = e.getLocalPosition(stage);
-            p2.vec2.set(init_stagePosition, pos.x, pos.y);
-            that.stagePositionToPhysics(init_physicsPosition, init_stagePosition);
+            var pos = e.data.getLocalPosition(stage);
+            copyPixiVector(init_physicsPosition, pos);
             that.handleMouseDown(init_physicsPosition);
-        };
-        container.mousemove = container.touchmove = function (e) {
-            if (e.originalEvent.touches) {
-                if (lastNumTouches !== e.originalEvent.touches.length) {
-                    lastX = e.global.x;
-                    lastY = e.global.y;
-                    startX = stage.position.x;
-                    startY = stage.position.y;
-                }
 
-                lastNumTouches = e.originalEvent.touches.length;
+            copyPixiVector(that.startMouseDelta, e.data.global);
+            vec2.copy(that.startCamPos, that.cameraPosition);
+        };
+
+        container.mousemove = container.touchmove = function(e){
+
+            // store touch state
+            if(e.data.identifier !== undefined){
+                copyPixiVector(that.touchPositions[e.data.identifier], e.data.getLocalPosition(stage));
             }
 
-            lastMoveX = e.global.x;
-            lastMoveY = e.global.y;
+            var numTouchesDown = that.getNumTouches();
 
-            if (e.originalEvent.touches && e.originalEvent.touches.length === 2) {
-                var touchA = that.container.interactionManager.touchs[0];
-                var touchB = that.container.interactionManager.touchs[1];
-
-                var pos = touchA.getLocalPosition(stage);
-                p2.vec2.set(stagePos, pos.x, pos.y);
-                that.stagePositionToPhysics(physicsPosA, stagePos);
-
-                var pos = touchB.getLocalPosition(stage);
-                p2.vec2.set(stagePos, pos.x, pos.y);
-                that.stagePositionToPhysics(physicsPosB, stagePos);
-
-                var pinchLength = p2.vec2.dist(physicsPosA, physicsPosB);
+            if(numTouchesDown === 2){
+                var physicsPosA = that.getTouchPosition(0);
+                var physicsPosB = that.getTouchPosition(1);
+                var pinchLength = vec2.distance(physicsPosA, physicsPosB);
 
                 // Get center
-                p2.vec2.add(physicsPosA, physicsPosA, physicsPosB);
-                p2.vec2.scale(physicsPosA, physicsPosA, 0.5);
-                that.zoom(
-                    (touchA.global.x + touchB.global.x) * 0.5,
-                    (touchA.global.y + touchB.global.y) * 0.5,
-                    null,
-                    pinchLength / initPinchLength * initScaleX, // zoom relative to the initial scale
-                    pinchLength / initPinchLength * initScaleY
+                var center = vec2.create();
+                vec2.add(center, physicsPosA, physicsPosB);
+                vec2.scale(center, center, 0.5);
+
+                that.setZoom(
+                    startZoom * pinchLength / lastPinchLength
+                    /*center,
+                    (pinchLength - lastPinchLength) / (that.renderer.height / that.zoom) * 2*/
                 );
+                //lastPinchLength = pinchLength;
+
+                vec2.subtract(touchPanDelta, initPinchCenter, center);
+                vec2.add(touchPanDelta, touchPanDelta, that.cameraPosition);
+
+                //that.setCameraCenter(touchPanDelta);
 
                 return;
             }
 
-            if (down && that.state === Renderer.PANNING) {
-                stage.position.x = e.global.x - lastX + startX;
-                stage.position.y = e.global.y - lastY + startY;
+            if((that.mouseDown || numTouchesDown !== 0) && that.state === Renderer.PANNING){
+                var delta = vec2.create();
+                var currentMousePosition = vec2.create();
+                copyPixiVector(currentMousePosition, e.data.global);
+                vec2.subtract(delta, currentMousePosition, that.startMouseDelta);
+                that.domVectorToPhysics(delta, delta);
+
+                // When we move mouse up, camera should go down
+                vec2.scale(delta, delta, -1);
+
+                // Add delta to the camera position where the panning started
+                vec2.add(delta, delta, that.startCamPos);
+
+                // Set new camera position
+                that.setCameraCenter(delta);
             }
 
-            that.lastMousePos = e.global;
-
-            var pos = e.getLocalPosition(stage);
-            p2.vec2.set(init_stagePosition, pos.x, pos.y);
-            that.stagePositionToPhysics(init_physicsPosition, init_stagePosition);
+            var pos = e.data.getLocalPosition(stage);
+            copyPixiVector(init_physicsPosition, pos);
             that.handleMouseMove(init_physicsPosition);
         };
-        container.mouseup = container.touchend = function (e) {
-            if (e.originalEvent.touches) {
-                lastNumTouches = e.originalEvent.touches.length;
-            }
 
-            down = false;
-            lastMoveX = e.global.x;
-            lastMoveY = e.global.y;
+        container.mouseup = function(e){
+            that.mouseDown = false;
+            var pos = e.data.getLocalPosition(stage);
+            copyPixiVector(init_physicsPosition, pos);
 
-            that.lastMousePos = e.global;
+            that.handleMouseUp(init_physicsPosition);
+        };
 
-            var pos = e.getLocalPosition(stage);
-            p2.vec2.set(init_stagePosition, pos.x, pos.y);
-            that.stagePositionToPhysics(init_physicsPosition, init_stagePosition);
+        container.touchend = function(e){
+            delete that.touchPositions[e.data.identifier];
+            var pos = e.data.getLocalPosition(stage);
+            copyPixiVector(init_physicsPosition, pos);
+
             that.handleMouseUp(init_physicsPosition);
         };
 
         // http://stackoverflow.com/questions/7691551/touchend-event-in-ios-webkit-not-firing
-        this.element.ontouchmove = function (e) {
+        this.element.ontouchmove = function(e){
             e.preventDefault();
         };
 
         function MouseWheelHandler(e) {
             // cross-browser wheel delta
             e = window.event || e; // old IE support
-            //var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
             var o = e,
                 d = o.detail, w = o.wheelDelta,
-                n = 225, n1 = n - 1;
+                n = 225, n1 = n-1;
 
             // Normalize delta: http://stackoverflow.com/a/13650579/2285811
             var f;
-            d = d ? w && (f = w / d) ? d / f : -d / 1.35 : w / 120;
+            d = d ? w && (f = w/d) ? d/f : -d/1.35 : w/120;
             // Quadratic scale if |d| > 1
             d = d < 1 ? d < -1 ? (-Math.pow(d, 2) - n1) / n : d : (Math.pow(d, 2) + n1) / n;
             // Delta *should* not be greater than 2...
             var delta = Math.min(Math.max(d / 2, -1), 1);
 
-            var out = delta >= 0;
-            if (typeof lastMoveX !== 'undefined') {
-                that.zoom(lastMoveX, lastMoveY, out, undefined, undefined, delta);
+            if(delta){
+                var point = that.domToPhysics([e.clientX, e.clientY]);
+                that.zoomAroundPoint(point, delta > 0 ? 0.05 : -0.05);
             }
         }
 
@@ -1195,40 +1407,53 @@ module.exports = function (p2) {
             el.attachEvent("onmousewheel", MouseWheelHandler); // IE 6/7/8
         }
 
-        this.centerCamera(0, 0);
+        this.setCameraCenter([0, 0]);
     };
 
-    WebGLRenderer.prototype.zoom = function (x, y, zoomOut, actualScaleX, actualScaleY, multiplier) {
-        var scrollFactor = this.scrollFactor,
-            stage = this.stage;
-
-        if (typeof actualScaleX === 'undefined') {
-
-            if (!zoomOut) {
-                scrollFactor *= -1;
+    WebGLRenderer.prototype.getNumTouches = function(){
+        var touchPositions = this.touchPositions;
+        var touchIdentifiers = Object.keys(touchPositions);
+        var numTouchesDown = 0;
+        for(var i=0; i<touchIdentifiers.length; i++){
+            if(touchPositions[touchIdentifiers[i]]){
+                numTouchesDown++;
             }
-
-            scrollFactor *= Math.abs(multiplier);
-
-            stage.scale.x *= (1 + scrollFactor);
-            stage.scale.y *= (1 + scrollFactor);
-            stage.position.x += (scrollFactor) * (stage.position.x - x);
-            stage.position.y += (scrollFactor) * (stage.position.y - y);
-        } else {
-            stage.scale.x *= actualScaleX;
-            stage.scale.y *= actualScaleY;
-            stage.position.x += (actualScaleX - 1) * (stage.position.x - x);
-            stage.position.y += (actualScaleY - 1) * (stage.position.y - y);
         }
-
-        stage.updateTransform();
+        return numTouchesDown;
     };
 
-    WebGLRenderer.prototype.centerCamera = function (x, y) {
-        this.stage.position.x = this.renderer.width / 2 - this.stage.scale.x * x;
-        this.stage.position.y = this.renderer.height / 2 - this.stage.scale.y * y;
+    WebGLRenderer.prototype.getTouchPosition = function(i){
+        var touchPositions = this.touchPositions;
+        var touchIdentifiers = Object.keys(touchPositions);
+        return touchPositions[touchIdentifiers[i]];
+    };
 
+    WebGLRenderer.prototype.domToPhysics = function(point){
+        var result = this.stage.toLocal(new PIXI.Point(point[0], point[1]));
+        return [result.x, result.y];
+    };
+
+    WebGLRenderer.prototype.domVectorToPhysics = function(vector, result){
+        result[0] = vector[0] / this.zoom;
+        result[1] = -vector[1] / this.zoom;
+    };
+
+    WebGLRenderer.prototype.onCameraPositionChanged = function(){
+        // TODO: can this be simplified by adding another PIXI.Container?
+        /*
+        this.stage.position.set(
+            this.renderer.width / 2 - this.stage.scale.x * this.cameraPosition[0],
+            this.renderer.height / 2 - this.stage.scale.y * this.cameraPosition[1]
+        );
         this.stage.updateTransform();
+        */
+    };
+
+    WebGLRenderer.prototype.onZoomChanged = function(){
+        /*
+        this.stage.scale.set(this.zoom, -this.zoom);
+        this.stage.updateTransform();
+        */
     };
 
     /**
@@ -1238,67 +1463,91 @@ module.exports = function (p2) {
      * @param  {number} width
      * @param  {number} height
      */
-    WebGLRenderer.prototype.frame = function (centerX, centerY, width, height) {
-        var ratio = this.renderer.width / this.renderer.height;
-        if (ratio < width / height) {
-            this.stage.scale.x = this.renderer.width / width;
-            this.stage.scale.y = -this.stage.scale.x;
+    WebGLRenderer.prototype.frame = function(centerX, centerY, width, height){
+        var renderer = this.renderer;
+        this.setCameraCenter([centerX, centerY]);
+        var ratio = renderer.width / renderer.height;
+
+        var zoom;
+        if(ratio < width / height){
+            zoom = renderer.width / width;
         } else {
-            this.stage.scale.y = -this.renderer.height / height;
-            this.stage.scale.x = -this.stage.scale.y;
+            zoom = renderer.height / height;
         }
-        this.centerCamera(centerX, centerY);
+        this.setZoom(zoom);
     };
 
-    /**
-     * Draw a circle onto a graphics object
-     * @method drawCircle
-     * @static
-     * @param  {PIXI.Graphics} g
-     * @param  {Number} x
-     * @param  {Number} y
-     * @param  {Number} radius
-     * @param  {Number} color
-     * @param  {Number} lineWidth
-     */
-    WebGLRenderer.prototype.drawCircle = function (g, x, y, angle, radius, color, lineWidth, isSleeping) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "number" ? color : 0xffffff;
-        g.lineStyle(lineWidth, 0x000000, 1);
-        g.beginFill(color, isSleeping ? this.sleepOpacity : 1.0);
-        g.drawCircle(x, y, radius);
-        g.endFill();
+    function pixiDrawCircleOnGraphics(g, x, y, radius){
+        var maxSegments = 32;
+        var minSegments = 12;
 
-        // line from center to edge
-        g.moveTo(x, y);
-        g.lineTo(x + radius * Math.cos(angle),
-            y + radius * Math.sin(angle));
-    };
+        var alpha = (radius - 0.1) / 1;
+        alpha = Math.max(Math.min(alpha, 1), 0);
 
-    WebGLRenderer.drawSpring = function (g, restLength, color, lineWidth) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "undefined" ? 0xffffff : color;
+        var numSegments = Math.round(
+            maxSegments * alpha + minSegments * (1-alpha)
+        );
+
+        var circlePath = [];
+        for(var i=0; i<numSegments+1; i++){
+            var a = Math.PI * 2 / numSegments * i;
+            circlePath.push(
+                new PIXI.Point(
+                    x + radius * Math.cos(a),
+                    y + radius * Math.sin(a)
+                )
+            );
+        }
+
+        g.drawPolygon(circlePath);
+    }
+
+    WebGLRenderer.prototype.drawSpring = function(g,restLength,color,lineWidth){
         g.lineStyle(lineWidth, color, 1);
-        if (restLength < lineWidth * 10) {
-            restLength = lineWidth * 10;
+        if(restLength < lineWidth*10){
+            restLength = lineWidth*10;
         }
         var M = 12;
-        var dx = restLength / M;
-        g.moveTo(-restLength / 2, 0);
-        for (var i = 1; i < M; i++) {
-            var x = -restLength / 2 + dx * i;
+        var dx = restLength/M;
+        g.moveTo(-restLength/2,0);
+        for(var i=1; i<M; i++){
+            var x = -restLength/2 + dx*i;
             var y = 0;
-            if (i <= 1 || i >= M - 1) {
+            if(i<=1 || i>=M-1 ){
                 // Do nothing
-            } else if (i % 2 === 0) {
-                y -= 0.1 * restLength;
+            } else if(i % 2 === 0){
+                y -= 0.1*restLength;
             } else {
-                y += 0.1 * restLength;
+                y += 0.1*restLength;
             }
-            g.lineTo(x, y);
+            g.lineTo(x,y);
         }
-        g.lineTo(restLength / 2, 0);
+        g.lineTo(restLength/2,0);
     };
+
+    WebGLRenderer.prototype.shapeDrawFunctions = {};
+
+    var tmpCircle = new p2.Circle({ radius: 0.02 });
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.PARTICLE] =
+        WebGLRenderer.prototype.drawParticle = function(graphics, particleShape, color, alpha, lineWidth){
+            this.drawCircle(graphics, tmpCircle, this.lineColor, 1, 0);
+        };
+
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.CIRCLE] =
+        WebGLRenderer.prototype.drawCircle = function(g, circleShape, color, alpha, lineWidth){
+            g.lineStyle(lineWidth, this.lineColor, 1);
+            g.beginFill(color, alpha);
+            var x = circleShape.position[0];
+            var y = circleShape.position[1];
+            var r = circleShape.radius;
+            pixiDrawCircleOnGraphics(g, x, y, r, 20);
+            g.endFill();
+
+            // line from center to edge
+            g.moveTo(x,y);
+            g.lineTo(   x + r * Math.cos(circleShape.angle),
+                y + r * Math.sin(circleShape.angle) );
+        };
 
     /**
      * Draw a finite plane onto a PIXI.Graphics.
@@ -1312,227 +1561,290 @@ module.exports = function (p2) {
      * @param  {Number} diagSize
      * @todo Should consider an angle
      */
-    WebGLRenderer.drawPlane = function (g, x0, x1, color, lineColor, lineWidth, diagMargin, diagSize, maxLength) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "undefined" ? 0xffffff : color;
-        g.lineStyle(lineWidth, lineColor, 1);
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.PLANE] =
+        WebGLRenderer.prototype.drawPlane = function(g, planeShape, color, alpha, lineWidth){
+            g.lineStyle(lineWidth, this.lineColor, 1);
 
-        // Draw a fill color
-        g.lineStyle(0, 0, 0);
-        g.beginFill(color);
-        var max = maxLength;
-        g.moveTo(-max, 0);
-        g.lineTo(max, 0);
-        g.lineTo(max, -max);
-        g.lineTo(-max, -max);
-        g.endFill();
+            // Draw a fill color
+            g.lineStyle(0,0,0);
+            g.beginFill(color);
+            var max = 100;
+            g.moveTo(-max,0);
+            g.lineTo(max,0);
+            g.lineTo(max,-max);
+            g.lineTo(-max,-max);
+            g.endFill();
 
-        // Draw the actual plane
-        g.lineStyle(lineWidth, lineColor);
-        g.moveTo(-max, 0);
-        g.lineTo(max, 0);
-    };
+            // Draw the actual plane
+            g.lineStyle(lineWidth, this.lineColor);
+            g.moveTo(-max,0);
+            g.lineTo(max,0);
+        };
 
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.LINE] =
+        WebGLRenderer.prototype.drawLine = function(g, shape, color, alpha, lineWidth){
+            var len = shape.length;
+            var angle = shape.angle;
+            var offset = shape.position;
 
-    WebGLRenderer.drawLine = function (g, offset, angle, len, color, lineWidth) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "undefined" ? 0x000000 : color;
-        g.lineStyle(lineWidth, color, 1);
-
-        var startPoint = p2.vec2.fromValues(-len / 2, 0);
-        var endPoint = p2.vec2.fromValues(len / 2, 0);
-
-        p2.vec2.rotate(startPoint, startPoint, angle);
-        p2.vec2.rotate(endPoint, endPoint, angle);
-
-        p2.vec2.add(startPoint, startPoint, offset);
-        p2.vec2.add(endPoint, endPoint, offset);
-
-        g.moveTo(startPoint[0], startPoint[1]);
-        g.lineTo(endPoint[0], endPoint[1]);
-    };
-
-    WebGLRenderer.prototype.drawCapsule = function (g, x, y, angle, len, radius, color, fillColor, lineWidth, isSleeping) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "undefined" ? 0x000000 : color;
-        g.lineStyle(lineWidth, color, 1);
-
-        // Draw circles at ends
-        var c = Math.cos(angle);
-        var s = Math.sin(angle);
-        g.beginFill(fillColor, isSleeping ? this.sleepOpacity : 1.0);
-        g.drawCircle(-len / 2 * c + x, -len / 2 * s + y, radius);
-        g.drawCircle(len / 2 * c + x, len / 2 * s + y, radius);
-        g.endFill();
-
-        // Draw rectangle
-        g.lineStyle(lineWidth, color, 0);
-        g.beginFill(fillColor, isSleeping ? this.sleepOpacity : 1.0);
-        g.moveTo(-len / 2 * c + radius * s + x, -len / 2 * s + radius * c + y);
-        g.lineTo(len / 2 * c + radius * s + x, len / 2 * s + radius * c + y);
-        g.lineTo(len / 2 * c - radius * s + x, len / 2 * s - radius * c + y);
-        g.lineTo(-len / 2 * c - radius * s + x, -len / 2 * s - radius * c + y);
-        g.endFill();
-
-        // Draw lines in between
-        g.lineStyle(lineWidth, color, 1);
-        g.moveTo(-len / 2 * c + radius * s + x, -len / 2 * s + radius * c + y);
-        g.lineTo(len / 2 * c + radius * s + x, len / 2 * s + radius * c + y);
-        g.moveTo(-len / 2 * c - radius * s + x, -len / 2 * s - radius * c + y);
-        g.lineTo(len / 2 * c - radius * s + x, len / 2 * s - radius * c + y);
-
-    };
-
-// Todo angle
-    WebGLRenderer.prototype.drawRectangle = function (g, x, y, angle, w, h, color, fillColor, lineWidth, isSleeping) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "number" ? color : 0xffffff;
-        fillColor = typeof(fillColor) === "number" ? fillColor : 0xffffff;
-        g.lineStyle(lineWidth);
-        g.beginFill(fillColor, isSleeping ? this.sleepOpacity : 1.0);
-        g.drawRect(x - w / 2, y - h / 2, w, h);
-    };
-
-    WebGLRenderer.prototype.drawConvex = function (g, verts, triangles, color, fillColor, lineWidth, debug, offset, isSleeping) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "undefined" ? 0x000000 : color;
-        if (!debug) {
             g.lineStyle(lineWidth, color, 1);
-            g.beginFill(fillColor, isSleeping ? this.sleepOpacity : 1.0);
-            for (var i = 0; i !== verts.length; i++) {
+
+            var startPoint = vec2.fromValues(-len/2,0);
+            var endPoint = vec2.fromValues(len/2,0);
+
+            vec2.rotate(startPoint, startPoint, angle);
+            vec2.rotate(endPoint, endPoint, angle);
+
+            vec2.add(startPoint, startPoint, offset);
+            vec2.add(endPoint, endPoint, offset);
+
+            g.moveTo(startPoint[0], startPoint[1]);
+            g.lineTo(endPoint[0], endPoint[1]);
+        };
+
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.CAPSULE] =
+        WebGLRenderer.prototype.drawCapsule = function(g, shape, color, alpha, lineWidth){
+            var angle = shape.angle;
+            var radius = shape.radius;
+            var len = shape.length;
+            var x = shape.position[0];
+            var y = shape.position[1];
+
+            g.lineStyle(lineWidth, this.lineColor, 1);
+
+            // Draw circles at ends
+            var hl = len / 2;
+            g.beginFill(color, alpha);
+            var localPos = vec2.fromValues(x, y);
+            var p0 = vec2.fromValues(-hl, 0);
+            var p1 = vec2.fromValues(hl, 0);
+            vec2.rotate(p0, p0, angle);
+            vec2.rotate(p1, p1, angle);
+            vec2.add(p0, p0, localPos);
+            vec2.add(p1, p1, localPos);
+            pixiDrawCircleOnGraphics(g, p0[0], p0[1], radius, 20);
+            pixiDrawCircleOnGraphics(g, p1[0], p1[1], radius, 20);
+            g.endFill();
+
+            // Draw rectangle
+            var pp2 = vec2.create();
+            var p3 = vec2.create();
+            vec2.set(p0, -hl, radius);
+            vec2.set(p1, hl, radius);
+            vec2.set(pp2, hl, -radius);
+            vec2.set(p3, -hl, -radius);
+
+            vec2.rotate(p0, p0, angle);
+            vec2.rotate(p1, p1, angle);
+            vec2.rotate(pp2, pp2, angle);
+            vec2.rotate(p3, p3, angle);
+
+            vec2.add(p0, p0, localPos);
+            vec2.add(p1, p1, localPos);
+            vec2.add(pp2, pp2, localPos);
+            vec2.add(p3, p3, localPos);
+
+            g.lineStyle(lineWidth, this.lineColor, 0);
+            g.beginFill(color, alpha);
+            g.moveTo(p0[0], p0[1]);
+            g.lineTo(p1[0], p1[1]);
+            g.lineTo(pp2[0], pp2[1]);
+            g.lineTo(p3[0], p3[1]);
+            g.endFill();
+
+            // Draw lines in between
+            for(var i=0; i<2; i++){
+                g.lineStyle(lineWidth, this.lineColor, 1);
+                var sign = (i===0?1:-1);
+                vec2.set(p0, -hl, sign*radius);
+                vec2.set(p1, hl, sign*radius);
+                vec2.rotate(p0, p0, angle);
+                vec2.rotate(p1, p1, angle);
+                vec2.add(p0, p0, localPos);
+                vec2.add(p1, p1, localPos);
+                g.moveTo(p0[0], p0[1]);
+                g.lineTo(p1[0], p1[1]);
+            }
+
+        };
+
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.BOX] =
+        WebGLRenderer.prototype.drawRectangle = function(g, shape, color, alpha, lineWidth){
+            var w = shape.width;
+            var h = shape.height;
+            var x = shape.position[0];
+            var y = shape.position[1];
+
+            var path = [
+                [w / 2, h / 2],
+                [-w / 2, h / 2],
+                [-w / 2, -h / 2],
+                [w / 2, -h / 2]
+            ];
+
+            // Rotate and add position
+            for (var i = 0; i < path.length; i++) {
+                var v = path[i];
+                vec2.rotate(v, v, shape.angle);
+                vec2.add(v, v, [x, y]);
+            }
+
+            this.drawPath(g, path, lineWidth, this.lineColor, color, alpha);
+        };
+
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.HEIGHTFIELD] =
+        WebGLRenderer.prototype.drawHeightfield = function(g, shape, color, alpha, lineWidth){
+            var path = [[0,-100]];
+            for(var j=0; j!==shape.heights.length; j++){
+                var v = shape.heights[j];
+                path.push([j*shape.elementWidth, v]);
+            }
+            path.push([shape.heights.length * shape.elementWidth, -100]);
+            this.drawPath(g, path, lineWidth, this.lineColor, color, alpha);
+        };
+
+    WebGLRenderer.prototype.shapeDrawFunctions[p2.Shape.CONVEX] =
+        WebGLRenderer.prototype.drawConvex = function(g, shape, color, alpha, lineWidth){
+            var verts = [];
+            var vrot = vec2.create();
+            var offset = shape.position;
+
+            for(var j=0; j!==shape.vertices.length; j++){
+                var v = shape.vertices[j];
+                vec2.rotate(vrot, v, shape.angle);
+                verts.push([(vrot[0]+offset[0]), (vrot[1]+offset[1])]);
+            }
+
+            g.lineStyle(lineWidth, this.lineColor, 1);
+            g.beginFill(color, alpha);
+            for(var i=0; i!==verts.length; i++){
                 var v = verts[i],
                     x = v[0],
                     y = v[1];
-                if (i === 0) {
-                    g.moveTo(x, y);
+                if(i===0){
+                    g.moveTo(x,y);
                 } else {
-                    g.lineTo(x, y);
+                    g.lineTo(x,y);
                 }
             }
             g.endFill();
-            if (verts.length > 2) {
-                g.moveTo(verts[verts.length - 1][0], verts[verts.length - 1][1]);
-                g.lineTo(verts[0][0], verts[0][1]);
-            }
-        } else {
-            var colors = [0xff0000, 0x00ff00, 0x0000ff];
-            for (var i = 0; i !== verts.length + 1; i++) {
-                var v0 = verts[i % verts.length],
-                    v1 = verts[(i + 1) % verts.length],
-                    x0 = v0[0],
-                    y0 = v0[1],
-                    x1 = v1[0],
-                    y1 = v1[1];
-                g.lineStyle(lineWidth, colors[i % colors.length], 1);
-                g.moveTo(x0, y0);
-                g.lineTo(x1, y1);
-                g.drawCircle(x0, y0, lineWidth * 2);
-            }
 
-            g.lineStyle(lineWidth, 0x000000, 1);
-            g.drawCircle(offset[0], offset[1], lineWidth * 2);
-        }
-    };
+            if(verts.length>2){
+                g.moveTo(verts[verts.length-1][0],verts[verts.length-1][1]);
+                g.lineTo(verts[0][0],verts[0][1]);
+            }
+        };
 
-    WebGLRenderer.prototype.drawPath = function (g, path, color, fillColor, lineWidth, isSleeping) {
-        lineWidth = typeof(lineWidth) === "number" ? lineWidth : 1;
-        color = typeof(color) === "undefined" ? 0x000000 : color;
-        g.lineStyle(lineWidth, color, 1);
-        if (typeof(fillColor) === "number") {
-            g.beginFill(fillColor, isSleeping ? this.sleepOpacity : 1.0);
+    WebGLRenderer.prototype.drawPath = function(g, path, lineWidth, lineColor, fillColor, fillAlpha){
+        g.lineStyle(lineWidth, lineColor, 1);
+
+        if(fillAlpha !== 0){
+            g.beginFill(fillColor, fillAlpha);
         }
-        var lastx = null,
-            lasty = null;
-        for (var i = 0; i < path.length; i++) {
-            var v = path[i],
+
+        var lastx = null, lasty = null;
+        for(var i=0; i<path.length+1; i++){
+            var v = path[i % path.length],
                 x = v[0],
                 y = v[1];
-            if (x !== lastx || y !== lasty) {
+            if(x !== lastx || y !== lasty){
                 if (i === 0) {
-                    g.moveTo(x, y);
+                    g.moveTo(x,y);
                 } else {
                     // Check if the lines are parallel
                     var p1x = lastx,
                         p1y = lasty,
                         p2x = x,
                         p2y = y,
-                        p3x = path[(i + 1) % path.length][0],
-                        p3y = path[(i + 1) % path.length][1];
-                    var area = ((p2x - p1x) * (p3y - p1y)) - ((p3x - p1x) * (p2y - p1y));
-                    if (area !== 0) {
-                        g.lineTo(x, y);
+                        p3x = path[(i+1)%path.length][0],
+                        p3y = path[(i+1)%path.length][1];
+                    var area = ((p2x - p1x)*(p3y - p1y))-((p3x - p1x)*(p2y - p1y));
+                    if(area !== 0){
+                        g.lineTo(x,y);
                     }
                 }
                 lastx = x;
                 lasty = y;
             }
         }
-        if (typeof(fillColor) === "number") {
+
+        if(fillAlpha !== 0){
             g.endFill();
         }
 
         // Close the path
-        if (path.length > 2 && typeof(fillColor) === "number") {
-            g.moveTo(path[path.length - 1][0], path[path.length - 1][1]);
-            g.lineTo(path[0][0], path[0][1]);
+        if(path.length>2 && fillAlpha !== 0){
+            g.moveTo(path[path.length-1][0], path[path.length-1][1]);
+            g.lineTo(path[0][0],path[0][1]);
         }
     };
 
-    WebGLRenderer.prototype.updateSpriteTransform = function (sprite, body) {
-        if (this.useInterpolatedPositions && !this.paused) {
-            sprite.position.x = body.interpolatedPosition[0];
-            sprite.position.y = body.interpolatedPosition[1];
+    WebGLRenderer.prototype.updateSpriteTransform = function(sprite,body){
+        if(this.useInterpolatedPositions && !this.paused){
+            sprite.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1]);
             sprite.rotation = body.interpolatedAngle;
         } else {
-            sprite.position.x = body.position[0];
-            sprite.position.y = body.position[1];
+            sprite.position.set(body.position[0], body.position[1]);
             sprite.rotation = body.angle;
         }
     };
 
-    var X = p2.vec2.fromValues(1, 0),
-        distVec = p2.vec2.fromValues(0, 0),
-        worldAnchorA = p2.vec2.fromValues(0, 0),
-        worldAnchorB = p2.vec2.fromValues(0, 0);
-    WebGLRenderer.prototype.render = function () {
-        var w = this.renderer.width,
-            h = this.renderer.height,
-            springSprites = this.springSprites,
-            sprites = this.sprites;
+    var X = vec2.fromValues(1,0),
+        distVec = vec2.fromValues(0,0),
+        worldAnchorA = vec2.fromValues(0,0),
+        worldAnchorB = vec2.fromValues(0,0);
+    WebGLRenderer.prototype.render = function(deltaTime){
+        var stage = this.stage;
+        var springSprites = this.springSprites;
+
+        // Damp position
+        this.currentStageX = smoothDamp(this.currentStageX, this.renderer.width / 2 - this.zoom * this.cameraPosition[0], this._cameraStoreX, deltaTime, this.smoothTime, this.maxSmoothVelocity);
+        this.currentStageY = smoothDamp(this.currentStageY, this.renderer.height / 2 + this.zoom * this.cameraPosition[1], this._cameraStoreY, deltaTime, this.smoothTime, this.maxSmoothVelocity);
+        this.stage.position.set(
+            this.currentStageX,
+            this.currentStageY
+        );
+
+        // Damp zoom
+        this.currentZoom = smoothDamp(this.currentZoom, this.zoom, this._zoomStore, deltaTime, this.smoothTime, this.maxSmoothVelocity);
+        this.stage.scale.set(this.currentZoom, -this.currentZoom);
+
+        this.stage.updateTransform();
 
         // Update body transforms
-        for (var i = 0; i !== this.bodies.length; i++) {
-            this.updateSpriteTransform(this.sprites[i], this.bodies[i]);
+        for(var i=0; i!==this.bodies.length; i++){
+            this.updateSpriteTransform(this.sprites[i],this.bodies[i]);
         }
 
-        // Update graphics if the body changed sleepState
-        for (var i = 0; i !== this.bodies.length; i++) {
-            var isSleeping = (this.bodies[i].sleepState === p2.Body.SLEEPING);
-            var sprite = this.sprites[i];
+        // Update graphics if the body changed sleepState or island
+        for(var i=0; i!==this.bodies.length; i++){
             var body = this.bodies[i];
-            if (sprite.drawnSleeping !== isSleeping) {
+            var isSleeping = (body.sleepState===p2.Body.SLEEPING);
+            var sprite = this.sprites[i];
+            var islandColor = this.getIslandColor(body);
+            if(sprite.drawnSleeping !== isSleeping || sprite.drawnColor !== islandColor){
                 sprite.clear();
-                this.drawRenderable(body, sprite, sprite.drawnColor, sprite.drawnLineColor);
+                this.drawRenderable(body, sprite, islandColor, sprite.drawnLineColor);
             }
         }
 
         // Update spring transforms
-        for (var i = 0; i !== this.springs.length; i++) {
+        for(var i=0; i!==this.springs.length; i++){
             var s = this.springs[i],
                 sprite = springSprites[i],
                 bA = s.bodyA,
                 bB = s.bodyB;
 
-            if (this.useInterpolatedPositions && !this.paused) {
-                p2.vec2.toGlobalFrame(worldAnchorA, s.localAnchorA, bA.interpolatedPosition, bA.interpolatedAngle);
-                p2.vec2.toGlobalFrame(worldAnchorB, s.localAnchorB, bB.interpolatedPosition, bB.interpolatedAngle);
+            if(this.useInterpolatedPositions && !this.paused){
+                vec2.toGlobalFrame(worldAnchorA, s.localAnchorA, bA.interpolatedPosition, bA.interpolatedAngle);
+                vec2.toGlobalFrame(worldAnchorB, s.localAnchorB, bB.interpolatedPosition, bB.interpolatedAngle);
             } else {
                 s.getWorldAnchorA(worldAnchorA);
                 s.getWorldAnchorB(worldAnchorB);
             }
 
             sprite.scale.y = 1;
-            if (worldAnchorA[1] < worldAnchorB[1]) {
+            if(worldAnchorA[1] < worldAnchorB[1]){
                 var tmp = worldAnchorA;
                 worldAnchorA = worldAnchorB;
                 worldAnchorB = tmp;
@@ -1545,29 +1857,32 @@ module.exports = function (p2) {
                 syB = worldAnchorB[1];
 
             // Spring position is the mean point between the anchors
-            sprite.position.x = ( sxA + sxB ) / 2;
-            sprite.position.y = ( syA + syB ) / 2;
+            sprite.position.set(
+                ( sxA + sxB ) / 2,
+                ( syA + syB ) / 2
+            );
 
             // Compute distance vector between anchors, in screen coords
-            distVec[0] = sxA - sxB;
-            distVec[1] = syA - syB;
+            vec2.set(distVec, sxA - sxB, syA - syB);
 
             // Compute angle
-            sprite.rotation = Math.acos(p2.vec2.dot(X, distVec) / p2.vec2.length(distVec));
+            sprite.rotation = Math.acos( vec2.dot(X, distVec) / vec2.length(distVec) );
 
             // And scale
-            sprite.scale.x = p2.vec2.length(distVec) / s.restLength;
+            sprite.scale.x = vec2.length(distVec) / s.restLength;
         }
 
         // Clear contacts
-        if (this.drawContacts) {
+        if(this.drawContacts){
             this.contactGraphics.clear();
-            this.stage.removeChild(this.contactGraphics);
-            this.stage.addChild(this.contactGraphics);
+
+            // Keep it on top
+            stage.removeChild(this.contactGraphics);
+            stage.addChild(this.contactGraphics);
 
             var g = this.contactGraphics;
             g.lineStyle(this.lineWidth, 0x000000, 1);
-            for (var i = 0; i !== this.world.narrowphase.contactEquations.length; i++) {
+            for(var i=0; i!==this.world.narrowphase.contactEquations.length; i++){
                 var eq = this.world.narrowphase.contactEquations[i],
                     bi = eq.bodyA,
                     bj = eq.bodyB,
@@ -1578,39 +1893,57 @@ module.exports = function (p2) {
                     xj = bj.position[0],
                     yj = bj.position[1];
 
-                g.moveTo(xi, yi);
-                g.lineTo(xi + ri[0], yi + ri[1]);
+                g.moveTo(xi,yi);
+                g.lineTo(xi+ri[0], yi+ri[1]);
 
-                g.moveTo(xj, yj);
-                g.lineTo(xj + rj[0], yj + rj[1]);
+                g.moveTo(xj,yj);
+                g.lineTo(xj+rj[0], yj+rj[1]);
 
             }
             this.contactGraphics.cleared = false;
-        } else if (!this.contactGraphics.cleared) {
+        } else if(!this.contactGraphics.cleared){
             this.contactGraphics.clear();
             this.contactGraphics.cleared = true;
         }
 
         // Draw AABBs
-        if (this.drawAABBs) {
+        if(this.drawAABBs){
             this.aabbGraphics.clear();
-            this.stage.removeChild(this.aabbGraphics);
-            this.stage.addChild(this.aabbGraphics);
+            stage.removeChild(this.aabbGraphics);
+            stage.addChild(this.aabbGraphics);
             var g = this.aabbGraphics;
-            g.lineStyle(this.lineWidth, 0x000000, 1);
+            g.lineStyle(this.lineWidth,0x000000,1);
 
-            for (var i = 0; i !== this.world.bodies.length; i++) {
+            for(var i=0; i!==this.world.bodies.length; i++){
                 var aabb = this.world.bodies[i].getAABB();
                 g.drawRect(aabb.lowerBound[0], aabb.lowerBound[1], aabb.upperBound[0] - aabb.lowerBound[0], aabb.upperBound[1] - aabb.lowerBound[1]);
             }
             this.aabbGraphics.cleared = false;
-        } else if (!this.aabbGraphics.cleared) {
+        } else if(!this.aabbGraphics.cleared){
             this.aabbGraphics.clear();
             this.aabbGraphics.cleared = true;
         }
 
-        if (this.followBody) {
-            app.centerCamera(this.followBody.interpolatedPosition[0], this.followBody.interpolatedPosition[1]);
+        // Draw pick line
+        if(this.mouseConstraint){
+            var g = this.pickGraphics;
+            g.clear();
+            stage.removeChild(g);
+            stage.addChild(g);
+            g.lineStyle(this.lineWidth,0x000000,1);
+            var c = this.mouseConstraint;
+            var worldPivotB = vec2.create();
+            c.bodyB.toWorldFrame(worldPivotB, c.pivotB);
+            g.moveTo(c.pivotA[0], c.pivotA[1]);
+            g.lineTo(worldPivotB[0], worldPivotB[1]);
+            g.cleared = false;
+        } else if(!this.pickGraphics.cleared){
+            this.pickGraphics.clear();
+            this.pickGraphics.cleared = true;
+        }
+
+        if(this.followBody){
+            this.setCameraCenter(this.followBody.interpolatedPosition);
         }
 
         this.renderer.render(this.container);
@@ -1621,144 +1954,110 @@ module.exports = function (p2) {
         var hex = c.toString(16);
         return hex.length === 1 ? "0" + hex : hex;
     }
-
     function rgbToHex(r, g, b) {
         return componentToHex(r) + componentToHex(g) + componentToHex(b);
     }
 
 //http://stackoverflow.com/questions/43044/algorithm-to-randomly-generate-an-aesthetically-pleasing-color-palette
-    function randomPastelHex() {
-        var mix = [255, 255, 255];
-        var red = Math.floor(Math.random() * 256);
-        var green = Math.floor(Math.random() * 256);
-        var blue = Math.floor(Math.random() * 256);
+    WebGLRenderer.randomColor = function(){
+        var mix = [255,255,255];
+        var red =   Math.floor(Math.random()*256);
+        var green = Math.floor(Math.random()*256);
+        var blue =  Math.floor(Math.random()*256);
 
         // mix the color
-        red = Math.floor((red + 3 * mix[0]) / 4);
-        green = Math.floor((green + 3 * mix[1]) / 4);
-        blue = Math.floor((blue + 3 * mix[2]) / 4);
+        red =   Math.floor((red +   3*mix[0]) / 4);
+        green = Math.floor((green + 3*mix[1]) / 4);
+        blue =  Math.floor((blue +  3*mix[2]) / 4);
 
-        return rgbToHex(red, green, blue);
-    }
+        return rgbToHex(red,green,blue);
+    };
 
-    WebGLRenderer.prototype.drawRenderable = function (obj, graphics, color, lineColor) {
+    WebGLRenderer.prototype.drawRenderable = function(obj, graphics, color, lineColor){
         var lw = this.lineWidth;
 
-        var zero = [0, 0];
         graphics.drawnSleeping = false;
         graphics.drawnColor = color;
         graphics.drawnLineColor = lineColor;
-
-        if (obj instanceof p2.Body && obj.shapes.length) {
+        if(obj instanceof p2.Body && obj.shapes.length){
 
             var isSleeping = (obj.sleepState === p2.Body.SLEEPING);
+            var alpha = isSleeping ? this.sleepOpacity : 1;
+
             graphics.drawnSleeping = isSleeping;
 
-            if (obj.concavePath && !this.debugPolygons) {
-                var path = [];
-                for (var j = 0; j !== obj.concavePath.length; j++) {
-                    var v = obj.concavePath[j];
-                    path.push([v[0], v[1]]);
-                }
-                this.drawPath(graphics, path, lineColor, color, lw, isSleeping);
+            if(this.bodyPolygonPaths[obj.id] && !this.debugPolygons){
+                // Special case: bodies created using Body#fromPolygon
+                this.drawPath(graphics, this.bodyPolygonPaths[obj.id], lw, lineColor, color, alpha);
             } else {
-                for (var i = 0; i < obj.shapes.length; i++) {
-                    var child = obj.shapes[i],
-                        offset = child.position,
-                        angle = child.angle;
+                // Draw all shapes
+                for(var i=0; i<obj.shapes.length; i++){
+                    var child = obj.shapes[i];
 
-                    if (child instanceof p2.Circle) {
-                        this.drawCircle(graphics, offset[0], offset[1], angle, child.radius, color, lw, isSleeping);
-
-                    } else if (child instanceof p2.Particle) {
-                        this.drawCircle(graphics, offset[0], offset[1], angle, 2 * lw, lineColor, 0);
-
-                    } else if (child instanceof p2.Plane) {
-                        // TODO use shape angle
-                        WebGLRenderer.drawPlane(graphics, -10, 10, color, lineColor, lw, lw * 10, lw * 10, 100);
-
-                    } else if (child instanceof p2.Line) {
-                        WebGLRenderer.drawLine(graphics, offset, angle, child.length, lineColor, lw);
-
-                    } else if (child instanceof p2.Box) {
-                        this.drawRectangle(graphics, offset[0], offset[1], angle, child.width, child.height, lineColor, color, lw, isSleeping);
-
-                    } else if (child instanceof p2.Capsule) {
-                        this.drawCapsule(graphics, offset[0], offset[1], angle, child.length, child.radius, lineColor, color, lw, isSleeping);
-
-                    } else if (child instanceof p2.Convex) {
-                        // Scale verts
-                        var verts = [],
-                            vrot = p2.vec2.create();
-                        for (var j = 0; j !== child.vertices.length; j++) {
-                            var v = child.vertices[j];
-                            p2.vec2.rotate(vrot, v, angle);
-                            verts.push([(vrot[0] + offset[0]), (vrot[1] + offset[1])]);
-                        }
-                        this.drawConvex(graphics, verts, child.triangles, lineColor, color, lw, this.debugPolygons, [offset[0], -offset[1]], isSleeping);
-
-                    } else if (child instanceof p2.Heightfield) {
-                        var path = [[0, -100]];
-                        for (var j = 0; j !== child.heights.length; j++) {
-                            var v = child.heights[j];
-                            path.push([j * child.elementWidth, v]);
-                        }
-                        path.push([child.heights.length * child.elementWidth, -100]);
-                        this.drawPath(graphics, path, lineColor, color, lw, isSleeping);
-
+                    var drawFunction = this.shapeDrawFunctions[child.type];
+                    if(drawFunction){
+                        drawFunction.call(this, graphics, child, color, alpha, lw);
                     }
                 }
             }
 
-        } else if (obj instanceof p2.Spring) {
+        } else if(obj instanceof p2.Spring){
             var restLengthPixels = obj.restLength;
-            WebGLRenderer.drawSpring(graphics, restLengthPixels, 0x000000, lw);
+            this.drawSpring(graphics, restLengthPixels, lineColor, lw);
         }
     };
 
-    WebGLRenderer.prototype.addRenderable = function (obj) {
-        var lw = this.lineWidth;
+    WebGLRenderer.prototype.getIslandColor = function(body){
+        var islandColors = this.islandColors;
+        var color;
+        if(body.islandId === -1){
+            color = this.islandStaticColor; // Gray for static objects
+        } else if(islandColors[body.islandId]){
+            color = islandColors[body.islandId];
+        } else {
+            color = islandColors[body.islandId] = parseInt(WebGLRenderer.randomColor(),16);
+        }
+        return color;
+    };
 
-        // Random color
-        var color = parseInt(randomPastelHex(), 16),
-            lineColor = 0x000000;
+    WebGLRenderer.prototype.addRenderable = function(obj){
 
-        var zero = [0, 0];
+        var lineColor = this.lineColor;
 
         var sprite = new PIXI.Graphics();
-        if (obj instanceof p2.Body && obj.shapes.length) {
+        if(obj instanceof p2.Body && obj.shapes.length){
 
+            var color = this.getIslandColor(obj);
             this.drawRenderable(obj, sprite, color, lineColor);
             this.sprites.push(sprite);
             this.stage.addChild(sprite);
 
-        } else if (obj instanceof p2.Spring) {
-            this.drawRenderable(obj, sprite, 0x000000, lineColor);
+        } else if(obj instanceof p2.Spring){
+
+            this.drawRenderable(obj, sprite, lineColor, lineColor);
             this.springSprites.push(sprite);
             this.stage.addChild(sprite);
+
         }
     };
 
-    WebGLRenderer.prototype.removeRenderable = function (obj) {
-        if (obj instanceof p2.Body) {
+    WebGLRenderer.prototype.removeRenderable = function(obj){
+        if(obj instanceof p2.Body){
             var i = this.bodies.indexOf(obj);
-            if (i !== -1) {
+            if(i!==-1){
                 this.stage.removeChild(this.sprites[i]);
-                this.sprites.splice(i, 1);
+                this.sprites.splice(i,1);
             }
-        } else if (obj instanceof p2.Spring) {
+        } else if(obj instanceof p2.Spring){
             var i = this.springs.indexOf(obj);
-            if (i !== -1) {
+            if(i!==-1){
                 this.stage.removeChild(this.springSprites[i]);
-                this.springSprites.splice(i, 1);
+                this.springSprites.splice(i,1);
             }
         }
     };
 
-    WebGLRenderer.prototype.resize = function (w, h) {
-        var renderer = this.renderer;
-        var view = renderer.view;
-        var ratio = w / h;
-        renderer.resize(w, h);
+    WebGLRenderer.prototype.resize = function(w,h){
+        this.renderer.resize(w, h);
     };
 }
