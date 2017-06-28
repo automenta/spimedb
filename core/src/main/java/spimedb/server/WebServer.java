@@ -49,6 +49,9 @@ import static io.undertow.UndertowOptions.ENABLE_HTTP2;
  */
 public class WebServer extends PathHandler {
 
+
+    private final boolean CORS = true;
+
     private boolean development = false;
 
     @ApplicationPath("/")
@@ -134,6 +137,9 @@ public class WebServer extends PathHandler {
 
         try {
             HttpHandler api = Handlers.disableCache(manager.start());
+
+            if (CORS)
+                api = Handlers.header(api, "Access-Control-Allow-Origin", "*");
 
             ResourceHandler statics = new ResourceHandler(staticResources(db), api);
             statics.setCacheTime(24 * 60 * 60 * 1000);

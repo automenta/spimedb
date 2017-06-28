@@ -5,11 +5,12 @@
 
 export default function(p2) {
 
+
+    window.p2 = p2;
+
     const opt = {
         fps: 30
     };
-
-    window.p2 = p2;
 
     p2.StateMachine = StateMachine;
 

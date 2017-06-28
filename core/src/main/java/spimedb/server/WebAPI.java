@@ -95,8 +95,7 @@ public class WebAPI {
         String x = q;
         return Response.ok((StreamingOutput) os -> {
             List<Lookup.LookupResult> x1 = db.suggest(x, SuggestionResultsMax);
-            if (x1 != null)
-                JSON.toJSON(Lists.transform(x1, y -> y.key), os);
+            JSON.toJSON(Lists.transform(x1, y -> y.key), os);
         }).build();
     }
 
@@ -183,7 +182,7 @@ public class WebAPI {
     @Path("/facet")
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation("Finds matching search facets for a given dimension key")
-    public Response facet(@QueryParam("q") String dimension) {
+    public Response facet(@QueryParam("d") String dimension) {
         if (!(dimension == null || (dimension = dimension.trim()).isEmpty())) {
             FacetResult x = db.facets(dimension, FacetResultsMax);
             if (x != null)
