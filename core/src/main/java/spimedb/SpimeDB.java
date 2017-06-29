@@ -380,7 +380,7 @@ public class SpimeDB {
             TermQuery x = new TermQuery(new Term(NObject.ID, id));
             try {
                 TopDocs y = searcher.search(x, firstResultOnly);
-                int hits = y.totalHits;
+                int hits = (int) y.totalHits;
                 if (hits > 0) {
                     if (hits > 1) {
                         logger.warn("multiple documents with id={} exist: {}", id, y);
