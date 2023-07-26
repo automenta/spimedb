@@ -64,35 +64,36 @@ public class MutableNObject extends ImmutableNObject {
     public MutableNObject put(String key, Object value) {
 
         switch (key) {
-
-            case TAG:
+            case TAG -> {
                 String[] tt;
                 if (value instanceof String[])
                     tt = ((String[]) value).clone();
                 else if (value instanceof String)
-                    tt = ((String)value).trim().split(" "); //new String[] { (String) value };
+                    tt = ((String) value).trim().split(" "); //new String[] { (String) value };
                 else if (value instanceof ArrayNode) {
-                    tt = JSON.toStrings((ArrayNode)value);
+                    tt = JSON.toStrings((ArrayNode) value);
                 } else
                     throw new RuntimeException("invalid tag property");
-
                 withTags(tt);
                 return this;
+            }
 
 //            case "<":
 //                //HACK
 //                setOutside(Sets.newHashSet((String[])value));
 //                return this;
 
-            case ID:
+            case ID -> {
                 if ((value instanceof String) && (value.equals(id))) {
                     //already being set to same ID
                     return this;
                 }
                 throw new RuntimeException(this + " can not change ID");
-            case NAME:
+            }
+            case NAME -> {
                 name(value.toString().trim());
                 return this;
+            }
         }
 
         //synchronized (data) {
@@ -146,7 +147,7 @@ public class MutableNObject extends ImmutableNObject {
         if (s.isEmpty()) {
             this.tag = null;
         } else {
-            this.tag = s.toArray(new String[s.size()]);
+            this.tag = s.toArray(new String[0]);
         }
 
 

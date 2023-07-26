@@ -202,9 +202,7 @@ public class OctBox<K> extends AABB implements Shape3D {
     }
 
     public void forEachRecursiveWithBox(BiConsumer<OctBox<K>, IdBB> visitor) {
-        forEachLocal(i -> {
-           visitor.accept(OctBox.this, i);
-        });
+        forEachLocal(i -> visitor.accept(OctBox.this, i));
 
         OctBox[] cc = this.children;
         if (cc !=null) {

@@ -1513,46 +1513,53 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final double get(int row, int column) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 switch (column) {
-                    case 0:
+                    case 0 -> {
                         return (this.m00);
-                    case 1:
+                    }
+                    case 1 -> {
                         return (this.m01);
-                    case 2:
+                    }
+                    case 2 -> {
                         return (this.m02);
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-                break;
-            case 1:
+            }
+            case 1 -> {
                 switch (column) {
-                    case 0:
+                    case 0 -> {
                         return (this.m10);
-                    case 1:
+                    }
+                    case 1 -> {
                         return (this.m11);
-                    case 2:
+                    }
+                    case 2 -> {
                         return (this.m12);
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 switch (column) {
-                    case 0:
+                    case 0 -> {
                         return (this.m20);
-                    case 1:
+                    }
+                    case 1 -> {
                         return (this.m21);
-                    case 2:
+                    }
+                    case 2 -> {
                         return (this.m22);
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-                break;
-
-            default:
-                break;
+            }
+            default -> {
+            }
         }
         throw new ArrayIndexOutOfBoundsException();
     }
@@ -1772,7 +1779,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
         tmp[8] = m1.m22;
 
         // Calculate LU decomposition: Is the matrix singular?
-        if (!Matrix4x4.LUDecomposition(tmp, row_perm, 3)) {
+        if (Matrix4x4.LUDecomposition(tmp, row_perm, 3)) {
             // Matrix has no inverse
             throw new SingularMatrixException();
         }
@@ -2485,26 +2492,22 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final void setColumn(int column, double[] v) {
         switch (column) {
-            case 0:
+            case 0 -> {
                 this.m00 = v[0];
                 this.m10 = v[1];
                 this.m20 = v[2];
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m01 = v[0];
                 this.m11 = v[1];
                 this.m21 = v[2];
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m02 = v[0];
                 this.m12 = v[1];
                 this.m22 = v[2];
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2522,26 +2525,22 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final void setColumn(int column, double x, double y, double z) {
         switch (column) {
-            case 0:
+            case 0 -> {
                 this.m00 = x;
                 this.m10 = y;
                 this.m20 = z;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m01 = x;
                 this.m11 = y;
                 this.m21 = z;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m02 = x;
                 this.m12 = y;
                 this.m22 = z;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2555,26 +2554,22 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final void setColumn(int column, Vec3D v) {
         switch (column) {
-            case 0:
+            case 0 -> {
                 this.m00 = v.x;
                 this.m10 = v.y;
                 this.m20 = v.z;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m01 = v.x;
                 this.m11 = v.y;
                 this.m21 = v.z;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m02 = v.x;
                 this.m12 = v.y;
                 this.m22 = v.z;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2590,56 +2585,31 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final void setElement(int row, int column, double value) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 switch (column) {
-                    case 0:
-                        this.m00 = value;
-                        break;
-                    case 1:
-                        this.m01 = value;
-                        break;
-                    case 2:
-                        this.m02 = value;
-                        break;
-                    default:
-                        throw new ArrayIndexOutOfBoundsException();
+                    case 0 -> this.m00 = value;
+                    case 1 -> this.m01 = value;
+                    case 2 -> this.m02 = value;
+                    default -> throw new ArrayIndexOutOfBoundsException();
                 }
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 switch (column) {
-                    case 0:
-                        this.m10 = value;
-                        break;
-                    case 1:
-                        this.m11 = value;
-                        break;
-                    case 2:
-                        this.m12 = value;
-                        break;
-                    default:
-                        throw new ArrayIndexOutOfBoundsException();
+                    case 0 -> this.m10 = value;
+                    case 1 -> this.m11 = value;
+                    case 2 -> this.m12 = value;
+                    default -> throw new ArrayIndexOutOfBoundsException();
                 }
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 switch (column) {
-                    case 0:
-                        this.m20 = value;
-                        break;
-                    case 1:
-                        this.m21 = value;
-                        break;
-                    case 2:
-                        this.m22 = value;
-                        break;
-                    default:
-                        throw new ArrayIndexOutOfBoundsException();
+                    case 0 -> this.m20 = value;
+                    case 1 -> this.m21 = value;
+                    case 2 -> this.m22 = value;
+                    default -> throw new ArrayIndexOutOfBoundsException();
                 }
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2778,26 +2748,22 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final void setRow(int row, double[] v) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 this.m00 = v[0];
                 this.m01 = v[1];
                 this.m02 = v[2];
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m10 = v[0];
                 this.m11 = v[1];
                 this.m12 = v[2];
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m20 = v[0];
                 this.m21 = v[1];
                 this.m22 = v[2];
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2815,26 +2781,22 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final void setRow(int row, double x, double y, double z) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 this.m00 = x;
                 this.m01 = y;
                 this.m02 = z;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m10 = x;
                 this.m11 = y;
                 this.m12 = z;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m20 = x;
                 this.m21 = y;
                 this.m22 = z;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2848,26 +2810,22 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      */
     public final void setRow(int row, Vec3D v) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 this.m00 = v.x;
                 this.m01 = v.y;
                 this.m02 = v.z;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m10 = v.x;
                 this.m11 = v.y;
                 this.m12 = v.z;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m20 = v.x;
                 this.m21 = v.y;
                 this.m22 = v.z;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 

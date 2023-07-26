@@ -71,7 +71,7 @@ public class MapGraphTest {
 
     @NotNull
     private MapGraph<String, String> newTestGraph() {
-        return new MapGraph<>(new LinkedHashMap<>(), ()->new LinkedHashSet<>());
+        return new MapGraph<>(new LinkedHashMap<>(), LinkedHashSet::new);
     }
 
     @Test public void testBreadthFirst() {

@@ -88,39 +88,38 @@ public class SutherlandHodgemanClipper implements PolygonClipper2D {
 
     private Vec2D getClippedPosOnEdge(int edgeID, Vec2D p1, Vec2D p2) {
         switch (edgeID) {
-            case 0:
+            case 0 -> {
                 return new Vec2D(p1.x + ((bounds.y - p1.y) * (p2.x - p1.x))
                         / (p2.y - p1.y), bounds.y);
-            case 2:
+            }
+            case 2 -> {
                 float by = bounds.y + bounds.height;
                 return new Vec2D(p1.x + ((by - p1.y) * (p2.x - p1.x))
                         / (p2.y - p1.y), by);
-            case 1:
+            }
+            case 1 -> {
                 float bx = bounds.x + bounds.width;
                 return new Vec2D(bx, p1.y + ((bx - p1.x) * (p2.y - p1.y))
                         / (p2.x - p1.x));
-
-            case 3:
+            }
+            case 3 -> {
                 return new Vec2D(bounds.x, p1.y
                         + ((bounds.x - p1.x) * (p2.y - p1.y)) / (p2.x - p1.x));
-            default:
+            }
+            default -> {
                 return null;
+            }
         }
     }
 
     private boolean isInsideEdge(Vec2D p, int edgeID) {
-        switch (edgeID) {
-            case 0:
-                return p.y >= bounds.y;
-            case 2:
-                return p.y < bounds.y + bounds.height;
-            case 3:
-                return p.x >= bounds.x;
-            case 1:
-                return p.x < bounds.x + bounds.width;
-            default:
-                return false;
-        }
+        return switch (edgeID) {
+            case 0 -> p.y >= bounds.y;
+            case 2 -> p.y < bounds.y + bounds.height;
+            case 3 -> p.x >= bounds.x;
+            case 1 -> p.x < bounds.x + bounds.width;
+            default -> false;
+        };
     }
 
     protected static boolean isKnownVertex(List<Vec2D> list, Vec2D q) {

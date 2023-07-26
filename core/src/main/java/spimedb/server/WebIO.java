@@ -113,10 +113,11 @@ public enum WebIO {
             @Override
             protected Object value(String key, Object v) {
                 switch (key) {
-                    case NObject.ICON:
+                    case NObject.ICON -> {
                         //rewrite the thumbnail blob byte[] as ID reference
                         return d.id();
-                    case NObject.DATA:
+                    }
+                    case NObject.DATA -> {
                         //rewrite the thumbnail blob byte[] as ID reference (if not already a string representing a URL)
                         if (v instanceof byte[]) {
                             return d.id();
@@ -129,6 +130,7 @@ public enum WebIO {
                         } else {
                             //??
                         }
+                    }
                 }
                 return v;
             }
@@ -163,16 +165,12 @@ public enum WebIO {
                     if (s.startsWith("file:")) {
                         File ff = new File(s.substring(5));
                         if (ff.exists()) {
-                            return Response.ok((StreamingOutput) o -> {
-                                IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE]);
-                            }).type(typeOf(x.get("url"))).build();
+                            return Response.ok((StreamingOutput) o -> IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE])).type(typeOf(x.get("url"))).build();
                         }
                     }
                 }
             } else if (f instanceof byte[]) {
-                return Response.ok((StreamingOutput) o -> {
-                    o.write((byte[]) f);
-                }).type(typeOfField(field)).build();
+                return Response.ok((StreamingOutput) o -> o.write((byte[]) f)).type(typeOfField(field)).build();
             }
         }
 
@@ -180,12 +178,10 @@ public enum WebIO {
     }
 
     private static String typeOfField(String field) {
-        switch (field) {
-            case "thumbnail": //deprecated
-            case "icon":
-                return "image/*";
-        }
-        return "application/*";
+        return switch (field) { //deprecated
+            case "thumbnail", "icon" -> "image/*";
+            default -> "application/*";
+        };
     }
 
     private static String typeOf(String s) {
@@ -193,20 +189,27 @@ public enum WebIO {
         if ((i != -1) && (i < s.length() - 1)) {
             //HACK todo use a nice trie or something
             switch (s.substring(i + 1)) {
-                case "jpg":
+                case "jpg" -> {
                     return "image/jpg";
-                case "png":
+                }
+                case "png" -> {
                     return "image/png";
-                case "gif":
+                }
+                case "gif" -> {
                     return "image/gif";
-                case "pdf":
+                }
+                case "pdf" -> {
                     return "application/pdf";
-                case "html":
+                }
+                case "html" -> {
                     return "text/html";
-                case "xml":
+                }
+                case "xml" -> {
                     return "text/xml";
-                case "json":
+                }
+                case "json" -> {
                     return "application/json";
+                }
             }
         }
         return "application/*";

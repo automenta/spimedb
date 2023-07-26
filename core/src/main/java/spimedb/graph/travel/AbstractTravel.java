@@ -95,8 +95,8 @@ public abstract class AbstractTravel<V, E> implements Travel<V, E> {
      * @param e the connected component finished event.
      */
     protected void fireConnectedComponentFinished(ObjectIntPair e) {
-        for (int i = 0, passengersSize = travellers.size(); i < passengersSize; i++) {
-            travellers.get(i).componentExit(e);
+        for (Traveller<V, E> traveller : travellers) {
+            traveller.componentExit(e);
         }
     }
 
@@ -106,8 +106,8 @@ public abstract class AbstractTravel<V, E> implements Travel<V, E> {
      * @param e the connected component finished event.
      */
     protected void fireConnectedComponentStarted(ObjectIntPair e) {
-        for (int i = 0, passengersSize = travellers.size(); i < passengersSize; i++) {
-            travellers.get(i).componentEnter(e);
+        for (Traveller<V, E> traveller : travellers) {
+            traveller.componentEnter(e);
         }
     }
 
@@ -123,8 +123,8 @@ public abstract class AbstractTravel<V, E> implements Travel<V, E> {
      * @param e the edge traversal event.
      */
     protected void fireEdgeTraversed(V s, E e, V t) {
-        for (int i = 0, passengersSize = travellers.size(); i < passengersSize; i++) {
-            travellers.get(i).edge(s, e, t);
+        for (Traveller<V, E> traveller : travellers) {
+            traveller.edge(s, e, t);
         }
     }
 
@@ -134,8 +134,8 @@ public abstract class AbstractTravel<V, E> implements Travel<V, E> {
      * @param e the vertex traversal event.
      */
     protected void fireVertexEnter(@Nullable Pair<V, E> incoming, V v) {
-        for (int i = 0, passengersSize = travellers.size(); i < passengersSize; i++) {
-            travellers.get(i).vertexEnter(incoming, v);
+        for (Traveller<V, E> traveller : travellers) {
+            traveller.vertexEnter(incoming, v);
         }
 
     }
@@ -146,8 +146,8 @@ public abstract class AbstractTravel<V, E> implements Travel<V, E> {
      * @param e the vertex traversal event.
      */
     protected void fireVertexFinished(V v) {
-        for (int i = 0, passengersSize = travellers.size(); i < passengersSize; i++) {
-            travellers.get(i).vertexExit(v);
+        for (Traveller<V, E> traveller : travellers) {
+            traveller.vertexExit(v);
         }
     }
 

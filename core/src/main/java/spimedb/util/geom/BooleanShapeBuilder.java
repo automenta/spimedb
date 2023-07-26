@@ -35,18 +35,10 @@ public class BooleanShapeBuilder {
 
     public BooleanShapeBuilder combineWithArea(Area a) {
         switch (type) {
-            case UNION:
-                area.add(a);
-                break;
-            case INTERSECTION:
-                area.intersect(a);
-                break;
-            case DIFFERENCE:
-                area.subtract(a);
-                break;
-            case XOR:
-                area.exclusiveOr(a);
-                break;
+            case UNION -> area.add(a);
+            case INTERSECTION -> area.intersect(a);
+            case DIFFERENCE -> area.subtract(a);
+            case XOR -> area.exclusiveOr(a);
         }
         return this;
     }

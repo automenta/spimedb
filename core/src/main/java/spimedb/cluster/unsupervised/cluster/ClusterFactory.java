@@ -30,8 +30,7 @@ import java.util.UUID;
 
 
 public class ClusterFactory implements Serializable {
-	private static final long serialVersionUID = -5094018550295526175L;
-	
+
 	private final boolean onlineUpdate;
 	private final Map<String, FeatureTypeDefinition> featureTypeDefs;
 	

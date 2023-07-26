@@ -85,7 +85,7 @@ public class Matrix4x4 {
                 }
                 // Is the matrix singular?
                 if (big == 0.0) {
-                    return false;
+                    return true;
                 }
                 row_scale[rs++] = 1.0 / big;
             }
@@ -165,7 +165,7 @@ public class Matrix4x4 {
 
                 // Is the matrix singular
                 if (matrix0[(mtx + (width * j) + j)] == 0.0) {
-                    return false;
+                    return true;
                 }
 
                 // Divide elements of lower diagonal matrix L by pivot
@@ -180,7 +180,7 @@ public class Matrix4x4 {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     public double[][] matrix;

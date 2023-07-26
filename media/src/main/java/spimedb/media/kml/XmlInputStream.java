@@ -174,8 +174,8 @@ public abstract class XmlInputStream extends GISInputStreamBase {
         Element el = (Element)this.getForeignElement(start);
         StringBuilder sb = new StringBuilder(100);
 
-        for (Object child : el.getChildren()) {
-            this.serialize((Element)child, sb);
+        for (Element child : el.getChildren()) {
+            this.serialize(child, sb);
         }
 
         sb.append(el.getText());

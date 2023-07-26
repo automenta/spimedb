@@ -115,10 +115,9 @@ public class DObject implements NObject {
 
             //special handling
             switch (k) {
-                case NObject.NAME:
-                case NObject.TAG:
-                case NObject.CONTENT:
+                case NObject.NAME, NObject.TAG, NObject.CONTENT -> {
                     return;
+                }
 
 //                case NObject.TYPE:
 //                    d.add(new FacetField(NObject.TYPE, v.toString()));
@@ -342,9 +341,7 @@ public class DObject implements NObject {
 
             String k = f.name();
             switch (k) {
-                case NObject.ID:
-                    break; //filtered
-                case NObject.BOUND:
+                case NObject.ID, NObject.BOUND:
                     break; //filtered
                 default:
                     each.accept(k, value(f));
@@ -365,9 +362,9 @@ public class DObject implements NObject {
     @NotNull
     private static Object value(IndexableField f) {
         switch (f.name()) {
-            case NObject.LINESTRING:
-            case NObject.POLYGON:
+            case NObject.LINESTRING, NObject.POLYGON -> {
                 return JSON.fromBytes(f.binaryValue().bytes, double[][].class);
+            }
             //return JSON.fromMsgPackBytes(f.binaryValue().bytes);
         }
 

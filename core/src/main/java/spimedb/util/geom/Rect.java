@@ -296,27 +296,17 @@ public class Rect implements Shape2D {
      * @return edge as Line2D
      */
     public Line2D getEdge(int id) {
-        Line2D edge = null;
-        switch (id) {
-        // top
-            case 0:
-                edge = new Line2D(x, y, x + width, y);
-                break;
+        Line2D edge = switch (id) {
+            // top
+            case 0 -> new Line2D(x, y, x + width, y);
             // right
-            case 1:
-                edge = new Line2D(x + width, y, x + width, y + height);
-                break;
+            case 1 -> new Line2D(x + width, y, x + width, y + height);
             // bottom
-            case 2:
-                edge = new Line2D(x, y + height, x + width, y + height);
-                break;
+            case 2 -> new Line2D(x, y + height, x + width, y + height);
             // left
-            case 3:
-                edge = new Line2D(x, y, x, y + height);
-                break;
-            default:
-                throw new IllegalArgumentException("edge ID needs to be 0...3");
-        }
+            case 3 -> new Line2D(x, y, x, y + height);
+            default -> throw new IllegalArgumentException("edge ID needs to be 0...3");
+        };
         return edge;
     }
 

@@ -41,7 +41,6 @@ import java.util.Collection;
  *
  */
 public class BagOfWordsFeature extends Feature {
-	private static final long serialVersionUID = 6927104885425283254L;
 	private FeatureFrequencyTable freqTable = new FeatureFrequencyTable();
 	
 	public BagOfWordsFeature() {

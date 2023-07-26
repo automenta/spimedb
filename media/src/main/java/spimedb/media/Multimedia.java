@@ -85,14 +85,12 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
         logger.info("{} enabled {}", this, db.onChange);
 
         //process existing items
-        db.forEach((xx) -> {
-            xx.forEach(x -> {
-                NObject y = apply(x, x);
-                if (y != x) {
-                    db.addAsync(0.5f, y);
-                }
-            });
-        }, db.exe.concurrency-1);
+        db.forEach((xx) -> xx.forEach(x -> {
+            NObject y = apply(x, x);
+            if (y != x) {
+                db.addAsync(0.5f, y);
+            }
+        }), db.exe.concurrency-1);
     }
 
     @Override
@@ -365,108 +363,25 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
         String m;
         switch (k) {
-
-            case "dc:title":
+            case "dc:title", "pdf:docinfo:keywords", "access_permission:can_print", "access_permission:can_print_degraded", "access_permission:modify_annotations", "pdf:encrypted", "X-Parsed-By", "pdf:docinfo:subject", "pdf:docinfo:creator", "dc:subject", "dc:description", "dc:creator", "cp:subject", "meta:keyword", "meta:save-date", "pdf:docinfo:modified", "Last-Save-Date", "modified", "pdf:docinfo:producer", "access_permission:fill_in_form", "access_permission:extract_content", "access_permission:assemble_document", "access_permission:extract_for_accessibility", "access_permission:can_modify", "pdf:PDFVersion", "meta:creation-date", "meta:author", "creator", "created", "Creation-Date", "pdf:docinfo:created", "Last-Modified" -> {
                 return null;  //duplicates
-            case "Last-Modified":
-                return null; //duplicates
-            case "pdf:docinfo:created":
-                return null; //duplicates
-            case "Creation-Date":
-                return null; //duplicates
-            case "created":
-                return null; //duplicates
-
-            case "creator":
-                return null;
-            case "meta:author":
-                return null;
-            case "meta:creation-date":
-                return null;
-            case "pdf:PDFVersion":
-                return null;
-            case "access_permission:can_modify":
-                return null;
-            case "access_permission:extract_for_accessibility":
-                return null;
-            case "access_permission:assemble_document":
-                return null;
-            case "access_permission:extract_content":
-                return null;
-            case "access_permission:fill_in_form":
-                return null;
-
-            case "producer":
+            }
+            case "producer" -> {
                 return "generator";
-
-            case "pdf:docinfo:producer":
-                return null;
-            case "modified":
-                return null;
-            case "Last-Save-Date":
-                return null;
-            case "pdf:docinfo:modified":
-                return null;
-            case "meta:save-date":
-                return null;
-            case "meta:keyword":
-                return null;
-            case "cp:subject":
-                return null;
-            case "dc:creator":
-                return null;
-
-            case "dc:description":
-                return null;
-            case "dc:subject":
-                return null;
-
-            case "pdf:docinfo:creator":
-                return null;
-            case "pdf:docinfo:subject":
-                return null;
-            case "X-Parsed-By":
-                return null;
-            case "pdf:encrypted":
-                return null;
-            case "access_permission:modify_annotations":
-                return null;
-            case "access_permission:can_print_degraded":
-                return null;
-            case "access_permission:can_print":
-                return null;
-            case "pdf:docinfo:keywords":
-                return null;
-
-            case "Keywords":
+            }
+            case "Keywords" -> {
                 return "keywords";
-
-            case "title":
-                m = "N";
-                break;
-
-
-            case "X-TIKA:content":
-                m = NObject.DESC;
-                break;
-            case "Author":
-                m = "author";
-                break;
-            case "Content-Type":
-                m = NObject.TYPE;
-                break;
-            case "xmpTPg:NPages":
-                m = "pageCount";
-                break;
-
-            case "pdf:docinfo:title":
-                m = null;
-                break; //duplicates "Title"
+            }
+            case "title" -> m = "N";
+            case "X-TIKA:content" -> m = NObject.DESC;
+            case "Author" -> m = "author";
+            case "Content-Type" -> m = NObject.TYPE;
+            case "xmpTPg:NPages" -> m = "pageCount";
+            case "pdf:docinfo:title" -> m = null;
+            //duplicates "Title"
             //TODO other duplcates
 
-            default:
-                m = k;
-                break;
+            default -> m = k;
         }
 
         return m;

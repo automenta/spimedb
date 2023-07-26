@@ -150,22 +150,22 @@ public final class NurbsCreator {
             uKnot[i + j] = 1;
         }
         switch (narcs) {
-            case 2:
+            case 2 -> {
                 uKnot[3] = 0.5f;
                 uKnot[4] = 0.5f;
-                break;
-            case 3:
+            }
+            case 3 -> {
                 uKnot[3] = uKnot[4] = MathUtils.THIRD;
                 uKnot[5] = uKnot[6] = 2 * MathUtils.THIRD;
-                break;
-            case 4:
+            }
+            case 4 -> {
                 uKnot[3] = 0.25f;
                 uKnot[4] = 0.25f;
                 uKnot[5] = 0.5f;
                 uKnot[6] = 0.5f;
                 uKnot[7] = 0.75f;
                 uKnot[8] = 0.75f;
-                break;
+            }
         }
 
         return new BasicNurbsCurve(cps, uKnot, 2);
@@ -275,22 +275,22 @@ public final class NurbsCreator {
             uKnot[j + i] = 1;
         }
         switch (narcs) {
-            case 2:
+            case 2 -> {
                 uKnot[3] = 0.5f;
                 uKnot[4] = 0.5f;
-                break;
-            case 3:
+            }
+            case 3 -> {
                 uKnot[3] = uKnot[4] = MathUtils.THIRD;
                 uKnot[5] = uKnot[6] = 2 * MathUtils.THIRD;
-                break;
-            case 4:
+            }
+            case 4 -> {
                 uKnot[3] = 0.25f;
                 uKnot[4] = 0.25f;
                 uKnot[5] = 0.5f;
                 uKnot[6] = 0.5f;
                 uKnot[7] = 0.75f;
                 uKnot[8] = 0.75f;
-                break;
+            }
         }
 
         double angle = 0;
@@ -392,22 +392,22 @@ public final class NurbsCreator {
             uKnot[j + i] = 1;
         }
         switch (narcs) {
-            case 2:
+            case 2 -> {
                 uKnot[3] = 0.5f;
                 uKnot[4] = 0.5f;
-                break;
-            case 3:
+            }
+            case 3 -> {
                 uKnot[3] = uKnot[4] = MathUtils.THIRD;
                 uKnot[5] = uKnot[6] = 2 * MathUtils.THIRD;
-                break;
-            case 4:
+            }
+            case 4 -> {
                 uKnot[3] = 0.25f;
                 uKnot[4] = 0.25f;
                 uKnot[5] = 0.5f;
                 uKnot[6] = 0.5f;
                 uKnot[7] = 0.75f;
                 uKnot[8] = 0.75f;
-                break;
+            }
         }
 
         double angle = thetaStart;

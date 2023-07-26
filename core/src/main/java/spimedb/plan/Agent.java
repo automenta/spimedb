@@ -74,7 +74,7 @@ public class Agent {
         try {
             exe.awaitTermination(timeoutMS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            logger.error("awaitTermination: {}", e);
+            logger.error("awaitTermination", e);
         }
     }
 

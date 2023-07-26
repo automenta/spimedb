@@ -29,20 +29,17 @@ import spimedb.cluster.distance.DistanceFunction;
 
 import java.io.Serializable;
 
-public class FeatureTypeDefinition implements Serializable {
-	private static final long serialVersionUID = -8378567604749382148L;
-	public final String featureName;
-	@SuppressWarnings("rawtypes")
-	public final DistanceFunction distFunc;
-	@SuppressWarnings("rawtypes")
-	public final Class<? extends Centroid> centroidClass;
-	
-	@SuppressWarnings("rawtypes")
-	public FeatureTypeDefinition(String featureName, 
-								Class<? extends Centroid> centroidClass, 
-								DistanceFunction distFunc) {
-		this.distFunc = distFunc;
-		this.featureName = featureName;
-		this.centroidClass = centroidClass;
-	}
+public record FeatureTypeDefinition(String featureName,
+                                    @SuppressWarnings("rawtypes") Class<? extends Centroid> centroidClass,
+                                    @SuppressWarnings("rawtypes") DistanceFunction distFunc) implements Serializable {
+    private static final long serialVersionUID = -8378567604749382148L;
+
+    @SuppressWarnings("rawtypes")
+    public FeatureTypeDefinition(String featureName,
+                                 Class<? extends Centroid> centroidClass,
+                                 DistanceFunction distFunc) {
+        this.distFunc = distFunc;
+        this.featureName = featureName;
+        this.centroidClass = centroidClass;
+    }
 }

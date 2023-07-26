@@ -75,7 +75,7 @@ public class TestTrackCluster {
         
         log.info("Creating {} track per track bases", T);
         // Now create a hundred random tracks from each
-        List<Track> tracks = new ArrayList<Track>();
+        List<Track> tracks = new ArrayList<>();
         for (int j=0; j<T; ++j) {
             for (int i=0; i<N; ++i) {
                 Track track = new GeodeticTrack(GEODETIC_PARAMETERS, randomPoints(trackBases[i], P));
@@ -134,7 +134,7 @@ public class TestTrackCluster {
         }
         double totalTime = times[N-1];
 
-        List<Vector> points = new ArrayList<Vector>();
+        List<Vector> points = new ArrayList<>();
         for (int i = 0; i < N; ++i) {
             times[i] = times[i] / totalTime;
             points.add(new Vector(minX + Math.random() * width,
@@ -153,7 +153,7 @@ public class TestTrackCluster {
         }
         double totalTime = times[N-1];
 
-        List<Position> points = new ArrayList<Position>(N);
+        List<Position> points = new ArrayList<>(N);
         for (int i=1; i<N-1; ++i) {
             double t = times[i]/totalTime;
             Vector point = basis.getPoint(t);
@@ -164,7 +164,7 @@ public class TestTrackCluster {
 
 
 
-    private class TrackFrame extends TestFrame {
+    private static class TrackFrame extends TestFrame {
         private static final long serialVersionUID = 1L;
 
 
@@ -174,8 +174,8 @@ public class TestTrackCluster {
         private Rectangle2D        _drawingBounds;
 
         public TrackFrame () {
-            _splines = new ArrayList<CubicBSpline>();
-            _clusters = new ArrayList<Cluster>();
+            _splines = new ArrayList<>();
+            _clusters = new ArrayList<>();
             _drawingBounds = null;
         }
 

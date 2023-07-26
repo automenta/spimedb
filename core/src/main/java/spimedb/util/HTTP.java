@@ -107,7 +107,7 @@ public class HTTP {
         try {
             JSON.json.writeValue(ex.getOutputStream(), d);
         } catch (IOException ex1) {
-            logger.warn("send: {}", ex1);
+            logger.warn("send", ex1);
         }
 
         ex.getResponseSender().close();

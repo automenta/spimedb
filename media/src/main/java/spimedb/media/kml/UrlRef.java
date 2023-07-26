@@ -351,27 +351,19 @@ public final class UrlRef implements Serializable {
                 switch (c) {
                     // case ' ': // %20
                     // excluded delim characters from URI syntax
-                    case '"': // %22
-                    case '<':
-                    case '>':
-                        // unwise characters
-                    case '{':
-                    case '}':
-                    case '|': // %7C: otherwise java.net.URISyntaxException: Illegal character
-                    case '\\':
-                    case '^':
-                    case '[':
-                    case ']':
-                        // NOTE: if URL is IPv6 format then may not want to encode brackets if enclosing IPv6 host address
-                        // e.g. (http://[1080:0:0:0:8:800:200C:417A]/index.html)
-                    case '`':
-                        buf.append('%').append(String.format("%02X", (int) c));
-                        // note '#" is allowed in URI construction only once
-                        // if '%' appears it must be followed by 2 hex-decimal chars
-                        break;
-                    default:
+                    // %22
+                    // unwise characters
+                    // %7C: otherwise java.net.URISyntaxException: Illegal character
+                    // NOTE: if URL is IPv6 format then may not want to encode brackets if enclosing IPv6 host address
+                    // e.g. (http://[1080:0:0:0:8:800:200C:417A]/index.html)
+                    case '"', '<', '>', '{', '}', '|', '\\', '^', '[', ']', '`' ->
+                            buf.append('%').append(String.format("%02X", (int) c));
+
+                    // note '#" is allowed in URI construction only once
+                    // if '%' appears it must be followed by 2 hex-decimal chars
+                    default ->
                         // characters e.g. A-Za-z0-9_-+:?/ are not encoded
-                        buf.append(c);
+                            buf.append(c);
                 }
             }
         }
@@ -438,7 +430,7 @@ public final class UrlRef implements Serializable {
                     // System.out.format(" XX: bad i=%d len=%d%n",i,len);
                     return false;
                 }
-                if (!isHexDigit(str.charAt(++i)) || !isHexDigit(str.charAt(++i))) {
+                if (isHexDigit(str.charAt(++i)) || isHexDigit(str.charAt(++i))) {
                     //System.out.println(" not hexdecimal");
                     return false;
                 }
@@ -460,7 +452,7 @@ public final class UrlRef implements Serializable {
      */
     public static boolean isHexDigit(char ch) {
         // digit(ch,16) == -1 then no hexadecimal character [0-9,a-f,A-F]
-        return Character.digit(ch, 16) >= 0;
+        return Character.digit(ch, 16) < 0;
     }
 
     //////////////////////////////////////////////////////

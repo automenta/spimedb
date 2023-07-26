@@ -17,18 +17,8 @@ import java.util.Set;
  *  change this to one Map<Pair<E,V>,Byte> where the integer's value bits mean:
  *      0 = incoming (off/on)
  *      1 = outgoing (off/on)
- *
  */
-public class VertexContainer<V,E> implements Serializable
-{
-    public final Set<Pair<V,E>> incoming;
-
-    public final Set<Pair<E,V>> outgoing;
-
-    public VertexContainer(Set<Pair<V,E>> incoming, Set<Pair<E,V>> outgoing) {
-        this.incoming = incoming;
-        this.outgoing = outgoing;
-    }
+public record VertexContainer<V, E>(Set<Pair<V, E>> incoming, Set<Pair<E, V>> outgoing) implements Serializable {
 
     @Override
     public String toString() {
@@ -44,7 +34,8 @@ public class VertexContainer<V,E> implements Serializable
         return incoming.add(pair(s, e));
     }
 
-    @NotNull private static Pair pair(Object x, Object y) {
+    @NotNull
+    private static Pair pair(Object x, Object y) {
         return Tuples.pair(x, y);
     }
 
@@ -71,7 +62,7 @@ public class VertexContainer<V,E> implements Serializable
      *
      * @param e
      */
-    public boolean removeOutgoingEdge(E e, V t)    {
+    public boolean removeOutgoingEdge(E e, V t) {
         return outgoing.remove(Tuples.pair(e, t));
     }
 
@@ -83,12 +74,15 @@ public class VertexContainer<V,E> implements Serializable
     public Iterator<V> inV() {
         return Iterators.transform(incoming.iterator(), Pair::getOne);
     }
+
     public Iterator<E> inE() {
         return Iterators.transform(incoming.iterator(), Pair::getTwo);
     }
+
     public Iterator<V> outV() {
         return Iterators.transform(outgoing.iterator(), Pair::getTwo);
     }
+
     public Iterator<E> outE() {
         return Iterators.transform(outgoing.iterator(), Pair::getOne);
     }
@@ -105,7 +99,9 @@ public class VertexContainer<V,E> implements Serializable
         return a;
     }
 
-    /** collates the edges by edge type, then direction, then vertex */
+    /**
+     * collates the edges by edge type, then direction, then vertex
+     */
     public Map<E, VertexIncidence<V>> incidence() {
         Map<E, VertexIncidence<V>> m = new HashMap();
         incoming.forEach(ve -> m.computeIfAbsent(ve.getTwo(), ee -> new VertexIncidence<>()).in.add(ve.getOne()));

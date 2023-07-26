@@ -53,16 +53,9 @@ public class StringMedianCentroid implements Centroid<StringFeature> {
 	private String[] testPoints = new String[NUM_REFERENCE];
 	
 	private final Map<String, StringFeature> points = new HashMap<>();
-	
-	
-	private static class DistanceScore {
-		public final String feature;
-		public final double distance;
-		
-		public DistanceScore(String feature, double distance) {
-			this.feature = feature;
-			this.distance = distance;
-		}
+
+
+	private record DistanceScore(String feature, double distance) {
 	}
 	
 	@Override

@@ -56,9 +56,7 @@ public class PrioritizedExecutor implements Executor {
     }
 
     protected void onShutDown() {
-        pq.forEach(x -> {
-            logger.info("not executed: {}", x);
-        });
+        pq.forEach(x -> logger.info("not executed: {}", x));
     }
 
     public void run(float pri, Runnable r) {

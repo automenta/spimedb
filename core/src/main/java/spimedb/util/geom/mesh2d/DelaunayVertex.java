@@ -2,6 +2,8 @@ package spimedb.util.geom.mesh2d;
 
 import spimedb.util.geom.Vec2D;
 
+import java.util.Arrays;
+
 /*
  * Copyright (c) 2005, 2007 by L. Paul Chew.
  *
@@ -98,9 +100,7 @@ public class DelaunayVertex {
             throw new IllegalArgumentException("Dimension mismatch");
         }
         boolean[] columns = new boolean[len];
-        for (int i = 0; i < len; i++) {
-            columns[i] = true;
-        }
+        Arrays.fill(columns, true);
         double[] result = new double[len];
         int sign = 1;
         try {
@@ -449,9 +449,7 @@ public class DelaunayVertex {
         DelaunayVertex[] matrix = new DelaunayVertex[dim + 1];
         /* First row */
         double[] coords = new double[dim + 2];
-        for (int j = 0; j < coords.length; j++) {
-            coords[j] = 1;
-        }
+        Arrays.fill(coords, 1);
         matrix[0] = new DelaunayVertex(coords);
         /* Other rows */
         for (int i = 0; i < dim; i++) {

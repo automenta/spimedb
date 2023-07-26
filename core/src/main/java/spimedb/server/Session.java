@@ -22,7 +22,7 @@ public class Session extends AbstractServerWebSocket {
     final RateLimiter defaultOutRate;
     final SpimeDB db;
     final SimpleBindings scope;
-    protected Set<WebSocketChannel> chan = Sets.newConcurrentHashSet();
+    protected final Set<WebSocketChannel> chan = Sets.newConcurrentHashSet();
 
     public Session(SpimeDB db) {
         this(db, Double.POSITIVE_INFINITY);

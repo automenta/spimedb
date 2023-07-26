@@ -45,7 +45,7 @@ abstract public class SchemaOrg {
 
                     MutableNObject t = new MutableNObject(id, label);
                     t.description(comment);
-                    t.put(">", supertypes.toArray(new String[supertypes.size()]));
+                    t.put(">", supertypes.toArray(new String[0]));
 
 
                     pending.add(t);

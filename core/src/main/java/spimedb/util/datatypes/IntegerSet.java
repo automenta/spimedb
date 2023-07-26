@@ -57,8 +57,8 @@ public class IntegerSet {
     }
 
     public boolean contains(int value) {
-        for (int i = 0; i < items.length; i++) {
-            if (items[i] == value) {
+        for (int item : items) {
+            if (item == value) {
                 return true;
             }
         }

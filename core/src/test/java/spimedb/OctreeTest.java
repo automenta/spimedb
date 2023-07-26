@@ -93,17 +93,13 @@ public class OctreeTest {
         assertEquals(o.itemCountRecursively(), 11);
 
         int[] sphereCount = new int[1];
-        o.forEachInSphere(new Vec3D(0, 0, -0.75f), 0.5f, x -> {
-            sphereCount[0]++;
-        });
+        o.forEachInSphere(new Vec3D(0, 0, -0.75f), 0.5f, x -> sphereCount[0]++);
         assertEquals(2, sphereCount[0]);
 
         int[] boxCount = new int[1];
 
         BB BB = new AABB(new Vec3D(0f, -0.5f, -2.0f), new Vec3D(0.5f, 0.5f, 0.5f));
-        o.forEachBox(BB, x -> {
-            boxCount[0]++;
-        });
+        o.forEachBox(BB, x -> boxCount[0]++);
         assertEquals(3, boxCount[0]);
 
     }

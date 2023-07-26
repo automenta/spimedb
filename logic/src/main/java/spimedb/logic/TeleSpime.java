@@ -33,27 +33,25 @@ public class TeleSpime {
         //Thread local = local();
         //local.start();
 
-        cloud.node(/*"**"*/ "ea").exec(new Runnable() {
-            @Override
-            public void run() {
+        cloud.node(/*"**"*/ "ea").exec((Runnable) () -> {
 
-                //String jvmName = ManagementFactory.getRuntimeMXBean().getName();
-                System.out.println("System properties: " + System.getProperties());
-                try {
-                    System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
+            //String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+            System.out.println("System properties: " + System.getProperties());
+            try {
+                System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
 
 
-                try {
+            try {
 //                    int port = 8090;
 
 //                    File home =
 //                            //null;
 //                            new File("/home/seh/doc");
 
-                    MultimediaMain.main("/home/seh/doc");
+                MultimediaMain.main("/home/seh/doc");
 
 //                    SpimeDB db = new SpimeDB(home);
 //                    new Multimedia(db);
@@ -62,10 +60,10 @@ public class TeleSpime {
 //                    WebServer ws = new WebServer(db);
 //                    ws.setPort(port);
 
-                    //SpimePeer peer = new SpimePeer(port, db);
-                    //peer.runFPS(0.5f);
+                //SpimePeer peer = new SpimePeer(port, db);
+                //peer.runFPS(0.5f);
 
-                    //System.out.println("ready: " + peer);
+                //System.out.println("ready: " + peer);
 
 //                    for (int i = 0; i < 500; i++) {
 //                        if (!peer.them.isEmpty()) System.out.println(peer.summary());
@@ -73,9 +71,8 @@ public class TeleSpime {
 //                    }
 //
 //                    peer.stop();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
 

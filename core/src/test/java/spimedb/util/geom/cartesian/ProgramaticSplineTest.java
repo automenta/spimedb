@@ -44,8 +44,8 @@ public class ProgramaticSplineTest {
                                    new Vector(0.75, 0.75),
                                    new Vector(0.25, 0.75)};
 
-        List<Vector> P1 = new ArrayList<Vector>();
-        List<Vector> P2 = new ArrayList<Vector>();
+        List<Vector> P1 = new ArrayList<>();
+        List<Vector> P2 = new ArrayList<>();
         computeControlPoints(Arrays.asList(K), P1, P2);
         CubicBSpline s = CubicBSpline.fit(new double[] {0, 1, 2, 3}, K);
 

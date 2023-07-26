@@ -27,7 +27,7 @@ public class KMZTest {
 
         db.sync(50);
 
-        db.forEach( x -> System.out.println(x) );
+        db.forEach(System.out::println);
 
         assertEquals(23, db.size());
 

@@ -87,7 +87,7 @@ public class SpimeDB {
      * default location of file resources if unspecified
      */
     public static final String TMP_SPIMEDB_CACHE_PATH = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
-    protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<TopScoreDocCollector, TopDocs>() {
+    protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<>() {
 
         @Override
         public TopScoreDocCollector newCollector() {
@@ -471,9 +471,7 @@ public class SpimeDB {
 
     public int size() {
         final int[] size = new int[1];
-        read((r) -> {
-            size[0] = r.maxDoc();
-        });
+        read((r) -> size[0] = r.maxDoc());
         return size[0];
     }
 
@@ -897,6 +895,7 @@ public class SpimeDB {
     }
 
     private static class SubTags<V, E> extends UnionTravel<V, E, Object> {
+        @SafeVarargs
         public SubTags(MapGraph<V, E> graph, V... parentTags) {
             super(graph, parentTags);
         }

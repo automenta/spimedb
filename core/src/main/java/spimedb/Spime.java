@@ -27,11 +27,13 @@ public class Spime extends Main {
 
 
     /** in-memory */
+    @SafeVarargs
     public Spime(Class<? extends Plugin>... plugin) throws Exception {
         this(null, plugin);
     }
 
     /** on-disk */
+    @SafeVarargs
     public Spime(String path, Class<? extends Plugin>... plugin) throws Exception {
         super(path, Maps.mutable.of(
                 "http", WebServer.class
@@ -79,9 +81,7 @@ public class Spime extends Main {
         //default: index a directory
 
         if (!d.getAbsolutePath().equals(db.indexPath)) {
-            db.exe.run(0.8f, () -> {
-                Crawl.fileDirectory(d.getAbsolutePath(), db);
-            });
+            db.exe.run(0.8f, () -> Crawl.fileDirectory(d.getAbsolutePath(), db));
         }
 
     }

@@ -209,27 +209,27 @@ public class DataSet implements Serializable, Iterable<Instance> {
 		double[] stdevVector = new double[meanVector.length];
 		
 		// compute stdev of feature
-		for (int i=0; i < allFeatures.size(); i++) {
-			NumericVectorFeature v = (NumericVectorFeature)allFeatures.get(i);
-			double[] vals = v.getValue();
-			
-			for (int j=0; j < meanVector.length; j++) {
-				stdevVector[j] += (vals[j] - meanVector[j])*(vals[j] - meanVector[j]);
-			}
-		}
+        for (Feature feature : allFeatures) {
+            NumericVectorFeature v = (NumericVectorFeature) feature;
+            double[] vals = v.getValue();
+
+            for (int j = 0; j < meanVector.length; j++) {
+                stdevVector[j] += (vals[j] - meanVector[j]) * (vals[j] - meanVector[j]);
+            }
+        }
 		for (int i=0; i < stdevVector.length; i++) {
 			stdevVector[i] = Math.sqrt( stdevVector[i] / (N-1) );
 		}
 		
 		// normalize each feature vector
-		for (int i=0; i < allFeatures.size(); i++) {
-			NumericVectorFeature v = (NumericVectorFeature)allFeatures.get(i);
-			double[] vals = v.getValue();
-			
-			for (int j=0; j < vals.length; j++) {
-				vals[j] = (vals[j] - meanVector[j]) / stdevVector[j];
-			}
-		}
+        for (Feature allFeature : allFeatures) {
+            NumericVectorFeature v = (NumericVectorFeature) allFeature;
+            double[] vals = v.getValue();
+
+            for (int j = 0; j < vals.length; j++) {
+                vals[j] = (vals[j] - meanVector[j]) / stdevVector[j];
+            }
+        }
 	}
 	 
 	@Override

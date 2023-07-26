@@ -193,7 +193,7 @@ public class TrackClusteringTests {
         LOGGER.info("Creating "+T+" track per track bases");
         
         // Now create a hundred random tracks from each
-        List<Track> tracks = new ArrayList<Track>();
+        List<Track> tracks = new ArrayList<>();
         for (int j=0; j<T; ++j) {
             for (int i=0; i<N; ++i) {
                 Track track = new GeodeticTrack(GEODETIC_PARAMETERS, randomPoints(trackBases[i], P));
@@ -252,7 +252,7 @@ public class TrackClusteringTests {
         }
         double totalTime = times[N-1];
 
-        List<Vector> points = new ArrayList<Vector>();
+        List<Vector> points = new ArrayList<>();
         for (int i = 0; i < N; ++i) {
             times[i] = times[i] / totalTime;
             points.add(new Vector(minX + Math.random() * width,
@@ -271,7 +271,7 @@ public class TrackClusteringTests {
         }
         double totalTime = times[N-1];
 
-        List<Position> points = new ArrayList<Position>(N);
+        List<Position> points = new ArrayList<>(N);
         for (int i=1; i<N-1; ++i) {
             double t = times[i]/totalTime;
             Vector point = basis.getPoint(t);
@@ -282,7 +282,7 @@ public class TrackClusteringTests {
 
 
 
-    private class TrackFrame extends TestFrame {
+    private static class TrackFrame extends TestFrame {
         private static final long serialVersionUID = 1L;
 
 
@@ -292,8 +292,8 @@ public class TrackClusteringTests {
         private Rectangle2D        _drawingBounds;
 
         public TrackFrame () {
-            _splines = new ArrayList<CubicBSpline>();
-            _clusters = new ArrayList<Cluster>();
+            _splines = new ArrayList<>();
+            _clusters = new ArrayList<>();
             _drawingBounds = null;
         }
 
@@ -384,11 +384,11 @@ public class TrackClusteringTests {
 
                     Point ptLast = null;
                     List<?> points = track.getPoints();
-                    for (int j=0; j<points.size(); ++j) {
-                        Position p = (Position) points.get(j);
+                    for (Object point : points) {
+                        Position p = (Position) point;
 
-                        Point pt = new Point((int) Math.round((p.getLongitude()-zeroX)*pixelsPerUnit),
-                                         (int) Math.round((zeroY-p.getLatitude())*pixelsPerUnit));
+                        Point pt = new Point((int) Math.round((p.getLongitude() - zeroX) * pixelsPerUnit),
+                                (int) Math.round((zeroY - p.getLatitude()) * pixelsPerUnit));
                         if (null != ptLast)
                             g.drawLine(ptLast.x, ptLast.y, pt.x, pt.y);
                         ptLast = pt;

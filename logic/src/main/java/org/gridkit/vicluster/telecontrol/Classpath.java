@@ -71,10 +71,9 @@ public class Classpath {
 
             int len$ = arr$.length;
 
-            for (int i$ = 0; i$ < len$; ++i$) {
-                URL url = arr$[i$];
-                addEntriesFromManifest(result, url);
-            }
+        for (URL url : arr$) {
+            addEntriesFromManifest(result, url);
+        }
 
 //            ClassLoader cls = classLoader.getParent();
 //            if (!(cls instanceof URLClassLoader) || cls.getClass().getName().endsWith("$ExtClassLoader")) {
@@ -124,9 +123,7 @@ public class Classpath {
                     String[] arr$ = cp.split("\\s+");
                     int len$ = arr$.length;
 
-                    for (int i$ = 0; i$ < len$; ++i$) {
-                        String entry = arr$[i$];
-
+                    for (String entry : arr$) {
                         try {
                             URL ipath = new URL(url, entry);
                             addEntriesFromManifest(list, ipath);
@@ -147,16 +144,13 @@ public class Classpath {
             Classpath.ClasspathEntry entry;
             if (wr != null) {
                 entry = wr.get();
-                return entry;
             } else {
                 entry = newEntry(url);
                 CUSTOM_ENTRIES.put(url, new WeakReference(entry));
-                return entry;
             }
-        } catch (MalformedURLException var4) {
+            return entry;
+        } catch (MalformedURLException | URISyntaxException var4) {
             throw new IOException(var4);
-        } catch (URISyntaxException var5) {
-            throw new IOException(var5);
         }
     }
 
@@ -165,13 +159,11 @@ public class Classpath {
     }
 
     private static void fillClasspath(List<Classpath.ClasspathEntry> classpath, Collection<URL> urls) {
-        Iterator i$ = urls.iterator();
 
-        while (i$.hasNext()) {
-            URL url = (URL) i$.next();
+        for (URL url : urls) {
             if (!isIgnoredJAR(url)) {
                 try {
-                    Classpath.ClasspathEntry entry = newEntry(url);
+                    ClasspathEntry entry = newEntry(url);
                     if (entry == null) {
                         LOGGER.warn("Cannot copy URL content: " + url);
                     } else {
@@ -319,9 +311,7 @@ public class Classpath {
 
     private static boolean isEmpty(File file) {
         File[] files = file.listFiles();
-        if (files == null) {
-            return true;
-        } else {
+        if (files != null) {
             File[] arr$ = files;
             int len$ = files.length;
 
@@ -332,8 +322,8 @@ public class Classpath {
                 }
             }
 
-            return true;
         }
+        return true;
     }
 
     private static File uriToFile(URI uri) {

@@ -74,14 +74,12 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
 
     private void balance() {
         switch (type) {
-            case EMPTY:
-            case LEAF:
+            case EMPTY, LEAF -> {
                 if (parent != null) {
                     parent.balance();
                 }
-                break;
-
-            case BRANCH:
+            }
+            case BRANCH -> {
                 PointQuadtree leaf = null;
                 if (childNW.type != Type.EMPTY) {
                     leaf = childNW;
@@ -117,6 +115,7 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
                 if (parent != null) {
                     parent.balance();
                 }
+            }
         }
     }
 
@@ -130,15 +129,16 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
         PointQuadtree result = this;
         while (true) {
             switch (result.type) {
-                case EMPTY:
+                case EMPTY -> {
                     return null;
-                case LEAF:
+                }
+                case LEAF -> {
                     return result.value.x == result.x && result.value.y == result.y ? result : null;
-                case BRANCH:
+                }
+                case BRANCH -> {
                     result = result.getQuadrantForPoint(p.x, p.y);
-                    continue;
-                default:
-                    throw new IllegalStateException("Invalid node type");
+                }
+                default -> throw new IllegalStateException("Invalid node type");
             }
         }
     }
@@ -156,11 +156,11 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
         while (true) {
             if (other.containsPoint(p)) {
                 switch (other.type) {
-                    case EMPTY:
+                    case EMPTY -> {
                         other.setPoint(p);
                         return true;
-
-                    case LEAF:
+                    }
+                    case LEAF -> {
                         if (other.value.x == p.x && other.value.y == p.y) {
                             return false;
                         } else {
@@ -168,10 +168,11 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
                             other = other.getQuadrantForPoint(p.x, p.y);
                             continue;
                         }
-
-                    case BRANCH:
+                    }
+                    case BRANCH -> {
                         other = other.getQuadrantForPoint(p.x, p.y);
                         continue;
+                    }
                 }
             }
             return false;
@@ -232,17 +233,14 @@ public class PointQuadtree extends Rect implements SpatialIndex<Vec2D> {
 
     public void prewalk(QuadtreeVisitor visitor) {
         switch (type) {
-            case LEAF:
-                visitor.visitNode(this);
-                break;
-
-            case BRANCH:
+            case LEAF -> visitor.visitNode(this);
+            case BRANCH -> {
                 visitor.visitNode(this);
                 childNW.prewalk(visitor);
                 childNE.prewalk(visitor);
                 childSW.prewalk(visitor);
                 childSE.prewalk(visitor);
-                break;
+            }
         }
     }
 

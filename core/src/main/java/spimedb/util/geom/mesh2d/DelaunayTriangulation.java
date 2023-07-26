@@ -120,7 +120,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
         marked.add(triangle);
         while (!toBeChecked.isEmpty()) {
             triangle = toBeChecked.remove();
-            if (site.vsCircumcircle(triangle.toArray(new DelaunayVertex[triangle.size()])) == 1) {
+            if (site.vsCircumcircle(triangle.toArray(new DelaunayVertex[0])) == 1) {
                 // Site outside triangle => triangle not in cavity
                 continue;
             }
@@ -166,7 +166,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
             visited.add(triangle);
             // Corner opposite point
             DelaunayVertex corner = point.isOutside(triangle
-                    .toArray(new DelaunayVertex[triangle.size()]));
+                    .toArray(new DelaunayVertex[0]));
             if (corner == null) {
                 return triangle;
             }
@@ -175,7 +175,7 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
         // No luck; try brute force
         System.out.println("Warning: Checking all triangles for " + point);
         for (DelaunayTriangle tri : this) {
-            if (point.isOutside(tri.toArray(new DelaunayVertex[tri.size()])) == null) {
+            if (point.isOutside(tri.toArray(new DelaunayVertex[0])) == null) {
                 return tri;
             }
         }

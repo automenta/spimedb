@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class OoaBFilterTest {
 
-  private class FElement implements OoaBFilter.Element {
+  private static class FElement implements OoaBFilter.Element {
     private final ByteBuffer byteBuffer;
 
     public FElement(int a, int b, int c) {

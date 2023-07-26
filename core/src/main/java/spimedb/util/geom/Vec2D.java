@@ -457,21 +457,20 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
     }
 
     public float getComponent(Axis id) {
-        switch (id) {
-            case X:
-                return x;
-            case Y:
-                return y;
-        }
-        return 0;
+        return switch (id) {
+            case X -> x;
+            case Y -> y;
+        };
     }
 
     public final float getComponent(int id) {
         switch (id) {
-            case 0:
+            case 0 -> {
                 return x;
-            case 1:
+            }
+            case 1 -> {
                 return y;
+            }
         }
         throw new IllegalArgumentException("index must be 0 or 1");
     }
@@ -933,27 +932,18 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
 
     public final Vec2D setComponent(Axis id, float val) {
         switch (id) {
-            case X:
-                x = val;
-                break;
-            case Y:
-                y = val;
-                break;
+            case X -> x = val;
+            case Y -> y = val;
         }
         return this;
     }
 
     public final Vec2D setComponent(int id, float val) {
         switch (id) {
-            case 0:
-                x = val;
-                break;
-            case 1:
-                y = val;
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "component id needs to be 0 or 1");
+            case 0 -> x = val;
+            case 1 -> y = val;
+            default -> throw new IllegalArgumentException(
+                    "component id needs to be 0 or 1");
         }
         return this;
     }

@@ -109,7 +109,7 @@ public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
     public DelaunayVertex getCircumcenter() {
         if (circumcenter == null) {
             circumcenter = DelaunayVertex.circumcenter(this
-                    .toArray(new DelaunayVertex[this.size()]));
+                    .toArray(new DelaunayVertex[0]));
         }
         return circumcenter;
     }
@@ -137,7 +137,7 @@ public class DelaunayTriangle extends ArraySet<DelaunayVertex> {
 
     @Override
     public int hashCode() {
-        return (idNumber ^ (idNumber >>> 32)); //wtf?
+        return (int)(idNumber ^ (((long)idNumber) << 32));
     }
 
     /**

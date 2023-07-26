@@ -907,67 +907,80 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final float getElement(int row, int column) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 switch (column) {
-                    case 0:
+                    case 0 -> {
                         return (this.m00);
-                    case 1:
+                    }
+                    case 1 -> {
                         return (this.m01);
-                    case 2:
+                    }
+                    case 2 -> {
                         return (this.m02);
-                    case 3:
+                    }
+                    case 3 -> {
                         return (this.m03);
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-                break;
-            case 1:
+            }
+            case 1 -> {
                 switch (column) {
-                    case 0:
+                    case 0 -> {
                         return (this.m10);
-                    case 1:
+                    }
+                    case 1 -> {
                         return (this.m11);
-                    case 2:
+                    }
+                    case 2 -> {
                         return (this.m12);
-                    case 3:
+                    }
+                    case 3 -> {
                         return (this.m13);
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 switch (column) {
-                    case 0:
+                    case 0 -> {
                         return (this.m20);
-                    case 1:
+                    }
+                    case 1 -> {
                         return (this.m21);
-                    case 2:
+                    }
+                    case 2 -> {
                         return (this.m22);
-                    case 3:
+                    }
+                    case 3 -> {
                         return (this.m23);
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 switch (column) {
-                    case 0:
+                    case 0 -> {
                         return (this.m30);
-                    case 1:
+                    }
+                    case 1 -> {
                         return (this.m31);
-                    case 2:
+                    }
+                    case 2 -> {
                         return (this.m32);
-                    case 3:
+                    }
+                    case 3 -> {
                         return (this.m33);
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-                break;
-
-            default:
-                break;
+            }
+            default -> {
+            }
         }
         throw new ArrayIndexOutOfBoundsException();
     }
@@ -1357,7 +1370,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
         temp[15] = m1.m33;
 
         // Calculate LU decomposition: Is the matrix singular?
-        if (!Matrix4x4.LUDecomposition(temp, row_perm, 4)) {
+        if (Matrix4x4.LUDecomposition(temp, row_perm, 4)) {
             // Matrix has no inverse
             throw new SingularMatrixException();
         }
@@ -2450,36 +2463,31 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final void setColumn(int column, float[] v) {
         switch (column) {
-            case 0:
+            case 0 -> {
                 this.m00 = v[0];
                 this.m10 = v[1];
                 this.m20 = v[2];
                 this.m30 = v[3];
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m01 = v[0];
                 this.m11 = v[1];
                 this.m21 = v[2];
                 this.m31 = v[3];
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m02 = v[0];
                 this.m12 = v[1];
                 this.m22 = v[2];
                 this.m32 = v[3];
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 this.m03 = v[0];
                 this.m13 = v[1];
                 this.m23 = v[2];
                 this.m33 = v[3];
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2499,36 +2507,31 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final void setColumn(int column, float x, float y, float z, float w) {
         switch (column) {
-            case 0:
+            case 0 -> {
                 this.m00 = x;
                 this.m10 = y;
                 this.m20 = z;
                 this.m30 = w;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m01 = x;
                 this.m11 = y;
                 this.m21 = z;
                 this.m31 = w;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m02 = x;
                 this.m12 = y;
                 this.m22 = z;
                 this.m32 = w;
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 this.m03 = x;
                 this.m13 = y;
                 this.m23 = z;
                 this.m33 = w;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2542,36 +2545,31 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final void setColumn(int column, Vec4D v) {
         switch (column) {
-            case 0:
+            case 0 -> {
                 this.m00 = v.x;
                 this.m10 = v.y;
                 this.m20 = v.z;
                 this.m30 = v.w;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m01 = v.x;
                 this.m11 = v.y;
                 this.m21 = v.z;
                 this.m31 = v.w;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m02 = v.x;
                 this.m12 = v.y;
                 this.m22 = v.z;
                 this.m32 = v.w;
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 this.m03 = v.x;
                 this.m13 = v.y;
                 this.m23 = v.z;
                 this.m33 = v.w;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2587,84 +2585,43 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final void setElement(int row, int column, float value) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 switch (column) {
-                    case 0:
-                        this.m00 = value;
-                        break;
-                    case 1:
-                        this.m01 = value;
-                        break;
-                    case 2:
-                        this.m02 = value;
-                        break;
-                    case 3:
-                        this.m03 = value;
-                        break;
-                    default:
-                        throw new ArrayIndexOutOfBoundsException();
+                    case 0 -> this.m00 = value;
+                    case 1 -> this.m01 = value;
+                    case 2 -> this.m02 = value;
+                    case 3 -> this.m03 = value;
+                    default -> throw new ArrayIndexOutOfBoundsException();
                 }
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 switch (column) {
-                    case 0:
-                        this.m10 = value;
-                        break;
-                    case 1:
-                        this.m11 = value;
-                        break;
-                    case 2:
-                        this.m12 = value;
-                        break;
-                    case 3:
-                        this.m13 = value;
-                        break;
-                    default:
-                        throw new ArrayIndexOutOfBoundsException();
+                    case 0 -> this.m10 = value;
+                    case 1 -> this.m11 = value;
+                    case 2 -> this.m12 = value;
+                    case 3 -> this.m13 = value;
+                    default -> throw new ArrayIndexOutOfBoundsException();
                 }
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 switch (column) {
-                    case 0:
-                        this.m20 = value;
-                        break;
-                    case 1:
-                        this.m21 = value;
-                        break;
-                    case 2:
-                        this.m22 = value;
-                        break;
-                    case 3:
-                        this.m23 = value;
-                        break;
-                    default:
-                        throw new ArrayIndexOutOfBoundsException();
+                    case 0 -> this.m20 = value;
+                    case 1 -> this.m21 = value;
+                    case 2 -> this.m22 = value;
+                    case 3 -> this.m23 = value;
+                    default -> throw new ArrayIndexOutOfBoundsException();
                 }
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 switch (column) {
-                    case 0:
-                        this.m30 = value;
-                        break;
-                    case 1:
-                        this.m31 = value;
-                        break;
-                    case 2:
-                        this.m32 = value;
-                        break;
-                    case 3:
-                        this.m33 = value;
-                        break;
-                    default:
-                        throw new ArrayIndexOutOfBoundsException();
+                    case 0 -> this.m30 = value;
+                    case 1 -> this.m31 = value;
+                    case 2 -> this.m32 = value;
+                    case 3 -> this.m33 = value;
+                    default -> throw new ArrayIndexOutOfBoundsException();
                 }
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -2978,36 +2935,31 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final void setRow(int row, float[] v) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 this.m00 = v[0];
                 this.m01 = v[1];
                 this.m02 = v[2];
                 this.m03 = v[3];
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m10 = v[0];
                 this.m11 = v[1];
                 this.m12 = v[2];
                 this.m13 = v[3];
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m20 = v[0];
                 this.m21 = v[1];
                 this.m22 = v[2];
                 this.m23 = v[3];
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 this.m30 = v[0];
                 this.m31 = v[1];
                 this.m32 = v[2];
                 this.m33 = v[3];
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -3027,36 +2979,31 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final void setRow(int row, float x, float y, float z, float w) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 this.m00 = x;
                 this.m01 = y;
                 this.m02 = z;
                 this.m03 = w;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m10 = x;
                 this.m11 = y;
                 this.m12 = z;
                 this.m13 = w;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m20 = x;
                 this.m21 = y;
                 this.m22 = z;
                 this.m23 = w;
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 this.m30 = x;
                 this.m31 = y;
                 this.m32 = z;
                 this.m33 = w;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 
@@ -3070,36 +3017,31 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public final void setRow(int row, Vec4D v) {
         switch (row) {
-            case 0:
+            case 0 -> {
                 this.m00 = v.x;
                 this.m01 = v.y;
                 this.m02 = v.z;
                 this.m03 = v.w;
-                break;
-
-            case 1:
+            }
+            case 1 -> {
                 this.m10 = v.x;
                 this.m11 = v.y;
                 this.m12 = v.z;
                 this.m13 = v.w;
-                break;
-
-            case 2:
+            }
+            case 2 -> {
                 this.m20 = v.x;
                 this.m21 = v.y;
                 this.m22 = v.z;
                 this.m23 = v.w;
-                break;
-
-            case 3:
+            }
+            case 3 -> {
                 this.m30 = v.x;
                 this.m31 = v.y;
                 this.m32 = v.z;
                 this.m33 = v.w;
-                break;
-
-            default:
-                throw new ArrayIndexOutOfBoundsException();
+            }
+            default -> throw new ArrayIndexOutOfBoundsException();
         }
     }
 

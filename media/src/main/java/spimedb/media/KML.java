@@ -68,12 +68,12 @@ public class KML {
 
 
     public static String[] pathArray(Deque<String> p) {
-        return p.toArray(new String[p.size()]);
+        return p.toArray(new String[0]);
     }
 
     public interface GISVisitor {
 
-        boolean on(IGISObject go, String[] path) throws IOException;
+        boolean on(IGISObject go, String[] path);
 
         void start(String layer);
 
@@ -283,20 +283,14 @@ public class KML {
 
 
     public Runnable url(String url) {
-        try {
-            return url(Crawl.fileName( new URL(url).getFile() ), url);
-        } catch (IOException e) {
-            return () -> {
-                logger.error("invalid url \"{}\": {}", e);
-            };
-        }
+        return url(Crawl.fileName( new URL(url).getFile() ), url);
     }
 
-    public Runnable url(String id, String url) throws IOException {
+    public Runnable url(String id, String url) {
         return url(id, url, null);
     }
 
-    public Runnable file(String id, String path) throws IOException {
+    public Runnable file(String id, String path) {
         return url(id, "file:///" + path, null);
     }
 
@@ -526,7 +520,7 @@ public class KML {
         }
 
         @Override
-        public boolean on(IGISObject go, String[] path) throws IOException {
+        public boolean on(IGISObject go, String[] path) {
             if (go == null) {
                 //throw new RuntimeException("null GISObject: " + Arrays.toString(path));
                 return false;

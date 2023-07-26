@@ -42,8 +42,7 @@ import java.util.*;
  *
  */
 public class Cluster extends Instance {
-	private static final long serialVersionUID = -1800048730067118377L;
-	
+
 	protected boolean onlineUpdate = false;  	// default to not updating centroid when new members are added
 	@SuppressWarnings("rawtypes")
 	protected final Map<String, Centroid> centroids = new HashMap<>();
@@ -60,9 +59,10 @@ public class Cluster extends Instance {
 		//TODO determine size of the collections from 'types'.size()
 		for (FeatureTypeDefinition def : types) {
 			try {
-				Centroid centroid = def.centroidClass.newInstance();
-				centroid.setName(def.featureName);
-				centroids.put(def.featureName, centroid);
+				Centroid centroid = def.centroidClass().newInstance();
+				String n = def.featureName();
+				centroid.setName(n);
+				centroids.put(n, centroid);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 				e.printStackTrace();

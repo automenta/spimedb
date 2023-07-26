@@ -26,18 +26,17 @@ public class ClassUtil {
 
         Set<Class> allInterfaces = new HashSet();
 
-        for (int i = 0; i < childInterfaces.length; i++) {
-            Class c = childInterfaces[i];
+        for (Class c : childInterfaces) {
             allInterfaces.add(c);
             allInterfaces.addAll(
-                            getSuperInterfaces(c.getInterfaces()));
+                    getSuperInterfaces(c.getInterfaces()));
         }
 
         return allInterfaces;
     }
 
     public static Set<Class> getSuperInterfacesOf(Class c) {
-        Set<Class> cs = getSuperInterfaces(new Class[] { c });
+        Set<Class> cs = getSuperInterfaces(c);
         cs.remove(c);
         return cs;
     }
@@ -59,8 +58,7 @@ public class ClassUtil {
         }
 
         Class[] superInterfaces = classObject.getInterfaces();
-        for (int i = 0; i < superInterfaces.length; i++) {
-            Class superInterface = superInterfaces[i];
+        for (Class superInterface : superInterfaces) {
             generalizations.addAll(getGeneralizations(superInterface));
         }
 

@@ -185,31 +185,28 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     private Function build(Pair<Class, String> id, File file) {
         String[] parts = file.getName().split(".");
         switch (parts.length) {
-            case 0:
-            case 1:
+            case 0, 1 -> {
                 //string
                 if (id.getOne() == String.class) {
                     return new FileToString(file);
                 } else {
                     return buildDefault(id, file);
                 }
-            case 2:
+            }
+            case 2 -> {
                 //properties file
                 return buildDefault(id, file);
-
-
-            case 3:
+            }
+            case 3 -> {
                 switch (parts[3]) {
                     case "js": //javascript
                         break;
-                    case "json":
-                        break;
-                    case "xml":
+                    case "json", "xml":
                         break;
                     case "java": //dynamically recompiled java
                         break;
                 }
-                break;
+            }
         }
 
         return (x) -> {
@@ -415,12 +412,8 @@ public abstract class Main extends FileAlterationListenerAdaptor {
                     BeanPropertySetter s = new BeanPropertySetter(x, f);
                     try {
                         switch (f.getType().toString()) {
-                            case "float":
-                                v = Str.f(v.toString());
-                                break;
-                            case "int":
-                                v = Str.i(v.toString());
-                                break;
+                            case "float" -> v = Str.f(v.toString());
+                            case "int" -> v = Str.i(v.toString());
                         }
                         logger.info("{}.{}={}", x, field, v);
                         s.set(v);
@@ -589,10 +582,12 @@ public abstract class Main extends FileAlterationListenerAdaptor {
     }
 
 
-    public Main(@Nullable String path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) throws Exception {
+    @SafeVarargs
+    public Main(@Nullable String path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) {
         this(path != null ? new File(path) : null, initialKlassPath, plugin);
     }
 
+    @SafeVarargs
     public Main(@Nullable File path, Map<String, Class> initialKlassPath, Class<? extends Plugin>... plugin) {
 
         if (path != null)
@@ -690,24 +685,18 @@ public abstract class Main extends FileAlterationListenerAdaptor {
 //    }
 
 
-    private static class FileToString implements Function {
-
-        private final File file;
-
-        public FileToString(File file) {
-            this.file = file;
-        }
+    private record FileToString(File file) implements Function {
 
         @Override
-        public Object apply(Object o) {
-            try {
-                return Files.toString(file, Charset.defaultCharset());
-            } catch (IOException e) {
-                logger.error("reading string: {}", file);
-                return null;
+            public Object apply(Object o) {
+                try {
+                    return Files.toString(file, Charset.defaultCharset());
+                } catch (IOException e) {
+                    logger.error("reading string: {}", file);
+                    return null;
+                }
             }
         }
-    }
 
 
 //    final static String cachePath = "cache";

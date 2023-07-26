@@ -39,7 +39,6 @@ import java.util.Collections;
  *
  */
 public class BagOfWordsCentroid implements Centroid<BagOfWordsFeature> {
-	private static final long serialVersionUID = -5723416814427314073L;
 	private String name;
 	private static final int MAX_CENTROID_FEATURES = 10;
 	protected final FeatureFrequencyTable freqTable = new FeatureFrequencyTable();

@@ -628,7 +628,7 @@ public final class MathUtils {
     }
 
     public static int sign(int x) {
-        return x < 0 ? -1 : (x > 0 ? 1 : 0);
+        return Integer.compare(x, 0);
     }
 
     public static double sin(double theta) {

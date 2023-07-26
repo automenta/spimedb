@@ -6,19 +6,12 @@ import java.util.TreeSet;
 
 public class NonLinearScaleMap {
 
-    public static class Sample implements Comparable<Sample> {
-
-        public final double x, y;
-
-        public Sample(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
+    public record Sample(double x, double y) implements Comparable<Sample> {
 
         public int compareTo(Sample b) {
-            return (int) Math.signum(x - b.x);
+                return (int) Math.signum(x - b.x);
+            }
         }
-    }
 
     private final TreeSet<Sample> samples;
 

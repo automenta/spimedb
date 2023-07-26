@@ -37,9 +37,9 @@ public final class CurveUtils {
         }
         LinkedList<Vec4D> cps = new LinkedList<>();
         cps.add(curves[0].getControlPoints()[0]);
-        for (int i = 0; i < curves.length; i++) {
-            float[] u = curves[i].getKnots();
-            if (degree != curves[i].getDegree()) {
+        for (NurbsCurve curve : curves) {
+            float[] u = curve.getKnots();
+            if (degree != curve.getDegree()) {
                 throw new IllegalArgumentException(
                         "Curves must have equal degrees");
             }
@@ -52,7 +52,7 @@ public final class CurveUtils {
                 knots.addLast(lastU);
             }
 
-            Vec4D[] pts = curves[i].getControlPoints();
+            Vec4D[] pts = curve.getControlPoints();
             for (int j = 1; j < pts.length; j++) {
                 cps.addLast(pts[j]);
             }
@@ -64,7 +64,7 @@ public final class CurveUtils {
         for (int i = 0; i < u.length; i++) {
             u[i] = knots.get(i);
         }
-        return new BasicNurbsCurve(cps.toArray(new Vec4D[cps.size()]), u,
+        return new BasicNurbsCurve(cps.toArray(new Vec4D[0]), u,
                 degree);
     }
 

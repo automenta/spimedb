@@ -15,10 +15,10 @@ abstract public class AtomicGoal<A extends Agent> extends AbstractGoal<A> {
 
     @NotNull
     @Override
-    public void DO(@NotNull A context, Consumer<Iterable<Goal<? super A>>> next) throws Exception {
+    public void DO(@NotNull A context, Consumer<Iterable<Goal<? super A>>> next) {
         run(context);
     }
 
-    protected abstract void run(A context) throws Exception;
+    protected abstract void run(A context);
 
 }

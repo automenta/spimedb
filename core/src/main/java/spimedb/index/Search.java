@@ -192,9 +192,7 @@ public class Search {
                 } else {
 
                     if (bqq instanceof DisjunctionMaxQuery dqq) {
-                        dqq.forEach(x -> {
-                            collectTags(x, tagsInc);
-                        });
+                        dqq.forEach(x -> collectTags(x, tagsInc));
                     } else if (bqq instanceof BoostQuery bbq) {
                         collectTags(bbq.getQuery(), tagsInc);
 

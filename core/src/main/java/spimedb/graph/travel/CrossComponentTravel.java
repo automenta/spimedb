@@ -153,10 +153,8 @@ public abstract class CrossComponentTravel<V, E, D> extends AbstractTravel<V, E>
                     }
                 }
 
-                return false;
-            } else {
-                return false;
             }
+            return false;
         } else {
             return true;
         }

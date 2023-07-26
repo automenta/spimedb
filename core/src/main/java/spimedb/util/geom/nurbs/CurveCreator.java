@@ -95,7 +95,7 @@ public class CurveCreator {
                 val += step;
             }
         }
-        curve = new BasicNurbsCurve(cps.toArray(new Vec4D[cps.size()]), u, tmp);
+        curve = new BasicNurbsCurve(cps.toArray(new Vec4D[0]), u, tmp);
         return curve;
     }
 

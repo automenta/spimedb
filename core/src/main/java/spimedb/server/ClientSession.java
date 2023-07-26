@@ -184,11 +184,7 @@ public class ClientSession extends Session {
         private boolean trySend(Task t, NObject n, boolean force) {
             int[] idHash = remoteMemory.hash(n.id());
             if (force || !remoteMemory.contains(idHash)) {
-                chan.forEach(c -> {
-
-                    t.sendJSON(c, n);
-
-                });
+                chan.forEach(c -> t.sendJSON(c, n));
                 remoteMemory.add(idHash);
                 return true;
             }

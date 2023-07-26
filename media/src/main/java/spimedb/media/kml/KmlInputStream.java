@@ -375,14 +375,13 @@ public class KmlInputStream extends XmlInputStream implements IKml {
         try {
             while (st.nextToken() != NumberStreamTokenizer.TT_EOF) {
                 switch (st.ttype) {
-                    case NumberStreamTokenizer.TT_WORD:
+                    case NumberStreamTokenizer.TT_WORD ->
                         //s = "STRING:" + st.sval; // Already a String
-                        log.warn("ignore invalid string in coordinate: \"",st.sval,"\"");
-                        //if (seenComma) System.out.println("\tXXX: WORD: seenComma");
-                        //if (numparts != 0) System.out.println("\tXXX: WORD: numparts=" + numparts);
-                        break;
-                        
-                    case NumberStreamTokenizer.TT_NUMBER:
+                            log.warn("ignore invalid string in coordinate: \"", st.sval, "\"");
+
+                    //if (seenComma) System.out.println("\tXXX: WORD: seenComma");
+                    //if (numparts != 0) System.out.println("\tXXX: WORD: numparts=" + numparts);
+                    case NumberStreamTokenizer.TT_NUMBER -> {
                         try {
                             if (numparts == 3) {
                                 if (seenComma) {
@@ -397,9 +396,9 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 }
                                 numparts = 0; // reset state for start of new tuple
                             }
-                            
+
                             switch (++numparts) {
-                                case 1:
+                                case 1 -> {
                                     if (seenComma) {
                                         // note: this branch might not be possible: if numparts==0 then seenComma should be false
                                         lat = new Latitude(st.nval, Angle.DEGREES);
@@ -412,9 +411,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                             log.warn("longitude out of range: {}", st.nval);
                                         }
                                     }
-                                    break;
-                                    
-                                case 2:
+                                }
+                                case 2 -> {
                                     if (seenComma) {
                                         //System.out.println("lat=" + st.nval);
                                         lat = new Latitude(st.nval, Angle.DEGREES);
@@ -430,9 +428,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                         }
                                         numparts = 1;
                                     }
-                                    break;
-                                    
-                                case 3:
+                                }
+                                case 3 -> {
                                     if (seenComma) {
                                         elev = st.nval;
                                     } else {
@@ -447,9 +444,9 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                         }
                                         numparts = 1;
                                     }
-                                    break;
+                                }
                             }
-                            
+
                             //s = "NUM:" + Double.toString(st.nval);
                             /*
                             double nval = st.nval;
@@ -468,9 +465,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             }
                         }
                         seenComma = false; // reset flag
-                        break;
-                        
-                    default: // single character in ttype
+                    }
+                    default -> { // single character in ttype
                         if (st.ttype == ',') {
                             if (!seenComma) {
                                 // start of next coordinate component
@@ -495,6 +491,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         } else {
                             log.warn("ignore invalid character in coordinate string: (", (char) st.ttype, ")");
                         }
+                    }
                     //s = "CHAR:" + String.valueOf((char) st.ttype);
                 }
                 //System.out.println("\t" + s);
@@ -508,14 +505,9 @@ public class KmlInputStream extends XmlInputStream implements IKml {
         // add last coord if valid
         if (numparts != 0 && lon != COORD_ERROR) {
             switch (numparts) {
-                case 1:
-                    list.add(new Point(new Geodetic2DPoint(lon, new Latitude())));
-                    break;
-                case 2:
-                    list.add(new Point(new Geodetic2DPoint(lon, lat)));
-                    break;
-                case 3:
-                    list.add(new Point(new Geodetic3DPoint(lon, lat, elev)));
+                case 1 -> list.add(new Point(new Geodetic2DPoint(lon, new Latitude())));
+                case 2 -> list.add(new Point(new Geodetic2DPoint(lon, lat)));
+                case 3 -> list.add(new Point(new Geodetic3DPoint(lon, lat, elev)));
             }
         }
 
@@ -626,11 +618,9 @@ public class KmlInputStream extends XmlInputStream implements IKml {
      *
      * @return next <code>IGISObject</code>, or <code>null</code> if the end of
      * the stream is reached.
-     * @throws IOException if an I/O error occurs or if there is a fatal error
-     * with the underlying XML
      */
     @CheckForNull
-    public IGISObject read() throws IOException {
+    public IGISObject read() {
         if (hasSaved()) {
             return readSaved();
         } else {
@@ -752,7 +742,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     if (isTrue(getElementText(qname))) {
                         cs.setOpen(true); // default = 0
                     }
-                } else if (!handleProperties(cs, ee, qname)) {
+                } else if (handleProperties(cs, ee, qname)) {
                     // Ignore other container elements
                     log.warn("ignore {}", qname);
                 }
@@ -778,11 +768,11 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 // sometimes markup found in names (e.g. <name><B>place name</B></name>)
                 // where is should be in the description and/or BalloonStyle
                 feature.setName(getElementText(name)); // non-empty or null value
-                return true;
+                return false;
             } else if (localname.equals(DESCRIPTION)) {
                 // description content with markup not enclosed in CDATA is invalid and cannot be parsed
                 feature.setDescription(getElementText(name));
-                return true;
+                return false;
             } else if (localname.equals(VISIBILITY)) {
                 String val = stream.getElementText();
                 if (val != null) {
@@ -793,43 +783,43 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         feature.setVisibility(Boolean.FALSE);
                     }
                 }
-                return true;
+                return false;
             } else if (localname.equals(STYLE)) {
                 handleStyle(feature, ee, name);
-                return true;
+                return false;
             } else if (ms_attributes.contains(localname)) {
                 // basic tags in Feature that are skipped but consumed
                 // e.g. open, address, phoneNumber, Metadata
                 // Skip, but consumed
                 skipNextElement(stream, name);
-                return true;
+                return false;
             } else if (localname.equals(STYLE_URL)) {
                 String st = stream.getElementText();
                 feature.setStyleUrl(st); // value trimmed to null
-                return true;
+                return false;
             } else if (localname.equals(TIME_SPAN) || localname.equals(TIME_STAMP)) {
                 handleTimePrimitive(feature, ee);
-                return true;
+                return false;
             } else if (localname.equals(REGION)) {
                 handleRegion(feature, name);
-                return true;
+                return false;
             } else if (localname.equals(STYLE_MAP)) {
                 handleStyleMap(feature, ee, name);
-                return true;
+                return false;
             } else if (localname.equals(LOOK_AT) || localname.equals(CAMERA)) {
                 handleAbstractView(feature, name);
-                return true;
+                return false;
             } else if (localname.equals(EXTENDED_DATA)) {
                 handleExtendedData(feature, name);
-                return true;
+                return false;
             } else if (localname.equals("Snippet")) { // kml:Snippet (deprecated)
                 // http://service.kmlvalidator.com/ets/ogc-kml/2.2/#Snippet
                 feature.setSnippet(getElementEmptyText(name)); // allow empty string to be preserved
-                return true;
+                return false;
             } else if (localname.equals("snippet")) { // kml:snippet
                 // http://code.google.com/apis/kml/documentation/kmlreference.html#snippet
                 feature.setSnippet(getElementEmptyText(name)); // allow empty string to be preserved
-                return true;
+                return false;
             } else if (localname.equals(ADDRESS) || localname.equals(PHONE_NUMBER)) { // kml:address | kml:phoneNumber
                 String value = getElementText(name); // non-empty or null value
                 if (value != null) {
@@ -859,7 +849,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         log.warn("Skip unknown namespace {}", name);
                         skipNextElement(stream, name);
                     }
-                    return true;
+                    return false;
                 }
             }
         } catch (XMLStreamException e) {
@@ -867,7 +857,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             // TODO: do we have any situation where need to skip over failed localname element??
             // skipNextElement(stream, name);
         }
-        return false;
+        return true;
     }
 
     /**
@@ -1270,24 +1260,12 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 QName qname = se.getName();
                 String localPart = qname.getLocalPart();
                 switch (localPart) {
-                    case ICON_STYLE:
-                        handleIconStyle(style, qname);
-                        break;
-                    case LINE_STYLE:
-                        handleLineStyle(style, qname);
-                        break;
-                    case BALLOON_STYLE:
-                        handleBalloonStyle(style, qname);
-                        break;
-                    case LABEL_STYLE:
-                        handleLabelStyle(style, qname);
-                        break;
-                    case POLY_STYLE:
-                        handlePolyStyle(style, qname);
-                        break;
-                    case LIST_STYLE:
-                        handleListStyle(style, qname);
-                        break;
+                    case ICON_STYLE -> handleIconStyle(style, qname);
+                    case LINE_STYLE -> handleLineStyle(style, qname);
+                    case BALLOON_STYLE -> handleBalloonStyle(style, qname);
+                    case LABEL_STYLE -> handleLabelStyle(style, qname);
+                    case POLY_STYLE -> handlePolyStyle(style, qname);
+                    case LIST_STYLE -> handleListStyle(style, qname);
                 }
             }
         }
@@ -1341,18 +1319,9 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 StartElement se = e.asStartElement();
                 String localPart = se.getName().getLocalPart();
                 switch (localPart) {
-                    case FILL:
-                        fill = isTrue(stream.getElementText()); // default=true
-
-                        break;
-                    case OUTLINE:
-                        outline = isTrue(stream.getElementText()); // default=true
-
-                        break;
-                    case COLOR:
-                        color = parseColor(stream.getElementText()); // default=WHITE
-
-                        break;
+                    case FILL -> fill = isTrue(stream.getElementText()); // default=true
+                    case OUTLINE -> outline = isTrue(stream.getElementText()); // default=true
+                    case COLOR -> color = parseColor(stream.getElementText()); // default=WHITE
                 }
             }
         }
@@ -1467,7 +1436,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 StartElement se = e.asStartElement();
                 String name = se.getName().getLocalPart();
                 switch (name) {
-                    case TEXT:
+                    case TEXT -> {
                         // Note: Google Earth 6.0.3 treats blank/empty text same as if missing.
                         // It's suggested that an earlier version handled blank string differently
                         // according to comments in some KML samples so we're preserving empty strings
@@ -1478,21 +1447,14 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             //..javax.xml.stream.XMLStreamException: ParseError at [row,col]:[9,79]
                             //Message: elementGetText() function expects text only elment but START_ELEMENT was encountered.
                         }
-                        break;
-                    case BG_COLOR:
-                        color = parseColor(stream.getElementText());
-                        break;
-                    case DISPLAY_MODE:
-                        displayMode = getNonEmptyElementText();
-                        break;
-                    case TEXT_COLOR:
-                        textColor = parseColor(stream.getElementText());
-                        break;
-                    case COLOR:
+                    }
+                    case BG_COLOR -> color = parseColor(stream.getElementText());
+                    case DISPLAY_MODE -> displayMode = getNonEmptyElementText();
+                    case TEXT_COLOR -> textColor = parseColor(stream.getElementText());
+                    case COLOR ->
                         // color element is deprecated in KML 2.1
                         // this is alias for bgColor
-                        color = parseColor(stream.getElementText());
-                        break;
+                            color = parseColor(stream.getElementText());
                 }
             }
         }
@@ -1585,7 +1547,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 QName qname = se.getName();
                 String localPart = qname.getLocalPart();
                 switch (localPart) {
-                    case SCALE: {
+                    case SCALE -> {
                         String value = getNonEmptyElementText();
                         if (value != null) {
                             try {
@@ -1594,9 +1556,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 log.warn("Invalid scale value: " + value);
                             }
                         }
-                        break;
                     }
-                    case HEADING: {
+                    case HEADING -> {
                         String value = getNonEmptyElementText();
                         if (value != null) {
                             try {
@@ -1605,18 +1566,16 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 log.warn("Invalid heading value: " + value);
                             }
                         }
-                        break;
                     }
-                    case COLOR: {
+                    case COLOR -> {
                         String value = stream.getElementText();
                         color = parseColor(value);
                         //if (color == null) {
                         //log.warn("Invalid IconStyle color: " + value);
                         //color = Color.white; // use default="ffffffff"
                         //}
-                        break;
                     }
-                    case ICON:
+                    case ICON -> {
                         // IconStyle/Icon is kml:BasicLinkType with only href property
                         url = parseIconHref(qname);
                         // if have Icon element but no href then use empty string to indicate that Icon
@@ -1626,7 +1585,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                         if (url == null) {
                             url = "";
                         }
-                        break;
+                    }
                 }
             }
         }
@@ -1748,76 +1707,63 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 String tag = qname.getLocalPart(); // never-null
                 if (updateFlag) {
                     switch (tag) {
-                        case "targetHref":
+                        case "targetHref" -> {
                             String val = getNonEmptyElementText();
                             if (val != null) {
                                 c.setTargetHref(val);
                             }
-                            // TODO: NetworkLinkControl can have 1 or more Update controls
-                            // TODO: -- handle Update details
-                            break;
-                        case "Create":
-                            c.setUpdateType("Create");
-                            break;
-                        case "Delete":
-                            c.setUpdateType("Delete");
-                            break;
-                        case "Change":
-                            c.setUpdateType("Change");
-                            break;
+                        }
+                        // TODO: NetworkLinkControl can have 1 or more Update controls
+                        // TODO: -- handle Update details
+                        case "Create" -> c.setUpdateType("Create");
+                        case "Delete" -> c.setUpdateType("Delete");
+                        case "Change" -> c.setUpdateType("Change");
                     }
                 } else {
                     switch (tag) {
-                        case "minRefreshPeriod": {
+                        case "minRefreshPeriod" -> {
                             Double val = getDoubleElementValue("minRefreshPeriod");
                             if (val != null) {
                                 c.setMinRefreshPeriod(val);
                             }
-                            break;
                         }
-                        case "maxSessionLength": {
+                        case "maxSessionLength" -> {
                             Double val = getDoubleElementValue("maxSessionLength");
                             if (val != null) {
                                 c.setMaxSessionLength(val);
                             }
-                            break;
                         }
-                        case "cookie": {
+                        case "cookie" -> {
                             String val = getNonEmptyElementText();
                             if (val != null) {
                                 c.setCookie(val);
                             }
-                            break;
                         }
-                        case "message": {
+                        case "message" -> {
                             String val = getNonEmptyElementText();
                             if (val != null) {
                                 c.setMessage(val);
                             }
-                            break;
                         }
-                        case "linkName": {
+                        case "linkName" -> {
                             String val = getNonEmptyElementText();
                             if (val != null) {
                                 c.setLinkName(val);
                             }
-                            break;
                         }
-                        case "linkDescription": {
+                        case "linkDescription" -> {
                             String val = getNonEmptyElementText();
                             if (val != null) {
                                 c.setLinkDescription(val);
                             }
-                            break;
                         }
-                        case "linkSnippet": {
+                        case "linkSnippet" -> {
                             String val = getNonEmptyElementText();
                             if (val != null) {
                                 c.setLinkSnippet(val);
                             }
-                            break;
                         }
-                        case "expires":
+                        case "expires" -> {
                             String expires = getNonEmptyElementText();
                             if (expires != null) {
                                 try {
@@ -1829,17 +1775,12 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             }*/
 
                             }
-                            break;
-                        case LOOK_AT:
-                        case CAMERA:
+                        }
+                        case LOOK_AT, CAMERA -> {
                             TaggedMap viewGroup = handleTaggedData(qname); // LookAt | Camera
-
                             c.setViewGroup(viewGroup);
-                            break;
-                        case "Update":
-                            updateFlag = true; // set flag to parse inside Update element
-
-                            break;
+                        }
+                        case "Update" -> updateFlag = true; // set flag to parse inside Update element
                     }
                 }
             } else {
@@ -2081,7 +2022,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     if (isTrue(getElementText(qName))) {
                         ((NetworkLink) fs).setOpen(true); // default = 0
                     }
-                } else if (!handleProperties(fs, ee, qName)) {
+                } else if (handleProperties(fs, ee, qName)) {
                     // Deal with specific feature elements
                     if (ms_geometries.contains(localname)) {
                         // geometry: Point, LineString, LinearRing, Polygon, MultiGeometry, Model
@@ -2219,10 +2160,10 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             Attribute xunits = sl.getAttributeByName(new QName("xunits"));
             Attribute yunits = sl.getAttributeByName(new QName("yunits"));
             if (x != null) {
-                loc.x = Double.valueOf(x.getValue());
+                loc.x = Double.parseDouble(x.getValue());
             }
             if (y != null) {
-                loc.y = Double.valueOf(y.getValue());
+                loc.y = Double.parseDouble(y.getValue());
             }
             if (xunits != null) {
                 String val = xunits.getValue();
@@ -2456,9 +2397,10 @@ public class KmlInputStream extends XmlInputStream implements IKml {
         // localname must match: { Point, MultiGeometry, Model }, or { LineString, LinearRing, Polygon }
         // note: gx:altitudeMode may be found within geometry elements but doesn't appear to affect parsing
         switch (localname) {
-            case POINT:
+            case POINT -> {
                 return parseCoordinate(name);
-            case MULTI_GEOMETRY:
+            }
+            case MULTI_GEOMETRY -> {
                 List<Geometry> geometries = new ArrayList<>();
                 while (true) {
                     XMLEvent event = stream.nextEvent();
@@ -2506,7 +2448,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 } else {
                     return new GeometryBag(geometries);
                 }
-            case MODEL:
+            }
+            case MODEL -> {
                 // we don't really have a way to represent this yet
                 Model model = new Model();
                 while (true) {
@@ -2534,9 +2477,11 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     }
                 }
                 return model;
-            default:
+            }
+            default -> {
                 // otherwise try LineString, LinearRing, Polygon
                 return getGeometryBase(name, localname);
+            }
         }
     }
 
@@ -2555,7 +2500,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
     private GeometryBase getGeometryBase(QName name, String localname)
             throws XMLStreamException {
         switch (localname) {
-            case LINE_STRING: {
+            case LINE_STRING -> {
                 GeometryGroup geom = parseCoordinates(name);
                 if (log.isDebugEnabled() && geom.size() < 2) {
                     // ATC 15: LineString [OGC-07-147r2: cl. 10.7.3.4.1]
@@ -2573,7 +2518,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     return getGeometry(geom, new Line(geom.points));
                 }
             }
-            case LINEAR_RING: {
+            case LINEAR_RING -> {
                 GeometryGroup geom = parseCoordinates(name);
                 if (log.isDebugEnabled() && geom.size() < 4) {
                     // ATC 16: LinearRing - control points
@@ -2594,7 +2539,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                     return getGeometry(geom, new LinearRing(geom.points));
                 }
             }
-            case POLYGON: {
+            case POLYGON -> {
                 // contains one outer ring and 0 or more inner rings
                 LinearRing outer = null;
                 GeometryGroup geom = new GeometryGroup();
@@ -2664,7 +2609,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                 StartElement se = event.asStartElement();
                 String name = se.getName().getLocalPart();
                 switch (name) {
-                    case LATITUDE: {
+                    case LATITUDE -> {
                         String value = getNonEmptyElementText();
                         if (value != null) {
                             try {
@@ -2673,9 +2618,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 log.warn("Invalid latitude value: " + value);
                             }
                         }
-                        break;
                     }
-                    case LONGITUDE: {
+                    case LONGITUDE -> {
                         String value = getNonEmptyElementText();
                         if (value != null) {
                             try {
@@ -2684,9 +2628,8 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 log.warn("Invalid longitude value: " + value);
                             }
                         }
-                        break;
                     }
-                    case ALTITUDE: {
+                    case ALTITUDE -> {
                         String value = getNonEmptyElementText();
                         if (value != null) {
                             try {
@@ -2695,7 +2638,6 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 log.warn("Invalid altitude value: " + value);
                             }
                         }
-                        break;
                     }
                 }
             }

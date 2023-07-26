@@ -72,7 +72,7 @@ public abstract class BaseClusterer implements Clusterer {
 	public DistanceFunction<Feature> getDistanceFunction(String featureName) {
 		DistanceFunction<Feature> func = null;
 		if (typeDefs.containsKey(featureName)) {
-			func = typeDefs.get(featureName).distFunc;
+			func = typeDefs.get(featureName).distFunc();
 		}
 		return func;
 	}
@@ -87,7 +87,7 @@ public abstract class BaseClusterer implements Clusterer {
 	public Class<? extends Centroid> getCentroidClass(String featureName) {
 		Class<? extends Centroid> centroidClass = null;
 		if (typeDefs.containsKey(featureName)) {
-			centroidClass = typeDefs.get(featureName).centroidClass;
+			centroidClass = typeDefs.get(featureName).centroidClass();
 		}
 		return centroidClass;
 	}

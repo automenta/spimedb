@@ -61,21 +61,15 @@ public class SimpleTunnelInitiator implements TunnellerInitiator {
                 LineLoggerOutputStream log = new LineLoggerOutputStream("", SimpleTunnelInitiator.this.logger.getLogger("console").warn());
                 final LineLoggerOutputStream dlog = new LineLoggerOutputStream("", SimpleTunnelInitiator.this.logger.getLogger("tunneller").info());
                 this.diag = SimpleTunnelInitiator.this.streamCopyService.link(stdErr, log, true);
-                Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            TunnellerConnection tcon = new TunnellerConnection("tunneller", stdOut, stdIn, new PrintStream(dlog), 10L, TimeUnit.SECONDS);
-                            tc.setData(tcon);
-                        } catch (IOException var2) {
-                            tc.setError(var2);
-                        } catch (InterruptedException var3) {
-                            tc.setError(var3);
-                        } catch (TimeoutException var4) {
-                            tc.setError(var4);
-                        }
-
-                        diag.flush();
+                Thread thread = new Thread(() -> {
+                    try {
+                        TunnellerConnection tcon = new TunnellerConnection("tunneller", stdOut, stdIn, new PrintStream(dlog), 10L, TimeUnit.SECONDS);
+                        tc.setData(tcon);
+                    } catch (IOException | TimeoutException | InterruptedException var2) {
+                        tc.setError(var2);
                     }
+
+                    diag.flush();
                 });
                 thread.setName("Tunnel initializer");
                 thread.start();
@@ -126,7 +120,7 @@ public class SimpleTunnelInitiator implements TunnellerInitiator {
         }
 
         cmd.addAll(Arrays.asList("-Xmx32m", "-Xms32m", "-cp", jarpath, Tunneller.class.getName()));
-        return cmd.toArray(new String[cmd.size()]);
+        return cmd.toArray(new String[0]);
     }
 
     private String detectCachePath(String jarpath) {
@@ -188,8 +182,7 @@ public class SimpleTunnelInitiator implements TunnellerInitiator {
 
             try {
                 done.get();
-            } catch (InterruptedException var11) {
-            } catch (ExecutionException var12) {
+            } catch (InterruptedException | ExecutionException var11) {
             }
 
             BufferedReader outr = new BufferedReader(new StringReader(stdOut.toString()));
@@ -224,34 +217,27 @@ public class SimpleTunnelInitiator implements TunnellerInitiator {
         }
     }
 
-    private static class CosnoleWrapper implements HostControlConsole {
-        private final HostControlConsole delegate;
-        private final Destroyable destroyable;
-
-        public CosnoleWrapper(HostControlConsole delegate, Destroyable destroyable) {
-            this.delegate = delegate;
-            this.destroyable = destroyable;
-        }
+    private record CosnoleWrapper(HostControlConsole delegate, Destroyable destroyable) implements HostControlConsole {
 
         public String cacheFile(FileBlob blob) {
-            return this.delegate.cacheFile(blob);
-        }
+                return this.delegate.cacheFile(blob);
+            }
 
-        public List<String> cacheFiles(List<? extends FileBlob> blobs) {
-            return this.delegate.cacheFiles(blobs);
-        }
+            public List<String> cacheFiles(List<? extends FileBlob> blobs) {
+                return this.delegate.cacheFiles(blobs);
+            }
 
-        public Destroyable openSocket(SocketHandler handler) {
-            return this.delegate.openSocket(handler);
-        }
+            public Destroyable openSocket(SocketHandler handler) {
+                return this.delegate.openSocket(handler);
+            }
 
-        public Destroyable startProcess(String workDir, String[] command, Map<String, String> env, ProcessHandler handler) {
-            return this.delegate.startProcess(workDir, command, env, handler);
-        }
+            public Destroyable startProcess(String workDir, String[] command, Map<String, String> env, ProcessHandler handler) {
+                return this.delegate.startProcess(workDir, command, env, handler);
+            }
 
-        public void terminate() {
-            this.delegate.terminate();
-            this.destroyable.destroy();
+            public void terminate() {
+                this.delegate.terminate();
+                this.destroyable.destroy();
+            }
         }
-    }
 }

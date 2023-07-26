@@ -34,10 +34,7 @@ public class Vector implements Serializable {
 
 
     public static Vector zeroVector (int size) {
-        double[] coords = new double[size];
-        for (int i=0; i<size; ++i)
-            coords[i] = 0.0;
-        return new Vector(coords);
+        return new Vector(new double[size]);
     }
 
 

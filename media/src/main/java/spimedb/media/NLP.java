@@ -1,6 +1,5 @@
 package spimedb.media;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import opennlp.tools.cmdline.parser.ParserTool;
@@ -29,48 +28,45 @@ public class NLP {
     static final HTTP http = new HTTP();
 
 
-    public static final LoadingCache<Class,Object> models = Caffeine.newBuilder().build(new CacheLoader<Class,Object>(){
-        @Override
-        public Object load(Class k) throws Exception {
+    public static final LoadingCache<Class,Object> models = Caffeine.newBuilder().build(k -> {
 
-            //http://opennlp.sourceforge.net/models-1.5/en-ner-date.bin
-            //http://opennlp.sourceforge.net/models-1.5/en-ner-time.bin
-            //http://opennlp.sourceforge.net/models-1.5/en-ner-location.bin
-            //http://opennlp.sourceforge.net/models-1.5/en-ner-money.bin
-            //http://opennlp.sourceforge.net/models-1.5/en-ner-organization.bin
-            //http://opennlp.sourceforge.net/models-1.5/en-ner-person.bin
-            //http://opennlp.sourceforge.net/models-1.5/en-ner-percentage.bin
+        //http://opennlp.sourceforge.net/models-1.5/en-ner-date.bin
+        //http://opennlp.sourceforge.net/models-1.5/en-ner-time.bin
+        //http://opennlp.sourceforge.net/models-1.5/en-ner-location.bin
+        //http://opennlp.sourceforge.net/models-1.5/en-ner-money.bin
+        //http://opennlp.sourceforge.net/models-1.5/en-ner-organization.bin
+        //http://opennlp.sourceforge.net/models-1.5/en-ner-person.bin
+        //http://opennlp.sourceforge.net/models-1.5/en-ner-percentage.bin
 
-            String base = "http://opennlp.sourceforge.net/models-1.5/";
+        String base = "http://opennlp.sourceforge.net/models-1.5/";
 
-            if (k == TokenizerModel.class) {
-                InputStream s = stream(base + "en-token.bin");
-                TokenizerModel model = new TokenizerModel(s);
-                s.close();
-                return (model);
-            }
-            if (k == ParserModel.class) {
-                InputStream s = stream(base + "en-parser-chunking.bin");
-                ParserModel model = new ParserModel(s);
-                s.close();
-                return model;
-            } else if (k == TokenNameFinderModel.class) {
-                TokenNameFinderModel person, location;
-                {
-                    InputStream s = stream(base + "en-ner-person.bin");
-                    person = new TokenNameFinderModel(s);
-                    s.close();
-                }
-                {
-                    InputStream s = stream(base + "en-ner-location.bin");
-                    location = new TokenNameFinderModel(s);
-                    s.close();
-                }
-                return new NameFinderME[] { new NameFinderME(person), new NameFinderME(location) };
-            }
-
-            throw new RuntimeException("unsupported key: " + k);
+        if (k == TokenizerModel.class) {
+            InputStream s = stream(base + "en-token.bin");
+            TokenizerModel model = new TokenizerModel(s);
+            s.close();
+            return (model);
         }
+        if (k == ParserModel.class) {
+            InputStream s = stream(base + "en-parser-chunking.bin");
+            ParserModel model = new ParserModel(s);
+            s.close();
+            return model;
+        } else if (k == TokenNameFinderModel.class) {
+            TokenNameFinderModel person, location;
+            {
+                InputStream s = stream(base + "en-ner-person.bin");
+                person = new TokenNameFinderModel(s);
+                s.close();
+            }
+            {
+                InputStream s = stream(base + "en-ner-location.bin");
+                location = new TokenNameFinderModel(s);
+                s.close();
+            }
+            return new NameFinderME[]{new NameFinderME(person), new NameFinderME(location)};
+        }
+
+        throw new RuntimeException("unsupported key: " + k);
     });
 
 

@@ -148,7 +148,7 @@ public class FloatRange {
             range.add((float) v);
             v += step;
         }
-        return range.toArray(new Float[range.size()]);
+        return range.toArray(new Float[0]);
     }
 
     @Override

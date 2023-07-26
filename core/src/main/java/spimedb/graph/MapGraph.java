@@ -11,10 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-//import org.jgrapht.DirectedGraph;
-//import org.jgrapht.Graph;
-//import org.jgrapht.util.ArrayUnenforcedSet;
-
 /**
  * High-performance customizable JGraphT DirectedGraph impl
  */
@@ -101,12 +97,8 @@ public class MapGraph<V, E> implements Serializable {
 
         VertexContainer<V,E> container = vertices.remove(v);
         if (container!=null) {
-            container.incoming.forEach(e -> {
-                vertex(e.getOne(), false).removeOutgoingEdge(e.getTwo(), v);
-            });
-            container.outgoing.forEach(e -> {
-                vertex(e.getTwo(), false).removeIncomingEdge(v, e.getOne());
-            });
+            container.incoming().forEach(e -> vertex(e.getOne(), false).removeOutgoingEdge(e.getTwo(), v));
+            container.outgoing().forEach(e -> vertex(e.getTwo(), false).removeIncomingEdge(v, e.getOne()));
             return true;
         }
 
@@ -151,7 +143,7 @@ public class MapGraph<V, E> implements Serializable {
         if (S!=null && containsVertex(targetVertex)) {
             edges = new ArrayUnenforcedSet<>();
 
-            for (Pair<E,V> e : S.outgoing) {
+            for (Pair<E,V> e : S.outgoing()) {
                 if (e.getTwo().equals(targetVertex)) {
                     edges.add(e.getOne());
                 }
@@ -176,7 +168,7 @@ public class MapGraph<V, E> implements Serializable {
      */
     public Set<Pair<V,E>> incomingEdgesOf(V vertex) {
         VertexContainer<V, E> vv = vertex(vertex, false);
-        return vv!=null ? vv.incoming : Collections.emptySet();
+        return vv!=null ? vv.incoming() : Collections.emptySet();
     }
 
     /**
@@ -191,7 +183,7 @@ public class MapGraph<V, E> implements Serializable {
      */
     public Set<Pair<E,V>> outgoingEdgesOf(V vertex) {
         VertexContainer<V, E> vv = vertex(vertex, false);
-        return vv!=null ? vv.outgoing : Collections.emptySet();
+        return vv!=null ? vv.outgoing() : Collections.emptySet();
     }
 
 

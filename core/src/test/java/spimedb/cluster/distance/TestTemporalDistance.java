@@ -751,7 +751,7 @@ public class TestTemporalDistance {
 		TemporalFeature t2 = new TemporalFeature();
 		t2.setValue(date3, date4);
 		
-		List<TemporalFeature> set1 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set1 = new LinkedList<>();
 		set1.add(t1);
 		set1.add(t2);
 		
@@ -761,7 +761,7 @@ public class TestTemporalDistance {
 		TemporalFeature t4 = new TemporalFeature();
 		t4.setValue(date7, date8);
 		
-		List<TemporalFeature> set2 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set2 = new LinkedList<>();
 		set2.add(t3);
 		set2.add(t4);
 		
@@ -793,7 +793,7 @@ public class TestTemporalDistance {
 		TemporalFeature t2 = new TemporalFeature();
 		t2.setValue(date3, date4);
 		
-		List<TemporalFeature> set1 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set1 = new LinkedList<>();
 		set1.add(t1);
 		set1.add(t2);
 		
@@ -803,7 +803,7 @@ public class TestTemporalDistance {
 		TemporalFeature t4 = new TemporalFeature();
 		t4.setValue(date7, date8);
 		
-		List<TemporalFeature> set2 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set2 = new LinkedList<>();
 		set2.add(t3);
 		set2.add(t4);
 		
@@ -839,7 +839,7 @@ public class TestTemporalDistance {
 		TemporalFeature t2 = new TemporalFeature();
 		t2.setValue(date3, date4);
 		
-		Collection<TemporalFeature> set1 = new LinkedList<TemporalFeature>();
+		Collection<TemporalFeature> set1 = new LinkedList<>();
 		set1.add(t1);
 		set1.add(t2);
 		
@@ -852,7 +852,7 @@ public class TestTemporalDistance {
 		TemporalFeature t5 = new TemporalFeature();
 		t5.setValue(date9, date10);
 		
-		Collection<TemporalFeature> set2 = new LinkedList<TemporalFeature>();
+		Collection<TemporalFeature> set2 = new LinkedList<>();
 		set2.add(t3);
 		set2.add(t4);
 		set2.add(t5);
@@ -897,7 +897,7 @@ public class TestTemporalDistance {
 		TemporalFeature t2 = new TemporalFeature();
 		t2.setValue(date3, date4);
 		
-		List<TemporalFeature> set1 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set1 = new LinkedList<>();
 		set1.add(t1);
 		set1.add(t2);
 		
@@ -910,7 +910,7 @@ public class TestTemporalDistance {
 		TemporalFeature t5 = new TemporalFeature();
 		t5.setValue(date9, date10);
 		
-		List<TemporalFeature> set2 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set2 = new LinkedList<>();
 		set2.add(t3);
 		set2.add(t4);
 		set2.add(t5);
@@ -946,7 +946,7 @@ public class TestTemporalDistance {
 		TemporalFeature t2 = new TemporalFeature();
 		t2.setValue(date3, date4);
 		
-		List<TemporalFeature> set1 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set1 = new LinkedList<>();
 		set1.add(t1);
 		set1.add(t2);
 		
@@ -959,7 +959,7 @@ public class TestTemporalDistance {
 		TemporalFeature t5 = new TemporalFeature();
 		t5.setValue(date9, date10);
 		
-		List<TemporalFeature> set2 = new LinkedList<TemporalFeature>();
+		List<TemporalFeature> set2 = new LinkedList<>();
 		set2.add(t3);
 		set2.add(t4);
 		set2.add(t5);

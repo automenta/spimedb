@@ -60,7 +60,7 @@ public class Crawl {
                         p = p.substring(root.length()+1);
                     }
 
-                    float pri = 0.5f * (1 / (1f + x.length()/(1024*1024))); //deprioritize relative to megabyte increase
+                    float pri = 0.5f * (1 / (1f + x.length()/(1024f*1024))); //deprioritize relative to megabyte increase
 
                     url(filenameable(p), u, "file:" + xPath, db, pri);
 
@@ -85,7 +85,7 @@ public class Crawl {
                 Set<String> keywords = parseKeywords(tokenizer, urlString);
 
                 MutableNObject n = new MutableNObject(id)
-                        .withTags(keywords.toArray(new String[keywords.size()]))
+                        .withTags(keywords.toArray(new String[0]))
                         .put("url_in", url_in)
                         .put("url", urlString);
 

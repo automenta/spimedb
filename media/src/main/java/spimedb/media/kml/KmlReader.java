@@ -548,8 +548,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
 
         // keep track of URLs visited to prevent revisits
         Set<URI> visited = new HashSet<>();
-        LinkedList<URI> networkLinks = new LinkedList<>();
-        networkLinks.addAll(gisNetworkLinks);
+        LinkedList<URI> networkLinks = new LinkedList<>(gisNetworkLinks);
         while (!networkLinks.isEmpty()) {
             URI uri = networkLinks.removeFirst();
             if (visited.add(uri)) {
@@ -727,7 +726,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
 
 
     @NonNull
-    public Iterator<Schema> enumerateSchemata() throws IOException {
+    public Iterator<Schema> enumerateSchemata() {
         throw new UnsupportedOperationException();
     }
 

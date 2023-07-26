@@ -31,7 +31,7 @@ public class GeoJSONTest {
     }
 
     @Test
-    public void test1() throws IOException {
+    public void test1() {
 
 
 

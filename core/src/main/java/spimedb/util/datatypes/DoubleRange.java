@@ -148,7 +148,7 @@ public class DoubleRange {
             range.add(v);
             v += step;
         }
-        return range.toArray(new Double[range.size()]);
+        return range.toArray(new Double[0]);
     }
 
     @Override

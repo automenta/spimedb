@@ -101,7 +101,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
      * 
      * @return new vector in the XY plane
      */
-    public static final XYZ fromXYTheta(float theta) {
+    public static XYZ fromXYTheta(float theta) {
         return new Vec3D((float) Math.cos(theta), (float) Math.sin(theta), 0);
     }
 
@@ -116,7 +116,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
      * 
      * @return new vector in the XZ plane
      */
-    public static final XYZ fromXZTheta(float theta) {
+    public static XYZ fromXZTheta(float theta) {
         return new Vec3D((float) Math.cos(theta), 0, (float) Math.sin(theta));
     }
 
@@ -131,7 +131,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
      * 
      * @return new vector in the YZ plane
      */
-    public static final XYZ fromYZTheta(float theta) {
+    public static XYZ fromYZTheta(float theta) {
         return new Vec3D(0, (float) Math.cos(theta), (float) Math.sin(theta));
     }
 
@@ -146,7 +146,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
      * 
      * @return result as new vector
      */
-    public static final Vec3D max(roVec3D a, roVec3D b) {
+    public static Vec3D max(roVec3D a, roVec3D b) {
         return new Vec3D(Math.max(a.x(), b.x()), Math.max(a.y(), b.y()), Math.max(a.z(), b.z()));
     }
 
@@ -161,7 +161,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
      * 
      * @return result as new vector
      */
-    public static final Vec3D min(roVec3D a, roVec3D b) {
+    public static Vec3D min(roVec3D a, roVec3D b) {
         return new Vec3D(MathUtils.min(a.x(), b.x()), MathUtils.min(a.y(),
                 b.y()), MathUtils.min(a.z(), b.z()));
     }
@@ -172,7 +172,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
      * 
      * @return a new random normalized unit vector.
      */
-    public static final XYZ randomVector() {
+    public static XYZ randomVector() {
         return randomVector(MathUtils.RND);
     }
 
@@ -187,7 +187,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
      * 
      * @return a new random normalized unit vector.
      */
-    public static final XYZ randomVector(Random rnd) {
+    public static XYZ randomVector(Random rnd) {
         Vec3D v = new Vec3D(rnd.nextFloat() * 2 - 1, rnd.nextFloat() * 2 - 1,
                 rnd.nextFloat() * 2 - 1);
         return v.normalize();
@@ -438,9 +438,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
         try {
             roVec3D vv = (roVec3D) v;
             return (x == vv.x() && y == vv.y() && z == vv.z());
-        } catch (NullPointerException e) {
-            return false;
-        } catch (ClassCastException e) {
+        } catch (NullPointerException | ClassCastException e) {
             return false;
         }
     }
@@ -545,25 +543,24 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
     }
 
     public final float getComponent(Axis id) {
-        switch (id) {
-            case X:
-                return x;
-            case Y:
-                return y;
-            case Z:
-                return z;
-        }
-        throw new IllegalArgumentException();
+        return switch (id) {
+            case X -> x;
+            case Y -> y;
+            case Z -> z;
+        };
     }
 
     public final float getComponent(int id) {
         switch (id) {
-            case 0:
+            case 0 -> {
                 return x;
-            case 1:
+            }
+            case 1 -> {
                 return y;
-            case 2:
+            }
+            case 2 -> {
                 return z;
+            }
         }
         throw new IllegalArgumentException("index must be 0, 1 or 2");
     }
@@ -1245,30 +1242,18 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
 
     public final XYZ setComponent(Axis id, float val) {
         switch (id) {
-            case X:
-                x = val;
-                break;
-            case Y:
-                y = val;
-                break;
-            case Z:
-                z = val;
-                break;
+            case X -> x = val;
+            case Y -> y = val;
+            case Z -> z = val;
         }
         return this;
     }
 
     public final XYZ setComponent(int id, float val) {
         switch (id) {
-            case 0:
-                x = val;
-                break;
-            case 1:
-                y = val;
-                break;
-            case 2:
-                z = val;
-                break;
+            case 0 -> x = val;
+            case 1 -> y = val;
+            case 2 -> z = val;
         }
         return this;
     }
@@ -1306,21 +1291,21 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
         float t;
         for (int i = 0; i < iterations; i++) {
             switch (MathUtils.random(3)) {
-                case 0:
+                case 0 -> {
                     t = x;
                     x = y;
                     y = t;
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     t = x;
                     x = z;
                     z = t;
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     t = y;
                     y = z;
                     z = t;
-                    break;
+                }
             }
         }
         return this;

@@ -82,7 +82,7 @@ public class QueryTest {
         ArrayList<NObject> found = new ArrayList();
         new Query().in("Person").start(db).forEachLocal((d, s) -> found.add(d));
 
-        found.forEach(f -> System.out.println(f));
+        found.forEach(System.out::println);
         assertEquals(1, found.size());
         System.out.println(found);
 

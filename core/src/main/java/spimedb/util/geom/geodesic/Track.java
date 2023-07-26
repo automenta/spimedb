@@ -98,8 +98,7 @@ abstract public class Track {
             Collections.reverse(reversePoints);
             List<Double> reverseParameterization = new ArrayList<>(_parameterization);
             Collections.reverse(reverseParameterization);
-            for (int i=0; i<reverseParameterization.size(); ++i)
-                reverseParameterization.set(i, 1.0-reverseParameterization.get(i));
+            reverseParameterization.replaceAll(aDouble -> 1.0 - aDouble);
             _reverse = createTrack(reversePoints, reverseParameterization);
             _reverse._reverse = this;
         }

@@ -22,6 +22,7 @@ abstract public class UnionTravel<V, E, D> implements Iterable<V>, Consumer<V> {
     private final Map<V, D> seen = new ConcurrentHashMap<>();
 
 
+    @SafeVarargs
     public UnionTravel(MapGraph<V, E> g, V... keys) {
         this(g, Arrays.asList(keys));
     }

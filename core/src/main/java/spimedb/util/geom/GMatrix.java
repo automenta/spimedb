@@ -866,7 +866,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
 
             // Is the matrix singular?
             if (big == 0.0) {
-                return false;
+                return true;
             }
             row_scale[rs++] = 1.0 / big;
         }
@@ -943,7 +943,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
 
             // Is the matrix singular
             if (matrix0[(mtx + (dim * j) + j)] == 0.0) {
-                return false;
+                return true;
             }
 
             // Divide elements of lower diagonal matrix L by pivot
@@ -959,7 +959,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
 
         }
 
-        return true;
+        return false;
     }
 
     private static void print_m(GMatrix m, GMatrix u, GMatrix v) {
@@ -1312,7 +1312,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
         }
 
         // Calculate LU decomposition: Is the matrix singular?
-        if (!decomposeLU(LU.nRow, temp, row_perm, even_row_exchange)) {
+        if (decomposeLU(LU.nRow, temp, row_perm, even_row_exchange)) {
             // Matrix has no inverse
             throw new SingularMatrixException();
         }
@@ -1948,7 +1948,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
         }
 
         // Calculate LU decomposition: Is the matrix singular?
-        if (!decomposeLU(m1.nRow, temp, row_perm, even_row_exchange)) {
+        if (decomposeLU(m1.nRow, temp, row_perm, even_row_exchange)) {
             // Matrix has no inverse
             throw new SingularMatrixException();
         }

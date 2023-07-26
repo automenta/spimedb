@@ -125,7 +125,7 @@ public class WrappingRectangle {
 	if (null == obj) return false;
 	if (!(obj instanceof WrappingRectangle rect)) return false;
 
-        if (Math.abs(_minLat-rect._minLat) > _epsilon) return false;
+    if (Math.abs(_minLat-rect._minLat) > _epsilon) return false;
 	if (Math.abs(_maxLat-rect._maxLat) > _epsilon) return false;
 	double oCenter = AngleUtilities.intoRangeDegrees(_centerLon, rect._centerLon);
 	if (Math.abs(oCenter-_centerLon) > _epsilon) return false;

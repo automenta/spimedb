@@ -45,7 +45,7 @@ public class ChainedResourceManager extends CopyOnWriteArrayList<ResourceManager
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         forEach(m -> {
             try {
                 m.close();

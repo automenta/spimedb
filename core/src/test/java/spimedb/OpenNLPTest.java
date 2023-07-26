@@ -3,8 +3,6 @@ package spimedb;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
-
 /**
  * Created by me on 1/20/17.
  */
@@ -12,7 +10,7 @@ import java.io.IOException;
 public class OpenNLPTest {
 
     @Test
-    public void testParse() throws IOException {
+    public void testParse() {
 
     }
 }

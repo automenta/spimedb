@@ -93,8 +93,8 @@ public class VisualSplineTest extends JFrame {
         private final List<Color>        _colors;
 
         SplinePanel () {
-            _splines = new ArrayList<CubicBSpline>();
-            _colors = new ArrayList<Color>();
+            _splines = new ArrayList<>();
+            _colors = new ArrayList<>();
         }
         public void addSpline (CubicBSpline s, Color c) {
             _splines.add(s);
