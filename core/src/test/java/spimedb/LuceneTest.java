@@ -6,8 +6,8 @@ import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,8 +44,9 @@ public class LuceneTest {
         Date start = new Date();
         try {
 
-            Directory dir = //FSDirectory.open(Paths.get(indexPath));
-                    new RAMDirectory();
+            Directory dir =
+                    //FSDirectory.open(Paths.get(indexPath));
+                    new ByteBuffersDirectory();
             Analyzer analyzer = new StandardAnalyzer();
             IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 

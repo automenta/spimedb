@@ -49,7 +49,7 @@ public class QueryTest {
         r.forEach((d, s) -> found.add(d), 300, () -> {
             assertEquals(1, db.size());
             assertNotNull(r.localDocs);
-            assertEquals(1, r.localDocs.totalHits);
+            assertEquals(1, r.localDocs.totalHits.value);
             assertFalse(found.isEmpty());
 
             assertEquals(dplace.toString(), found.get(0).toString());

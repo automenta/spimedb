@@ -1,6 +1,8 @@
 package spimedb.util;
 
-import org.apache.lucene.analysis.core.LowerCaseTokenizer;
+
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -72,14 +74,15 @@ public class Crawl {
     }
 
     public static void url(String id, URL u, String url_in, SpimeDB db, float pri) {
-
-
         DObject p = db.get(id);
         Long whenCached = p != null ? p.get("url_cached") : null;
         try {
             if (whenCached == null || whenCached < u.openConnection().getLastModified()) {
                 String urlString = u.toString();
-                Set<String> keywords = parseKeywords(new LowerCaseTokenizer(), urlString);
+                Tokenizer tokenizer =
+                    new KeywordTokenizer();
+                    //new LowerCaseTokenizer();
+                Set<String> keywords = parseKeywords(tokenizer, urlString);
 
                 MutableNObject n = new MutableNObject(id)
                         .withTags(keywords.toArray(new String[keywords.size()]))

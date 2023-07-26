@@ -1,7 +1,7 @@
 package spimedb.graph;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jcog.list.ArrayUnenforcedSet;
+import jcog.data.set.ArrayUnenforcedSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 

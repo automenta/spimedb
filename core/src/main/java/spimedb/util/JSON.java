@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.google.common.primitives.Longs;
 import org.jetbrains.annotations.NotNull;
-import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -93,20 +93,20 @@ public class JSON {
         }
     }
 
-    public final static ObjectMapper msgPackMapper = new ObjectMapper(new MessagePackFactory());
+    public final static ObjectMapper mapper = new CBORMapper();
 
-    public static byte[] toMsgPackBytes(Object x, Class c) {
+    public static byte[] toBytes(Object x, Class c) {
         try {
-            return msgPackMapper.writerFor(c).writeValueAsBytes(x);
+            return mapper.writerFor(c).writeValueAsBytes(x);
         } catch (JsonProcessingException e) {
             logger.error("{}", e);
             return null;
         }
     }
 
-    public static <X> X fromMsgPackBytes(byte[] msgPacked, Class<? extends X> type) {
+    public static <X> X fromBytes(byte[] b, Class<? extends X> type) {
         try {
-            return msgPackMapper.reader(type).readValue(msgPacked);
+            return mapper.reader(type).readValue(b);
         } catch (IOException e) {
             logger.error("{}", e);
             return null;

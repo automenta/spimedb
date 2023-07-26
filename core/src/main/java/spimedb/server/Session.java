@@ -68,26 +68,26 @@ public class Session extends AbstractServerWebSocket {
     @Override
     protected void onFullTextMessage(WebSocketChannel socket, BufferedTextMessage message) {
 
-        String code = message.getData().trim();
-        if (code.isEmpty())
-            return; //ignore
-
-        db.runLater(1f, () -> {
-            JSExec.eval(code, scope, db.js, result -> {
-                if (result == null)
-                    return;
-
-                Object resultObj = result.o;
-
-                if (resultObj instanceof Task) {
-                    //if the result of the evaluation is a Task, queue it
-                    start((Task) resultObj);
-                } else {
-                    //else send the immediate result
-                    sendJSONBinary(socket, result.toJSON(), defaultOutRate, null);
-                }
-            });
-        });
+//        String code = message.getData().trim();
+//        if (code.isEmpty())
+//            return; //ignore
+//
+//        db.runLater(1f, () -> {
+//            JSExec.eval(code, scope, db.js, result -> {
+//                if (result == null)
+//                    return;
+//
+//                Object resultObj = result.o;
+//
+//                if (resultObj instanceof Task) {
+//                    //if the result of the evaluation is a Task, queue it
+//                    start((Task) resultObj);
+//                } else {
+//                    //else send the immediate result
+//                    sendJSONBinary(socket, result.toJSON(), defaultOutRate, null);
+//                }
+//            });
+//        });
 
     }
 

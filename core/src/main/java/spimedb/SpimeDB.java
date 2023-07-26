@@ -10,11 +10,10 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
 import jcog.Util;
-import jcog.event.ArrayTopic;
+import jcog.data.list.Lst;
+import jcog.event.ListTopic;
 import jcog.event.Topic;
-import jcog.list.FasterList;
 import jcog.random.XorShift128PlusRandom;
-import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -35,9 +34,9 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.search.suggest.DocumentDictionary;
 import org.apache.lucene.search.suggest.Lookup;
 import org.apache.lucene.search.suggest.analyzing.FreeTextSuggester;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
@@ -94,7 +93,7 @@ public class SpimeDB {
 
         @Override
         public TopScoreDocCollector newCollector() {
-            return TopScoreDocCollector.create(1);
+            return TopScoreDocCollector.create(1, 1);
         }
 
 
@@ -116,12 +115,9 @@ public class SpimeDB {
     };
 
     static {
-        if (!DEBUG)
-            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.INFO);
-        else
-            SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, Level.DEBUG);
+        SpimeDB.LOG(Logger.ROOT_LOGGER_NAME, !DEBUG ? Level.INFO : Level.DEBUG);
 
-        SpimeDB.LOG(Reflections.log, Level.WARN);
+        //SpimeDB.LOG(Reflections.log, Level.WARN);
         SpimeDB.LOG("logging", Level.WARN);
     }
 
@@ -138,13 +134,13 @@ public class SpimeDB {
     /**
      * active searches
      */
-    public final Topic<Search> onSearch = new ArrayTopic();
+    public final Topic<Search> onSearch = new ListTopic();
     protected final Directory dir;
     /**
      * server-side javascript engine
      */
     transient final ScriptEngineManager engineManager = new ScriptEngineManager();
-    transient public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
+    //transient public final NashornScriptEngine js = (NashornScriptEngine) engineManager.getEngineByName("nashorn");
     final ThreadLocal<QueryParser> defaultFindQueryParser;
     final IndexWriterConfig writerConf;
     final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
@@ -185,9 +181,9 @@ public class SpimeDB {
      * in-memory
      */
     public SpimeDB() throws IOException {
-        this(null, new RAMDirectory());
+        this(null, new ByteBuffersDirectory());
         this.indexPath = null;
-        this.taxoDir = new RAMDirectory();
+        this.taxoDir = new ByteBuffersDirectory();
         this.taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
     }
 
@@ -223,7 +219,8 @@ public class SpimeDB {
                 NObject.NAME,
                 NObject.DESC,
                 NObject.TAG,
-                NObject.ID};
+                NObject.ID
+        };
 
         this.defaultFindQueryParser = ThreadLocal.withInitial(() -> new MultiFieldQueryParser(defaultFindFields, analyzer, Maps.mutable.with(
                 NObject.NAME, 1f,
@@ -245,17 +242,16 @@ public class SpimeDB {
 
     }
 
-    @NotNull
     public static String uuidString() {
-        return Util.uuid64();
+        return Util.UUIDbase64();
         //return Base64.getEncoder().encodeToString(uuidBytes()).replaceAll("\\/", "`");
         //return BinTxt.encode(uuidBytes());
     }
 
     public static byte[] uuidBytes() {
         return ArrayUtils.addAll(
-                Longs.toByteArray(rng.nextLong()),
-                Longs.toByteArray(rng.nextLong())
+            Longs.toByteArray(rng.nextLong()),
+            Longs.toByteArray(rng.nextLong())
         );
     }
 
@@ -337,7 +333,12 @@ public class SpimeDB {
                     if (nameDictReader.maxDoc() == 0)
                         return;
 
-                    DocumentDictionary nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
+                    DocumentDictionary nameDict = null;
+                    try {
+                        nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     Stopwatch time = Stopwatch.createStarted();
 
@@ -380,7 +381,7 @@ public class SpimeDB {
             TermQuery x = new TermQuery(new Term(NObject.ID, id));
             try {
                 TopDocs y = searcher.search(x, firstResultOnly);
-                int hits = (int) y.totalHits;
+                int hits = (int) y.totalHits.value;
                 if (hits > 0) {
                     if (hits > 1) {
                         logger.warn("multiple documents with id={} exist: {}", id, y);
@@ -834,9 +835,9 @@ public class SpimeDB {
             int chunkSize = max / chunks;
             int j = 0;
             for (int i = 0; i < chunks && j < max; i++) {
-                List<NObject> l = new FasterList(chunkSize);
+                List<NObject> l = new Lst<>(chunkSize);
                 IntStream.range(j, j + chunkSize).forEach(k -> {
-                    Document d = null;
+                    Document d;
                     try {
                         d = r.document(k);
                         if (d != null)
@@ -882,7 +883,7 @@ public class SpimeDB {
      */
     public boolean sync(int waitDelayMS) {
         if (busy()) {
-            Util.sleep(waitDelayMS);
+            Util.sleepMS(waitDelayMS);
             return busy();
         } else {
             return false;

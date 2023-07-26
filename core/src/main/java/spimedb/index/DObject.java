@@ -2,11 +2,11 @@ package spimedb.index;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import jcog.TODO;
 import jcog.tree.rtree.point.DoubleND;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.LowerCaseTokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
 import org.apache.lucene.document.*;
@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 
-import static jcog.tree.rtree.rect.RectDoubleND.unbounded;
 
 /**
  * (Lucene) Document-based NObject
@@ -54,7 +53,7 @@ public class DObject implements NObject {
 
     public static DObject get(NObject n, SpimeDB db) {
         if (n instanceof DObject)
-            return ((DObject) n);
+            return (DObject) n;
         return get(toDocument(n, db));
     }
 
@@ -81,9 +80,9 @@ public class DObject implements NObject {
 
         if (n.bounded()) {
             DoubleND minP = n.min();
-            if (minP != unbounded) {
+            //if (minP != unbounded) {
 
-                d.add(new SpacetimeField((minP.coord), (n.max().coord)));
+                d.add(new SpacetimeField(minP.coord, n.max().coord));
 
                 //d.add(new FloatRangeField(NObject.BOUND, min, max));
                 //float[] aa = ArrayUtils.addAll(min, max);
@@ -93,7 +92,7 @@ public class DObject implements NObject {
 
 
 
-            }
+            //}
         }
 
         n.forEach((k, v) -> {
@@ -131,7 +130,7 @@ public class DObject implements NObject {
 
             Class c = v.getClass();
             if (c == String.class) {
-                d.add(text(k, ((String) v)));
+                d.add(text(k, (String) v));
             } else if (c == String[].class) {
                 String[] ss = (String[]) v;
                 for (String s : ss) {
@@ -148,13 +147,13 @@ public class DObject implements NObject {
                 d.add(new StoredField(k, (Long) v));
                 //throw new UnsupportedOperationException();
                 //d.add(new LongPoint(k, ((Long) v).longValue()));
-            } else if (v instanceof ScriptObjectMirror) {
+//            } else if (v instanceof ScriptObjectMirror) {
                 //HACK ignore
             } else if (c == double[][].class) {
                 //d.add(new StoredField(k, new BytesRef(JSON.toMsgPackBytes(v))));
                 //d.add(new StoredField(k, JSON.toJSONBytes(v)));
                 //throw new UnsupportedOperationException();
-                d.add(bytes(k, JSON.toMsgPackBytes(v, double[][].class)));
+                d.add(bytes(k, JSON.toBytes(v, double[][].class)));
             } else if (c == byte[].class) {
                 d.add(new StoredField(k, (byte[]) v));
             } else if (v instanceof JsonNode) {
@@ -230,7 +229,8 @@ public class DObject implements NObject {
             this.max = new DoubleND(max);
 
         } else {
-            min = max = unbounded;
+            throw new TODO();
+            //min = max = DoubleND.fill(4, );
         }
 
         if (id.contains("/")) {
@@ -251,9 +251,9 @@ public class DObject implements NObject {
         if (name != null && !name.isEmpty()) {
 
 
-            Set<String> k = parseKeywords(new LowerCaseTokenizer(), name);
+            Set<String> k = parseKeywords(new KeywordTokenizer(), name);
             for (String l : k) {
-                if (l.length() >= 3 && !StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(l))
+                if (l.length() >= 3) // && !StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(l))
                     d.add(new FacetField(NObject.TAG, l));
             }
         }
@@ -371,7 +371,7 @@ public class DObject implements NObject {
         switch (f.name()) {
             case NObject.LINESTRING:
             case NObject.POLYGON:
-                return JSON.fromMsgPackBytes(f.binaryValue().bytes, double[][].class);
+                return JSON.fromBytes(f.binaryValue().bytes, double[][].class);
             //return JSON.fromMsgPackBytes(f.binaryValue().bytes);
         }
 

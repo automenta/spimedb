@@ -1,7 +1,8 @@
 package spimedb.query;
 
-import jcog.list.FasterList;
-import jcog.tree.rtree.rect.RectDoubleND;
+
+import jcog.data.list.Lst;
+import jcog.tree.rtree.rect.HyperRectDouble;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.DoubleRange;
 import org.apache.lucene.index.Term;
@@ -17,6 +18,7 @@ import spimedb.index.Search;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static java.lang.Double.NEGATIVE_INFINITY;
@@ -46,7 +48,7 @@ public class Query  {
     /**
      * OR-d together, potentially executed in parallel
      */
-    public RectDoubleND[] bounds = null;
+    public HyperRectDouble[] bounds = null;
 
     public BoundsCondition boundsCondition = Intersect;
 
@@ -103,7 +105,7 @@ public class Query  {
     @NotNull
     private Search find(org.apache.lucene.search.Query q, int limit, SpimeDB db, ScoreDoc after, Collector... collectors) throws IOException {
 
-        TopScoreDocCollector hitsCollector = TopScoreDocCollector.create(limit, after);
+        TopScoreDocCollector hitsCollector = TopScoreDocCollector.create(limit, after, Integer.MAX_VALUE);
 
         Collector collector = collectors.length > 0 ?
                 MultiCollector.wrap(ArrayUtils.add(collectors, hitsCollector))
@@ -117,7 +119,7 @@ public class Query  {
 
         Search s = new Search(q, searcher, db, docs);
 
-        if (docs.totalHits > 0) {
+        if (docs.totalHits.value > 0) {
             for (Collector c : collectors) {
                 if (c instanceof CollectFacets) {
                     ((CollectFacets) c).commit(s, db);
@@ -141,7 +143,7 @@ public class Query  {
         if (tagInclude != null) {
             int tags = tagInclude.length;
             //if (tags > 1) {
-            List<org.apache.lucene.search.Query> tagQueries = new FasterList(tags);
+            List<org.apache.lucene.search.Query> tagQueries = new Lst<>(tags);
             for (String s : tagInclude)
                 tagQueries.add(tagTermQuery(s));
 
@@ -156,15 +158,13 @@ public class Query  {
 
         if (bounds != null && bounds.length > 0) {
 
-            List<org.apache.lucene.search.Query> boundQueries = new FasterList();
+            List<org.apache.lucene.search.Query> boundQueries = new Lst<>();
 
-            for (RectDoubleND x : bounds) {
-                switch (boundsCondition) {
-                    case Intersect:
-                        boundQueries.add(DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord));
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("TODO");
+            for (HyperRectDouble x : bounds) {
+                if (Objects.requireNonNull(boundsCondition) == Intersect) {
+                    boundQueries.add(DoubleRange.newIntersectsQuery(NObject.BOUND, x.min.coord, x.max.coord));
+                } else {
+                    throw new UnsupportedOperationException("TODO");
                 }
 
 
@@ -212,8 +212,8 @@ public class Query  {
 
 
     /** time-axis only */
-    public <Q extends Query> Q when(float start, float end) {
-        return (Q) bounds(new RectDoubleND(
+    public <Q extends Query> Q when(double start, double end) {
+        return bounds(new HyperRectDouble(
                 new double[]{start, NEGATIVE_INFINITY, NEGATIVE_INFINITY, NEGATIVE_INFINITY},
                 new double[]{end, POSITIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY}
         ));
@@ -260,15 +260,15 @@ public class Query  {
             }
 
             return bounds(
-                new RectDoubleND(
+                new HyperRectDouble(
                     new double[]{NEGATIVE_INFINITY, -180, latMinFinal, NEGATIVE_INFINITY},
                     new double[]{POSITIVE_INFINITY, x1max, latMaxFinal, POSITIVE_INFINITY}
-                ),new RectDoubleND(
+                ),new HyperRectDouble(
                     new double[]{NEGATIVE_INFINITY, x2min, latMinFinal, NEGATIVE_INFINITY},
                     new double[]{POSITIVE_INFINITY, +180, latMaxFinal, POSITIVE_INFINITY}
             ));
         } else {
-            return (Q) bounds(new RectDoubleND(
+            return bounds(new HyperRectDouble(
                     new double[]{NEGATIVE_INFINITY, centerX-wHalf, latMinFinal, NEGATIVE_INFINITY},
                     new double[]{POSITIVE_INFINITY, centerX+wHalf, latMaxFinal, POSITIVE_INFINITY}
             ));
@@ -276,7 +276,7 @@ public class Query  {
     }
 
     @NotNull
-    public <Q extends Query> Q bounds(RectDoubleND... newBounds) {
+    public <Q extends Query> Q bounds(HyperRectDouble... newBounds) {
         ensureNotStarted();
 
         if (bounds!=null)

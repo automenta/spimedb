@@ -1,6 +1,5 @@
 package spimedb;
 
-import org.apache.commons.math3.util.MathUtils;
 import spimedb.server.Session;
 
 /**
@@ -35,8 +34,7 @@ public class Tag extends MutableNObject {
         float prevValue = this.priority;
 
         p = Math.max(0f, Math.min(1f, p));
-
-        if (!MathUtils.equals(prevValue,p)) {
+        if (prevValue!=p) {
             this.priority = p;
             reprioritized(prevValue, p);
         }

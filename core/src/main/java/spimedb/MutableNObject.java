@@ -35,7 +35,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     public MutableNObject(NObject copy) {
-        super(copy.bounded() ? copy.min() : unbounded, copy.bounded() ? copy.max() : unbounded, copy.id(), copy.name());
+        super(copy.min(), copy.max(), copy.id(), copy.name());
         copy.forEach(this::put);
     }
 

@@ -1,7 +1,9 @@
 package spimedb.server;
 
 import jcog.bloom.StableBloomFilter;
-import jcog.bloom.hash.StringHashProvider;
+import jcog.bloom.hash.StringHasher;
+import jcog.random.AtomicRandom;
+import jcog.random.XoRoShiRo128PlusRandom;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +46,7 @@ public class ClientSession extends Session {
     public class API {
 
         final StableBloomFilter<String> remoteMemory = new StableBloomFilter(
-            /* size */ 32 * 1024, 3, new StringHashProvider());
+            /* size */ 32 * 1024, 3, 0, new XoRoShiRo128PlusRandom(1), new StringHasher());
 
         private Task currentFocus;
 

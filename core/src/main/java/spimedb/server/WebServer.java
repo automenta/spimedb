@@ -24,15 +24,16 @@ import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import org.eclipse.collections.impl.factory.Sets;
+import org.jboss.resteasy.core.ResteasyDeploymentImpl;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
 
-import javax.servlet.ServletException;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -123,7 +124,7 @@ public class WebServer extends PathHandler {
         Application application = new WebApp();
 
         String contextPath = "/";
-        ResteasyDeployment deployment = new ResteasyDeployment();
+        ResteasyDeployment deployment = new ResteasyDeploymentImpl();
         deployment.setApplication(application);
         DeploymentInfo di = this.undertowDeployment(deployment);
         di.setClassLoader(application.getClass().getClassLoader());
@@ -159,7 +160,7 @@ public class WebServer extends PathHandler {
             }
             addPrefixPath("/", statics);
 
-        } catch (ServletException var4) {
+        } catch (Exception var4) {
             throw new RuntimeException(var4);
         }
 

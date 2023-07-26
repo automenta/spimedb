@@ -1,6 +1,5 @@
 package spimedb.util;
 
-import jcog.list.CircularArrayList;
 import spimedb.util.geom.Rect;
 
 /** maintains a short-term history of a series of rectangular focus
@@ -18,5 +17,5 @@ public class RectangleFocusHistory {
         }
     }
 
-    CircularArrayList<Req> history;
+    //CircularArrayList<Req> history;
 }

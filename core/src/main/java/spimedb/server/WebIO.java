@@ -67,7 +67,7 @@ public enum WebIO {
                     if (!sentSTM.addIfMissing(y.id())) {
                         return true;
                     } else {
-                        sentSTM.unlearn(0.0005f);
+                        //sentSTM.forget(0.0005f);
                     }
                 }
 

@@ -1,7 +1,7 @@
 package spimedb.graph;
 
 import com.google.common.collect.Iterators;
-import jcog.list.ArrayUnenforcedSet;
+import jcog.data.set.ArrayUnenforcedSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;

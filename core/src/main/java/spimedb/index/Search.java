@@ -60,7 +60,7 @@ public class Search {
         int ts = tagsInc.size();
         this.tagsInc = (ts > 0) ? tagsInc.toArray(new String[ts]) : ArrayUtils.EMPTY_STRING_ARRAY;
 
-        db.onSearch.emit(this);
+        db.onSearch.accept(this);
 
         logger.debug("query({}) hits={}", query, docs != null ? docs.totalHits : 0);
     }

@@ -10,7 +10,7 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 import com.google.common.io.Files;
-import jcog.Texts;
+import jcog.Str;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -52,8 +52,8 @@ public abstract class Main extends FileAlterationListenerAdaptor {
         //http://logback.qos.ch/manual/layouts.html
 
         LOG = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        LoggerContext loggerContext = LOG.getLoggerContext();
-        loggerContext.reset();
+//        LoggerContext loggerContext = LOG.getLoggerContext();
+//        loggerContext.reset();
 
 
     }
@@ -181,7 +181,6 @@ public abstract class Main extends FileAlterationListenerAdaptor {
      * the function returned will accept the previous value (null if there was none) and return a result
      *
      * @param file
-     * @param klass
      */
     @NotNull
     private Function build(Pair<Class, String> id, File file) {
@@ -420,10 +419,10 @@ public abstract class Main extends FileAlterationListenerAdaptor {
                     try {
                         switch (f.getType().toString()) {
                             case "float":
-                                v = Texts.f(v.toString());
+                                v = Str.f(v.toString());
                                 break;
                             case "int":
-                                v = Texts.i(v.toString());
+                                v = Str.i(v.toString());
                                 break;
                         }
                         logger.info("{}.{}={}", x, field, v);

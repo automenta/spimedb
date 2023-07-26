@@ -2,7 +2,7 @@ package spimedb;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jcog.tree.rtree.point.DoubleND;
-import jcog.tree.rtree.rect.RectDoubleND;
+import jcog.tree.rtree.rect.HyperRectDouble;
 import org.apache.commons.lang3.ArrayUtils;
 import spimedb.util.JSON;
 
@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 @JsonSerialize(using= NObject.NObjectSerializer.class)
-public abstract class ImmutableNObject extends RectDoubleND implements NObject {
+public abstract class ImmutableNObject extends HyperRectDouble implements NObject {
 
     protected final String id;
 

@@ -1,16 +1,10 @@
 package spimedb.logic;
 
-import jcog.Util;
 import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.nanocloud.RemoteNode;
-import org.jetbrains.annotations.NotNull;
 import spimedb.MultimediaMain;
-import spimedb.SpimeDB;
-import spimedb.SpimePeer;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -95,29 +89,4 @@ public class TeleSpime {
 //        });
     }
 
-    @NotNull
-    private static Thread local() {
-        return new Thread(() -> {
-
-
-                try {
-                    SpimePeer me = new SpimePeer(10000,
-                        new SpimeDB(new File("/home/me/doc/"))
-                        //new SpimeDB()
-                    );
-                    me.runFPS(4f);
-
-                    System.out.println("connecting");
-                    for (int i = 0; i < 100000; i++) {
-                        if (!me.them.isEmpty()) System.out.println(me.summary());
-                        else me.ping("ana", 10000);
-                        Util.sleep(1000);
-                    }
-                    me.stop();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            });
-    }
 }

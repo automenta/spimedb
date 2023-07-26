@@ -6,7 +6,6 @@ import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xnio.Xnio;
-import spimedb.server.SpimeUDP;
 import spimedb.server.WebServer;
 import spimedb.util.Crawl;
 
@@ -126,14 +125,12 @@ public class Spime extends Main {
         w.setPort(port);
         m.put(WebServer.class, w);
 
-
-        try {
-            m.put(SpimeUDP.class, new SpimePeer(0, m.db));
-        } catch (Exception e) {
-            logger.error("udp {}", e);
-            e.printStackTrace();
-        }
-
+//        try {
+//            m.put(SpimeUDP.class, new SpimePeer(0, m.db));
+//        } catch (Exception e) {
+//            logger.error("udp {}", e);
+//            e.printStackTrace();
+//        }
 
     }
 

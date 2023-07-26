@@ -3,8 +3,10 @@ package spimedb.server;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.servlet.http.HttpServletRequest;
 import jcog.bloom.StableBloomFilter;
-import jcog.bloom.hash.StringHashProvider;
+import jcog.bloom.hash.StringHasher;
+import jcog.random.XoRoShiRo128PlusRandom;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.suggest.Lookup;
 import org.slf4j.Logger;
@@ -17,14 +19,14 @@ import spimedb.query.CollectFacets;
 import spimedb.query.Query;
 import spimedb.util.JSON;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static spimedb.server.WebIO.*;
 
@@ -37,7 +39,7 @@ public class WebAPI {
     * swagger editor: http://editor.swagger.io/#/
     */
 
-    final static Logger logger = LoggerFactory.getLogger(WebAPI.class);
+//    final static Logger logger = LoggerFactory.getLogger(WebAPI.class);
 
 
     private final SpimeDB db;
@@ -137,7 +139,7 @@ public class WebAPI {
             @PathParam("latMax") float latMax) {
 
 
-        HttpSession sess = request.getSession(true);
+        var sess = request.getSession(true);
 
         //TODO use a unique 'window' id to uniquify each tab/widnow session in case there are multiple
         //System.out.println(sess.getId() + " " + request.getRemotePort() + " " + sess);
@@ -149,14 +151,14 @@ public class WebAPI {
         int totalCells = 32 * 1024;
         float unlearnCellsPerSecond = 2;
         if (_sentSTM==null) {
-            sentSTM = new StableBloomFilter<>(totalCells, 3, new StringHashProvider());
+            sentSTM = new StableBloomFilter<>(totalCells, 3, 0, new XoRoShiRo128PlusRandom(), new StringHasher());
             sess.setAttribute("sentSTM", sentSTM);
         } else {
             sentSTM = (StableBloomFilter<String>)_sentSTM;
             long msSinceLastAccess = System.currentTimeMillis() - sess.getLastAccessedTime();
             int unlearnedCells = Math.round((msSinceLastAccess/1000f) * unlearnCellsPerSecond);
             if (unlearnedCells > 0)
-                sentSTM.unlearn(unlearnedCells);
+                sentSTM.forget(unlearnedCells, ThreadLocalRandom.current());
         }
 
         Object prevBounds = sess.getAttribute("earthLonLat");

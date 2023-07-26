@@ -25,11 +25,11 @@
             <artifactId>spimedb-media</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
-            <groupId>narchy</groupId>
-            <artifactId>nal</artifactId>
-            <version>1.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>narchy</groupId>-->
+<!--            <artifactId>nal</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.pircbotx/pircbotx -->
         <dependency>
             <groupId>org.pircbotx</groupId>

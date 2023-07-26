@@ -1,6 +1,5 @@
 package spimedb.util;
 
-import jcog.Texts;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static jcog.Str.n2;
 
 /**
  * Created by me on 2/3/17.
@@ -136,7 +137,7 @@ public class PrioritizedExecutor implements Executor {
 
         @Override
         public String toString() {
-            return Texts.n2(100f * pri) + "%:" + r.toString();
+            return n2(100f * pri) + "%:" + r.toString();
         }
     }
 
@@ -150,7 +151,8 @@ public class PrioritizedExecutor implements Executor {
 
         public void run() {
             if (t != null && t.isAlive()) {
-                t.stop();
+                //t.stop();
+                t.interrupt();
             }
         }
     }
