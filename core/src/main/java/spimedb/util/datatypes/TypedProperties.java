@@ -129,7 +129,7 @@ public class TypedProperties extends Properties {
     public float[] getFloatArray(String id, float[] defaultArray) {
         StringTokenizer tokenizer = new StringTokenizer(getProperty(id, ""),
                 DELIM);
-        float pieces[] = new float[tokenizer.countTokens()];
+        float[] pieces = new float[tokenizer.countTokens()];
         int index = 0;
         while (tokenizer.hasMoreTokens()) {
             try {
@@ -195,7 +195,7 @@ public class TypedProperties extends Properties {
     public int[] getIntArray(String id, int[] defaultArray) {
         StringTokenizer tokenizer = new StringTokenizer(getProperty(id, ""),
                 DELIM);
-        int pieces[] = new int[tokenizer.countTokens()];
+        int[] pieces = new int[tokenizer.countTokens()];
         int index = 0;
         while (tokenizer.hasMoreTokens()) {
             try {

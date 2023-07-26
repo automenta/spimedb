@@ -40,7 +40,7 @@ public class KnotVector {
      * @param degree
      *            degree of Nurbs
      */
-    public KnotVector(float knots[], int degree)
+    public KnotVector(float[] knots, int degree)
             throws IllegalArgumentException {
         this.knots = knots;
         this.degree = degree;
@@ -61,11 +61,13 @@ public class KnotVector {
         for (int k = 0; k < degree && isOpen; k++) {
             if (knots[k] != knots[k + 1]) {
                 isOpen = false;
+                break;
             }
         }
         for (int k = m; k > m - degree && isOpen; k--) {
             if (knots[k] != knots[k - 1]) {
                 isOpen = false;
+                break;
             }
         }
 
@@ -96,9 +98,9 @@ public class KnotVector {
      */
     public double[] basisFunctions(int span, float u) {
         final int d1 = degree + 1;
-        double res[] = new double[d1];
-        double left[] = new double[d1];
-        double right[] = new double[d1];
+        double[] res = new double[d1];
+        double[] left = new double[d1];
+        double[] right = new double[d1];
         res[0] = 1;
         for (int j = 1; j < d1; j++) {
             left[j] = u - knots[span + 1 - j];

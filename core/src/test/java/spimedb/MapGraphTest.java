@@ -20,9 +20,9 @@ public class MapGraphTest {
 
     // ~ Instance fields --------------------------------------------------------
 
-    private String v1 = "v1";
-    private String v2 = "v2";
-    private String v3 = "v3";
+    private final String v1 = "v1";
+    private final String v2 = "v2";
+    private final String v3 = "v3";
 
     // ~ Methods ----------------------------------------------------------------
 

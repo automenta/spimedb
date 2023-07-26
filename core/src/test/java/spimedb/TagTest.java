@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by me on 1/14/17.
@@ -97,7 +98,7 @@ public class TagTest {
 
         db.sync(50);
 
-        assertEquals(null, db.get(""));
+        assertNull(db.get(""));
         assertEquals("{\"I\":\"Disaster\",\"inh\":{\">\":[\"Hurricane\"],\"<\":[\"\"]}}", db.get("Disaster").toString() );
         assertEquals("{\"I\":\"Hurricane\",\"inh\":{\"<\":[\"Disaster\"]}}", db.get("Hurricane").toString() );
     }

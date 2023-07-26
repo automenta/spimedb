@@ -64,7 +64,7 @@ public class OctreeTest {
         assertEquals(0, o.itemCountRecursively());
 
         OctBox<String> block = o.put(point(3f, 3f, 3f));
-        assertTrue(block!=null);
+        assertNotNull(block);
         assertEquals(1, o.itemCountRecursively());
 
         o.put(point(0, 1, 0));

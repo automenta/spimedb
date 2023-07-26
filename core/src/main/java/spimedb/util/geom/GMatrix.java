@@ -838,7 +838,7 @@ public class GMatrix implements java.io.Serializable, Cloneable {
     public static boolean decomposeLU(int dim, double[] matrix0,
             int[] row_perm, int[] even_row_xchg) {
 
-        double row_scale[] = new double[dim];
+        double[] row_scale = new double[dim];
 
         // Determine implicit scaling information by looping over rows
         int i, j;
@@ -990,8 +990,8 @@ public class GMatrix implements java.io.Serializable, Cloneable {
             System.out.println(" " + e[i]);
         }
 
-        System.out.println(" \nu  = \n" + u.toString());
-        System.out.println(" \nv  = \n" + v.toString());
+        System.out.println(" \nu  = \n" + u);
+        System.out.println(" \nv  = \n" + v);
 
         mtmp.identity();
         for (i = 0; i < s.length; i++) {
@@ -1000,13 +1000,13 @@ public class GMatrix implements java.io.Serializable, Cloneable {
         for (i = 0; i < e.length; i++) {
             mtmp.values[i][i + 1] = e[i];
         }
-        System.out.println(" \nm  = \n" + mtmp.toString());
+        System.out.println(" \nm  = \n" + mtmp);
 
         mtmp.mulTransposeLeft(u, mtmp);
         mtmp.mulTransposeRight(mtmp, v);
 
         System.out.println(" \n u.transpose*m*v.transpose  = \n"
-                + mtmp.toString());
+                + mtmp);
     }
 
     private static String toString(GMatrix m) {
@@ -1927,9 +1927,9 @@ public class GMatrix implements java.io.Serializable, Cloneable {
      */
     final void invertGeneral(GMatrix m1) {
         int size = m1.nRow * m1.nCol;
-        double temp[] = new double[size];
-        double result[] = new double[size];
-        int row_perm[] = new int[m1.nRow];
+        double[] temp = new double[size];
+        double[] result = new double[size];
+        int[] row_perm = new int[m1.nRow];
         int[] even_row_exchange = new int[1];
         int i, j;
 

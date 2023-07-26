@@ -436,10 +436,9 @@ public class AABB extends Vec3D implements BB {
      * @see toxi.geom.Vec3D#toString()
      */
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<aabb@").append(super.toString()).append('x')
-                .append(extent);
-        return sb.toString();
+        String sb = "<aabb@" + super.toString() + 'x' +
+                extent;
+        return sb;
     }
 
     public final void setRangeZ(float min, float max) {

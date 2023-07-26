@@ -49,8 +49,7 @@ public class EventEmitter {
     
     public final boolean isActive(final Class event) {
         if (events.get(event)!=null)
-            if (!events.get(event).isEmpty())
-                return true;
+            return !events.get(event).isEmpty();
         return false;
     }
     

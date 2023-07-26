@@ -6,7 +6,6 @@ import org.apache.lucene.document.DocumentStoredFieldVisitor;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -184,8 +183,7 @@ public class Search {
 
     /** TODO collect a HashTagSet not only a list */
     static void collectTags(org.apache.lucene.search.Query q, Collection<String> tagsInc) {
-        if (q instanceof BooleanQuery) {
-            BooleanQuery bq = (BooleanQuery) q;
+        if (q instanceof BooleanQuery bq) {
             bq.forEach(b -> {
                 org.apache.lucene.search.Query bqq = b.getQuery();
 
@@ -193,13 +191,11 @@ public class Search {
                     //TODO handle negative tags
                 } else {
 
-                    if (bqq instanceof DisjunctionMaxQuery) {
-                        DisjunctionMaxQuery dqq = (DisjunctionMaxQuery) bqq;
+                    if (bqq instanceof DisjunctionMaxQuery dqq) {
                         dqq.forEach(x -> {
                             collectTags(x, tagsInc);
                         });
-                    } else if (bqq instanceof BoostQuery) {
-                        BoostQuery bbq = (BoostQuery) bqq;
+                    } else if (bqq instanceof BoostQuery bbq) {
                         collectTags(bbq.getQuery(), tagsInc);
 
                     } else if (bqq instanceof BooleanQuery) {
@@ -209,8 +205,7 @@ public class Search {
 
 
             });
-        } else if (q instanceof TermQuery) {
-            TermQuery tq = (TermQuery) q;
+        } else if (q instanceof TermQuery tq) {
             Term term = tq.getTerm();
             if (term.field().equals(NObject.TAG)) {
                 tagsInc.add(term.text());

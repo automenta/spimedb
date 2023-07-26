@@ -218,9 +218,8 @@ public class Plane extends Vec3D implements Shape3D {
 //    }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("origin: ").append(super.toString()).append(" norm: ")
-                .append(normal.toString());
-        return sb.toString();
+        String sb = "origin: " + super.toString() + " norm: " +
+                normal.toString();
+        return sb;
     }
 }

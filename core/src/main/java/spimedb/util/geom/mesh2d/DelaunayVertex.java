@@ -305,10 +305,9 @@ public class DelaunayVertex {
 
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof DelaunayVertex)) {
+        if (!(other instanceof DelaunayVertex p)) {
             return false;
         }
-        DelaunayVertex p = (DelaunayVertex) other;
         if (this.coordinates.length != p.coordinates.length) {
             return false;
         }

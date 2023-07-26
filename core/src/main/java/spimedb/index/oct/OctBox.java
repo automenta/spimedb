@@ -575,7 +575,7 @@ public class OctBox<K> extends AABB implements Shape3D {
     }
 
     /** identified bounding box */
-    public static interface IdBB {
+    public interface IdBB {
         String id();
         BB getBB();
     }

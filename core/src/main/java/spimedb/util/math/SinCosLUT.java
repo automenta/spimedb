@@ -84,7 +84,7 @@ public final class SinCosLUT {
      * @param theta
      * @return cosine value for theta
      */
-    public final float cos(float theta) {
+    public float cos(float theta) {
         while (theta < 0) {
             theta += MathUtils.TWO_PI;
         }
@@ -109,7 +109,7 @@ public final class SinCosLUT {
      * @param theta
      * @return sine value for theta
      */
-    public final float sin(float theta) {
+    public float sin(float theta) {
         while (theta < 0) {
             theta += MathUtils.TWO_PI;
         }

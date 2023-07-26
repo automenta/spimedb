@@ -33,7 +33,6 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.LoggerFactory;
 import spimedb.SpimeDB;
 
-
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -150,8 +149,7 @@ public class WebServer extends PathHandler {
 
                     String rp = p.getRequestPath();
                     if (!rp.startsWith("/lib/")) {
-                        if (rp.endsWith(".js") || rp.endsWith(".html") || rp.endsWith(".css"))
-                            return false;
+                        return !rp.endsWith(".js") && !rp.endsWith(".html") && !rp.endsWith(".css");
                     }
 
 

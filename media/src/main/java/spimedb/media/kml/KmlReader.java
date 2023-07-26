@@ -344,9 +344,8 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
             for (StyleSelector s : cs.getStyles()) {
                 checkStyleType(parent, s);
             }
-        } else if (gisObj instanceof NetworkLink) {
+        } else if (gisObj instanceof NetworkLink link) {
             // handle NetworkLink href
-            NetworkLink link = (NetworkLink) gisObj;
             TaggedMap region = link.getRegion();
             // check/ignore networklinks if region not in view
             if (ignoreInactiveRegionNetworkLinks && checkRegion(region)) {
@@ -373,9 +372,8 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                 }
                 // Note: NetworkLinks can have inline Styles & StyleMaps
             }
-        } else if (gisObj instanceof Overlay) {
+        } else if (gisObj instanceof Overlay o) {
             // handle GroundOverlay, ScreenOverlay or PhotoOverlay href
-            Overlay o = (Overlay) gisObj;
             checkStyleUrl(parent, o);
             TaggedMap icon = o.getIcon();
             String href = icon != null ? trimToNull(icon, HREF) : null;

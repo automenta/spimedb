@@ -893,15 +893,15 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
             matrix2[cv + 3 * 2] /= matrix1[rv + 2];
 
             rv -= 3;
-            matrix2[cv + 3 * 1] = (matrix2[cv + 3 * 1] - matrix1[rv + 2]
+            matrix2[cv + 3] = (matrix2[cv + 3] - matrix1[rv + 2]
                     * matrix2[cv + 3 * 2])
                     / matrix1[rv + 1];
 
             rv -= 3;
-            matrix2[cv + 4 * 0] = (matrix2[cv + 3 * 0] - matrix1[rv + 1]
-                    * matrix2[cv + 3 * 1] - matrix1[rv + 2]
+            matrix2[cv] = (matrix2[cv] - matrix1[rv + 1]
+                    * matrix2[cv + 3] - matrix1[rv + 2]
                     * matrix2[cv + 3 * 2])
-                    / matrix1[rv + 0];
+                    / matrix1[rv];
         }
     }
 
@@ -938,7 +938,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
     static void print_mat(double[] mat) {
         int i;
         for (i = 0; i < 3; i++) {
-            System.out.println(mat[i * 3 + 0] + " " + mat[i * 3 + 1] + ' '
+            System.out.println(mat[i * 3] + " " + mat[i * 3 + 1] + ' '
                     + mat[i * 3 + 2] + '\n');
         }
 
@@ -1087,10 +1087,10 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
             outRot[0] = rot[index];
 
             index = out[in0] + 3;
-            outRot[0 + 3] = rot[index];
+            outRot[3] = rot[index];
 
             index = out[in0] + 6;
-            outRot[0 + 6] = rot[index];
+            outRot[6] = rot[index];
 
             index = out[in1];
             outRot[1] = rot[index];
@@ -1566,7 +1566,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      * @param v
      *            the array into which the matrix row values will be copied
      */
-    public final void getColumn(int column, double v[]) {
+    public final void getColumn(int column, double[] v) {
         if (column == 0) {
             v[0] = m00;
             v[1] = m10;
@@ -1621,7 +1621,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      * @param v
      *            the array into which the matrix row values will be copied
      */
-    public final void getRow(int row, double v[]) {
+    public final void getRow(int row, double[] v) {
         if (row == 0) {
             v[0] = m00;
             v[1] = m01;
@@ -1684,7 +1684,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
     /**
      * perform SVD (if necessary to get rotational component
      */
-    final void getScaleRotate(double scales[], double rots[]) {
+    final void getScaleRotate(double[] scales, double[] rots) {
         double[] tmp = new double[9];
         tmp[0] = m00;
         tmp[1] = m01;
@@ -1750,8 +1750,8 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      * allocating a little bit of garbage.
      */
     private void invertGeneral(Matrix3d m1) {
-        double result[] = new double[9];
-        int row_perm[] = new int[3];
+        double[] result = new double[9];
+        int[] row_perm = new int[3];
         int i, r, c;
         double[] tmp = new double[9]; // scratch matrix
 
@@ -2483,7 +2483,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      * @param v
      *            the replacement column
      */
-    public final void setColumn(int column, double v[]) {
+    public final void setColumn(int column, double[] v) {
         switch (column) {
             case 0:
                 this.m00 = v[0];
@@ -2776,7 +2776,7 @@ public class Matrix3d implements java.io.Serializable, Cloneable {
      * @param v
      *            the replacement row
      */
-    public final void setRow(int row, double v[]) {
+    public final void setRow(int row, double[] v) {
         switch (row) {
             case 0:
                 this.m00 = v[0];

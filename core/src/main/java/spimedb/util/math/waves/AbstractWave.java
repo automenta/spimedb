@@ -183,12 +183,11 @@ public abstract class AbstractWave {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.getClass().getName()).append(" phase: ").append(phase);
-        sb.append(" frequency: ").append(frequency);
-        sb.append(" amp: ").append(amp);
-        sb.append(" offset: ").append(offset);
-        return sb.toString();
+        String sb = this.getClass().getName() + " phase: " + phase +
+                " frequency: " + frequency +
+                " amp: " + amp +
+                " offset: " + offset;
+        return sb;
     }
 
     /**

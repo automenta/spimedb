@@ -96,8 +96,7 @@ public class BooleanShapeBuilder {
             Rect r = (Rect) s;
             return new Rectangle2D.Float(r.x, r.y, r.width, r.height);
         }
-        if (s instanceof Triangle2D) {
-            Triangle2D t = (Triangle2D) s;
+        if (s instanceof Triangle2D t) {
             Path2D path = new Path2D.Float();
             path.moveTo(t.a.x, t.a.y);
             path.lineTo(t.b.x, t.b.y);
@@ -105,8 +104,7 @@ public class BooleanShapeBuilder {
             path.closePath();
             return path;
         }
-        if (s instanceof Ellipse) {
-            Ellipse e = (Ellipse) s;
+        if (s instanceof Ellipse e) {
             Vec2D r = e.getRadii();
             return new Ellipse2D.Float(e.x - r.x, e.y - r.y, r.x * 2, r.y * 2);
         }

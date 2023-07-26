@@ -64,10 +64,6 @@ public class Agent {
                 });
                 return s;
             } else {
-                switch (prevState.getState()) {
-                    default:
-                        break;
-                }
                 return prevState;
             }
         });
@@ -129,7 +125,7 @@ public class Agent {
 
         public void setState(@NotNull State state, Object... logged) {
             this.state = state;
-            logger.info("{} {}", state.toString(), logged);
+            logger.info("{} {}", state, logged);
         }
 
         @Override

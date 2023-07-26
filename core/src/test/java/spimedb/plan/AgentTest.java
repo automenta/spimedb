@@ -54,7 +54,7 @@ public class AgentTest {
         TestAgent a = new TestAgent();
         a.goal(new SuperGoal("1"));
         a.sync(1000 * 10);
-        System.out.println(a.log.toString());
+        System.out.println(a.log);
         assertEquals("SuperGoal(\"1\") SubGoal(\"x\") SubGoal(\"y\") ", a.log.toString());
     }
 }

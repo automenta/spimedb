@@ -107,17 +107,17 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
                     / matrix1[rv + 2];
 
             rv -= 4;
-            matrix2[cv + 4 * 1] = (matrix2[cv + 4 * 1] - matrix1[rv + 2]
+            matrix2[cv + 4] = (matrix2[cv + 4] - matrix1[rv + 2]
                     * matrix2[cv + 4 * 2] - matrix1[rv + 3]
                     * matrix2[cv + 4 * 3])
                     / matrix1[rv + 1];
 
             rv -= 4;
-            matrix2[cv + 4 * 0] = (matrix2[cv + 4 * 0] - matrix1[rv + 1]
-                    * matrix2[cv + 4 * 1] - matrix1[rv + 2]
+            matrix2[cv] = (matrix2[cv] - matrix1[rv + 1]
+                    * matrix2[cv + 4] - matrix1[rv + 2]
                     * matrix2[cv + 4 * 2] - matrix1[rv + 3]
                     * matrix2[cv + 4 * 3])
-                    / matrix1[rv + 0];
+                    / matrix1[rv];
         }
     }
 
@@ -595,11 +595,8 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      */
     public boolean epsilonEquals(Matrix4f m1, float epsilon) {
 
-        boolean status = true;
+        boolean status = !(Math.abs(this.m00 - m1.m00) > epsilon);
 
-        if (Math.abs(this.m00 - m1.m00) > epsilon) {
-            status = false;
-        }
         if (Math.abs(this.m01 - m1.m01) > epsilon) {
             status = false;
         }
@@ -836,7 +833,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      * @param v
      *            the array into which the matrix row values will be copied
      */
-    public final void getColumn(int column, float v[]) {
+    public final void getColumn(int column, float[] v) {
         if (column == 0) {
             v[0] = m00;
             v[1] = m10;
@@ -1178,7 +1175,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      * @param v
      *            the array into which the matrix row values will be copied
      */
-    public final void getRow(int row, float v[]) {
+    public final void getRow(int row, float[] v) {
         if (row == 0) {
             v[0] = m00;
             v[1] = m01;
@@ -1254,7 +1251,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
         return ((float) MathUtils.max(tmp_scale));
     }
 
-    private void getScaleRotate(double scales[], double rots[]) {
+    private void getScaleRotate(double[] scales, double[] rots) {
 
         double[] tmp = new double[9]; // scratch matrix
         tmp[0] = m00;
@@ -1330,9 +1327,9 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      * allocating a little bit of garbage.
      */
     final void invertGeneral(Matrix4f m1) {
-        double temp[] = new double[16];
-        double result[] = new double[16];
-        int row_perm[] = new int[4];
+        double[] temp = new double[16];
+        double[] result = new double[16];
+        int[] row_perm = new int[4];
         int i, r, c;
 
         // Use LU decomposition and backsubstitution code specifically
@@ -2451,7 +2448,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      * @param v
      *            the replacement column
      */
-    public final void setColumn(int column, float v[]) {
+    public final void setColumn(int column, float[] v) {
         switch (column) {
             case 0:
                 this.m00 = v[0];
@@ -2979,7 +2976,7 @@ public class Matrix4f implements java.io.Serializable, Cloneable {
      * @param v
      *            the replacement row
      */
-    public final void setRow(int row, float v[]) {
+    public final void setRow(int row, float[] v) {
         switch (row) {
             case 0:
                 this.m00 = v[0];

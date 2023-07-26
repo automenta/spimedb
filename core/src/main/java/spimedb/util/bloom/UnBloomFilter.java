@@ -69,7 +69,7 @@ public class UnBloomFilter<X> {
         Object prev = array.getAndSet(code.asInt() & sizeMask, element);
 
         total++;
-        if ((prev == null || !element.equals(prev))) {
+        if ((!element.equals(prev))) {
             hit++;
             return false;
         }

@@ -35,8 +35,8 @@ import spimedb.util.geom.geodesic.Track;
 import spimedb.util.math.statistics.StatTracker;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -99,9 +99,8 @@ public class TrackClusterWrapper {
         for (Cluster cluster: clusters) {
             for (Instance instance : cluster.getMembers()) {
                 for (Feature f : instance.getAllFeatures()) {
-                	if (f instanceof TrackFeature) {
-                		TrackFeature tf = (TrackFeature) f;
-                		Track track = tf.getValue();
+                	if (f instanceof TrackFeature tf) {
+                        Track track = tf.getValue();
     
                 		if (null == _trueMean) {
                 			_trueMean = track;

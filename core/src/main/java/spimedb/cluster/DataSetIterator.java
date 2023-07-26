@@ -12,17 +12,17 @@ final public class DataSetIterator implements Iterator<Instance> {
     }
 
 	@Override
-    public final boolean hasNext() {
+    public boolean hasNext() {
         return iterator.hasNext();
     }
 
 	@Override
-    public final Instance next() {
+    public Instance next() {
         return iterator.next().getValue();
     }
 
 	@Override
-    public final void remove() {
+    public void remove() {
         iterator.remove();
     }
 }

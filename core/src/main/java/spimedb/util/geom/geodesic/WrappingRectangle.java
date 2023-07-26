@@ -123,11 +123,9 @@ public class WrappingRectangle {
     public boolean equals (Object obj) {
 	if (this == obj) return true;
 	if (null == obj) return false;
-	if (!(obj instanceof WrappingRectangle)) return false;
+	if (!(obj instanceof WrappingRectangle rect)) return false;
 
-	WrappingRectangle rect = (WrappingRectangle) obj;
-
-	if (Math.abs(_minLat-rect._minLat) > _epsilon) return false;
+        if (Math.abs(_minLat-rect._minLat) > _epsilon) return false;
 	if (Math.abs(_maxLat-rect._maxLat) > _epsilon) return false;
 	double oCenter = AngleUtilities.intoRangeDegrees(_centerLon, rect._centerLon);
 	if (Math.abs(oCenter-_centerLon) > _epsilon) return false;

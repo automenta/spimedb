@@ -146,7 +146,7 @@ public class SimplexNoise {
      * @param y
      * @return dot product
      */
-    private static double dot(int g[], double x, double y) {
+    private static double dot(int[] g, double x, double y) {
         return g[0] * x + g[1] * y;
     }
 
@@ -160,7 +160,7 @@ public class SimplexNoise {
      * @param z
      * @return dot product
      */
-    private static double dot(int g[], double x, double y, double z) {
+    private static double dot(int[] g, double x, double y, double z) {
         return g[0] * x + g[1] * y + g[2] * z;
     }
 
@@ -175,7 +175,7 @@ public class SimplexNoise {
      * @param w
      * @return dot product
      */
-    private static double dot(int g[], double x, double y, double z, double w) {
+    private static double dot(int[] g, double x, double y, double z, double w) {
         return g[0] * x + g[1] * y + g[2] * z + g[3] * w;
     }
 

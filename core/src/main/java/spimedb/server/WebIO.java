@@ -120,8 +120,7 @@ public enum WebIO {
                         //rewrite the thumbnail blob byte[] as ID reference (if not already a string representing a URL)
                         if (v instanceof byte[]) {
                             return d.id();
-                        } else if (v instanceof String) {
-                            String s = (String) v;
+                        } else if (v instanceof String s) {
                             if (s.startsWith("file:")) {
                                 return d.id();  //same as if it's a byte
                             } else {
@@ -151,27 +150,24 @@ public enum WebIO {
 
             Object f = x.get(field);
 
-            if (f instanceof String) {
+            if (f instanceof String s) {
                 //interpret the string stored at this as a URL or a redirect to another field
-                String s = (String) f;
-                switch (s) {
-                    case NObject.DATA:
-                        if (!field.equals(NObject.DATA))
-                            return send(db, id, NObject.DATA);
-                        else {
-                            //infinite loop
-                            throw new UnsupportedOperationException("document field redirect cycle");
+                if (s.equals(NObject.DATA)) {
+                    if (!field.equals(NObject.DATA))
+                        return send(db, id, NObject.DATA);
+                    else {
+                        //infinite loop
+                        throw new UnsupportedOperationException("document field redirect cycle");
+                    }
+                } else {
+                    if (s.startsWith("file:")) {
+                        File ff = new File(s.substring(5));
+                        if (ff.exists()) {
+                            return Response.ok((StreamingOutput) o -> {
+                                IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE]);
+                            }).type(typeOf(x.get("url"))).build();
                         }
-                    default:
-                        if (s.startsWith("file:")) {
-                            File ff = new File(s.substring(5));
-                            if (ff.exists()) {
-                                return Response.ok((StreamingOutput) o -> {
-                                    IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE]);
-                                }).type(typeOf(x.get("url"))).build();
-                            }
-                        }
-                        break;
+                    }
                 }
             } else if (f instanceof byte[]) {
                 return Response.ok((StreamingOutput) o -> {

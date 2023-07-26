@@ -2,7 +2,7 @@ package spimedb.media;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Lists;
-import jcog.list.FasterList;
+import jcog.data.list.Lst;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
@@ -28,7 +28,7 @@ abstract public class SchemaOrg {
     public static void load(SpimeDB db) {
         //MutableGraph<String> types = GraphBuilder.directed().allowsSelfLoops(false).nodeOrder(ElementOrder.unordered()).expectedNodeCount(1024).build();
 
-        List<NObject> pending = new FasterList(1024);
+        List<NObject> pending = new Lst<>(1024);
 
         try {
             new SchemaOrg() {
@@ -197,7 +197,7 @@ abstract public class SchemaOrg {
                 if (id.length() == 0) {
                     continue;
                 }
-                String iduppercase = id.substring(0, 1).toUpperCase() + id.substring(1, id.length());
+                String iduppercase = id.substring(0, 1).toUpperCase() + id.substring(1);
                 String description = line[1];
 
                 onClass(id, iduppercase, Lists.newArrayList("Action"), description);

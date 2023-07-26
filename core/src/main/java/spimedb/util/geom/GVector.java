@@ -52,7 +52,7 @@ public class GVector implements java.io.Serializable, Cloneable {
      * @param length
      *            The number of values copied from the array.
      */
-    public GVector(double vector[], int length) {
+    public GVector(double[] vector, int length) {
         this.length = length;
         values = new double[length];
         System.arraycopy(vector, 0, values, 0, length);
@@ -559,7 +559,7 @@ public class GVector implements java.io.Serializable, Cloneable {
             throw new MatrixSizeException();
         }
 
-        double v[];
+        double[] v;
         if (v1 != this) {
             v = v1.values;
         } else {
@@ -595,7 +595,7 @@ public class GVector implements java.io.Serializable, Cloneable {
             throw new MatrixSizeException();
         }
 
-        double v[];
+        double[] v;
         if (v1 != this) {
             v = v1.values;
         } else {

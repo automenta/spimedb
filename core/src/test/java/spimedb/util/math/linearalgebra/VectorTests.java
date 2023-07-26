@@ -27,13 +27,16 @@ package spimedb.util.math.linearalgebra;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
 public class VectorTests {
     @Test
     public void testVectorEquality () {
-        Assert.assertFalse(new Vector(Double.NaN).equals(new Vector(0)));
-        Assert.assertFalse(new Vector(0).equals(new Vector(Double.NaN)));
-        Assert.assertTrue(new Vector(0).equals(new Vector(0)));
-        Assert.assertTrue(new Vector(Double.NaN).equals(new Vector(Double.NaN)));
+        assertNotEquals(new Vector(Double.NaN), new Vector(0));
+        assertNotEquals(new Vector(0), new Vector(Double.NaN));
+        assertEquals(new Vector(0), new Vector(0));
+        assertEquals(new Vector(Double.NaN), new Vector(Double.NaN));
     }
 
     @Test

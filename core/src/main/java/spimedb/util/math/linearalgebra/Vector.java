@@ -204,8 +204,7 @@ public class Vector implements Serializable {
     @Override
     public boolean equals (Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Vector)) return false;
-        Vector v = (Vector) obj;
+        if (!(obj instanceof Vector v)) return false;
 
         int len = size();
         if (v.size() != len) return false;

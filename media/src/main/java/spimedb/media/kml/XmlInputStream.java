@@ -152,8 +152,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
         XMLEvent nextel2 = this.stream.nextEvent();
 
         while(true) {
-            if(nextel2 instanceof Characters) {
-                Characters text1 = (Characters)nextel2;
+            if(nextel2 instanceof Characters text1) {
                 oldText = el.getText();
                 if(oldText != null) {
                     el.setText(oldText + text1.getData());
@@ -241,7 +240,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
     /*@Nullable*/
     protected Double getDoubleElementValue(String localName) throws XMLStreamException {
         String elementText = this.stream.getElementText();
-        if(elementText != null && StringUtils.isNotBlank(elementText)) {
+        if(StringUtils.isNotBlank(elementText)) {
             try {
                 return Double.parseDouble(elementText);
             } catch (NumberFormatException var4) {

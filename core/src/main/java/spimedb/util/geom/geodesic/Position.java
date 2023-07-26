@@ -641,8 +641,7 @@ public class Position implements Serializable {
     public boolean equals (Object obj) {
         if (this == obj) return true;
         if (null == obj) return false;
-        if (!(obj instanceof Position)) return false;
-        Position p = (Position) obj;
+        if (!(obj instanceof Position p)) return false;
 
         if (_baseFormIsPolar) {
             double epsilon = getPrecision();
@@ -653,11 +652,10 @@ public class Position implements Serializable {
             if (_elevationUsed) {
                 if (!p._elevationUsed)
                     return false;
-                if (Math.abs(getElevation() - p.getElevation()) >= epsilon)
-                    return false;
+                return !(Math.abs(getElevation() - p.getElevation()) >= epsilon);
             }
         } else {
-            if (!_cartesian.equals(p.getAsCartesian())) return false;
+            return _cartesian.equals(p.getAsCartesian());
         }
         return true;
     }

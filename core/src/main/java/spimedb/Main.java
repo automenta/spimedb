@@ -1,6 +1,5 @@
 package spimedb;
 
-import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
@@ -226,8 +225,7 @@ public abstract class Main extends FileAlterationListenerAdaptor {
                 LogConfigurator newConfig = new LogConfigurator(file);
 
 
-                if (x instanceof LogConfigurator) {
-                    LogConfigurator old = (LogConfigurator) x;
+                if (x instanceof LogConfigurator old) {
                     LoggingLogger.info("stop {}", old.message);
                     old.stop();
                 }
@@ -354,10 +352,9 @@ public abstract class Main extends FileAlterationListenerAdaptor {
          * @return Setter name.
          */
         private String setterName(String fieldName) {
-            return new StringBuilder(SET_PREFIX)
-                    .append(fieldName.substring(0, 1).toUpperCase(Locale.ENGLISH))
-                    .append(fieldName.substring(1))
-                    .toString();
+            return SET_PREFIX +
+                    fieldName.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                    fieldName.substring(1);
         }
 
         private void reportNoSetterFound() {
@@ -520,32 +517,30 @@ public abstract class Main extends FileAlterationListenerAdaptor {
             if (f != null) {
                 try {
                     String line = Files.readFirstLine(f, Charset.defaultCharset()).trim();
-                    switch (line) {
-                        case "rolling":
-                            String logFile = workingDirectory();
-                            message = ("rolling to file://{}" + logFile);
+                    if (line.equals("rolling")) {
+                        String logFile = workingDirectory();
+                        message = ("rolling to file://{}" + logFile);
 
-                            RollingFileAppender r = new RollingFileAppender();
-                            r.setFile(logFile);
-                            r.setAppend(true);
+                        RollingFileAppender r = new RollingFileAppender();
+                        r.setFile(logFile);
+                        r.setAppend(true);
 
-                            SizeBasedTriggeringPolicy triggeringPolicy = new ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy();
-                            triggeringPolicy.setMaxFileSize(FileSize.valueOf("5MB"));
-                            triggeringPolicy.start();
+                        SizeBasedTriggeringPolicy triggeringPolicy = new SizeBasedTriggeringPolicy();
+                        triggeringPolicy.setMaxFileSize(FileSize.valueOf("5MB"));
+                        triggeringPolicy.start();
 
-                            FixedWindowRollingPolicy policy = new FixedWindowRollingPolicy();
-                            policy.setFileNamePattern("log.%i.gz");
-                            policy.setParent(r);
-                            policy.setContext(LOG.getLoggerContext());
-                            policy.start();
+                        FixedWindowRollingPolicy policy = new FixedWindowRollingPolicy();
+                        policy.setFileNamePattern("log.%i.gz");
+                        policy.setParent(r);
+                        policy.setContext(LOG.getLoggerContext());
+                        policy.start();
 
-                            r.setEncoder(logEncoder());
-                            r.setRollingPolicy(policy);
-                            r.setTriggeringPolicy(triggeringPolicy);
+                        r.setEncoder(logEncoder());
+                        r.setRollingPolicy(policy);
+                        r.setTriggeringPolicy(triggeringPolicy);
 
 
-                            appender = r;
-                            break;
+                        appender = r;
                         //TODO TCP/UDP etc
                     }
                 } catch (IOException e) {

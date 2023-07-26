@@ -38,16 +38,16 @@ public class ListUtilitiesTests {
         List<Double> base = Arrays.asList(0.0, 1.0, 2.0, 3.0, 4.0);
 
         Assert.assertEquals(Arrays.asList(-1.0, 0.0, 1.0, 2.0, 3.0, 4.0),
-                            ListUtilities.joinLists(base, Arrays.asList(-1.0), EPSILON));
-        Assert.assertEquals(base, ListUtilities.joinLists(base, Arrays.asList(0.0), EPSILON));
-        Assert.assertEquals(base, ListUtilities.joinLists(base, Arrays.asList(1.0), EPSILON));
-        Assert.assertEquals(base, ListUtilities.joinLists(base, Arrays.asList(2.0), EPSILON));
+                            ListUtilities.joinLists(base, List.of(-1.0), EPSILON));
+        Assert.assertEquals(base, ListUtilities.joinLists(base, List.of(0.0), EPSILON));
+        Assert.assertEquals(base, ListUtilities.joinLists(base, List.of(1.0), EPSILON));
+        Assert.assertEquals(base, ListUtilities.joinLists(base, List.of(2.0), EPSILON));
         Assert.assertEquals(Arrays.asList(0.0, 1.0, 2.0, 2.5, 3.0, 4.0),
-                            ListUtilities.joinLists(base, Arrays.asList(2.5), EPSILON));
-        Assert.assertEquals(base, ListUtilities.joinLists(base, Arrays.asList(3.0), EPSILON));
-        Assert.assertEquals(base, ListUtilities.joinLists(base, Arrays.asList(4.0), EPSILON));
+                            ListUtilities.joinLists(base, List.of(2.5), EPSILON));
+        Assert.assertEquals(base, ListUtilities.joinLists(base, List.of(3.0), EPSILON));
+        Assert.assertEquals(base, ListUtilities.joinLists(base, List.of(4.0), EPSILON));
         Assert.assertEquals(Arrays.asList(0.0, 1.0, 2.0, 3.0, 4.0, 5.0),
-                            ListUtilities.joinLists(base, Arrays.asList(5.0), EPSILON));
+                            ListUtilities.joinLists(base, List.of(5.0), EPSILON));
     }
 
     @Test

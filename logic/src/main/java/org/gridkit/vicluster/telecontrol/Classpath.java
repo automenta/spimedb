@@ -173,12 +173,12 @@ public class Classpath {
                 try {
                     Classpath.ClasspathEntry entry = newEntry(url);
                     if (entry == null) {
-                        LOGGER.warn("Cannot copy URL content: " + url.toString());
+                        LOGGER.warn("Cannot copy URL content: " + url);
                     } else {
                         classpath.add(entry);
                     }
                 } catch (Exception var5) {
-                    LOGGER.warn("Cannot copy URL content: " + url.toString(), var5);
+                    LOGGER.warn("Cannot copy URL content: " + url, var5);
                 }
             }
         }
@@ -382,7 +382,7 @@ public class Classpath {
         }
 
         public long size() {
-            return (long) this.data.length;
+            return this.data.length;
         }
     }
 

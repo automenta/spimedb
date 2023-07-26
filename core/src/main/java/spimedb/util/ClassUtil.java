@@ -37,7 +37,7 @@ public class ClassUtil {
     }
 
     public static Set<Class> getSuperInterfacesOf(Class c) {
-        Set<Class> cs = getSuperInterfaces((Class[])new Class[] { c } );
+        Set<Class> cs = getSuperInterfaces(new Class[] { c });
         cs.remove(c);
         return cs;
     }

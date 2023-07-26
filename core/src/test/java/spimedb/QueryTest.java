@@ -54,7 +54,7 @@ public class QueryTest {
 
             assertEquals(dplace.toString(), found.get(0).toString());
 
-            assertTrue(found + "", found.contains(place));
+            assertTrue(String.valueOf(found), found.contains(place));
         });
 
 

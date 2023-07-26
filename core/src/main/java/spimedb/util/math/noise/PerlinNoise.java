@@ -60,7 +60,7 @@ public class PerlinNoise {
 
     protected float[] perlin_cosTable;
 
-    protected float perlin[];
+    protected float[] perlin;
 
     protected Random perlinRandom;
 

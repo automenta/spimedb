@@ -37,9 +37,7 @@ public class ZAxisCylinder extends AxisAlignedCylinder {
         if (Math.abs(p.z() - pos.z) < length * 0.5) {
             float dx = p.x() - pos.x;
             float dy = p.y() - pos.y;
-            if (Math.abs(dx * dx + dy * dy) < radiusSquared) {
-                return true;
-            }
+            return Math.abs(dx * dx + dy * dy) < radiusSquared;
         }
         return false;
     }

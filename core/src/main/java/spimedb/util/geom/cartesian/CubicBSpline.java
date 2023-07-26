@@ -73,7 +73,7 @@ public class CubicBSpline {
         matrixEntries[1] = 1;
         for (int i=1; i<n-1; ++i) {
             matrixEntries[3*i-1] = 1;
-            matrixEntries[3*i-0] = 4;
+            matrixEntries[3 * i] = 4;
             matrixEntries[3*i+1] = 1;
         }
         matrixEntries[3*n-4] = 2;

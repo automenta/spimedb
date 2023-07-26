@@ -74,7 +74,7 @@ public abstract class DistanceFunction<T> implements Serializable {
 	public abstract double distance(T x, T y);
 	
 	private double[][] createCoverMatrix(Collection<T> x, Collection<T> y) {
-		double cover[][] = new double[x.size()][y.size()];
+		double[][] cover = new double[x.size()][y.size()];
 		
 		int i = 0;
 		for (T itemx : x) {
@@ -100,7 +100,7 @@ public abstract class DistanceFunction<T> implements Serializable {
 		if (x.size() == 1 && y.size() == 1) return distance(x.get(0), y.get(0));
 		
 		double distance = 0;
-		double cover[][] = createCoverMatrix(x, y);
+		double[][] cover = createCoverMatrix(x, y);
 		
 		for (int i = 0; i < x.size(); i++) {
 			double min = 1;
@@ -133,7 +133,7 @@ public abstract class DistanceFunction<T> implements Serializable {
 		if (x.size() == 1 && y.size() == 1) return distance(x.get(0), y.get(0));
 		
 		double distance = 0;
-		double cover[][] = createCoverMatrix(x, y);
+		double[][] cover = createCoverMatrix(x, y);
 		
 		for (int i = 0; i < x.size(); i++) {
 			double max = 0;

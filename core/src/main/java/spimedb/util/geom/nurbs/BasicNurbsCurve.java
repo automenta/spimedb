@@ -104,7 +104,7 @@ public class BasicNurbsCurve implements NurbsCurve, Cloneable {
 
         // TODO: compute derivatives also for NURBS
         // currently supports only non-rational B-Splines
-        float derivVals[][] = uKnots.derivBasisFunctions(span, u, grade);
+        float[][] derivVals = uKnots.derivBasisFunctions(span, u, grade);
 
         // Zero values
         for (int k = (degree + 1); k <= grade; k++) {

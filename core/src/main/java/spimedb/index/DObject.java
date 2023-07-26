@@ -7,7 +7,6 @@ import jcog.tree.rtree.point.DoubleND;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.KeywordTokenizer;
-import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
@@ -100,8 +99,7 @@ public class DObject implements NObject {
             if (v == null)
                 throw new NullPointerException();
 
-            if (v instanceof LazyValue) {
-                LazyValue l = (LazyValue) v;
+            if (v instanceof LazyValue l) {
                 v = l.pendingValue;
                 db.runLater(l.priority, () -> {
                     Object lv = l.value.get();
@@ -204,8 +202,7 @@ public class DObject implements NObject {
         this.id = d.get(NObject.ID);
 
         IndexableField b = d.getField(NObject.BOUND);
-        if (b instanceof DoubleRange) {
-            DoubleRange f = (DoubleRange) b;
+        if (b instanceof DoubleRange f) {
             double[] min = new double[4];
             double[] max = new double[4];
             for (int i = 0; i < 4; i++) {
@@ -215,8 +212,7 @@ public class DObject implements NObject {
 
             this.min = new DoubleND(min);
             this.max = new DoubleND(max);
-        } else if (b instanceof StoredField) {
-            StoredField sf = (StoredField) b;
+        } else if (b instanceof StoredField sf) {
 
             byte[] bbb = sf.binaryValue().bytes;
             int l = bbb.length/2;
@@ -378,9 +374,8 @@ public class DObject implements NObject {
         if (f instanceof BinaryPoint) {
             //HACK convert to boolean
             return f.binaryValue().bytes[0] != 0;
-        } else if (f instanceof DoublePoint) {
+        } else if (f instanceof DoublePoint dp) {
             //throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
-            DoublePoint dp = (DoublePoint) f;
             byte[] b = dp.binaryValue().bytes;
 
             double[] dd = new double[b.length / Double.BYTES];
@@ -390,9 +385,8 @@ public class DObject implements NObject {
                 return dd[0];
             return dd;
 
-        } else if (f instanceof LongPoint) {
+        } else if (f instanceof LongPoint lp) {
             //throw new UnsupportedOperationException(); //not sure why this doesnt seem to be working
-            LongPoint lp = (LongPoint)f;
             byte[] b = lp.binaryValue().bytes;
             long[] dd = new long[b.length / Long.BYTES];
             for (int i = 0;i < dd.length; i++)
@@ -402,20 +396,17 @@ public class DObject implements NObject {
             return dd;
         } else if (f instanceof FloatRange) {
             throw new UnsupportedOperationException();
-        } else if (f instanceof IntPoint) {
-            IntPoint ff = (IntPoint) f;
+        } else if (f instanceof IntPoint ff) {
             return ff.numericValue().intValue(); //HACK assumes dim=1
         }
 
         IndexableFieldType type = f.fieldType();
 
         if (type == StoredField.TYPE) {
-            switch (f.name()) {
-                case "url_cached":
-                    return (Long)f.numericValue(); //HACK
-                default:
-                    return f.binaryValue().bytes;
+            if (f.name().equals("url_cached")) {
+                return f.numericValue(); //HACK
             }
+            return f.binaryValue().bytes;
         } else {
             String s = f.stringValue(); //TODO adapt based on field type
             if (s.startsWith("{") && s.endsWith("}")) {

@@ -116,8 +116,8 @@ public interface NObject extends Serializable {
         x.fields().forEachRemaining(e -> {
             String k = e.getKey();
 
-            switch (k) {
-                case ID: return; //ID already processed
+            if (k.equals(ID)) {
+                return; //ID already processed
             }
 
             JsonNode v = e.getValue();

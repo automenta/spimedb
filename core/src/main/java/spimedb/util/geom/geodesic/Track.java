@@ -305,9 +305,8 @@ abstract public class Track {
     public boolean equals (Object that) {
         if (this == that) return true;
         if (null == that) return false;
-        if (!(that instanceof Track)) return false;
+        if (!(that instanceof Track track)) return false;
 
-        Track track = (Track) that;
         return getDistance(track) < getParameters().getPrecision();
     }
 

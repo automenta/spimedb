@@ -278,12 +278,10 @@ public final class UrlRef implements Serializable {
         //  Accept-Charset: iso-8859-1,*,utf-8
         //  Accept-Encoding: gzip,deflate
         //  Accept-Language: en-us,en,*
-        if (conn instanceof HttpURLConnection) {
-            HttpURLConnection httpConn = (HttpURLConnection) conn;
+        if (conn instanceof HttpURLConnection httpConn) {
             httpConn.setRequestProperty("Accept", ACCEPT_STRING);
             httpConn.setRequestProperty("User-Agent", USER_AGENT);
-            if (httpConn instanceof HttpsURLConnection) {
-                HttpsURLConnection conn1 = (HttpsURLConnection) httpConn;
+            if (httpConn instanceof HttpsURLConnection conn1) {
                 conn1.setHostnameVerifier((hostname, session) -> true);
                 setDefaultSSLSocketFactory(conn1);
             }
@@ -2408,7 +2406,7 @@ public final class UrlRef implements Serializable {
         if (ind <= 0) {
             throw new MalformedURLException("Invalid KMZ URI missing file parameter");
         }
-        buf.append(urlStr.substring(3, ind - 1));
+        buf.append(urlStr, 3, ind - 1);
         // System.out.println("\trestored kmz_rel_path=" + urlStr.substring(ind + 5));
         url = new URL(buf.toString());
         kmzRelPath = urlStr.substring(ind + 5);

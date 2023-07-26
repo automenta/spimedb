@@ -31,9 +31,9 @@ import java.util.Random;
 public class TestAnnealer {
 
 	public static class TestSolution implements Solution {
-		public double vertex[] = new double[3];
+		public double[] vertex = new double[3];
 		
-		public TestSolution(double vals[]) {
+		public TestSolution(double[] vals) {
 			vertex = vals.clone();
 		}
 		public TestSolution(double a, double b, double c) {
@@ -45,7 +45,7 @@ public class TestAnnealer {
 		@Override
 		public Solution neighbor(double temp) {
 			Random rnd = new Random();
-			double tmp[] = vertex.clone();
+			double[] tmp = vertex.clone();
 			
 			tmp[0] = tmp[0] + Math.pow(-1, rnd.nextInt(2)) * rnd.nextDouble() * temp;
 			tmp[1] = tmp[1] + Math.pow(-1, rnd.nextInt(2)) * rnd.nextDouble() * temp;

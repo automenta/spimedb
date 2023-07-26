@@ -88,7 +88,7 @@ public class JSON {
         try {
             return writer.writeValueAsBytes(x);
         } catch (JsonProcessingException ex) {
-            System.err.println(ex.toString());
+            System.err.println(ex);
             return x.toString().getBytes();
         }
     }

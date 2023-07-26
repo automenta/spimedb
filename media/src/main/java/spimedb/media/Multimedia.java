@@ -325,7 +325,6 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
             } catch (IOException f) {
                 logger.error("error: {} {}", docID, f);
-            } finally {
             }
 
             //clean and update parent DOM

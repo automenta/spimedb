@@ -9,8 +9,6 @@ import jcog.bloom.hash.StringHasher;
 import jcog.random.XoRoShiRo128PlusRandom;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.suggest.Lookup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 import spimedb.index.DObject;
@@ -18,7 +16,6 @@ import spimedb.index.Search;
 import spimedb.query.CollectFacets;
 import spimedb.query.Query;
 import spimedb.util.JSON;
-
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;

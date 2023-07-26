@@ -10,6 +10,7 @@ import spimedb.util.JSON;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -39,7 +40,7 @@ public abstract class ClimateViewer {
 
         byte[] encoded = Files.readAllBytes(Paths.get(uri));
 
-        String layers = new String(encoded, "UTF8");
+        String layers = new String(encoded, StandardCharsets.UTF_8);
 
         JsonNode lll = JSON.fromJSON(layers).get("cv");
 

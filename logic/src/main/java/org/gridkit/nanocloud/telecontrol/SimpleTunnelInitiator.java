@@ -192,8 +192,8 @@ public class SimpleTunnelInitiator implements TunnellerInitiator {
             } catch (ExecutionException var12) {
             }
 
-            BufferedReader outr = new BufferedReader(new StringReader(new String(stdOut.toByteArray())));
-            BufferedReader errr = new BufferedReader(new StringReader(new String(stdErr.toByteArray())));
+            BufferedReader outr = new BufferedReader(new StringReader(stdOut.toString()));
+            BufferedReader errr = new BufferedReader(new StringReader(stdErr.toString()));
             Pattern p = Pattern.compile("(openjdk|java) version \"([^\"]*)\"");
 
             while(true) {

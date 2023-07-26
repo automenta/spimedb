@@ -44,7 +44,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
     final public boolean hasY() { return Float.isNaN(y);    }
     final public boolean hasZ() { return Float.isNaN(z);    }
 
-    public static enum Axis {
+    public enum Axis {
 
         X(Vec3D.X_AXIS),
         Y(Vec3D.Y_AXIS),
@@ -52,7 +52,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
 
         private final roVec3D vector;
 
-        private Axis(roVec3D v) {
+        Axis(roVec3D v) {
             this.vector = v;
         }
 
@@ -71,7 +71,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
     public static final roVec3D Z_AXIS = new Vec3D(0, 0, 1);
 
     /** Defines the zero vector. */
-    public static final roVec3D ZERO = new Vec3D();;
+    public static final roVec3D ZERO = new Vec3D();
 
     /**
      * Defines vector with all coords set to Float.MIN_VALUE. Useful for
@@ -481,10 +481,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
             if (Float.isNaN(diff)) {
                 return false;
             }
-            if ((diff < 0 ? -diff : diff) > tolerance) {
-                return false;
-            }
-            return true;
+            return !((diff < 0 ? -diff : diff) > tolerance);
         } catch (NullPointerException e) {
             return false;
         }
@@ -811,10 +808,7 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
             return false;
         }
         w = boxExtent.z;
-        if (z < boxOrigin.z - w || z > boxOrigin.z + w) {
-            return false;
-        }
-        return true;
+        return !(z < boxOrigin.z - w) && !(z > boxOrigin.z + w);
     }
 
     public final boolean isMajorAxis(float tol) {
@@ -1481,12 +1475,11 @@ public class Vec3D implements Comparable<roVec3D>, roVec3D, Serializable {
     public static Vec3D v(float x, float y, float z) { return new Vec3D(x, y, z); }
 
     public String toString() {
-        final StringBuffer sb = new StringBuffer(32);
-//        sb.append("{x:").append(x).append(", y:").append(y).append(", z:")
+        //        sb.append("{x:").append(x).append(", y:").append(y).append(", z:")
 //                .append(z).append("}");
-        sb.append("(").append(x).append(",").append(y).append(",")
-                .append(z).append(')');
-        return sb.toString();
+        String sb = "(" + x + "," + y + "," +
+                z + ')';
+        return sb;
     }
 
     public final float x() {

@@ -44,8 +44,7 @@ public class Solr {
                     y.put(k,(String)v);
                 else if (v instanceof Integer)
                     y.put(k,(Integer)v);
-                else if (v instanceof String[]) {
-                    String[] vv = (String[])v;
+                else if (v instanceof String[] vv) {
                     ArrayNode va = y.putArray(k);
                     for (String s : vv) {
                         va.add(s);

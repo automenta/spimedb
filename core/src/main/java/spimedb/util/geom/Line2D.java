@@ -200,10 +200,9 @@ public class Line2D {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Line2D)) {
+        if (!(obj instanceof Line2D l)) {
             return false;
         }
-        Line2D l = (Line2D) obj;
         return (a.equals(l.a) || a.equals(l.b))
                 && (b.equals(l.b) || b.equals(l.a));
     }

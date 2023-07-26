@@ -2,7 +2,6 @@ package spimedb.server;
 
 import jcog.bloom.StableBloomFilter;
 import jcog.bloom.hash.StringHasher;
-import jcog.random.AtomicRandom;
 import jcog.random.XoRoShiRo128PlusRandom;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;

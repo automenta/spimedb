@@ -738,8 +738,8 @@ public final class NurbsCreator {
         out.set(p.plus(t.scale(t.dot(dir.normalize()) * hyp)));
     }
 
-    private static float[][] surfaceMeshParameters(Vec3D points[][], int n,
-            int m) {
+    private static float[][] surfaceMeshParameters(Vec3D[][] points, int n,
+                                                   int m) {
         final float[][] res = new float[2][];
         int num = m + 1;
         final float[] cds = new float[(n + 1) * (m + 1)];

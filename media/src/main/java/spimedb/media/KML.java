@@ -341,12 +341,12 @@ public class KML {
                     public void start(String layer) {
                     }
 
-                    protected void onStyle(Style s) {
+                    private void onStyle(Style s) {
                         String id = s.getId();
                         styles.put(id, s);
                     }
 
-                    protected void onStyleMap(StyleMap ss) {
+                    private void onStyleMap(StyleMap ss) {
 
                         String ssid = ss.getId();
                         if (ssid == null) {
@@ -373,8 +373,7 @@ public class KML {
                         } else if (go instanceof StyleMap) {
                             onStyleMap((StyleMap) go);
                         }
-                        if (go instanceof ContainerStart) {
-                            ContainerStart cs = (ContainerStart) go;
+                        if (go instanceof ContainerStart cs) {
 
                             for (StyleSelector ss : cs.getStyles()) {
                                 if (ss instanceof Style) {
@@ -535,8 +534,7 @@ public class KML {
 
             GeoNObject d;
 
-            if (go instanceof ContainerStart) {
-                ContainerStart cs = (ContainerStart) go;
+            if (go instanceof ContainerStart cs) {
                 //TODO startTime?
                 //System.out.println(cs + " " + cs.getId());
 
@@ -583,8 +581,7 @@ public class KML {
 
             }
 
-            if (go instanceof Common) {
-                Common cm = (Common) go;
+            if (go instanceof Common cm) {
                 if (cm.getStartTime() != null) {
                     if (cm.getEndTime() != null) {
                         d.when(cm.getStartTime().getTime(), cm.getEndTime().getTime());
@@ -596,8 +593,7 @@ public class KML {
                 d.name(cm.getName());
             }
 
-            if (go instanceof Feature) {
-                Feature f = (Feature) go;
+            if (go instanceof Feature f) {
 
                 if (enableDescriptions) {
                     String desc = f.getDescription();
@@ -625,20 +621,17 @@ public class KML {
 
                     }
                     else */
-                    if (g instanceof Point) {
-                        Point pp = (Point) g;
+                    if (g instanceof Point pp) {
                         d.where(pp.getCenter());
 
                     } else if (g instanceof org.opensextant.giscore.geometry.LinearRing) {
                         logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
 
-                    } else if (g instanceof org.opensextant.giscore.geometry.Line) {
-                        org.opensextant.giscore.geometry.Line l = (org.opensextant.giscore.geometry.Line) g;
+                    } else if (g instanceof org.opensextant.giscore.geometry.Line l) {
                         d.where(l);
                     } else if (g instanceof org.opensextant.giscore.geometry.MultiLinearRings) {
                         logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
-                    } else if (g instanceof org.opensextant.giscore.geometry.Polygon) {
-                        org.opensextant.giscore.geometry.Polygon p = (org.opensextant.giscore.geometry.Polygon) g;
+                    } else if (g instanceof org.opensextant.giscore.geometry.Polygon p) {
                         d.where(p);
                     } else {
                         logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);

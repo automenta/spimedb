@@ -59,7 +59,7 @@ public class Matrix4x4 {
      * @return true if the matrix is nonsingular, or false otherwise.
      */
     static boolean LUDecomposition(double[] matrix0, int[] row_perm, int width) {
-        double row_scale[] = new double[width];
+        double[] row_scale = new double[width];
         // Determine implicit scaling information by looping over rows
         {
             int i, j;

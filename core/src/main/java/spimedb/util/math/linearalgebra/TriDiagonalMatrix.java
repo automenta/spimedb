@@ -224,7 +224,7 @@ public class TriDiagonalMatrix {
             // From above: 
             //    (a1 c0 - b0 b1) x1 = (a1 d0 - b0 d1)
             //    (b0 b1 - a1 c0) x0 = (b1 d0 - c0 d1)
-            x[currentColumn+0] = (b1 * d0 - c0 * d1) / determinate; 
+            x[currentColumn] = (b1 * d0 - c0 * d1) / determinate;
             x[currentColumn+1] = (b0 * d1 - a1 * d0) / determinate;
         }
     }

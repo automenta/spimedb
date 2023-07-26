@@ -9,6 +9,7 @@ import spimedb.util.geom.Vec3D;
 
 import java.util.HashMap;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -48,7 +49,7 @@ public class OctMapTest {
     @Test
     public void test0() {
         o.clear();
-        assertTrue(o.size() == 0);
+        assertEquals(0, o.size());
         assertTrue(o.isEmpty());
 
         o.put(new Event("Beginning of Common Era", 75f, -20f, 0));

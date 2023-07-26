@@ -88,7 +88,7 @@ public class NLP {
     public static Parse parse(String input) {
         ParserModel model = (ParserModel) models.get(ParserModel.class);
         Parser parser = ParserFactory.create(model);
-        Parse topParses[] = ParserTool.parseLine(input, parser, tokenizer(), 1);
+        Parse[] topParses = ParserTool.parseLine(input, parser, tokenizer(), 1);
         return topParses[0];
 
     }

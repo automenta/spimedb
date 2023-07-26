@@ -60,8 +60,7 @@ public class GeoJSON   {
 
         GeoJsonObject g = f.getGeometry();
         if (g != null) {
-            if (g instanceof org.geojson.Point) {
-                org.geojson.Point point = (org.geojson.Point) g;
+            if (g instanceof org.geojson.Point point) {
                 LngLatAlt coord = point.getCoordinates();
                 d.where((float)coord.getLongitude(), (float)coord.getLatitude(), (float)coord.getAltitude());
             }

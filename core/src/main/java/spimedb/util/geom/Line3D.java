@@ -226,10 +226,9 @@ public class Line3D {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Line3D)) {
+        if (!(obj instanceof Line3D l)) {
             return false;
         }
-        Line3D l = (Line3D) obj;
         return (a.equals(l.a) || a.equals(l.b))
                 && (b.equals(l.b) || b.equals(l.a));
     }

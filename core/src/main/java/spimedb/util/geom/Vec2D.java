@@ -1085,9 +1085,7 @@ public class Vec2D implements Comparable<ReadonlyVec2D>, ReadonlyVec2D {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("{x:").append(x).append(", y:").append(y).append('}');
-        return sb.toString();
+        return "{x:" + x + ", y:" + y + '}';
     }
 
     public final float x() {

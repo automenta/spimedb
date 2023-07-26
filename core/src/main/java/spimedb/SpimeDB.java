@@ -42,7 +42,6 @@ import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.graph.MapGraph;
@@ -51,7 +50,6 @@ import spimedb.graph.travel.CrossComponentTravel;
 import spimedb.graph.travel.UnionTravel;
 import spimedb.index.DObject;
 import spimedb.index.Search;
-import spimedb.query.Query;
 import spimedb.server.Router;
 import spimedb.server.WebIO;
 import spimedb.util.Locker;
@@ -769,7 +767,7 @@ public class SpimeDB {
             {
                 String asv = afi.stringValue();
                 String bsv = afi.stringValue();
-                if (asv != null && bsv != null && asv.equals(bsv))
+                if (asv != null && asv.equals(bsv))
                     continue;
                 else if (asv != null ^ bsv != null)
                     return false; //one is null the other isnt
