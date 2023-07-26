@@ -38,16 +38,12 @@ public class Query  {
 
     long whenAccepted;
 
-
-
-//    public static final double[] ANY_SCALAR = {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
-//    public static final RectDoubleND[] ANYWHERE_4 =
-//            new RectDoubleND[] ( ANY_SCALAR, ANY_SCALAR );
-
     /**
      * OR-d together, potentially executed in parallel
      */
     public HyperRectDouble[] bounds = null;
+
+    //TODO: public HyperRectDouble minBounds = null;
 
     public BoundsCondition boundsCondition = Intersect;
 
@@ -59,7 +55,7 @@ public class Query  {
      */
     public String[] tagInclude = null;
 
-    public int limit = 128;
+    public int limit = 1024;
     private ScoreDoc after = null;
 
     /**
@@ -111,7 +107,6 @@ public class Query  {
                 :
                 hitsCollector;
 
-
         IndexSearcher searcher = db.searcher();
         searcher.search(q, collector);
         TopDocs docs = hitsCollector.topDocs();
@@ -129,9 +124,6 @@ public class Query  {
         return s;
     }
 
-
-
-    @NotNull
     public static TermQuery tagTermQuery(String tag) {
         return new TermQuery(new Term(NObject.TAG, tag));
     }
@@ -146,8 +138,7 @@ public class Query  {
             for (String s : tagInclude)
                 tagQueries.add(tagTermQuery(s));
 
-            bqb.add(
-                    new DisjunctionMaxQuery(tagQueries, 1f / tags),
+            bqb.add(new DisjunctionMaxQuery(tagQueries, 1f / tags),
                     BooleanClause.Occur.MUST);
 
             /* } else if (tags == 1) {

@@ -1,7 +1,5 @@
 package spimedb;
 
-import spimedb.server.Session;
-
 /**
  * Created by me on 1/12/17.
  */
@@ -22,9 +20,9 @@ public class Tag extends MutableNObject {
         return priority;
     }
 
-    public void pri(Session who, float value) {
-        setPriority( pri() + value);
-    }
+//    public void pri(Session who, float value) {
+//        setPriority( pri() + value);
+//    }
 
     public void priMult(float rate) {
         setPriority( pri() * rate );

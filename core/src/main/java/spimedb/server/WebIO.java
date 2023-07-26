@@ -1,25 +1,17 @@
 package spimedb.server;
 
 import com.google.common.collect.Iterables;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
 import jcog.bloom.StableBloomFilter;
-import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.impl.factory.Sets;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spimedb.FilteredNObject;
 import spimedb.NObject;
-import spimedb.SpimeDB;
-import spimedb.index.DObject;
 import spimedb.index.Search;
 import spimedb.util.JSON;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.BiConsumer;
@@ -144,38 +136,38 @@ public enum WebIO {
         };
     }
 
-    public static Response send(SpimeDB db, @NotNull String id, String field) {
-
-        DObject x = db.get(id);
-
-        if (x != null) {
-
-            Object f = x.get(field);
-
-            if (f instanceof String s) {
-                //interpret the string stored at this as a URL or a redirect to another field
-                if (s.equals(NObject.DATA)) {
-                    if (!field.equals(NObject.DATA))
-                        return send(db, id, NObject.DATA);
-                    else {
-                        //infinite loop
-                        throw new UnsupportedOperationException("document field redirect cycle");
-                    }
-                } else {
-                    if (s.startsWith("file:")) {
-                        File ff = new File(s.substring(5));
-                        if (ff.exists()) {
-                            return Response.ok((StreamingOutput) o -> IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE])).type(typeOf(x.get("url"))).build();
-                        }
-                    }
-                }
-            } else if (f instanceof byte[]) {
-                return Response.ok((StreamingOutput) o -> o.write((byte[]) f)).type(typeOfField(field)).build();
-            }
-        }
-
-        return Response.status(404).build();
-    }
+//    public static Response send(SpimeDB db, @NotNull String id, String field) {
+//
+//        DObject x = db.get(id);
+//
+//        if (x != null) {
+//
+//            Object f = x.get(field);
+//
+//            if (f instanceof String s) {
+//                //interpret the string stored at this as a URL or a redirect to another field
+//                if (s.equals(NObject.DATA)) {
+//                    if (!field.equals(NObject.DATA))
+//                        return send(db, id, NObject.DATA);
+//                    else {
+//                        //infinite loop
+//                        throw new UnsupportedOperationException("document field redirect cycle");
+//                    }
+//                } else {
+//                    if (s.startsWith("file:")) {
+//                        File ff = new File(s.substring(5));
+//                        if (ff.exists()) {
+//                            return Response.ok((StreamingOutput) o -> IOUtils.copyLarge(new FileInputStream(ff), o, new byte[BUFFER_SIZE])).type(typeOf(x.get("url"))).build();
+//                        }
+//                    }
+//                }
+//            } else if (f instanceof byte[]) {
+//                return Response.ok((StreamingOutput) o -> o.write((byte[]) f)).type(typeOfField(field)).build();
+//            }
+//        }
+//
+//        return Response.status(404).build();
+//    }
 
     private static String typeOfField(String field) {
         return switch (field) { //deprecated

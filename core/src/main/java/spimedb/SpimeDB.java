@@ -9,7 +9,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
-import jakarta.ws.rs.ext.Provider;
 import jcog.Util;
 import jcog.data.list.Lst;
 import jcog.event.ListTopic;
@@ -75,7 +74,6 @@ import java.util.stream.Stream;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
-@Provider
 public class SpimeDB {
 
     public static final String VERSION = "SpimeDB v-0.00";
@@ -178,11 +176,15 @@ public class SpimeDB {
     /**
      * in-memory
      */
-    public SpimeDB() throws IOException {
+    public SpimeDB() {
         this(null, new ByteBuffersDirectory());
         this.indexPath = null;
         this.taxoDir = new ByteBuffersDirectory();
-        this.taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
+        try {
+            this.taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
