@@ -1,6 +1,8 @@
 package spimedb.server;
 
 import com.google.common.collect.Iterables;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import jcog.bloom.StableBloomFilter;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.facet.FacetResult;
@@ -16,8 +18,6 @@ import spimedb.index.DObject;
 import spimedb.index.Search;
 import spimedb.util.JSON;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

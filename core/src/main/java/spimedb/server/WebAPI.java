@@ -1,9 +1,16 @@
 package spimedb.server;
 
 import com.google.common.collect.Lists;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.OpenAPI31;
+import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.annotations.Api;
+//import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import jcog.bloom.StableBloomFilter;
 import jcog.bloom.hash.StringHasher;
 import jcog.random.XoRoShiRo128PlusRandom;
@@ -17,19 +24,16 @@ import spimedb.query.CollectFacets;
 import spimedb.query.Query;
 import spimedb.util.JSON;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static spimedb.server.WebIO.*;
 
 
+//@Server(description = "SpimeDB")
 @Path("/")
-@Api(description = "SpimeDB")
+@Produces({"application/json", "application/xml"})
 public class WebAPI {
 
     /*
@@ -40,11 +44,8 @@ public class WebAPI {
 
 
     private final SpimeDB db;
-    private final WebServer web;
-
 
     public WebAPI(WebServer w) {
-        this.web = w;
         this.db = w.db;
     }
 
@@ -59,7 +60,7 @@ public class WebAPI {
     @GET
     @Path("/{I}/json")
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation("Get by ID (JSON)")
+    @Operation(summary="Get by ID (JSON)")
     public NObject get(@PathParam("I") String q) {
         DObject n = db.get(q);
         return (n != null) ? searchResult(n, searchResultFull) : null;
@@ -68,7 +69,7 @@ public class WebAPI {
     @GET
     @Path("/{I}/icon")
     @Produces({MediaType.MEDIA_TYPE_WILDCARD})
-    @ApiOperation("Get icon")
+    @Operation(summary="Get icon")
     public Response getIcon(@PathParam("I") String q) {
         return WebIO.send(db, q, NObject.ICON /* TODO: icon */);
     }
@@ -76,7 +77,7 @@ public class WebAPI {
     @GET
     @Path("/{I}/data")
     @Produces({MediaType.MEDIA_TYPE_WILDCARD})
-    @ApiOperation("Get data")
+    @Operation(summary="Get data")
     public Response getData(@PathParam("I") String q) {
         return WebIO.send(db, q, NObject.DATA);
     }
@@ -85,7 +86,7 @@ public class WebAPI {
     @GET
     @Path("/suggest")
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation("Provides search query suggestions given a partially complete input query")
+    @Operation(summary="Provides search query suggestions given a partially complete input query")
     public Response suggest(@QueryParam("q") String q) {
 
         if (q == null || (q = q.trim()).isEmpty() || q.length() > SuggestLengthMax)
@@ -102,7 +103,7 @@ public class WebAPI {
     @GET
     @Path("/find")
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation("Finds the results of a text search query")
+    @Operation(summary="Finds the results of a text search query")
     public Response find(@QueryParam("q") String q) {
 
         if (q == null || (q = q.trim()).isEmpty())
@@ -127,7 +128,7 @@ public class WebAPI {
     @GET
     @Path("/earth/lonlat/rect/{lonMin}/{lonMax}/{latMin}/{latMax}/json")
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation("Bounded longitude/latitude rectangle geoquery")
+    @Operation(summary="Bounded longitude/latitude rectangle geoquery")
     public Response earthLonLatRect(
             @Context HttpServletRequest request,
             @PathParam("lonMin") float lonMin,
@@ -180,7 +181,7 @@ public class WebAPI {
     @GET
     @Path("/facet")
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation("Finds matching search facets for a given dimension key")
+    @Operation(summary="Finds matching search facets for a given dimension key")
     public Response facet(@QueryParam("d") String dimension) {
         if (!(dimension == null || (dimension = dimension.trim()).isEmpty())) {
             FacetResult x = db.facets(dimension, FacetResultsMax);
@@ -194,7 +195,7 @@ public class WebAPI {
 
     @POST
     @Path("/tell/json")
-    @ApiOperation("Input arbitrary JSON")
+    @Operation(summary="Input arbitrary JSON")
     public Response tellJSON(@QueryParam("q") String dimension) {
         //TODO @Context HttpServletRequest request,
 //            //POST only

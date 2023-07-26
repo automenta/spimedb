@@ -3,7 +3,7 @@ package spimedb.util;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Cleaner;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public final class HTML {
 //    }
 
 
-    static final Whitelist whitelist = Whitelist.basicWithImages();
+    static final Safelist whitelist = Safelist.basicWithImages();
     static final Cleaner cleaner = new Cleaner(whitelist);
     static final Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);
 

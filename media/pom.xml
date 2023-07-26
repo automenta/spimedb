@@ -28,7 +28,7 @@
         <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
         <dependency>
             <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
+            <artifactId>tika-app</artifactId>
             <version>2.8.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/de.intarsys.opensource/jbig2 -->

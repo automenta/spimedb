@@ -7,6 +7,13 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
+
+//import org.apache.tika.parser.AutoDetectParser;
+//import org.apache.tika.parser.ParseContext;
+//import org.apache.tika.parser.Parser;
+//import org.apache.tika.parser.RecursiveParserWrapper;
+//import org.apache.tika.sax.BasicContentHandlerFactory;
+//import org.apache.tika.sax.ContentHandlerFactory;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -20,7 +27,7 @@ import org.jpedal.jbig2.jai.JBIG2ImageReaderSpi;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Cleaner;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +43,6 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
-import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -52,7 +58,7 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
     public final static Logger logger = LoggerFactory.getLogger(Multimedia.class);
 
 
-    static final Cleaner cleaner = new Cleaner(Whitelist.basic());
+    static final Cleaner cleaner = new Cleaner(Safelist.basic());
 
     static final float thumbnailQuality = 0.75f;
     static final int pdfPageImageDPI = 32;
@@ -157,10 +163,10 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
                 Metadata metadata = new Metadata();
                 ParseContext context = new ParseContext();
 
-                final Parser tika = new AutoDetectParser();
-                final ContentHandlerFactory tikaFactory = new BasicContentHandlerFactory(BasicContentHandlerFactory.HANDLER_TYPE.HTML, -1);
+                Parser tika = new AutoDetectParser();
 
-                final RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(tika, tikaFactory);
+                RecursiveParserWrapper tikaWrapper = new RecursiveParserWrapper(
+                        tika);
 
                 if (stream instanceof FileInputStream) {
                     ((MutableNObject) x).put(NObject.DATA, url);
@@ -177,28 +183,27 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
 
                 stream.close();
 
-
-                List<Metadata> m = tikaWrapper.getMetadata();
+//                List<Metadata> m = tikaWrapper.getMetadata();
                 NObject finalX = x;
-                m.forEach(md -> {
-                    for (String k : md.names()) {
-                        String[] v = md.getValues(k);
+//                m.forEach(md -> {
+                for (String k : metadata.names()) {
+                    //for (String k : md.names()) {
+                        String[] v = metadata.getValues(k);
 
                         String kk = tikiToField(k);
                         if (kk != null) {
                             Object vv = v.length > 1 ? v : v[0];
-                            if (vv instanceof String) {
+                            if (vv instanceof String s) {
                                 try {
-                                    int ivv = Integer.parseInt((String) vv);
-                                    vv = ivv;
+                                    vv = Integer.parseInt(s);
                                 } catch (Exception e) {
                                     //not an int
                                 }
                             }
                             ((MutableNObject) finalX).put(kk, vv);
                         }
-                    }
-                });
+//                    }
+                }
 
             }
 

@@ -67,8 +67,10 @@ public class WebServer extends PathHandler {
         @Override
         public Set<Class<?>> getClasses() {
             return Sets.mutable.of(
-                    io.swagger.jaxrs.listing.ApiListingResource.class,
-                    io.swagger.jaxrs.listing.SwaggerSerializers.class
+                    //io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class,
+                    io.swagger.v3.jaxrs2.SwaggerSerializers.class
+                    //io.swagger.jaxrs.listing.ApiListingResource.class,
+                    //io.swagger.jaxrs.listing.SwaggerSerializers.class
             );
         }
 
@@ -122,12 +124,12 @@ public class WebServer extends PathHandler {
 
         Application application = new WebApp();
 
-        String contextPath = "/";
         ResteasyDeployment deployment = new ResteasyDeploymentImpl();
         deployment.setApplication(application);
+
         DeploymentInfo di = this.undertowDeployment(deployment);
         di.setClassLoader(application.getClass().getClassLoader());
-        di.setContextPath(contextPath);
+        di.setContextPath("/");
         di.setDeploymentName("SpimeDB");
         di.setAsyncExecutor(db.exe);
 
@@ -348,12 +350,18 @@ public class WebServer extends PathHandler {
             prefix = mapping.substring(0, mapping.length() - 2);
         }
 
-        ServletInfo resteasyServlet = Servlets.servlet("ResteasyServlet", HttpServlet30Dispatcher.class).setAsyncSupported(true).setLoadOnStartup(1).addMapping(mapping);
+        ServletInfo resteasyServlet = Servlets.servlet("ResteasyServlet",
+                HttpServlet30Dispatcher.class).setAsyncSupported(true)
+                .setLoadOnStartup(2).addMapping(mapping);
         if (prefix != null) {
-            resteasyServlet.addInitParam("resteasy.servlet.mapping.prefix", prefix);
+            //resteasyServlet.addInitParam("resteasy.servlet.mapping.prefix", prefix);
+            resteasyServlet.addInitParam("swagger.api.basepath", prefix);
+            resteasyServlet.addInitParam("api.version", "1.0.0");
         }
 
-        return (new DeploymentInfo()).addServletContextAttribute(ResteasyDeployment.class.getName(), deployment).addServlet(resteasyServlet);
+        return (new DeploymentInfo()).addServletContextAttribute(
+                ResteasyDeployment.class.getName(),
+                deployment).addServlet(resteasyServlet);
     }
 
     DeploymentInfo undertowDeployment(ResteasyDeployment deployment) {

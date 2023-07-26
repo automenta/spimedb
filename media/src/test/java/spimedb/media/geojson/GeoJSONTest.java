@@ -1,6 +1,7 @@
 package spimedb.media.geojson;
 
-import jcog.tree.rtree.rect.RectDoubleND;
+
+import jcog.tree.rtree.rect.HyperRectDouble;
 import org.junit.Before;
 import org.junit.Test;
 import spimedb.NObject;
@@ -57,7 +58,7 @@ public class GeoJSONTest {
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
         List<NObject> res = new ArrayList();
-        new Query().bounds(new RectDoubleND(
+        new Query().bounds(new HyperRectDouble(
                 new double[]{1.48252053E12f, 130, 0, Double.NEGATIVE_INFINITY},
                 new double[]{1.48250336E12f, +180, +90, Double.POSITIVE_INFINITY}
         )).start(db).forEachObject(res::add);

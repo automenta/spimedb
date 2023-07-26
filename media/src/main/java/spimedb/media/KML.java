@@ -26,6 +26,7 @@ import spimedb.util.HTML;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
@@ -282,7 +283,7 @@ public class KML {
     }
 
 
-    public Runnable url(String url) {
+    public Runnable url(String url) throws MalformedURLException {
         return url(Crawl.fileName( new URL(url).getFile() ), url);
     }
 

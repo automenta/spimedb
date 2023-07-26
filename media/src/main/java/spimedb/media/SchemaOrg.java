@@ -119,7 +119,8 @@ abstract public class SchemaOrg {
     public SchemaOrg() throws IOException {
 
             String[] line;
-            CSVReader reader = new CSVReader(new FileReader("data/schema.org/all-classes.csv"), ',', '\"');
+            CSVReader reader = new CSVReader(new FileReader(
+                    "data/schema.org/all-classes.csv"), ',', '\"');
             int c = 0;
             while ((line = reader.readNext()) != null) {
                 if (c++ == 0) { /* skip first line */

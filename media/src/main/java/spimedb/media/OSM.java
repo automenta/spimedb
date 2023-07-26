@@ -24,7 +24,7 @@ public class OSM implements Sink, EntityProcessor {
     }
 
     @Override
-    public void release() {
+    public void close() {
 
     }
 
