@@ -2,6 +2,7 @@ package spimedb.media;
 
 import ch.qos.logback.classic.Level;
 import com.google.common.base.Joiner;
+import jcog.TODO;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
@@ -206,7 +207,8 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
             if (isKMLorKMZ) {
                 new KML(db, ((GeoNObject) x)).url(url).run();
             } else if (isGeoJSON) {
-                GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
+                throw new TODO();
+                //GeoJSON.load(url, GeoJSON.baseGeoJSONBuilder, db);
             }
 
         } catch (Exception e) {

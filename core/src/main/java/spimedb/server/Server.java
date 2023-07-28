@@ -1,6 +1,7 @@
 package spimedb.server;
 
 import com.google.common.collect.Lists;
+import jcog.data.list.Lst;
 import jcog.io.Twokenize;
 import jcog.net.http.HttpConnection;
 import jcog.net.http.HttpModel;
@@ -8,14 +9,20 @@ import jcog.net.http.HttpServer;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import spimedb.MutableNObject;
+import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.Search;
+import spimedb.query.Query;
+import spimedb.util.JSON;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Server implements HttpModel {
     public final SpimeDB db;
-    private final HttpServer server;
+    public final HttpServer server;
 
     public Server(SpimeDB db) {
         this.db = db;
@@ -25,6 +32,7 @@ public class Server implements HttpModel {
     @Override
     public void wssOpen(WebSocket ws, ClientHandshake handshake) {
         //ws.send("hi");
+        System.out.println("OPEN " + ws);
     }
 
     @Override
@@ -44,6 +52,36 @@ public class Server implements HttpModel {
             { _: 'index' }
             Get tag index, ontology, schema, etc..
         */
+        var m = JSON.fromJSON(message);
+        switch (m.get("_").asText()) {
+            case "index":
+                ws.send(JSON.toJSONString(db.facets(NObject.TAG, 32).labelValues));
+                break;
+            case "get":
+                var B = m.get(NObject.BOUND);
+                Query q = new Query().where(
+                    new double[]{B.get(0).asDouble(), B.get(1).asDouble()},
+                    new double[]{B.get(2).asDouble(), B.get(3).asDouble()});
+                //System.out.println(q);
+
+                Search r = q.start(db);
+
+                List<NObject> found = new Lst<>();
+                r.forEach((d, s) -> found.add(d), Long.MAX_VALUE, () -> {
+                    if (!found.isEmpty())
+                        ws.send(JSON.toJSONString(found));
+//                    assertEquals(1, db.size());
+//                    assertNotNull(r.localDocs);
+//                    assertEquals(1, r.localDocs.totalHits.value);
+//                    assertFalse(found.isEmpty());
+//                    assertEquals(dplace.toString(), found.get(0).toString());
+//                    assertTrue(String.valueOf(found), found.contains(place));
+                });
+
+                break;
+            default:
+                break;
+        }
     }
 //    @Override
 //    public void wssMessage(WebSocket ws, ByteBuffer message) {
@@ -90,10 +128,22 @@ public class Server implements HttpModel {
     @Override
     public void response(HttpConnection h) {
         //h.respond("");
-        //        URI url = h.url();
+        URI url = h.url();
 //
-//        String path = url.getPath();
-//        switch (path) {
+        String path = url.getPath();
+//        try {
+            if (path.equals("/"))
+                path = "/index.html";
+
+            h.respond(
+                //new File(Server.class.getResource(path).toURI())
+                new File("./src/main/resources" + path)
+            );
+//        } catch (URISyntaxException e) {
+//            //throw new RuntimeException(e);
+//            h.respond("404");
+//        }
+        ;
 ////            case "/teavm/runtime.js":
 ////                h.respond(new File("/tmp/tea/runtime.js")); //TODO managed temporary directory
 ////                break;

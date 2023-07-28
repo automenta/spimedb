@@ -24,15 +24,15 @@ public class GeoNObject extends MutableNObject {
 
     public NObject where(Geodetic2DPoint c) {
 
-        float lon = (float) c.getLongitudeAsDegrees();
+        double lon = c.getLongitudeAsDegrees();
         min.coord[1] = max.coord[1] = lon;
 
-        float lat = (float) c.getLatitudeAsDegrees();
+        double lat = c.getLatitudeAsDegrees();
         min.coord[2] = max.coord[2] = lat;
 
 
-        if (c instanceof Geodetic3DPoint) {
-            float ele = (float) ((Geodetic3DPoint) c).getElevation();
+        if (c instanceof Geodetic3DPoint g3) {
+            double ele = g3.getElevation();
             min.coord[3] = max.coord[3] = ele;
         } else {
             min.coord[3] = Float.NEGATIVE_INFINITY;

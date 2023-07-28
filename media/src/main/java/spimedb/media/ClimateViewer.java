@@ -6,104 +6,110 @@
 package spimedb.media;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import spimedb.util.JSON;
-
-import java.io.File;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import spimedb.SpimeDB;
+import spimedb.server.Server;
 
 /**
  * @author me
  */
-public abstract class ClimateViewer {
+public class ClimateViewer {
 
     static final String basePath = "cache";
     static final String layersFile = "data/climateviewer.json";
 
     String currentSection = "Unknown";
 
+    public static void main(String[] args) throws Exception {
+        new ClimateViewer();
+    }
+
     public ClimateViewer() throws Exception {
+        Server server = new Server(new SpimeDB());
+        //SpimeDB db = new SpimeDB();
+        //System.out.println(v);
 
+        GeoJSON.load("https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson",
+            new GeoJSON.GeoJSONBuilder("nuclear"), server.db);
 
-        /*ExecutorService executor =
+        new KML(server.db, (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"))
+            .url("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz")
+            .run();
 
-         threads == 1 ?
-         Executors.newSingleThreadExecutor() :
-         Executors.newFixedThreadPool(threads);*/
-        if (!Files.exists(Paths.get(basePath))) {
-            Files.createDirectory(Paths.get(basePath));
-        }
+        server.db.sync(50);
 
-        URI uri = new File(layersFile).toURI();
+        //server.db.forEach(System.out::println);
+        //System.out.println("db size=" + server.db.size());
 
-        byte[] encoded = Files.readAllBytes(Paths.get(uri));
+        server.server.fps(10);
 
-        String layers = new String(encoded, StandardCharsets.UTF_8);
-
-        JsonNode lll = JSON.fromJSON(layers).get("cv");
-
-        JsonNode n = lll;
-
-
-
-
-
-        n.forEach(x -> {
-
-            //x.isObject() &&
-            if (x.has("section")) {
-
-                String name = x.get("section").textValue();
-                String id = getSectionID(x);
-                String icon = x.get("icon").textValue();
-
-                if (id == null) {
-                    throw new RuntimeException("Section " + x + " missing ID");
-                }
-
-                onSection(name, id, icon);
-                //Tag t = Tag.the(st, id);
-                //if (t != null)
-                  //  t.name(name);
-
-            }
-            else  {
-                String icon = null;
-
-                if (x.has("icon"))
-                    icon = x.get("icon").textValue();
-
-                if (x.isTextual()) {
-                    currentSection = x.textValue();
-                } else if (x.isObject() && x.has("section")) {
-                    currentSection = getSectionID(x);
-                } else if (!x.isObject() && !x.has("layer")) {
-                    System.err.println("Unrecognized item: " + x);
-                } else {
-                    final String id = x.get("layer").textValue();
-                    final String kml = x.has("kml") ? x.get("kml").textValue() : null;
-                    final String name = x.get("name").textValue();
-
-
-
-                    onLayer(id, name, kml, icon, currentSection);
-
-                    //System.out.println(currentSection + " " + name + " " + x);
-                    //executor.submit(new ImportKML(st, proxy, id, name, url));
-                }
-
-
-            }
-        });
+//        /*ExecutorService executor =
+//
+//         threads == 1 ?
+//         Executors.newSingleThreadExecutor() :
+//         Executors.newFixedThreadPool(threads);*/
+//        if (!Files.exists(Paths.get(basePath))) {
+//            Files.createDirectory(Paths.get(basePath));
+//        }
+//
+//        URI uri = new File(layersFile).toURI();
+//
+//        String layers = new String(Files.readAllBytes(Paths.get(uri)), StandardCharsets.UTF_8);
+//
+//        JsonNode lll = JSON.fromJSON(layers).get("cv");
+//
+//        JsonNode n = lll;
+//
+//
+//        n.forEach(x -> {
+//
+//            //x.isObject() &&
+//            if (x.has("section")) {
+//
+//                String name = x.get("section").textValue();
+//                String id = getSectionID(x);
+//                String icon = x.get("icon").textValue();
+//
+//                if (id == null) {
+//                    throw new RuntimeException("Section " + x + " missing ID");
+//                }
+//
+//                onSection(name, id, icon);
+//                //Tag t = Tag.the(st, id);
+//                //if (t != null)
+//                //  t.name(name);
+//
+//            } else {
+//                String icon = null;
+//
+//                if (x.has("icon"))
+//                    icon = x.get("icon").textValue();
+//
+//                if (x.isTextual()) {
+//                    currentSection = x.textValue();
+//                } else if (x.isObject() && x.has("section")) {
+//                    currentSection = getSectionID(x);
+//                } else if (!x.isObject() && !x.has("layer")) {
+//                    System.err.println("Unrecognized item: " + x);
+//                } else {
+//                    final String id = x.get("layer").textValue();
+//                    final String kml = x.has("kml") ? x.get("kml").textValue() : null;
+//                    final String name = x.get("name").textValue();
+//                    onLayer(id, name, kml, icon, currentSection);
+//
+//                    //System.out.println(currentSection + " " + name + " " + x);
+//                    //executor.submit(new ImportKML(st, proxy, id, name, url));
+//                }
+//
+//
+//            }
+//        });
 
 
     }
 
-    abstract public void onLayer(String id, String name, String kml, String icon, String currentSection);
-
-    abstract public void onSection(String name, String id, String icon);
+//    abstract public void onLayer(String id, String name, String kml, String icon, String currentSection);
+//
+//    abstract public void onSection(String name, String id, String icon);
 
 
 //

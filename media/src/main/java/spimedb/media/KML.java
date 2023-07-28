@@ -49,7 +49,7 @@ public class KML {
     final int maxPathDepth = 3;
     //private final Proxy proxy;
     private final SpimeDB db;
-    private final GeoNObject root;
+    private final GeoNObject prototype;
 
     private String layer;
     final Deque<String> path = new ArrayDeque();
@@ -277,11 +277,10 @@ public class KML {
         }
     }
 
-    public KML(SpimeDB db, GeoNObject root) {
+    public KML(SpimeDB db, GeoNObject prototype) {
         this.db = db;
-        this.root = root;
+        this.prototype = prototype;
     }
-
 
     public Runnable url(String url) throws MalformedURLException {
         return url(Crawl.fileName( new URL(url).getFile() ), url);
@@ -539,10 +538,10 @@ public class KML {
                     }
                     rootFound = true;
                     //name the top level folder
-                    d = root;
+                    d = prototype;
                 } else {
-                    if (pathString.equals(root.id()))
-                        d = new GeoNObject(root);
+                    if (pathString.equals(prototype.id()))
+                        d = new GeoNObject(prototype);
                     else
                         d = new GeoNObject(pathString);
 
@@ -691,7 +690,7 @@ public class KML {
                     System.err.println("Un-NObjectized: " + go);
                     return false;
                 }*/
-            if (d!=root)
+            if (d!= prototype)
                 db.add(d);
 
 

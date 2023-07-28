@@ -7,6 +7,7 @@ package spimedb.media;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jcog.TODO;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.GeoJsonObject;
@@ -41,7 +42,7 @@ public class GeoJSON   {
 
     public static void load(String url, Function<Feature, NObject> builder, SpimeDB db) {
         try {
-            db.add(get(new URL(url).openStream(), baseGeoJSONBuilder));
+            db.add(get(new URL(url).openStream(), builder));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -53,33 +54,43 @@ public class GeoJSON   {
         return featureCollection.getFeatures().stream().map(builder);
     }
 
-    /** TODO remove Earthquake specific tags into an extended builder */
-    public static final Function<Feature, NObject> baseGeoJSONBuilder = (f) -> {
-        MutableNObject d = new MutableNObject(f.getId());
 
 
-        GeoJsonObject g = f.getGeometry();
-        if (g != null) {
-            if (g instanceof org.geojson.Point point) {
-                LngLatAlt coord = point.getCoordinates();
-                d.where((float)coord.getLongitude(), (float)coord.getLatitude(), (float)coord.getAltitude());
-            }
+    public static class GeoJSONBuilder implements Function<Feature, NObject> {
+        public final String tag;
+
+        public GeoJSONBuilder(String tag) {
+            this.tag = tag;
         }
 
-        Object time = f.getProperty("time");
-        if (time!=null) {
-            if (time instanceof Long) {
-                d.when(((Long)time));
-            }
-        }
+        @Override
+        public NObject apply(Feature f) {
+            MutableNObject d = new MutableNObject(f.getId());
 
-        //EQ specific mappnig
-        //Feature{properties={mag=6.2, place=33km S of Tolotangga, Indonesia, time=1483050618360, updated=1483052912295, tz=480, url=http://earthquake.usgs.gov/earthquakes/eventpage/us10007nl0, detail=http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us10007nl0.geojson, felt=73, cdi=7, mmi=4.81, alert=green, status=reviewed, tsunami=1, sig=642, net=us, code=10007nl0, ids=,us10007nl0,, sources=,us,, types=,dyfi,geoserve,losspager,origin,phase-data,shakemap,, nst=null, dmin=3.611, rms=1.52, gap=26, magType=mwp, type=earthquake, title=M 6.2 - 33km S of Tolotangga, Indonesia}, geometry=Point{coordinates=LngLatAlt{longitude=118.6088, latitude=-9.0665, altitude=72.27}} GeoJsonObject{}, id='us10007nl0'}
-        d.name( f.getProperty("place") );
-        d.withTags("Earthquake");
-        Object mag = f.getProperty("mag");
-        if (mag!=null)
-            d.put( "eqMag", mag.toString());
+            GeoJsonObject g = f.getGeometry();
+            if (g != null) {
+                if (g instanceof org.geojson.Point point) {
+                    LngLatAlt coord = point.getCoordinates();
+                    d.where((float) coord.getLongitude(), (float) coord.getLatitude(), (float) coord.getAltitude());
+                } else {
+                    throw new TODO();
+                }
+            }
+
+            Object time = f.getProperty("time");
+            if (time != null) {
+                if (time instanceof Long l)
+                    d.when(l);
+            }
+
+            d.withTags(tag);
+
+//            //EQ specific mappnig
+//            //Feature{properties={mag=6.2, place=33km S of Tolotangga, Indonesia, time=1483050618360, updated=1483052912295, tz=480, url=http://earthquake.usgs.gov/earthquakes/eventpage/us10007nl0, detail=http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us10007nl0.geojson, felt=73, cdi=7, mmi=4.81, alert=green, status=reviewed, tsunami=1, sig=642, net=us, code=10007nl0, ids=,us10007nl0,, sources=,us,, types=,dyfi,geoserve,losspager,origin,phase-data,shakemap,, nst=null, dmin=3.611, rms=1.52, gap=26, magType=mwp, type=earthquake, title=M 6.2 - 33km S of Tolotangga, Indonesia}, geometry=Point{coordinates=LngLatAlt{longitude=118.6088, latitude=-9.0665, altitude=72.27}} GeoJsonObject{}, id='us10007nl0'}
+//            d.name(f.getProperty("place"));
+//            Object mag = f.getProperty("mag");
+//            if (mag != null)
+//                d.put("eqMag", mag.toString());
 
 
 //                    /*if (g instanceof Circle) {
@@ -107,8 +118,9 @@ public class GeoJSON   {
 //            //TODO other types
 //        }
 
-        return d;
-    };
+            return d;
+        }
+    }
 
 //    public static void main(String[] arg) throws Exception {
 //        URL pointFile = new URL("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson");

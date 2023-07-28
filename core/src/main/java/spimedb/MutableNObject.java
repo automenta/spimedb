@@ -144,12 +144,7 @@ public class MutableNObject extends ImmutableNObject {
             s.add(t);
         }
 
-        if (s.isEmpty()) {
-            this.tag = null;
-        } else {
-            this.tag = s.toArray(new String[0]);
-        }
-
+        this.tag = s.isEmpty() ? null : s.toArray(new String[0]);
 
         return this;
     }

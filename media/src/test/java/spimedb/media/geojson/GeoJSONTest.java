@@ -27,7 +27,7 @@ public class GeoJSONTest {
         db = new SpimeDB();
         db.add(GeoJSON.get(
                 new BufferedInputStream(GeoJSONTest.class.getClassLoader().getResourceAsStream("geojson/eq.geojson"), 1024),
-                GeoJSON.baseGeoJSONBuilder));
+                new GeoJSON.GeoJSONBuilder("main")));
         db.sync(50);
     }
 

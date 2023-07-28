@@ -13,10 +13,10 @@ import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.Span;
 import org.jetbrains.annotations.Nullable;
-import spimedb.util.HTTP;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +24,6 @@ import java.util.Map;
  * http://opennlp.sourceforge.net/models-1.5/
  */
 public class NLP {
-
-    static final HTTP http = new HTTP();
 
 
     public static final LoadingCache<Class,Object> models = Caffeine.newBuilder().build(k -> {
@@ -75,9 +73,10 @@ public class NLP {
     }
 
     private static InputStream stream(String url) throws IOException {
-        final InputStream[] stream = new InputStream[1];
-        http.asStream(url, (modelIn) -> stream[0] = modelIn);
-        return stream[0];
+        //final InputStream[] stream = new InputStream[1];
+        //http.asStream(url, (modelIn) -> stream[0] = modelIn);
+        //return stream[0];
+        return new URL(url).openStream();
     }
 
 
