@@ -71,16 +71,82 @@ class SpimeDBLayer extends GeoLayer {
         super.start(f);
     }
 
+    pointVisible(latitude, longitude, altitude, f) {
+        const p = WorldWind.Vec3.zero();
+        f.view.w.globe.computePointFromPosition(latitude, longitude, altitude, p);
+        return f.view.w.drawContext.frustumInModelCoordinates.containsPoint(p);
+    }
     _update(f) {
         const p = f.view.pos();
-        const alt = p.altitude;
-        const r = Math.min(0.1, p.altitude/100.0); //TODO fix
-        const latMin = p.latitude - r;
-        const latMax = p.latitude + r;
-        const lonMin = p.longitude - r;
-        const lonMax = p.longitude + r;
+        const lat = p.latitude, lon = p.longitude;
+        let latMin, latMax, lonMin, lonMax;
+        const minDX = 0.001;
+        const decay =
+            //0.5;
+            0.9;
+        {
+            let dx = 45;
+            let latMinNext;
+            do {
+                latMinNext = lat - dx;
+                if (!this.pointVisible(latMinNext, lon, 0, f)) {
+                    dx *= decay;
+                    if (dx < minDX)
+                        break;
+                } else
+                    break;
+            } while (true);
+            latMin = latMinNext;
+        }
+        {
+            let dx = 45;
+            let latMaxNext;
+            do {
+                latMaxNext = lat + dx;
+                if (!this.pointVisible(latMaxNext, lon, 0, f)) {
+                    dx *= decay;
+                    if (dx < minDX)
+                        break;
+                } else
+                    break;
+            } while (true);
+            latMax = latMaxNext;
+        }
+        {
+            let dx = 90;
+            let lonMinNext;
+            do {
+                lonMinNext = lon - dx;
+                if (!this.pointVisible(lat, lonMinNext, 0, f)) {
+                    dx *= decay;
+                    if (dx < minDX)
+                        break;
+                } else
+                    break;
+            } while (true);
+            lonMin = lonMinNext;
+        }
+        {
+            let dx = 90;
+            let lonMaxNext;
+            do {
+                lonMaxNext = lon + dx;
+                if (!this.pointVisible(lat, lonMaxNext, 0, f)) {
+                    dx *= decay;
+                    if (dx < minDX)
+                        break;
+                } else
+                    break;
+            } while (true);
+            lonMax = lonMaxNext;
+        }
+        //console.log([latMin, latMax], [lonMin, lonMax]);
+        this.getAll(lonMin, lonMax, latMin, latMax);
+    }
+
+    getAll(lonMin, lonMax, latMin, latMax) {
         //TODO LOD filtering
-        const m = "{'_':'earth','@':[" + lonMin + "," + lonMax + "," + latMin + "," + latMax+"]}";
+        const m = "{'_':'earth','@':[" + lonMin + "," + lonMax + "," + latMin + "," + latMax + "]}";
         this.socket.send(m);
     }
 
@@ -138,7 +204,21 @@ class SpimeDBLayer extends GeoLayer {
                 //     1.0);
                 // cfg.attributes.outlineWidth = 2.0;
 
-                if (i["@"]) {
+                if (i["g-"]) {
+                    //path
+                    //const pathPositions = _.map(i["g-"], p => new WorldWind.Position(p[0], p[1], 100 /* TODO */));
+                    // const path = new WorldWind.Path(pathPositions, null);
+                    // path.altitudeMode = WorldWind.RELATIVE_TO_GROUND; // The path's altitude stays relative to the terrain's altitude.
+                    // path.followTerrain = true;
+                    // path.extrude = false; // Make it a curtain.
+                    // path.useSurfaceShapeFor2D = false; // Use a surface shape in 2D mode.
+                    // this.layer.addRenderable(i.renderable = path);
+
+                    const pathPositions = _.map(i["g-"], p => new WorldWind.Location(p[0], p[1], 0 /* TODO */));
+                    const path = new WorldWind.SurfacePolyline(pathPositions, null);
+                    this.layer.addRenderable(i.renderable = path);
+
+                } else if (i["@"]) {
                     //point
                     const ii = i["@"];
                     const pos = new WorldWind.Position(ii[2], ii[1], ii[3]);
@@ -150,17 +230,6 @@ class SpimeDBLayer extends GeoLayer {
 
                     point.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
                     this.layer.addRenderable(i.renderable = point);
-                } else if (i["g-"]) {
-                    //path
-                    const pathPositions = _.map(i["g-"], p => new WorldWind.Position(p[0], p[1], 100 /* TODO */));
-
-                    // Create the path.
-                    var path = new WorldWind.Path(pathPositions, null);
-                    path.altitudeMode = WorldWind.RELATIVE_TO_GROUND; // The path's altitude stays relative to the terrain's altitude.
-                    path.followTerrain = true;
-                    //path.extrude = true; // Make it a curtain.
-                    //path.useSurfaceShapeFor2D = true; // Use a surface shape in 2D mode.
-                    this.layer.addRenderable(i.renderable = path);
                 } else {
                     console.error("unhandled geometry type: ", i);
                 }
@@ -175,7 +244,7 @@ class SpimeDBLayer extends GeoLayer {
                 }
             }
         });
-        console.log(this.active);
+        //console.log(this.active);
     }
 
     close() {

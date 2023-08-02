@@ -1,6 +1,7 @@
 package spimedb.query;
 
 
+import jcog.Util;
 import jcog.data.list.Lst;
 import jcog.tree.rtree.rect.HyperRectDouble;
 import org.apache.commons.lang3.ArrayUtils;
@@ -8,6 +9,7 @@ import org.apache.lucene.document.DoubleRange;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
+import org.hipparchus.util.MathUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,7 +211,26 @@ public class Query  {
         ));
     }
 
+    private static double a2t(double angle) {
+        return angle / (180/Math.PI);
+    }
+    private static double t2a(double theta) {
+        return theta * (180/Math.PI);
+    }
+
     public <Q extends Query> Q where(double lonMin, double lonMax, double latMin, double latMax) {
+//        //TODO is there a way to normalize these polar coordinates without looping
+//        while (lonMin < -180) lonMin += 360;
+//        while (lonMin > +180) lonMin -= 360;
+//        while (lonMax < -180) lonMax += 360;
+//        while (lonMax > +180) lonMax -= 360;
+
+//        lonMin = t2a(MathUtils.normalizeAngle(a2t(lonMin), 0));
+//        lonMax = t2a(MathUtils.normalizeAngle(a2t(lonMax), 0));
+//        latMin = MathUtils.normalizeAngle(latMin, 0);
+//        latMax = MathUtils.normalizeAngle(latMax, 0);
+        latMin = Util.clamp(latMin, -90, +90);
+        latMax = Util.clamp(latMax, -90, +90);
 
         if (lonMin > lonMax) { /* swap */ var c = lonMin; lonMin = lonMax; lonMax = c; }
         if (latMin > latMax) { /* swap */ var c = latMin; latMin = latMax; latMax = c; }
@@ -217,11 +238,9 @@ public class Query  {
         double centerX = (lonMin + lonMax)/2;
         double centerY = (latMin + latMax)/2;
 
-        //TODO is there a way to do this without looping
-        while (centerX < -180)
-            centerX += 360;
-        while (centerX > +180)
-            centerX -= 360;
+//        //TODO is there a way to do this without looping
+        while (centerX < -180) centerX += 360;
+        while (centerX > +180) centerX -= 360;
 
         double wHalf = Math.min(Math.abs(lonMax - lonMin), 360)/2.0;
         double hHalf = Math.min(Math.abs(latMax - latMin), 180)/2.0;

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
 
@@ -159,7 +160,7 @@ public class Search {
         if (localDocs == null)
             return true;
 
-        final DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
+        DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
 
         IndexReader reader = searcher.getIndexReader();
         Document d = visitor.getDocument();

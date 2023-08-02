@@ -71,11 +71,10 @@ public class Server implements HttpModel {
                 Query q = new Query().where(
                         B.get(0).asDouble(), B.get(1).asDouble(),
                         B.get(2).asDouble(), B.get(3).asDouble());
-                //System.out.println(q);
 
                 Search r = q.start(db);
                 List<NObject> found = new Lst<>();
-                r.forEach((d, s) -> found.add(d), 100, () -> {
+                r.forEach((d, s) -> found.add(new MutableNObject(d)), 0, () -> {
                     if (!found.isEmpty())
                         ws.send(JSON.toJSONString(found));
 //                    assertEquals(1, db.size());
@@ -167,7 +166,7 @@ public class Server implements HttpModel {
     }
 
     public static void main(String[] args) {
-        new Server(new SpimeDB()).server.fps(10);
+        new Server(new SpimeDB()).server.fps(30);
     }
 
 }

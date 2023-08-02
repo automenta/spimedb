@@ -43,23 +43,20 @@ public class DObject implements NObject {
 
     final String id;
     public final Document document;
-    private final DoubleND min;
-    private final DoubleND max;
+    private final DoubleND min, max;
 
     public static DObject get(Document d) {
         return new DObject(d);
     }
 
     public static DObject get(NObject n, SpimeDB db) {
-        if (n instanceof DObject)
-            return (DObject) n;
-        return get(toDocument(n, db));
+        return n instanceof DObject d ? d : get(toDocument(n, db));
     }
 
     static Document toDocument(@NotNull NObject n, @NotNull SpimeDB db) {
 
-        if (n instanceof DObject)
-            return ((DObject) n).document;
+        if (n instanceof DObject d)
+            return d.document;
 
         Document d = new Document();
 
