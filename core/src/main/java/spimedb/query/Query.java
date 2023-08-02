@@ -9,7 +9,6 @@ import org.apache.lucene.document.DoubleRange;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
-import org.hipparchus.util.MathUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +91,7 @@ public class Query  {
         try {
             return find(bq, limit, db, after, collectors);
         } catch (IOException e) {
-
-            logger.error("{}", e);
+            logger.error("Query.start", e);
             return null;
         }
 
@@ -105,9 +103,8 @@ public class Query  {
         TopScoreDocCollector hitsCollector = TopScoreDocCollector.create(limit, after, Integer.MAX_VALUE);
 
         Collector collector = collectors.length > 0 ?
-                MultiCollector.wrap(ArrayUtils.add(collectors, hitsCollector))
-                :
-                hitsCollector;
+            MultiCollector.wrap(ArrayUtils.add(collectors, hitsCollector)) :
+            hitsCollector;
 
         IndexSearcher searcher = db.searcher();
         searcher.search(q, collector);
@@ -162,12 +159,8 @@ public class Query  {
 
             }
 
-            bqb.add(new DisjunctionMaxQuery(boundQueries, 0.1f),
-                    BooleanClause.Occur.MUST);
-
+            bqb.add(new DisjunctionMaxQuery(boundQueries, 0.1f), BooleanClause.Occur.MUST);
         }
-
-
 
         if (queryString!=null) {
             try {
@@ -211,12 +204,12 @@ public class Query  {
         ));
     }
 
-    private static double a2t(double angle) {
-        return angle / (180/Math.PI);
-    }
-    private static double t2a(double theta) {
-        return theta * (180/Math.PI);
-    }
+//    private static double a2t(double angle) {
+//        return angle / (180/Math.PI);
+//    }
+//    private static double t2a(double theta) {
+//        return theta * (180/Math.PI);
+//    }
 
     public <Q extends Query> Q where(double lonMin, double lonMax, double latMin, double latMax) {
 //        //TODO is there a way to normalize these polar coordinates without looping
@@ -242,8 +235,8 @@ public class Query  {
         while (centerX < -180) centerX += 360;
         while (centerX > +180) centerX -= 360;
 
-        double wHalf = Math.min(Math.abs(lonMax - lonMin), 360)/2.0;
-        double hHalf = Math.min(Math.abs(latMax - latMin), 180)/2.0;
+        double wHalf = Math.min(Math.abs(lonMax - lonMin), 360)/2;
+        double hHalf = Math.min(Math.abs(latMax - latMin), 180)/2;
 
         //TODO clip latitude in -90,+90
 

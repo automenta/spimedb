@@ -76,6 +76,15 @@ class SpimeDBLayer extends GeoLayer {
         f.view.w.globe.computePointFromPosition(latitude, longitude, altitude, p);
         return f.view.w.drawContext.frustumInModelCoordinates.containsPoint(p);
     }
+    // pointsVisible(latitudes, longitude, altitude, f) {
+    //     //disjunction
+    //     for (const latitude of latitudes) {
+    //         if (this.pointVisible(latitude, longitude, altitude, f))
+    //             return true;
+    //     }
+    //     return false;
+    // }
+
     _update(f) {
         const p = f.view.pos();
         const lat = p.latitude, lon = p.longitude;
@@ -83,12 +92,14 @@ class SpimeDBLayer extends GeoLayer {
         const minDX = 0.001;
         const decay =
             //0.5;
-            0.9;
+            0.75;
+            //0.9;
         {
-            let dx = 45;
+            let dx = 90;
             let latMinNext;
             do {
                 latMinNext = lat - dx;
+                if (latMinNext < -90) { latMinNext = -90; break; }
                 if (!this.pointVisible(latMinNext, lon, 0, f)) {
                     dx *= decay;
                     if (dx < minDX)
@@ -99,10 +110,11 @@ class SpimeDBLayer extends GeoLayer {
             latMin = latMinNext;
         }
         {
-            let dx = 45;
+            let dx = 90;
             let latMaxNext;
             do {
                 latMaxNext = lat + dx;
+                if (latMaxNext < +90) { latMaxNext = +90; break; }
                 if (!this.pointVisible(latMaxNext, lon, 0, f)) {
                     dx *= decay;
                     if (dx < minDX)
@@ -113,11 +125,11 @@ class SpimeDBLayer extends GeoLayer {
             latMax = latMaxNext;
         }
         {
-            let dx = 90;
+            let dx = 180;
             let lonMinNext;
             do {
                 lonMinNext = lon - dx;
-                if (!this.pointVisible(lat, lonMinNext, 0, f)) {
+                if (!this.pointVisible(lat,  lonMinNext, 0, f)) {
                     dx *= decay;
                     if (dx < minDX)
                         break;
@@ -127,7 +139,7 @@ class SpimeDBLayer extends GeoLayer {
             lonMin = lonMinNext;
         }
         {
-            let dx = 90;
+            let dx = 180;
             let lonMaxNext;
             do {
                 lonMaxNext = lon + dx;
@@ -161,7 +173,7 @@ class SpimeDBLayer extends GeoLayer {
                 if (!this.view_change) {
                     this.view_change = f.event.on('view_change', _.throttle(() => {
                         this._update(f);
-                    }, 100));
+                    }, 50));
                 }
 
                 //this.socket.send("{'_':'index'}");

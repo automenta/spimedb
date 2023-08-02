@@ -6,8 +6,8 @@
     <artifactId>spimedb</artifactId>
     <version>1.0</version>
     <modules>
-        <module>media</module>
         <module>core</module>
+        <module>media</module>
         <module>logic</module>
     </modules>
     <packaging>pom</packaging>
