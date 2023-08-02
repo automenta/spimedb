@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>netvr</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js" type="text/javascript"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js" type="text/javascript"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/worldwindjs@latest/build/dist/worldwind.min.js" type="text/javascript"></script>
+
+    <!--
+    OSM Tags
+      https://taginfo.openstreetmap.org/download
+      https://wiki.openstreetmap.org/wiki/Category:Tag_descriptions
+    -->
+    <script src="https://unpkg.com/osmtogeojson@latest/osmtogeojson.js" type="text/javascript"></script>
+
+    <!-- https://forkaweso.me/Fork-Awesome/icons/ -->
+    <link href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css"
+          rel="stylesheet" integrity="sha256-XoaMnoYC5TH6/+ihMEnospgm0J1PM/nioxbOUdnM8HY=" crossorigin="anonymous"/>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"/>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui/build/dat.gui.min.js" type="text/javascript"></script>
+
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js"-->
+<!--            type="text/javascript"></script>-->
+<!--    &lt;!&ndash;    <script src="https://cdn.skypack.dev/cytoscape-dom-node"></script>&ndash;&gt;-->
+<!--    <script src="cytoscape-dom-node.js"></script>-->
+
+    <script src="graphology.min.js"></script>
+    <script src="graphology-library.min.js"></script>
+
+    <!--    <script src='https://meet.jit.si/external_api.js'></script>-->
+
+    <!-- https://github.com/SaneMethod/jquery-ajax-localstorage-cache#usage -->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-localstorage-cache/2.0.1/jalc.min.js"></script>-->
+
+    <!-- https://github.com/developit/mitt#usage -->
+    <script src="https://unpkg.com/mitt/dist/mitt.umd.js"></script>
+
+    <script src="rbush.js" type="text/javascript"></script>
+
+    <script src="focus.js" type="text/javascript"></script>
+
+    <script src="view.js" type="text/javascript"></script>
+    <script src="view.worldwind.js" type="text/javascript"></script>
+
+    <script src="layer.js" type="text/javascript"></script>
+
+    <script src="layer.home.js" type="text/javascript"></script>
+    <script src="layer.geo.js" type="text/javascript"></script>
+    <script src="layer.spimedb.js" type="text/javascript"></script>
+    <script src="layer.shapefile.js" type="text/javascript"></script>
+    <script src="layer.osm.js" type="text/javascript"></script>
+    <script src="layer.kml.js" type="text/javascript"></script>
+    <script src="layer.geojson.js" type="text/javascript"></script>
+
+    <script src="comm.js" type="text/javascript"></script>
+
+    <script src="sidebarmenu.js" type="text/javascript"></script><link rel="stylesheet" href="sidebarmenu.css"/>
+
+    <script src="menu.js" type="text/javascript"></script>
+
+    <!-- https://packery.metafizzy.co/ -->
+    <!--    <script src="https://unpkg.com/packery@2.1.2/dist/packery.pkgd.min.js" type="text/javascript"></script>-->
+
+    <!--    <script src="https://kombai.github.io/freewall/freewall.js" type="text/javascript"></script>-->
+    <!--    <link rel="stylesheet" href="https://kombai.github.io/freewall/example/css/style.css"/>-->
+
+    <!--    <script src="https://code.jquery.com/mobile/1.5.0-rc1/jquery.mobile-1.5.0-rc1.min.js" type="text/javascript"></script>-->
+    <!--    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.5.0-rc1/jquery.mobile-1.5.0-rc1.min.css">-->
+
+
+    <link rel="stylesheet" href="index.css"/>
+
+</head>
+
+<body>
+
+
+<div id="menu">
+<!--    <ul id="menu" class="sidebar-menu">-->
+<!--        <li style="display:inline-flex">-->
+<!--            <div title="map" class="buttonlike">-->
+<!--                <i class="fa fa-map-marker"></i>-->
+<!--            </div>-->
+<!--            <div title="time" class="buttonlike">-->
+<!--                <i class="fa fa-calendar-check-o"></i>-->
+<!--            </div>-->
+<!--            <div title="graph" class="buttonlike">-->
+<!--                <i class="fa fa-cubes"></i>-->
+<!--            </div>-->
+<!--            <div title="comm" class="buttonlike">-->
+<!--                <i class="fa fa-comment"></i>-->
+<!--            </div>-->
+<!--        </li>-->
+<!--        <li style="display:inline-flex">-->
+<!--            <div id="layers">-->
+<!--            </div>-->
+<!--        </li>-->
+<!--    </ul>-->
+</div>
+
+
+<!--<div id="addmenu" style="display:none">-->
+<!--    <div id="mode_menu">-->
+<!--        <button title="Clear"><i class="fa fa-times" aria-hidden="true"></i></button>-->
+<!--        <button title="Amenity"><i class="fa fa-wrench" aria-hidden="true"></i></button>-->
+<!--        <button title="Idiocracy"><i class="fa fa-trophy" aria-hidden="true"></i></button>-->
+<!--    </div>-->
+<!--    <div id="mode_idiocracy">-->
+<!--        <button>fuck</button>-->
+<!--        <button>shit</button>-->
+<!--        <button>play</button>-->
+<!--        <button>slep</button>-->
+<!--        <button>eaat</button>-->
+<!--    </div>-->
+<!--    &lt;!&ndash; mode_effect: https://psychonautwiki.org/wiki/Category:Effect &ndash;&gt;-->
+<!--</div>-->
+
+
+<!--<div id="menu2" class="modal" style="display:none">-->
+<!--    <div id="side_toggle" title="add" class="buttonlike">X</div>-->
+<!--    <div id="addmenu_toggle" title="add" class="buttonlike">+</div>-->
+<!--    &lt;!&ndash;        <div id="remembermenu_toggle" title="remember" class="buttonlike">s</div>&ndash;&gt;-->
+<!--</div>-->
+
+<script>
+    "use strict";
+    window.addEventListener('load', (e) => {
+
+        const f = new Focus();
+        const fv = new WorldWindView().start($('body'), f);
+
+        //TODO w.clearLayers()
+        f.addLayer(new HomeLayer());
+        f.addLayer(new GeoLayer("Atmosphere", new WorldWind.AtmosphereLayer()).disable());
+        //f.addLayer(new GeoLayer("View Controls", new WorldWind.ViewControlsLayer(w)).disable());
+        //view.addLayer(new WorldWind.CompassLayer());
+        //view.addLayer(new WorldWind.CoordinatesDisplayLayer(wwd));
+
+        f.addLayer(new SpimeDBLayer("SpimeDB", "ws://localhost:8080/"));
+
+        // f.addLayer(new ShapefileLayer("Countries", "https://worldwind.arc.nasa.gov/web/examples/data/shapefiles/naturalearth" +
+        //     "/ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp").disable());
+        // f.addLayer(new ShapefileLayer("Cities", "https://worldwind.arc.nasa.gov/web/examples/data/shapefiles/naturalearth" +
+        //     "/ne_50m_populated_places_simple/ne_50m_populated_places_simple.shp").disable());
+
+        //f.addLayer(new KMLLayer("AirNow Air Quality Index (current)", "http://files.airnowtech.org/airnow/today/airnow_conditions.kml").disable());
+        f.addLayer(new GeoJSONLayer("Earthquakes",
+            "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+            //'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson'
+        ).disable());
+        f.addLayer(new GeoJSONLayer("Air Quality",
+            //AirNow
+            'https://gis-calema.opendata.arcgis.com/datasets/acee3cdfe7ff45ad9751e8f9d95a50b3_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D'
+        ).disable());
+
+        f.addLayer(new GeoLayer("OSM Map", new WorldWind.OpenStreetMapImageLayer())/*.opacity(0.5)*/);
+        f.addLayer(new GeoLayer("Satellite", new WorldWind.BingAerialWithLabelsLayer()).disable());
+        //f.addLayer(new WWLayer("BMGNOne", new WorldWind.BMNGOneImageLayer()).disable());
+
+        f.addLayer(new OSMNodeLayer(f));
+
+        const m = new Menu("menu");
+        f.event.on('graph_change', _.throttle(()=>{
+            f.updateMenu(m);
+        }, 500));
+        f.event.on('view_change', _.throttle(()=>{
+            //TODO
+        }, 100));
+
+    }, false);
+</script>
+</body>
+</html>

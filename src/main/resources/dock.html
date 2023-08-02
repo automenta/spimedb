@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>netvr</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" type="text/javascript" ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js" type="text/javascript" ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/worldwindjs@latest/build/dist/worldwind.min.js" type="text/javascript" ></script>
+
+    <!--
+    OSM Tags
+      https://taginfo.openstreetmap.org/download
+      https://wiki.openstreetmap.org/wiki/Category:Tag_descriptions
+    -->
+    <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.4/osmtogeojson.js" type="text/javascript" ></script>
+
+    <!-- https://forkaweso.me/Fork-Awesome/icons/ -->
+    <link href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css"
+          rel="stylesheet" integrity="sha256-XoaMnoYC5TH6/+ihMEnospgm0J1PM/nioxbOUdnM8HY=" crossorigin="anonymous"/>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" ></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"/>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.min.js" type="text/javascript"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.18.2/cytoscape.min.js" type="text/javascript"></script>
+
+    <script src='https://meet.jit.si/external_api.js'></script>
+
+    <script src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
+
+    <link rel="stylesheet" href="index.css"/>
+
+    <script src="focus.js" type="text/javascript"></script>
+    <script src="layer.js" type="text/javascript"></script>
+    <script src="layer.home.js" type="text/javascript"></script>
+    <script src="layer.geo.js" type="text/javascript"></script>
+    <script src="layer.shapefile.js" type="text/javascript" ></script>
+    <script src="layer.osm.js" type="text/javascript" ></script>
+    <script src="comm.js" type="text/javascript" ></script>
+
+
+    <!-- https://packery.metafizzy.co/ -->
+    <!--    <script src="https://unpkg.com/packery@2.1.2/dist/packery.pkgd.min.js" type="text/javascript"></script>-->
+
+    <!--    <script src="https://kombai.github.io/freewall/freewall.js" type="text/javascript"></script>-->
+    <!--    <link rel="stylesheet" href="https://kombai.github.io/freewall/example/css/style.css"/>-->
+
+
+    <!--    <script src="https://code.jquery.com/mobile/1.5.0-rc1/jquery.mobile-1.5.0-rc1.min.js" type="text/javascript"></script>-->
+    <!--    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.5.0-rc1/jquery.mobile-1.5.0-rc1.min.css">-->
+
+</head>
+
+<body>
+
+
+
+</body>
+<script>
+    "use strict"; window.addEventListener('load', (e) => {
+        //https://golden-layout.com/tutorials/getting-started.html
+        const config = {
+            content: [{
+                type: 'row',
+                content: [{
+                    // type: 'component', componentName: 'testComponent', componentState: {label: 'A'}
+                    componentName: 'focus', type: 'component'
+                }, {
+                    type: 'column',
+                    content: [{
+                        componentName: 'map', type: 'component'
+                    }, {
+                        componentName: 'comm', type: 'component'
+                    }]
+                }]
+            }]
+        };
+
+
+        const l = new GoldenLayout(config, $('body'));
+        // l.registerComponent('testComponent', function(container, state)  {
+        //     container.getElement().html('<h2>' + state.label + '</h2>');
+        // });
+        l.registerComponent('focus', function(container, state)  {
+            container.getElement().html('<h1>focus</h1>');
+        });
+        l.registerComponent('map', function(container, state)  {
+            container.getElement().html('<h1>map</h1>');
+        });
+        l.registerComponent('comm', function(container, state)  {
+            //$(container.getElement()).append(comm());
+            comm($(container.getElement()));
+        });
+
+        l.init();
+    });
+</script>
+</html>

@@ -112,9 +112,9 @@ public class Search {
 
         Throwable ee = null;
         try {
-            if (!forEachLocal(each::test)) {
+            if (!forEachLocal(each::test))
                 return;
-            }
+
             if (continuing.get() && waitMS > 0) {
                 try {
                     Thread.sleep(waitMS);

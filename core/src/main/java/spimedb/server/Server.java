@@ -1,5 +1,8 @@
 package spimedb.server;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import jcog.data.list.Lst;
 import jcog.io.Twokenize;
@@ -37,37 +40,42 @@ public class Server implements HttpModel {
 
     @Override
     public void wssMessage(WebSocket ws, String message) {
-        /*
-            { _: 'get',
-              earth: [ latMin, lonMin, latMax, lonMax ] //optional
-              time: [tMin, tMax]                        //optional
-              detailMin: [ latEps, lonEps, tEps ]       //optional
-              tagInclude: [ ... ]                       //optional
-              tagExclude: [ ... ]                       //optional
-              //TODO output parameters
-            }
-            Get items
-        */
-        /*
-            { _: 'index' }
-            Get tag index, ontology, schema, etc..
-        */
-        var m = JSON.fromJSON(message);
+
+
+        JsonNode m;
+        try {
+            m = JSON.fromJSON(message);
+        } catch (JsonProcessingException e) {
+            return;
+        }
         switch (m.get("_").asText()) {
-            case "index":
+            case "index" ->
+                /*
+                    { _: 'index' }
+                    Get tag index, ontology, schema, etc..
+                */
                 ws.send(JSON.toJSONString(db.facets(NObject.TAG, 32).labelValues));
-                break;
-            case "get":
+            case "earth" -> {
+                /*
+                    { _: 'get',
+                      earth: [ latMin, lonMin, latMax, lonMax ] //optional
+                      time: [tMin, tMax]                        //optional
+                      detailMin: [ latEps, lonEps, tEps ]       //optional
+                      tagInclude: [ ... ]                       //optional
+                      tagExclude: [ ... ]                       //optional
+                      //TODO output parameters
+                    }
+                    Get items
+                */
                 var B = m.get(NObject.BOUND);
                 Query q = new Query().where(
-                    new double[]{B.get(0).asDouble(), B.get(1).asDouble()},
-                    new double[]{B.get(2).asDouble(), B.get(3).asDouble()});
+                        B.get(0).asDouble(), B.get(1).asDouble(),
+                        B.get(2).asDouble(), B.get(3).asDouble());
                 //System.out.println(q);
 
                 Search r = q.start(db);
-
                 List<NObject> found = new Lst<>();
-                r.forEach((d, s) -> found.add(d), Long.MAX_VALUE, () -> {
+                r.forEach((d, s) -> found.add(d), 100, () -> {
                     if (!found.isEmpty())
                         ws.send(JSON.toJSONString(found));
 //                    assertEquals(1, db.size());
@@ -77,10 +85,9 @@ public class Server implements HttpModel {
 //                    assertEquals(dplace.toString(), found.get(0).toString());
 //                    assertTrue(String.valueOf(found), found.contains(place));
                 });
-
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
     }
 //    @Override

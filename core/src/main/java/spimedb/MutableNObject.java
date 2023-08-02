@@ -40,7 +40,7 @@ public class MutableNObject extends ImmutableNObject {
     }
 
     public MutableNObject(String id, String name) {
-        super(DoubleND.fill(4, Float.NEGATIVE_INFINITY), DoubleND.fill(4, Float.POSITIVE_INFINITY), id, name);
+        super(DoubleND.fill(4, Double.NEGATIVE_INFINITY), DoubleND.fill(4, Double.POSITIVE_INFINITY), id, name);
     }
 
     @Override
@@ -161,28 +161,27 @@ public class MutableNObject extends ImmutableNObject {
         return this;
     }
 
-    public void when(float when) {
-        min.coord[0] = when;
-        max.coord[0] = when;
+    public void when(double when) {
+        min.coord[0] = max.coord[0] = when;
     }
 
     public void setEternal() {
-        min.coord[0] = Float.NEGATIVE_INFINITY;
-        max.coord[0] = Float.POSITIVE_INFINITY;
+        min.coord[0] = Double.NEGATIVE_INFINITY;
+        max.coord[0] = Double.POSITIVE_INFINITY;
     }
 
-    public void where(float x, float y) {
+    public void where(double x, double y) {
         min.coord[1] = x;
         max.coord[1] = x;
         min.coord[2] = y;
         max.coord[2] = y;
     }
 
-    public void where(float x, float y, float z) {
+    public void where(double x, double y, double z) {
         where(x, y);
         if (z!=z) { //avoid NaN
-            min.coord[3] = Float.NEGATIVE_INFINITY;
-            max.coord[3] = Float.POSITIVE_INFINITY;
+            min.coord[3] = Double.NEGATIVE_INFINITY;
+            max.coord[3] = Double.POSITIVE_INFINITY;
         } else {
             min.coord[3] = z;
             max.coord[3] = z;

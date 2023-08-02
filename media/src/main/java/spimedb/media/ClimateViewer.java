@@ -31,9 +31,9 @@ public class ClimateViewer {
         GeoJSON.load("https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson",
             new GeoJSON.GeoJSONBuilder("nuclear"), server.db);
 
-        new KML(server.db, (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"))
-            .url("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz")
-            .run();
+//        new KML(server.db, (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"))
+//            .url("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz")
+//            .run();
 
         server.db.sync(50);
 

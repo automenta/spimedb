@@ -617,18 +617,16 @@ public class KML {
                     else */
                     if (g instanceof Point pp) {
                         d.where(pp.getCenter());
-
                     } else if (g instanceof org.opensextant.giscore.geometry.LinearRing) {
-                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
-
+                        unhandledGeometryType(g);
                     } else if (g instanceof org.opensextant.giscore.geometry.Line l) {
                         d.where(l);
                     } else if (g instanceof org.opensextant.giscore.geometry.MultiLinearRings) {
-                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
+                        unhandledGeometryType(g);
                     } else if (g instanceof org.opensextant.giscore.geometry.Polygon p) {
                         d.where(p);
                     } else {
-                        logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
+                        unhandledGeometryType(g);
                     }
 
                     //TODO other types
@@ -638,17 +636,12 @@ public class KML {
                 StyleSelector fstyle = f.getStyle();
                 if (fstyle != null) {
 
-                    if (fstyle instanceof Style) {
-
-                        Style ss = (Style) fstyle;
+                    if (fstyle instanceof Style ss) {
                         styleInline = ss;
-
-                    } else if (fstyle instanceof StyleMap) {
-                        StyleMap ss = (StyleMap) fstyle;
-                        styleInline = styles.get(ss.getId());
-                        if (styleInline == null) {
-                            logger.warn("Missing style: {}", ss.getId());
-                        }
+                    } else if (fstyle instanceof StyleMap sm) {
+                        styleInline = styles.get(sm.getId());
+                        if (styleInline == null)
+                            logger.warn("Missing style: {}", sm.getId());
                     }
 
                 }
@@ -693,8 +686,11 @@ public class KML {
             if (d!= prototype)
                 db.add(d);
 
-
             return true;
+        }
+
+        private void unhandledGeometryType(Geometry g) {
+            logger.warn("unhandled geometry type: {}: {}", g.getClass(), g);
         }
 
         @Override

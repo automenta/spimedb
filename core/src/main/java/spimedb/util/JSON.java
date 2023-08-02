@@ -129,17 +129,17 @@ public class JSON {
         }
     }
 
-    public static JsonNode fromJSON(String x) {
+    public static JsonNode fromJSON(String x) throws JsonProcessingException {
         return fromJSON(x, JsonNode.class);
     }
 
-    public static <X> X fromJSON(String x, Class<? extends X> type) {
-        try {
+    public static <X> X fromJSON(String x, Class<? extends X> type) throws JsonProcessingException {
+//        try {
             return json.readValue(x, type);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//            return null;
+//        }
     }
     public static <X> X fromJSON(byte[] j, Class<? extends X> type) {
         try {

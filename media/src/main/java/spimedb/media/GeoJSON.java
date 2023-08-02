@@ -67,21 +67,20 @@ public class GeoJSON   {
         public NObject apply(Feature f) {
             MutableNObject d = new MutableNObject(f.getId());
 
+            String name = f.getProperty("Name"); if (name!=null) d.name(name);
+            String desc = f.getProperty("Description"); if (desc!=null) d.description(desc);
+
             GeoJsonObject g = f.getGeometry();
             if (g != null) {
                 if (g instanceof org.geojson.Point point) {
                     LngLatAlt coord = point.getCoordinates();
-                    d.where((float) coord.getLongitude(), (float) coord.getLatitude(), (float) coord.getAltitude());
+                    d.where(coord.getLongitude(), coord.getLatitude(), coord.getAltitude());
                 } else {
                     throw new TODO();
                 }
             }
 
-            Object time = f.getProperty("time");
-            if (time != null) {
-                if (time instanceof Long l)
-                    d.when(l);
-            }
+            Object time = f.getProperty("time"); if (time instanceof Long l) d.when(l);
 
             d.withTags(tag);
 

@@ -3,6 +3,7 @@ class SpimeDBLayer extends GeoLayer {
         super(name, new WorldWind.RenderableLayer(name));
         this.url = url;
         this.socket = undefined;
+        this.active = new Map();
     }
 
     start(f) {
@@ -64,26 +65,47 @@ class SpimeDBLayer extends GeoLayer {
         };
 
 
-        this.reconnect();
+        this.reconnect(f);
 
-        // const g = new WorldWind.GeoJSONParser(this.url);
-        // g.load(null, shapeConfigurationCallback, this.layer);
 
         super.start(f);
     }
 
-    reconnect() {
+    _update(f) {
+        const p = f.view.pos();
+        const alt = p.altitude;
+        const r = Math.min(0.1, p.altitude/100.0); //TODO fix
+        const latMin = p.latitude - r;
+        const latMax = p.latitude + r;
+        const lonMin = p.longitude - r;
+        const lonMax = p.longitude + r;
+        //TODO LOD filtering
+        const m = "{'_':'earth','@':[" + lonMin + "," + lonMax + "," + latMin + "," + latMax+"]}";
+        this.socket.send(m);
+    }
+
+    reconnect(f) {
         if (this.socket) {
             this.close();
         }
 
         this.socket = new WebSocket(this.url);
         this.socket.onopen = () => {
-            this.socket.send("{ '_': 'index' }");
+            setTimeout(()=>{
+                if (!this.view_change) {
+                    this.view_change = f.event.on('view_change', _.throttle(() => {
+                        this._update(f);
+                    }, 100));
+                }
+
+                //this.socket.send("{'_':'index'}");
+                this._update(f);
+            }, 0);
         };
         // socket.addEventListener('close', closeConnection);
         this.socket.onmessage = (x) => {
-            console.log(x.data);
+            const d = JSON.parse(x.data);
+            this.addAll(d);
         };
         this.socket.onclose = (e) => {
             this.close();
@@ -93,6 +115,68 @@ class SpimeDBLayer extends GeoLayer {
         };
     }
 
+
+    addAll(d) {
+        this.active.forEach((v, k) => {
+            v.unseen = true;
+        });
+        _.forEach(d, i => {
+            const e = this.active.get(i.I);
+            if (e) {
+                //exists TODO check for difference?
+                e.unseen = false;
+            } else {
+                //console.log(i);
+                this.active.set(i.I, i);
+                // const cfg = {};
+                // cfg.attributes = new WorldWind.ShapeAttributes(null);
+                // cfg.attributes.drawOutline = true;
+                // cfg.attributes.outlineColor = new WorldWind.Color(
+                //     0.1 * cfg.attributes.interiorColor.red,
+                //     0.3 * cfg.attributes.interiorColor.green,
+                //     0.7 * cfg.attributes.interiorColor.blue,
+                //     1.0);
+                // cfg.attributes.outlineWidth = 2.0;
+
+                if (i["@"]) {
+                    //point
+                    const ii = i["@"];
+                    const pos = new WorldWind.Position(ii[2], ii[1], ii[3]);
+                    const point = new WorldWind.Placemark(pos, true, null);
+                    if (i.N)
+                        point.label = i.N;
+                    else
+                        point.label = i[">"];
+
+                    point.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
+                    this.layer.addRenderable(i.renderable = point);
+                } else if (i["g-"]) {
+                    //path
+                    const pathPositions = _.map(i["g-"], p => new WorldWind.Position(p[0], p[1], 100 /* TODO */));
+
+                    // Create the path.
+                    var path = new WorldWind.Path(pathPositions, null);
+                    path.altitudeMode = WorldWind.RELATIVE_TO_GROUND; // The path's altitude stays relative to the terrain's altitude.
+                    path.followTerrain = true;
+                    //path.extrude = true; // Make it a curtain.
+                    //path.useSurfaceShapeFor2D = true; // Use a surface shape in 2D mode.
+                    this.layer.addRenderable(i.renderable = path);
+                } else {
+                    console.error("unhandled geometry type: ", i);
+                }
+            }
+        });
+        this.active.forEach((v, k) => {
+            if (v.unseen) {
+                this.active.delete(k);
+                if (v.renderable) {
+                    this.layer.removeRenderable(v.renderable);
+                    delete v.renderable;
+                }
+            }
+        });
+        console.log(this.active);
+    }
 
     close() {
         this.socket.close();

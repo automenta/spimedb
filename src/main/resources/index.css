@@ -1,0 +1,251 @@
+/*@font-face{*/
+/*    font-family: "_Mono";*/
+/*    src: url("css/big-pixel-shadowed-demo.demo.otf");*/
+/*}*/
+
+body {
+    color: white;
+    background-color: black;
+    font-family: monospace;
+    /*font-family: '_Mono';*/
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    /*transition: 0.25s;*/
+}
+
+#overlay {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background-color: #ffcf76;
+}
+
+.content {
+    position: fixed;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body:not(.sideExpanded) .content {
+    width: 100%;
+    height: 100%;
+}
+
+body.sideExpanded .content {
+    width: 50%;
+    height: 100%;
+    right: 0;
+}
+
+body.sideExpanded .side {
+    width: 50%;
+    height: 100%;
+    position: fixed;
+    margin: 0;
+    padding: 0;
+}
+
+body:not(.sideExpanded) .side {
+    width: 0;
+}
+
+body:not(.sideExpanded) .side #active {
+    display: none;
+}
+
+#mode_menu {
+    color: white;
+}
+
+
+#mode_idiocracy button {
+    margin: 1em;
+    /*opacity:0.75;*/
+    /*pointer-events:painted;*/
+}
+
+/*#addmenu {*/
+/*    position: fixed;*/
+/*    left:10%;*/
+/*    top:10%;*/
+/*    width:80%;*/
+/*    height:80%;*/
+/*}*/
+
+#active {
+    height: 100%;
+    overflow: auto;
+    direction: rtl;
+    /*opacity: 0.9;*/
+    /*display: flow;*/
+}
+
+#active * {
+    direction: ltr; /* restore direction */
+}
+
+#layers {
+    display: flow-root;;
+}
+
+#layers div {
+    overflow: hidden;
+    display: inline-grid;
+}
+
+.cell {
+    background-color: rgba(0.7, 0.7, 0.7, 0.75);
+    /*background-color: black;*/
+
+    /*color: white;*/
+
+    /*opacity:0.9;*/
+    /*width: auto;*/
+
+    padding: 0.1em;
+    margin: 0.2em;
+
+    width: 27%;
+    min-height: 3em;
+    border: 4px solid black;
+}
+
+.cell.cell_enabled {
+    /*background-color: rgba(1, 1, 1, 0.9) !important;*/
+    /*padding-top: 0.5em;*/
+    /*padding-bottom: 0.5em;*/
+    border-color: yellow;
+}
+
+.cell .label {
+    float: left;
+    clear: both;
+}
+
+.cell .controls {
+    font-size: 90%;
+    padding: 1em;
+}
+
+.buttonlike {
+    cursor: pointer;
+    color: white;
+    /*background-color: black;*/
+    min-height: 1em;
+    min-width: 1em;
+    vertical-align: central;
+    border: solid 0.05em transparent;
+}
+
+.buttonlike:hover {
+    color: darkorange;
+    border-color: orange;
+}
+
+.buttonlike:active {
+    color: gold;
+    border-color: gold;
+}
+
+.buttonlike select {
+    color: white;
+    background-color: black;
+    border-color: transparent;
+    /*font-size: 50%;*/
+}
+
+.buttonlike select:hover {
+    border-color: orange;
+}
+
+.modal {
+    position: fixed;
+    width: 90%;
+    height: 70%;
+    left: 5%;
+    top: 5%;
+    overflow: auto;
+}
+
+#menu {
+    width: 90%;
+    height: 15%;
+    left: 5%;
+    bottom: 2%;
+    position: fixed;
+    z-index: 10;
+    resize: both;
+    overflow: auto;
+    list-style: none;
+    display: inline-flex;
+    opacity: 0.9;
+}
+
+body:not(.sideExpanded) * #menu {
+    left: auto !important;
+}
+
+/* dat.gui overrides */
+.close-button {
+    display: none !important;
+}
+
+.dg {
+    /*font: 11px 'Lucida Grande', sans-serif; */
+    font: inherit !important;
+    text-shadow: none !important;
+}
+
+.interestIcon {
+    /*padding: 0.25em;*/
+    /*font-size: 150%;*/
+}
+
+/*#menu {*/
+/*    width: 100%;*/
+/*    max-height: 25%;*/
+/*    overflow: auto;*/
+/*}*/
+/*#menu div {*/
+/*    font-size: 150%;*/
+/*    display: inline-flex;*/
+/*    padding: 0.25em;*/
+/*    cursor: crosshair;*/
+/*}*/
+/*.menuActive, #menu div:hover {*/
+/*    background-color: blue;*/
+/*}*/
+
+.popup {
+    position: absolute;
+    max-width: 75%;
+    max-height: 75%;
+    margin: 1em;
+    padding: 1em;
+    z-index: 5;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#menu2 .buttonlike {
+    background-color: rgba(0, 0, 0, 0.5);
+    font-size: 200%;
+    text-align: center;
+    /*margin-bottom: 0.5em;*/
+}
+
+#menu2 .buttonlike:hover {
+    transform: scale(1.5);
+}
+
+.interestIcon {
+    display: flex;
+}
+
+.interestGroup .interestGroup {
+    margin-left: 1em;
+}

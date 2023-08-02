@@ -42,7 +42,7 @@ public class QueryTest {
         List<NObject> found = new ArrayList();
 
         Query q = new Query()
-                .where(new double[]{0, 1}, new double[]{0, 1});
+                .where(0, 1, 0, 1);
         System.out.println(q);
 
         Search r = q.start(db);

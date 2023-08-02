@@ -1,6 +1,7 @@
 package spimedb;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -17,8 +18,6 @@ import java.util.function.BiConsumer;
  */
 @JsonSerialize(using = NObject.NObjectSerializer.class)
 public interface NObject extends Serializable {
-
-
 
     //public final static String POINT = ".";
 
@@ -106,11 +105,11 @@ public interface NObject extends Serializable {
     }
 
 
-    static MutableNObject fromJSON(String json) {
+    static MutableNObject fromJSON(String json) throws IOException {
         JsonNode x = JSON.fromJSON(json, JsonNode.class);
         JsonNode idNode = x.get(ID);
         if (idNode == null)
-            throw new RuntimeException("invalid nobject JSON: " +  json);
+            throw new IOException("invalid nobject JSON: " +  json);
 
         MutableNObject y = new MutableNObject(idNode.textValue());
         x.fields().forEachRemaining(e -> {

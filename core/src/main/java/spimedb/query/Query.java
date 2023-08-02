@@ -209,14 +209,10 @@ public class Query  {
         ));
     }
 
-    /**
-     * specific lat x lon region, at any time
-     */
-    public <Q extends Query> Q where(double[] lon, double[] lat) {
-        return where(lon[0], lon[1], lat[0], lat[1]);
-    }
-
     public <Q extends Query> Q where(double lonMin, double lonMax, double latMin, double latMax) {
+
+        if (lonMin > lonMax) { /* swap */ var c = lonMin; lonMin = lonMax; lonMax = c; }
+        if (latMin > latMax) { /* swap */ var c = latMin; latMin = latMax; latMax = c; }
 
         double centerX = (lonMin + lonMax)/2;
         double centerY = (latMin + latMax)/2;
@@ -265,7 +261,6 @@ public class Query  {
         }
     }
 
-    @NotNull
     public <Q extends Query> Q bounds(HyperRectDouble... newBounds) {
         ensureNotStarted();
 
