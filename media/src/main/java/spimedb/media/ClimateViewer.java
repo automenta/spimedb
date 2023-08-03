@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import spimedb.SpimeDB;
 import spimedb.server.Server;
 
+import java.net.MalformedURLException;
+
 /**
  * @author me
  */
@@ -25,18 +27,13 @@ public class ClimateViewer {
 
     public ClimateViewer() throws Exception {
         Server server = new Server(new SpimeDB());
-        //SpimeDB db = new SpimeDB();
-        //System.out.println(v);
 
-        GeoJSON.load("https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson",
-            new GeoJSON.GeoJSONBuilder("nuclear"), server.db);
+        geojson("nuclear", "https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson", server);
 
-        new KML(server.db, (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"))
-            .url("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz")
-            .run();
+        kml("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz",
+                (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"), server);
 
         //server.db.sync(50);
-
         //server.db.forEach(System.out::println);
         //System.out.println("db size=" + server.db.size());
 
@@ -105,6 +102,14 @@ public class ClimateViewer {
 //        });
 
 
+    }
+
+    private static void kml(String url, GeoNObject prototype, Server server) throws MalformedURLException {
+        new KML(server.db, prototype).url(url).run();
+    }
+
+    private static void geojson(String tag, String url, Server server) {
+        GeoJSON.load(url, new GeoJSON.GeoJSONBuilder(tag), server.db);
     }
 
 //    abstract public void onLayer(String id, String name, String kml, String icon, String currentSection);

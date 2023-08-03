@@ -63,12 +63,6 @@ body:not(.sideExpanded) .side #active {
 }
 
 
-#mode_idiocracy button {
-    margin: 1em;
-    /*opacity:0.75;*/
-    /*pointer-events:painted;*/
-}
-
 /*#addmenu {*/
 /*    position: fixed;*/
 /*    left:10%;*/
@@ -183,7 +177,7 @@ body:not(.sideExpanded) .side #active {
     overflow: auto;
     list-style: none;
     display: inline-flex;
-    opacity: 0.9;
+    /*opacity: 0.9;*/
 }
 
 body:not(.sideExpanded) * #menu {

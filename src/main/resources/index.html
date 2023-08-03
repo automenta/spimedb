@@ -144,7 +144,7 @@
         //view.addLayer(new WorldWind.CompassLayer());
         //view.addLayer(new WorldWind.CoordinatesDisplayLayer(wwd));
 
-        f.addLayer(new SpimeDBLayer("SpimeDB", "ws://localhost:8080/"));
+        f.addLayer(new SpimeDBLayer("SpimeDB", "ws://" + window.location.host));
 
         // f.addLayer(new ShapefileLayer("Countries", "https://worldwind.arc.nasa.gov/web/examples/data/shapefiles/naturalearth" +
         //     "/ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp").disable());

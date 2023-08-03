@@ -28,7 +28,7 @@ public class Server implements HttpModel {
 
     public Server(SpimeDB db) {
         this.db = db;
-        server = new HttpServer("localhost", 8080, this);
+        server = new HttpServer("0.0.0.0", 8080, this);
     }
 
 //    @Override

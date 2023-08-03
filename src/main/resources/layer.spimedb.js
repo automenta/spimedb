@@ -172,9 +172,9 @@ class SpimeDBLayer extends GeoLayer {
             setTimeout(()=>{
                 if (!this.view_change) {
                     this.view_change = f.event.on('view_change', _.debounce(() => {
-                        setTimeout(()=> {
+                        //setTimeout(()=> {
                             this._update(f);
-                        });
+                        //});
                     }, 50));
                 }
 
@@ -185,7 +185,7 @@ class SpimeDBLayer extends GeoLayer {
         // socket.addEventListener('close', closeConnection);
         this.socket.onmessage = (x) => {
             const d = JSON.parse(x.data);
-            this.addAll(d);
+            this.addAll(d, f);
         };
         this.socket.onclose = (e) => {
             this.close();
@@ -196,7 +196,7 @@ class SpimeDBLayer extends GeoLayer {
     }
 
 
-    addAll(d) {
+    addAll(d, f) {
         this.active.forEach((v, k) => {
             v.unseen = true;
         });
@@ -259,6 +259,7 @@ class SpimeDBLayer extends GeoLayer {
             }
         });
         //console.log(this.active);
+        //f.view.redraw();
     }
 
     close() {
