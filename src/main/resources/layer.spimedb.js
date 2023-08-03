@@ -88,72 +88,115 @@ class SpimeDBLayer extends GeoLayer {
     _update(f) {
         const p = f.view.pos();
         const lat = p.latitude, lon = p.longitude;
+
+        const W = f.view.w.viewport.width;
+        const H = f.view.w.viewport.height;
+
         let latMin, latMax, lonMin, lonMax;
-        const minDX = 0.001;
-        const decay =
-            //0.5;
-            0.75;
-            //0.9;
-        {
-            let dx = 90;
-            let latMinNext;
-            do {
-                latMinNext = lat - dx;
-                if (latMinNext < -90) { latMinNext = -90; break; }
-                if (!this.pointVisible(latMinNext, lon, 0, f)) {
-                    dx *= decay;
-                    if (dx < minDX)
-                        break;
-                } else
-                    break;
-            } while (true);
-            latMin = latMinNext;
+        const points = [];
+
+        this.pickPos(W/2, H/2, points, f); //CENTER
+
+        this.pickPos(0, 0, points, f);
+        this.pickPos(W/2, 0, points, f);
+        this.pickPos(W, 0, points, f);
+        this.pickPos(0, H/2, points, f);
+        this.pickPos(0, H, points, f);
+        this.pickPos(W/2, H, points, f);
+        this.pickPos(W, H/2, points, f);
+        this.pickPos(W, H, points, f);
+
+        if (points.length <= 1) {
+            //entire hemisphere
+             lonMin = lon - 90;
+             lonMax = lon + 90;
+             latMin = lat - 45;
+             latMax = lat + 45;
+        } else {
+            //extent sector
+            lonMin = latMin = Number.POSITIVE_INFINITY;
+            lonMax = latMax = Number.NEGATIVE_INFINITY;
+            for (const x of points) {
+                lonMin = Math.min(lonMin, x.longitude); lonMax = Math.max(lonMax, x.longitude);
+                latMin = Math.min(latMin, x.latitude);  latMax = Math.max(latMax, x.latitude);
+            }
         }
-        {
-            let dx = 90;
-            let latMaxNext;
-            do {
-                latMaxNext = lat + dx;
-                if (latMaxNext < +90) { latMaxNext = +90; break; }
-                if (!this.pointVisible(latMaxNext, lon, 0, f)) {
-                    dx *= decay;
-                    if (dx < minDX)
-                        break;
-                } else
-                    break;
-            } while (true);
-            latMax = latMaxNext;
-        }
-        {
-            let dx = 180;
-            let lonMinNext;
-            do {
-                lonMinNext = lon - dx;
-                if (!this.pointVisible(lat,  lonMinNext, 0, f)) {
-                    dx *= decay;
-                    if (dx < minDX)
-                        break;
-                } else
-                    break;
-            } while (true);
-            lonMin = lonMinNext;
-        }
-        {
-            let dx = 180;
-            let lonMaxNext;
-            do {
-                lonMaxNext = lon + dx;
-                if (!this.pointVisible(lat, lonMaxNext, 0, f)) {
-                    dx *= decay;
-                    if (dx < minDX)
-                        break;
-                } else
-                    break;
-            } while (true);
-            lonMax = lonMaxNext;
-        }
-        //console.log([latMin, latMax], [lonMin, lonMax]);
+
+        // const p = f.view.pos();
+        // const lat = p.latitude, lon = p.longitude;
+        // const minDX = 0.001;
+        // const decay =
+        //     //0.5;
+        //     0.75;
+        //     //0.9;
+        // {
+        //     let dx = 90;
+        //     let latMinNext;
+        //     do {
+        //         latMinNext = lat - dx;
+        //         if (latMinNext < -90) { latMinNext = -90; break; }
+        //         if (!this.pointVisible(latMinNext, lon, 0, f)) {
+        //             dx *= decay;
+        //             if (dx < minDX)
+        //                 break;
+        //         } else
+        //             break;
+        //     } while (true);
+        //     latMin = latMinNext;
+        // }
+        // {
+        //     let dx = 90;
+        //     let latMaxNext;
+        //     do {
+        //         latMaxNext = lat + dx;
+        //         if (latMaxNext < +90) { latMaxNext = +90; break; }
+        //         if (!this.pointVisible(latMaxNext, lon, 0, f)) {
+        //             dx *= decay;
+        //             if (dx < minDX)
+        //                 break;
+        //         } else
+        //             break;
+        //     } while (true);
+        //     latMax = latMaxNext;
+        // }
+        // {
+        //     let dx = 180;
+        //     let lonMinNext;
+        //     do {
+        //         lonMinNext = lon - dx;
+        //         if (!this.pointVisible(lat,  lonMinNext, 0, f)) {
+        //             dx *= decay;
+        //             if (dx < minDX)
+        //                 break;
+        //         } else
+        //             break;
+        //     } while (true);
+        //     lonMin = lonMinNext;
+        // }
+        // {
+        //     let dx = 180;
+        //     let lonMaxNext;
+        //     do {
+        //         lonMaxNext = lon + dx;
+        //         if (!this.pointVisible(lat, lonMaxNext, 0, f)) {
+        //             dx *= decay;
+        //             if (dx < minDX)
+        //                 break;
+        //         } else
+        //             break;
+        //     } while (true);
+        //     lonMax = lonMaxNext;
+        // }
+
+        console.log([latMin, latMax], [lonMin, lonMax]);
         this.getAll(lonMin, lonMax, latMin, latMax);
+    }
+
+    pickPos(x, y, points, f) {
+        const xy = f.view.w.pickTerrain(new WorldWind.Vec2(x, y));
+        if (xy.objects.length > 0) {
+            points.push(xy.objects[0].position);
+        }
     }
 
     getAll(lonMin, lonMax, latMin, latMax) {
@@ -259,7 +302,7 @@ class SpimeDBLayer extends GeoLayer {
             }
         });
         //console.log(this.active);
-        //f.view.redraw();
+        f.view.redraw();
     }
 
     close() {
