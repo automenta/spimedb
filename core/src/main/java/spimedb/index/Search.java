@@ -195,7 +195,6 @@ public class Search {
                         dqq.forEach(x -> collectTags(x, tagsInc));
                     } else if (bqq instanceof BoostQuery bbq) {
                         collectTags(bbq.getQuery(), tagsInc);
-
                     } else if (bqq instanceof BooleanQuery) {
                         collectTags(bqq, tagsInc);
                     }
@@ -228,7 +227,7 @@ public class Search {
         try {
             db.searcherMgr.release(searcher);
         } catch (IOException e) {
-            logger.error("{}", e);
+            logger.error("close", e);
         }
     }
 

@@ -56,7 +56,7 @@ public class Query  {
      */
     public String[] tagInclude = null;
 
-    public int limit = 1024;
+    public int limit = 16 * 1024;
     private ScoreDoc after = null;
 
     /**
@@ -114,9 +114,8 @@ public class Query  {
 
         if (docs.totalHits.value > 0) {
             for (Collector c : collectors) {
-                if (c instanceof CollectFacets) {
-                    ((CollectFacets) c).commit(s, db);
-                }
+                if (c instanceof CollectFacets cf)
+                    cf.commit(s, db);
             }
         }
 

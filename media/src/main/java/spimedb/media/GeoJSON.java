@@ -80,7 +80,7 @@ public class GeoJSON   {
                 }
             }
 
-            Object time = f.getProperty("time"); if (time instanceof Long l) d.when(l);
+            //Object time = f.getProperty("time"); if (time instanceof Long l) d.when(l,l+1 /* HACK */);
 
             d.withTags(tag);
 

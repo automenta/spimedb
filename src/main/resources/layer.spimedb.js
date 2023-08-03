@@ -279,13 +279,25 @@ class SpimeDBLayer extends GeoLayer {
                     //point
                     const ii = i["@"];
                     const pos = new WorldWind.Position(ii[2], ii[1], ii[3]);
-                    const point = new WorldWind.Placemark(pos, true, null);
+
+                    const point = new WorldWind.Placemark(pos);
                     if (i.N)
                         point.label = i.N;
-                    else
-                        point.label = i[">"];
+                    // else if (i['>'])
+                    //     point.label = i[">"];
 
                     point.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
+
+
+                    const placemarkAttributes = new WorldWind.PlacemarkAttributes(null);
+                    placemarkAttributes.imageScale = 1;
+                    placemarkAttributes.imageColor = new WorldWind.Color(1, 0, 0, 0.5);
+                    // placemarkAttributes.labelAttributes.offset = new WorldWind.Offset(
+                    //     WorldWind.OFFSET_FRACTION, 0.5,
+                    //     WorldWind.OFFSET_FRACTION, 1.5);
+                    placemarkAttributes.imageSource = WorldWind.configuration.baseUrl + "images/white-dot.png";
+                    point.attributes = placemarkAttributes;
+
                     this.layer.addRenderable(i.renderable = point);
                 } else {
                     console.error("unhandled geometry type: ", i);

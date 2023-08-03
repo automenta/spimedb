@@ -30,6 +30,9 @@ public class ClimateViewer {
 
         geojson("nuclear", "https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson", server);
 
+        geojson("earthquake", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson", server);
+        //geojson("air", "https://gis-calema.opendata.arcgis.com/datasets/acee3cdfe7ff45ad9751e8f9d95a50b3_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D", server);
+
         kml("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz",
                 (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"), server);
 
