@@ -31,22 +31,21 @@ public class Server implements HttpModel {
         server = new HttpServer("localhost", 8080, this);
     }
 
-    @Override
-    public void wssOpen(WebSocket ws, ClientHandshake handshake) {
-        //ws.send("hi");
-        System.out.println("OPEN " + ws);
-    }
+//    @Override
+//    public void wssOpen(WebSocket ws, ClientHandshake handshake) {
+//        //ws.send("hi");
+//        //System.out.println("OPEN " + ws);
+//    }
 
     @Override
     public void wssMessage(WebSocket ws, String message) {
-
-
         JsonNode m;
         try {
             m = JSON.fromJSON(message);
         } catch (JsonProcessingException e) {
             return;
         }
+
         switch (m.get("_").asText()) {
             case "index" ->
                 /*
@@ -76,12 +75,6 @@ public class Server implements HttpModel {
                 r.forEach((d, s) -> found.add(new MutableNObject(d)), 0, () -> {
                     if (!found.isEmpty())
                         ws.send(JSON.toJSONString(found));
-//                    assertEquals(1, db.size());
-//                    assertNotNull(r.localDocs);
-//                    assertEquals(1, r.localDocs.totalHits.value);
-//                    assertFalse(found.isEmpty());
-//                    assertEquals(dplace.toString(), found.get(0).toString());
-//                    assertTrue(String.valueOf(found), found.contains(place));
                 });
             }
             default -> {
@@ -118,12 +111,7 @@ public class Server implements HttpModel {
         }
 
         n.when(System.currentTimeMillis());
-        n.withTags(
-                //Iterables.concat(
-                tt
-                //Collections.singletonList(chan.getDestinationAddress().toString())
-                //)
-        );
+        n.withTags(tt);
 
         //TODO decorate with: geo-ip, etc
 
@@ -132,36 +120,15 @@ public class Server implements HttpModel {
 
     @Override
     public void response(HttpConnection h) {
-        //h.respond("");
         URI url = h.url();
-//
         String path = url.getPath();
-//        try {
-            if (path.equals("/"))
-                path = "/index.html";
+        if (path.equals("/"))
+            path = "/index.html";
 
-            h.respond(
-                //new File(Server.class.getResource(path).toURI())
-                new File("./src/main/resources" + path)
-            );
-//        } catch (URISyntaxException e) {
-//            //throw new RuntimeException(e);
-//            h.respond("404");
-//        }
-        ;
-////            case "/teavm/runtime.js":
-////                h.respond(new File("/tmp/tea/runtime.js")); //TODO managed temporary directory
-////                break;
-////            case "/teavm/classes.js":
-////                h.respond(new File("/tmp/tea/classes.js")); //TODO managed temporary directory
-////                break;
-////            case "/websocket.js":
-////                h.respond(spacegraph.web.util.WebSocket.websocket_js);
-////                break;
-////            case "/msgpack.js":
-////                h.respond(MsgPack.msgpack_js);
-////                break;
-
+        h.respond(
+            new File("./src/main/resources" + path)
+            //new File(Server.class.getResource(path).toURI())
+        );
     }
 
     public static void main(String[] args) {

@@ -2,6 +2,18 @@ class WorldWindView extends View {
 
     constructor() {
         super();
+
+        {
+            //https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+            if (WorldWind.SurfaceShapeTile.canvas)
+                throw "instantiation problem";
+            WorldWind.SurfaceShapeTile.canvas = document.createElement("canvas");
+            WorldWind.SurfaceShapeTile.ctx2D = WorldWind.SurfaceShapeTile.canvas.getContext("2d", {
+                // desynchronized: true,
+                willReadFrequently: true
+            });
+            WorldWind.SurfaceShape.DEFAULT_NUM_EDGE_INTERVALS = 32; //default=128
+        }
     }
 
     start(target, focus) {
@@ -12,14 +24,16 @@ class WorldWindView extends View {
         this.target.append(this.canvas);
 
         //console.log(WorldWind.configuration);
-        WorldWind.configuration.gpuCacheSize = 1e9; // 1gb
+        //WorldWind.configuration.gpuCacheSize = 1e9; // 1gb
         WorldWind.Logger.setLoggingLevel(WorldWind.Logger.LEVEL_WARNING);
 
-        const view = new WorldWind.WorldWindow(elementID);
-        this.w = view;
+        const w = new WorldWind.WorldWindow(elementID);
+        this.w = w;
 
+        //w.pixelScale = 0.5; //lo-res
         //w.deepPicking = true;
         //w.camera.fieldOfView = 40;
+        //console.error(w);
 
         let anim = null;
 
@@ -32,14 +46,14 @@ class WorldWindView extends View {
 
             let picked;
             try {
-                picked = view.pick(view.canvasCoordinates(o.clientX, o.clientY));
+                picked = w.pick(w.canvasCoordinates(o.clientX, o.clientY));
             } catch (e) {
                 console.log(e);
                 return;
             }
 
             const picks = picked.objects;
-            console.log('pick', picks);
+            //console.log('pick', picks);
 
             if (picks.length > 0) {
                 const x = picks[picks.length - 1];
@@ -52,7 +66,7 @@ class WorldWindView extends View {
                         const tgt = new WorldWind.Position().copy(x.userObject.referencePosition);
                         tgt.altitude += 100;
 
-                        anim = new WorldWind.GoToAnimator(view);
+                        anim = new WorldWind.GoToAnimator(w);
                         anim.travelTime = 1000;
                         anim.goTo(tgt, () => {
                             anim = null;
@@ -73,11 +87,11 @@ class WorldWindView extends View {
             //view.redraw(); // redraw to make the highlighting changes take effect on the screen
 
         };
-        finger = _.throttle(finger, 100);
+        finger = _.debounce(finger, 50);
 
         //var tapRecognizer = new WorldWind.TapRecognizer(view, finger);
         //view.addEventListener("mousemove", finger);
-        view.addEventListener("pointerdown", finger);
+        w.addEventListener("pointerdown", finger);
 
         let lastCam = undefined;
         window.setInterval(() => {
@@ -87,7 +101,7 @@ class WorldWindView extends View {
                 //console.log(cam);
             }
             lastCam = cam;
-        }, 100);
+        }, 50);
 
         return this;
     }

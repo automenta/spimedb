@@ -17,6 +17,7 @@
             <artifactId>spimedb-core</artifactId>
             <version>1.0</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -30,6 +31,12 @@
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-app</artifactId>
             <version>2.8.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/de.intarsys.opensource/jbig2 -->
         <dependency>
@@ -44,6 +51,12 @@
             <groupId>org.apache.opennlp</groupId>
             <artifactId>opennlp-tools</artifactId>
             <version>2.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/de.grundid.opendatalab/geojson-jackson -->

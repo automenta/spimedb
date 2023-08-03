@@ -171,8 +171,10 @@ class SpimeDBLayer extends GeoLayer {
         this.socket.onopen = () => {
             setTimeout(()=>{
                 if (!this.view_change) {
-                    this.view_change = f.event.on('view_change', _.throttle(() => {
-                        this._update(f);
+                    this.view_change = f.event.on('view_change', _.debounce(() => {
+                        setTimeout(()=> {
+                            this._update(f);
+                        });
                     }, 50));
                 }
 

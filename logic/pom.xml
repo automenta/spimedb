@@ -19,12 +19,6 @@
             <version>0.8.21</version>
         </dependency>
 
-        <dependency>
-            <groupId>automenta</groupId>
-            <!--<artifactId>spimedb-core</artifactId>-->
-            <artifactId>spimedb-media</artifactId>
-            <version>1.0</version>
-        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>narchy</groupId>-->
 <!--            <artifactId>nal</artifactId>-->
@@ -43,6 +37,10 @@
                 <exclusion>
                     <artifactId>guava</artifactId>
                     <groupId>com.google.guava</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>*</artifactId>
+                    <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
