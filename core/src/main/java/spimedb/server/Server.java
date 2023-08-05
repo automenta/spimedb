@@ -48,12 +48,12 @@ public class Server implements HttpModel {
         }
 
         switch (m.get("_").asText()) {
-            case "index" ->
+            case "tag" ->
                 /*
                     { _: 'index' }
                     Get tag index, ontology, schema, etc..
                 */
-                ws.send(JSON.toJSONString(db.facets(NObject.TAG, 32).labelValues));
+                send("tag", db.facets(NObject.TAG, 128).labelValues, ws);
             case "getAll" -> {
                 ArrayNode B = (ArrayNode) m.get("id");
                 List<NObject> found = new Lst<>();
@@ -63,7 +63,8 @@ public class Server implements HttpModel {
                     if (d!=null)
                         found.add(d);
                 });
-                send("full", found, ws);
+                if (!found.isEmpty())
+                    send("full", found, ws);
             }
 
             case "earth" -> {
@@ -92,13 +93,15 @@ public class Server implements HttpModel {
                     case "full" -> {
                         List<NObject> found = new Lst<>();
                         r.forEach(DObject::get, (d, s) -> found.add(new MutableNObject(d)), () -> {
-                            send("full", found, ws);
+                            if (!found.isEmpty())
+                                send("full", found, ws);
                         });
                     }
                     case "id" -> {
                         List<String> found = new Lst<>();
                         r.forEach(d -> d.get(NObject.ID), (id, s) -> found.add(id), () -> {
-                            send("id", found, ws);
+                            if (!found.isEmpty())
+                                send("id", found, ws);
                         });
                     }
                 }
@@ -108,9 +111,8 @@ public class Server implements HttpModel {
         }
     }
 
-    private static void send(String response, List found, WebSocket ws) {
-        if (!found.isEmpty())
-            ws.send("{\"" + response + "\":" + JSON.toJSONString(found) + "}");
+    private static void send(String type, Object x, WebSocket s) {
+        s.send("{\"" + type + "\":" + JSON.toJSONString(x) + "}");
     }
 
 //    @Override

@@ -31,7 +31,7 @@ class WorldWindView extends View {
         this.w = w;
 
         //w.pixelScale = 0.5; //lo-res
-        //w.deepPicking = true;
+        w.deepPicking = true;
         //w.camera.fieldOfView = 40;
         //console.error(w);
 
@@ -61,16 +61,22 @@ class WorldWindView extends View {
                 if (x.isTerrain) {
                     //toastr.info("terrain " + x.position);
                 } else {
-                    if (anim === null) {
+                    // if (anim === null) {
+                    //
+                    //     const tgt = new WorldWind.Position().copy(x.userObject.referencePosition);
+                    //     tgt.altitude += 100;
+                    //
+                    //     anim = new WorldWind.GoToAnimator(w);
+                    //     anim.travelTime = 1000;
+                    //     anim.goTo(tgt, () => {
+                    //         anim = null;
+                    //     });
+                    // }
 
-                        const tgt = new WorldWind.Position().copy(x.userObject.referencePosition);
-                        tgt.altitude += 100;
-
-                        anim = new WorldWind.GoToAnimator(w);
-                        anim.travelTime = 1000;
-                        anim.goTo(tgt, () => {
-                            anim = null;
-                        });
+                    if (x.userObject) {
+                        if (x.userObject.nobject) {
+                            console.log('pick', x.userObject.nobject);
+                        }
                     }
 
                     // const concept = x.userObject.userProperties.concept || x.userObject.displayName;
@@ -87,7 +93,7 @@ class WorldWindView extends View {
             //view.redraw(); // redraw to make the highlighting changes take effect on the screen
 
         };
-        finger = _.debounce(finger, 50);
+        //finger = _.throttle(finger, 50);
 
         //var tapRecognizer = new WorldWind.TapRecognizer(view, finger);
         //view.addEventListener("mousemove", finger);
