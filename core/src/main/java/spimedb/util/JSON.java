@@ -124,7 +124,7 @@ public class JSON {
                 out.write(suffix);
             return true;
         } catch (Exception ex) {
-            logger.error("toJSON: {}", ex);
+            logger.error("toJSON", ex);
             return false;
         }
     }

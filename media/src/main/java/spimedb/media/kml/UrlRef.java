@@ -2408,29 +2408,29 @@ public final class UrlRef implements Serializable {
         kmzRelPath = urlStr.substring(ind + 5);
     }
 
-    /**
-     * Determines if a UrlRef references a linked reference (networked linked
-     * KML, image overlay, icon, model, etc.) in a KMZ file.
-     *
-     * @return true if UrlRef reprensents a linked reference in a KMZ file
-     */
-    public boolean isKmz() {
-        return kmzRelPath != null;
-    }
+//    /**
+//     * Determines if a UrlRef references a linked reference (networked linked
+//     * KML, image overlay, icon, model, etc.) in a KMZ file.
+//     *
+//     * @return true if UrlRef reprensents a linked reference in a KMZ file
+//     */
+//    public boolean isKmz() {
+//        return kmzRelPath != null;
+//    }
 
-    /**
-     * Opens a connection to this <code>UrlRef</code> and returns an
-     * <code>InputStream</code> for reading from that connection.
-     *
-     * @return an input stream for reading from the resource represented by the
-     * <code>UrlRef</code>.
-     * @throws FileNotFoundException if referenced link was not found in the
-     * parent KMZ resource
-     * @throws IOException	if an I/O error occurs
-     */
-    public InputStream getInputStream() throws IOException {
-        return getInputStream((Proxy) null);
-    }
+//    /**
+//     * Opens a connection to this <code>UrlRef</code> and returns an
+//     * <code>InputStream</code> for reading from that connection.
+//     *
+//     * @return an input stream for reading from the resource represented by the
+//     * <code>UrlRef</code>.
+//     * @throws FileNotFoundException if referenced link was not found in the
+//     * parent KMZ resource
+//     * @throws IOException	if an I/O error occurs
+//     */
+//    public InputStream getInputStream() throws IOException {
+//        return getInputStream(null);
+//    }
 
     /**
      * Opens a connection to this <code>UrlRef</code> and returns an

@@ -9,7 +9,6 @@ import org.apache.lucene.document.DoubleRange;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
@@ -97,10 +96,9 @@ public class Query  {
 
     }
 
-    @NotNull
     private Search find(org.apache.lucene.search.Query q, int limit, SpimeDB db, ScoreDoc after, Collector... collectors) throws IOException {
 
-        TopScoreDocCollector hitsCollector = TopScoreDocCollector.create(limit, after, Integer.MAX_VALUE);
+        TopScoreDocCollector hitsCollector = TopScoreDocCollector.create(limit, after, limit/2/*Integer.MAX_VALUE*/);
 
         Collector collector = collectors.length > 0 ?
             MultiCollector.wrap(ArrayUtils.add(collectors, hitsCollector)) :
@@ -111,14 +109,12 @@ public class Query  {
         TopDocs docs = hitsCollector.topDocs();
 
         Search s = new Search(q, searcher, db, docs);
-
         if (docs.totalHits.value > 0) {
             for (Collector c : collectors) {
                 if (c instanceof CollectFacets cf)
                     cf.commit(s, db);
             }
         }
-
         return s;
     }
 

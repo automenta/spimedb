@@ -135,7 +135,8 @@
     window.addEventListener('load', (e) => {
 
         const f = new Focus();
-        const fv = new WorldWindView().start($('body'), f);
+
+        new WorldWindView().start($('body'), f);
 
         //TODO w.clearLayers()
         f.addLayer(new HomeLayer());

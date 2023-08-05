@@ -34,9 +34,6 @@ public class GeoJSONTest {
     @Test
     public void test1() {
 
-
-
-
         int all = db.size();
         assertTrue(all > 50);
 
@@ -50,11 +47,9 @@ public class GeoJSONTest {
         assertTrue(aNum < all/4);
 
 
-        System.out.println(r1);
-        System.out.println(aNum + " / " + all + " found:");
-//        System.out.println("\t" + a.result);
-//
-//        System.out.println();
+//        System.out.println(r1);
+//        System.out.println(aNum + " / " + all + " found:");
+////        System.out.println("\t" + a.result);
 
         //time & space query (more restrictive): positive lon, positive lat quadrant
         List<NObject> res = new ArrayList();

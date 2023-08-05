@@ -46,7 +46,7 @@ public class QueryTest {
         System.out.println(q);
 
         Search r = q.start(db);
-        r.forEach((d, s) -> found.add(d), 300, () -> {
+        r.forEach((d, s) -> found.add(d), () -> {
             assertEquals(1, db.size());
             assertNotNull(r.localDocs);
             assertEquals(1, r.localDocs.totalHits.value);
@@ -80,7 +80,8 @@ public class QueryTest {
 
 
         ArrayList<NObject> found = new ArrayList();
-        new Query().in("Person").start(db).forEachLocal((d, s) -> found.add(d));
+        Search search = new Query().in("Person").start(db);
+        search.forEachLocal(DObject::get, (d, s) -> found.add(d));
 
         found.forEach(System.out::println);
         assertEquals(1, found.size());

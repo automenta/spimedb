@@ -4,8 +4,6 @@ import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
@@ -60,11 +58,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -125,7 +121,7 @@ public class SpimeDB {
             Math.max(2, Runtime.getRuntime().availableProcessors())
     );
     public final File file;
-    public final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
+//    public final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
     public final Router<String, Consumer<NObject>> onTag = new Router(); //TODO make private
     /**
      * active searches
@@ -482,17 +478,16 @@ public class SpimeDB {
     }
 
     private void commit() {
-        exe.run(1f, () -> {
+        exe.run(1, () -> {
 
-            if (out.isEmpty() || !writing.compareAndSet(false, true)) {
+            if (out.isEmpty() || !writing.compareAndSet(false, true))
                 return; //already writing in another thread
-            }
 
             int written = 0, removed = 0;
 
             try {
 
-                while (!out.isEmpty()) {
+                do {
 
                     //long seq = writer.addDocuments(Iterables.transform(drain(out.entrySet()), documenter));
 
@@ -501,9 +496,7 @@ public class SpimeDB {
                         Map.Entry<String, DObject> nn = ii.next();
                         ii.remove();
 
-                        String id = nn.getKey();
-                        Term key = new Term(NObject.ID, id);
-
+                        Term key = new Term(NObject.ID, nn.getKey());
                         DObject val = nn.getValue();
                         if (val != REMOVE) {
                             if (-1 != writer.updateDocument(key,
@@ -521,7 +514,7 @@ public class SpimeDB {
                     writer.commit();
                     taxoWriter.commit();
                     lastWrite = now();
-                }
+                } while (!out.isEmpty());
 
             } catch (IOException e) {
                 logger.error("indexing error: {}", e);
@@ -535,18 +528,17 @@ public class SpimeDB {
 
     }
 
-    @Nullable
-    DObject commit(NObject previous, NObject _next) {
+    @Nullable DObject commit(/*NObject previous,*/ NObject _next) {
 
         NObject next = _next;
 
         //logger.debug("commit onChange={}", onChange, previous, _next);
 
-        if (!onChange.isEmpty()) {
-            for (BiFunction<NObject, NObject, NObject> c : onChange) {
-                next = c.apply(previous, next);
-            }
-        }
+//        if (!onChange.isEmpty()) {
+//            for (BiFunction<NObject, NObject, NObject> c : onChange) {
+//                next = c.apply(previous, next);
+//            }
+//        }
 
         if (next == null)
             return null;
@@ -626,9 +618,9 @@ public class SpimeDB {
         return "{\"" + getClass().getSimpleName() + "\"}";
     }
 
-    public void on(BiFunction<NObject, NObject, NObject> changed) {
-        onChange.add(changed);
-    }
+//    public void on(BiFunction<NObject, NObject, NObject> changed) {
+//        onChange.add(changed);
+//    }
 
     public void on(NObjectConsumer c) {
         update(c, true);
@@ -666,10 +658,14 @@ public class SpimeDB {
             try {
                 return r.get();
             } catch (Throwable t) {
-                logger.error("{} {} {}", id, r, t);
+                logger.error("{} {}", id, r, t);
                 return null;
             }
         });
+    }
+
+    public void addAsync(NObject next) {
+        addAsync(1, next);
     }
 
     public void addAsync(float pri, @Nullable NObject next) {
@@ -723,27 +719,27 @@ public class SpimeDB {
 
             logger.debug("merge {}", id);
 
-            return commit(previous, merged);
+            return commit(/*previous,*/ merged);
         };
     }
 
     private Supplier<DObject> addProcedure(@Nullable NObject _next) {
         return () -> {
 
-            String id = _next.id();
+//            String id = _next.id();
             DObject next = DObject.get(_next, this);
 
-            DObject previous = get(id);
-            if (previous != next && previous != null) {
-                if (deepEquals(previous.document, next.document)) {
-                    //logger.debug("equiv {}", id);
-                    return previous;
-                }
-            }
+//            DObject previous = get(id);
+//            if (previous != next && previous != null) {
+//                if (deepEquals(previous.document, next.document)) {
+//                    //logger.debug("equiv {}", id);
+//                    return previous;
+//                }
+//            }
 
             //logger.debug("add {}", id);
 
-            return commit(previous, next);
+            return commit(/*previous, */next);
         };
     }
 
@@ -761,7 +757,6 @@ public class SpimeDB {
 
             IndexableField afi = af.get(i);
             IndexableField bfi = bf.get(i);
-
 
             {
                 String asv = afi.stringValue();
@@ -873,6 +868,9 @@ public class SpimeDB {
 
     public void add(Stream<? extends NObject> s) {
         s.forEach(this::add);
+    }
+    public void addAsync(Stream<? extends NObject> s) {
+        s.forEach(this::addAsync);
     }
 
     /**

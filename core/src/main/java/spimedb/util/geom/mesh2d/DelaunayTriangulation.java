@@ -245,15 +245,12 @@ public class DelaunayTriangulation extends AbstractSet<DelaunayTriangle> {
         DelaunayTriangle start = triangle;
         DelaunayVertex guide = triangle.getVertexButNot(site); // Affects cw or
         // ccw
-        while (true) {
+        do {
             list.add(triangle);
             DelaunayTriangle previous = triangle;
             triangle = this.neighborOpposite(guide, triangle); // Next triangle
             guide = previous.getVertexButNot(site, guide); // Update guide
-            if (triangle == start) {
-                break;
-            }
-        }
+        } while (triangle != start);
         return list;
     }
 

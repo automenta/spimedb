@@ -19,11 +19,12 @@ public class ClimateViewer {
 
 //    String currentSection = "Unknown";
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         new ClimateViewer();
     }
 
-    public ClimateViewer() throws Exception {
+    public ClimateViewer() {
+
         Server server = new Server(new SpimeDB());
 
         geojson("nuclear", "https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson", server);

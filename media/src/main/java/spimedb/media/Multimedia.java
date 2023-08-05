@@ -79,8 +79,8 @@ public class Multimedia implements Plugin, BiFunction<NObject, NObject, NObject>
     public Multimedia(SpimeDB db) {
         this.db = db;
 
-        db.on(this);
-        logger.info("{} enabled {}", this, db.onChange);
+//        db.on(this);
+//        logger.info("{} enabled {}", this, db.onChange);
 
         //process existing items
         db.forEach((xx) -> xx.forEach(x -> {

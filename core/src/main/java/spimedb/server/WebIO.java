@@ -1,7 +1,6 @@
 package spimedb.server;
 
 import com.google.common.collect.Iterables;
-import jcog.bloom.StableBloomFilter;
 import org.apache.lucene.facet.FacetResult;
 import org.apache.lucene.search.ScoreDoc;
 import org.eclipse.collections.api.set.ImmutableSet;
@@ -9,10 +8,8 @@ import org.eclipse.collections.impl.factory.Sets;
 import org.jetbrains.annotations.Nullable;
 import spimedb.FilteredNObject;
 import spimedb.NObject;
-import spimedb.index.Search;
 import spimedb.util.JSON;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -21,8 +18,6 @@ import static java.lang.Double.parseDouble;
 
 public enum WebIO {
     ;
-
-    public static final int BUFFER_SIZE = 32 * 1024;
 
     public static final ImmutableSet<String> searchResultSummary =
             Sets.immutable.of(
@@ -36,58 +31,58 @@ public enum WebIO {
             )));
 
 
-    public static void send(Search r, OutputStream o, int timeoutMS, ImmutableSet<String> keys) {
-        send(r, o, timeoutMS, keys, null);
-    }
-
-    static final byte[] openingBracketBytes = "[[".getBytes();
-    static final byte[] intermediateClosingBracketBytes = "{}],".getBytes();
-    static final byte[] endingClosingBracketBytes = "[]]".getBytes();
-
-    public static void send(Search r, OutputStream o, int timeoutMS, ImmutableSet<String> keys, @Nullable StableBloomFilter<String> sentSTM) {
-        if (r != null) {
-
-            try {
-                o.write(openingBracketBytes);
-            } catch (IOException ignored) {
-                return;
-            }
-
-            r.forEach((y, x) -> {
-
-                if (sentSTM!=null) {
-                    if (!sentSTM.addIfMissing(y.id())) {
-                        return true;
-                    } else {
-                        //sentSTM.forget(0.0005f);
-                    }
-                }
-
-                JSON.toJSON(searchResult(y, keys, x), o, ',');
-
-                return true;
-            }, timeoutMS, () -> {
-                try {
 
 
-                    o.write(intermediateClosingBracketBytes); //<-- TODO search result metadata, query time etc
-
-                    if (r.facets != null) {
-                        stream(r.facets, o);
-                        o.write(']');
-                    } else {
-                        o.write(endingClosingBracketBytes);
-                    }
-
-                } catch (IOException ignored) {
-
-                }
-            });
-
-        }
-
-
-    }
+//    static final byte[] openingBracketBytes = "[[".getBytes();
+//    static final byte[] intermediateClosingBracketBytes = "{}],".getBytes();
+//    static final byte[] endingClosingBracketBytes = "[]]".getBytes();
+//    public static void send(Search r, OutputStream o, int timeoutMS, ImmutableSet<String> keys) {
+//        send(r, o, timeoutMS, keys, null);
+//    }
+//    public static void send(Search r, OutputStream o, int timeoutMS, ImmutableSet<String> keys, @Nullable StableBloomFilter<String> sentSTM) {
+//        if (r != null) {
+//
+//            try {
+//                o.write(openingBracketBytes);
+//            } catch (IOException ignored) {
+//                return;
+//            }
+//
+//            r.forEach(timeoutMS, (y, x) -> {
+//
+//                if (sentSTM!=null) {
+//                    if (!sentSTM.addIfMissing(y.id())) {
+//                        return true;
+//                    } else {
+//                        //sentSTM.forget(0.0005f);
+//                    }
+//                }
+//
+//                JSON.toJSON(searchResult(y, keys, x), o, ',');
+//
+//                return true;
+//            }, () -> {
+//                try {
+//
+//
+//                    o.write(intermediateClosingBracketBytes); //<-- TODO search result metadata, query time etc
+//
+//                    if (r.facets != null) {
+//                        stream(r.facets, o);
+//                        o.write(']');
+//                    } else {
+//                        o.write(endingClosingBracketBytes);
+//                    }
+//
+//                } catch (IOException ignored) {
+//
+//                }
+//            });
+//
+//        }
+//
+//
+//    }
 
     static public void stream(FacetResult x, OutputStream o) {
         JSON.toJSON(
@@ -96,9 +91,9 @@ public enum WebIO {
                 Collectors.toMap(y->y.label, y->y.value ))*/, o);
     }
 
-    public static FilteredNObject searchResult(NObject d, ImmutableSet<String> include) {
-        return searchResult(d, include, null);
-    }
+//    public static FilteredNObject searchResult(NObject d, ImmutableSet<String> include) {
+//        return searchResult(d, include, null);
+//    }
 
     public static FilteredNObject searchResult(NObject d, ImmutableSet<String> include, @Nullable ScoreDoc score) {
         return new FilteredNObject(d, include) {

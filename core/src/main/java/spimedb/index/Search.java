@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /** manages and stores a collection process of search results */
@@ -29,7 +29,6 @@ public class Search {
     public final static Logger logger = LoggerFactory.getLogger(Search.class);
 
     public final TopDocs localDocs;
-    @NotNull
     private final IndexSearcher searcher;
     public final org.apache.lucene.search.Query query;
 
@@ -43,9 +42,6 @@ public class Search {
      * cached
      */
     transient public final String[] tagsInc;
-
-
-
 
     public Search(Query q, @NotNull IndexSearcher searcher, SpimeDB db, @Nullable TopDocs docs) {
         this.query = q;
@@ -85,34 +81,37 @@ public class Search {
 
     /** async */
     public void forEach(BiPredicate<NObject,ScoreDoc> each) {
-        forEach(each, 0);
+        forEach(each, null);
     }
 
-    /** async */
-    public void forEach(BiPredicate<NObject,ScoreDoc> each, long waitMS) {
-        forEach(each, waitMS, null);
+    public void forEach(BiPredicate<NObject,ScoreDoc> each, @Nullable Runnable onFinished) {
+        forEach(DObject::get, each, onFinished);
+    }
+
+    public <Y> void forEach(Function<Document, Y> f, BiPredicate<Y,ScoreDoc> each, @Nullable Runnable onFinished) {
+        forEach(f, each, 0, onFinished);
     }
 
     /** async  */
-    public void forEach(BiPredicate<NObject,ScoreDoc> each, long waitMS, @Nullable Runnable onFinished) {
+    public <Y> void forEach(Function<Document, Y> f, BiPredicate<Y,ScoreDoc> each, long waitMS, @Nullable Runnable onFinished) {
 
         Thread t = Thread.currentThread();
         AtomicBoolean continuing = new AtomicBoolean(true);
 
-        Consumer<NObject> recv = (x) -> {
-            if (!each.test(x,null)) {
-                continuing.set(false);
-                t.interrupt();
-            }
-        };
-
-        db.onTag.on(id, recv);
-        for (String x : tagsInc)
-            db.onTag.on(x, recv);
+//        Consumer<NObject> recv = (x) -> {
+//            if (!each.test(x,null)) {
+//                continuing.set(false);
+//                t.interrupt();
+//            }
+//        };
+//
+//        db.onTag.on(id, recv);
+//        for (String x : tagsInc)
+//            db.onTag.on(x, recv);
 
         Throwable ee = null;
         try {
-            if (!forEachLocal(each::test))
+            if (!forEachLocal(f, each))
                 return;
 
             if (continuing.get() && waitMS > 0) {
@@ -125,9 +124,9 @@ public class Search {
             ee = e;
         } finally {
 
-            for (String x : tagsInc)
-                db.onTag.off(x, recv);
-            db.onTag.off(id, recv);
+//            for (String x : tagsInc)
+//                db.onTag.off(x, recv);
+//            db.onTag.off(id, recv);
 
             try {
                 if (onFinished != null)
@@ -145,11 +144,8 @@ public class Search {
     }
 
 
-    /**
-     * sync; returns false if canceled via the predicate
-     */
-    public boolean forEachLocal(BiPredicate<DObject, ScoreDoc> each) {
-        return forEachLocalDoc((d, s) -> each.test(DObject.get(d), s));
+    public <Y> boolean forEachLocal(Function<Document,Y> f, BiPredicate<Y, ScoreDoc> each) {
+        return forEachLocalDoc((d, s) -> each.test(f.apply(d), s));
     }
 
     /**
@@ -159,9 +155,9 @@ public class Search {
         if (localDocs == null)
             return true;
 
-        DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
-
         IndexReader reader = searcher.getIndexReader();
+
+        DocumentStoredFieldVisitor visitor = new DocumentStoredFieldVisitor();
         Document d = visitor.getDocument();
 
         boolean result = true;
@@ -174,7 +170,7 @@ public class Search {
                     break;
                 }
             } catch (IOException e) {
-                Search.logger.error("{}", e.getMessage());
+                Search.logger.error("search result error", e);
             }
         }
         close();

@@ -39,7 +39,7 @@ public class GeoJSON   {
 
     public static void load(String url, Function<Feature, NObject> builder, SpimeDB db) {
         try {
-            db.add(get(HTTP.inputStream(url), builder));
+            db.addAsync(get(HTTP.inputStream(url), builder));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,7 +83,7 @@ public class GeoJSON   {
 
             }
 
-            //Object time = f.getProperty("time"); if (time instanceof Long l) d.when(l,l+1 /* HACK */);
+            Object time = f.getProperty("time"); if (time instanceof Long l) d.when(l,l+1 /* HACK */);
 
             d.withTags(tag);
 

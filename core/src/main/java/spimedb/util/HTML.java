@@ -35,28 +35,26 @@ public final class HTML {
 //
 //    }
 
+    private static final Safelist whitelist = Safelist.basicWithImages();
+    private static final Cleaner cleaner = new Cleaner(whitelist);
+    private static final Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);
 
-    static final Safelist whitelist = Safelist.basicWithImages();
-    static final Cleaner cleaner = new Cleaner(whitelist);
-    static final Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);
-
-    static final Logger logger = LoggerFactory.getLogger(HTML.class);
+    private static final Logger logger = LoggerFactory.getLogger(HTML.class);
 
     public static String filterHTML(String html) {
-
-        try {
-            Document dirty = Jsoup.parseBodyFragment(html);
-            Document clean = cleaner.clean(dirty);
-            clean.outputSettings(outputSettings);
-            return clean.body().html();
+        if (html.indexOf('>')!=-1 && html.indexOf('<')!=-1) {
+            try {
+                Document clean = cleaner.clean(Jsoup.parseBodyFragment(html));
+                clean.outputSettings(outputSettings);
+                return clean.body().html();
 
 //            String compressedHtml = compressor.compress(html);
 //            return compressedHtml;
-        } catch (Exception e) {
-            logger.error("filterHTML {}: \"{}\"", e, html);
-            return html;
+            } catch (Exception e) {
+                logger.error("filterHTML {}: \"{}\"", e, html);
+            }
         }
-
+        return html;
     }
 
 }

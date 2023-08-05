@@ -54,11 +54,11 @@ public class Locker<X> {
     }
 
     public final class DBLock extends ReentrantLock {
-        private final X id;
+//        private final X id;
 
         public DBLock(X id) {
             super(true);
-            this.id = id;
+//            this.id = id;
         }
 
 //        //TODO did this need to be synchronized?

@@ -2,6 +2,7 @@ package spimedb.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
 import jcog.data.list.Lst;
 import jcog.io.Twokenize;
@@ -12,6 +13,7 @@ import org.java_websocket.WebSocket;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.index.DObject;
 import spimedb.index.Search;
 import spimedb.query.Query;
 import spimedb.util.JSON;
@@ -52,6 +54,17 @@ public class Server implements HttpModel {
                     Get tag index, ontology, schema, etc..
                 */
                 ws.send(JSON.toJSONString(db.facets(NObject.TAG, 32).labelValues));
+            case "getAll" -> {
+                ArrayNode B = (ArrayNode) m.get("id");
+                List<NObject> found = new Lst<>();
+                B.forEach((ID) -> {
+                    String id = ID.asText();
+                    var d = db.get(id);
+                    if (d!=null)
+                        found.add(d);
+                });
+                send(ws, found);
+            }
             case "earth" -> {
                 /*
                     { _: 'get',
@@ -60,6 +73,7 @@ public class Server implements HttpModel {
                       detailMin: [ latEps, lonEps, tEps ]       //optional
                       tagInclude: [ ... ]                       //optional
                       tagExclude: [ ... ]                       //optional
+                      output: "id" | "full"
                       //TODO output parameters
                     }
                     Get items
@@ -70,15 +84,33 @@ public class Server implements HttpModel {
                         B.get(2).asDouble(), B.get(3).asDouble());
 
                 Search r = q.start(db);
-                List<NObject> found = new Lst<>();
-                r.forEach((d, s) -> found.add(new MutableNObject(d)), 0, () -> {
-                    if (!found.isEmpty())
-                        ws.send(JSON.toJSONString(found));
-                });
+
+                var _output = m.get("output");
+                String output = _output == null ? "full" : _output.textValue();
+                switch (output) {
+                    case "full" -> {
+                        List<NObject> found = new Lst<>();
+                        r.forEach(DObject::get, (d, s) -> found.add(new MutableNObject(d)), () -> {
+                            send(ws, found);
+                        });
+                    }
+                    case "id" -> {
+                        List<String> found = new Lst<>();
+                        r.forEach(d -> d.get(NObject.ID), (id, s) -> found.add(id), () -> {
+                            if (!found.isEmpty())
+                                ws.send(JSON.toJSONString(found));
+                        });
+                    }
+                }
             }
             default -> {
             }
         }
+    }
+
+    private static void send(WebSocket ws, List<NObject> found) {
+        if (!found.isEmpty())
+            ws.send(JSON.toJSONString(found));
     }
 //    @Override
 //    public void wssMessage(WebSocket ws, ByteBuffer message) {

@@ -190,11 +190,11 @@ public class Position implements Serializable {
                 double rad2 = Math.sqrt(e4*p*q);
     
                 // 10*e2 is my arbitrary decision of what Vermeille means by "near... the cusps of the evolute".
+                double mcbrt = Math.cbrt((rad1 + rad2) * (rad1 + rad2));
                 if (evoluteBorderTest > 10*e2) {
-                    double rad3 = Math.cbrt((rad1+rad2)*(rad1+rad2));
-                    u = r + 0.5*rad3 + 2*r*r/rad3;
+                    u = r + 0.5* mcbrt + 2*r*r/ mcbrt;
                 } else {
-                    u = r + 0.5*Math.cbrt((rad1+rad2)*(rad1+rad2))+0.5*Math.cbrt((rad1-rad2)*(rad1-rad2));
+                    u = r + 0.5* mcbrt +0.5*Math.cbrt((rad1-rad2)*(rad1-rad2));
                 }
             } else {
                 // Step 3: near evolute

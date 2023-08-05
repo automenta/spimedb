@@ -328,13 +328,12 @@ public class KML {
 
                 long start = System.currentTimeMillis();
 
-                final Map<String, Style> styles = new LinkedHashMap();
-
+                Map<String, Style> styles = new LinkedHashMap<>();
 
                 //1. pre-process: collect style information
                 transformKML(reader, id, new GISVisitor() {
 
-                    final Map<String, String> styleMap = new LinkedHashMap();
+                    final Map<String, String> styleMap = new LinkedHashMap<>();
 
                     @Override
                     public void start(String layer) {
@@ -409,7 +408,7 @@ public class KML {
                 transformKML(reader, id, new MyGISVisitor(id, styles));
 
                 long end = System.currentTimeMillis();
-                logger.warn("{} loaded: {}(ms)", id, end - start);
+                logger.info("{} loaded: {}(ms)", id, end - start);
 
             } catch (Throwable e) {
                 logger.error("error {}", e);
@@ -577,7 +576,6 @@ public class KML {
             } else {
                 d = new GeoNObject(pathString + "/" + nextID());
                 d.withTags(pathString);
-
             }
 
             if (go instanceof Common cm) {
@@ -689,7 +687,7 @@ public class KML {
                     return false;
                 }*/
             if (d!= prototype)
-                db.add(d);
+                db.addAsync(d);
 
             return true;
         }
