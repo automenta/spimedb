@@ -63,10 +63,12 @@ public class Server implements HttpModel {
                     if (d!=null)
                         found.add(d);
                 });
-                send(ws, found);
+                send("full", found, ws);
             }
+
             case "earth" -> {
                 /*
+                    REQUEST:
                     { _: 'get',
                       earth: [ latMin, lonMin, latMax, lonMax ] //optional
                       time: [tMin, tMax]                        //optional
@@ -76,7 +78,6 @@ public class Server implements HttpModel {
                       output: "id" | "full"
                       //TODO output parameters
                     }
-                    Get items
                 */
                 var B = m.get(NObject.BOUND);
                 Query q = new Query().where(
@@ -91,14 +92,13 @@ public class Server implements HttpModel {
                     case "full" -> {
                         List<NObject> found = new Lst<>();
                         r.forEach(DObject::get, (d, s) -> found.add(new MutableNObject(d)), () -> {
-                            send(ws, found);
+                            send("full", found, ws);
                         });
                     }
                     case "id" -> {
                         List<String> found = new Lst<>();
                         r.forEach(d -> d.get(NObject.ID), (id, s) -> found.add(id), () -> {
-                            if (!found.isEmpty())
-                                ws.send(JSON.toJSONString(found));
+                            send("id", found, ws);
                         });
                     }
                 }
@@ -108,10 +108,11 @@ public class Server implements HttpModel {
         }
     }
 
-    private static void send(WebSocket ws, List<NObject> found) {
+    private static void send(String response, List found, WebSocket ws) {
         if (!found.isEmpty())
-            ws.send(JSON.toJSONString(found));
+            ws.send("{\"" + response + "\":" + JSON.toJSONString(found) + "}");
     }
+
 //    @Override
 //    public void wssMessage(WebSocket ws, ByteBuffer message) {
 //

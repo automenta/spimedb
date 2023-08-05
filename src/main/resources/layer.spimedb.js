@@ -3,6 +3,7 @@ class SpimeDBLayer extends GeoLayer {
         super(name, new WorldWind.RenderableLayer(name));
         this.url = url || ("ws://" + window.location.host);
         this.socket = undefined;
+        this.cache = new Map(); //TODO LRU
         this.active = new Map();
     }
 
@@ -180,7 +181,7 @@ class SpimeDBLayer extends GeoLayer {
         // }
 
         //console.log([latMin, latMax], [lonMin, lonMax]);
-        this.getAll(lonMin, lonMax, latMin, latMax);
+        this.getAll(lonMin, lonMax, latMin, latMax, "id");
     }
 
     pickPos(x, y, points, f) {
@@ -190,9 +191,9 @@ class SpimeDBLayer extends GeoLayer {
         }
     }
 
-    getAll(lonMin, lonMax, latMin, latMax) {
+    getAll(lonMin, lonMax, latMin, latMax, output) {
         //TODO LOD filtering
-        const m = "{'_':'earth','@':[" + lonMin + "," + lonMax + "," + latMin + "," + latMax + "]}";
+        const m = "{'_':'earth','@':[" + lonMin + "," + lonMax + "," + latMin + "," + latMax + "],output:\"" + output  + "\"}";
         this.socket.send(m);
     }
 
@@ -219,7 +220,12 @@ class SpimeDBLayer extends GeoLayer {
         // socket.addEventListener('close', closeConnection);
         this.socket.onmessage = (x) => {
             const d = JSON.parse(x.data);
-            this.addAll(d, f);
+            if (d.full)
+                this.addAll(d.full, f);
+            else if (d.id)
+                this.addAllID(d.id, f);
+            else
+                console.warn(d);
         };
         this.socket.onclose = (e) => {
             this.close();
@@ -229,83 +235,131 @@ class SpimeDBLayer extends GeoLayer {
         };
     }
 
+    addAllID(xx, f) {
+        this.active.forEach((v, k) => {
+            v.visible = false;
+        });
+
+        const needFull = [];
+
+        for (const x of xx) {
+            const X = this.cache.get(x);
+            if (X) {
+                X.visible = true;
+                this.active.set(x, X);
+            } else {
+                needFull.push(x);
+            }
+        }
+        if (needFull.length > 0) {
+            this.socket.send('{"_":"getAll", "id":' + JSON.stringify(needFull, null) + '}');
+        } else {
+            this.addAll([], f); //just commit
+        }
+        //console.log('refresh', needFull.length + '/' + xx.length);
+    }
 
     addAll(d, f) {
-        this.active.forEach((v, k) => {
-            v.unseen = true;
-        });
-        _.forEach(d, i => {
-            const e = this.active.get(i.I);
-            if (e) {
-                //exists TODO check for difference?
-                e.unseen = false;
+
+        const renderables = [];
+
+        for (var i of d) {
+            //INSTANTIATE:
+            //console.log(i);
+            // const prev = this.cache.get(i.I);
+            // if (prev) {
+            //     console.log('rev remvomv');
+            //     this.layer.removeRenderable(prev.renderable); //HACK
+            // }
+            this.cache.set(i.I, i);
+            this.active.set(i.I, i);
+            // const cfg = {};
+            // cfg.attributes = new WorldWind.ShapeAttributes(null);
+            // cfg.attributes.drawOutline = true;
+            // cfg.attributes.outlineColor = new WorldWind.Color(
+            //     0.1 * cfg.attributes.interiorColor.red,
+            //     0.3 * cfg.attributes.interiorColor.green,
+            //     0.7 * cfg.attributes.interiorColor.blue,
+            //     1.0);
+            // cfg.attributes.outlineWidth = 2.0;
+
+            if (i["g-"]) {
+                //path
+                //const pathPositions = _.map(i["g-"], p => new WorldWind.Position(p[0], p[1], 100 /* TODO */));
+                // const path = new WorldWind.Path(pathPositions, null);
+                // path.altitudeMode = WorldWind.RELATIVE_TO_GROUND; // The path's altitude stays relative to the terrain's altitude.
+                // path.followTerrain = true;
+                // path.extrude = false; // Make it a curtain.
+                // path.useSurfaceShapeFor2D = false; // Use a surface shape in 2D mode.
+                // this.layer.addRenderable(i.renderable = path);
+
+                const pathPositions = _.map(i["g-"], p => new WorldWind.Location(p[0], p[1], 0 /* TODO */));
+                const path = new WorldWind.SurfacePolyline(pathPositions, null);
+                renderables.push(i.renderable = path);
+
+
+            } else if (i["@"]) {
+                //point
+                const ii = i["@"];
+                const pos = new WorldWind.Position(ii[2], ii[1], ii[3]);
+
+                const point = new WorldWind.Placemark(pos);
+                if (i.N)
+                    point.label = i.N;
+                // else if (i['>'])
+                //     point.label = i[">"];
+
+                point.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
+
+
+                const placemarkAttributes = new WorldWind.PlacemarkAttributes(null);
+                placemarkAttributes.imageScale = 1;
+                placemarkAttributes.imageColor = new WorldWind.Color(1, 0, 0, 0.5);
+                // placemarkAttributes.labelAttributes.offset = new WorldWind.Offset(
+                //     WorldWind.OFFSET_FRACTION, 0.5,
+                //     WorldWind.OFFSET_FRACTION, 1.5);
+                placemarkAttributes.imageSource = WorldWind.configuration.baseUrl + "images/white-dot.png";
+                point.attributes = placemarkAttributes;
+
+                renderables.push(i.renderable = point);
             } else {
-                //console.log(i);
-                this.active.set(i.I, i);
-                // const cfg = {};
-                // cfg.attributes = new WorldWind.ShapeAttributes(null);
-                // cfg.attributes.drawOutline = true;
-                // cfg.attributes.outlineColor = new WorldWind.Color(
-                //     0.1 * cfg.attributes.interiorColor.red,
-                //     0.3 * cfg.attributes.interiorColor.green,
-                //     0.7 * cfg.attributes.interiorColor.blue,
-                //     1.0);
-                // cfg.attributes.outlineWidth = 2.0;
-
-                if (i["g-"]) {
-                    //path
-                    //const pathPositions = _.map(i["g-"], p => new WorldWind.Position(p[0], p[1], 100 /* TODO */));
-                    // const path = new WorldWind.Path(pathPositions, null);
-                    // path.altitudeMode = WorldWind.RELATIVE_TO_GROUND; // The path's altitude stays relative to the terrain's altitude.
-                    // path.followTerrain = true;
-                    // path.extrude = false; // Make it a curtain.
-                    // path.useSurfaceShapeFor2D = false; // Use a surface shape in 2D mode.
-                    // this.layer.addRenderable(i.renderable = path);
-
-                    const pathPositions = _.map(i["g-"], p => new WorldWind.Location(p[0], p[1], 0 /* TODO */));
-                    const path = new WorldWind.SurfacePolyline(pathPositions, null);
-                    this.layer.addRenderable(i.renderable = path);
-
-                } else if (i["@"]) {
-                    //point
-                    const ii = i["@"];
-                    const pos = new WorldWind.Position(ii[2], ii[1], ii[3]);
-
-                    const point = new WorldWind.Placemark(pos);
-                    if (i.N)
-                        point.label = i.N;
-                    // else if (i['>'])
-                    //     point.label = i[">"];
-
-                    point.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
-
-
-                    const placemarkAttributes = new WorldWind.PlacemarkAttributes(null);
-                    placemarkAttributes.imageScale = 1;
-                    placemarkAttributes.imageColor = new WorldWind.Color(1, 0, 0, 0.5);
-                    // placemarkAttributes.labelAttributes.offset = new WorldWind.Offset(
-                    //     WorldWind.OFFSET_FRACTION, 0.5,
-                    //     WorldWind.OFFSET_FRACTION, 1.5);
-                    placemarkAttributes.imageSource = WorldWind.configuration.baseUrl + "images/white-dot.png";
-                    point.attributes = placemarkAttributes;
-
-                    this.layer.addRenderable(i.renderable = point);
-                } else {
-                    console.error("unhandled geometry type: ", i);
-                }
+                console.error("unhandled geometry type: ", i);
             }
+            i.visible = true;
+            this.active.set(i.I, i);
+        }
+        this.active.forEach((v,k) => {
+           this.enable(k, v, renderables);
         });
         this.active.forEach((v, k) => {
-            if (v.unseen) {
-                this.active.delete(k);
-                if (v.renderable) {
-                    this.layer.removeRenderable(v.renderable);
-                    delete v.renderable;
+            if (!v.visible) {
+                if (this.active.delete(k)) {
+                    if (v.renderable) {
+                        this.layer.removeRenderable(v.renderable);
+                        v.renderableOff = true;
+                        //delete v.renderable;
+                    }
                 }
             }
         });
-        //console.log(this.active);
+        for (const r of renderables) {
+            this.layer.addRenderable(r);
+        }
+
+        //console.log(this.active.size, 'active', this.cache.size, 'cached');
         f.view.redraw();
+    }
+
+    enable(i, x, renderables) {
+        //exists, keep
+        //TODO check for difference?
+        if (x.visible) {
+            if (x.renderableOff) {
+                //reactivate
+                delete x.renderableOff;
+                renderables.push(x.renderable);
+            }
+        }
     }
 
     close() {
