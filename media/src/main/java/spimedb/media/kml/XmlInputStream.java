@@ -50,7 +50,7 @@ public abstract class XmlInputStream extends GISInputStreamBase {
                 AsyncXMLInputFactory f = new InputFactoryImpl();
                 f.configureForSpeed();
 
-                Reader reader = new InputStreamReader(is,encoding);
+                Reader reader = new InputStreamReader(is, encoding);
 
                 stream = (EventReaderImpl) f.createXMLEventReader(reader);
 

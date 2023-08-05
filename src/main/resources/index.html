@@ -144,7 +144,7 @@
         //view.addLayer(new WorldWind.CompassLayer());
         //view.addLayer(new WorldWind.CoordinatesDisplayLayer(wwd));
 
-        f.addLayer(new SpimeDBLayer("SpimeDB", "ws://" + window.location.host));
+        f.addLayer(new SpimeDBLayer("SpimeDB"));
 
         // f.addLayer(new ShapefileLayer("Countries", "https://worldwind.arc.nasa.gov/web/examples/data/shapefiles/naturalearth" +
         //     "/ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp").disable());
@@ -162,10 +162,11 @@
         //f.addLayer(new KMLLayer("AirNow Air Quality Index (current)", "http://files.airnowtech.org/airnow/today/airnow_conditions.kml").disable());
 
         f.addLayer(new GeoLayer("OSM Map", new WorldWind.OpenStreetMapImageLayer())/*.opacity(0.5)*/);
-        f.addLayer(new GeoLayer("Satellite", new WorldWind.BingAerialWithLabelsLayer()).disable());
+        //f.addLayer(new GeoLayer("Satellite", new WorldWind.BingAerialWithLabelsLayer()).disable());
+
         //f.addLayer(new WWLayer("BMGNOne", new WorldWind.BMNGOneImageLayer()).disable());
 
-        f.addLayer(new OSMNodeLayer(f));
+        //f.addLayer(new OSMNodeLayer(f));
 
         const m = new Menu("menu");
         f.event.on('graph_change', _.throttle(()=>{

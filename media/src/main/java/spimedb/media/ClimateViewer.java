@@ -9,17 +9,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import spimedb.SpimeDB;
 import spimedb.server.Server;
 
-import java.net.MalformedURLException;
-
 /**
  * @author me
  */
 public class ClimateViewer {
 
-    static final String basePath = "cache";
-    static final String layersFile = "data/climateviewer.json";
+//    static final String basePath = "cache";
+//    static final String layersFile = "data/climateviewer.json";
 
-    String currentSection = "Unknown";
+//    String currentSection = "Unknown";
 
     public static void main(String[] args) throws Exception {
         new ClimateViewer();
@@ -30,7 +28,9 @@ public class ClimateViewer {
 
         geojson("nuclear", "https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson", server);
 
-        geojson("earthquake", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson", server);
+        geojson("emf", "https://climateviewer.org/layers/geojson/2018/Extremely-Low-Frequency-ULF-ELF-VLF-Transmission-Sites-ClimateViewer-3D.geojson", server);
+
+//        geojson("earthquake", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson", server);
         //geojson("air", "https://gis-calema.opendata.arcgis.com/datasets/acee3cdfe7ff45ad9751e8f9d95a50b3_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D", server);
 
         kml("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz",
@@ -107,8 +107,8 @@ public class ClimateViewer {
 
     }
 
-    private static void kml(String url, GeoNObject prototype, Server server) throws MalformedURLException {
-        new KML(server.db, prototype).url(url).run();
+    private static void kml(String url, GeoNObject prototype, Server server) {
+        new KML(server.db, prototype).url(null, url).run();
     }
 
     private static void geojson(String tag, String url, Server server) {

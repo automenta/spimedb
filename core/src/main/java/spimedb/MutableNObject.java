@@ -176,6 +176,12 @@ public class MutableNObject extends ImmutableNObject {
         min.coord[2] = y;
         max.coord[2] = y;
     }
+    public void where(double xMin, double yMin, double xMax, double yMax) {
+        min.coord[1] = xMin;
+        max.coord[1] = xMax;
+        min.coord[2] = yMin;
+        max.coord[2] = yMax;
+    }
 
     public void where(double x, double y, double z) {
         where(x, y);

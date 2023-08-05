@@ -1,5 +1,8 @@
 package spimedb.media;
 
+import jcog.Util;
+import org.geojson.LineString;
+import org.geojson.LngLatAlt;
 import org.opensextant.geodesy.*;
 import org.opensextant.giscore.geometry.Line;
 import org.opensextant.giscore.geometry.Point;
@@ -24,16 +27,11 @@ public class GeoNObject extends MutableNObject {
 
     public NObject where(Geodetic2DPoint c) {
 
-        double lon = c.getLongitudeAsDegrees();
-        min.coord[1] = max.coord[1] = lon;
-
-        double lat = c.getLatitudeAsDegrees();
-        min.coord[2] = max.coord[2] = lat;
-
+        min.coord[1] = max.coord[1] = c.getLongitudeAsDegrees();
+        min.coord[2] = max.coord[2] = c.getLatitudeAsDegrees();
 
         if (c instanceof Geodetic3DPoint g3) {
-            double ele = g3.getElevation();
-            min.coord[3] = max.coord[3] = ele;
+            min.coord[3] = max.coord[3] = g3.getElevation();
         } else {
             min.coord[3] = Float.NEGATIVE_INFINITY;
             max.coord[3] = Float.POSITIVE_INFINITY;
@@ -92,6 +90,17 @@ public class GeoNObject extends MutableNObject {
         where(bb.getEastLon(), bb.getWestLon(), bb.getSouthLat(), bb.getNorthLat());
     }
 
+    private static double[][] toArrayGeoJSON(List<LngLatAlt> lp) {
+        double[][] points = new double[lp.size()][2];
+
+        for (int i = 0; i < points.length; i++) {
+            var c = lp.get(i);
+            double[] pi = points[i];
+            pi[0] = c.getLatitude();
+            pi[1] = c.getLongitude();
+        }
+        return points;
+    }
 
     public static double[][] toArray(List<Point> lp) {
         double[][] points = new double[lp.size()][2];
@@ -113,16 +122,54 @@ public class GeoNObject extends MutableNObject {
         put(NObject.LINESTRING, points);
         return this;
     }
+    public NObject where(LineString l) {
+        var points = toArrayGeoJSON(l.getCoordinates());
+        double[] bb = bounds(points);
+        where(bb[0], bb[1], bb[2], bb[3]);
+        put(NObject.LINESTRING, points);
+        return this;
+    }
 
+    /** TODO handle inner rings? */
     public NObject where(Polygon p) {
         double[][] outerRing = toArray(p.getOuterRing().getPoints());
-
-        //TODO handle inner rings
-
         where(p.getBoundingBox());
         put(NObject.POLYGON, outerRing);
         return this;
     }
-
-
+    /** TODO handle inner rings? */
+    public NObject where(org.geojson.Polygon p) {
+        var outerRing = toArrayGeoJSON(p.getExteriorRing());
+        double[] bb = bounds(outerRing); where(bb[0], bb[1], bb[2], bb[3]);
+        put(NObject.POLYGON, outerRing);
+        return this;
+    }
+    public static double[] bounds(double[][] c) {
+        double xMin = Double.POSITIVE_INFINITY, xMax = Double.NEGATIVE_INFINITY;
+        double yMin = Double.POSITIVE_INFINITY, yMax = Double.NEGATIVE_INFINITY;
+        for (var a : c) {
+            double y = a[0];
+            double x = a[1];
+            //double z = a.getAltitude() //TODO
+            xMin = Util.min(xMin, x);
+            xMax = Util.max(xMax, x);
+            yMin = Util.min(yMin, y);
+            yMax = Util.max(yMax, y);
+        }
+        return new double[] { xMin, yMin, xMax, yMax };
+    }
+//    public static double[] bounds(List<LngLatAlt> c) {
+//        double xMin = Double.POSITIVE_INFINITY, xMax = Double.NEGATIVE_INFINITY;
+//        double yMin = Double.POSITIVE_INFINITY, yMax = Double.NEGATIVE_INFINITY;
+//        for (var a : c) {
+//            double x = a.getLongitude();
+//            double y = a.getLatitude();
+//            //double z = a.getAltitude() //TODO
+//            xMin = Util.min(xMin, x);
+//            xMax = Util.max(xMax, x);
+//            yMin = Util.min(yMin, y);
+//            yMax = Util.max(yMax, y);
+//        }
+//        return new double[] { xMin, yMin, xMax, yMax };
+//    }
 }

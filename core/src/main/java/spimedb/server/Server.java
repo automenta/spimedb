@@ -9,7 +9,6 @@ import jcog.net.http.HttpConnection;
 import jcog.net.http.HttpModel;
 import jcog.net.http.HttpServer;
 import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
 import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;

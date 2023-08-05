@@ -101,7 +101,7 @@ public class Crawl {
         URL uu = new URL(url);
         Document page = Jsoup.parse(uu, 10*1000);
         page.getElementsByTag("a").forEach(a -> {
-            String href = (a.attr("href"));
+            String href = a.attr("href");
             if (href!=null) {
 
                 try {
@@ -126,9 +126,6 @@ public class Crawl {
             throw new RuntimeException("not a file?");
 
         int slash = url.lastIndexOf('/');
-        if (slash == -1)
-            return url;
-        else
-            return url.substring(slash + 1);
+        return slash == -1 ? url : url.substring(slash + 1);
     }
 }

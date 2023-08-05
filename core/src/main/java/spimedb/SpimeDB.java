@@ -104,7 +104,7 @@ public class SpimeDB {
         }
     };
     final static boolean DEBUG = System.getProperty("debug", "false").equals("true");
-    final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ (-31 * System.currentTimeMillis()));
+    final static Random rng = new XorShift128PlusRandom(System.nanoTime() ^ -31 * System.currentTimeMillis());
     static final int NObjectCacheSize = 64 * 1024;
     final static DObject REMOVE = new DObject() {
 
@@ -142,8 +142,8 @@ public class SpimeDB {
     final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
     final Locker<String> locker = new Locker();
     private final Map<String, DObject> out = new ConcurrentHashMap<>(1024);
-    private final Cache<String, DObject> cache =
-            Caffeine.newBuilder().maximumSize(NObjectCacheSize).build();
+//    private final Cache<String, DObject> cache =
+//            Caffeine.newBuilder().maximumSize(NObjectCacheSize).build();
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer;
     private final FacetsConfig facetsConfig = new FacetsConfig();
@@ -283,7 +283,7 @@ public class SpimeDB {
     @Nullable
     public FacetResult facets(String dimension, int count) {
 
-        return withSearcher((searcher) -> {
+        return withSearcher(searcher -> {
             FacetsCollector fc = new FacetsCollector();
 
             // MatchAllDocsQuery is for "browsing" (counts facets
@@ -328,7 +328,7 @@ public class SpimeDB {
 
                 FreeTextSuggester nextSuggester = new FreeTextSuggester(new SimpleAnalyzer());
 
-                read((nameDictReader) -> {
+                read(nameDictReader -> {
 
                     if (nameDictReader.maxDoc() == 0)
                         return;
@@ -377,7 +377,7 @@ public class SpimeDB {
     }
 
     private Document the(String id) {
-        return withSearcher((searcher) -> {
+        return withSearcher(searcher -> {
             TermQuery x = new TermQuery(new Term(NObject.ID, id));
             try {
                 TopDocs y = searcher.search(x, firstResultOnly);
@@ -473,7 +473,7 @@ public class SpimeDB {
 
     public int size() {
         final int[] size = new int[1];
-        read((r) -> size[0] = r.maxDoc());
+        read(r -> size[0] = r.maxDoc());
         return size[0];
     }
 
@@ -511,7 +511,7 @@ public class SpimeDB {
                                 written++;
                             }
                         } else {
-                            cache.invalidate(id);
+//                            cache.invalidate(id);
                             if (writer.deleteDocuments(key) != -1) {
                                 removed++;
                             }
@@ -554,7 +554,7 @@ public class SpimeDB {
         DObject d = DObject.get(next, this);
         String id = d.id();
         out.put(id, d);
-        cache.put(id, d);
+//        cache.put(id, d);
         commit();
 
         pub(next);
@@ -572,7 +572,7 @@ public class SpimeDB {
         ImmutableSet<String> filters = WebIO.searchResultFull;
         NObject finalNext = new FilteredNObject(next, filters);
 
-        Consumer<Consumer<NObject>> take = (c) -> c.accept(finalNext);
+        Consumer<Consumer<NObject>> take = c -> c.accept(finalNext);
         onTag.emit(tags, take);
         on.forEach(take);
     }
@@ -588,7 +588,7 @@ public class SpimeDB {
             e.printStackTrace();
         }
         out.clear();
-        cache.invalidateAll();
+//        cache.invalidateAll();
 
         if (indexPath != null) {
             recursiveDelete(new File(indexPath));
@@ -609,7 +609,7 @@ public class SpimeDB {
 //        } else {
 
         JsonNode inode = x.get("I");
-        String I = (inode != null) ? inode.toString() : SpimeDB.uuidString();
+        String I = inode != null ? inode.toString() : SpimeDB.uuidString();
 
         MutableNObject d = new MutableNObject(I)
                 .withTags(NObject.TAG_PUBLIC)
@@ -662,7 +662,7 @@ public class SpimeDB {
     }
 
     public <X> X run(String id, Supplier<X> r) {
-        return locker.locked(id, (ii) -> {
+        return locker.locked(id, ii -> {
             try {
                 return r.get();
             } catch (Throwable t) {
@@ -727,7 +727,6 @@ public class SpimeDB {
         };
     }
 
-    @NotNull
     private Supplier<DObject> addProcedure(@Nullable NObject _next) {
         return () -> {
 
@@ -749,8 +748,8 @@ public class SpimeDB {
     }
 
     private boolean deepEquals(Document a, Document b) {
-        List<IndexableField> af = (a.getFields());
-        List<IndexableField> bf = (b.getFields());
+        List<IndexableField> af = a.getFields();
+        List<IndexableField> bf = b.getFields();
         int size = af.size();
         if (bf.size() != size)
             return false;
@@ -808,7 +807,7 @@ public class SpimeDB {
     }
 
     public void forEach(Consumer<NObject> each) {
-        read((r) -> {
+        read(r -> {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
 
             IntStream.range(0, max).forEach(i -> {
@@ -827,7 +826,7 @@ public class SpimeDB {
 
     public void forEach(Consumer<List<NObject>> each, int _chunks) {
         int chunks = Math.max(1, _chunks);
-        read((r) -> {
+        read(r -> {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
 
             int chunkSize = max / chunks;
@@ -852,11 +851,11 @@ public class SpimeDB {
         });
     }
 
-    public DObject get(String id) {
-        return cache.get(id, (i) -> {
+    public DObject get(String i) {
+//        return cache.get(id, (i) -> {
             Document d = the(i);
             return d != null ? DObject.get(d) : null;
-        });
+//        });
     }
 
 

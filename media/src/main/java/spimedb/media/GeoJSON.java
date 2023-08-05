@@ -8,19 +8,16 @@ package spimedb.media;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jcog.TODO;
-import org.geojson.Feature;
-import org.geojson.FeatureCollection;
-import org.geojson.GeoJsonObject;
-import org.geojson.LngLatAlt;
+import org.geojson.*;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spimedb.MutableNObject;
 import spimedb.NObject;
 import spimedb.SpimeDB;
+import spimedb.util.HTTP;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -42,7 +39,7 @@ public class GeoJSON   {
 
     public static void load(String url, Function<Feature, NObject> builder, SpimeDB db) {
         try {
-            db.add(get(new URL(url).openStream(), builder));
+            db.add(get(HTTP.inputStream(url), builder));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,19 +62,25 @@ public class GeoJSON   {
 
         @Override
         public NObject apply(Feature f) {
-            MutableNObject d = new MutableNObject(f.getId());
+            GeoNObject d = new GeoNObject(f.getId());
 
-            String name = f.getProperty("Name"); if (name!=null) d.name(name);
-            String desc = f.getProperty("Description"); if (desc!=null) d.description(desc);
+            String name = nameProperty(f); if (name!=null) d.name(name);
+            String desc = descProperty(f); if (desc!=null) d.description(desc);
+//            var m = f.getProperties();
 
             GeoJsonObject g = f.getGeometry();
             if (g != null) {
                 if (g instanceof org.geojson.Point point) {
                     LngLatAlt coord = point.getCoordinates();
                     d.where(coord.getLongitude(), coord.getLatitude(), coord.getAltitude());
+                } else if (g instanceof Polygon pg){
+                    d.where(pg);
+                } else if (g instanceof LineString ls) {
+                    d.where(ls);
                 } else {
                     throw new TODO();
                 }
+
             }
 
             //Object time = f.getProperty("time"); if (time instanceof Long l) d.when(l,l+1 /* HACK */);
@@ -119,6 +122,20 @@ public class GeoJSON   {
 
             return d;
         }
+
+        @Nullable private static String descProperty(Feature f) {
+            String s = f.getProperty("description");
+            if (s != null) return s;
+            return f.getProperty("Description");
+        }
+
+        @Nullable private static String nameProperty(Feature f) {
+            String s = f.getProperty("name");
+            if (s != null) return s;
+            return f.getProperty("Name");
+        }
+
+
     }
 
 //    public static void main(String[] arg) throws Exception {

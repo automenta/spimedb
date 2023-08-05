@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jetbrains.annotations.Nullable;
 import org.opensextant.giscore.events.*;
 import org.opensextant.giscore.events.SimpleField.Type;
 import org.opensextant.giscore.geometry.Geometry;
@@ -47,11 +48,10 @@ import static spimedb.media.kml.KmlReader.logger;
 public class KML {
 
     final int maxPathDepth = 3;
-    //private final Proxy proxy;
     private final SpimeDB db;
     private final GeoNObject prototype;
 
-    private String layer;
+//    private String layer;
     final Deque<String> path = new ArrayDeque();
 
     boolean enableDescriptions = true;
@@ -65,8 +65,6 @@ public class KML {
         int c = serial.incrementAndGet();
         return Integer.toUnsignedString(c, Character.MAX_RADIX);
     }
-
-
 
     public static String[] pathArray(Deque<String> p) {
         return p.toArray(new String[0]);
@@ -82,9 +80,7 @@ public class KML {
     }
 
 
-    public void transformKML(Supplier<KmlReader> source, String layer, final GISVisitor visitor) {
-
-        this.layer = layer;
+    public void transformKML(Supplier<KmlReader> source, String layer, GISVisitor visitor) {
 
         KmlReader reader = source.get();
         reader.setRewriteStyleUrls(true);
@@ -157,7 +153,7 @@ public class KML {
             }
         } while (true);
 
-// get list of network links that were retrieved from step above
+        // get list of network links that were retrieved from step above
         List<URI> _links = reader.getNetworkLinks();
 
         Set<URI> networkLinks = !_links.isEmpty() ? new LinkedHashSet(_links) : Collections.emptySet();
@@ -213,7 +209,7 @@ public class KML {
         }
 
         if (!exceptions.isEmpty()) {
-            logger.error("{} exceptions: {}" + exceptions);
+            logger.error("exceptions: " + exceptions);
         }
 
         visitor.end();
@@ -227,10 +223,11 @@ public class KML {
         }
     }
 
-    void updatePath() {
+    synchronized void updatePath() {
         int ps = path.size();
         if (ps > 0) {
-            parentPathString = String.join("/", new ArrayList(path).subList(0, path.size() - 1));
+            parentPathString = String.join("/",
+                new ArrayList<>(path).subList(0, path.size() - 1));
         } else {
             parentPathString = null;
         }
@@ -282,8 +279,8 @@ public class KML {
         this.prototype = prototype;
     }
 
-    public Runnable url(String url) throws MalformedURLException {
-        return url(Crawl.fileName( new URL(url).getFile() ), url);
+    public Runnable url(String url) {
+        return url(null, url);
     }
 
     public Runnable url(String id, String url) {
@@ -294,10 +291,18 @@ public class KML {
         return url(id, "file:///" + path, null);
     }
 
-    public Runnable url(String id, String url, Proxy proxy) {
+    public Runnable url(@Nullable String id, String url, Proxy proxy) {
+        if (id == null) {
+            try {
+                id = Crawl.fileName( new URL(url).getFile() );
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return task(id, () -> {
             try {
-                return new KmlReader(new URL(url), proxy);
+                return new KmlReader(url, proxy);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;

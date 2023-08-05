@@ -459,7 +459,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                             */
                         } catch (IllegalArgumentException e) {
                             // bad lat/longitude; e.g. out of valid range
-                            log.error("Invalid coordinate: ", st.nval, " ", e);
+                            log.error("Invalid coordinate {}", st.nval, e);
                             if (numparts != 0) {
                                 lon = COORD_ERROR;
                             }
@@ -489,7 +489,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
                                 }
                             //else System.out.println("\tXXX: ** ERROR: COMMA3: seenComma w/numparts=" + numparts);
                         } else {
-                            log.warn("ignore invalid character in coordinate string: (", (char) st.ttype, ")");
+                            log.warn("ignore invalid character in coordinate string: {}", (char) st.ttype);
                         }
                     }
                     //s = "CHAR:" + String.valueOf((char) st.ttype);
@@ -498,7 +498,7 @@ public class KmlInputStream extends XmlInputStream implements IKml {
             } // while
         } catch (IOException e) {
             // we're using StringReader. this should never happen
-            log.error("Failed to parse coord string: ", (coord == null || coord.length() <= 20
+            log.error("Failed to parse coord string: {} {}", (coord == null || coord.length() <= 20
                     ? coord : coord.substring(0, 20) + "..."), e);
         }
         

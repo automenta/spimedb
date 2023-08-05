@@ -1,4 +1,13 @@
-//package spimedb.util;
+package spimedb.util;
+
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
+import okhttp3.Response;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 //
 //import com.fasterxml.jackson.databind.JsonNode;
 //import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -24,10 +33,44 @@
 //
 //import static io.undertow.Handlers.resource;
 //
-///**
-// * dead simple HTTP response cache
-// */
-//public class HTTP {
+public class HTTP {
+
+    /* https://square.github.io/okhttp/features/caching/ */
+    private static final Cache cache = new Cache(new File("/var/tmp", "spimedb"),
+            1024 * 1024L * 1024L //1gb
+    );
+    private static final OkHttpClient client = new OkHttpClient.Builder().cache(cache).build();
+
+
+    public static InputStream inputStream(String url) throws IOException {
+        var request = new okhttp3.Request.Builder()
+                .url(url)
+                .build();
+
+        Response response = client.newCall(request).execute();
+        //try () {
+            if (!response.isSuccessful())
+                throw new IOException("Unexpected code " + response);
+
+//            Headers responseHeaders = response.headers();
+//            for (int i = 0; i < responseHeaders.size(); i++)
+//                System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+
+//              System.out.println("HTTP cache");
+//              System.out.println("hit: " + cache.hitCount());
+//              System.out.println("request: " + cache.requestCount());
+//              System.out.println("network: " + cache.networkCount());
+//              System.out.println("writeSuccess: " + cache.writeSuccessCount());
+
+            return response.body().byteStream();
+
+//        byte[] bb = b.bytes();
+//        var i = new ByteArrayInputStream(bb);
+//              b.close();
+//              response.close();
+//              return i;
+        //}
+    }
 //        public static void asStream(String url, /* long maxAge */ Consumer<InputStream> result) throws IOException {
 //
 //        //TODO use Tee pipe to read and write the cache miss simultaneously and still provide streaming result to the callee
@@ -260,4 +303,4 @@
 ////        http.asFile("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_day.geojson", (Consumer<File>) System.out::println);
 ////    }
 //
-//}
+}

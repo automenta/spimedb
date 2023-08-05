@@ -46,13 +46,11 @@ public class Locker<X> {
 
     public <Y> Y locked(X x, Function<X, Y> r) {
         Lock l = lock(x);
-        Y y = null;
         try {
-            y = r.apply(x);
+            return r.apply(x);
         } finally {
             l.unlock();
         }
-        return y;
     }
 
     public final class DBLock extends ReentrantLock {

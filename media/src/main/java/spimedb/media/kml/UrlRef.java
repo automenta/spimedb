@@ -79,9 +79,11 @@ package spimedb.media.kml;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import jcog.TODO;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spimedb.util.HTTP;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -133,9 +135,6 @@ public final class UrlRef implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(UrlRef.class);
 
-    private static final long serialVersionUID = 1L;
-
-
     public static final String MIME_TYPE_KMZ = "application/vnd.google-earth.kmz";
     public static final String MIME_TYPE_KML = "application/vnd.google-earth.kml+xml";
 
@@ -161,21 +160,26 @@ public final class UrlRef implements Serializable {
 
     private static volatile boolean httpsInit;
 
-    /**
-     * This method gets the correct input stream for a URL. Attempts to
-     * determine if URL is a KMZ (compressed KML file) first by the returned
-     * content type from the <code>URLConnection</code> and it that fails then
-     * by checking if a .kmz extension appears at end of the file name. If
-     * stream is for a KMZ file then the stream is advanced until the first KML
-     * file is found in the stream.
-     *
-     * @param url The url to the KML or KMZ file
-     * @return The InputStream used to read the KML source.
-     * @throws IOException when an I/O error prevents a document from
-     * being fully parsed.
-     */
-    public static InputStream getInputStream(URL url) throws IOException {
-        return getInputStream(url, null);
+//    /**
+//     * This method gets the correct input stream for a URL. Attempts to
+//     * determine if URL is a KMZ (compressed KML file) first by the returned
+//     * content type from the <code>URLConnection</code> and it that fails then
+//     * by checking if a .kmz extension appears at end of the file name. If
+//     * stream is for a KMZ file then the stream is advanced until the first KML
+//     * file is found in the stream.
+//     *
+//     * @param url The url to the KML or KMZ file
+//     * @return The InputStream used to read the KML source.
+//     * @throws IOException when an I/O error prevents a document from
+//     * being fully parsed.
+//     */
+    public static InputStream getInputStream(URL url, Proxy p) throws IOException {
+        return getInputStream(url.toString(), p);
+    }
+
+    public static InputStream getInputStream(String url, Proxy p) throws IOException {
+        if (p!=null) throw new TODO();
+        return HTTP.inputStream(url);
     }
 
     /**
@@ -196,7 +200,7 @@ public final class UrlRef implements Serializable {
      * @throws IllegalArgumentException if content size is <= 0 @
      * throws NullPointerException	if url is <tt>null</tt>
      */
-    public static InputStream getInputStream(URL url, Proxy proxy) throws IOException {
+    public static InputStream getInputStream2(URL url, Proxy proxy) throws IOException {
         // Open the connection
         URLConnection conn = getConnection(url, proxy);
 
@@ -288,7 +292,7 @@ public final class UrlRef implements Serializable {
         }
 
         // Connect to get the response headers
-        conn.connect();
+        //conn.connect();
         return conn;
     }
 
@@ -2442,10 +2446,9 @@ public final class UrlRef implements Serializable {
      */
     public InputStream getInputStream(Proxy proxy) throws IOException {
         // check if non-KMZ URI
-        if (kmzRelPath == null) {
+        if (kmzRelPath == null)
             return getInputStream(url, proxy);
-        }
-        
+
         String kmzPath = kmzRelPath;
         // if whitespace appears in networkLink URLs then it's commonly escaped to %20
         // so need to convert back to spaces to match exactly how it is stored in KMZ file
@@ -2490,7 +2493,6 @@ public final class UrlRef implements Serializable {
     /**
      * @return the internal URI of the UrlRef, never {@code null}
      */
-    @NonNull
     public URI getURI() {
         return uri;
     }

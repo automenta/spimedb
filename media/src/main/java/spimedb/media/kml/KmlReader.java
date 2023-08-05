@@ -76,17 +76,6 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
      * Creates a <code>KmlStreamReader</code> and attempts to read all
      * GISObjects from a stream created from the <code>URL</code>.
      *
-     * @param url the KML or KMZ URL to be opened for reading.
-     * @throws IOException if an I/O error occurs
-     */
-    public KmlReader(URL url) throws IOException {
-        this(url, null);
-    }
-
-    /**
-     * Creates a <code>KmlStreamReader</code> and attempts to read all
-     * GISObjects from a stream created from the <code>URL</code>.
-     *
      * @param url the KML or KMZ URL to be opened for reading, never
      * <tt>null</tt>.
      * @param proxy the Proxy through which this connection will be made. If
@@ -95,9 +84,32 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
      * @throws IOException if an I/O error occurs
      * @throws NullPointerException if url is <tt>null</tt>
      */
-    public KmlReader(URL url, Proxy proxy) throws IOException {
+    public KmlReader(String url, Proxy proxy) throws IOException {
+        InputStream _iStream = UrlRef.getInputStream(url, proxy);
         this.proxy = proxy;
-        iStream = UrlRef.getInputStream(url, proxy);
+
+        if (!url.endsWith(".kmz")) {
+            iStream = _iStream;
+        } else {
+            // Note: some "KMZ" files fail validation using ZipFile but work with ZipInputStream
+            ZipInputStream zis = new ZipInputStream(_iStream);
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                // simply find first kml file in the archive
+                // see note on KMZ in UrlRef.getInputStream() method for more detail
+                if (entry.getName().toLowerCase().endsWith(".kml")) {
+                    iStream = zis;
+                    // indicate that the stream is for a KMZ compressed file
+                    compressed = true;
+                    break;
+                }
+            }
+            if (iStream == null) {
+                IOUtils.closeQuietly(zis);
+                throw new FileNotFoundException("Failed to find KML content in: " + url);
+            }
+        }
+
         try {
             kis = new KmlInputStream(iStream);
         } catch (IOException e) {
@@ -107,7 +119,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
         if (iStream instanceof ZipInputStream) {
             compressed = true;
         }
-        baseUrl = url;
+        baseUrl = new URL(url);
     }
 
     /**
@@ -120,7 +132,7 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
      * @throws NullPointerException if file is <tt>null</tt>
      */
     @SuppressWarnings("unchecked")
-    public KmlReader(File file) throws IOException {
+    @Deprecated public KmlReader(File file) throws IOException {
         if (file.getName().toLowerCase().endsWith(".kmz")) {
             // Note: some "KMZ" files fail validation using ZipFile but work with ZipInputStream
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE));
@@ -538,12 +550,12 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
      * @throws IllegalArgumentException if reader is still opened
      */
     private List<IGISObject> _importFromNetworkLinks(ImportEventHandler handler) {
-        if (iStream != null) {
+        if (iStream != null)
             throw new IllegalArgumentException("reader must first be closed");
-        }
-        if (gisNetworkLinks.isEmpty()) {
+
+        if (gisNetworkLinks.isEmpty())
             return Collections.emptyList();
-        }
+
         List<IGISObject> linkedFeatures = new ArrayList<>();
 
         // keep track of URLs visited to prevent revisits
@@ -564,25 +576,24 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                     // Determination also uses the HTTP mime type for the resource.
                     try {
                         is = ref.getInputStream(proxy);
-                        if (is == null) {
+                        if (is == null)
                             continue;
-                        }
+
                     } catch (FileNotFoundException nfe) {
                         // If href does not exist in KMZ then try with respect to parent context.
                         // Check if target exists outside of KMZ file in same context (file system or URL root).
                         // e.g. http://kml-samples.googlecode.com/svn/trunk/kml/kmz/networklink/hier.kmz
-                        final URL tempUrl = new URL(ref.getURL(), ref.getKmzRelPath());
-                        //log.info("XXX: tryURL\n\t{}", tempUrl); // debug
+                        URL tempUrl = new URL(ref.getURL(), ref.getKmzRelPath());
                         is = UrlRef.getInputStream(tempUrl, proxy);
-                        if (is == null) {
+                        if (is == null)
                             continue;
-                        }
+
                         ref = new UrlRef(tempUrl, null);
                     }
-                    int oldSize = networkLinks.size();
-                    int oldFeatSize = linkedFeatures.size();
+//                    int oldSize = networkLinks.size();
+//                    int oldFeatSize = linkedFeatures.size();
                     KmlInputStream kis = new KmlInputStream(is);
-                    logger.debug("Parse networkLink: {}", ref);
+//                    logger.debug("Parse networkLink: {}", ref);
                     try {
                         IGISObject gisObj;
                         while ((gisObj = read(kis, ref, networkLinks)) != null) {
@@ -600,14 +611,14 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
                     } finally {
                         kis.close();
                     }
-                    if (logger.isDebugEnabled()) {
-                        if (oldFeatSize != linkedFeatures.size()) {
-                            logger.debug("*** got features from network link ***");
-                        }
-                        if (oldSize != networkLinks.size()) {
-                            logger.debug("*** got new URLs from network link ***");
-                        }
-                    }
+//                    if (logger.isDebugEnabled()) {
+//                        if (oldFeatSize != linkedFeatures.size()) {
+//                            logger.debug("*** got features from network link ***");
+//                        }
+//                        if (oldSize != networkLinks.size()) {
+//                            logger.debug("*** got new URLs from network link ***");
+//                        }
+//                    }
                 } catch (java.net.ConnectException | FileNotFoundException e) {
                     logger.error("Failed to import from network link: {}\n{}", uri, e);
                     if (handler != null) {
@@ -627,28 +638,27 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
         return linkedFeatures;
     }
 
-    /**
-     * Short-cut help method to read all GISObjects closing the stream and
-     * returning the list of GIS objects. This is useful for most KML documents
-     * that can fit into memory otherwise read() should be used directly to
-     * iterate over each object.
-     *
-     * @return list of objects
-     * @throws IOException if an I/O error occurs
-     */
-    @NonNull
-    public List<IGISObject> readAll() throws IOException {
-        List<IGISObject> features = new ArrayList<>();
-        try {
-            IGISObject gisObj;
-            while ((gisObj = read(kis, null, null)) != null) {
-                features.add(gisObj);
-            }
-        } finally {
-            close();
-        }
-        return features;
-    }
+//    /**
+//     * Short-cut help method to read all GISObjects closing the stream and
+//     * returning the list of GIS objects. This is useful for most KML documents
+//     * that can fit into memory otherwise read() should be used directly to
+//     * iterate over each object.
+//     *
+//     * @return list of objects
+//     * @throws IOException if an I/O error occurs
+//     */
+//    public List<IGISObject> readAll() throws IOException {
+//        List<IGISObject> features = new ArrayList<>();
+//        try {
+//            IGISObject gisObj;
+//            while ((gisObj = read(kis, null, null)) != null) {
+//                features.add(gisObj);
+//            }
+//        } finally {
+//            close();
+//        }
+//        return features;
+//    }
 
     /**
      * Closes this input stream and releases any system resources associated
@@ -664,17 +674,6 @@ public class KmlReader extends KmlBaseReader implements IGISInputStream {
         }
     }
 
-    /**
-     * Set proxy through which URL connections will be made for network links.
-     * If direct connection is desired,  <code>null</code> should be specified.
-     * This proxy will be used if <code>importFromNetworkLinks()</code> is
-     * called.
-     *
-     * @param proxy
-     */
-    public void setProxy(Proxy proxy) {
-        this.proxy = proxy;
-    }
 
     /**
      * Get proxy through which URL connections will be made for network links.
