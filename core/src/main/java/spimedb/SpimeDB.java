@@ -82,21 +82,15 @@ public class SpimeDB {
      */
     public static final String TMP_SPIMEDB_CACHE_PATH = "/tmp/spimedb.cache"; //TODO use correct /tmp location per platform (ex: Windows will need somewhere else)
     protected static final CollectorManager<TopScoreDocCollector, TopDocs> firstResultOnly = new CollectorManager<>() {
-
         @Override
         public TopScoreDocCollector newCollector() {
             return TopScoreDocCollector.create(1, 1);
         }
 
-
         @Override
         public TopDocs reduce(Collection<TopScoreDocCollector> collectors) {
             Iterator<TopScoreDocCollector> ii = collectors.iterator();
-            if (ii.hasNext()) {
-                TopScoreDocCollector l = ii.next();
-                return l.topDocs();
-            }
-            return null;
+            return ii.hasNext() ? ii.next().topDocs() : null;
         }
     };
     final static boolean DEBUG = System.getProperty("debug", "false").equals("true");
@@ -372,20 +366,39 @@ public class SpimeDB {
 
     }
 
-    private Document the(String id) {
+    private <X> List<X> getDocument(String[] id, Function<Document,X> f) {
         return withSearcher(searcher -> {
-            TermQuery x = new TermQuery(new Term(NObject.ID, id));
+            Query q;
+            if (id.length == 1)
+                q = new TermQuery(new Term(NObject.ID, id[0]));
+            else {
+                BooleanQuery.Builder bqb = new BooleanQuery.Builder();
+                for (int i = 0; i < id.length; i++)
+                    bqb.add(new TermQuery(new Term(NObject.ID, id[i])), BooleanClause.Occur.SHOULD);
+                q = bqb.build();
+            }
+
             try {
-                TopDocs y = searcher.search(x, firstResultOnly);
+                TopDocs y;
+                if (id.length == 1)
+                    y = searcher.search(q, firstResultOnly);
+                else
+                    y = searcher.search(q, id.length);
+
                 int hits = (int) y.totalHits.value;
                 if (hits > 0) {
-                    if (hits > 1) {
-                        logger.warn("multiple documents with id={} exist: {}", id, y);
+//                    if (hits > 1) {
+//                        logger.warn("multiple documents with id={} exist: {}", id, y);
+//                    }
+                    Lst<X> z = new Lst<>(hits);
+                    for (int i = 0; i < hits; i++) {
+                        Document d = searcher.doc(y.scoreDocs[i].doc);
+                        if (d!=null) z.addFast(f.apply(d));
                     }
-                    return searcher.doc(y.scoreDocs[0].doc);
+                    return z;
                 }
             } catch (IOException e) {
-                logger.error("{}", e);
+                logger.error("getDocument", e);
             }
             return null;
         });
@@ -394,13 +407,12 @@ public class SpimeDB {
     public <X> X withSearcher(Function<IndexSearcher, X> c) {
         IndexSearcher s = searcher();
         try {
-            X result = c.apply(s);
-            return result;
+            return c.apply(s);
         } finally {
             try {
                 searcherMgr.release(s);
             } catch (IOException e) {
-                logger.error("{}", e);
+                logger.error("searchMgr release", e);
             }
         }
     }
@@ -423,7 +435,7 @@ public class SpimeDB {
             //return DirectoryReader.open(writer); //NRT mode
             //return DirectoryReader.indexExists(dir) ? DirectoryReader.open(dir) : null;
         } catch (IOException e) {
-            logger.error("reader open {}", e);
+            logger.error("reader open", e);
             throw new RuntimeException(e);
             //return null;
         }
@@ -437,7 +449,7 @@ public class SpimeDB {
             try {
                 readerMgr.release(r);
             } catch (IOException e) {
-                logger.error("reader close {}", e);
+                logger.error("reader close", e);
             }
         }
     }
@@ -461,10 +473,7 @@ public class SpimeDB {
     @NotNull
     public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
         Lookup s = suggester();
-        if (s == null)
-            return Collections.EMPTY_LIST;
-        else
-            return s.lookup(qText, false, count);
+        return s == null ? Collections.EMPTY_LIST : s.lookup(qText, false, count);
     }
 
     public int size() {
@@ -517,7 +526,7 @@ public class SpimeDB {
                 } while (!out.isEmpty());
 
             } catch (IOException e) {
-                logger.error("indexing error: {}", e);
+                logger.error("indexing error", e);
             } finally {
                 writing.set(false);
                 //logger.debug("{} indexed, {} removed", written, removed);
@@ -572,7 +581,7 @@ public class SpimeDB {
     /**
      * deletes the index and optionally triggers a rebuild
      */
-    public synchronized void clear(boolean rebuild) {
+    public synchronized void clear() {
         exe.pq.clear();
         try {
             exe.exe.awaitTermination(1, TimeUnit.SECONDS);
@@ -690,7 +699,7 @@ public class SpimeDB {
         return run(n.id(), addProcedure(n));
     }
 
-    public NObject merge(@NotNull MutableNObject n) {
+    public NObject merge(MutableNObject n) {
         return run(n.id(), mergeProcedure(n));
     }
 
@@ -806,7 +815,7 @@ public class SpimeDB {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
 
             IntStream.range(0, max).forEach(i -> {
-                Document d = null;
+                Document d;
                 try {
                     d = r.document(i);
                     if (d != null)
@@ -847,10 +856,12 @@ public class SpimeDB {
     }
 
     public DObject get(String i) {
-//        return cache.get(id, (i) -> {
-            Document d = the(i);
-            return d != null ? DObject.get(d) : null;
-//        });
+        List<DObject> l = getDocument(new String[]{i}, DObject::get);
+        return l!=null ? l.get(0) : null;
+    }
+
+    public List<DObject> get(String[] i) {
+        return getDocument(i, DObject::get);
     }
 
 

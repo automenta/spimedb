@@ -56,14 +56,15 @@ public class Server implements HttpModel {
                 send("tag", db.facets(NObject.TAG, 128).labelValues, ws);
             case "getAll" -> {
                 ArrayNode B = (ArrayNode) m.get("id");
-                List<NObject> found = new Lst<>();
-                B.forEach((ID) -> {
-                    String id = ID.asText();
-                    var d = db.get(id);
-                    if (d!=null)
-                        found.add(d);
-                });
-                if (!found.isEmpty())
+                String[] ids = new String[B.size()]; for (int i = 0; i < ids.length; i++)  ids[i] = B.get(i).asText();
+                var found = db.get(ids);
+//                B.forEach((ID) -> {
+//                    String id = ID.asText();
+//                    var d = db.get(id);
+//                    if (d!=null)
+//                        found.add(d);
+//                });
+                if (found!=null)
                     send("full", found, ws);
             }
 
@@ -112,7 +113,7 @@ public class Server implements HttpModel {
     }
 
     private static void send(String type, Object x, WebSocket s) {
-        s.send("{\"" + type + "\":" + JSON.toJSONString(x) + "}");
+        s.send("{\"" + type + "\":" + JSON.toJSONString(x) + "}"); //HACK
     }
 
 //    @Override

@@ -31,7 +31,7 @@ class WorldWindView extends View {
         this.w = w;
 
         //w.pixelScale = 0.5; //lo-res
-        w.deepPicking = true;
+        //w.deepPicking = true;
         //w.camera.fieldOfView = 40;
         //console.error(w);
 
@@ -44,47 +44,50 @@ class WorldWindView extends View {
             if (o.buttons !== 1)
                 return;
 
-            let picked;
-            try {
-                picked = w.pick(w.canvasCoordinates(o.clientX, o.clientY));
-            } catch (e) {
-                console.log(e);
-                return;
-            }
+            setTimeout(()=>{
+                let picked;
+                try {
+                    picked = w.pick(w.canvasCoordinates(o.clientX, o.clientY));
+                } catch (e) {
+                    console.log(e);
+                    return;
+                }
 
-            const picks = picked.objects;
-            //console.log('pick', picks);
+                const picks = picked.objects;
+                //console.log('pick', picks);
 
-            if (picks.length > 0) {
-                const x = picks[picks.length - 1];
-                //_.forEach(picks, x => {
-                if (x.isTerrain) {
-                    //toastr.info("terrain " + x.position);
-                } else {
-                    // if (anim === null) {
-                    //
-                    //     const tgt = new WorldWind.Position().copy(x.userObject.referencePosition);
-                    //     tgt.altitude += 100;
-                    //
-                    //     anim = new WorldWind.GoToAnimator(w);
-                    //     anim.travelTime = 1000;
-                    //     anim.goTo(tgt, () => {
-                    //         anim = null;
-                    //     });
-                    // }
+                if (picks.length > 0) {
+                    const x = picks[picks.length - 1];
+                    //_.forEach(picks, x => {
+                    if (x.isTerrain) {
+                        //toastr.info("terrain " + x.position);
+                    } else {
+                        // if (anim === null) {
+                        //
+                        //     const tgt = new WorldWind.Position().copy(x.userObject.referencePosition);
+                        //     tgt.altitude += 100;
+                        //
+                        //     anim = new WorldWind.GoToAnimator(w);
+                        //     anim.travelTime = 1000;
+                        //     anim.goTo(tgt, () => {
+                        //         anim = null;
+                        //     });
+                        // }
 
-                    if (x.userObject) {
-                        if (x.userObject.nobject) {
-                            console.log('pick', x.userObject.nobject);
+                        if (x.userObject) {
+                            if (x.userObject.nobject) {
+                                console.log('pick', x.userObject.nobject);
+                            }
                         }
+
+                        // const concept = x.userObject.userProperties.concept || x.userObject.displayName;
+                        // toastr.info(JSON.stringify(concept), {
+                        //     closeButton: true
+                        // });
                     }
 
-                    // const concept = x.userObject.userProperties.concept || x.userObject.displayName;
-                    // toastr.info(JSON.stringify(concept), {
-                    //     closeButton: true
-                    // });
                 }
-            }
+            }, 0);
             // _.forEach(picks, p => {
             //     const o = p.userObject;
             //     o.highlighted = true;
@@ -101,12 +104,12 @@ class WorldWindView extends View {
 
         let lastCam = undefined;
         window.setInterval(() => {
-            const cam = this.w.camera.clone();
+            const cam = this.w.camera;
             if (!cam.equals(lastCam)) {
                 focus.event.emit('view_change', cam);
                 //console.log(cam);
+                lastCam = cam.clone();
             }
-            lastCam = cam;
         }, 50);
 
         return this;
