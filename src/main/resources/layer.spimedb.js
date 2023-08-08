@@ -146,7 +146,7 @@ class SpimeDBLayer extends GeoLayer {
 
         this.socket = new WebSocket(this.url);
         this.socket.onopen = () => {
-            setTimeout(()=>{
+            //setTimeout(()=>{
                 if (!this.view_change) {
                     this.view_change = f.event.on('view_change', _.debounce(() => {
                         //setTimeout(()=> {
@@ -157,7 +157,7 @@ class SpimeDBLayer extends GeoLayer {
 
                 this.socket.send("{'_':'tag'}");
                 this._update(f);
-            }, 0);
+            //}, 0);
         };
         // socket.addEventListener('close', closeConnection);
         this.socket.onmessage = (x) => {
@@ -171,7 +171,7 @@ class SpimeDBLayer extends GeoLayer {
             else
                 console.warn('unknown message', d);
         };
-        this.socket.onclose = (e) => {
+        this.socket.onclose = () => {
             this.close();
         };
         this.socket.onerror = (e) => {
@@ -188,7 +188,7 @@ class SpimeDBLayer extends GeoLayer {
             v.visible = false;
         });
 
-        const needFull = [];
+        const need = [];
 
         for (const x of xx) {
             const X = this.cache.get(x);
@@ -196,11 +196,14 @@ class SpimeDBLayer extends GeoLayer {
                 X.visible = true;
                 this.active.set(x, X);
             } else {
-                needFull.push(x);
+                need.push(x);
             }
         }
-        if (needFull.length > 0) {
-            this.socket.send('{"_":"getAll", "id":' + JSON.stringify(needFull, null) + '}');
+        if (need.length > 0) {
+            this.socket.send(
+                JSON.stringify({"_":"getAll",id:need}, null)
+                //'{"_":"getAll", "id":' + JSON.stringify(need, null) + '}'
+            );
         } else {
             this.addAll([], f); //just commit
         }
@@ -211,7 +214,7 @@ class SpimeDBLayer extends GeoLayer {
 
         const renderables = [];
 
-        for (var i of d) {
+        for (const i of d) {
             //INSTANTIATE:
             //console.log(i);
             // const prev = this.cache.get(i.I);
@@ -284,19 +287,22 @@ class SpimeDBLayer extends GeoLayer {
             this.active.set(i.I, i);
         }
         this.active.forEach((v,k) => {
-           this.enable(k, v, renderables);
-        });
-        this.active.forEach((v, k) => {
-            if (!v.visible) {
+            if (v.visible) {
+                if (v.hidden) {
+                    //reactivate
+                    delete v.hidden;
+                    renderables.push(v.renderable);
+                }
+            } else {
                 if (this.active.delete(k)) {
                     if (v.renderable) {
                         this.layer.removeRenderable(v.renderable);
-                        v.renderableOff = true;
-                        //delete v.renderable;
+                        v.hidden = true;
                     }
                 }
             }
         });
+
         for (const r of renderables) {
             this.layer.addRenderable(r);
         }
@@ -305,17 +311,6 @@ class SpimeDBLayer extends GeoLayer {
         f.view.redraw();
     }
 
-    enable(i, x, renderables) {
-        //exists, keep
-        //TODO check for difference?
-        if (x.visible) {
-            if (x.renderableOff) {
-                //reactivate
-                delete x.renderableOff;
-                renderables.push(x.renderable);
-            }
-        }
-    }
 
     close() {
         this.socket.close();

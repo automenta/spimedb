@@ -44,7 +44,7 @@ class WorldWindView extends View {
             if (o.buttons !== 1)
                 return;
 
-            setTimeout(()=>{
+            //s(()=>{
                 let picked;
                 try {
                     picked = w.pick(w.canvasCoordinates(o.clientX, o.clientY));
@@ -87,7 +87,8 @@ class WorldWindView extends View {
                     }
 
                 }
-            }, 0);
+            //}, 0);
+
             // _.forEach(picks, p => {
             //     const o = p.userObject;
             //     o.highlighted = true;

@@ -42,13 +42,13 @@ class HomeLayer extends Layer {
     }
 
     go(focus) {
-        setTimeout(()=>{
+        //setTimeout(()=>{
             const pos = this.pos;
             console.log('go', pos);
             if (pos) {
                 focus.position(pos.latitude, pos.longitude, pos.altitude);
                 focus.view.redraw();
             }
-        });
+        //});
     }
 }
