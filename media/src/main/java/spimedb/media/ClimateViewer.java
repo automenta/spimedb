@@ -37,6 +37,12 @@ public class ClimateViewer {
         kml("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz",
                 (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"), server);
 
+        new OpenStreetMaps(server.db).load(
+                //-23, -43.0995, -22.9995, -43.1
+                -74.00542,40.71753,-73.99434,40.71946
+                //-23, -43.1, -22.999, -43.099
+        );
+
         //server.db.sync(50);
         //server.db.forEach(System.out::println);
         //System.out.println("db size=" + server.db.size());

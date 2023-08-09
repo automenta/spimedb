@@ -1,5 +1,6 @@
 package spimedb.media;
 
+import de.westnordost.osmapi.map.data.LatLon;
 import jcog.Util;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
@@ -26,21 +27,29 @@ public class GeoNObject extends MutableNObject {
     }
 
     public NObject where(Geodetic2DPoint c) {
-
-        min.coord[1] = max.coord[1] = c.getLongitudeAsDegrees();
-        min.coord[2] = max.coord[2] = c.getLatitudeAsDegrees();
-
-        if (c instanceof Geodetic3DPoint g3) {
-            min.coord[3] = max.coord[3] = g3.getElevation();
-        } else {
-            min.coord[3] = Float.NEGATIVE_INFINITY;
-            max.coord[3] = Float.POSITIVE_INFINITY;
-        }
-
-        //put("g" + NObject.POINT, )
-
+        double ele = c instanceof Geodetic3DPoint g3 ? g3.getElevation() : Double.NaN;
+        where(c.getLongitudeAsDegrees(), c.getLatitudeAsDegrees(), ele);
         return this;
     }
+
+//    public NObject where(double lat, double lon, double ele) {
+//
+//        min.coord[1] = max.coord[1] = lat;
+//        min.coord[2] = max.coord[2] = lon;
+//
+//        if (ele == ele)
+//            min.coord[3] = max.coord[3] = ele;
+//        else {
+//            min.coord[3] = Double.NEGATIVE_INFINITY;
+//            max.coord[3] = Double.POSITIVE_INFINITY;
+//        }
+//
+//
+//
+//        //put("g" + NObject.POINT, )
+//
+//        return this;
+//    }
 
     public NObject where(Longitude AX, Longitude BX, Latitude AY, Latitude BY) {
 
@@ -90,9 +99,18 @@ public class GeoNObject extends MutableNObject {
         where(bb.getEastLon(), bb.getWestLon(), bb.getSouthLat(), bb.getNorthLat());
     }
 
+    private static double[][] toArrayGeoJSON2(List<LatLon> lp) {
+        double[][] points = new double[lp.size()][2];
+        for (int i = 0; i < points.length; i++) {
+            var c = lp.get(i);
+            double[] pi = points[i];
+            pi[0] = c.getLatitude();
+            pi[1] = c.getLongitude();
+        }
+        return points;
+    }
     private static double[][] toArrayGeoJSON(List<LngLatAlt> lp) {
         double[][] points = new double[lp.size()][2];
-
         for (int i = 0; i < points.length; i++) {
             var c = lp.get(i);
             double[] pi = points[i];
@@ -130,6 +148,14 @@ public class GeoNObject extends MutableNObject {
         return this;
     }
 
+    public NObject where(List<LatLon> _points, boolean polygon) {
+        var points = toArrayGeoJSON2(_points);
+        double[] bb = bounds(points);
+        where(bb[0], bb[1], bb[2], bb[3]);
+        put(polygon ? NObject.POLYGON : NObject.LINESTRING, points);
+        return this;
+    }
+
     /** TODO handle inner rings? */
     public NObject where(Polygon p) {
         double[][] outerRing = toArray(p.getOuterRing().getPoints());
@@ -137,6 +163,7 @@ public class GeoNObject extends MutableNObject {
         put(NObject.POLYGON, outerRing);
         return this;
     }
+
     /** TODO handle inner rings? */
     public NObject where(org.geojson.Polygon p) {
         var outerRing = toArrayGeoJSON(p.getExteriorRing());

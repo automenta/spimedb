@@ -36,3 +36,10 @@ class View {
 
     }
 }
+
+function winbox(title, w) {
+    const b = new WinBox(title, {
+        //modal: true,
+    });
+    b.body.appendChild(w[0]);
+}

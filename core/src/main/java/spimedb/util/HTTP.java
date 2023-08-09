@@ -1,8 +1,7 @@
 package spimedb.util;
 
-import okhttp3.Cache;
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
+import okhttp3.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,9 +42,21 @@ public class HTTP {
 
 
     public static InputStream inputStream(String url) throws IOException {
-        var request = new okhttp3.Request.Builder()
-                .url(url)
-                .build();
+        return inputStream(url, null);
+    }
+
+    public static InputStream inputStream(String url, @Nullable String post) throws IOException {
+        Request.Builder rb = new Request.Builder().url(url);
+
+        if (post!=null) {
+            //POST
+            RequestBody b = RequestBody.create(post, MediaType.get("text/json"));
+            rb.post(b);
+        } else {
+            //GET
+        }
+
+        var request = rb.build();
 
         Response response = client.newCall(request).execute();
         //try () {

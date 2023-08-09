@@ -180,7 +180,20 @@ class SpimeDBLayer extends GeoLayer {
     }
 
     tag(tags, f) {
-        console.log(tags);
+        //console.log(tags);
+        const w = $('<div>').css({
+            'position': 'fixed',
+            'margin': '4%',
+            'width': '80%',
+            'max-height': '80%',
+            'overflow': 'auto',
+            'background-color': 'black',
+            'color': 'orange'
+        });
+        for (const t of tags)
+            w.append($('<div>').text(JSON.stringify(t)));
+
+        winbox("Tags", w);
     }
 
     addAllID(xx, f) {
@@ -234,26 +247,42 @@ class SpimeDBLayer extends GeoLayer {
             //     1.0);
             // cfg.attributes.outlineWidth = 2.0;
 
-            if (i["g-"]) {
-                //path
-                //const pathPositions = _.map(i["g-"], p => new WorldWind.Position(p[0], p[1], 100 /* TODO */));
-                // const path = new WorldWind.Path(pathPositions, null);
-                // path.altitudeMode = WorldWind.RELATIVE_TO_GROUND; // The path's altitude stays relative to the terrain's altitude.
-                // path.followTerrain = true;
-                // path.extrude = false; // Make it a curtain.
-                // path.useSurfaceShapeFor2D = false; // Use a surface shape in 2D mode.
-                // this.layer.addRenderable(i.renderable = path);
-
-                const pathPositions = _.map(i["g-"], p => new WorldWind.Location(p[0], p[1], 0 /* TODO */));
-                const path = new WorldWind.SurfacePolyline(pathPositions, null);
+            if (i["g*"]) {
+                //POLYGON
+                // const pathPositions = _.map(i["g*"], p => new WorldWind.Location(p[0], p[1], 1 /* TODO */));
+                // const p = new WorldWind.SurfacePolygon(pathPositions, null);
+                const pathPositions = _.map(i["g*"], p => new WorldWind.Position(p[0], p[1], 1 /* TODO */));
+                const p = new WorldWind.Polygon(pathPositions, null);
+                p.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
+                //p.altitudeMode = WorldWind.CLAMP_TO_GROUND;
                 //path.attributes.extrude = true;
-                path.attributes.drawInterior = false;
-                path.attributes.drawOutline = true;
-                path.attributes.outlineWidth = 5;
-                path.attributes.outlineColor = new WorldWind.Color(1, 0, 1, 0.75);
+                p.attributes.drawInterior = true;
+                p.attributes.drawOutline = false;
+                p.attributes.interiorColor = new WorldWind.Color(1, 0.5, 0, 0.9);
+                p.nobject = i; renderables.push(i.renderable = p);
+            } else if (i["g-"]) {
+                //LINESTRING (path)
+
+                const pathPositions = _.map(i["g-"], p => new WorldWind.Position(p[0], p[1], 1 /* TODO */));
+                const p = new WorldWind.Path(pathPositions, null);
+
+                //p.altitudeMode = WorldWind.RELATIVE_TO_GROUND; // The path's altitude stays relative to the terrain's altitude.
+                p.altitudeMode = WorldWind.CLAMP_TO_GROUND;
+
+                p.followTerrain = true;
+                p.extrude = false; // Make it a curtain.
+                p.useSurfaceShapeFor2D = false; // Use a surface shape in 2D mode.
+
+                // const pathPositions = _.map(i["g-"], p => new WorldWind.Location(p[0], p[1], 0 /* TODO */));
+                // const p = new WorldWind.SurfacePolyline(pathPositions, null);
+                // //path.attributes.extrude = true;
+                // p.attributes.drawInterior = false;
+                // p.attributes.drawOutline = true;
+                p.attributes.outlineWidth = 5;
+                // p.attributes.outlineColor = new WorldWind.Color(1, 0, 1, 0.75);
 
 
-                path.nobject = i; renderables.push(i.renderable = path);
+                p.nobject = i; renderables.push(i.renderable = p);
 
 
             } else if (i["@"]) {
@@ -261,13 +290,13 @@ class SpimeDBLayer extends GeoLayer {
                 const ii = i["@"];
                 const pos = new WorldWind.Position(ii[2], ii[1], ii[3]);
 
-                const point = new WorldWind.Placemark(pos);
+                const p = new WorldWind.Placemark(pos);
                 if (i.N)
-                    point.label = i.N;
+                    p.label = i.N;
                 // else if (i['>'])
                 //     point.label = i[">"];
 
-                point.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
+                p.altitudeMode = WorldWind.RELATIVE_TO_GROUND;
 
 
                 const placemarkAttributes = new WorldWind.PlacemarkAttributes(null);
@@ -277,9 +306,9 @@ class SpimeDBLayer extends GeoLayer {
                 //     WorldWind.OFFSET_FRACTION, 0.5,
                 //     WorldWind.OFFSET_FRACTION, 1.5);
                 placemarkAttributes.imageSource = WorldWind.configuration.baseUrl + "images/white-dot.png";
-                point.attributes = placemarkAttributes;
+                p.attributes = placemarkAttributes;
 
-                point.nobject = i; renderables.push(i.renderable = point);
+                p.nobject = i; renderables.push(i.renderable = p);
             } else {
                 console.error("unhandled geometry type: ", i);
             }
