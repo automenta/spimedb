@@ -16,6 +16,10 @@ body {
     /*transition: 0.25s;*/
 }
 
+.wb-body {
+    color: black;
+}
+
 #overlay {
     height: 100%;
     width: 100%;

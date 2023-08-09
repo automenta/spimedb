@@ -279,7 +279,7 @@ class SpimeDBLayer extends GeoLayer {
                 // p.attributes.drawInterior = false;
                 // p.attributes.drawOutline = true;
                 p.attributes.outlineWidth = 5;
-                // p.attributes.outlineColor = new WorldWind.Color(1, 0, 1, 0.75);
+                p.attributes.outlineColor = new WorldWind.Color(1, 0, 1, 0.75);
 
 
                 p.nobject = i; renderables.push(i.renderable = p);
@@ -290,7 +290,7 @@ class SpimeDBLayer extends GeoLayer {
                 const ii = i["@"];
                 const pos = new WorldWind.Position(ii[2], ii[1], ii[3]);
 
-                const p = new WorldWind.Placemark(pos);
+                const p = new WorldWind.Placemark(pos, true);
                 if (i.N)
                     p.label = i.N;
                 // else if (i['>'])
@@ -300,7 +300,7 @@ class SpimeDBLayer extends GeoLayer {
 
 
                 const placemarkAttributes = new WorldWind.PlacemarkAttributes(null);
-                placemarkAttributes.imageScale = 1;
+                placemarkAttributes.imageScale = 0.5;
                 placemarkAttributes.imageColor = new WorldWind.Color(1, 0, 0, 0.5);
                 // placemarkAttributes.labelAttributes.offset = new WorldWind.Offset(
                 //     WorldWind.OFFSET_FRACTION, 0.5,
