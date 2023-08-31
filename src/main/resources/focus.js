@@ -150,29 +150,43 @@ class Focus {
         for (const ff of f) {
             this.ele.append(this.tagIcon(ff));
         }
+        this.event.emit('attn_change');
     }
 
-    get() {
+    /** produces a snapshot state of the focus */
+    getFocus() {
         const y = [];
         this.ele.children().each((i,e) => {
-           const ee = $(e).data().get();
-           if (ee)
-               y.push(ee);
+            const yy = $(e).data().get();
+            if (yy)
+                y.push(yy);
         });
         return y;
     }
 
+    /** infers all relevant tags in the focus */
+    getFocusTags() {
+        const f = this.getFocus();
+        const t = new Set();
+        _.forEach(f, (K, v) => {
+            const k = K.id;
+            t.add(k);
+            graphologyLibrary.traversal.dfsFromNode(this.attn, k, (_v, v) => {
+                //console.log(_n, x, _v, v);
+                //const xi = v.instance;
+                t.add(_v);
+            });
+        });
+        return Array.from(t);
+    }
+
     clear() {
         this.setFocus(
-            //['','']
-            ['eat','way','']
+            ['']
+            //['eat','way','']
         );
-        // this.ele.empty();
-        // const n = 10;
-        // for (var i = 0; i < n; i++) {
-        //     this.ele.append(this.tagIcon());
-        // }
     }
+
     // graphView(elementID) {
     //     //TODO
     //     const v = cytoscape({
@@ -210,39 +224,79 @@ class Focus {
     //     return v;
     // }
 
+    changed() {
+        this.event.emit('attn_change');
+    }
+
     tagIcon(idInitial) {
         const x = $('<div>').addClass('label buttonlike');
-        const xx = $('<div>');
+        const xx = $('<div>').css({'text-align': 'center'});
         const i = $('<input type="text">');
 
-        if (idInitial) i.val(idInitial); //HACK
+        if (idInitial) i.val(typeof(idInitial)==="string" ? idInitial : idInitial.id); //HACK
 
         const enableButton = $('<input type="checkbox">');
-
-        function disable() {
-            xx.empty();
-            enableButton.hide();
-        }
-        function enable() {
-            xx.empty();
-            xx.append('<input type="range" min="-10" max="10" value="0">');
-            enableButton.show();
-        }
+        enableButton.change(()=>{
+            this.changed();
+        });
 
         let ID = null;
+        let state = idInitial.state ? idInitial.state : {};
+
+        const disable = () => {
+            xx.empty();
+            enableButton.hide();
+        };
+
+        const enable = () => {
+            xx.empty();
+            const s = this.addSlider(xx, "want", 'frown-o', 'smile-o', state);
+            s.change(()=>{
+                const v = s.val()/10.0;
+                let r, g;
+                const a = Math.abs(v) * 0.1 /* max opacity */;
+                const b = 0;
+                if (v < 0) {
+                    r = -v; g = 0;
+                } else {
+                    g = +v; r = 0;
+                }
+                x.css({'background-color': 'rgba(' + (r * 256) + ',' + (g * 256) +',' + (b * 256) + ',' + a + ')'});
+            });
+            enableButton.show();
+        };
+
         const X = {
 
-            get: () => ID,
-            set: t => {
-                if (ID===t) return; //same
-                if (!this.attn.hasNode(t)) {
-                    disable();
-                } else {
-                    enableButton.prop('checked', true);
-                    enable();
+            get: () => { return enableButton.prop('checked') ? { 'id': (ID || ''), 'state': state } : null; },
+
+            set: T => {
+                const t = T.id ? T.id : T;
+                let changed = false;
+                if (ID!==t) {
+                    if (!this.attn.hasNode(t)) {
+                        disable();
+                    } else {
+                        enableButton.prop('checked', true);
+                        enable();
+                    }
+                    ID = t;
+                    i[0].textContent = t;
+                    changed = true;
                 }
-                ID = t;
-                i[0].textContent = t;
+                const s = T.id ? T.state : null;
+                //TODO other dimensions
+                if (s && s.want) {
+                    const nextVal = s.want * 10 /* steps */;
+                    const sv = slider.val();
+                    if (sv !== nextVal) {
+                        slider.val(nextVal);
+                        changed = true;
+                    }
+                }
+
+                if (changed)
+                    this.changed();
             }
         };
         x.data(X);
@@ -271,6 +325,31 @@ class Focus {
         });
 
         return x;
+    }
+
+    addSlider(tgt, dimension, iconMin, iconMax, state) {
+        const steps = 10;
+        const slider = $('<input type="range" min="-' + steps + '" max="' + steps + '" value="0">');
+
+        if (state[dimension]) {
+            //initialize
+            slider.val(state[dimension] * steps);
+        }
+        slider.change(() => {
+            const v = slider.val()/steps;
+            if (v)
+                state[dimension] = v;
+            else
+                delete state.dimension;
+
+            this.changed();
+        });
+        tgt.append(
+            '<a title="No"><i class="fa fa-' + iconMin + '"></i></a>',
+            slider,
+            '<a title="Yes"><i class="fa fa-' + iconMax + '"></i></a>'
+        );
+        return slider;
     }
 
     /** spreading activation iteration */

@@ -154,7 +154,7 @@ body:not(.sideExpanded) .side #active {
 
 .buttonlike {
     cursor: pointer;
-    color: white;
+
     /*background-color: black;*/
     min-height: 1em;
     min-width: 1em;
@@ -163,12 +163,10 @@ body:not(.sideExpanded) .side #active {
 }
 
 .buttonlike:hover {
-    color: darkorange;
     border-color: orange;
 }
 
 .buttonlike:active {
-    color: gold;
     border-color: gold;
 }
 
@@ -193,8 +191,8 @@ body:not(.sideExpanded) .side #active {
 }
 
 #sidebar {
-    width: 25%;
-    height: 100%;
+    max-width: 25%;
+    max-height: 100%;
     left: 0%;
     top: 0%;
     position: fixed;
