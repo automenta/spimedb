@@ -1,5 +1,6 @@
+"use strict";
 class Menu /* extends View */ {
-    
+
     constructor(elementID) {
         this.ele = $("#" + elementID);
         //$.sidebarMenu(this.ele);
@@ -45,4 +46,6 @@ class Menu /* extends View */ {
 
         this.ele.append($('<div>').addClass('cell').append(i));
     }
+
+
 }

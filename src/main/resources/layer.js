@@ -5,9 +5,9 @@ class Layer {
     }
 
     start(focus) {
-        const e = this.icon = $('<div>');
-        e.attr('class', 'cell').append(this.layerIcon(focus));
-        $('#menu').append(e);
+        // const e = this.icon = $('<div>');
+        // e.attr('class', 'cell').append(this.layerIcon(focus));
+        // $('#menu').append(e);
         this.enabled = this.enabled; //force update
     }
 
@@ -51,8 +51,7 @@ class Layer {
         return this;
     }
 
-    /* produce an element for display in list */
-    layerIcon(focus) {
-        return $('<button>').text(this.name);
-    }
+    // layerIcon(focus) {
+    //     return $('<button>').text(this.name);
+    // }
 }

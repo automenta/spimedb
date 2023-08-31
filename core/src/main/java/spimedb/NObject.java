@@ -98,11 +98,8 @@ public interface NObject extends Serializable {
 
     default boolean equalsDeep(NObject n) {
         //TODO more efficient comparison
-
         return toString().equals(n.toString());
-        //return toString().equals(n.toString());
     }
-
 
     static MutableNObject fromJSON(String json) throws IOException {
         JsonNode x = JSON.fromJSON(json, JsonNode.class);
@@ -114,9 +111,8 @@ public interface NObject extends Serializable {
         x.fields().forEachRemaining(e -> {
             String k = e.getKey();
 
-            if (k.equals(ID)) {
+            if (k.equals(ID))
                 return; //ID already processed
-            }
 
             JsonNode v = e.getValue();
             Object w = v;
@@ -137,23 +133,21 @@ public interface NObject extends Serializable {
         @Override
         public void serialize(NObject o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
             jsonGenerator.writeStartObject();
-            {
 
-                jsonGenerator.writeStringField(ID, o.id());
+            jsonGenerator.writeStringField(ID, o.id());
 
-                o.forEach((fieldName, pojo) -> {
-                    if (pojo == null)
-                        return;
-                    try {
-                        jsonGenerator.writeObjectField(fieldName, pojo);
-                    } catch (IOException e) {
-                        //e.printStackTrace();
-                    }
-                });
+            o.forEach((fieldName, pojo) -> {
+                if (pojo == null)
+                    return;
+                try {
+                    jsonGenerator.writeObjectField(fieldName, pojo);
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            });
 
-                writeBounds(o, jsonGenerator);
+            writeBounds(o, jsonGenerator);
 
-            }
             jsonGenerator.writeEndObject();
         }
 

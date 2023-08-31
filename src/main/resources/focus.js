@@ -1,17 +1,20 @@
 "use strict";
 class Focus {
 
-    constructor() {
+    constructor(attnElementID) {
         this.layers = [];
         /* DEPRECATED */
         this.view = null;
 
-        this.tree = new RBush();
+        //this.tree = new RBush();
+
+
+        this.ele = $("#" + attnElementID);
 
         this.event = new window.mitt();
 
         const attn = new graphology.Graph({multi: true, allowSelfLoops: false, type: 'directed'});
-        attn.attnUpdated = ()=>{};
+        //attn.attnUpdated = ()=>{};
 
         // attn.attnUpdated = _.throttle(() => {
         //
@@ -138,8 +141,38 @@ class Focus {
         this.link('happy_hours', 'eat');
         this.link('outdoor_seating', 'eat');
 
+        this.clear();
+
     }
 
+    setFocus(f) {
+        this.ele.empty();
+        for (const ff of f) {
+            this.ele.append(this.tagIcon(ff));
+        }
+    }
+
+    get() {
+        const y = [];
+        this.ele.children().each((i,e) => {
+           const ee = $(e).data().get();
+           if (ee)
+               y.push(ee);
+        });
+        return y;
+    }
+
+    clear() {
+        this.setFocus(
+            //['','']
+            ['eat','way','']
+        );
+        // this.ele.empty();
+        // const n = 10;
+        // for (var i = 0; i < n; i++) {
+        //     this.ele.append(this.tagIcon());
+        // }
+    }
     // graphView(elementID) {
     //     //TODO
     //     const v = cytoscape({
@@ -176,6 +209,69 @@ class Focus {
     //     v.domNode();
     //     return v;
     // }
+
+    tagIcon(idInitial) {
+        const x = $('<div>').addClass('label buttonlike');
+        const xx = $('<div>');
+        const i = $('<input type="text">');
+
+        if (idInitial) i.val(idInitial); //HACK
+
+        const enableButton = $('<input type="checkbox">');
+
+        function disable() {
+            xx.empty();
+            enableButton.hide();
+        }
+        function enable() {
+            xx.empty();
+            xx.append('<input type="range" min="-10" max="10" value="0">');
+            enableButton.show();
+        }
+
+        let ID = null;
+        const X = {
+
+            get: () => ID,
+            set: t => {
+                if (ID===t) return; //same
+                if (!this.attn.hasNode(t)) {
+                    disable();
+                } else {
+                    enableButton.prop('checked', true);
+                    enable();
+                }
+                ID = t;
+                i[0].textContent = t;
+            }
+        };
+        x.data(X);
+
+        i.autocomplete({
+            lookup: (query, done) => {
+                const result = { suggestions: [] };
+                this.attn.forEachNode((id, attributes) => {
+                    if (id.indexOf(query)!==-1)
+                        result.suggestions.push( { "value": id });
+                });
+                done(result);
+            },
+            onSelect: t => {
+                X.set(t.value);
+            }
+        });
+
+        //TODO class
+
+        x.append(i, enableButton, xx);
+
+        X.set(i.val()); //init
+        i.change(()=>{
+            X.set(i.val());
+        });
+
+        return x;
+    }
 
     /** spreading activation iteration */
     _update() {
@@ -452,19 +548,6 @@ class Focus {
         return true;
     }
 
-    nodeDiv(x) {
-        return $(document.createElement("div")).append(x, this.interestIcon(x, () => 1));
-        //$(div).append($('<button>').text('+'), $('<button>').text('-'));
-
-        //$(div).append($('<a>').text(id));
-        //$(div).click(()=>{console.log(this);});
-
-        //div.classList = ['my-cy-node'];
-        //div.style.width = `${Math.floor(Math.random() * 40) + 60}px`;
-        //div.style.height = `${Math.floor(Math.random() * 30) + 50}px`;
-        //div.style.opacity = 0.5;
-        //div.style.margin = '10px';
-    }
 
      addLayer(layer) {
         this.layers.push(layer);
@@ -485,27 +568,5 @@ class Focus {
         layer.stop(this);
     }
 
-    updateMenu(m) {
-        this.attn.forEachNode((id, attributes) => {
-            if (this.attn.inDegree(id) <= 0) {
 
-                // console.log(id);
-
-                m.addMenu(id, () => {
-                    const d = $('<div>');
-
-                    d.append(this.interestIcon(id));
-
-                    // //TODO hierarchical, not flattened:
-                    graphologyLibrary.traversal.dfsFromNode(this.attn, id, (s, attr, depth) => {
-                        if (id!==s && this.attn.outDegree(s) > 1) {
-                            d.append(this.interestIcon(s));
-                        }
-                    });
-
-                    return d;
-                });
-            }
-        });
-    }
 }

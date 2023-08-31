@@ -86,11 +86,6 @@ class WorldWindView extends View {
                                 winbox(y.I, d);
                             }
                         }
-
-                        // const concept = x.userObject.userProperties.concept || x.userObject.displayName;
-                        // toastr.info(JSON.stringify(concept), {
-                        //     closeButton: true
-                        // });
                     }
 
                 }

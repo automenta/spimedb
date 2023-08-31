@@ -8,7 +8,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js" type="text/javascript"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/worldwindjs@latest/build/dist/worldwind.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/worldwindjs@latest/build/dist/worldwind.min.js"
+            type="text/javascript"></script>
+
+    <!-- https://github.com/olifolkerd/tabulator -->
+    <link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+
+    <!--    &lt;!&ndash; https://datatables.net/extensions/index &ndash;&gt;-->
+    <!--    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>-->
+    <!--    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>-->
 
     <!--
     OSM Tags
@@ -33,9 +42,9 @@
 
 
     <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js"-->
-<!--            type="text/javascript"></script>-->
-<!--    &lt;!&ndash;    <script src="https://cdn.skypack.dev/cytoscape-dom-node"></script>&ndash;&gt;-->
-<!--    <script src="cytoscape-dom-node.js"></script>-->
+    <!--            type="text/javascript"></script>-->
+    <!--    &lt;!&ndash;    <script src="https://cdn.skypack.dev/cytoscape-dom-node"></script>&ndash;&gt;-->
+    <!--    <script src="cytoscape-dom-node.js"></script>-->
 
     <!-- https://hildjj.github.io/node-cbor/index.html -->
     <script src="https://unpkg.com/cbor-web"></script>
@@ -46,7 +55,7 @@
     <!--    <script src='https://meet.jit.si/external_api.js'></script>-->
 
     <!-- https://github.com/SaneMethod/jquery-ajax-localstorage-cache#usage -->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-localstorage-cache/2.0.1/jalc.min.js"></script>-->
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-localstorage-cache/2.0.1/jalc.min.js"></script>-->
 
     <!-- https://github.com/developit/mitt#usage -->
     <script src="https://unpkg.com/mitt/dist/mitt.umd.js"></script>
@@ -70,7 +79,8 @@
 
     <script src="comm.js" type="text/javascript"></script>
 
-    <script src="sidebarmenu.js" type="text/javascript"></script><link rel="stylesheet" href="sidebarmenu.css"/>
+    <script src="sidebarmenu.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="sidebarmenu.css"/>
 
     <script src="menu.js" type="text/javascript"></script>
 
@@ -86,32 +96,33 @@
 
     <link rel="stylesheet" href="index.css"/>
 
+    <!-- https://github.com/kraaden/autocomplete#getting-started -->
+    <script src="https://kraaden.github.io/autocomplete/autocomplete.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://kraaden.github.io/autocomplete/autocomplete.css">
+
+
+    <script src="lib/jquery.autocomplete.min.js"></script>
+
 </head>
 
 <body>
 
-
-<div id="menu">
-<!--    <ul id="menu" class="sidebar-menu">-->
-<!--        <li style="display:inline-flex">-->
-<!--            <div title="map" class="buttonlike">-->
-<!--                <i class="fa fa-map-marker"></i>-->
-<!--            </div>-->
-<!--            <div title="time" class="buttonlike">-->
-<!--                <i class="fa fa-calendar-check-o"></i>-->
-<!--            </div>-->
-<!--            <div title="graph" class="buttonlike">-->
-<!--                <i class="fa fa-cubes"></i>-->
-<!--            </div>-->
-<!--            <div title="comm" class="buttonlike">-->
-<!--                <i class="fa fa-comment"></i>-->
-<!--            </div>-->
-<!--        </li>-->
-<!--        <li style="display:inline-flex">-->
-<!--            <div id="layers">-->
-<!--            </div>-->
-<!--        </li>-->
-<!--    </ul>-->
+<!-- <div id="options_button" class="hud_button">
+    <i class="fa fa-cogs" aria-hidden="true"></i>
+</div> -->
+<div id="sidebar">
+    <div id="meta">
+        <a title="Load"><i class="fa fa-folder-open"></i></a>
+        <a title="Save"><i class="fa fa-save"></i></a>
+        <a title="Share"><i class="fa fa-share-alt"></i></a>
+        <a title="Dump"><i class="fa fa-print"></i></a>
+        <a title="Clear"><i class="fa fa-eraser"></i></a>
+        <a title="Options"><i class="fa fa-cog"></i></a>
+    </div>
+    <div id="status">
+    </div>
+    <div id="menu">
+    </div>
 </div>
 
 
@@ -132,23 +143,22 @@
 <!--</div>-->
 
 
-<!--<div id="menu2" class="modal" style="display:none">-->
-<!--    <div id="side_toggle" title="add" class="buttonlike">X</div>-->
-<!--    <div id="addmenu_toggle" title="add" class="buttonlike">+</div>-->
-<!--    &lt;!&ndash;        <div id="remembermenu_toggle" title="remember" class="buttonlike">s</div>&ndash;&gt;-->
-<!--</div>-->
-
 <script>
     "use strict";
     window.addEventListener('load', (e) => {
 
-        const f = new Focus();
+        const f = new Focus('menu');
 
         new WorldWindView().start($('body'), f);
 
         //TODO w.clearLayers()
         f.addLayer(new HomeLayer());
         f.addLayer(new GeoLayer("Atmosphere", new WorldWind.AtmosphereLayer()).disable());
+        f.addLayer(new GeoLayer("OSM Map", new WorldWind.OpenStreetMapImageLayer())/*.opacity(0.5)*/);
+        //f.addLayer(new GeoLayer("Satellite", new WorldWind.BingAerialWithLabelsLayer()).disable());
+
+        //f.addLayer(new WWLayer("BMGNOne", new WorldWind.BMNGOneImageLayer()).disable());
+
         //f.addLayer(new GeoLayer("View Controls", new WorldWind.ViewControlsLayer(w)).disable());
         //view.addLayer(new WorldWind.CompassLayer());
         //view.addLayer(new WorldWind.CoordinatesDisplayLayer(wwd));
@@ -170,20 +180,34 @@
         // ).disable());
         //f.addLayer(new KMLLayer("AirNow Air Quality Index (current)", "http://files.airnowtech.org/airnow/today/airnow_conditions.kml").disable());
 
-        f.addLayer(new GeoLayer("OSM Map", new WorldWind.OpenStreetMapImageLayer())/*.opacity(0.5)*/);
-        //f.addLayer(new GeoLayer("Satellite", new WorldWind.BingAerialWithLabelsLayer()).disable());
-
-        //f.addLayer(new WWLayer("BMGNOne", new WorldWind.BMNGOneImageLayer()).disable());
 
         //f.addLayer(new OSMNodeLayer(f));
 
-        const m = new Menu("menu");
-        f.event.on('graph_change', _.throttle(()=>{
-            f.updateMenu(m);
+        f.event.on('graph_change', _.throttle(() => {
+
         }, 500));
-        f.event.on('view_change', _.throttle(()=>{
+        f.event.on('view_change', _.throttle(() => {
             //TODO
         }, 100));
+
+        $('a[title=Load]').click(() => {
+            alert('Load');
+        });
+        $('a[title=Save]').click(() => {
+            alert('Save');
+        });
+        $('a[title=Share]').click(() => {
+            alert('Share');
+        });
+        $('a[title=Clear]').click(() => {
+            f.clear();
+        });
+        $('a[title=Dump]').click(() => {
+            winbox('dump', $('<div>').text(JSON.stringify(f.get())));
+        });
+        $('a[title=Options]').click(() => {
+            winbox('options', $('<div>').text('options'));
+        });
 
     }, false);
 </script>

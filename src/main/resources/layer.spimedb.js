@@ -182,18 +182,75 @@ class SpimeDBLayer extends GeoLayer {
     tag(tags, f) {
         //console.log(tags);
         const w = $('<div>').css({
-            'position': 'fixed',
-            'margin': '4%',
-            'width': '80%',
-            'max-height': '80%',
+            'position': 'relative',
+            'max-width': '100%',
+            'max-height': '100%',
             'overflow': 'auto',
             'background-color': 'black',
             'color': 'orange'
         });
-        for (const t of tags)
-            w.append($('<div>').text(JSON.stringify(t)));
+        // for (const t of tags)
+        //     w.append($('<div>').text(JSON.stringify(t)));
 
-        winbox("Tags", w);
+        for (const t of tags)
+            f.addNode(t);
+
+        //const ww = this.newTableWindow(tags);
+
+        // new DataTable(ww, {
+        //     data: data,
+        //     paging: false,
+        //     columns: [
+        //         {
+        //             title: 'Enable',
+        //             // render: (data, type) =>
+        //             //     '<button>' + data + '</button>'
+        //         },
+        //         { title: 'Tag' },
+        //         { title: 'Count' }
+        //     ]
+        // });
+
+        //winbox("Tags", w.append(ww));
+    }
+
+    newTableWindow(tags) {
+        const data = _.map(tags, t => {
+            const v = {};
+            v.enable = true;
+            v.label = t.label;
+            v.count = t.value;
+            return v;
+        });
+
+        const ww = $('<table>'); //.css('width', '100%');
+
+        /* https://datatables.net/manual/options */
+        var table = new Tabulator(ww[0], {
+            width: '100%',
+            resizableColumnFit: true,
+            layout: "fitColumns",
+            data: data,
+            columns: [
+                {
+                    title: "Enable", field: "enable", sorter: "boolean",
+                    formatter: 'tickCross', editor: "tickCross"
+                },
+                { title: "Name", field: "label", sorter: "string" },
+                { title: "Count", field: "count", sorter: "number" },
+                // {title:"Rating", field:"rating", formatter:"star", hozAlign:"center", width:100},
+                // {title:"Favourite Color", field:"col", sorter:"string"},
+                // {title:"Date Of Birth", field:"dob", sorter:"date", hozAlign:"center"},
+                // {title:"Driver", field:"car", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},
+            ],
+        });
+        table.on("cellEdited", function (cell) {
+            //console.log('edited', cell);
+            const row = cell._cell.row.data;
+            const colField = cell._cell.column.field;
+
+        });
+        return ww;
     }
 
     addAllID(xx, f) {
@@ -229,14 +286,44 @@ class SpimeDBLayer extends GeoLayer {
 
         for (const i of d) {
             //INSTANTIATE:
+
+            const tags = i['>'];
+            const id = i.I;
+
+            if (tags) {
+                if (_.isArray(tags)) {
+                    for (const t of tags)
+                        f.link(id, t);
+                } else {
+                    f.link(id, tags);
+                }
+            }
+
+            // _.forEach(i, (value, key) => {
+            //     if (key === 'id' || key === 'name' || key === 'ele' || key.startsWith('addr') || key==='odbl' || key==='layer' || key === 'website' || key.startsWith('source') || key.startsWith('gnis') || key.startsWith('tiger') || key.startsWith('brand:'))
+            //         return;
+            //
+            //     //custom rewrites:
+            //     if (key === 'foot') key = 'walkable';
+            //
+            //     const keyvalue = key + '=' + value;
+            //     f.link(i, keyvalue);
+            //     f.link(keyvalue, key);
+            //     if (value!=='yes' && value!=='no' && !_.isNumber(parseFloat(value)))
+            //         f.link(keyvalue, value);
+            //     //const xx = f.attn.getNodeAttributes(i);
+            //     //xx.instance = x;
+            //     //xx.style('display', 'none');
+            // });
+
             //console.log(i);
             // const prev = this.cache.get(i.I);
             // if (prev) {
             //     console.log('rev remvomv');
             //     this.layer.removeRenderable(prev.renderable); //HACK
             // }
-            this.cache.set(i.I, i);
-            this.active.set(i.I, i);
+            this.cache.set(id, i);
+            this.active.set(id, i);
             // const cfg = {};
             // cfg.attributes = new WorldWind.ShapeAttributes(null);
             // cfg.attributes.drawOutline = true;
@@ -313,7 +400,7 @@ class SpimeDBLayer extends GeoLayer {
                 console.error("unhandled geometry type: ", i);
             }
             i.visible = true;
-            this.active.set(i.I, i);
+            this.active.set(id, i);
         }
         this.active.forEach((v,k) => {
             if (v.visible) {
