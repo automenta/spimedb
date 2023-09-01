@@ -210,7 +210,7 @@
         });
         $('a[title=Add]').click(() => {
             const c = f.getFocus();
-            c.push({'id': ''});
+            c.push({'id': ''}); //append blank entry
             f.setFocus(c);
         });
         $('a[title=Clear]').click(() => {

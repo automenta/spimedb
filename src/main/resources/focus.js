@@ -164,7 +164,7 @@ class Focus {
         return y;
     }
 
-    /** infers all relevant tags in the focus */
+    /** infers all relevant tags in the focus.  TODO cache and update when focus actually changes */
     getFocusTags() {
         const f = this.getFocus();
         const t = new Set();

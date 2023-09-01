@@ -123,7 +123,7 @@ class SpimeDBLayer extends GeoLayer {
         // }
 
         //console.log([latMin, latMax], [lonMin, lonMax]);
-        this.getAll(lonMin, lonMax, latMin, latMax, "id");
+        this.getAll(lonMin, lonMax, latMin, latMax, "id", f.getFocusTags());
     }
 
     pickPos(x, y, points, f) {
@@ -133,10 +133,16 @@ class SpimeDBLayer extends GeoLayer {
         }
     }
 
-    getAll(lonMin, lonMax, latMin, latMax, output) {
+    getAll(lonMin, lonMax, latMin, latMax, output, tagsInclude) {
         //TODO LOD filtering
-        const m = "{'_':'earth','@':[" + lonMin + "," + lonMax + "," + latMin + "," + latMax + "],output:\"" + output  + "\"}";
-        this.socket.send(m);
+        const m = {
+            '_': 'earth',
+            '@': [ lonMin, lonMax, latMin, latMax ],
+            'output': output
+        };
+        if (tagsInclude.length > 0)
+            m.in = tagsInclude;
+        this.socket.send(JSON.stringify(m));
     }
 
     reconnect(f) {
@@ -148,11 +154,12 @@ class SpimeDBLayer extends GeoLayer {
         this.socket.onopen = () => {
             //setTimeout(()=>{
                 if (!this.view_change) {
-                    this.view_change = f.event.on('view_change', _.debounce(() => {
+                    let changer = _.debounce(() => {
                         //setTimeout(()=> {
-                            this._update(f);
+                        this._update(f);
                         //});
-                    }, 50));
+                    }, 50);
+                    this.view_change = [ f.event.on('view_change', changer), f.event.on('attn_change', changer) ];
                 }
 
                 this.socket.send("{'_':'tag'}");

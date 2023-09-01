@@ -372,10 +372,17 @@ public class SpimeDB {
             if (id.length == 1)
                 q = new TermQuery(new Term(NObject.ID, id[0]));
             else {
-                BooleanQuery.Builder bqb = new BooleanQuery.Builder();
+//                BooleanQuery.Builder bqb = new BooleanQuery.Builder();
+//                for (int i = 0; i < id.length; i++)
+//                    bqb.add(new TermQuery(new Term(NObject.ID, id[i])), BooleanClause.Occur.MUST);
+//                q = bqb.build();
+
+                List<Query> bqb = new Lst<>(id.length);
                 for (int i = 0; i < id.length; i++)
-                    bqb.add(new TermQuery(new Term(NObject.ID, id[i])), BooleanClause.Occur.SHOULD);
-                q = bqb.build();
+                    bqb.add(new TermQuery(new Term(NObject.ID, id[i])));
+                q = new DisjunctionMaxQuery(bqb, 1f/id.length);
+
+                //q = spimedb.query.Query.termSetQuery(NObject.ID, id);
             }
 
             try {

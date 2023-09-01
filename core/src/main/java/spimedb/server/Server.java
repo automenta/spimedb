@@ -3,6 +3,8 @@ package spimedb.server;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import jcog.data.list.Lst;
 import jcog.io.Twokenize;
@@ -53,7 +55,7 @@ public class Server implements HttpModel {
                     { _: 'index' }
                     Get tag index, ontology, schema, etc..
                 */
-                send("tag", db.facets(NObject.TAG, 128).labelValues, ws);
+                send("tag", db.facets(NObject.TAG, 1024).labelValues, ws);
             case "getAll" -> {
                 ArrayNode B = (ArrayNode) m.get("id");
                 String[] ids = new String[B.size()]; for (int i = 0; i < ids.length; i++)  ids[i] = B.get(i).asText();
@@ -86,6 +88,14 @@ public class Server implements HttpModel {
                         B.get(0).asDouble(), B.get(1).asDouble(),
                         B.get(2).asDouble(), B.get(3).asDouble());
 
+                if (m.has("in")) {
+                    var ins = (ArrayNode)m.get("in");
+                    if (ins.size() > 0) {
+                        var inss = Lists.newArrayList(Iterables.transform(ins, JsonNode::asText)).toArray(new String[0]);
+                        q.in(inss);
+                    }
+                }
+
                 Search r = q.start(db);
 
                 var _output = m.get("output");
@@ -94,14 +104,14 @@ public class Server implements HttpModel {
                     case "full" -> {
                         List<NObject> found = new Lst<>();
                         r.forEach(DObject::get, (d, s) -> found.add(new MutableNObject(d)), () -> {
-                            if (!found.isEmpty())
+                            //if (!found.isEmpty())
                                 send("full", found, ws);
                         });
                     }
                     case "id" -> {
                         List<String> found = new Lst<>();
                         r.forEach(d -> d.get(NObject.ID), (id, s) -> found.add(id), () -> {
-                            if (!found.isEmpty())
+                            //if (!found.isEmpty())
                                 send("id", found, ws);
                         });
                     }

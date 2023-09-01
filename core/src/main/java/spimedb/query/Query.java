@@ -6,9 +6,9 @@ import jcog.data.list.Lst;
 import jcog.tree.rtree.rect.HyperRectDouble;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.DoubleRange;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
+import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spimedb.NObject;
@@ -118,22 +118,23 @@ public class Query  {
         return s;
     }
 
-    public static TermQuery tagTermQuery(String tag) {
-        return new TermQuery(new Term(NObject.TAG, tag));
-    }
+//    public static TermQuery tagTermQuery(String tag) {
+//        return new TermQuery(new Term(NObject.TAG, tag));
+//    }
 
     private BooleanQuery buildQuery(SpimeDB db) {
         BooleanQuery.Builder bqb = new BooleanQuery.Builder();
 
         if (tagInclude != null) {
-            int tags = tagInclude.length;
+//            int tags = tagInclude.length;
             //if (tags > 1) {
-            List<org.apache.lucene.search.Query> tagQueries = new Lst<>(tags);
-            for (String s : tagInclude)
-                tagQueries.add(tagTermQuery(s));
+//            List<org.apache.lucene.search.Query> tagQueries = new Lst<>(tags);
+//            for (String s : tagInclude)
+//                tagQueries.add(tagTermQuery(s));
+//            bqb.add(new DisjunctionMaxQuery(tagQueries, 1f / tags),
+//                    BooleanClause.Occur.MUST);
 
-            bqb.add(new DisjunctionMaxQuery(tagQueries, 1f / tags),
-                    BooleanClause.Occur.MUST);
+            bqb.add(termSetQuery(NObject.TAG, tagInclude), BooleanClause.Occur.MUST);
 
             /* } else if (tags == 1) {
                 bqb.add(tagTermQuery(tagInclude[0]))
@@ -164,8 +165,18 @@ public class Query  {
                 throw new RuntimeException(e);
             }
         }
-        return bqb.build();
 
+        return bqb.build();
+    }
+
+
+    public static TermInSetQuery termSetQuery(String field, String[] values) {
+        Lst<BytesRef> _tags = new Lst<>();
+        for (String s : values)
+            _tags.add(new BytesRef(s));
+
+        TermInSetQuery termSetQuery = new TermInSetQuery(field, _tags);
+        return termSetQuery;
     }
 
 
