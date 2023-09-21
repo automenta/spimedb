@@ -13,7 +13,7 @@ import static junit.framework.TestCase.assertEquals;
 
 
 public class KMZTest {
-    @Test public void testKMLGeometry1() throws IOException {
+    @Test public void testKMLGeometry1() {
         SpimeDB db = new SpimeDB();
         //System.out.println(v);
 

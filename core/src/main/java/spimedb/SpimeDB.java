@@ -72,6 +72,10 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class SpimeDB {
 
+    static {
+        IndexSearcher.setMaxClauseCount(Integer.MAX_VALUE);
+    }
+
     public static final String VERSION = "SpimeDB v-0.00";
     @JsonIgnore
     public final static Logger logger = LoggerFactory.getLogger(SpimeDB.class);
@@ -115,7 +119,7 @@ public class SpimeDB {
             Math.max(2, Runtime.getRuntime().availableProcessors())
     );
     public final File file;
-//    public final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
+    //    public final List<BiFunction<NObject, NObject, NObject>> onChange = new CopyOnWriteArrayList<>();
     public final Router<String, Consumer<NObject>> onTag = new Router(); //TODO make private
     /**
      * active searches
@@ -132,7 +136,7 @@ public class SpimeDB {
     final Set<NObjectConsumer> on = Sets.newConcurrentHashSet();
     final Locker<String> locker = new Locker();
     private final Map<String, DObject> out = new ConcurrentHashMap<>(1024);
-//    private final Cache<String, DObject> cache =
+    //    private final Cache<String, DObject> cache =
 //            Caffeine.newBuilder().maximumSize(NObjectCacheSize).build();
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private final StandardAnalyzer analyzer;
@@ -188,7 +192,6 @@ public class SpimeDB {
 
         this.taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
 
-
         logger.info("index file://{} loaded ({} objects)", indexPath, size());
     }
 
@@ -205,7 +208,7 @@ public class SpimeDB {
         this.facetsConfig.setHierarchical(NObject.TAG, false);
         this.facetsConfig.setMultiValued(NObject.TAG, true);
 
-        final String[] defaultFindFields = new String[]{
+        var defaultFindFields = new String[]{
                 NObject.NAME,
                 NObject.DESC,
                 NObject.TAG,
@@ -222,6 +225,7 @@ public class SpimeDB {
         writerConf = new IndexWriterConfig(analyzer);
         writerConf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         writerConf.setCommitOnClose(true);
+
         try {
             writer = new IndexWriter(dir, writerConf);
             readerMgr = new ReaderManager(writer, true, true);
@@ -238,12 +242,12 @@ public class SpimeDB {
         //return BinTxt.encode(uuidBytes());
     }
 
-    public static byte[] uuidBytes() {
-        return ArrayUtils.addAll(
-            Longs.toByteArray(rng.nextLong()),
-            Longs.toByteArray(rng.nextLong())
-        );
-    }
+//    public static byte[] uuidBytes() {
+//        return ArrayUtils.addAll(
+//            Longs.toByteArray(rng.nextLong()),
+//            Longs.toByteArray(rng.nextLong())
+//        );
+//    }
 
     public static void LOG(String l, Level ll) {
         ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(l)).setLevel(ll);
@@ -291,7 +295,7 @@ public class SpimeDB {
 
                 return result;
             } catch (IOException e) {
-                logger.error("{}", e);
+                logger.error("facets", e);
             }
 
             return null;
@@ -323,7 +327,7 @@ public class SpimeDB {
                     if (nameDictReader.maxDoc() == 0)
                         return;
 
-                    DocumentDictionary nameDict = null;
+                    DocumentDictionary nameDict;
                     try {
                         nameDict = new DocumentDictionary(nameDictReader, NObject.NAME, NObject.NAME);
                     } catch (IOException e) {
@@ -366,31 +370,28 @@ public class SpimeDB {
 
     }
 
-    private <X> List<X> getDocument(String[] id, Function<Document,X> f) {
+    private <X> List<X> getDocument(String[] id, Function<Document, X> f) {
         return withSearcher(searcher -> {
             Query q;
             if (id.length == 1)
                 q = new TermQuery(new Term(NObject.ID, id[0]));
             else {
-//                BooleanQuery.Builder bqb = new BooleanQuery.Builder();
-//                for (int i = 0; i < id.length; i++)
-//                    bqb.add(new TermQuery(new Term(NObject.ID, id[i])), BooleanClause.Occur.MUST);
+//                var bqb = new BooleanQuery.Builder();
+//                for (String s : id)
+//                    bqb.add(new TermQuery(new Term(NObject.ID, s)), BooleanClause.Occur.SHOULD);
 //                q = bqb.build();
 
                 List<Query> bqb = new Lst<>(id.length);
-                for (int i = 0; i < id.length; i++)
-                    bqb.add(new TermQuery(new Term(NObject.ID, id[i])));
-                q = new DisjunctionMaxQuery(bqb, 1f/id.length);
+                for (String s : id)
+                    bqb.add(new TermQuery(new Term(NObject.ID, s)));
+                q = new DisjunctionMaxQuery(bqb, 1f / id.length);
 
-                //q = spimedb.query.Query.termSetQuery(NObject.ID, id);
+//                q = spimedb.query.Query.termSetQuery(NObject.ID, id);
             }
 
             try {
-                TopDocs y;
-                if (id.length == 1)
-                    y = searcher.search(q, firstResultOnly);
-                else
-                    y = searcher.search(q, id.length);
+
+                TopDocs y = id.length == 1 ? searcher.search(q, firstResultOnly) : searcher.search(q, id.length);
 
                 int hits = (int) y.totalHits.value;
                 if (hits > 0) {
@@ -400,7 +401,7 @@ public class SpimeDB {
                     Lst<X> z = new Lst<>(hits);
                     for (int i = 0; i < hits; i++) {
                         Document d = searcher.doc(y.scoreDocs[i].doc);
-                        if (d!=null) z.addFast(f.apply(d));
+                        if (d != null) z.addFast(f.apply(d));
                     }
                     return z;
                 }
@@ -434,7 +435,6 @@ public class SpimeDB {
         }
     }
 
-    @NotNull
     private DirectoryReader read() {
         try {
             readerMgr.maybeRefresh();
@@ -461,8 +461,6 @@ public class SpimeDB {
         }
     }
 
-
-
     public org.apache.lucene.search.Query parseQuery(String query) throws ParseException {
         QueryParser qp = defaultFindQueryParser.get();
         try {
@@ -476,8 +474,6 @@ public class SpimeDB {
         }
     }
 
-
-    @NotNull
     public List<Lookup.LookupResult> suggest(String qText, int count) throws IOException {
         Lookup s = suggester();
         return s == null ? Collections.EMPTY_LIST : s.lookup(qText, false, count);
@@ -684,26 +680,21 @@ public class SpimeDB {
         addAsync(1, next);
     }
 
-    public void addAsync(float pri, @Nullable NObject next) {
-        if (next != null) {
+    public void addAsync(float pri, NObject next) {
+        /*return */
+        exe.run(pri, () -> {
             /*return */
-            exe.run(pri, () -> {
-                /*return */
-                DObject d = add(next);
-                //System.out.println(d.document);
-            });
-        } /*else
-            return null;*/
+            DObject d = add(next);
+            //System.out.println(d.document);
+        });
+
     }
 
     /**
      * returns the resulting (possibly merged/transformed) nobject, which differs from typical put() semantics
      */
     public DObject add(@Nullable NObject n) {
-        if (n == null)
-            return null;
-
-        return run(n.id(), addProcedure(n));
+        return n == null ? null : run(n.id(), addProcedure(n));
     }
 
     public NObject merge(MutableNObject n) {
@@ -812,15 +803,13 @@ public class SpimeDB {
         return true;
     }
 
-
-    protected NObject internal(NObject next) {
-        return next;
-    }
+//    protected NObject internal(NObject next) {
+//        return next;
+//    }
 
     public void forEach(Consumer<NObject> each) {
         read(r -> {
             int max = r.maxDoc(); // When documents are deleted, gaps are created in the numbering. These are eventually removed as the index evolves through merging. Deleted documents are dropped when segments are merged. A freshly-merged segment thus has no gaps in its numbering.
-
             IntStream.range(0, max).forEach(i -> {
                 Document d;
                 try {
@@ -864,7 +853,7 @@ public class SpimeDB {
 
     public DObject get(String i) {
         List<DObject> l = getDocument(new String[]{i}, DObject::get);
-        return l!=null ? l.get(0) : null;
+        return l != null ? l.get(0) : null;
     }
 
     public List<DObject> get(String[] i) {
@@ -884,10 +873,11 @@ public class SpimeDB {
         add(s.stream());
     }
 
-    public void add(Stream<? extends NObject> s) {
+    public final void add(Stream<? extends NObject> s) {
         s.forEach(this::add);
     }
-    public void addAsync(Stream<? extends NObject> s) {
+
+    public final void addAsync(Stream<? extends NObject> s) {
         s.forEach(this::addAsync);
     }
 

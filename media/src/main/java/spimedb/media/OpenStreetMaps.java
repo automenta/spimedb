@@ -6,6 +6,9 @@ import de.westnordost.osmapi.OsmConnection;
 import de.westnordost.osmapi.map.data.*;
 import de.westnordost.osmapi.overpass.MapDataWithGeometryHandler;
 import de.westnordost.osmapi.overpass.OverpassMapDataApi;
+import jcog.Log;
+import jcog.Util;
+import org.slf4j.Logger;
 import spimedb.SpimeDB;
 import spimedb.util.HTTP;
 
@@ -22,46 +25,27 @@ public class OpenStreetMaps implements MapDataWithGeometryHandler {
     private final SpimeDB db;
     private static final Set<String> tagExcludes = Set.of("source", "wikidata" /* TODO */);
 
-    public static void main(String[] args) {
-        SpimeDB db = new SpimeDB();
-        new OpenStreetMaps(db).load(
-            -23, -43.0995, -22.9995, -43.1
-        );
-        //db.forEach(System.out::println);
-    }
-
     public OpenStreetMaps(SpimeDB db) {
         this.db = db;
     }
 
-    public void load(double latMin, double lonMin, double latMax, double lonMax) {
-        OsmConnection connection = new OsmConnection(apiURL, "") {
-            @Override
-            public <T> T makeRequest(String call, String method, boolean authenticate, ApiRequestWriter writer, ApiResponseReader<T> reader) {
-                var bos = new ByteArrayOutputStream();
-                try {
-                    writer.write(bos);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-                try {
-                    //var is = HTTP.inputStream(apiURL + "/" + call, new String(bos.toByteArray()));
-                    String url = apiURL + call + "?" + new String(bos.toByteArray());
-                    var is = HTTP.inputStream(url);
-                    T y = reader.parse(is);
-                    is.close();
-                    return y;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        OverpassMapDataApi overpass = new OverpassMapDataApi(connection);
-        overpass.queryElementsWithGeometry(
-            "[bbox:" + lonMin + "," + latMin + "," + lonMax + "," + latMax + "]; (node; way;); out geom;"
-            , this);
+    public void load(double lat, double lon, double size) {
+        load(lat - size/2, lon - size/2, lat + size/2, lon + size/2);
     }
+
+    public void load(double latMin, double lonMin, double latMax, double lonMax) {
+        new OverpassMapDataApi(new MyOsmConnection()).queryElementsWithGeometry(
+            "[bbox:" + latMin + "," + lonMin + "," + latMax + "," + lonMax +
+                    "]; (node; way;); out geom;"
+                    //"]; (node; way;); out body geom;"
+                    //"]; (node; way; relation;); out body geom;"
+
+            , this);
+
+        logger.info("({}..{},{}..{}) loaded", latMin, latMax, lonMin, lonMax);
+    }
+
+    private static final Logger logger = Log.log(OpenStreetMaps.class);
 
     @Override
     public void handle(BoundingBox boundingBox) {
@@ -70,31 +54,27 @@ public class OpenStreetMaps implements MapDataWithGeometryHandler {
 
     @Override
     public void handle(Node node) {
-        GeoNObject g = new GeoNObject("osm_" + node.getId());
+        Map<String, String> tags = node.getTags();
+        if (!tags.containsKey("name"))
+            return; //ignore if has no name
+
+        GeoNObject g = new GeoNObject("osm_node_" + node.getId());
         LatLon p = node.getPosition();
         g.where(p.getLongitude(), p.getLatitude(), 0 /* TODO ele */);
-        if (!tags(node.getTags(), g)) return;
+        tags(g, tags);
         db.add(g);
     }
 
     @Override
     public void handle(Way way, BoundingBox boundingBox, List<LatLon> points) {
-        GeoNObject g = new GeoNObject("osm_" + way.getId());
-        if (!tags(way.getTags(), g))
-            return;
-
-        if (points.get(0).equals(points.get(points.size()-1))) {
-            g.where(points, true);
-        } else {
-            g.where(points, false);
-        }
+        GeoNObject g = new GeoNObject("osm_way_" + way.getId());
+        tags(g, way.getTags());
+        g.where(points, points.get(0).equals(points.get(points.size() - 1)));
         db.add(g);
     }
 
     /** extract OSM tags */
-    private static boolean tags(Map<String, String> tags, GeoNObject g) {
-        if (!tags.containsKey("name"))
-            return false; //ignore if has no name
+    private static void tags(GeoNObject g, Map<String, String> tags) {
         tags.forEach((k, v) -> {
             if (tagExcludes.contains(k))
                 return;
@@ -104,12 +84,52 @@ public class OpenStreetMaps implements MapDataWithGeometryHandler {
                 default -> g.put("osm:" + k, v);
             }
         });
-        return true;
     }
 
     @Override
     public void handle(Relation relation, BoundingBox boundingBox, Map<Long, LatLon> nodeGeom, Map<Long, List<LatLon>> wayGeom) {
         //System.out.println("relation: " + relation.getTags());
+//        //HACK
+//        GeoNObject g = new GeoNObject("osm_rel_" + relation.getId());
+//        tags(g, relation.getTags());
+//        if (!wayGeom.isEmpty()) {
+//            var points = wayGeom.values().iterator().next();
+//            g.where(points, points.get(0).equals(points.get(points.size() - 1)));
+//        } else {
+//            if (nodeGeom.isEmpty()) return;
+//            var node = nodeGeom.values().iterator().next();
+//            g.where(node.getLongitude(), node.getLatitude());
+//        }
+//        db.add(g);
+
+    }
+
+    private class MyOsmConnection extends OsmConnection {
+
+        MyOsmConnection() {
+            super(OpenStreetMaps.this.apiURL, "");
+        }
+
+        @Override
+        public <T> T makeRequest(String call, String method, boolean authenticate, ApiRequestWriter writer, ApiResponseReader<T> reader) {
+            var bos = new ByteArrayOutputStream();
+            try {
+                writer.write(bos);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            String url = apiURL + call + "?" + new String(bos.toByteArray());
+
+            try {
+                var is = HTTP.inputStream(url);
+                T y = reader.parse(is);
+                is.close();
+                return y;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 //    public static class WayWithGeometry {

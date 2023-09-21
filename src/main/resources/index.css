@@ -96,6 +96,13 @@ body:not(.sideExpanded) .side #active {
     color: white;
 }
 
+#sidebar * a {
+    border: 2px solid transparent;
+}
+
+#sidebar * a:hover {
+    border: 2px solid green;
+}
 
 /*#addmenu {*/
 /*    position: fixed;*/
@@ -190,8 +197,16 @@ body:not(.sideExpanded) .side #active {
     overflow: auto;
 }
 
+input {
+    background-color: transparent;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: monospace;
+}
+
 #sidebar {
-    max-width: 25%;
+    max-width: 30%;
     max-height: 100%;
     left: 0%;
     top: 0%;

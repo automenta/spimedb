@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.opensextant.giscore.events.*;
 import org.opensextant.giscore.events.SimpleField.Type;
@@ -328,84 +329,8 @@ public class KML {
 
                 long start = System.currentTimeMillis();
 
-                Map<String, Style> styles = new LinkedHashMap<>();
-
-                //1. pre-process: collect style information
-                transformKML(reader, id, new GISVisitor() {
-
-                    final Map<String, String> styleMap = new LinkedHashMap<>();
-
-                    @Override
-                    public void start(String layer) {
-                    }
-
-                    private void onStyle(Style s) {
-                        String id = s.getId();
-                        styles.put(id, s);
-                    }
-
-                    private void onStyleMap(StyleMap ss) {
-
-                        String ssid = ss.getId();
-                        if (ssid == null) {
-                            System.err.println("null id: " + ss);
-                            return;
-                        }
-                        Pair p = ss.getPair(StyleMap.NORMAL);
-                        StyleSelector ps = p.getStyleSelector();
-                        if (ps instanceof Style) {
-                            styles.put(ssid, ((Style) ps));
-                        } else if (ps instanceof StyleMap) {
-                            //System.out.println("Unmanaged StyleMap: " + p);
-                            styleMap.put(ssid, p.getStyleUrl());
-                        }
-
-                        //TODO highlight?
-                    }
-
-                    @Override
-                    public boolean on(IGISObject go, String[] path) {
-
-                        if (go instanceof Style) {
-                            onStyle((Style) go);
-                        } else if (go instanceof StyleMap) {
-                            onStyleMap((StyleMap) go);
-                        }
-                        if (go instanceof ContainerStart cs) {
-
-                            for (StyleSelector ss : cs.getStyles()) {
-                                if (ss instanceof Style) {
-                                    onStyle((Style) ss);
-                                } else if (ss instanceof StyleMap) {
-                                    onStyleMap((StyleMap) ss);
-                                }
-                            }
-                        }
-
-                        return true;
-                    }
-
-                    @Override
-                    public void end() {
-                        for (Map.Entry<String, String> e : styleMap.entrySet()) {
-                            String from = e.getKey();
-                            String to = e.getValue();
-                            Style toStyle = styles.get(to);
-                            if (toStyle == null) {
-                                System.err.println("Missing style: " + to);
-                                continue;
-                            }
-                            styles.put(from, toStyle);
-                        }
-                    }
-
-                });
-
-                //System.out.println(layer + " STYLES:  \n" + styles.keySet());
-
-
                 //2. process features
-                transformKML(reader, id, new MyGISVisitor(id, styles));
+                transformKML(reader, id, new MyGISVisitor(id, styles(id, reader)));
 
                 long end = System.currentTimeMillis();
                 logger.info("{} loaded: {}(ms)", id, end - start);
@@ -415,6 +340,83 @@ public class KML {
             }
 
         };
+    }
+
+    @NotNull
+    private Map<String, Style> styles(String id, Supplier<KmlReader> reader) {
+        Map<String, Style> styles = new LinkedHashMap<>();
+
+        //1. pre-process: collect style information
+        transformKML(reader, id, new GISVisitor() {
+
+            final Map<String, String> styleMap = new LinkedHashMap<>();
+
+            @Override
+            public void start(String layer) {
+            }
+
+            private void onStyle(Style s) {
+                String id = s.getId();
+                styles.put(id, s);
+            }
+
+            private void onStyleMap(StyleMap ss) {
+
+                String ssid = ss.getId();
+                if (ssid == null) {
+                    System.err.println("null id: " + ss);
+                    return;
+                }
+                Pair p = ss.getPair(StyleMap.NORMAL);
+                StyleSelector ps = p.getStyleSelector();
+                if (ps instanceof Style) {
+                    styles.put(ssid, ((Style) ps));
+                } else if (ps instanceof StyleMap) {
+                    //System.out.println("Unmanaged StyleMap: " + p);
+                    styleMap.put(ssid, p.getStyleUrl());
+                }
+
+                //TODO highlight?
+            }
+
+            @Override
+            public boolean on(IGISObject go, String[] path) {
+
+                if (go instanceof Style) {
+                    onStyle((Style) go);
+                } else if (go instanceof StyleMap) {
+                    onStyleMap((StyleMap) go);
+                }
+                if (go instanceof ContainerStart cs) {
+
+                    for (StyleSelector ss : cs.getStyles()) {
+                        if (ss instanceof Style) {
+                            onStyle((Style) ss);
+                        } else if (ss instanceof StyleMap) {
+                            onStyleMap((StyleMap) ss);
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            @Override
+            public void end() {
+                for (Map.Entry<String, String> e : styleMap.entrySet()) {
+                    String from = e.getKey();
+                    String to = e.getValue();
+                    Style toStyle = styles.get(to);
+                    if (toStyle == null) {
+                        System.err.println("Missing style: " + to);
+                        continue;
+                    }
+                    styles.put(from, toStyle);
+                }
+            }
+
+        });
+        return styles;
     }
 
     public static boolean anchorHash(String su) {
@@ -687,7 +689,7 @@ public class KML {
                     return false;
                 }*/
             if (d!= prototype)
-                db.addAsync(d);
+                db.add(d);
 
             return true;
         }

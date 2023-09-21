@@ -150,6 +150,10 @@ public class GeoNObject extends MutableNObject {
 
     public NObject where(List<LatLon> _points, boolean polygon) {
         var points = toArrayGeoJSON2(_points);
+        if (points.length == 1) {
+            where(points[0][0], points[0][1], points[0][2]);
+            return this;
+        }
         double[] bb = bounds(points);
         where(bb[0], bb[1], bb[2], bb[3]);
         put(polygon ? NObject.POLYGON : NObject.LINESTRING, points);

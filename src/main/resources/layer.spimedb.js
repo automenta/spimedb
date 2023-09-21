@@ -20,6 +20,10 @@ class SpimeDBLayer extends GeoLayer {
     }
 
     _update(f) {
+        if (this.updateInProgress)
+            return;
+        this.updateInProgress = true;
+
         const p = f.view.pos();
         const lat = p.latitude, lon = p.longitude;
 
@@ -41,11 +45,11 @@ class SpimeDBLayer extends GeoLayer {
         this.pickPos(W, H, points, f);
 
         if (points.length <= 1) {
-            //entire hemisphere
-             lonMin = lon - 90;
-             lonMax = lon + 90;
-             latMin = lat - 45;
-             latMax = lat + 45;
+             //entire hemisphere
+             lonMin = lon - 90/2;
+             lonMax = lon + 90/2;
+             latMin = lat - 45/2;
+             latMax = lat + 45/2;
         } else {
             //extent sector
             lonMin = latMin = Number.POSITIVE_INFINITY;
@@ -152,19 +156,15 @@ class SpimeDBLayer extends GeoLayer {
 
         this.socket = new WebSocket(this.url);
         this.socket.onopen = () => {
-            //setTimeout(()=>{
-                if (!this.view_change) {
-                    let changer = _.debounce(() => {
-                        //setTimeout(()=> {
-                        this._update(f);
-                        //});
-                    }, 50);
-                    this.view_change = [ f.event.on('view_change', changer), f.event.on('attn_change', changer) ];
-                }
+            if (!this.view_change) {
+                let changer = _.debounce(() => {
+                    this._update(f);
+                }, 50);
+                this.view_change = [ f.event.on('view_change', changer), f.event.on('attn_change', changer) ];
+            }
 
-                this.socket.send("{'_':'tag'}");
-                this._update(f);
-            //}, 0);
+            this.socket.send("{'_':'tag'}");
+            this._update(f);
         };
         // socket.addEventListener('close', closeConnection);
         this.socket.onmessage = (x) => {
@@ -188,14 +188,14 @@ class SpimeDBLayer extends GeoLayer {
 
     tag(tags, f) {
         //console.log(tags);
-        const w = $('<div>').css({
-            'position': 'relative',
-            'max-width': '100%',
-            'max-height': '100%',
-            'overflow': 'auto',
-            'background-color': 'black',
-            'color': 'orange'
-        });
+        // const w = $('<div>').css({
+        //     'position': 'relative',
+        //     'max-width': '100%',
+        //     'max-height': '100%',
+        //     'overflow': 'auto',
+        //     'background-color': 'black',
+        //     'color': 'orange'
+        // });
         // for (const t of tags)
         //     w.append($('<div>').text(JSON.stringify(t)));
 
@@ -429,6 +429,8 @@ class SpimeDBLayer extends GeoLayer {
         for (const r of renderables) {
             this.layer.addRenderable(r);
         }
+
+        this.updateInProgress = false;
 
         //console.log(this.active.size, 'active', this.cache.size, 'cached');
         f.view.redraw();

@@ -24,6 +24,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class Server implements HttpModel {
     public final SpimeDB db;
@@ -48,6 +49,7 @@ public class Server implements HttpModel {
         } catch (JsonProcessingException e) {
             return;
         }
+        //System.out.println(m);
 
         switch (m.get("_").asText()) {
             case "tag" ->

@@ -18,6 +18,7 @@ import spimedb.util.HTTP;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -39,19 +40,16 @@ public class GeoJSON   {
 
     public static void load(String url, Function<Feature, NObject> builder, SpimeDB db) {
         try {
-            db.addAsync(get(HTTP.inputStream(url), builder));
+            db.add(get(HTTP.inputStream(url), builder));
+            logger.info("{} loaded", url);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static Stream<NObject> get(InputStream i, Function<Feature, NObject> builder) throws IOException {
-        FeatureCollection featureCollection = geojsonMapper.readValue(i, FeatureCollection.class);
-        logger.info("{} contained {} objects", i, featureCollection.getFeatures().size());
-        return featureCollection.getFeatures().stream().map(builder);
+        return geojsonMapper.readValue(i, FeatureCollection.class).getFeatures().stream().map(builder);
     }
-
-
 
     public static class GeoJSONBuilder implements Function<Feature, NObject> {
         public final String tag;

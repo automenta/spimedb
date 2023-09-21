@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import spimedb.SpimeDB;
 import spimedb.server.Server;
 
+import static jcog.exe.Exe.run;
+
 /**
  * @author me
  */
@@ -27,21 +29,28 @@ public class ClimateViewer {
 
         Server server = new Server(new SpimeDB());
 
-        geojson("nuclear", "https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson", server);
+        run(()->{
+            geojson("nuclear", "https://climateviewer.org/layers/geojson/2018/Nuclear-Reactors-Pressurized-Water-ClimateViewer-3D.geojson", server);
+        });
+        run(()->{
+            geojson("emf", "https://climateviewer.org/layers/geojson/2018/Extremely-Low-Frequency-ULF-ELF-VLF-Transmission-Sites-ClimateViewer-3D.geojson", server);
+        });
+        run(()->{
+            kml("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz",
+                    (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"), server);
+        });
 
-        geojson("emf", "https://climateviewer.org/layers/geojson/2018/Extremely-Low-Frequency-ULF-ELF-VLF-Transmission-Sites-ClimateViewer-3D.geojson", server);
-
+        run(()->{
+            new OpenStreetMaps(server.db).load(
+                    //-23, -43.0995, -22.9995, -43.1
+                    40.71753,-74.00542,40.71946,-73.99434
+                    //-23, -43.1, -22.999, -43.099
+            );
+        });
 //        geojson("earthquake", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson", server);
         //geojson("air", "https://gis-calema.opendata.arcgis.com/datasets/acee3cdfe7ff45ad9751e8f9d95a50b3_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D", server);
 
-        kml("https://climateviewer.org/layers/kml/2018/submarine-telecommunication-cables-ClimateViewer-3D.kmz",
-                (GeoNObject) new GeoNObject("submarine.kmz").withTags("submarine"), server);
 
-        new OpenStreetMaps(server.db).load(
-                //-23, -43.0995, -22.9995, -43.1
-                -74.00542,40.71753,-73.99434,40.71946
-                //-23, -43.1, -22.999, -43.099
-        );
 
         //server.db.sync(50);
         //server.db.forEach(System.out::println);
