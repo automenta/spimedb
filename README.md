@@ -1,3 +1,5 @@
+
+
 # SpimeDB - Realtime Spatio-Temporal Database
 
 SpimeDB unifies the semantic, spatial, and temporal dimensions of data in a common n-dimensional ranged vector space.
@@ -42,7 +44,7 @@ Exploit hyperdimensional locality for efficient iterative access in display, ana
  * Javascript Server-side control and configuration
 
 ## Requirements
- * OpenJDK9
+ * OpenJDK 19
  * Maven 3.3+
  * git
  * bower
